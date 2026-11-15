@@ -1,0 +1,133 @@
+{
+	"format": 1,
+	"kind": "sessionCut.index",
+	"name": "byte-order-mark",
+	"input": {
+		"source": {
+			"base64": "77u/eyJ0eXBlIjoibW9kZSIsInNlc3Npb25JZCI6IjExMTExMTExLTExMTEtNDExMS04MTExLTExMTExMTExMTExMSJ9CnsidHlwZSI6InBlcm1pc3Npb24tbW9kZSIsInNlc3Npb25JZCI6IjExMTExMTExLTExMTEtNDExMS04MTExLTExMTExMTExMTExMSJ9CnsidHlwZSI6InNlc3Npb24tb3duZXIiLCJzZXNzaW9uSWQiOiIxMTExMTExMS0xMTExLTQxMTEtODExMS0xMTExMTExMTExMTEifQp7InR5cGUiOiJhdGlzLWxhdGNoIiwic2Vzc2lvbklkIjoiMTExMTExMTEtMTExMS00MTExLTgxMTEtMTExMTExMTExMTExIn0KeyJwYXJlbnRVdWlkIjpudWxsLCJpc1NpZGVjaGFpbiI6ZmFsc2UsInR5cGUiOiJ1c2VyIiwibWVzc2FnZSI6eyJyb2xlIjoidXNlciIsImNvbnRlbnQiOiJmaXJzdCJ9LCJ1dWlkIjoidTEiLCJ0aW1lc3RhbXAiOiIyMDI2LTExLTEzVDAwOjAwOjAxLjAwMFoiLCJ1c2VyVHlwZSI6ImV4dGVybmFsIiwiZW50cnlwb2ludCI6ImNsaSIsImN3ZCI6Ii93b3JrIiwic2Vzc2lvbklkIjoiMTExMTExMTEtMTExMS00MTExLTgxMTEtMTExMTExMTExMTExIiwidmVyc2lvbiI6IjIuMS4zMjMiLCJnaXRCcmFuY2giOiJtYWluIiwic2x1ZyI6ImEtc2x1ZyJ9CnsicGFyZW50VXVpZCI6InUxIiwiaXNTaWRlY2hhaW4iOmZhbHNlLCJ0eXBlIjoiYXNzaXN0YW50IiwibWVzc2FnZSI6eyJyb2xlIjoiYXNzaXN0YW50IiwiY29udGVudCI6W3sidHlwZSI6InRleHQiLCJ0ZXh0IjoiYW5zd2VyZWQifV19LCJ1dWlkIjoidTIiLCJ0aW1lc3RhbXAiOiIyMDI2LTExLTEzVDAwOjAwOjAyLjAwMFoiLCJ1c2VyVHlwZSI6ImV4dGVybmFsIiwiZW50cnlwb2ludCI6ImNsaSIsImN3ZCI6Ii93b3JrIiwic2Vzc2lvbklkIjoiMTExMTExMTEtMTExMS00MTExLTgxMTEtMTExMTExMTExMTExIiwidmVyc2lvbiI6IjIuMS4zMjMiLCJnaXRCcmFuY2giOiJtYWluIiwic2x1ZyI6ImEtc2x1ZyJ9CnsicGFyZW50VXVpZCI6InUyIiwiaXNTaWRlY2hhaW4iOmZhbHNlLCJ0eXBlIjoidXNlciIsIm1lc3NhZ2UiOnsicm9sZSI6InVzZXIiLCJjb250ZW50Ijoic2Vjb25kIn0sInV1aWQiOiJ1MyIsInRpbWVzdGFtcCI6IjIwMjYtMTEtMTNUMDA6MDA6MDMuMDAwWiIsInVzZXJUeXBlIjoiZXh0ZXJuYWwiLCJlbnRyeXBvaW50IjoiY2xpIiwiY3dkIjoiL3dvcmsiLCJzZXNzaW9uSWQiOiIxMTExMTExMS0xMTExLTQxMTEtODExMS0xMTExMTExMTExMTEiLCJ2ZXJzaW9uIjoiMi4xLjMyMyIsImdpdEJyYW5jaCI6Im1haW4iLCJzbHVnIjoiYS1zbHVnIn0KeyJwYXJlbnRVdWlkIjoidTMiLCJpc1NpZGVjaGFpbiI6ZmFsc2UsInR5cGUiOiJhc3Npc3RhbnQiLCJtZXNzYWdlIjp7InJvbGUiOiJhc3Npc3RhbnQiLCJjb250ZW50IjpbeyJ0eXBlIjoidG9vbF91c2UiLCJpZCI6ImYxIiwibmFtZSI6IkJhc2giLCJpbnB1dCI6eyJzZXNzaW9uX2lkIjoiMTExMTExMTEtMTExMS00MTExLTgxMTEtMTExMTExMTExMTExIn19XX0sInV1aWQiOiJ1NCIsInRpbWVzdGFtcCI6IjIwMjYtMTEtMTNUMDA6MDA6MDQuMDAwWiIsInVzZXJUeXBlIjoiZXh0ZXJuYWwiLCJlbnRyeXBvaW50IjoiY2xpIiwiY3dkIjoiL3dvcmsiLCJzZXNzaW9uSWQiOiIxMTExMTExMS0xMTExLTQxMTEtODExMS0xMTExMTExMTExMTEiLCJ2ZXJzaW9uIjoiMi4xLjMyMyIsImdpdEJyYW5jaCI6Im1haW4iLCJzbHVnIjoiYS1zbHVnIn0KeyJwYXJlbnRVdWlkIjoidTQiLCJpc1NpZGVjaGFpbiI6ZmFsc2UsInR5cGUiOiJ1c2VyIiwibWVzc2FnZSI6eyJyb2xlIjoidXNlciIsImNvbnRlbnQiOlt7InR5cGUiOiJ0b29sX3Jlc3VsdCIsInRvb2xfdXNlX2lkIjoiZjEiLCJjb250ZW50IjoicmFuIGluIDExMTExMTExLTExMTEtNDExMS04MTExLTExMTExMTExMTExMSJ9XX0sInV1aWQiOiJ1NSIsInRpbWVzdGFtcCI6IjIwMjYtMTEtMTNUMDA6MDA6MDUuMDAwWiIsInVzZXJUeXBlIjoiZXh0ZXJuYWwiLCJlbnRyeXBvaW50IjoiY2xpIiwiY3dkIjoiL3dvcmsiLCJzZXNzaW9uSWQiOiIxMTExMTExMS0xMTExLTQxMTEtODExMS0xMTExMTExMTExMTEiLCJ2ZXJzaW9uIjoiMi4xLjMyMyIsImdpdEJyYW5jaCI6Im1haW4iLCJzbHVnIjoiYS1zbHVnIn0KeyJwYXJlbnRVdWlkIjoidTUiLCJpc1NpZGVjaGFpbiI6ZmFsc2UsInR5cGUiOiJhc3Npc3RhbnQiLCJtZXNzYWdlIjp7InJvbGUiOiJhc3Npc3RhbnQiLCJjb250ZW50IjpbeyJ0eXBlIjoidGV4dCIsInRleHQiOiJkb25lIn1dfSwidXVpZCI6InU2IiwidGltZXN0YW1wIjoiMjAyNi0xMS0xM1QwMDowMDowNi4wMDBaIiwidXNlclR5cGUiOiJleHRlcm5hbCIsImVudHJ5cG9pbnQiOiJjbGkiLCJjd2QiOiIvd29yayIsInNlc3Npb25JZCI6IjExMTExMTExLTExMTEtNDExMS04MTExLTExMTExMTExMTExMSIsInZlcnNpb24iOiIyLjEuMzIzIiwiZ2l0QnJhbmNoIjoibWFpbiIsInNsdWciOiJhLXNsdWcifQo="
+		}
+	},
+	"expected": {
+		"index": {
+			"lines": 10,
+			"unparsed": 1,
+			"unreadable": [
+				1
+			],
+			"version": "2.1.323",
+			"header": [
+				[
+					"permission-mode",
+					2
+				],
+				[
+					"session-owner",
+					3
+				],
+				[
+					"atis-latch",
+					4
+				]
+			],
+			"boundary": null,
+			"boundaries": 0,
+			"standing": null,
+			"tail": [
+				{
+					"line": 2,
+					"bytes": 78,
+					"type": "permission-mode",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 3,
+					"bytes": 76,
+					"type": "session-owner",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 4,
+					"bytes": 73,
+					"type": "atis-latch",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 5,
+					"bytes": 310,
+					"type": "user",
+					"uuid": "u1",
+					"at": "2026-11-13T00:00:01.000Z",
+					"openTools": 0,
+					"delivered": true,
+					"text": "first",
+					"points": []
+				},
+				{
+					"line": 6,
+					"bytes": 348,
+					"type": "assistant",
+					"uuid": "u2",
+					"at": "2026-11-13T00:00:02.000Z",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 7,
+					"bytes": 311,
+					"type": "user",
+					"uuid": "u3",
+					"at": "2026-11-13T00:00:03.000Z",
+					"openTools": 0,
+					"delivered": true,
+					"text": "second",
+					"points": []
+				},
+				{
+					"line": 8,
+					"bytes": 420,
+					"type": "assistant",
+					"uuid": "u4",
+					"at": "2026-11-13T00:00:04.000Z",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 9,
+					"bytes": 402,
+					"type": "user",
+					"uuid": "u5",
+					"at": "2026-11-13T00:00:05.000Z",
+					"openTools": 1,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 10,
+					"bytes": 344,
+					"type": "assistant",
+					"uuid": "u6",
+					"at": "2026-11-13T00:00:06.000Z",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 11,
+					"bytes": 0,
+					"type": "end",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				}
+			]
+		}
+	}
+}

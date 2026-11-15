@@ -1,0 +1,10 @@
+{
+	"extends": "../ts/tsconfig.base.json",
+	"compilerOptions": {
+		"rootDir": "..",
+		"outDir": ".tsbuild",
+		"typeRoots": ["../ts/node_modules"]
+	},
+	"include": ["**/*.ts"],
+	"references": [{ "path": "../ts/contract" }, { "path": "../ts/operator" }, { "path": "../ts/testkit" }]
+}

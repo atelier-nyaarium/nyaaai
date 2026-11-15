@@ -1,0 +1,34 @@
+{
+	"format": 1,
+	"kind": "sessionCut.plan",
+	"name": "empty-file",
+	"input": {
+		"source": {
+			"base64": ""
+		},
+		"requests": [
+			{
+				"mode": "trim"
+			},
+			{
+				"mode": "clear",
+				"targetUuid": "u1"
+			}
+		],
+		"cliVersion": "2.1.323"
+	},
+	"expected": {
+		"plans": [
+			{
+				"ok": false,
+				"reason": "no_rows",
+				"detail": "The session file is empty."
+			},
+			{
+				"ok": false,
+				"reason": "no_rows",
+				"detail": "The session file is empty."
+			}
+		]
+	}
+}

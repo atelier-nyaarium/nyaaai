@@ -1,0 +1,42 @@
+{
+	"format": 1,
+	"kind": "sessionCut.rehomed",
+	"name": "damaged-rows",
+	"input": {
+		"rows": [
+			"",
+			"{",
+			"{\"sessionId\":\"old",
+			"{\"sessionId\":\"old\\",
+			"{\"sessionId\":",
+			"{\"sessionId\"",
+			"{\"sessionId",
+			"{\"sessionId\":\"old\"",
+			"}{\"sessionId\":\"old\"}",
+			"]]{\"sessionId\":\"old\"}",
+			"{{\"sessionId\":\"old\"}}",
+			"{\"a\":\"unclosed,\"sessionId\":\"old\"}",
+			"{\"a\":\"x\"}{\"sessionId\":\"second object\"}",
+			"{\"a\\\":\"x\",\"sessionId\":\"old\"}"
+		],
+		"sessionId": "new-id"
+	},
+	"expected": {
+		"rows": [
+			"",
+			"{",
+			"{\"sessionId\":\"new-id\"",
+			"{\"sessionId\":\"new-id\"",
+			"{\"sessionId\":",
+			"{\"sessionId\"",
+			"{\"sessionId",
+			"{\"sessionId\":\"new-id\"",
+			"}{\"sessionId\":\"old\"}",
+			"]]{\"sessionId\":\"old\"}",
+			"{{\"sessionId\":\"old\"}}",
+			"{\"a\":\"unclosed,\"sessionId\":\"old\"}",
+			"{\"a\":\"x\"}{\"sessionId\":\"new-id\"}",
+			"{\"a\\\":\"x\",\"sessionId\":\"old\"}"
+		]
+	}
+}

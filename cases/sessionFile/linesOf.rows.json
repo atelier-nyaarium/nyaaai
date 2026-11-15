@@ -1,0 +1,16 @@
+{
+	"format": 1,
+	"kind": "sessionFile.linesOf",
+	"name": "rows",
+	"input": {
+		"base64": "b25lCnR3bw0KCg10aHJlZSDwn5iA4oCowoULDCBzdGlsbCB0aHJlZQp1bnRlcm1pbmF0ZWQ="
+	},
+	"expected": {
+		"rows": [
+			"one",
+			"two\r",
+			"",
+			"\rthree 😀 \u000b\f still three"
+		]
+	}
+}

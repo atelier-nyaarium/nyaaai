@@ -1,0 +1,32 @@
+{
+	"format": 1,
+	"kind": "sessionCut.index",
+	"name": "only-an-unterminated-row",
+	"input": {
+		"source": {
+			"base64": "eyJ0eXBlIjoidXNlciIsInV1aWQiOiJ0YWlsIn0="
+		}
+	},
+	"expected": {
+		"index": {
+			"lines": 0,
+			"unparsed": 0,
+			"unreadable": [],
+			"version": null,
+			"header": [],
+			"boundary": null,
+			"boundaries": 0,
+			"standing": null,
+			"tail": [
+				{
+					"line": 1,
+					"bytes": 0,
+					"type": "end",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				}
+			]
+		}
+	}
+}

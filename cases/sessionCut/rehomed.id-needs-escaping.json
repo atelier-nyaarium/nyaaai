@@ -1,0 +1,16 @@
+{
+	"format": 1,
+	"kind": "sessionCut.rehomed",
+	"name": "id-needs-escaping",
+	"input": {
+		"rows": [
+			"{\"sessionId\":\"old\",\"session_id\":\"old\"}"
+		],
+		"sessionId": "q\"uote\\ 😀\n \t\u0001"
+	},
+	"expected": {
+		"rows": [
+			"{\"sessionId\":\"q\\\"uote\\\\ 😀\\n \\t\\u0001\",\"session_id\":\"q\\\"uote\\\\ 😀\\n \\t\\u0001\"}"
+		]
+	}
+}

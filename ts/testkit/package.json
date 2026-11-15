@@ -1,0 +1,11 @@
+{
+	"name": "@nyaaai/testkit",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"description": "Fakes for tests",
+	"exports": {
+		".": "./src/index.ts",
+		"./claudeSession": "./src/claudeSession.ts"
+	}
+}

@@ -1,0 +1,14 @@
+{
+	"format": 1,
+	"kind": "sessionFile.linesOf",
+	"name": "byte-order-mark",
+	"input": {
+		"base64": "77u/QQrvu79BCg=="
+	},
+	"expected": {
+		"rows": [
+			"﻿A",
+			"﻿A"
+		]
+	}
+}

@@ -1,0 +1,19 @@
+[workspace]
+resolver = "3"
+members = ["contract", "process", "agentic", "operator", "testkit", "cli"]
+
+[workspace.package]
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.99"
+publish = false
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.dependencies]
+nyaaai-contract = { path = "contract" }
+nyaaai-process = { path = "process" }
+nyaaai-agentic = { path = "agentic" }
+nyaaai-operator = { path = "operator" }
+nyaaai-testkit = { path = "testkit" }

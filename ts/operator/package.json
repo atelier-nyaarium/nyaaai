@@ -1,0 +1,19 @@
+{
+	"name": "@nyaaai/operator",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"description": "Login-backed agent CLIs",
+	"exports": {
+		".": "./src/index.ts",
+		"./claude/cliVersion": "./src/claude/cliVersion.ts",
+		"./claude/sessionCut": "./src/claude/sessionCut.ts",
+		"./claude/sessionFile": "./src/claude/sessionFile.ts"
+	},
+	"dependencies": {
+		"@nyaaai/contract": "workspace:*"
+	},
+	"devDependencies": {
+		"@nyaaai/testkit": "workspace:*"
+	}
+}

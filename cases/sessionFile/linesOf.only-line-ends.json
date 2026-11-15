@@ -1,0 +1,15 @@
+{
+	"format": 1,
+	"kind": "sessionFile.linesOf",
+	"name": "only-line-ends",
+	"input": {
+		"base64": "CgoK"
+	},
+	"expected": {
+		"rows": [
+			"",
+			"",
+			""
+		]
+	}
+}

@@ -1,0 +1,25 @@
+{
+	"format": 1,
+	"kind": "sessionCut.plan",
+	"name": "blank-lines-only",
+	"input": {
+		"source": {
+			"base64": "CgoK"
+		},
+		"requests": [
+			{
+				"mode": "trim"
+			}
+		],
+		"cliVersion": "2.1.323"
+	},
+	"expected": {
+		"plans": [
+			{
+				"ok": false,
+				"reason": "no_rows",
+				"detail": "The session file is empty."
+			}
+		]
+	}
+}

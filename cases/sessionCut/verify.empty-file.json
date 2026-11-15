@@ -1,0 +1,17 @@
+{
+	"format": 1,
+	"kind": "sessionCut.verify",
+	"name": "empty-file",
+	"input": {
+		"source": {
+			"base64": ""
+		},
+		"sessionId": "built-1",
+		"paired": true
+	},
+	"expected": {
+		"problems": [
+			"no compaction row"
+		]
+	}
+}

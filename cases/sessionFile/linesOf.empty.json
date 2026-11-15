@@ -1,0 +1,11 @@
+{
+	"format": 1,
+	"kind": "sessionFile.linesOf",
+	"name": "empty",
+	"input": {
+		"base64": ""
+	},
+	"expected": {
+		"rows": []
+	}
+}

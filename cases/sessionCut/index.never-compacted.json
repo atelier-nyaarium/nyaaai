@@ -1,0 +1,154 @@
+{
+	"format": 1,
+	"kind": "sessionCut.index",
+	"name": "never-compacted",
+	"input": {
+		"source": {
+			"lines": [
+				"{\"type\":\"mode\",\"sessionId\":\"11111111-1111-4111-8111-111111111111\"}",
+				"{\"type\":\"permission-mode\",\"sessionId\":\"11111111-1111-4111-8111-111111111111\"}",
+				"{\"type\":\"session-owner\",\"sessionId\":\"11111111-1111-4111-8111-111111111111\"}",
+				"{\"type\":\"atis-latch\",\"sessionId\":\"11111111-1111-4111-8111-111111111111\"}",
+				"{\"parentUuid\":null,\"isSidechain\":false,\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":\"first\"},\"uuid\":\"u1\",\"timestamp\":\"2026-11-13T00:00:01.000Z\",\"userType\":\"external\",\"entrypoint\":\"cli\",\"cwd\":\"/work\",\"sessionId\":\"11111111-1111-4111-8111-111111111111\",\"version\":\"2.1.323\",\"gitBranch\":\"main\",\"slug\":\"a-slug\"}",
+				"{\"parentUuid\":\"u1\",\"isSidechain\":false,\"type\":\"assistant\",\"message\":{\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"answered\"}]},\"uuid\":\"u2\",\"timestamp\":\"2026-11-13T00:00:02.000Z\",\"userType\":\"external\",\"entrypoint\":\"cli\",\"cwd\":\"/work\",\"sessionId\":\"11111111-1111-4111-8111-111111111111\",\"version\":\"2.1.323\",\"gitBranch\":\"main\",\"slug\":\"a-slug\"}",
+				"{\"parentUuid\":\"u2\",\"isSidechain\":false,\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":\"second\"},\"uuid\":\"u3\",\"timestamp\":\"2026-11-13T00:00:03.000Z\",\"userType\":\"external\",\"entrypoint\":\"cli\",\"cwd\":\"/work\",\"sessionId\":\"11111111-1111-4111-8111-111111111111\",\"version\":\"2.1.323\",\"gitBranch\":\"main\",\"slug\":\"a-slug\"}",
+				"{\"parentUuid\":\"u3\",\"isSidechain\":false,\"type\":\"assistant\",\"message\":{\"role\":\"assistant\",\"content\":[{\"type\":\"tool_use\",\"id\":\"f1\",\"name\":\"Bash\",\"input\":{\"session_id\":\"11111111-1111-4111-8111-111111111111\"}}]},\"uuid\":\"u4\",\"timestamp\":\"2026-11-13T00:00:04.000Z\",\"userType\":\"external\",\"entrypoint\":\"cli\",\"cwd\":\"/work\",\"sessionId\":\"11111111-1111-4111-8111-111111111111\",\"version\":\"2.1.323\",\"gitBranch\":\"main\",\"slug\":\"a-slug\"}",
+				"{\"parentUuid\":\"u4\",\"isSidechain\":false,\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"tool_result\",\"tool_use_id\":\"f1\",\"content\":\"ran in 11111111-1111-4111-8111-111111111111\"}]},\"uuid\":\"u5\",\"timestamp\":\"2026-11-13T00:00:05.000Z\",\"userType\":\"external\",\"entrypoint\":\"cli\",\"cwd\":\"/work\",\"sessionId\":\"11111111-1111-4111-8111-111111111111\",\"version\":\"2.1.323\",\"gitBranch\":\"main\",\"slug\":\"a-slug\"}",
+				"{\"parentUuid\":\"u5\",\"isSidechain\":false,\"type\":\"assistant\",\"message\":{\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"done\"}]},\"uuid\":\"u6\",\"timestamp\":\"2026-11-13T00:00:06.000Z\",\"userType\":\"external\",\"entrypoint\":\"cli\",\"cwd\":\"/work\",\"sessionId\":\"11111111-1111-4111-8111-111111111111\",\"version\":\"2.1.323\",\"gitBranch\":\"main\",\"slug\":\"a-slug\"}"
+			]
+		}
+	},
+	"expected": {
+		"index": {
+			"lines": 10,
+			"unparsed": 0,
+			"unreadable": [],
+			"version": "2.1.323",
+			"header": [
+				[
+					"mode",
+					1
+				],
+				[
+					"permission-mode",
+					2
+				],
+				[
+					"session-owner",
+					3
+				],
+				[
+					"atis-latch",
+					4
+				]
+			],
+			"boundary": null,
+			"boundaries": 0,
+			"standing": null,
+			"tail": [
+				{
+					"line": 1,
+					"bytes": 67,
+					"type": "mode",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 2,
+					"bytes": 78,
+					"type": "permission-mode",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 3,
+					"bytes": 76,
+					"type": "session-owner",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 4,
+					"bytes": 73,
+					"type": "atis-latch",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 5,
+					"bytes": 310,
+					"type": "user",
+					"uuid": "u1",
+					"at": "2026-11-13T00:00:01.000Z",
+					"openTools": 0,
+					"delivered": true,
+					"text": "first",
+					"points": []
+				},
+				{
+					"line": 6,
+					"bytes": 348,
+					"type": "assistant",
+					"uuid": "u2",
+					"at": "2026-11-13T00:00:02.000Z",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 7,
+					"bytes": 311,
+					"type": "user",
+					"uuid": "u3",
+					"at": "2026-11-13T00:00:03.000Z",
+					"openTools": 0,
+					"delivered": true,
+					"text": "second",
+					"points": []
+				},
+				{
+					"line": 8,
+					"bytes": 420,
+					"type": "assistant",
+					"uuid": "u4",
+					"at": "2026-11-13T00:00:04.000Z",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 9,
+					"bytes": 402,
+					"type": "user",
+					"uuid": "u5",
+					"at": "2026-11-13T00:00:05.000Z",
+					"openTools": 1,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 10,
+					"bytes": 344,
+					"type": "assistant",
+					"uuid": "u6",
+					"at": "2026-11-13T00:00:06.000Z",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 11,
+					"bytes": 0,
+					"type": "end",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				}
+			]
+		}
+	}
+}

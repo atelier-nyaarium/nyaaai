@@ -1,0 +1,13 @@
+{
+	"$schema": "https://json.schemastore.org/tsconfig",
+	"files": [],
+	"references": [
+		{ "path": "./ts/contract" },
+		{ "path": "./ts/process" },
+		{ "path": "./ts/agentic" },
+		{ "path": "./ts/operator" },
+		{ "path": "./ts/ui" },
+		{ "path": "./ts/testkit" },
+		{ "path": "./scripts" }
+	]
+}

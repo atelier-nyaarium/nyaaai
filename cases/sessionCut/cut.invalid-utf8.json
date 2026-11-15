@@ -1,0 +1,72 @@
+{
+	"format": 1,
+	"kind": "sessionCut.cut",
+	"name": "invalid-utf8",
+	"input": {
+		"source": {
+			"base64": "eyJ0eXBlIjoibW9kZSIsInNlc3Npb25JZCI6IjExMTExMTExLTExMTEtNDExMS04MTExLTExMTExMTExMTExMSJ9CnsidHlwZSI6InBlcm1pc3Npb24tbW9kZSIsInNlc3Npb25JZCI6IjExMTExMTExLTExMTEtNDExMS04MTExLTExMTExMTExMTExMSJ9CnsidHlwZSI6InNlc3Npb24tb3duZXIiLCJzZXNzaW9uSWQiOiIxMTExMTExMS0xMTExLTQxMTEtODExMS0xMTExMTExMTExMTEifQp7InR5cGUiOiJhdGlzLWxhdGNoIiwic2Vzc2lvbklkIjoiMTExMTExMTEtMTExMS00MTExLTgxMTEtMTExMTExMTExMTExIn0KeyJwYXJlbnRVdWlkIjpudWxsLCJpc1NpZGVjaGFpbiI6ZmFsc2UsInR5cGUiOiJ1c2VyIiwibWVzc2FnZSI6eyJyb2xlIjoidXNlciIsImNvbnRlbnQiOiJmaXJzdCJ9LCJ1dWlkIjoidTEiLCJ0aW1lc3RhbXAiOiIyMDI2LTExLTEzVDAwOjAwOjAxLjAwMFoiLCJ1c2VyVHlwZSI6ImV4dGVybmFsIiwiZW50cnlwb2ludCI6ImNsaSIsImN3ZCI6Ii93b3JrIiwic2Vzc2lvbklkIjoiMTExMTExMTEtMTExMS00MTExLTgxMTEtMTExMTExMTExMTExIiwidmVyc2lvbiI6IjIuMS4zMjMiLCJnaXRCcmFuY2giOiJtYWluIiwic2x1ZyI6ImEtc2x1ZyJ9CnsicGFyZW50VXVpZCI6InUxIiwiaXNTaWRlY2hhaW4iOmZhbHNlLCJ0eXBlIjoiYXNzaXN0YW50IiwibWVzc2FnZSI6eyJyb2xlIjoiYXNzaXN0YW50IiwiY29udGVudCI6W3sidHlwZSI6InRleHQiLCJ0ZXh0IjoiYW5zd2VyZWQifV19LCJ1dWlkIjoidTIiLCJ0aW1lc3RhbXAiOiIyMDI2LTExLTEzVDAwOjAwOjAyLjAwMFoiLCJ1c2VyVHlwZSI6ImV4dGVybmFsIiwiZW50cnlwb2ludCI6ImNsaSIsImN3ZCI6Ii93b3JrIiwic2Vzc2lvbklkIjoiMTExMTExMTEtMTExMS00MTExLTgxMTEtMTExMTExMTExMTExIiwidmVyc2lvbiI6IjIuMS4zMjMiLCJnaXRCcmFuY2giOiJtYWluIiwic2x1ZyI6ImEtc2x1ZyJ9CnsicGFyZW50VXVpZCI6InUyIiwiaXNTaWRlY2hhaW4iOmZhbHNlLCJ0eXBlIjoidXNlciIsIm1lc3NhZ2UiOnsicm9sZSI6InVzZXIiLCJjb250ZW50Ijoic2Vjb25kIn0sInV1aWQiOiJ1MyIsInRpbWVzdGFtcCI6IjIwMjYtMTEtMTNUMDA6MDA6MDMuMDAwWiIsInVzZXJUeXBlIjoiZXh0ZXJuYWwiLCJlbnRyeXBvaW50IjoiY2xpIiwiY3dkIjoiL3dvcmsiLCJzZXNzaW9uSWQiOiIxMTExMTExMS0xMTExLTQxMTEtODExMS0xMTExMTExMTExMTEiLCJ2ZXJzaW9uIjoiMi4xLjMyMyIsImdpdEJyYW5jaCI6Im1haW4iLCJzbHVnIjoiYS1zbHVnIn0KeyJwYXJlbnRVdWlkIjoidTMiLCJpc1NpZGVjaGFpbiI6ZmFsc2UsInR5cGUiOiJhc3Npc3RhbnQiLCJtZXNzYWdlIjp7InJvbGUiOiJhc3Npc3RhbnQiLCJjb250ZW50IjpbeyJ0eXBlIjoidG9vbF91c2UiLCJpZCI6ImYxIiwibmFtZSI6IkJhc2giLCJpbnB1dCI6eyJzZXNzaW9uX2lkIjoiMTExMTExMTEtMTExMS00MTExLTgxMTEtMTExMTExMTExMTExIn19XX0sInV1aWQiOiJ1NCIsInRpbWVzdGFtcCI6IjIwMjYtMTEtMTNUMDA6MDA6MDQuMDAwWiIsInVzZXJUeXBlIjoiZXh0ZXJuYWwiLCJlbnRyeXBvaW50IjoiY2xpIiwiY3dkIjoiL3dvcmsiLCJzZXNzaW9uSWQiOiIxMTExMTExMS0xMTExLTQxMTEtODExMS0xMTExMTExMTExMTEiLCJ2ZXJzaW9uIjoiMi4xLjMyMyIsImdpdEJyYW5jaCI6Im1haW4iLCJzbHVnIjoiYS1zbHVnIn0KeyJwYXJlbnRVdWlkIjoidTQiLCJpc1NpZGVjaGFpbiI6ZmFsc2UsInR5cGUiOiJ1c2VyIiwibWVzc2FnZSI6eyJyb2xlIjoidXNlciIsImNvbnRlbnQiOlt7InR5cGUiOiJ0b29sX3Jlc3VsdCIsInRvb2xfdXNlX2lkIjoiZjEiLCJjb250ZW50IjoicmFuIGluIDExMTExMTExLTExMTEtNDExMS04MTExLTExMTExMTExMTExMSJ9XX0sInV1aWQiOiJ1NSIsInRpbWVzdGFtcCI6IjIwMjYtMTEtMTNUMDA6MDA6MDUuMDAwWiIsInVzZXJUeXBlIjoiZXh0ZXJuYWwiLCJlbnRyeXBvaW50IjoiY2xpIiwiY3dkIjoiL3dvcmsiLCJzZXNzaW9uSWQiOiIxMTExMTExMS0xMTExLTQxMTEtODExMS0xMTExMTExMTExMTEiLCJ2ZXJzaW9uIjoiMi4xLjMyMyIsImdpdEJyYW5jaCI6Im1haW4iLCJzbHVnIjoiYS1zbHVnIn0KeyJwYXJlbnRVdWlkIjoidTUiLCJpc1NpZGVjaGFpbiI6ZmFsc2UsInR5cGUiOiJhc3Npc3RhbnQiLCJtZXNzYWdlIjp7InJvbGUiOiJhc3Npc3RhbnQiLCJjb250ZW50IjpbeyJ0eXBlIjoidGV4dCIsInRleHQiOiJkb25lIn1dfSwidXVpZCI6InU2IiwidGltZXN0YW1wIjoiMjAyNi0xMS0xM1QwMDowMDowNi4wMDBaIiwidXNlclR5cGUiOiJleHRlcm5hbCIsImVudHJ5cG9pbnQiOiJjbGkiLCJjd2QiOiIvd29yayIsInNlc3Npb25JZCI6IjExMTExMTExLTExMTEtNDExMS04MTExLTExMTExMTExMTExMSIsInZlcnNpb24iOiIyLjEuMzIzIiwiZ2l0QnJhbmNoIjoibWFpbiIsInNsdWciOiJhLXNsdWcifQp7InBhcmVudFV1aWQiOiJ1NiIsInR5cGUiOiJ1c2VyIiwidXVpZCI6ImJhZC0xIiwibWVzc2FnZSI6eyJyb2xlIjoidXNlciIsImNvbnRlbnQiOiJiYWQg/+KCIMCA7aCAIGJ5dGVzIn0sInNlc3Npb25JZCI6IjExMTExMTExLTExMTEtNDExMS04MTExLTExMTExMTExMTExMSIsInZlcnNpb24iOiIyLjEuMzIzIn0KeyJwYXJlbnRVdWlkIjoiYmFkLTEiLCJ0eXBlIjoiYXNzaXN0YW50IiwidXVpZCI6ImJhZC0yIiwibWVzc2FnZSI6eyJyb2xlIjoiYXNzaXN0YW50IiwiY29udGVudCI6W3sidHlwZSI6InRleHQiLCJ0ZXh0IjoiZmluZSJ9XX0sInNlc3Npb25JZCI6IjExMTExMTExLTExMTEtNDExMS04MTExLTExMTExMTExMTExMSJ9Cg=="
+		},
+		"request": {
+			"mode": "clear",
+			"targetUuid": "bad-1"
+		},
+		"cliVersion": "2.1.323",
+		"sourcePath": "/sessions/old.jsonl",
+		"idPrefix": "new-",
+		"nowMs": 1794535200000
+	},
+	"expected": {
+		"result": {
+			"ok": true,
+			"sessionId": "new-1",
+			"plan": {
+				"ok": true,
+				"mode": "clear",
+				"headerLines": [
+					1,
+					2,
+					3,
+					4
+				],
+				"keptLines": [
+					11,
+					12
+				],
+				"preserved": {
+					"head": "bad-1",
+					"tail": "bad-2",
+					"uuids": [
+						"bad-1",
+						"bad-2"
+					]
+				},
+				"foldLines": [
+					5,
+					6,
+					7,
+					8,
+					9,
+					10
+				],
+				"keptBytes": 372,
+				"droppedBytes": 2429,
+				"droppedRows": 6,
+				"from": {
+					"at": null,
+					"text": "bad �� ����� bytes"
+				}
+			}
+		},
+		"built": [
+			"{\"type\":\"mode\",\"sessionId\":\"new-1\"}",
+			"{\"type\":\"permission-mode\",\"sessionId\":\"new-1\"}",
+			"{\"type\":\"session-owner\",\"sessionId\":\"new-1\"}",
+			"{\"type\":\"atis-latch\",\"sessionId\":\"new-1\"}",
+			"{\"parentUuid\":\"u6\",\"type\":\"user\",\"uuid\":\"bad-1\",\"message\":{\"role\":\"user\",\"content\":\"bad �� ����� bytes\"},\"sessionId\":\"new-1\",\"version\":\"2.1.323\"}",
+			"{\"parentUuid\":\"bad-1\",\"type\":\"assistant\",\"uuid\":\"bad-2\",\"message\":{\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"fine\"}]},\"sessionId\":\"new-1\"}",
+			"{\"parentUuid\":null,\"logicalParentUuid\":\"bad-2\",\"isSidechain\":false,\"type\":\"system\",\"subtype\":\"compact_boundary\",\"content\":\"Conversation compacted\",\"level\":\"info\",\"compactMetadata\":{\"trigger\":\"manual\",\"preTokens\":700,\"postTokens\":127,\"cumulativeDroppedTokens\":573,\"durationMs\":1,\"preservedSegment\":{\"headUuid\":\"bad-1\",\"anchorUuid\":\"new-3\",\"tailUuid\":\"bad-2\"},\"preservedMessages\":{\"anchorUuid\":\"new-3\",\"uuids\":[\"bad-1\",\"bad-2\"],\"allUuids\":[\"bad-1\",\"bad-2\"]}},\"uuid\":\"new-2\",\"timestamp\":\"2026-11-13T02:00:00.000Z\",\"sessionId\":\"new-1\"}",
+			"{\"parentUuid\":\"new-2\",\"isSidechain\":false,\"promptId\":\"new-4\",\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":\"[The owner cleared 6 earlier rows of this conversation without summarizing them. They remain in the transcript at: /sessions/old.jsonl]\"},\"isVisibleInTranscriptOnly\":true,\"isCompactSummary\":true,\"uuid\":\"new-3\",\"timestamp\":\"2026-11-13T02:00:00.000Z\",\"session_id\":\"new-1\",\"sessionId\":\"new-1\"}"
+		],
+		"summarized": null
+	}
+}

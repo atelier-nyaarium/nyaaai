@@ -1,0 +1,15 @@
+node_modules/
+
+# tsc project output
+.tsbuild/
+*.tsbuildinfo
+
+# Cargo output
+target/
+
+*.log
+
+#### OS
+.DS_Store
+._.DS_Store
+Thumbs.db

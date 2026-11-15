@@ -1,0 +1,35 @@
+{
+	"format": 1,
+	"kind": "sessionCut.index",
+	"name": "blank-lines",
+	"input": {
+		"source": {
+			"base64": "Cg0KIAoK"
+		}
+	},
+	"expected": {
+		"index": {
+			"lines": 4,
+			"unparsed": 2,
+			"unreadable": [
+				2,
+				3
+			],
+			"version": null,
+			"header": [],
+			"boundary": null,
+			"boundaries": 0,
+			"standing": null,
+			"tail": [
+				{
+					"line": 5,
+					"bytes": 0,
+					"type": "end",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				}
+			]
+		}
+	}
+}

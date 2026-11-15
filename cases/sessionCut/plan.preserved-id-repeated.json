@@ -1,0 +1,30 @@
+{
+	"format": 1,
+	"kind": "sessionCut.plan",
+	"name": "preserved-id-repeated",
+	"input": {
+		"source": {
+			"lines": [
+				"{\"type\":\"user\",\"parentUuid\":\"outside\",\"uuid\":\"a\",\"message\":{\"content\":\"kept\"}}",
+				"{\"parentUuid\":null,\"logicalParentUuid\":null,\"isSidechain\":false,\"type\":\"system\",\"subtype\":\"compact_boundary\",\"content\":\"Conversation compacted\",\"level\":\"info\",\"compactMetadata\":{\"trigger\":\"manual\",\"preTokens\":5000,\"postTokens\":400,\"cumulativeDroppedTokens\":1000,\"durationMs\":9,\"preservedSegment\":{\"headUuid\":\"elsewhere\",\"anchorUuid\":\"s1\",\"tailUuid\":\"a\"},\"preservedMessages\":{\"anchorUuid\":\"s1\",\"uuids\":[\"a\",\"a\"],\"allUuids\":[\"a\",\"a\",\"gone\"]}},\"uuid\":\"b1\",\"timestamp\":\"2026-11-13T00:01:00.000Z\",\"userType\":\"external\",\"entrypoint\":\"cli\",\"cwd\":\"/work\",\"sessionId\":\"11111111-1111-4111-8111-111111111111\",\"version\":\"2.1.323\",\"gitBranch\":\"main\",\"slug\":\"a-slug\"}",
+				"{\"parentUuid\":\"b1\",\"isSidechain\":false,\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":\"s\"},\"isCompactSummary\":true,\"isVisibleInTranscriptOnly\":true,\"uuid\":\"s1\",\"timestamp\":\"2026-11-13T00:00:01.000Z\",\"userType\":\"external\",\"entrypoint\":\"cli\",\"cwd\":\"/work\",\"sessionId\":\"11111111-1111-4111-8111-111111111111\",\"version\":\"2.1.323\",\"gitBranch\":\"main\",\"slug\":\"a-slug\"}",
+				"{\"parentUuid\":\"s1\",\"isSidechain\":false,\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":\"after\"},\"uuid\":\"u2\",\"timestamp\":\"2026-11-13T00:00:02.000Z\",\"userType\":\"external\",\"entrypoint\":\"cli\",\"cwd\":\"/work\",\"sessionId\":\"11111111-1111-4111-8111-111111111111\",\"version\":\"2.1.323\",\"gitBranch\":\"main\",\"slug\":\"a-slug\"}"
+			]
+		},
+		"requests": [
+			{
+				"mode": "trim"
+			}
+		],
+		"cliVersion": "2.1.323"
+	},
+	"expected": {
+		"plans": [
+			{
+				"ok": false,
+				"reason": "preserved_unresolved",
+				"detail": "Messages the last compaction kept are missing from the session file."
+			}
+		]
+	}
+}

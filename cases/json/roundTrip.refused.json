@@ -1,0 +1,117 @@
+{
+	"format": 1,
+	"kind": "json.roundTrip",
+	"name": "refused",
+	"input": {
+		"texts": [
+			"",
+			"01",
+			"[1,]",
+			"{\"a\":1,}",
+			"nul",
+			"1 2",
+			"﻿1",
+			"\"a\tb\"",
+			"{\"a\"}",
+			"[",
+			"\"\\x\"",
+			"\"\\u12\"",
+			"+1",
+			".5",
+			"1.",
+			"-",
+			"1e",
+			"Infinity",
+			"NaN",
+			"'a'",
+			"{a:1}",
+			"[1 2]",
+			"true false",
+			" 1",
+			"\u000b1",
+			"\"\\ud83d\\uZZZZ\""
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": false
+			},
+			{
+				"ok": false
+			},
+			{
+				"ok": false
+			},
+			{
+				"ok": false
+			},
+			{
+				"ok": false
+			},
+			{
+				"ok": false
+			},
+			{
+				"ok": false
+			},
+			{
+				"ok": false
+			},
+			{
+				"ok": false
+			},
+			{
+				"ok": false
+			},
+			{
+				"ok": false
+			},
+			{
+				"ok": false
+			},
+			{
+				"ok": false
+			},
+			{
+				"ok": false
+			},
+			{
+				"ok": false
+			},
+			{
+				"ok": false
+			},
+			{
+				"ok": false
+			},
+			{
+				"ok": false
+			},
+			{
+				"ok": false
+			},
+			{
+				"ok": false
+			},
+			{
+				"ok": false
+			},
+			{
+				"ok": false
+			},
+			{
+				"ok": false
+			},
+			{
+				"ok": false
+			},
+			{
+				"ok": false
+			},
+			{
+				"ok": false
+			}
+		]
+	}
+}

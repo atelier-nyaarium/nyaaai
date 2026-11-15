@@ -1,0 +1,11 @@
+{
+	"format": 1,
+	"kind": "sessionFile.linesOf",
+	"name": "no-line-end",
+	"input": {
+		"base64": "bmV2ZXIgZW5kZWQ="
+	},
+	"expected": {
+		"rows": []
+	}
+}

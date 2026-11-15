@@ -1,0 +1,23 @@
+{
+	"format": 1,
+	"kind": "json.roundTrip",
+	"name": "space",
+	"input": {
+		"texts": [
+			" \t\n\r[ 1 , 2 ] \r\n",
+			"{ \"a\" : { \"b\" : [ ] } }"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "[1,2]"
+			},
+			{
+				"ok": true,
+				"text": "{\"a\":{\"b\":[]}}"
+			}
+		]
+	}
+}

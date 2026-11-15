@@ -1,0 +1,18 @@
+{
+	"format": 1,
+	"kind": "sessionCut.verify",
+	"name": "summary-with-no-parent-after-a-boundary-with-no-id",
+	"input": {
+		"source": {
+			"lines": [
+				"{\"type\":\"system\",\"subtype\":\"compact_boundary\",\"parentUuid\":null}",
+				"{\"type\":\"user\",\"isCompactSummary\":true}"
+			]
+		},
+		"sessionId": "built-1",
+		"paired": false
+	},
+	"expected": {
+		"problems": []
+	}
+}

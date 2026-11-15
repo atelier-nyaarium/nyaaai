@@ -1,0 +1,10 @@
+{
+	"name": "@nyaaai/agentic",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"description": "Key-backed model turns",
+	"exports": {
+		".": "./src/index.ts"
+	}
+}

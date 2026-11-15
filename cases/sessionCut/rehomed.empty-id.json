@@ -1,0 +1,16 @@
+{
+	"format": 1,
+	"kind": "sessionCut.rehomed",
+	"name": "empty-id",
+	"input": {
+		"rows": [
+			"{\"sessionId\":\"old\"}"
+		],
+		"sessionId": ""
+	},
+	"expected": {
+		"rows": [
+			"{\"sessionId\":\"\"}"
+		]
+	}
+}

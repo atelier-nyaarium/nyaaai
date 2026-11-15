@@ -1,0 +1,32 @@
+{
+	"format": 1,
+	"kind": "sessionCut.verify",
+	"name": "no-summary",
+	"input": {
+		"source": {
+			"lines": [
+				"{\"parentUuid\":\"u9\",\"isSidechain\":false,\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":\"second turn\"},\"uuid\":\"u10\",\"timestamp\":\"2026-11-13T00:00:10.000Z\",\"userType\":\"external\",\"entrypoint\":\"cli\",\"cwd\":\"/work\",\"sessionId\":\"built-1\",\"version\":\"2.1.323\",\"gitBranch\":\"main\",\"slug\":\"a-slug\"}",
+				"{\"type\":\"last-prompt\",\"leafUuid\":\"u10\",\"sessionId\":\"built-1\"}",
+				"{\"parentUuid\":\"u10\",\"isSidechain\":false,\"type\":\"assistant\",\"message\":{\"role\":\"assistant\",\"content\":[{\"type\":\"tool_use\",\"id\":\"t2\",\"name\":\"Bash\",\"input\":{\"session_id\":\"11111111-1111-4111-8111-111111111111\"}}]},\"uuid\":\"u11\",\"timestamp\":\"2026-11-13T00:00:11.000Z\",\"userType\":\"external\",\"entrypoint\":\"cli\",\"cwd\":\"/work\",\"sessionId\":\"built-1\",\"version\":\"2.1.323\",\"gitBranch\":\"main\",\"slug\":\"a-slug\"}",
+				"{\"parentUuid\":\"u11\",\"isSidechain\":false,\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"tool_result\",\"tool_use_id\":\"t2\",\"content\":\"ran in 11111111-1111-4111-8111-111111111111\"}]},\"uuid\":\"u12\",\"timestamp\":\"2026-11-13T00:00:12.000Z\",\"userType\":\"external\",\"entrypoint\":\"cli\",\"cwd\":\"/work\",\"sessionId\":\"built-1\",\"version\":\"2.1.323\",\"gitBranch\":\"main\",\"slug\":\"a-slug\"}",
+				"{\"parentUuid\":\"u12\",\"isSidechain\":false,\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":\"typed while it worked\"},\"uuid\":\"u13\",\"timestamp\":\"2026-11-13T00:00:13.000Z\",\"userType\":\"external\",\"entrypoint\":\"cli\",\"cwd\":\"/work\",\"sessionId\":\"built-1\",\"version\":\"2.1.323\",\"gitBranch\":\"main\",\"slug\":\"a-slug\"}",
+				"{\"parentUuid\":\"u13\",\"isSidechain\":false,\"type\":\"assistant\",\"message\":{\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"both done\"}]},\"uuid\":\"u14\",\"timestamp\":\"2026-11-13T00:00:14.000Z\",\"userType\":\"external\",\"entrypoint\":\"cli\",\"cwd\":\"/work\",\"sessionId\":\"built-1\",\"version\":\"2.1.323\",\"gitBranch\":\"main\",\"slug\":\"a-slug\"}",
+				"{\"parentUuid\":\"u14\",\"isSidechain\":false,\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":\"third turn\"},\"uuid\":\"u15\",\"timestamp\":\"2026-11-13T00:00:15.000Z\",\"userType\":\"external\",\"entrypoint\":\"cli\",\"cwd\":\"/work\",\"sessionId\":\"built-1\",\"version\":\"2.1.323\",\"gitBranch\":\"main\",\"slug\":\"a-slug\"}",
+				"{\"type\":\"mode\",\"sessionId\":\"built-1\"}",
+				"{\"type\":\"permission-mode\",\"sessionId\":\"built-1\"}",
+				"{\"type\":\"session-owner\",\"sessionId\":\"built-1\"}",
+				"{\"type\":\"atis-latch\",\"sessionId\":\"built-1\"}",
+				"{\"parentUuid\":\"u15\",\"isSidechain\":false,\"type\":\"assistant\",\"message\":{\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"finished\"}]},\"uuid\":\"u16\",\"timestamp\":\"2026-11-13T00:00:16.000Z\",\"userType\":\"external\",\"entrypoint\":\"cli\",\"cwd\":\"/work\",\"sessionId\":\"built-1\",\"version\":\"2.1.323\",\"gitBranch\":\"main\",\"slug\":\"a-slug\"}",
+				"{\"type\":\"last-prompt\",\"leafUuid\":\"u16\",\"sessionId\":\"built-1\"}",
+				"{\"parentUuid\":null,\"logicalParentUuid\":\"u16\",\"isSidechain\":false,\"type\":\"system\",\"subtype\":\"compact_boundary\",\"content\":\"Conversation compacted\",\"level\":\"info\",\"compactMetadata\":{\"trigger\":\"manual\",\"preTokens\":900,\"postTokens\":500,\"cumulativeDroppedTokens\":1400,\"durationMs\":1,\"preservedSegment\":{\"headUuid\":\"u10\",\"anchorUuid\":\"anchor\",\"tailUuid\":\"u16\"},\"preservedMessages\":{\"anchorUuid\":\"anchor\",\"uuids\":[\"u10\",\"u11\",\"u12\",\"u13\",\"u14\",\"u15\",\"u16\"],\"allUuids\":[\"u10\",\"u11\",\"u12\",\"u13\",\"u14\",\"u15\",\"u16\"]}},\"uuid\":\"edge\",\"timestamp\":\"2026-11-13T02:00:00.000Z\",\"userType\":\"external\",\"entrypoint\":\"cli\",\"cwd\":\"/work\",\"sessionId\":\"built-1\",\"version\":\"2.1.323\",\"gitBranch\":\"main\",\"slug\":\"a-slug\"}"
+			]
+		},
+		"sessionId": "built-1",
+		"paired": true
+	},
+	"expected": {
+		"problems": [
+			"no summary follows the compaction row"
+		]
+	}
+}

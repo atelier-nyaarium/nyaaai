@@ -1,0 +1,38 @@
+{
+	"format": 1,
+	"kind": "json.roundTrip",
+	"name": "plain",
+	"input": {
+		"texts": [
+			"{\"a\":1,\"b\":[true,null,\"x\"]}",
+			"null",
+			"\"text\"",
+			"[]",
+			"{}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"a\":1,\"b\":[true,null,\"x\"]}"
+			},
+			{
+				"ok": true,
+				"text": "null"
+			},
+			{
+				"ok": true,
+				"text": "\"text\""
+			},
+			{
+				"ok": true,
+				"text": "[]"
+			},
+			{
+				"ok": true,
+				"text": "{}"
+			}
+		]
+	}
+}

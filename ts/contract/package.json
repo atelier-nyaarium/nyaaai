@@ -1,0 +1,13 @@
+{
+	"name": "@nyaaai/contract",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"description": "Message shapes, written in Zod",
+	"exports": {
+		".": "./src/index.ts",
+		"./id": "./src/id.ts",
+		"./json": "./src/json.ts",
+		"./time": "./src/time.ts"
+	}
+}

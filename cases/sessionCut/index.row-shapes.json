@@ -1,0 +1,495 @@
+{
+	"format": 1,
+	"kind": "sessionCut.index",
+	"name": "row-shapes",
+	"input": {
+		"source": {
+			"lines": [
+				"",
+				"[1]",
+				"\"text\"",
+				"5",
+				"null",
+				"true",
+				"{\"uuid\":\"no-type\"}",
+				"{\"type\":5,\"uuid\":\"n1\"}",
+				"{\"type\":[\"a\",null,{\"b\":1},[2,[3]],true,1e21,-0],\"uuid\":\"n2\"}",
+				"{\"type\":{\"a\":1},\"uuid\":\"n3\"}",
+				"{\"type\":null,\"uuid\":\"n4\"}",
+				"{\"type\":true,\"uuid\":\"n5\"}",
+				"{\"type\":1e999,\"uuid\":\"n6\"}",
+				"{\"type\":\"user\",\"uuid\":\"\"}",
+				"{\"type\":\"user\",\"uuid\":7}",
+				"{\"type\":\"mode\",\"uuid\":\"h1\",\"version\":\"0.0.1\"}",
+				"{\"type\":\"mode\"}",
+				"{\"type\":\"atis-latch\",\"version\":7}",
+				"{\"type\":\"user\",\"uuid\":\"m-user-7\",\"message\":{\"role\":\"user\",\"content\":\"plain\"}}",
+				"{\"type\":\"user\",\"uuid\":\"m-user-2\",\"message\":{\"role\":\"user\",\"content\":[]}}",
+				"{\"type\":\"user\",\"uuid\":\"m-user-89\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"a\"},{\"type\":\"text\",\"text\":7},{\"type\":\"image\"},\"loose\",null,[1],5]}}",
+				"{\"type\":\"user\",\"uuid\":\"m-user-68\",\"message\":{\"role\":\"user\",\"content\":[[{\"type\":\"tool_result\"}],{\"type\":\"text\",\"text\":\"array part first\"}]}}",
+				"{\"type\":\"user\",\"uuid\":\"m-user-82\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"tool_result\",\"tool_use_id\":\"c1\"},{\"type\":\"text\",\"text\":\"with a result\"}]}}",
+				"{\"type\":\"user\",\"uuid\":\"m-user-40\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"tool_result\",\"tool_use_id\":9}]}}",
+				"{\"type\":\"user\",\"uuid\":\"m-user-34\",\"message\":{\"role\":\"user\",\"content\":{\"type\":\"text\",\"text\":\"an object\"}}}",
+				"{\"type\":\"user\",\"uuid\":\"m-user-2\",\"message\":{\"role\":\"user\",\"content\":12}}",
+				"{\"type\":\"user\",\"uuid\":\"m-user-4\",\"message\":{\"role\":\"user\",\"content\":null}}",
+				"{\"type\":\"user\",\"uuid\":\"m-none\"}",
+				"{\"type\":\"user\",\"uuid\":\"m-text-message\",\"message\":\"just text\"}",
+				"{\"type\":\"user\",\"uuid\":\"m-list-message\",\"message\":[{\"content\":\"x\"}]}",
+				"{\"type\":\"user\",\"uuid\":\"m-side\",\"isSidechain\":true,\"message\":{\"content\":\"sidechain\"}}",
+				"{\"type\":\"user\",\"uuid\":\"m-sum\",\"isCompactSummary\":true,\"message\":{\"content\":\"summary with no boundary\"}}",
+				"{\"type\":\"user\",\"uuid\":\"m-side-text\",\"isSidechain\":\"true\",\"message\":{\"content\":\"sidechain as text\"}}",
+				"{\"type\":\"assistant\",\"uuid\":\"m-assistant-108\",\"message\":{\"role\":\"assistant\",\"content\":[{\"type\":\"tool_use\",\"id\":\"c1\"},{\"type\":\"tool_use\",\"id\":\"c2\"},{\"type\":\"tool_use\"},{\"type\":\"tool_use\",\"id\":3}]}}",
+				"{\"type\":\"assistant\",\"uuid\":\"m-assistant-16\",\"message\":{\"role\":\"assistant\",\"content\":\"assistant text\"}}",
+				"{\"type\":\"user\",\"uuid\":\"m-user-130\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"tool_result\",\"tool_use_id\":\"c2\"},{\"type\":\"tool_result\",\"tool_use_id\":\"c2\"},{\"type\":\"tool_result\",\"tool_use_id\":\"never\"}]}}",
+				"{\"type\":\"assistant\",\"uuid\":\"m-user-part\",\"message\":{\"content\":[{\"type\":\"tool_result\",\"tool_use_id\":\"c1\"}]}}",
+				"{\"type\":\"attachment\",\"uuid\":\"a1\",\"attachment\":{\"type\":\"queued_command\",\"prompt\":\"taken in\"}}",
+				"{\"type\":\"attachment\",\"uuid\":\"a2\",\"attachment\":{\"type\":\"queued_command\",\"prompt\":7}}",
+				"{\"type\":\"attachment\",\"uuid\":\"a3\",\"attachment\":{\"type\":\"file\",\"prompt\":\"not a command\"}}",
+				"{\"type\":\"attachment\",\"uuid\":\"a4\",\"attachment\":\"queued_command\"}",
+				"{\"type\":\"attachment\",\"uuid\":\"a5\",\"attachment\":[\"queued_command\"]}",
+				"{\"type\":\"attachment\",\"uuid\":\"a6\"}",
+				"{\"type\":\"last-prompt\",\"leafUuid\":\"a1\",\"messageId\":\"m-none\",\"snapshotMessageId\":7,\"timestamp\":\"2026-11-13T00:00:00.000Z\"}",
+				"{\"type\":\"file-history-snapshot\",\"snapshotMessageId\":\"a1\",\"messageId\":null,\"timestamp\":12}",
+				"{\"type\":\"api-request\",\"uuid\":\"r1\",\"message\":{\"content\":[{\"type\":\"tool_use\",\"id\":\"logged\"}]}}",
+				"{\"type\":\"user\",\"uuid\":\"m-escaped\",\"message\":{\"content\":\"lone \\ud83d and pair \\ud83d\\ude00\"},\"version\":\"\\ud83d\"}",
+				"{\"type\":\"user\",\"uuid\":\"m-deep\",\"message\":{\"content\":[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]}}",
+				"{\"type\":\"user\",\"uuid\":\"m-too-deep\",\"message\":{\"content\":[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]}}",
+				"{\"type\":\"user\",\"uuid\":\"m-last\",\"message\":{\"content\":\"the last row\"},\"timestamp\":\"not a time\"}   "
+			]
+		}
+	},
+	"expected": {
+		"index": {
+			"lines": 50,
+			"unparsed": 6,
+			"unreadable": [
+				2,
+				3,
+				4,
+				5,
+				6,
+				49
+			],
+			"version": "�",
+			"header": [
+				[
+					"mode",
+					17
+				],
+				[
+					"atis-latch",
+					18
+				]
+			],
+			"boundary": null,
+			"boundaries": 0,
+			"standing": null,
+			"tail": [
+				{
+					"line": 7,
+					"bytes": 19,
+					"type": "undefined",
+					"uuid": "no-type",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 8,
+					"bytes": 23,
+					"type": "5",
+					"uuid": "n1",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 9,
+					"bytes": 61,
+					"type": "a,,[object Object],2,3,true,1e+21,0",
+					"uuid": "n2",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 10,
+					"bytes": 29,
+					"type": "[object Object]",
+					"uuid": "n3",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 11,
+					"bytes": 26,
+					"type": "null",
+					"uuid": "n4",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 12,
+					"bytes": 26,
+					"type": "true",
+					"uuid": "n5",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 13,
+					"bytes": 27,
+					"type": "Infinity",
+					"uuid": "n6",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 14,
+					"bytes": 26,
+					"type": "user",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 15,
+					"bytes": 25,
+					"type": "user",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 16,
+					"bytes": 46,
+					"type": "mode",
+					"uuid": "h1",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 17,
+					"bytes": 16,
+					"type": "mode",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 18,
+					"bytes": 34,
+					"type": "atis-latch",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 19,
+					"bytes": 78,
+					"type": "user",
+					"uuid": "m-user-7",
+					"openTools": 0,
+					"delivered": true,
+					"text": "plain",
+					"points": []
+				},
+				{
+					"line": 20,
+					"bytes": 73,
+					"type": "user",
+					"uuid": "m-user-2",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 21,
+					"bytes": 161,
+					"type": "user",
+					"uuid": "m-user-89",
+					"openTools": 0,
+					"delivered": true,
+					"text": "a\n\n\n",
+					"points": []
+				},
+				{
+					"line": 22,
+					"bytes": 140,
+					"type": "user",
+					"uuid": "m-user-68",
+					"openTools": 0,
+					"delivered": true,
+					"text": "\narray part first",
+					"points": []
+				},
+				{
+					"line": 23,
+					"bytes": 154,
+					"type": "user",
+					"uuid": "m-user-82",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 24,
+					"bytes": 112,
+					"type": "user",
+					"uuid": "m-user-40",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 25,
+					"bytes": 106,
+					"type": "user",
+					"uuid": "m-user-34",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 26,
+					"bytes": 73,
+					"type": "user",
+					"uuid": "m-user-2",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 27,
+					"bytes": 75,
+					"type": "user",
+					"uuid": "m-user-4",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 28,
+					"bytes": 32,
+					"type": "user",
+					"uuid": "m-none",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 29,
+					"bytes": 62,
+					"type": "user",
+					"uuid": "m-text-message",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 30,
+					"bytes": 68,
+					"type": "user",
+					"uuid": "m-list-message",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 31,
+					"bytes": 85,
+					"type": "user",
+					"uuid": "m-side",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 32,
+					"bytes": 104,
+					"type": "user",
+					"uuid": "m-sum",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 33,
+					"bytes": 100,
+					"type": "user",
+					"uuid": "m-side-text",
+					"openTools": 0,
+					"delivered": true,
+					"text": "sidechain as text",
+					"points": []
+				},
+				{
+					"line": 34,
+					"bytes": 196,
+					"type": "assistant",
+					"uuid": "m-assistant-108",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 35,
+					"bytes": 103,
+					"type": "assistant",
+					"uuid": "m-assistant-16",
+					"openTools": 2,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 36,
+					"bytes": 203,
+					"type": "user",
+					"uuid": "m-user-130",
+					"openTools": 2,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 37,
+					"bytes": 108,
+					"type": "assistant",
+					"uuid": "m-user-part",
+					"openTools": 1,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 38,
+					"bytes": 93,
+					"type": "attachment",
+					"uuid": "a1",
+					"openTools": 1,
+					"delivered": true,
+					"text": "taken in",
+					"points": []
+				},
+				{
+					"line": 39,
+					"bytes": 84,
+					"type": "attachment",
+					"uuid": "a2",
+					"openTools": 1,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 40,
+					"bytes": 88,
+					"type": "attachment",
+					"uuid": "a3",
+					"openTools": 1,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 41,
+					"bytes": 64,
+					"type": "attachment",
+					"uuid": "a4",
+					"openTools": 1,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 42,
+					"bytes": 66,
+					"type": "attachment",
+					"uuid": "a5",
+					"openTools": 1,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 43,
+					"bytes": 34,
+					"type": "attachment",
+					"uuid": "a6",
+					"openTools": 1,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 44,
+					"bytes": 121,
+					"type": "last-prompt",
+					"at": "2026-11-13T00:00:00.000Z",
+					"openTools": 1,
+					"delivered": false,
+					"points": [
+						"a1",
+						"m-none"
+					]
+				},
+				{
+					"line": 45,
+					"bytes": 90,
+					"type": "file-history-snapshot",
+					"openTools": 1,
+					"delivered": false,
+					"points": [
+						"a1"
+					]
+				},
+				{
+					"line": 46,
+					"bytes": 93,
+					"type": "api-request",
+					"uuid": "r1",
+					"openTools": 1,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 47,
+					"bytes": 112,
+					"type": "user",
+					"uuid": "m-escaped",
+					"openTools": 1,
+					"delivered": true,
+					"text": "lone � and pair 😀",
+					"points": []
+				},
+				{
+					"line": 48,
+					"bytes": 2099,
+					"type": "user",
+					"uuid": "m-deep",
+					"openTools": 1,
+					"delivered": true,
+					"text": "",
+					"points": []
+				},
+				{
+					"line": 50,
+					"bytes": 97,
+					"type": "user",
+					"uuid": "m-last",
+					"at": "not a time",
+					"openTools": 1,
+					"delivered": true,
+					"text": "the last row",
+					"points": []
+				},
+				{
+					"line": 51,
+					"bytes": 0,
+					"type": "end",
+					"openTools": 1,
+					"delivered": false,
+					"points": []
+				}
+			]
+		}
+	}
+}

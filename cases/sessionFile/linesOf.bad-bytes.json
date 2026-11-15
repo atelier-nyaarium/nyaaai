@@ -1,0 +1,22 @@
+{
+	"format": 1,
+	"kind": "sessionFile.linesOf",
+	"name": "bad-bytes",
+	"input": {
+		"base64": "gL9BCv/++MDB9UEKwwriggrwn5gK4oJB8J9B8J+YQQrAgOCAgPCAgIDgn78K7aCA7b+/7Z+/CvSQgID0j7+/CuLigqzww6kK"
+	},
+	"expected": {
+		"rows": [
+			"��A",
+			"������A",
+			"�",
+			"�",
+			"�",
+			"�A�A�A",
+			"������������",
+			"������퟿",
+			"����􏿿",
+			"�€�é"
+		]
+	}
+}

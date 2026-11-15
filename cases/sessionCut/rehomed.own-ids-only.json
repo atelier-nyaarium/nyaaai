@@ -1,0 +1,54 @@
+{
+	"format": 1,
+	"kind": "sessionCut.rehomed",
+	"name": "own-ids-only",
+	"input": {
+		"rows": [
+			"{\"sessionId\":\"old\",\"type\":\"user\"}",
+			"{\"type\":\"user\",\"session_id\":\"old\",\"sessionId\":\"old\"}",
+			"{\"a\":\"😀🧪 astral before\",\"sessionId\":\"old\",\"b\":\" \"}",
+			"{\"input\":{\"sessionId\":\"nested\"},\"sessionId\":\"old\"}",
+			"{\"list\":[{\"sessionId\":\"nested\"}],\"sessionId\":\"old\"}",
+			"[{\"sessionId\":\"in a list\"}]",
+			"{\"session\\u0049d\":\"escaped key\",\"sessionId\":\"old\"}",
+			"{\"sessionId\":\"a\\\"b\\\\\",\"after\":\"x\",\"session_id\":\"c\\\\\\\"d\"}",
+			"{\"sessionId\":123,\"session_id\":null,\"x\":{\"sessionId\":\"old\"}}",
+			"{\"sessionId\": \"spaced\",\"session_id\" :\"spaced\"}",
+			"{\"sessionId\":\"one\",\"sessionId\":\"two\"}",
+			"{\"text\":\"{\\\"sessionId\\\":\\\"in text\\\"}\",\"sessionId\":\"old\"}",
+			"{\"text\":\"braces } ] { [ in text\",\"sessionId\":\"old\"}",
+			"{\"text\":\"ends with a backslash \\\\\",\"sessionId\":\"old\"}",
+			"{\"sessionId\":\"\",\"type\":\"x\"}",
+			"{\"sessionId\":\"old\"}\r",
+			"{\"sessionId\":\"old\",\t\"session_id\":\"old\"}",
+			"\"sessionId\":\"old\"",
+			"{\"sessionId\":[\"old\"],\"session_id\":{\"sessionId\":\"old\"}}",
+			"{\"sessionid\":\"old\",\"SessionId\":\"old\",\"sessionId \":\"old\"}"
+		],
+		"sessionId": "new-id"
+	},
+	"expected": {
+		"rows": [
+			"{\"sessionId\":\"new-id\",\"type\":\"user\"}",
+			"{\"type\":\"user\",\"session_id\":\"new-id\",\"sessionId\":\"new-id\"}",
+			"{\"a\":\"😀🧪 astral before\",\"sessionId\":\"new-id\",\"b\":\" \"}",
+			"{\"input\":{\"sessionId\":\"nested\"},\"sessionId\":\"new-id\"}",
+			"{\"list\":[{\"sessionId\":\"nested\"}],\"sessionId\":\"new-id\"}",
+			"[{\"sessionId\":\"in a list\"}]",
+			"{\"session\\u0049d\":\"escaped key\",\"sessionId\":\"new-id\"}",
+			"{\"sessionId\":\"new-id\",\"after\":\"x\",\"session_id\":\"new-id\"}",
+			"{\"sessionId\":123,\"session_id\":null,\"x\":{\"sessionId\":\"old\"}}",
+			"{\"sessionId\": \"spaced\",\"session_id\" :\"spaced\"}",
+			"{\"sessionId\":\"new-id\",\"sessionId\":\"new-id\"}",
+			"{\"text\":\"{\\\"sessionId\\\":\\\"in text\\\"}\",\"sessionId\":\"new-id\"}",
+			"{\"text\":\"braces } ] { [ in text\",\"sessionId\":\"new-id\"}",
+			"{\"text\":\"ends with a backslash \\\\\",\"sessionId\":\"new-id\"}",
+			"{\"sessionId\":\"new-id\",\"type\":\"x\"}",
+			"{\"sessionId\":\"new-id\"}\r",
+			"{\"sessionId\":\"new-id\",\t\"session_id\":\"new-id\"}",
+			"\"sessionId\":\"old\"",
+			"{\"sessionId\":[\"old\"],\"session_id\":{\"sessionId\":\"old\"}}",
+			"{\"sessionid\":\"old\",\"SessionId\":\"old\",\"sessionId \":\"old\"}"
+		]
+	}
+}
