@@ -14,12 +14,12 @@ interface Manifest {
 	dependencies?: Record<string, string>;
 	devDependencies?: Record<string, string>;
 	nyaaai?: { packages?: unknown };
+	workspaces?: string[];
 }
 
 ////////////////////////////////
 //  Constants
 
-const ALL_PACKAGES = ["contract", "process", "agentic", "operator", "ui", "testkit"];
 const SCOPE = "@nyaaai/";
 
 ////////////////////////////////
@@ -34,14 +34,23 @@ function rootManifest(root: string): Manifest {
 	return existsSync(file) ? readManifest(file) : {};
 }
 
-export function usedPackages(root: string): string[] {
+/** Checked-out package names. */
+function allPackages(submodule: string): string[] {
+	const file = path.join(submodule, "ts", "package.json");
+	const names = existsSync(file) ? (readManifest(file).workspaces ?? []) : [];
+	if (names.some((name) => /[*?[\]{}]/.test(name))) throw new Error(`${file} lists a workspace pattern, not a name`);
+	return names;
+}
+
+export function usedPackages(root: string, submodule: string): string[] {
+	const all = allPackages(submodule);
 	const listed = rootManifest(root).nyaaai?.packages;
-	if (listed === undefined) return ALL_PACKAGES;
+	if (listed === undefined || all.length === 0) return all;
 	if (!Array.isArray(listed) || listed.some((name) => typeof name !== "string")) {
 		throw new Error('"nyaaai.packages" in package.json must be a list of names');
 	}
 	const names = listed as string[];
-	const unknown = names.filter((name) => !ALL_PACKAGES.includes(name));
+	const unknown = names.filter((name) => !all.includes(name));
 	if (unknown.length > 0) throw new Error(`unknown nyaaai package: ${unknown.join(", ")}`);
 	return names;
 }
@@ -56,7 +65,7 @@ function linkPath(root: string, name: string): string {
 
 export function link(root: string, submodule: string): string[] {
 	const lines: string[] = [];
-	for (const name of usedPackages(root)) {
+	for (const name of usedPackages(root, submodule)) {
 		const source = packageDir(submodule, name);
 		const manifest = path.join(source, "package.json");
 		if (!existsSync(manifest)) continue;
@@ -113,13 +122,16 @@ export function bump(submodule: string): string[] {
 export function assertConsumer(root: string, submodule: string, packageMode: boolean): string[] {
 	const failures: string[] = [];
 	const notes: string[] = [];
-	const used = usedPackages(root);
-
 	if (!existsSync(path.join(packageDir(submodule, "contract"), "package.json"))) {
 		throw new Error(`submodule is not initialized: ${path.join(submodule, "ts/contract/package.json")} is missing`);
 	}
 
-	const folders = [submodule, path.join(submodule, "ts"), ...ALL_PACKAGES.map((n) => packageDir(submodule, n))];
+	const used = usedPackages(root, submodule);
+	const folders = [
+		submodule,
+		path.join(submodule, "ts"),
+		...allPackages(submodule).map((n) => packageDir(submodule, n)),
+	];
 	for (const folder of folders) {
 		if (existsSync(path.join(folder, "node_modules"))) {
 			failures.push(`node_modules inside the submodule: ${path.join(folder, "node_modules")}`);

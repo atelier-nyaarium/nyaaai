@@ -29,6 +29,7 @@ function parts(): Part[] {
 	const demoManifest = path.join(DEMO, "Cargo.toml");
 	const demo = existsSync(demoManifest);
 	return [
+		{ name: "link", command: "bun", args: ["scripts/consumer.ts", "link"] },
 		{ name: "biome", command: path.join(BIN, "biome"), args: ["ci", "."] },
 		{ name: "tsc", command: path.join(BIN, "tsc"), args: ["--build"] },
 		{ name: "test", command: "bun", args: ["test"] },
@@ -42,13 +43,18 @@ function parts(): Part[] {
 				MANIFEST,
 				"--workspace",
 				"--all-targets",
+				"--all-features",
 				"--locked",
 				"--",
 				"-D",
 				"warnings",
 			],
 		},
-		{ name: "cargo-test", command: cargo, args: ["test", "--manifest-path", MANIFEST, "--workspace", "--locked"] },
+		{
+			name: "cargo-test",
+			command: cargo,
+			args: ["test", "--manifest-path", MANIFEST, "--workspace", "--all-features", "--locked"],
+		},
 		{
 			name: "crates",
 			command: "bun",
@@ -84,7 +90,7 @@ if (import.meta.main) {
 	}
 	if (!held.some((part) => part.name === "demo")) console.log(`\n[demo] SKIPPED: no ${DEMO}`);
 	for (const part of held) {
-		if (wanted.size > 0 && !wanted.has(part.name)) continue;
+		if (wanted.size > 0 && !wanted.has(part.name) && part.name !== "link") continue;
 		if (interrupted) {
 			results.push({ name: part.name, ok: false });
 			continue;

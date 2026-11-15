@@ -7,6 +7,7 @@ Shared AI framework for Nyaarium tools. TypeScript and Rust twins, judged by one
 - `ts/`: Bun workspace. Packages `contract`, `process`, `agentic`, `operator`, `ui`, `testkit`, scope `@nyaaai`.
 - `rust/`: Cargo workspace. Crates `contract`, `process`, `agentic`, `operator`, `testkit`, `cli`.
 - `cases/`: language-neutral cases. Generated from `scripts/caseSources/`, committed.
+  - A case is data. `paths` cases also name a folder tree, built in a temp folder by each language.
 - `scripts/`: gate, case runner, crate check, snapshot, consumer script.
 
 ## Commands
@@ -23,7 +24,9 @@ bun scripts/snapshot.ts           # commit the working tree for a consumer, prin
 bun scripts/realSessions.ts       # both languages on this machine's real session files; prints counts only
 ```
 
-Gate parts: `biome`, `tsc`, `test`, `fmt`, `clippy`, `cargo-test`, `crates`, `cases`, `symbols`, `demo`.
+Gate parts: `link`, `biome`, `tsc`, `test`, `fmt`, `clippy`, `cargo-test`, `crates`, `cases`, `symbols`, `demo`.
+
+`link` makes `node_modules/@nyaaai` here, as a consumer's does. Scripts import packages by name, so the gate reads the same exports a consumer reads.
 
 `cargo` comes from `PATH`, else `~/.cargo/bin`. `rust-toolchain.toml` pins the toolchain.
 `demo` runs when `../nyaaai-demo` exists, or `NYAAAI_DEMO_DIR`.
@@ -61,13 +64,15 @@ bun <submodule>/scripts/consumer.ts assert --package    # also refuses a snapsho
 - TypeScript is a move of tested code. Rust is a port against the cases.
 - Pairs land together: TypeScript module, Rust module and cases in one commit.
 - Same module map and public names in both languages. `sessionCut.ts` is `session_cut.rs`.
-  - Rust alone exports stand-ins for JavaScript built-ins: `quote_json`, `to_js_string`.
+  - Rust alone exports stand-ins for JavaScript built-ins: `contract::js`, and `quote_json`. A port calls them, never its own copy.
 - Expected case output comes from TypeScript. Review the diff of every refresh.
 - `agentic` holds keys and local URLs only. `operator` holds logins. `agentic` never imports `operator`; `scripts/__tests__/residue.test.ts` holds it.
 - Clean break. No old code path survives its change.
 - A change rewrites the documents it makes false, in the same commit.
 - Engine names no tool. Tools declare their traits.
 - Rust is synchronous where nothing waits on IO.
+- A path check goes through `paths` in `process`. Cases with a folder tree judge it in both languages.
+- The case runner is `nyaaai-cases`, behind the `cases` feature. The `nyaaai` tool holds no test code.
 - No build output, no large corpus.
 - Consumers import TypeScript source through a submodule. No `node_modules` inside one.
 - A package lists what it needs in `dependencies`. The consumer pins each at that version.

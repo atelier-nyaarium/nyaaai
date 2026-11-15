@@ -1,0 +1,90 @@
+// Path cases: bun scripts/cases.ts.
+
+import type { CaseSource, TreeEntry } from "../caseAdapter";
+
+const tree: TreeEntry[] = [
+	{ path: "keep/nested" },
+	{ path: "out" },
+	{ path: "out/file", file: true },
+	{ path: "link-in", link: "keep/nested" },
+	{ path: "abs-link", link: "$ROOT/keep" },
+	{ path: "dangling", link: "nowhere/else" },
+	{ path: "loop-a", link: "loop-b" },
+	{ path: "loop-b", link: "loop-a" },
+	{ path: "up", link: ".." },
+	{ path: "out/back", link: "../keep" },
+	{ path: "file-link", link: "out/file" },
+	{ path: "sp ace/\u{e9}t\u{e9}" },
+	{ path: "to-root", link: "/" },
+];
+
+const inKeep = (child: string) => ({ child, parent: "keep" });
+
+export const pathCases: CaseSource[] = [
+	{
+		kind: "paths.isInside",
+		name: "tree",
+		input: {
+			tree,
+			checks: [
+				inKeep("out"),
+				inKeep("keep"),
+				inKeep("keep/"),
+				inKeep("keep/nested/new/deeper"),
+				inKeep("keepsake"),
+				inKeep("out/../keep/x"),
+				inKeep("link-in/x"),
+				inKeep("link-in/../escape/out"),
+				inKeep("link-in/../../out"),
+				inKeep("abs-link"),
+				inKeep("out/back/new"),
+				inKeep("dangling/x"),
+				inKeep("loop-a/x"),
+				inKeep("out/missing/../x"),
+				inKeep("out/file/x"),
+				inKeep("out/file/../x"),
+				inKeep("keep/nested/../../out"),
+				inKeep("dangling/../keep"),
+				inKeep("../../../../../../../../../../.."),
+				inKeep("up/x"),
+				inKeep("out//double"),
+				{ child: "keep/./nested/.", parent: "keep/nested" },
+				{ child: "out", parent: "/" },
+				{ child: "out", parent: "missing/parent" },
+				{ child: "missing/parent/child", parent: "missing/parent" },
+				{ child: "keep", parent: "abs-link" },
+				{ child: "out", parent: "loop-a" },
+				{ child: "file-link", parent: "out" },
+				{ child: "file-link/", parent: "out" },
+				{ child: "out/file/", parent: "out" },
+				{ child: "out/file/.", parent: "out" },
+				{ child: "out/", parent: "out" },
+				{ child: "missing/", parent: "out" },
+				{ child: "sp ace/\u{e9}t\u{e9}/new", parent: "sp ace" },
+				{ child: "to-root", parent: "keep" },
+				{ child: "keep", parent: "to-root" },
+			],
+		},
+	},
+	{
+		kind: "paths.isInside",
+		name: "relative",
+		input: {
+			tree,
+			relative: true,
+			checks: [
+				inKeep("keep/nested"),
+				inKeep("out/../keep"),
+				inKeep("./keep/./nested/new"),
+				inKeep("link-in/../x"),
+				inKeep("out"),
+				inKeep(".."),
+				{ child: "./out", parent: "." },
+				{ child: "..", parent: "." },
+				{ child: "out/..", parent: "." },
+				{ child: "", parent: "keep" },
+				{ child: "keep", parent: "" },
+			],
+		},
+	},
+];

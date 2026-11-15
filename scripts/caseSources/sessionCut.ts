@@ -1,7 +1,7 @@
 // Synthetic cases contain no real transcripts.
 
-import type { CutRequest, TurnPick } from "../../ts/operator/src/claude/sessionCut";
-import { CLI_VERSION, compactedSession, SESSION_ID, SyntheticSession } from "../../ts/testkit/src/claudeSession";
+import type { CutRequest, TurnPick } from "@nyaaai/operator/claude/sessionCut";
+import { CLI_VERSION, compactedSession, SESSION_ID, SyntheticSession } from "@nyaaai/testkit/claudeSession";
 import type { BodyOf, CaseSource, CutCaseInput, SessionBytes } from "../caseAdapter";
 
 ////////////////////////////////

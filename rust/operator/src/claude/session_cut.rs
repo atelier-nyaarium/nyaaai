@@ -6,7 +6,8 @@ use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::io;
 
-use nyaaai_contract::json::{Object, Value, parse_json, quote_json, stringify_json, to_js_string};
+use nyaaai_contract::js::{collapse_space, strict_equal, to_js_string, trim};
+use nyaaai_contract::json::{Object, Value, parse_json, quote_json, stringify_json};
 use nyaaai_contract::time::{iso_time, parse_iso_time};
 
 /// CLI versions whose session file shape a built cut is known to resume under.
@@ -218,6 +219,9 @@ pub struct BuildInputs<'a> {
     pub now_ms: &'a dyn Fn() -> i64,
 }
 
+/// Folds what stood and the rows above the cut into a summary.
+pub type Summarizer<'a> = dyn Fn(Option<&str>, &[String]) -> io::Result<String> + 'a;
+
 /// Rows of text, each fallible to read.
 pub type Lines<'a> = Box<dyn Iterator<Item = io::Result<String>> + 'a>;
 
@@ -235,13 +239,9 @@ pub trait CutPorts {
     fn new_id(&self) -> String;
     fn now_ms(&self) -> i64;
     fn cli_version(&self) -> io::Result<String>;
-    /// Whether `summarize` answers.
-    fn can_summarize(&self) -> bool {
-        false
-    }
-    /// Folds what stood and the rows above the cut into a summary.
-    fn summarize(&self, _standing: Option<&str>, _rows: &[String]) -> io::Result<String> {
-        Err(io::Error::other("no summarizer"))
+    /// Absent: a compact needs its summary handed over.
+    fn summarizer(&self) -> Option<&Summarizer<'_>> {
+        None
     }
 }
 
@@ -1024,18 +1024,6 @@ where
     Ok(built)
 }
 
-/// `===` on two values that may be absent. Objects and lists are never equal.
-fn strict_eq(left: Option<&Value>, right: Option<&Value>) -> bool {
-    match (left, right) {
-        (None, None) => true,
-        (Some(Value::Null), Some(Value::Null)) => true,
-        (Some(Value::Bool(a)), Some(Value::Bool(b))) => a == b,
-        (Some(Value::Number(a)), Some(Value::Number(b))) => a == b,
-        (Some(Value::String(a)), Some(Value::String(b))) => a == b,
-        _ => false,
-    }
-}
-
 /// The read-back: what would stop the built file resuming as planned. Empty when sound.
 /// `paired` holds a built segment to its own tool calls; a trim keeps the CLI's own segment as it stood.
 pub fn verify_cut<I>(lines: I, session_id: &str, paired: bool) -> io::Result<Vec<String>>
@@ -1135,8 +1123,8 @@ where
     }
     let end_of = |key: &str| segment.and_then(|held| held.get(key));
     if !uuids.is_empty()
-        && (!strict_eq(end_of("headUuid"), uuids.first())
-            || !strict_eq(end_of("tailUuid"), uuids.last()))
+        && (!strict_equal(end_of("headUuid"), uuids.first())
+            || !strict_equal(end_of("tailUuid"), uuids.last()))
     {
         problems.push("the preserved segment's ends are not its rows' ends".to_owned());
     }
@@ -1144,46 +1132,20 @@ where
         problems.push("the compaction row has a parent".to_owned());
     }
     let summary = after_boundary.as_ref().filter(|row| {
-        is_true(row, "isCompactSummary") && strict_eq(row.get("parentUuid"), boundary.get("uuid"))
+        is_true(row, "isCompactSummary")
+            && strict_equal(row.get("parentUuid"), boundary.get("uuid"))
     });
     match summary {
         None => problems.push("no summary follows the compaction row".to_owned()),
         Some(summary) => {
             let uuid = summary.get("uuid");
             let anchor = messages.and_then(|held| held.get("anchorUuid"));
-            if !strict_eq(uuid, end_of("anchorUuid")) || !strict_eq(uuid, anchor) {
+            if !strict_equal(uuid, end_of("anchorUuid")) || !strict_equal(uuid, anchor) {
                 problems.push("the summary is not the compaction row's anchor".to_owned());
             }
         }
     }
     Ok(problems)
-}
-
-/// What `\s` matches in ECMAScript, and what `trim` removes.
-fn is_js_space(char: char) -> bool {
-    matches!(
-        char,
-        '\t' | '\n' | '\u{B}' | '\u{C}' | '\r' | ' ' | '\u{A0}' | '\u{1680}' | '\u{2000}'
-            ..='\u{200A}'
-                | '\u{2028}'
-                | '\u{2029}'
-                | '\u{202F}'
-                | '\u{205F}'
-                | '\u{3000}'
-                | '\u{FEFF}'
-    )
-}
-
-fn js_trim(text: &str) -> &str {
-    text.trim_matches(is_js_space)
-}
-
-/// Runs of space become one; the ends are trimmed.
-fn collapsed(text: &str) -> String {
-    text.split(is_js_space)
-        .filter(|word| !word.is_empty())
-        .collect::<Vec<_>>()
-        .join(" ")
 }
 
 /// The turn a chat row names. Its own text finds it, nearest in time; a row that started no turn finds the
@@ -1203,12 +1165,14 @@ pub fn pick_turn(
     if let Some(wanted) = pick
         .text
         .as_deref()
-        .map(collapsed)
+        .map(collapse_space)
         .filter(|wanted| !wanted.is_empty())
     {
         let named = starts
             .iter()
-            .filter(|(row, _)| collapsed(&body_of(row.text.as_deref().unwrap_or(""))) == wanted)
+            .filter(|(row, _)| {
+                collapse_space(&body_of(row.text.as_deref().unwrap_or(""))) == wanted
+            })
             .filter_map(|(row, uuid)| time_of(row).map(|at| (at.abs_diff(pick.at), *uuid)))
             .min_by_key(|(gap, _)| *gap);
         if let Some((_, uuid)) = named {
@@ -1240,7 +1204,7 @@ pub fn compacted_summary(summary: &str, source_path: &str) -> String {
          above a message they chose. The summary below covers everything before that message.\n\n{}\n\nIf you \
          need specific details from before the compaction, read the full transcript at: {source_path}\n\nThe \
          messages after this summary are the conversation from that message on, kept verbatim.",
-        js_trim(summary)
+        trim(summary)
     )
 }
 
@@ -1277,12 +1241,12 @@ pub fn cut_session(ports: &dyn CutPorts, request: &CutRequest) -> Result<CutOutc
         let summary = match &request.summary_text {
             Some(summary) => summary.clone(),
             None => {
-                if !ports.can_summarize() {
+                let Some(summarize) = ports.summarizer() else {
                     return Ok(Err(refused(
                         CutRefusal::SummaryNeeded,
                         "No summary was handed over.",
                     )));
-                }
+                };
                 let fold: HashSet<usize> = plan.fold_lines.iter().copied().collect();
                 let mut rows: Vec<String> = Vec::new();
                 for (at, text) in ports.read()?.enumerate() {
@@ -1291,10 +1255,10 @@ pub fn cut_session(ports: &dyn CutPorts, request: &CutRequest) -> Result<CutOutc
                         rows.push(text);
                     }
                 }
-                ports.summarize(index.standing.as_deref(), &rows)?
+                summarize(index.standing.as_deref(), &rows)?
             }
         };
-        if js_trim(&summary).is_empty() {
+        if trim(&summary).is_empty() {
             return Ok(Err(refused(
                 CutRefusal::SummaryNeeded,
                 "The summary is empty.",

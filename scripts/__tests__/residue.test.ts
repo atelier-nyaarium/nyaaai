@@ -54,4 +54,16 @@ describe("residue", () => {
 		];
 		expect(namesOperator(probes)).toEqual(["a.ts", "b.ts", "Cargo.toml", "c.rs"]);
 	});
+
+	it("both workspaces hold the same packages", () => {
+		const packages = (
+			JSON.parse(readFileSync(path.join(ROOT, "ts", "package.json"), "utf8")) as { workspaces: string[] }
+		).workspaces;
+		const members = /^members = \[([^\]]*)\]/m.exec(
+			readFileSync(path.join(ROOT, "rust", "Cargo.toml"), "utf8"),
+		)?.[1];
+		const crates = (members ?? "").split(",").map((name) => name.trim().replaceAll('"', ""));
+		// UI/CLI are language-specific.
+		expect([...packages.filter((name) => name !== "ui"), "cli"].sort()).toEqual(crates.sort());
+	});
 });

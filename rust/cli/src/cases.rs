@@ -1,24 +1,43 @@
-//! Shared case output runner.
+//! Rust case runner. Gate only.
+
+mod render;
 
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
+use std::process::ExitCode;
+use std::rc::Rc;
 
+use nyaaai_contract::id::random_uuid;
 use nyaaai_contract::json::{Object, Value, parse_json, stringify_json};
 use nyaaai_contract::time::{iso_time, parse_iso_time};
 use nyaaai_operator::claude::cli_version::version_in;
 use nyaaai_operator::claude::session_cut::{
-    BoundaryMeta, CutError, CutMode, CutPlan, CutPorts, CutRefused, CutRequest, Lines, RowMeta,
-    SessionIndex, TurnPick, cut_session, index_session, pick_turn, plan_cut, rehomed, verify_cut,
+    BoundaryMeta, CutError, CutMode, CutPorts, CutRequest, Lines, RowMeta, SessionIndex,
+    Summarizer, TurnPick, cut_session, index_session, pick_turn, plan_cut, rehomed, verify_cut,
 };
 use nyaaai_operator::claude::session_file::{lines_of, session_lines};
+use nyaaai_process::paths::is_inside;
 use nyaaai_testkit::claude_session::compacted_session;
+
+use render::{object, plan_json, refused_json};
 
 type Outcome = Result<Value, String>;
 
-pub fn run(paths: &[String]) -> Result<(), String> {
+fn main() -> ExitCode {
+    let paths: Vec<String> = std::env::args().skip(1).collect();
+    match run(&paths) {
+        Ok(()) => ExitCode::SUCCESS,
+        Err(message) => {
+            eprintln!("{message}");
+            ExitCode::FAILURE
+        }
+    }
+}
+
+fn run(paths: &[String]) -> Result<(), String> {
     let mut files = Vec::new();
     for path in paths {
         collect(Path::new(path), &mut files).map_err(|error| format!("{path}: {error}"))?;
@@ -70,20 +89,13 @@ fn run_file(file: &Path) -> Outcome {
         "sessionCut.pickTurn" => cut_pick_turn(input),
         "sessionFile.linesOf" => file_lines_of(input),
         "claude.versionIn" => claude_version_in(input),
+        "paths.isInside" => paths_is_inside(input),
         "testkit.compactedSession" => Ok(object(vec![(
             "lines",
             Value::from(compacted_session().session.lines),
         )])),
         other => Err(format!("unknown kind {other}")),
     }
-}
-
-pub(crate) fn object(pairs: Vec<(&str, Value)>) -> Value {
-    let mut held = Object::new();
-    for (key, value) in pairs {
-        held.insert(key, value);
-    }
-    Value::Object(held)
 }
 
 fn text_at<'a>(input: &'a Value, key: &str) -> Result<&'a str, String> {
@@ -194,6 +206,55 @@ fn claude_version_in(input: &Value) -> Outcome {
     Ok(object(vec![("found", Value::Array(found))]))
 }
 
+#[cfg(unix)]
+fn paths_is_inside(input: &Value) -> Outcome {
+    let made = std::env::temp_dir().join(format!("nyaaai-paths-{}", random_uuid()));
+    fs::create_dir(&made).map_err(failed)?;
+    let started = std::env::current_dir().map_err(failed)?;
+    let relative = input.get("relative").and_then(Value::as_bool) == Some(true);
+    let judged = (|| -> Outcome {
+        let root = fs::canonicalize(&made).map_err(failed)?;
+        let root = root.to_string_lossy();
+        for entry in list_at(input, "tree")? {
+            let at = format!("{root}/{}", text_at(entry, "path")?);
+            let link = entry.get("link").and_then(Value::as_str);
+            match link {
+                Some(target) => std::os::unix::fs::symlink(target.replace("$ROOT", &root), &at),
+                None if entry.get("file").and_then(Value::as_bool) == Some(true) => {
+                    fs::write(&at, "")
+                }
+                None => fs::create_dir_all(&at),
+            }
+            .map_err(failed)?;
+        }
+        if relative {
+            std::env::set_current_dir(&*root).map_err(failed)?;
+        }
+        let place = |text: &str| match text.strip_prefix('/') {
+            None if !relative => PathBuf::from(format!("{root}/{text}")),
+            _ => PathBuf::from(text),
+        };
+        let mut results = Vec::new();
+        for check in list_at(input, "checks")? {
+            let child = place(text_at(check, "child")?);
+            let parent = place(text_at(check, "parent")?);
+            results.push(match is_inside(&child, &parent) {
+                Ok(inside) => Value::Bool(inside),
+                Err(_) => Value::from("error"),
+            });
+        }
+        Ok(object(vec![("results", Value::Array(results))]))
+    })();
+    let _ = std::env::set_current_dir(started);
+    let _ = fs::remove_dir_all(&made);
+    judged
+}
+
+#[cfg(not(unix))]
+fn paths_is_inside(_input: &Value) -> Outcome {
+    Err("links need a Unix host".to_owned())
+}
+
 fn file_lines_of(input: &Value) -> Outcome {
     let bytes = base64_decode(text_at(input, "base64")?)?;
     Ok(object(vec![("rows", Value::from(lines_of(&bytes)))]))
@@ -277,42 +338,6 @@ fn index_json(index: &SessionIndex) -> Value {
     ])
 }
 
-pub(crate) fn plan_json(plan: &CutPlan) -> Value {
-    let preserved = plan.preserved.as_ref().map_or(Value::Null, |held| {
-        object(vec![
-            ("head", Value::from(held.head.as_str())),
-            ("tail", Value::from(held.tail.as_str())),
-            ("uuids", Value::from(held.uuids.clone())),
-        ])
-    });
-    let from = plan.from.as_ref().map_or(Value::Null, |held| {
-        object(vec![
-            ("at", Value::from(held.at.clone())),
-            ("text", Value::from(held.text.as_str())),
-        ])
-    });
-    object(vec![
-        ("ok", Value::Bool(true)),
-        ("mode", Value::from(plan.mode.as_str())),
-        ("headerLines", Value::from(plan.header_lines.clone())),
-        ("keptLines", Value::from(plan.kept_lines.clone())),
-        ("preserved", preserved),
-        ("foldLines", Value::from(plan.fold_lines.clone())),
-        ("keptBytes", Value::from(plan.kept_bytes)),
-        ("droppedBytes", Value::from(plan.dropped_bytes)),
-        ("droppedRows", Value::from(plan.dropped_rows)),
-        ("from", from),
-    ])
-}
-
-pub(crate) fn refused_json(refused: &CutRefused) -> Value {
-    object(vec![
-        ("ok", Value::Bool(false)),
-        ("reason", Value::from(refused.reason.as_str())),
-        ("detail", Value::from(refused.detail.as_str())),
-    ])
-}
-
 fn request_of(request: &Value) -> Result<CutRequest, String> {
     let mode = request
         .get("mode")
@@ -362,10 +387,9 @@ struct MemoryPorts {
     id_prefix: String,
     now_ms: i64,
     cli_version: String,
-    summary: Option<String>,
+    summarize: Option<Box<Summarizer<'static>>>,
     built: RefCell<HashMap<String, Vec<String>>>,
     minted: Cell<usize>,
-    summarized: RefCell<Option<Value>>,
 }
 
 impl CutPorts for MemoryPorts {
@@ -412,22 +436,24 @@ impl CutPorts for MemoryPorts {
         Ok(self.cli_version.clone())
     }
 
-    fn can_summarize(&self) -> bool {
-        self.summary.is_some()
-    }
-
-    fn summarize(&self, standing: Option<&str>, rows: &[String]) -> io::Result<String> {
-        *self.summarized.borrow_mut() = Some(object(vec![
-            ("standing", Value::from(standing)),
-            ("rows", Value::from(rows.to_vec())),
-        ]));
-        self.summary
-            .clone()
-            .ok_or(io::Error::other("no summarizer"))
+    fn summarizer(&self) -> Option<&Summarizer<'_>> {
+        self.summarize.as_deref()
     }
 }
 
 fn cut_cut(input: &Value) -> Outcome {
+    let summarized: Rc<RefCell<Option<Value>>> = Rc::default();
+    let summarize = optional_text(input, "summary").map(|summary| {
+        let seen = Rc::clone(&summarized);
+        let answer = move |standing: Option<&str>, rows: &[String]| {
+            *seen.borrow_mut() = Some(object(vec![
+                ("standing", Value::from(standing)),
+                ("rows", Value::from(rows.to_vec())),
+            ]));
+            Ok(summary.clone())
+        };
+        Box::new(answer) as Box<Summarizer<'static>>
+    });
     let ports = MemoryPorts {
         rows: rows_of(input)?,
         source_path: text_at(input, "sourcePath")?.to_owned(),
@@ -437,10 +463,9 @@ fn cut_cut(input: &Value) -> Outcome {
             .and_then(Value::as_f64)
             .ok_or("input.nowMs is not a number")? as i64,
         cli_version: text_at(input, "cliVersion")?.to_owned(),
-        summary: optional_text(input, "summary"),
+        summarize,
         built: RefCell::default(),
         minted: Cell::new(0),
-        summarized: RefCell::new(None),
     };
     let request = request_of(input.get("request").ok_or("input.request is absent")?)?;
     let outcome = match cut_session(&ports, &request) {
@@ -459,7 +484,7 @@ fn cut_cut(input: &Value) -> Outcome {
         ),
         Err(refused) => (refused_json(refused), Value::Null),
     };
-    let summarized = ports.summarized.borrow().clone().unwrap_or(Value::Null);
+    let summarized = summarized.borrow().clone().unwrap_or(Value::Null);
     Ok(object(vec![
         ("result", result),
         ("built", built),

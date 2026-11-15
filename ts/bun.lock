@@ -23,6 +23,7 @@
       "version": "0.0.0",
       "dependencies": {
         "@nyaaai/contract": "workspace:*",
+        "@nyaaai/process": "workspace:*",
       },
       "devDependencies": {
         "@nyaaai/testkit": "workspace:*",

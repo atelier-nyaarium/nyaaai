@@ -24,7 +24,8 @@ describe("session file rows", () => {
 			// Multibyte chars cross chunks.
 			const row = (at: number) => `${at} \u{1F600}\u{e9}\u{2028}${"x".repeat(at % 97)}\r`;
 			const text = Array.from({ length: 40_000 }, (_, at) => row(at)).join("\n");
-			const bytes = Buffer.from(`${text}\nunterminated tail`);
+			const bad = Buffer.from([0x62, 0x61, 0x64, 0x20, 0xff, 0xe2, 0x82, 0x0a]);
+			const bytes = Buffer.concat([bad, Buffer.from(`${text}\n`), bad, Buffer.from("unterminated tail")]);
 			const file = path.join(folder, "session.jsonl");
 			writeFileSync(file, bytes);
 
@@ -32,8 +33,9 @@ describe("session file rows", () => {
 			for await (const line of sessionLines(file)) streamed.push(line);
 			expect(bytes.length).toBeGreaterThan(2 * (1 << 20));
 			expect(streamed).toEqual([...linesOf(bytes)]);
-			expect(streamed).toHaveLength(40_000);
-			expect(streamed[7]).toBe(row(7));
+			expect(streamed).toHaveLength(40_002);
+			expect(streamed[8]).toBe(row(7));
+			expect([streamed[0], streamed.at(-1)]).toEqual(["bad \u{fffd}\u{fffd}", "bad \u{fffd}\u{fffd}"]);
 		} finally {
 			rmSync(folder, { recursive: true, force: true });
 		}

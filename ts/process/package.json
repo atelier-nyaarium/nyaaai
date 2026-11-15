@@ -5,6 +5,7 @@
 	"type": "module",
 	"description": "Child processes and command runs",
 	"exports": {
-		".": "./src/index.ts"
+		".": "./src/index.ts",
+		"./paths": "./src/paths.ts"
 	}
 }

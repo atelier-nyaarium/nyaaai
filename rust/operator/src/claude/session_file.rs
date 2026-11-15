@@ -1,12 +1,12 @@
 //! Claude Code session rows.
 
-use std::ffi::OsString;
 use std::fs::{self, File, OpenOptions};
 use std::io::{self, BufRead, BufReader, BufWriter, Write};
-use std::path::{Component, Path, PathBuf};
+use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use nyaaai_contract::id::random_uuid;
+use nyaaai_process::paths::is_inside;
 
 use super::session_cut::{CutPorts, Lines};
 
@@ -42,28 +42,6 @@ pub fn session_lines(file: &Path) -> io::Result<impl Iterator<Item = io::Result<
             Err(error) => Some(Err(error)),
         }
     }))
-}
-
-/// Canonicalizes paths with missing tails.
-fn resolved(path: &Path) -> io::Result<PathBuf> {
-    let mut held = std::path::absolute(path)?;
-    let mut tail: Vec<OsString> = Vec::new();
-    loop {
-        match fs::canonicalize(&held) {
-            Ok(mut found) => {
-                found.extend(tail.iter().rev());
-                return Ok(found);
-            }
-            Err(error) if error.kind() == io::ErrorKind::NotFound => {
-                match held.components().next_back() {
-                    Some(Component::Normal(last)) => tail.push(last.to_owned()),
-                    _ => return Err(error),
-                }
-                held.pop();
-            }
-            Err(error) => return Err(error),
-        }
-    }
 }
 
 /// File-backed session cut ports.
@@ -108,7 +86,7 @@ impl CutPorts for FileCutPorts {
 
     fn create(&self, session_id: &str, lines: &[String]) -> io::Result<()> {
         if let Some(kept) = &self.keep_out_of
-            && resolved(&self.out)?.starts_with(resolved(kept)?)
+            && is_inside(&self.out, kept)?
         {
             return Err(io::Error::new(
                 io::ErrorKind::PermissionDenied,

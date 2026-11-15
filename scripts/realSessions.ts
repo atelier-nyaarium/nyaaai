@@ -34,7 +34,7 @@ function sessionFiles(root: string): string[] {
 }
 
 function rustResult(binary: string, caseFile: string): unknown {
-	const ran = spawnSync(binary, ["cases", caseFile], { encoding: "utf8", maxBuffer: 1 << 30 });
+	const ran = spawnSync(binary, [caseFile], { encoding: "utf8", maxBuffer: 1 << 30 });
 	if (ran.status !== 0) throw new Error(ran.stderr.trim());
 	const line = JSON.parse(ran.stdout) as { actual?: unknown; error?: string };
 	if (line.error !== undefined) throw new Error(line.error);
@@ -48,14 +48,21 @@ if (import.meta.main) {
 	const root = process.argv[2] ?? path.join(homedir(), ".claude", "projects");
 	const built = spawnSync(
 		cargoBin(),
-		["build", "--quiet", "--locked", "--manifest-path", "rust/Cargo.toml", "-p", "nyaaai-cli"],
-		{
-			cwd: ROOT,
-			stdio: "inherit",
-		},
+		[
+			"build",
+			"--quiet",
+			"--locked",
+			"--manifest-path",
+			"rust/Cargo.toml",
+			"-p",
+			"nyaaai-cli",
+			"--features",
+			"cases",
+		],
+		{ cwd: ROOT, stdio: "inherit" },
 	);
 	if (built.status !== 0) process.exit(1);
-	const binary = path.join(ROOT, "rust", "target", "debug", "nyaaai");
+	const binary = path.join(ROOT, "rust", "target", "debug", "nyaaai-cases");
 	const scratch = mkdtempSync(path.join(tmpdir(), "nyaaai-real-sessions-"));
 	let differing = 0;
 	try {

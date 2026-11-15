@@ -545,7 +545,7 @@ fn even_on_a_tie(magnitude: f64, digits: String, exponent: i32) -> String {
 }
 
 /// ECMAScript base-10 number text.
-fn number_to_string(number: f64) -> String {
+pub(crate) fn number_to_string(number: f64) -> String {
     if number.is_nan() {
         return "NaN".to_owned();
     }
@@ -597,26 +597,6 @@ fn number_to_string(number: f64) -> String {
         out.push_str(&power.abs().to_string());
     }
     out
-}
-
-/// ECMAScript `String` coercion; `None` means `undefined`.
-pub fn to_js_string(value: Option<&Value>) -> String {
-    match value {
-        None => "undefined".to_owned(),
-        Some(Value::Null) => "null".to_owned(),
-        Some(Value::Bool(held)) => held.to_string(),
-        Some(Value::Number(number)) => number_to_string(*number),
-        Some(Value::String(text)) => text.clone(),
-        Some(Value::Array(items)) => items
-            .iter()
-            .map(|item| match item {
-                Value::Null => String::new(),
-                other => to_js_string(Some(other)),
-            })
-            .collect::<Vec<_>>()
-            .join(","),
-        Some(Value::Object(_)) => "[object Object]".to_owned(),
-    }
 }
 
 #[cfg(test)]

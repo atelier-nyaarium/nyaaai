@@ -1,0 +1,244 @@
+{
+	"format": 1,
+	"kind": "paths.isInside",
+	"name": "tree",
+	"input": {
+		"tree": [
+			{
+				"path": "keep/nested"
+			},
+			{
+				"path": "out"
+			},
+			{
+				"path": "out/file",
+				"file": true
+			},
+			{
+				"path": "link-in",
+				"link": "keep/nested"
+			},
+			{
+				"path": "abs-link",
+				"link": "$ROOT/keep"
+			},
+			{
+				"path": "dangling",
+				"link": "nowhere/else"
+			},
+			{
+				"path": "loop-a",
+				"link": "loop-b"
+			},
+			{
+				"path": "loop-b",
+				"link": "loop-a"
+			},
+			{
+				"path": "up",
+				"link": ".."
+			},
+			{
+				"path": "out/back",
+				"link": "../keep"
+			},
+			{
+				"path": "file-link",
+				"link": "out/file"
+			},
+			{
+				"path": "sp ace/été"
+			},
+			{
+				"path": "to-root",
+				"link": "/"
+			}
+		],
+		"checks": [
+			{
+				"child": "out",
+				"parent": "keep"
+			},
+			{
+				"child": "keep",
+				"parent": "keep"
+			},
+			{
+				"child": "keep/",
+				"parent": "keep"
+			},
+			{
+				"child": "keep/nested/new/deeper",
+				"parent": "keep"
+			},
+			{
+				"child": "keepsake",
+				"parent": "keep"
+			},
+			{
+				"child": "out/../keep/x",
+				"parent": "keep"
+			},
+			{
+				"child": "link-in/x",
+				"parent": "keep"
+			},
+			{
+				"child": "link-in/../escape/out",
+				"parent": "keep"
+			},
+			{
+				"child": "link-in/../../out",
+				"parent": "keep"
+			},
+			{
+				"child": "abs-link",
+				"parent": "keep"
+			},
+			{
+				"child": "out/back/new",
+				"parent": "keep"
+			},
+			{
+				"child": "dangling/x",
+				"parent": "keep"
+			},
+			{
+				"child": "loop-a/x",
+				"parent": "keep"
+			},
+			{
+				"child": "out/missing/../x",
+				"parent": "keep"
+			},
+			{
+				"child": "out/file/x",
+				"parent": "keep"
+			},
+			{
+				"child": "out/file/../x",
+				"parent": "keep"
+			},
+			{
+				"child": "keep/nested/../../out",
+				"parent": "keep"
+			},
+			{
+				"child": "dangling/../keep",
+				"parent": "keep"
+			},
+			{
+				"child": "../../../../../../../../../../..",
+				"parent": "keep"
+			},
+			{
+				"child": "up/x",
+				"parent": "keep"
+			},
+			{
+				"child": "out//double",
+				"parent": "keep"
+			},
+			{
+				"child": "keep/./nested/.",
+				"parent": "keep/nested"
+			},
+			{
+				"child": "out",
+				"parent": "/"
+			},
+			{
+				"child": "out",
+				"parent": "missing/parent"
+			},
+			{
+				"child": "missing/parent/child",
+				"parent": "missing/parent"
+			},
+			{
+				"child": "keep",
+				"parent": "abs-link"
+			},
+			{
+				"child": "out",
+				"parent": "loop-a"
+			},
+			{
+				"child": "file-link",
+				"parent": "out"
+			},
+			{
+				"child": "file-link/",
+				"parent": "out"
+			},
+			{
+				"child": "out/file/",
+				"parent": "out"
+			},
+			{
+				"child": "out/file/.",
+				"parent": "out"
+			},
+			{
+				"child": "out/",
+				"parent": "out"
+			},
+			{
+				"child": "missing/",
+				"parent": "out"
+			},
+			{
+				"child": "sp ace/été/new",
+				"parent": "sp ace"
+			},
+			{
+				"child": "to-root",
+				"parent": "keep"
+			},
+			{
+				"child": "keep",
+				"parent": "to-root"
+			}
+		]
+	},
+	"expected": {
+		"results": [
+			false,
+			true,
+			true,
+			true,
+			false,
+			true,
+			true,
+			true,
+			false,
+			true,
+			true,
+			false,
+			"error",
+			"error",
+			"error",
+			"error",
+			false,
+			"error",
+			false,
+			false,
+			false,
+			true,
+			true,
+			false,
+			true,
+			true,
+			"error",
+			true,
+			"error",
+			"error",
+			true,
+			true,
+			false,
+			true,
+			false,
+			true
+		]
+	}
+}

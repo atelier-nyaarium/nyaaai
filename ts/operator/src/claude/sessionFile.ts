@@ -1,9 +1,10 @@
 // Session file ports.
 
 import { createReadStream } from "node:fs";
-import { mkdir, open, realpath, rm } from "node:fs/promises";
+import { mkdir, open, rm } from "node:fs/promises";
 import path from "node:path";
 import { randomUuid } from "@nyaaai/contract/id";
+import { isInside } from "@nyaaai/process/paths";
 import type { CutPorts, Summarizer } from "./sessionCut";
 
 ////////////////////////////////
@@ -59,29 +60,6 @@ export async function* sessionLines(file: string): AsyncGenerator<string> {
 	}
 }
 
-/** Resolves missing path tails. */
-async function resolved(target: string): Promise<string> {
-	// Unnormalized: a link is followed before its `..`.
-	let held = path.isAbsolute(target) ? target : `${process.cwd()}${path.sep}${target}`;
-	const tail: string[] = [];
-	for (;;) {
-		try {
-			return path.join(await realpath(held), ...tail.reverse());
-		} catch (error) {
-			const last = path.basename(held);
-			const missing = (error as { code?: string }).code === "ENOENT";
-			if (!missing || last === ".." || last === "." || path.dirname(held) === held) throw error;
-			tail.push(last);
-			held = path.dirname(held);
-		}
-	}
-}
-
-function inside(child: string, parent: string): boolean {
-	const relative = path.relative(parent, child);
-	return !(relative === ".." || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative));
-}
-
 export function builtFile(out: string, sessionId: string): string {
 	if (sessionId.length === 0 || /[/\\]|^\.\.?$/.test(sessionId)) throw new Error("the session id is not a file name");
 	return path.join(out, `${sessionId}.jsonl`);
@@ -94,7 +72,7 @@ export function fileCutPorts(options: FileCutOptions): CutPorts {
 		sourcePath: options.source,
 		create: async (sessionId, lines) => {
 			const kept = options.keepOutOf;
-			if (kept !== undefined && inside(await resolved(options.out), await resolved(kept))) {
+			if (kept !== undefined && (await isInside(options.out, kept))) {
 				throw new Error(`${options.out} is inside ${kept}`);
 			}
 			await mkdir(options.out, { recursive: true });

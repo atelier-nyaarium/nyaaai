@@ -5,15 +5,29 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 publish.workspace = true
+default-run = "nyaaai"
 
 [lints]
 workspace = true
+
+[features]
+# The gate's case runner.
+cases = ["dep:nyaaai-testkit"]
 
 [[bin]]
 name = "nyaaai"
 path = "src/main.rs"
 
+[[bin]]
+name = "nyaaai-cases"
+path = "src/cases.rs"
+required-features = ["cases"]
+
 [dependencies]
 nyaaai-contract.workspace = true
 nyaaai-operator.workspace = true
+nyaaai-process.workspace = true
+nyaaai-testkit = { workspace = true, optional = true }
+
+[dev-dependencies]
 nyaaai-testkit.workspace = true

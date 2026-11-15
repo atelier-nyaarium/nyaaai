@@ -8,7 +8,7 @@ use nyaaai_operator::claude::cli_version::installed_version;
 use nyaaai_operator::claude::session_cut::{CutMode, CutRequest, cut_session};
 use nyaaai_operator::claude::session_file::FileCutPorts;
 
-use crate::cases::{object, plan_json, refused_json};
+use crate::render::{object, plan_json, refused_json};
 
 pub const USAGE: &str = "nyaaai cut <trim|clear|compact> --source <file> --out <folder> [--target <uuid>] \
 [--through <uuid>] [--end-before <text>] [--summary <text>] [--live-tail] [--cli-version <version>]";

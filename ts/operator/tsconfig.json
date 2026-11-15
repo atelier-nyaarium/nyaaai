@@ -12,6 +12,9 @@
 			"path": "../contract"
 		},
 		{
+			"path": "../process"
+		},
+		{
 			"path": "../testkit"
 		}
 	]

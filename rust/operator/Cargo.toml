@@ -11,6 +11,7 @@ workspace = true
 
 [dependencies]
 nyaaai-contract.workspace = true
+nyaaai-process.workspace = true
 
 [dev-dependencies]
 nyaaai-testkit.workspace = true

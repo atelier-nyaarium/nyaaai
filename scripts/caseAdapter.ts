@@ -1,8 +1,11 @@
 // TypeScript case adapter.
 
-import { parseJson, stringifyJson } from "../ts/contract/src/json";
-import { isoTime, parseIsoTime } from "../ts/contract/src/time";
-import { versionIn } from "../ts/operator/src/claude/cliVersion";
+import { mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { parseJson, stringifyJson } from "@nyaaai/contract/json";
+import { isoTime, parseIsoTime } from "@nyaaai/contract/time";
+import { versionIn } from "@nyaaai/operator/claude/cliVersion";
 import {
 	type CutPorts,
 	type CutRequest,
@@ -14,9 +17,10 @@ import {
 	type SessionIndex,
 	type TurnPick,
 	verifyCut,
-} from "../ts/operator/src/claude/sessionCut";
-import { linesOf, sessionLines } from "../ts/operator/src/claude/sessionFile";
-import { compactedSession } from "../ts/testkit/src/claudeSession";
+} from "@nyaaai/operator/claude/sessionCut";
+import { linesOf, sessionLines } from "@nyaaai/operator/claude/sessionFile";
+import { isInside } from "@nyaaai/process/paths";
+import { compactedSession } from "@nyaaai/testkit/claudeSession";
 
 ////////////////////////////////
 //  Interfaces & Types
@@ -151,6 +155,42 @@ async function cutPickTurn(input: { source: SessionBytes; picks: Array<TurnPick 
 	return { picked: input.picks.map(({ bodyOf, ...pick }) => pickTurn(index, pick, BODIES[bodyOf])) };
 }
 
+/** Folder, file, or link. */
+export interface TreeEntry {
+	path: string;
+	file?: true;
+	/** `$ROOT` marks root. */
+	link?: string;
+}
+
+async function pathsIsInside(input: {
+	tree: TreeEntry[];
+	checks: Array<{ child: string; parent: string }>;
+	/** Relative paths use root. */
+	relative?: true;
+}) {
+	const root = realpathSync(mkdtempSync(path.join(tmpdir(), "nyaaai-paths-")));
+	const started = process.cwd();
+	try {
+		for (const entry of input.tree) {
+			const at = `${root}/${entry.path}`;
+			if (entry.link !== undefined) symlinkSync(entry.link.replaceAll("$ROOT", root), at);
+			else if (entry.file) writeFileSync(at, "");
+			else mkdirSync(at, { recursive: true });
+		}
+		if (input.relative) process.chdir(root);
+		const place = (text: string) => (input.relative || text.startsWith("/") ? text : `${root}/${text}`);
+		const results: Array<boolean | "error"> = [];
+		for (const check of input.checks) {
+			results.push(await isInside(place(check.child), place(check.parent)).catch(() => "error" as const));
+		}
+		return { results };
+	} finally {
+		process.chdir(started);
+		rmSync(root, { recursive: true, force: true });
+	}
+}
+
 const HANDLERS: Record<string, Handler> = {
 	"json.roundTrip": jsonRoundTrip,
 	"time.parseIso": timeParseIso,
@@ -162,6 +202,7 @@ const HANDLERS: Record<string, Handler> = {
 	"sessionCut.verify": cutVerify,
 	"sessionCut.pickTurn": cutPickTurn,
 	"sessionFile.linesOf": fileLinesOf,
+	"paths.isInside": pathsIsInside,
 	"claude.versionIn": (input: { texts: string[] }) => ({ found: input.texts.map((text) => versionIn(text) ?? null) }),
 	"testkit.compactedSession": () => ({ lines: compactedSession().session.lines }),
 };

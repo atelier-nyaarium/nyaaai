@@ -11,7 +11,8 @@
 		"./claude/sessionFile": "./src/claude/sessionFile.ts"
 	},
 	"dependencies": {
-		"@nyaaai/contract": "workspace:*"
+		"@nyaaai/contract": "workspace:*",
+		"@nyaaai/process": "workspace:*"
 	},
 	"devDependencies": {
 		"@nyaaai/testkit": "workspace:*"

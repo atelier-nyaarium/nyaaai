@@ -13,13 +13,28 @@ export const ROOT = path.join(import.meta.dirname, "..");
 ////////////////////////////////
 //  Functions & Helpers
 
+/** Overrides for another repository. */
+const GIT_OVERRIDES = [
+	"GIT_DIR",
+	"GIT_WORK_TREE",
+	"GIT_INDEX_FILE",
+	"GIT_COMMON_DIR",
+	"GIT_OBJECT_DIRECTORY",
+	"GIT_ALTERNATE_OBJECT_DIRECTORIES",
+	"GIT_PREFIX",
+];
+
+function ownRepository(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+	return Object.fromEntries(Object.entries(env).filter(([name]) => !GIT_OVERRIDES.includes(name)));
+}
+
 /** Trim output; contextualize failures. */
 export function git(cwd: string, args: string[], env: Record<string, string> = {}): string {
 	try {
 		return execFileSync("git", args, {
 			cwd,
 			encoding: "utf8",
-			env: { ...process.env, ...env },
+			env: { ...ownRepository(process.env), ...env },
 			stdio: ["ignore", "pipe", "pipe"],
 		}).trim();
 	} catch (error) {

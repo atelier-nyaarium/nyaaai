@@ -6,6 +6,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync
 import path from "node:path";
 import { type CaseSource, runCase } from "./caseAdapter";
 import { jsonCases } from "./caseSources/json";
+import { pathCases } from "./caseSources/paths";
 import { sessionCutCases } from "./caseSources/sessionCut";
 import { sessionFileCases } from "./caseSources/sessionFile";
 import { timeCases } from "./caseSources/time";
@@ -27,11 +28,27 @@ interface CaseFile {
 
 const FORMAT = 1;
 const FOLDER = "cases";
+/** Arguments for Rust cases. */
+export const RUST_ADAPTER = [
+	"run",
+	"--quiet",
+	"--locked",
+	"--manifest-path",
+	"rust/Cargo.toml",
+	"-p",
+	"nyaaai-cli",
+	"--features",
+	"cases",
+	"--bin",
+	"nyaaai-cases",
+	"--",
+];
 const SOURCES: CaseSource[] = [
 	...jsonCases,
 	...timeCases,
 	...sessionCutCases,
 	...sessionFileCases,
+	...pathCases,
 	{ kind: "testkit.compactedSession", name: "rows", input: {} },
 	{
 		kind: "claude.versionIn",
@@ -106,11 +123,12 @@ export function drift(root: string, fresh: Map<string, string>): string[] {
 export function rustProblems(root: string): string[] {
 	const files = committedFiles(root);
 	if (files.length === 0) return [];
-	const ran = spawnSync(
-		cargoBin(),
-		["run", "--quiet", "--locked", "--manifest-path", "rust/Cargo.toml", "-p", "nyaaai-cli", "--", "cases", FOLDER],
-		{ cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "inherit"], maxBuffer: 1 << 30 },
-	);
+	const ran = spawnSync(cargoBin(), [...RUST_ADAPTER, FOLDER], {
+		cwd: root,
+		encoding: "utf8",
+		stdio: ["ignore", "pipe", "inherit"],
+		maxBuffer: 1 << 30,
+	});
 	if (ran.status !== 0) return ["the Rust adapter failed"];
 	const problems: string[] = [];
 	const seen = new Set<string>();
