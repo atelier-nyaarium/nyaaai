@@ -1,0 +1,65 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.validate",
+	"name": "prototype-keys",
+	"input": {
+		"schema": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"texts": [
+			"{\"10\":1,\"2\":2,\"0\":0,\"constructor\":3,\"toString\":4,\"__proto__\":5}",
+			"{}"
+		]
+	},
+	"expected": {
+		"issues": [
+			[
+				{
+					"path": [
+						"0"
+					],
+					"code": "additional",
+					"message": "additional 0"
+				},
+				{
+					"path": [
+						"2"
+					],
+					"code": "additional",
+					"message": "additional 2"
+				},
+				{
+					"path": [
+						"10"
+					],
+					"code": "additional",
+					"message": "additional 10"
+				},
+				{
+					"path": [
+						"constructor"
+					],
+					"code": "additional",
+					"message": "additional constructor"
+				},
+				{
+					"path": [
+						"toString"
+					],
+					"code": "additional",
+					"message": "additional toString"
+				},
+				{
+					"path": [
+						"__proto__"
+					],
+					"code": "additional",
+					"message": "additional __proto__"
+				}
+			],
+			[]
+		]
+	}
+}

@@ -1,0 +1,59 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.edits",
+	"name": "split-optional-captures",
+	"input": {
+		"source": "(a)|(b)|c",
+		"flags": "",
+		"template": "[$1$2]",
+		"texts": [
+			"xaybzc",
+			"abc",
+			"c"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"replaced": "x[a]y[b]z[]",
+				"pieces": [
+					"x",
+					"a",
+					"",
+					"y",
+					"",
+					"b",
+					"z",
+					"",
+					"",
+					""
+				]
+			},
+			{
+				"replaced": "[a][b][]",
+				"pieces": [
+					"",
+					"a",
+					"",
+					"",
+					"",
+					"b",
+					"",
+					"",
+					"",
+					""
+				]
+			},
+			{
+				"replaced": "[]",
+				"pieces": [
+					"",
+					"",
+					"",
+					""
+				]
+			}
+		]
+	}
+}

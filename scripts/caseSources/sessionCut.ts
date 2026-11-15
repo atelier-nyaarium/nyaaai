@@ -1,8 +1,9 @@
-// Synthetic cases contain no real transcripts.
+// Synthetic session-cut cases.
 
 import type { CutRequest, TurnPick } from "@nyaaai/operator/claude/sessionCut";
+import type { BodyOf, SessionCutCutInput, SessionSource } from "@nyaaai/testkit/caseKinds";
 import { CLI_VERSION, compactedSession, SESSION_ID, SyntheticSession } from "@nyaaai/testkit/claudeSession";
-import type { BodyOf, CaseSource, CutCaseInput, SessionBytes } from "../caseAdapter";
+import type { CaseSource } from "../caseAdapter";
 
 ////////////////////////////////
 //  Constants
@@ -15,11 +16,10 @@ const BOUNDARY = '"subtype":"compact_boundary"';
 ////////////////////////////////
 //  Functions & Helpers
 
-const rows = (lines: string[]): SessionBytes => ({ lines: [...lines] });
-const raw = (bytes: Uint8Array | string): SessionBytes => ({ base64: Buffer.from(bytes).toString("base64") });
+const rows = (lines: string[]): SessionSource => ({ lines: [...lines] });
+const raw = (bytes: Uint8Array | string): SessionSource => ({ base64: Buffer.from(bytes).toString("base64") });
 const json = (row: unknown) => JSON.stringify(row);
 
-/** First accepted row UUID. */
 function uuidWhere(lines: string[], accepts: (row: Record<string, unknown>) => boolean): string {
 	for (const line of lines) {
 		const row = JSON.parse(line) as Record<string, unknown>;
@@ -38,9 +38,9 @@ const reshaped = (lines: string[], from: string, to: string) => {
 
 const cutCase = (
 	name: string,
-	source: SessionBytes,
+	source: SessionSource,
 	request: CutRequest,
-	more: Partial<CutCaseInput> = {},
+	more: Partial<SessionCutCutInput> = {},
 ): CaseSource => ({
 	kind: "sessionCut.cut",
 	name,
@@ -52,12 +52,12 @@ const cutCase = (
 		idPrefix: "new-",
 		nowMs: NOW_MS,
 		...more,
-	} satisfies CutCaseInput,
+	} satisfies SessionCutCutInput,
 });
 
 const planCase = (
 	name: string,
-	source: SessionBytes,
+	source: SessionSource,
 	requests: CutRequest[],
 	cliVersion = CLI_VERSION,
 ): CaseSource => ({
@@ -66,19 +66,18 @@ const planCase = (
 	input: { source, requests, cliVersion },
 });
 
-const indexCase = (name: string, source: SessionBytes): CaseSource => ({
+const indexCase = (name: string, source: SessionSource): CaseSource => ({
 	kind: "sessionCut.index",
 	name,
 	input: { source },
 });
 
-const verifyCase = (name: string, source: SessionBytes, sessionId: string, paired: boolean): CaseSource => ({
+const verifyCase = (name: string, source: SessionSource, sessionId: string, paired: boolean): CaseSource => ({
 	kind: "sessionCut.verify",
 	name,
 	input: { source, sessionId, paired },
 });
 
-/** Self-compaction, then a tool call. */
 function asked() {
 	const { session, second } = compactedSession();
 	session.user('Owner asked to compact. Call the tool with cutId "cut-00aa".');
@@ -86,7 +85,7 @@ function asked() {
 	return { session, second };
 }
 
-/** Uncompacted session with a second-turn call. */
+/** Fresh second-turn call. */
 function fresh() {
 	const session = new SyntheticSession();
 	session.header();
@@ -99,7 +98,7 @@ function fresh() {
 	return { session, first, second, end };
 }
 
-/** Clear output fixture. */
+/** Cleared output fixture. */
 function builtClear(): string[] {
 	const { session, second } = compactedSession();
 	const kept = session.lines.slice(session.lines.findIndex((line) => line.includes(`"uuid":"${second}"`)));
@@ -347,6 +346,13 @@ function cutCases(): CaseSource[] {
 		),
 		cutCase("far-future", rows(lines), { mode: "clear", targetUuid: base.second }, { nowMs: 253_402_300_800_000 }),
 		cutCase(
+			"clock-out-of-range",
+			rows(lines),
+			{ mode: "clear", targetUuid: base.second },
+			{ nowMs: 8_640_000_000_000_001 },
+		),
+		cutCase("trim-reads-no-clock", rows(lines), { mode: "trim" }, { nowMs: 8_640_000_000_000_001 }),
+		cutCase(
 			"source-path-in-the-summary",
 			rows(lines),
 			{ mode: "clear", targetUuid: base.second },
@@ -510,6 +516,8 @@ function indexCases(): CaseSource[] {
 		'{"type":null,"uuid":"n4"}',
 		'{"type":true,"uuid":"n5"}',
 		'{"type":1e999,"uuid":"n6"}',
+		'{"type":{"toString":1},"uuid":"n7"}',
+		'{"type":[{"toString":"x","valueOf":2}],"uuid":"n8"}',
 		'{"type":"user","uuid":""}',
 		'{"type":"user","uuid":7}',
 		'{"type":"mode","uuid":"h1","version":"0.0.1"}',

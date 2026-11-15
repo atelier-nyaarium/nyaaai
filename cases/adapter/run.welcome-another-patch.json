@@ -1,0 +1,30 @@
+{
+	"format": 2,
+	"type": "run",
+	"kind": "adapter.run",
+	"name": "welcome-another-patch",
+	"script": [
+		{
+			"send": {
+				"type": "hello",
+				"version": "0.1.0977"
+			}
+		},
+		{
+			"await": {
+				"type": "welcome"
+			}
+		}
+	],
+	"expected": {
+		"exit": 0,
+		"connection": [
+			{
+				"type": "welcome",
+				"version": "0.1.0"
+			}
+		],
+		"runs": {},
+		"files": {}
+	}
+}

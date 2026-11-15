@@ -1,0 +1,79 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.replay",
+	"name": "chunk-edges",
+	"input": {
+		"file": "cases/traces/synthetic.chunks.json"
+	},
+	"expected": {
+		"requests": [
+			{
+				"model": "synthetic/one",
+				"stream": true,
+				"messages": [
+					{
+						"role": "user",
+						"content": "split me"
+					}
+				]
+			},
+			null,
+			[
+				1,
+				{
+					"b": 2,
+					"a": [
+						null
+					]
+				}
+			],
+			"text"
+		],
+		"exchanges": [
+			{
+				"status": 200,
+				"headers": {
+					"content-type": "text/event-stream",
+					"retry-after": "2",
+					"x-ratelimit-remaining": "7"
+				},
+				"chunks": [
+					10,
+					9,
+					4,
+					5,
+					0,
+					15
+				],
+				"body": "data: {\"text\":\"café 😀\"}\n\ndata: [DONE]\n\n"
+			},
+			{
+				"status": 429,
+				"headers": {
+					"content-type": "application/json"
+				},
+				"chunks": [
+					44
+				],
+				"body": "{\"error\":{\"message\":\"slow down\",\"code\":429}}"
+			},
+			{
+				"status": 204,
+				"headers": {},
+				"chunks": [],
+				"body": ""
+			},
+			{
+				"status": 500,
+				"headers": {
+					"content-type": "text/plain"
+				},
+				"chunks": [
+					15
+				],
+				"body": "�� bad bytes �"
+			}
+		]
+	}
+}

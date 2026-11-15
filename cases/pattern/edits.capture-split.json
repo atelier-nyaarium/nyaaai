@@ -1,0 +1,55 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.edits",
+	"name": "capture-split",
+	"input": {
+		"source": "(,)",
+		"flags": "",
+		"template": "<$1>",
+		"texts": [
+			",a,b,",
+			"a,b",
+			"",
+			","
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"replaced": "<,>a<,>b<,>",
+				"pieces": [
+					"",
+					",",
+					"a",
+					",",
+					"b",
+					",",
+					""
+				]
+			},
+			{
+				"replaced": "a<,>b",
+				"pieces": [
+					"a",
+					",",
+					"b"
+				]
+			},
+			{
+				"replaced": "",
+				"pieces": [
+					""
+				]
+			},
+			{
+				"replaced": "<,>",
+				"pieces": [
+					"",
+					",",
+					""
+				]
+			}
+		]
+	}
+}

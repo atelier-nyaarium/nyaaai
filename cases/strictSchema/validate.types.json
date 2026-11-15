@@ -1,0 +1,88 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.validate",
+	"name": "types",
+	"input": {
+		"schema": {
+			"type": [
+				"integer",
+				"null"
+			]
+		},
+		"texts": [
+			"null",
+			"1",
+			"1.0",
+			"-0",
+			"1.5",
+			"\"1\"",
+			"[]",
+			"{}",
+			"true",
+			"5e-324",
+			"9007199254740993",
+			"1e300",
+			"1e400"
+		]
+	},
+	"expected": {
+		"issues": [
+			[],
+			[],
+			[],
+			[],
+			[
+				{
+					"path": [],
+					"code": "type",
+					"message": "expected integer or null"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "type",
+					"message": "expected integer or null"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "type",
+					"message": "expected integer or null"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "type",
+					"message": "expected integer or null"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "type",
+					"message": "expected integer or null"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "type",
+					"message": "expected integer or null"
+				}
+			],
+			[],
+			[],
+			[
+				{
+					"path": [],
+					"code": "type",
+					"message": "expected integer or null"
+				}
+			]
+		]
+	}
+}

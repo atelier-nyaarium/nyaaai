@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "frames-Welcome",
+	"input": {
+		"set": "frames",
+		"shape": "Welcome",
+		"texts": [
+			"{\"type\":\"welcome\",\"version\":\"0.1.0\"}",
+			"{\"type\":\"welcome\",\"version\":1}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"type\":\"welcome\",\"version\":\"0.1.0\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"version"
+				]
+			}
+		]
+	}
+}

@@ -1,0 +1,69 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.validate",
+	"name": "root-reference",
+	"input": {
+		"schema": {
+			"$ref": "#/$defs/Node",
+			"$defs": {
+				"Node": {
+					"type": "object",
+					"properties": {
+						"next": {
+							"anyOf": [
+								{
+									"type": "null"
+								},
+								{
+									"$ref": "#/$defs/Node"
+								}
+							]
+						}
+					},
+					"required": [
+						"next"
+					]
+				}
+			}
+		},
+		"texts": [
+			"{\"next\":null}",
+			"{\"next\":{\"next\":{\"next\":null}}}",
+			"{\"next\":{\"next\":{}}}",
+			"{}",
+			"null"
+		]
+	},
+	"expected": {
+		"issues": [
+			[],
+			[],
+			[
+				{
+					"path": [
+						"next"
+					],
+					"code": "no_branch",
+					"message": "no branch matches"
+				}
+			],
+			[
+				{
+					"path": [
+						"next"
+					],
+					"code": "required",
+					"message": "missing next"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "type",
+					"message": "expected object"
+				}
+			]
+		]
+	}
+}

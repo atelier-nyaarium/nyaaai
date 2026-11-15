@@ -1,0 +1,39 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.matches",
+	"name": "bmp-edge-range",
+	"input": {
+		"source": "[\\u{d7ff}-\\u{e000}]",
+		"flags": "",
+		"texts": [
+			"퟿",
+			"x"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 1,
+						"text": "퟿",
+						"captures": []
+					},
+					{
+						"start": 1,
+						"end": 2,
+						"text": "",
+						"captures": []
+					}
+				]
+			},
+			{
+				"test": false,
+				"all": []
+			}
+		]
+	}
+}

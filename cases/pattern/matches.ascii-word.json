@@ -1,0 +1,82 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.matches",
+	"name": "ascii-word",
+	"input": {
+		"source": "\\w",
+		"flags": "",
+		"texts": [
+			"a",
+			"_",
+			"9",
+			"é",
+			"ſ",
+			"K",
+			"١",
+			"１",
+			""
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 1,
+						"text": "a",
+						"captures": []
+					}
+				]
+			},
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 1,
+						"text": "_",
+						"captures": []
+					}
+				]
+			},
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 1,
+						"text": "9",
+						"captures": []
+					}
+				]
+			},
+			{
+				"test": false,
+				"all": []
+			},
+			{
+				"test": false,
+				"all": []
+			},
+			{
+				"test": false,
+				"all": []
+			},
+			{
+				"test": false,
+				"all": []
+			},
+			{
+				"test": false,
+				"all": []
+			},
+			{
+				"test": false,
+				"all": []
+			}
+		]
+	}
+}

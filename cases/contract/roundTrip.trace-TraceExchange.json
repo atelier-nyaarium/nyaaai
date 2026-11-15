@@ -1,0 +1,63 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "trace-TraceExchange",
+	"input": {
+		"set": "trace",
+		"shape": "TraceExchange",
+		"texts": [
+			"{\"request\":null,\"status\":200,\"headers\":{},\"chunks\":[]}",
+			"{\"request\":{\"a\":[1]},\"status\":599,\"headers\":{\"content-type\":\"text/plain\",\"b\":\"2\"},\"chunks\":[\"QQ==\",\"\"]}",
+			"{\"status\":200,\"headers\":{},\"chunks\":[]}",
+			"{\"request\":1,\"status\":99,\"headers\":{},\"chunks\":[]}",
+			"{\"request\":1,\"status\":600,\"headers\":{},\"chunks\":[]}",
+			"{\"request\":1,\"status\":200,\"headers\":{\"a\":1},\"chunks\":[]}",
+			"{\"request\":1,\"status\":200,\"headers\":{},\"chunks\":[1]}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"request\":null,\"status\":200,\"headers\":{},\"chunks\":[]}"
+			},
+			{
+				"ok": true,
+				"text": "{\"request\":{\"a\":[1]},\"status\":599,\"headers\":{\"content-type\":\"text/plain\",\"b\":\"2\"},\"chunks\":[\"QQ==\",\"\"]}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"request"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"status"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"status"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"headers",
+					"a"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"chunks",
+					0
+				]
+			}
+		]
+	}
+}

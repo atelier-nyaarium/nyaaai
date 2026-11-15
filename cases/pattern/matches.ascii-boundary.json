@@ -1,0 +1,124 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.matches",
+	"name": "ascii-boundary",
+	"input": {
+		"source": "\\b",
+		"flags": "",
+		"texts": [
+			"éa",
+			"ſa",
+			"Ka",
+			"١a",
+			"_a",
+			"aé"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 1,
+						"end": 1,
+						"text": "",
+						"captures": []
+					},
+					{
+						"start": 2,
+						"end": 2,
+						"text": "",
+						"captures": []
+					}
+				]
+			},
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 1,
+						"end": 1,
+						"text": "",
+						"captures": []
+					},
+					{
+						"start": 2,
+						"end": 2,
+						"text": "",
+						"captures": []
+					}
+				]
+			},
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 1,
+						"end": 1,
+						"text": "",
+						"captures": []
+					},
+					{
+						"start": 2,
+						"end": 2,
+						"text": "",
+						"captures": []
+					}
+				]
+			},
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 1,
+						"end": 1,
+						"text": "",
+						"captures": []
+					},
+					{
+						"start": 2,
+						"end": 2,
+						"text": "",
+						"captures": []
+					}
+				]
+			},
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 0,
+						"text": "",
+						"captures": []
+					},
+					{
+						"start": 2,
+						"end": 2,
+						"text": "",
+						"captures": []
+					}
+				]
+			},
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 0,
+						"text": "",
+						"captures": []
+					},
+					{
+						"start": 1,
+						"end": 1,
+						"text": "",
+						"captures": []
+					}
+				]
+			}
+		]
+	}
+}

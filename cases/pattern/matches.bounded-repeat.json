@@ -1,0 +1,57 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.matches",
+	"name": "bounded-repeat",
+	"input": {
+		"source": "a{2,3}",
+		"flags": "",
+		"texts": [
+			"a",
+			"aa",
+			"aaa",
+			"aaaa"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"test": false,
+				"all": []
+			},
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 2,
+						"text": "aa",
+						"captures": []
+					}
+				]
+			},
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 3,
+						"text": "aaa",
+						"captures": []
+					}
+				]
+			},
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 3,
+						"text": "aaa",
+						"captures": []
+					}
+				]
+			}
+		]
+	}
+}

@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.edits",
+	"name": "missing-template-capture",
+	"input": {
+		"source": "a",
+		"flags": "",
+		"template": "$1/$9/$0/$10/$",
+		"texts": [
+			"aba"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"replaced": "//$0/0/$b//$0/0/$",
+				"pieces": [
+					"",
+					"b",
+					""
+				]
+			}
+		]
+	}
+}

@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "frames-FaultCode",
+	"input": {
+		"set": "frames",
+		"shape": "FaultCode",
+		"texts": [
+			"\"bad_frame\"",
+			"\"oversized_frame\"",
+			"\"not_greeted\"",
+			"\"unknown_reply\"",
+			"\"duplicate_run\"",
+			"0"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "\"bad_frame\""
+			},
+			{
+				"ok": true,
+				"text": "\"oversized_frame\""
+			},
+			{
+				"ok": true,
+				"text": "\"not_greeted\""
+			},
+			{
+				"ok": true,
+				"text": "\"unknown_reply\""
+			},
+			{
+				"ok": true,
+				"text": "\"duplicate_run\""
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

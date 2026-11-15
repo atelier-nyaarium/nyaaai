@@ -1,0 +1,193 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.validate",
+	"name": "limit-inside-a-probe",
+	"input": {
+		"schema": {
+			"oneOf": [
+				{
+					"$ref": "#/$defs/Link"
+				},
+				{
+					"type": "object"
+				}
+			],
+			"anyOf": [
+				{
+					"$ref": "#/$defs/Link"
+				},
+				{}
+			],
+			"$defs": {
+				"Link": {
+					"type": "object",
+					"properties": {
+						"next": {
+							"$ref": "#/$defs/Link"
+						}
+					}
+				}
+			}
+		},
+		"texts": [
+			"{\"next\":{\"next\":{\"next\":{\"next\":{}}}}}",
+			"{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}",
+			"1"
+		]
+	},
+	"expected": {
+		"issues": [
+			[
+				{
+					"path": [],
+					"code": "many_branches",
+					"message": "multiple branches match"
+				}
+			],
+			[
+				{
+					"path": [
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next",
+						"next"
+					],
+					"code": "limit",
+					"message": "past a limit"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "no_branch",
+					"message": "no branch matches"
+				}
+			]
+		]
+	}
+}

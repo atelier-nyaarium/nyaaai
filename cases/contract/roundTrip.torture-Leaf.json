@@ -1,0 +1,143 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "torture-Leaf",
+	"input": {
+		"set": "torture",
+		"shape": "Leaf",
+		"texts": [
+			"{\"kind\":\"leaf\",\"value\":1}",
+			"{\"kind\":\"leaf\",\"value\":1,\"color\":\"red\"}",
+			"{\"kind\":\"leaf\",\"value\":1,\"color\":null}",
+			"{\"kind\":\"leaf\",\"value\":1,\"color\":\"mauve\"}",
+			"{\"kind\":\"branch\",\"value\":1}",
+			"{\"value\":1}",
+			"{\"kind\":\"leaf\"}",
+			"{\"kind\":\"leaf\",\"value\":1.5}",
+			"{\"kind\":\"leaf\",\"value\":1e400}",
+			"{\"kind\":\"leaf\",\"value\":9007199254740991}",
+			"{\"kind\":\"leaf\",\"value\":9007199254740992}",
+			"{\"kind\":\"leaf\",\"value\":-9007199254740992}",
+			"{\"kind\":\"leaf\",\"value\":-0}",
+			"{\"kind\":\"leaf\",\"value\":1.0}",
+			"{\"kind\":\"leaf\",\"value\":1e3}",
+			"{\"kind\":\"leaf\",\"value\":\"1\"}",
+			"{\"value\":2,\"extra\":{\"deep\":[1]},\"kind\":\"leaf\",\"kind\":\"leaf\",\"value\":3}",
+			"{\"__proto__\":{\"kind\":\"leaf\",\"value\":1}}",
+			"[]",
+			"null",
+			"{"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"kind\":\"leaf\",\"value\":1}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"leaf\",\"value\":1,\"color\":\"red\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"color"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"color"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"value"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"value"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"value"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"leaf\",\"value\":9007199254740991}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"value"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"value"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"leaf\",\"value\":0}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"leaf\",\"value\":1}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"leaf\",\"value\":1000}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"value"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"leaf\",\"value\":3}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

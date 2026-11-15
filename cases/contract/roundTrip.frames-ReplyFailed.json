@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "frames-ReplyFailed",
+	"input": {
+		"set": "frames",
+		"shape": "ReplyFailed",
+		"texts": [
+			"{\"type\":\"reply-failed\",\"run\":\"r1\",\"id\":\"q1\",\"message\":\"m\"}",
+			"{\"type\":\"reply-failed\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"type\":\"reply-failed\",\"run\":\"r1\",\"id\":\"q1\",\"message\":\"m\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"run"
+				]
+			}
+		]
+	}
+}

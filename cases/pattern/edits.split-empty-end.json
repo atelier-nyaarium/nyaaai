@@ -1,0 +1,39 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.edits",
+	"name": "split-empty-end",
+	"input": {
+		"source": "x*",
+		"flags": "",
+		"template": "<$&>",
+		"texts": [
+			"abc",
+			"x",
+			""
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"replaced": "<>a<>b<>c<>",
+				"pieces": [
+					"a",
+					"b",
+					"c"
+				]
+			},
+			{
+				"replaced": "<x><>",
+				"pieces": [
+					"",
+					""
+				]
+			},
+			{
+				"replaced": "<>",
+				"pieces": []
+			}
+		]
+	}
+}

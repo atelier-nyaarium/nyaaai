@@ -1,0 +1,303 @@
+{
+	"format": 2,
+	"type": "run",
+	"kind": "adapter.run",
+	"name": "replies-out-of-order",
+	"script": [
+		{
+			"send": {
+				"type": "hello",
+				"version": "0.1.0"
+			}
+		},
+		{
+			"await": {
+				"type": "welcome"
+			}
+		},
+		{
+			"send": {
+				"type": "start",
+				"run": "many",
+				"command": "testkit.converse",
+				"input": {
+					"requests": 3,
+					"together": true
+				},
+				"fixed": {
+					"nowMs": 1794535200000,
+					"stepMs": 1000,
+					"idPrefix": "many-"
+				}
+			}
+		},
+		{
+			"await": {
+				"type": "request",
+				"run": "many",
+				"id": "q1"
+			}
+		},
+		{
+			"await": {
+				"type": "request",
+				"run": "many",
+				"id": "q2"
+			}
+		},
+		{
+			"await": {
+				"type": "request",
+				"run": "many",
+				"id": "q3"
+			}
+		},
+		{
+			"send": {
+				"type": "reply",
+				"run": "many",
+				"id": "q3",
+				"value": "third"
+			}
+		},
+		{
+			"send": {
+				"type": "steer",
+				"run": "many",
+				"text": "between"
+			}
+		},
+		{
+			"send": {
+				"type": "reply-failed",
+				"run": "many",
+				"id": "q2",
+				"message": "the host has no key"
+			}
+		},
+		{
+			"send": {
+				"type": "reply",
+				"run": "many",
+				"id": "q3",
+				"value": "twice"
+			}
+		},
+		{
+			"await": {
+				"type": "fault",
+				"code": "unknown_reply"
+			}
+		},
+		{
+			"send": {
+				"type": "reply",
+				"run": "many",
+				"id": "q1",
+				"value": {
+					"first": [
+						1
+					]
+				}
+			}
+		},
+		{
+			"await": [
+				{
+					"type": "done",
+					"run": "many"
+				},
+				{
+					"type": "failed",
+					"run": "many"
+				}
+			]
+		},
+		{
+			"send": {
+				"type": "start",
+				"run": "cut",
+				"command": "testkit.converse",
+				"input": {
+					"requests": 2,
+					"together": true
+				},
+				"fixed": {
+					"nowMs": 1794535200000,
+					"stepMs": 1000,
+					"idPrefix": "cut-"
+				}
+			}
+		},
+		{
+			"await": {
+				"type": "request",
+				"run": "cut",
+				"id": "q2"
+			}
+		},
+		{
+			"send": {
+				"type": "reply",
+				"run": "cut",
+				"id": "q2",
+				"value": "kept"
+			}
+		},
+		{
+			"send": {
+				"type": "interrupt",
+				"run": "cut"
+			}
+		},
+		{
+			"await": [
+				{
+					"type": "done",
+					"run": "cut"
+				},
+				{
+					"type": "failed",
+					"run": "cut"
+				}
+			]
+		},
+		{
+			"send": {
+				"type": "reply",
+				"run": "cut",
+				"id": "q1",
+				"value": "too late"
+			}
+		},
+		{
+			"await": {
+				"type": "fault",
+				"code": "unknown_run"
+			}
+		}
+	],
+	"expected": {
+		"exit": 0,
+		"connection": [
+			{
+				"type": "welcome",
+				"version": "0.1.0"
+			},
+			{
+				"type": "fault",
+				"code": "unknown_reply",
+				"run": "many",
+				"message": "no such request"
+			},
+			{
+				"type": "fault",
+				"code": "unknown_run",
+				"run": "cut",
+				"message": "no such run"
+			}
+		],
+		"runs": {
+			"cut": [
+				{
+					"type": "request",
+					"run": "cut",
+					"id": "q1",
+					"kind": "echo",
+					"input": {
+						"count": 1
+					}
+				},
+				{
+					"type": "request",
+					"run": "cut",
+					"id": "q2",
+					"kind": "echo",
+					"input": {
+						"count": 2
+					}
+				},
+				{
+					"type": "failed",
+					"run": "cut",
+					"seq": 1,
+					"code": "interrupted",
+					"message": "interrupted"
+				}
+			],
+			"many": [
+				{
+					"type": "request",
+					"run": "many",
+					"id": "q1",
+					"kind": "echo",
+					"input": {
+						"count": 1
+					}
+				},
+				{
+					"type": "request",
+					"run": "many",
+					"id": "q2",
+					"kind": "echo",
+					"input": {
+						"count": 2
+					}
+				},
+				{
+					"type": "request",
+					"run": "many",
+					"id": "q3",
+					"kind": "echo",
+					"input": {
+						"count": 3
+					}
+				},
+				{
+					"type": "event",
+					"run": "many",
+					"seq": 1,
+					"event": {
+						"reply": {
+							"first": [
+								1
+							]
+						}
+					}
+				},
+				{
+					"type": "event",
+					"run": "many",
+					"seq": 2,
+					"event": {
+						"failed": "the host has no key"
+					}
+				},
+				{
+					"type": "event",
+					"run": "many",
+					"seq": 3,
+					"event": {
+						"reply": "third"
+					}
+				},
+				{
+					"type": "done",
+					"run": "many",
+					"seq": 4,
+					"result": {
+						"ids": [
+							"many-1",
+							"many-2"
+						],
+						"nowMs": 1794535200000,
+						"steers": [
+							"between"
+						]
+					}
+				}
+			]
+		},
+		"files": {}
+	}
+}

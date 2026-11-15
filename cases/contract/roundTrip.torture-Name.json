@@ -1,0 +1,61 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "torture-Name",
+	"input": {
+		"set": "torture",
+		"shape": "Name",
+		"texts": [
+			"\"a\"",
+			"\"\"",
+			"\"abcd\"",
+			"\"😀😀😀\"",
+			"\"😀😀😀😀\"",
+			"\"\\ud83d\"",
+			"\"\\ud83d\\ude00\\ud83d\\ude00\\ude00\"",
+			"5",
+			"null"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "\"a\""
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": true,
+				"text": "\"😀😀😀\""
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": true,
+				"text": "\"�\""
+			},
+			{
+				"ok": true,
+				"text": "\"😀😀�\""
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

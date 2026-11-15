@@ -1,0 +1,40 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "sessionCut-KeptFrom",
+	"input": {
+		"set": "sessionCut",
+		"shape": "KeptFrom",
+		"texts": [
+			"{\"at\":null,\"text\":\"\"}",
+			"{\"at\":\"t\",\"text\":\"x\"}",
+			"{\"at\":5,\"text\":\"x\"}",
+			"{\"text\":\"x\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"at\":null,\"text\":\"\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"at\":\"t\",\"text\":\"x\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"at"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"at"
+				]
+			}
+		]
+	}
+}

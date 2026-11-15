@@ -1,0 +1,53 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.edits",
+	"name": "split-empty-capture-at-end",
+	"input": {
+		"source": "(x*)",
+		"flags": "",
+		"template": "<$1>",
+		"texts": [
+			"ab",
+			"abx",
+			"xab",
+			""
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"replaced": "<>a<>b<>",
+				"pieces": [
+					"a",
+					"",
+					"b"
+				]
+			},
+			{
+				"replaced": "<>a<>b<x><>",
+				"pieces": [
+					"a",
+					"",
+					"b",
+					"x",
+					""
+				]
+			},
+			{
+				"replaced": "<x><>a<>b<>",
+				"pieces": [
+					"",
+					"x",
+					"a",
+					"",
+					"b"
+				]
+			},
+			{
+				"replaced": "<>",
+				"pieces": []
+			}
+		]
+	}
+}

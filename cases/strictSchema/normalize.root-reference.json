@@ -1,0 +1,172 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.normalize",
+	"name": "root-reference",
+	"input": {
+		"schemas": [
+			{
+				"anyOf": [
+					{
+						"type": "null"
+					},
+					{
+						"type": "array",
+						"items": {
+							"$ref": "#"
+						}
+					},
+					{
+						"type": "object",
+						"additionalProperties": {
+							"$ref": "#"
+						}
+					}
+				]
+			},
+			{
+				"type": "object",
+				"properties": {
+					"next": {
+						"$ref": "#",
+						"description": "kept"
+					}
+				},
+				"$defs": {
+					"Root": {
+						"type": "null"
+					},
+					"Root_": {
+						"type": "string"
+					}
+				},
+				"description": "moved"
+			},
+			{
+				"$ref": "#"
+			},
+			{
+				"properties": {
+					"a": {
+						"const": {
+							"$ref": "#"
+						}
+					}
+				}
+			},
+			{
+				"$ref": "#",
+				"$defs": []
+			},
+			{
+				"properties": {
+					"2": {},
+					"10": {
+						"$ref": "#"
+					},
+					"b": {}
+				},
+				"type": "object"
+			},
+			{
+				"allOf": [
+					{
+						"$ref": "#"
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"schemas": [
+			{
+				"$ref": "#/$defs/Root",
+				"$defs": {
+					"Root": {
+						"anyOf": [
+							{
+								"type": "null"
+							},
+							{
+								"type": "array",
+								"items": {
+									"$ref": "#/$defs/Root"
+								}
+							},
+							{
+								"type": "object",
+								"additionalProperties": {
+									"$ref": "#/$defs/Root"
+								}
+							}
+						]
+					}
+				}
+			},
+			{
+				"$ref": "#/$defs/Root__",
+				"$defs": {
+					"Root": {
+						"type": "null"
+					},
+					"Root_": {
+						"type": "string"
+					},
+					"Root__": {
+						"type": "object",
+						"properties": {
+							"next": {
+								"$ref": "#/$defs/Root__",
+								"description": "kept"
+							}
+						},
+						"description": "moved"
+					}
+				}
+			},
+			{
+				"$ref": "#/$defs/Root",
+				"$defs": {
+					"Root": {
+						"$ref": "#/$defs/Root"
+					}
+				}
+			},
+			{
+				"properties": {
+					"a": {
+						"const": {
+							"$ref": "#"
+						}
+					}
+				}
+			},
+			{
+				"$ref": "#",
+				"$defs": []
+			},
+			{
+				"$ref": "#/$defs/Root",
+				"$defs": {
+					"Root": {
+						"properties": {
+							"2": {},
+							"10": {
+								"$ref": "#/$defs/Root"
+							},
+							"b": {}
+						},
+						"type": "object"
+					}
+				}
+			},
+			{
+				"allOf": [
+					{
+						"$ref": "#"
+					}
+				]
+			}
+		]
+	}
+}

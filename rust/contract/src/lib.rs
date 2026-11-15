@@ -1,4 +1,15 @@
+pub mod base64;
 pub mod id;
+pub mod issues;
 pub mod js;
 pub mod json;
+pub mod number;
+pub mod order;
+pub mod pattern;
+pub mod random;
+pub mod shape;
+pub mod shapes;
+pub mod strict_schema;
+pub mod text;
 pub mod time;
+pub mod version;

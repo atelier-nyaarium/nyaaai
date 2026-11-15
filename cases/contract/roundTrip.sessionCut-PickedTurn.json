@@ -1,0 +1,35 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "sessionCut-PickedTurn",
+	"input": {
+		"set": "sessionCut",
+		"shape": "PickedTurn",
+		"texts": [
+			"{\"uuid\":\"u1\",\"exact\":true}",
+			"{\"uuid\":\"u1\",\"exact\":1}",
+			"{\"exact\":false}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"uuid\":\"u1\",\"exact\":true}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"exact"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"uuid"
+				]
+			}
+		]
+	}
+}

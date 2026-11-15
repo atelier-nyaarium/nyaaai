@@ -1,0 +1,212 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.validate",
+	"name": "object-order",
+	"input": {
+		"schema": {
+			"type": "object",
+			"required": [
+				"missingB",
+				"missingA"
+			],
+			"propertyNames": {
+				"minLength": 2
+			},
+			"properties": {
+				"0": {
+					"type": "string"
+				},
+				"2": {
+					"type": "string"
+				},
+				"10": {
+					"type": "string"
+				},
+				"constructor": {
+					"type": "number"
+				},
+				"toString": {
+					"type": "boolean"
+				},
+				"__proto__": {
+					"const": "okay"
+				},
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"required": [
+							"count"
+						],
+						"properties": {
+							"count": {
+								"type": "integer"
+							}
+						}
+					}
+				}
+			},
+			"additionalProperties": false
+		},
+		"texts": [
+			"{\"10\":false,\"2\":false,\"0\":false,\"constructor\":\"first\",\"constructor\":\"bad\",\"toString\":1,\"__proto__\":\"bad\",\"rows\":[{\"count\":\"bad\",\"extra\":1},{}],\"extra\":1,\"x\":2}",
+			"{\"2\":\"two\",\"10\":\"ten\",\"constructor\":1,\"toString\":true,\"__proto__\":\"okay\",\"rows\":[{\"count\":1}]}",
+			"{\"missingA\":1,\"missingB\":2,\"missingA\":3}"
+		]
+	},
+	"expected": {
+		"issues": [
+			[
+				{
+					"path": [
+						"missingB"
+					],
+					"code": "required",
+					"message": "missing missingB"
+				},
+				{
+					"path": [
+						"missingA"
+					],
+					"code": "required",
+					"message": "missing missingA"
+				},
+				{
+					"path": [
+						"0"
+					],
+					"code": "property_name",
+					"message": "invalid property name"
+				},
+				{
+					"path": [
+						"0"
+					],
+					"code": "type",
+					"message": "expected string"
+				},
+				{
+					"path": [
+						"2"
+					],
+					"code": "property_name",
+					"message": "invalid property name"
+				},
+				{
+					"path": [
+						"2"
+					],
+					"code": "type",
+					"message": "expected string"
+				},
+				{
+					"path": [
+						"10"
+					],
+					"code": "type",
+					"message": "expected string"
+				},
+				{
+					"path": [
+						"constructor"
+					],
+					"code": "type",
+					"message": "expected number"
+				},
+				{
+					"path": [
+						"toString"
+					],
+					"code": "type",
+					"message": "expected boolean"
+				},
+				{
+					"path": [
+						"__proto__"
+					],
+					"code": "const",
+					"message": "not equal to const"
+				},
+				{
+					"path": [
+						"rows",
+						0,
+						"count"
+					],
+					"code": "type",
+					"message": "expected integer"
+				},
+				{
+					"path": [
+						"rows",
+						1,
+						"count"
+					],
+					"code": "required",
+					"message": "missing count"
+				},
+				{
+					"path": [
+						"extra"
+					],
+					"code": "additional",
+					"message": "additional extra"
+				},
+				{
+					"path": [
+						"x"
+					],
+					"code": "property_name",
+					"message": "invalid property name"
+				},
+				{
+					"path": [
+						"x"
+					],
+					"code": "additional",
+					"message": "additional x"
+				}
+			],
+			[
+				{
+					"path": [
+						"missingB"
+					],
+					"code": "required",
+					"message": "missing missingB"
+				},
+				{
+					"path": [
+						"missingA"
+					],
+					"code": "required",
+					"message": "missing missingA"
+				},
+				{
+					"path": [
+						"2"
+					],
+					"code": "property_name",
+					"message": "invalid property name"
+				}
+			],
+			[
+				{
+					"path": [
+						"missingA"
+					],
+					"code": "additional",
+					"message": "additional missingA"
+				},
+				{
+					"path": [
+						"missingB"
+					],
+					"code": "additional",
+					"message": "additional missingB"
+				}
+			]
+		]
+	}
+}

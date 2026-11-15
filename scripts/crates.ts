@@ -1,4 +1,4 @@
-// Check Cargo.lock age and advisories.
+// Cargo crate checks.
 // Run: bun scripts/crates.ts
 
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
@@ -23,8 +23,10 @@ export interface Exemptions {
 export interface CrateSources {
 	/** Publish timestamp. */
 	publishedAt(crate: LockedCrate): Promise<string>;
-	/** Preserve advisory order and completeness. */
+	/** Preserve order and completeness. */
 	advisories(crates: LockedCrate[]): Promise<string[][]>;
+	/** Unknown IDs return empty. */
+	advisoryCrates(id: string): Promise<string[]>;
 	now(): number;
 }
 
@@ -40,13 +42,13 @@ const ADVISORY_ID = /^(RUSTSEC-\d{4}-\d{4}|GHSA(-[0-9a-z]{4}){3}|CVE-\d{4}-\d{4,
 ////////////////////////////////
 //  Functions & Helpers
 
-/** Path packages have no source. */
+/** Path packages omit sources. */
 function lockedPackages(lock: string): Array<LockedCrate & { source: string | undefined }> {
 	return lock
 		.split("[[package]]")
 		.slice(1)
 		.flatMap((held) => {
-			// One table, in Cargo's own spelling.
+			// Stop at next table.
 			const block = held.split(/^\[/m)[0] as string;
 			if (/^(name|version|source) = (?!"[^"]*"$)/m.test(block))
 				throw new Error("a lock entry is not as Cargo writes it");
@@ -63,7 +65,6 @@ export function lockedCrates(lock: string): LockedCrate[] {
 		.map(({ name, version }) => ({ name, version }));
 }
 
-/** Other registry packages. */
 export function foreignPackages(lock: string): string[] {
 	return lockedPackages(lock)
 		.filter((held) => held.source !== undefined && held.source !== REGISTRY)
@@ -76,7 +77,6 @@ function readJson<T>(file: string, fallback: T): T {
 	return existsSync(file) ? (JSON.parse(readFileSync(file, "utf8")) as T) : fallback;
 }
 
-/** Checks one lock and updates age metadata. */
 export async function checkLock(lockFile: string, sources: CrateSources): Promise<string[]> {
 	const folder = path.dirname(lockFile);
 	const agesFile = path.join(folder, "crate-ages.json");
@@ -99,12 +99,13 @@ export async function checkLock(lockFile: string, sources: CrateSources): Promis
 
 	for (const crate of crates) {
 		const age = sources.now() - Date.parse(held[keyOf(crate)] as string);
-		const excused = exempt.young.some(
+		if (age >= MINIMUM_AGE_MS) continue;
+		const excuse = exempt.young.find(
 			(entry) => entry.name === crate.name && entry.version === crate.version && ADVISORY_ID.test(entry.advisory),
 		);
-		if (!(age >= MINIMUM_AGE_MS) && !excused) {
-			problems.push(`${keyOf(crate)} was published ${Math.floor(age / 86_400_000)} days ago`);
-		}
+		if (!excuse) problems.push(`${keyOf(crate)} was published ${Math.floor(age / 86_400_000)} days ago`);
+		else if (!(await sources.advisoryCrates(excuse.advisory)).includes(crate.name))
+			problems.push(`${keyOf(crate)} cites ${excuse.advisory}, which does not name it`);
 	}
 
 	const accepted = new Set(exempt.advisories.map((entry) => entry.id));
@@ -150,6 +151,18 @@ export const liveSources: CrateSources = {
 			}
 		}
 		return found;
+	},
+	async advisoryCrates(id) {
+		const url = `https://api.osv.dev/v1/vulns/${id}`;
+		const response = await fetch(url, { headers: { "User-Agent": AGENT } });
+		if (response.status === 404) return [];
+		if (!response.ok) throw new Error(`${url} answered ${response.status}`);
+		const body = (await response.json()) as {
+			affected?: Array<{ package?: { ecosystem?: string; name?: string } }>;
+		};
+		return (body.affected ?? []).flatMap(({ package: held }) =>
+			held?.ecosystem === "crates.io" && held.name ? [held.name] : [],
+		);
 	},
 	now: () => Date.now(),
 };

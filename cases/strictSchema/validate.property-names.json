@@ -1,0 +1,51 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.validate",
+	"name": "property-names",
+	"input": {
+		"schema": {
+			"propertyNames": {
+				"maxLength": 2,
+				"enum": [
+					"ab",
+					"😀😀",
+					"abc"
+				]
+			},
+			"additionalProperties": {
+				"type": "null"
+			}
+		},
+		"texts": [
+			"{\"ab\":null,\"abc\":null,\"😀😀\":1,\"zz\":null}"
+		]
+	},
+	"expected": {
+		"issues": [
+			[
+				{
+					"path": [
+						"abc"
+					],
+					"code": "property_name",
+					"message": "invalid property name"
+				},
+				{
+					"path": [
+						"😀😀"
+					],
+					"code": "type",
+					"message": "expected null"
+				},
+				{
+					"path": [
+						"zz"
+					],
+					"code": "property_name",
+					"message": "invalid property name"
+				}
+			]
+		]
+	}
+}

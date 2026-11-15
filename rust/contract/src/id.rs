@@ -1,11 +1,46 @@
-//! Random identifier generation.
+//! Random ID generation.
 
 use std::fs::File;
 use std::hash::{BuildHasher, Hasher, RandomState};
 use std::io::Read;
+use std::sync::atomic::{AtomicU64, Ordering};
+
+pub trait Ids {
+    fn new_id(&self) -> String;
+}
+
+pub struct RandomIds;
+
+impl Ids for RandomIds {
+    fn new_id(&self) -> String {
+        random_uuid()
+    }
+}
+
+/// IDs start at 1.
+pub struct CountedIds {
+    prefix: String,
+    minted: AtomicU64,
+}
+
+impl CountedIds {
+    pub fn new(prefix: impl Into<String>) -> Self {
+        Self {
+            prefix: prefix.into(),
+            minted: AtomicU64::new(0),
+        }
+    }
+}
+
+impl Ids for CountedIds {
+    fn new_id(&self) -> String {
+        let minted = self.minted.fetch_add(1, Ordering::Relaxed) + 1;
+        format!("{}{minted}", self.prefix)
+    }
+}
 
 /// OS randomness, keyed-hash fallback.
-fn random_bytes() -> [u8; 16] {
+pub(crate) fn random_bytes() -> [u8; 16] {
     let mut bytes = [0u8; 16];
     let read = File::open("/dev/urandom").and_then(|mut device| device.read_exact(&mut bytes));
     if read.is_err() {
@@ -40,6 +75,11 @@ mod tests {
     fn mints_distinct_version_four_ids() {
         let id = random_uuid();
         assert_eq!(id.len(), 36);
+        for (at, unit) in id.bytes().enumerate() {
+            let hyphen = matches!(at, 8 | 13 | 18 | 23);
+            assert_eq!(unit == b'-', hyphen, "{id}");
+            assert!(hyphen || matches!(unit, b'0'..=b'9' | b'a'..=b'f'), "{id}");
+        }
         assert_eq!(id.as_bytes()[14], b'4');
         assert!(matches!(id.as_bytes()[19], b'8' | b'9' | b'a' | b'b'));
         assert_ne!(id, random_uuid());

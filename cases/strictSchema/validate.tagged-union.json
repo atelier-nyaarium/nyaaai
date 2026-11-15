@@ -1,0 +1,62 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.validate",
+	"name": "tagged-union",
+	"input": {
+		"schema": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"const": "cat"
+						},
+						"lives": {
+							"type": "integer"
+						}
+					},
+					"required": [
+						"kind",
+						"lives"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"const": "dog"
+						},
+						"bark": {
+							"type": "boolean"
+						}
+					},
+					"required": [
+						"kind",
+						"bark"
+					]
+				}
+			]
+		},
+		"texts": [
+			"{\"kind\":\"cat\",\"lives\":9}",
+			"{\"kind\":\"dog\",\"bark\":true}",
+			"{\"kind\":\"bird\"}",
+			"{\"kind\":\"cat\",\"lives\":9,\"bark\":true}"
+		]
+	},
+	"expected": {
+		"issues": [
+			[],
+			[],
+			[
+				{
+					"path": [],
+					"code": "no_branch",
+					"message": "no branch matches"
+				}
+			],
+			[]
+		]
+	}
+}

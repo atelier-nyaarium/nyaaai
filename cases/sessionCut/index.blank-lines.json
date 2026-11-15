@@ -1,5 +1,6 @@
 {
-	"format": 1,
+	"format": 2,
+	"type": "function",
 	"kind": "sessionCut.index",
 	"name": "blank-lines",
 	"input": {
@@ -16,7 +17,7 @@
 				3
 			],
 			"version": null,
-			"header": [],
+			"header": {},
 			"boundary": null,
 			"boundaries": 0,
 			"standing": null,

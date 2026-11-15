@@ -1,0 +1,67 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "torture-Legacy",
+	"input": {
+		"set": "torture",
+		"shape": "Legacy",
+		"texts": [
+			"{\"id\":\"i\",\"tags\":[\"a\"]}",
+			"{\"name\":\"n\",\"tags\":\"t\"}",
+			"{\"id\":\"i\",\"name\":\"n\",\"tags\":[]}",
+			"{\"name\":5,\"tags\":[]}",
+			"{\"tags\":[]}",
+			"{\"id\":\"i\",\"tags\":5}",
+			"\"text\"",
+			"[]",
+			"null"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"id\":\"i\",\"tags\":[\"a\"]}"
+			},
+			{
+				"ok": true,
+				"text": "{\"id\":\"n\",\"tags\":[\"t\"]}"
+			},
+			{
+				"ok": true,
+				"text": "{\"id\":\"i\",\"tags\":[]}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"id"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"id"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"tags"
+				]
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "frames-Done",
+	"input": {
+		"set": "frames",
+		"shape": "Done",
+		"texts": [
+			"{\"type\":\"done\",\"run\":\"r1\",\"seq\":1,\"result\":null}",
+			"{\"type\":\"done\",\"run\":\"r1\",\"seq\":1.5,\"result\":null}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"type\":\"done\",\"run\":\"r1\",\"seq\":1,\"result\":null}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"seq"
+				]
+			}
+		]
+	}
+}

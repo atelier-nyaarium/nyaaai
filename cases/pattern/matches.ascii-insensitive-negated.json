@@ -1,0 +1,40 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.matches",
+	"name": "ascii-insensitive-negated",
+	"input": {
+		"source": "[^A]",
+		"flags": "i",
+		"texts": [
+			"aAbéÉ"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 2,
+						"end": 3,
+						"text": "b",
+						"captures": []
+					},
+					{
+						"start": 3,
+						"end": 4,
+						"text": "é",
+						"captures": []
+					},
+					{
+						"start": 4,
+						"end": 5,
+						"text": "É",
+						"captures": []
+					}
+				]
+			}
+		]
+	}
+}

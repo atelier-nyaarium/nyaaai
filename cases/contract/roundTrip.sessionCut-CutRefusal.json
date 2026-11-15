@@ -1,0 +1,36 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "sessionCut-CutRefusal",
+	"input": {
+		"set": "sessionCut",
+		"shape": "CutRefusal",
+		"texts": [
+			"\"no_rows\"",
+			"\"summary_needed\"",
+			"\"no-rows\"",
+			"null"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "\"no_rows\""
+			},
+			{
+				"ok": true,
+				"text": "\"summary_needed\""
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

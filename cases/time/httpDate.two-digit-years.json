@@ -1,0 +1,25 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "time.httpDate",
+	"name": "two-digit-years",
+	"input": {
+		"nowMs": 946598400000,
+		"texts": [
+			"Saturday, 01-Jan-00 00:00:00 GMT",
+			"Sunday, 06-Nov-48 08:49:37 GMT",
+			"Sunday, 06-Nov-49 08:49:37 GMT",
+			"Sunday, 06-Nov-50 08:49:37 GMT",
+			"Sunday, 06-Nov-99 08:49:37 GMT"
+		]
+	},
+	"expected": {
+		"results": [
+			946684800000,
+			2488265377000,
+			2519801377000,
+			-604422623000,
+			941878177000
+		]
+	}
+}

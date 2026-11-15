@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "frames-Failed",
+	"input": {
+		"set": "frames",
+		"shape": "Failed",
+		"texts": [
+			"{\"type\":\"failed\",\"run\":\"r1\",\"seq\":3,\"code\":\"bad_input\",\"message\":\"m\"}",
+			"{\"type\":\"failed\",\"run\":\"r1\",\"seq\":3,\"code\":\"bad_input\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"type\":\"failed\",\"run\":\"r1\",\"seq\":3,\"code\":\"bad_input\",\"message\":\"m\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"message"
+				]
+			}
+		]
+	}
+}

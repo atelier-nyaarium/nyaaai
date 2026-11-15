@@ -13,7 +13,6 @@ export const ROOT = path.join(import.meta.dirname, "..");
 ////////////////////////////////
 //  Functions & Helpers
 
-/** Overrides for another repository. */
 const GIT_OVERRIDES = [
 	"GIT_DIR",
 	"GIT_WORK_TREE",
@@ -28,7 +27,6 @@ function ownRepository(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
 	return Object.fromEntries(Object.entries(env).filter(([name]) => !GIT_OVERRIDES.includes(name)));
 }
 
-/** Trim output; contextualize failures. */
 export function git(cwd: string, args: string[], env: Record<string, string> = {}): string {
 	try {
 		return execFileSync("git", args, {
@@ -53,17 +51,21 @@ export function gitOrNull(cwd: string, args: string[]): string | null {
 	}
 }
 
-/** PATH before CARGO_HOME. */
-export function cargoBin(): string {
-	const onPath = spawnSync("cargo", ["--version"], { stdio: "ignore" }).status === 0;
-	if (onPath) return "cargo";
+/** PATH precedes CARGO_HOME. */
+function rustBin(name: string): string {
+	const onPath = spawnSync(name, ["--version"], { stdio: "ignore" }).status === 0;
+	if (onPath) return name;
 	const home = process.env.CARGO_HOME ?? path.join(homedir(), ".cargo");
-	const held = path.join(home, "bin", "cargo");
-	if (!existsSync(held)) throw new Error("cargo is neither on PATH nor under CARGO_HOME");
+	const held = path.join(home, "bin", name);
+	if (!existsSync(held)) throw new Error(`${name} is neither on PATH nor under CARGO_HOME`);
 	return held;
 }
 
-/** Children unwind on SIGINT. */
+export const cargoBin = (): string => rustBin("cargo");
+
+export const rustfmtBin = (): string => rustBin("rustfmt");
+
+/** Let children handle SIGINT. */
 export function outliveInterrupts(): void {
 	process.on("SIGINT", () => {});
 }

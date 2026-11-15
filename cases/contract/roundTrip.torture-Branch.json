@@ -1,0 +1,40 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "torture-Branch",
+	"input": {
+		"set": "torture",
+		"shape": "Branch",
+		"texts": [
+			"{\"kind\":\"branch\",\"kids\":[]}",
+			"{\"kind\":\"branch\",\"kids\":[{\"kind\":\"leaf\",\"value\":1}]}",
+			"{\"kind\":\"leaf\",\"value\":1}",
+			"{\"kind\":\"branch\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"kind\":\"branch\",\"kids\":[]}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"branch\",\"kids\":[{\"kind\":\"leaf\",\"value\":1}]}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kids"
+				]
+			}
+		]
+	}
+}

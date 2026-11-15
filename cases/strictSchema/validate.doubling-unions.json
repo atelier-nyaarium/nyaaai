@@ -1,0 +1,59 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.validate",
+	"name": "doubling-unions",
+	"input": {
+		"schema": {
+			"$ref": "#/$defs/Twice",
+			"$defs": {
+				"Twice": {
+					"anyOf": [
+						{
+							"type": "object",
+							"properties": {
+								"next": {
+									"$ref": "#/$defs/Twice"
+								}
+							},
+							"required": [
+								"next"
+							]
+						},
+						{
+							"type": "object",
+							"properties": {
+								"next": {
+									"$ref": "#/$defs/Twice"
+								}
+							},
+							"additionalProperties": false
+						}
+					]
+				}
+			}
+		},
+		"texts": [
+			"{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":1}}}}}}}}",
+			"{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":{\"next\":1}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}"
+		]
+	},
+	"expected": {
+		"issues": [
+			[
+				{
+					"path": [],
+					"code": "no_branch",
+					"message": "no branch matches"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "limit",
+					"message": "past a limit"
+				}
+			]
+		]
+	}
+}

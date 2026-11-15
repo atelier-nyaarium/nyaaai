@@ -1,0 +1,33 @@
+{
+	"format": 2,
+	"type": "run",
+	"kind": "adapter.run",
+	"name": "handshake",
+	"script": [
+		{
+			"send": {
+				"type": "hello",
+				"version": "0.1.0"
+			}
+		},
+		{
+			"await": {
+				"type": "welcome"
+			}
+		},
+		{
+			"close": true
+		}
+	],
+	"expected": {
+		"exit": 0,
+		"connection": [
+			{
+				"type": "welcome",
+				"version": "0.1.0"
+			}
+		],
+		"runs": {},
+		"files": {}
+	}
+}

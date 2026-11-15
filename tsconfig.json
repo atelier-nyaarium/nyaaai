@@ -8,6 +8,7 @@
 		{ "path": "./ts/operator" },
 		{ "path": "./ts/ui" },
 		{ "path": "./ts/testkit" },
+		{ "path": "./ts/cli" },
 		{ "path": "./scripts" }
 	]
 }

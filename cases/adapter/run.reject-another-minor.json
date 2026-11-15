@@ -1,0 +1,31 @@
+{
+	"format": 2,
+	"type": "run",
+	"kind": "adapter.run",
+	"name": "reject-another-minor",
+	"script": [
+		{
+			"send": {
+				"type": "hello",
+				"version": "0.99.0"
+			}
+		},
+		{
+			"await": {
+				"type": "reject"
+			}
+		}
+	],
+	"expected": {
+		"exit": 2,
+		"connection": [
+			{
+				"type": "reject",
+				"version": "0.1.0",
+				"reason": "another contract version"
+			}
+		],
+		"runs": {},
+		"files": {}
+	}
+}

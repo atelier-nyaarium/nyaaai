@@ -6,7 +6,6 @@ import { CLI_VERSION, compactedSession } from "@nyaaai/testkit/claudeSession";
 import { cutSession, verifyCut } from "../sessionCut";
 import { builtFile, fileCutPorts, linesOf, sessionLines } from "../sessionFile";
 
-/** Synthetic session folder. */
 function scratch() {
 	const folder = mkdtempSync(path.join(tmpdir(), "nyaaai-file-ports-"));
 	const sessions = path.join(folder, "sessions");

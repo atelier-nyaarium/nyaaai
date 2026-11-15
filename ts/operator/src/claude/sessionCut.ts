@@ -1,162 +1,65 @@
-import { parseJson } from "@nyaaai/contract/json";
-import { parseIsoTime } from "@nyaaai/contract/time";
+import type { Ids } from "@nyaaai/contract/id";
+import { jsString, parseJson } from "@nyaaai/contract/json";
+import { Pattern } from "@nyaaai/contract/pattern";
+import type {
+	BoundaryMeta,
+	CutDone,
+	CutPlan,
+	CutRefusal,
+	CutRefused,
+	CutRequest,
+	PickedTurn,
+	RowMeta,
+	SessionIndex,
+	TurnPick,
+} from "@nyaaai/contract/shapes/sessionCut";
+import { type Clock, isoTime, parseIsoTime } from "@nyaaai/contract/time";
+import { clearedNote, compactedSummary as compactedPrompt } from "../prompts";
+
+export type {
+	BoundaryMeta,
+	CutDone,
+	CutMode,
+	CutPlan,
+	CutRefusal,
+	CutRefused,
+	CutRequest,
+	KeptFrom,
+	PickedTurn,
+	Preserved,
+	RowMeta,
+	SessionIndex,
+	TurnPick,
+} from "@nyaaai/contract/shapes/sessionCut";
 
 ////////////////////////////////
 //  Interfaces & Types
 
-/** CLI versions whose session file shape a built cut is known to resume under. */
 export const CUT_CLI_VERSIONS: readonly string[] = ["2.1.323"];
-
-/** Trim keeps the live segment; clear and compact cut above a chosen turn. */
-export type CutMode = "trim" | "clear" | "compact";
-
-export type CutRefusal =
-	| "no_rows"
-	| "cli_version"
-	| "boundary_shape"
-	| "unreadable_rows"
-	| "nothing_to_trim"
-	| "preserved_unresolved"
-	| "target_missing"
-	| "target_compacted"
-	| "target_not_turn_start"
-	| "target_mid_tool"
-	| "tail_mid_tool"
-	| "end_missing"
-	| "late_message"
-	| "nothing_above"
-	| "summary_needed";
-
-export interface CutRefused {
-	ok: false;
-	reason: CutRefusal;
-	detail: string;
-}
-
-/** One row after the live boundary, without its text. */
-export interface RowMeta {
-	line: number;
-	bytes: number;
-	type: string;
-	uuid?: string;
-	at?: string;
-	/** Tool calls still unanswered before this row. */
-	openTools: number;
-	/** A message reached the session here: a turn start, or one taken in mid-turn. A cut point. */
-	delivered: boolean;
-	/** A delivered message's own text. */
-	text?: string;
-	/** Rows this one names: a prompt's leaf, a file snapshot's message. */
-	points: string[];
-}
-
-export interface BoundaryMeta {
-	line: number;
-	uuid: string;
-	/** Its preserved rows, which sit before it in the file. */
-	preservedLines: number[];
-	/** Every preserved id is a row, and they are the chain from tail back to head. */
-	preservedSound: boolean;
-	preserved: string[];
-	summaryLine: number | null;
-	cumulativeDroppedTokens: number;
-	postTokens: number;
-	/** Its keys and value types are ones a cut knows. */
-	known: boolean;
-}
-
-export interface SessionIndex {
-	lines: number;
-	unparsed: number;
-	/** Lines after the live boundary that do not parse. A cut that keeps past one would lose it. */
-	unreadable: number[];
-	version: string | null;
-	/** The newest of each header row. */
-	header: Map<string, number>;
-	boundary: BoundaryMeta | null;
-	/** Compaction rows in the whole file. */
-	boundaries: number;
-	/** The live boundary's summary text. */
-	standing: string | null;
-	/** Rows after the live boundary, or every row when there is none. The last entry is the file's end. */
-	tail: RowMeta[];
-}
-
-export interface CutRequest {
-	mode: CutMode;
-	/** The turn start to keep from. Unused by trim. */
-	targetUuid?: string;
-	/** The last row to keep; the file's end when absent. */
-	throughUuid?: string;
-	/** Ends the kept rows before the first later turn start whose text holds this. */
-	endBefore?: string;
-	/** A compact's summary, when the caller already holds it. */
-	summaryText?: string;
-	/** A plan while the session still writes: where the kept rows end is checked at the build. */
-	liveTail?: boolean;
-}
-
-/** A chat row to find a turn by: its time, and its text when it is a message the session was sent. */
-export interface TurnPick {
-	at: number;
-	text?: string;
-}
-
-export interface PickedTurn {
-	uuid: string;
-	/** The row's own text matched; otherwise the turn at or before its time. */
-	exact: boolean;
-}
-
-export interface CutPlan {
-	ok: true;
-	mode: CutMode;
-	/** The newest header rows, written first. */
-	headerLines: number[];
-	/** Lines kept verbatim, ascending. */
-	keptLines: number[];
-	/** Clear and compact: the segment a built boundary preserves. Trim builds none. */
-	preserved: { head: string; tail: string; uuids: string[] } | null;
-	/** Rows a summarizer folds: after the standing summary, above the target. */
-	foldLines: number[];
-	keptBytes: number;
-	droppedBytes: number;
-	droppedRows: number;
-	/** The kept turn, for a confirmation. */
-	from: { at: string | null; text: string } | null;
-}
 
 export interface BuildInputs {
 	sessionId: string;
-	/** Clear and compact: the built summary's text. */
+	/** Clear or compact summary. */
 	summaryText?: string;
-	newId: () => string;
-	now: () => Date;
+	ids: Ids;
+	clock: Clock;
 }
 
 export type Summarizer = (input: { standing: string | null; rows: string[] }) => Promise<string>;
 
 export interface CutPorts {
-	/** The source's lines, split on LF alone, readable more than once. Never opened for writing. */
+	/** Repeatable, read-only LF rows. */
 	read: () => AsyncIterable<string>;
-	/** Where the source is, for the summary to name. */
 	sourcePath: string;
-	/** Exclusive create of the new session's file. */
+	/** Creates without overwriting. */
 	create: (sessionId: string, lines: AsyncIterable<string>) => Promise<void>;
-	/** The built file's lines, for the read-back. */
 	readBuilt: (sessionId: string) => AsyncIterable<string>;
-	/** Removes a built file that failed its read-back. */
+	/** Removes rejected output. */
 	discard: (sessionId: string) => Promise<void>;
-	newId: () => string;
-	now: () => Date;
+	ids: Ids;
+	clock: Clock;
 	cliVersion: () => Promise<string>;
 	summarize?: Summarizer;
-}
-
-export interface CutDone {
-	ok: true;
-	sessionId: string;
-	plan: CutPlan;
 }
 
 type Row = Record<string, unknown>;
@@ -165,13 +68,13 @@ type Row = Record<string, unknown>;
 //  Functions & Helpers
 
 const HEADER_TYPES = new Set(["mode", "permission-mode", "atis-latch", "session-owner"]);
-/** The CLI's request log; a resume reads none of it. */
+/** Resume ignores request logs. */
 const SKIPPED_TYPES = new Set(["api-request", "api-request-blob", "api-request-shape"]);
 const SESSION_KEYS = new Set(["sessionId", "session_id"]);
-/** Keys under which a row names another row. */
+/** Row-link keys. */
 const POINTER_KEYS = ["leafUuid", "messageId", "snapshotMessageId"];
 
-/** The boundary a cut writes, in the CLI's own key order. */
+/** Keys follow CLI order. */
 const BOUNDARY_KEYS = [
 	"parentUuid",
 	"logicalParentUuid",
@@ -191,7 +94,7 @@ const BOUNDARY_KEYS = [
 	"gitBranch",
 	"slug",
 ];
-/** An automatic compaction's boundary also carries this. */
+/** Compactions add `isMeta`. */
 const BOUNDARY_EXTRA_KEYS = ["isMeta"];
 const METADATA_KEYS = [
 	"trigger",
@@ -204,7 +107,7 @@ const METADATA_KEYS = [
 ];
 const METADATA_EXTRA_KEYS = ["preCompactArtifactReadVersions"];
 const ENVELOPE_KEYS = ["userType", "entrypoint", "cwd", "version", "gitBranch", "slug"];
-/** A turn starts this long after its message was sent, at most. */
+/** Maximum sent-message delay. */
 const PICK_SLACK_MS = 2000;
 
 const refused = (reason: CutRefusal, detail: string): CutRefused => ({ ok: false, reason, detail });
@@ -221,7 +124,7 @@ const partsOf = (row: Row): Row[] => {
 	return Array.isArray(content) ? (content.filter((part) => part && typeof part === "object") as Row[]) : [];
 };
 
-/** Tool call ids a conversation row opens and answers. The request log repeats messages and counts for neither. */
+/** Excludes request-log duplicates. */
 const callsOf = (row: Row): { opened: string[]; answered: string[] } => {
 	const ids = (kind: string, key: string) =>
 		partsOf(row)
@@ -242,7 +145,7 @@ const textOf = (row: Row): string | undefined => {
 	return parts.map((part) => (typeof part.text === "string" ? part.text : "")).join("\n");
 };
 
-/** A message the CLI took in while a turn ran: its text, else undefined. */
+/** Queued prompt text. */
 function absorbedText(row: Row): string | undefined {
 	if (row.type !== "attachment") return undefined;
 	const held = row.attachment as Row | undefined;
@@ -252,7 +155,7 @@ function absorbedText(row: Row): string | undefined {
 const pointsOf = (row: Row): string[] =>
 	POINTER_KEYS.map((key) => row[key]).filter((id): id is string => typeof id === "string");
 
-/** Every required key, and nothing outside the required and the allowed. */
+/** Required keys; no extras. */
 const keysWithin = (value: unknown, required: string[], allowed: string[]) => {
 	if (value === null || typeof value !== "object") return false;
 	const keys = Object.keys(value as Row);
@@ -264,20 +167,16 @@ const keysWithin = (value: unknown, required: string[], allowed: string[]) => {
 
 const counted = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value);
 
-/** A rough count: the CLI reports these numbers and sums them. */
+/** Four-byte token estimate. */
 const tokensOf = (bytes: number) => Math.round(bytes / 4);
 
-/** The end of the JSON string that opens at `from`. */
 function stringEnd(text: string, from: number): number {
 	let at = from + 1;
 	while (at < text.length && text[at] !== '"') at += text[at] === "\\" ? 2 : 1;
 	return at;
 }
 
-/**
- * A row's bytes with its own session ids changed and nothing else: only top-level keys, found by depth,
- * so an id inside a tool input or a path is left alone.
- */
+/** Top-level session IDs only. */
 export function rehomed(text: string, sessionId: string): string {
 	const spans: Array<[number, number]> = [];
 	let depth = 0;
@@ -300,9 +199,9 @@ export function rehomed(text: string, sessionId: string): string {
 	return next;
 }
 
-/** One pass over the file: the live boundary, the newest header rows, and the rows after it. */
+/** Indexes boundary, header, tail. */
 export async function indexSession(lines: AsyncIterable<string>): Promise<SessionIndex> {
-	const header = new Map<string, number>();
+	const header: Record<string, number> = {};
 	let segment = new Map<string, { line: number; parent: unknown }>();
 	let tail: RowMeta[] = [];
 	let boundary: BoundaryMeta | null = null;
@@ -323,8 +222,8 @@ export async function indexSession(lines: AsyncIterable<string>): Promise<Sessio
 			unreadable.push(line);
 			continue;
 		}
-		const type = String(row.type);
-		if (HEADER_TYPES.has(type)) header.set(type, line);
+		const type = jsString(row.type);
+		if (HEADER_TYPES.has(type)) header[type] = line;
 		if (typeof row.version === "string") version = row.version;
 		const uuid = typeof row.uuid === "string" ? row.uuid : undefined;
 
@@ -409,7 +308,6 @@ export async function indexSession(lines: AsyncIterable<string>): Promise<Sessio
 	return { lines: line, unparsed, unreadable, version, header, boundary, boundaries, standing, tail };
 }
 
-/** What a cut keeps and drops, or why it is refused. Writes nothing. */
 export function planCut(index: SessionIndex, request: CutRequest, cliVersion: string): CutPlan | CutRefused {
 	const rows = index.tail.slice(0, -1);
 	const end = index.tail.at(-1);
@@ -432,7 +330,7 @@ export function planCut(index: SessionIndex, request: CutRequest, cliVersion: st
 		index.unreadable.some((line) => line >= from && line <= to)
 			? refused("unreadable_rows", "The session file has a damaged row after this message.")
 			: null;
-	const headerLines = [...index.header.values()].sort((a, b) => a - b);
+	const headerLines = Object.values(index.header).sort((a, b) => a - b);
 	const writes = (row: RowMeta) => !SKIPPED_TYPES.has(row.type);
 	const resolving = (range: RowMeta[], held: Set<string>) =>
 		range.filter((row) => writes(row) && row.points.every((id) => held.has(id)));
@@ -518,7 +416,6 @@ export function planCut(index: SessionIndex, request: CutRequest, cliVersion: st
 	};
 }
 
-/** The new file's lines: the header, the kept rows, then for a clear or compact a built boundary and summary. */
 export async function* buildCut(
 	plan: CutPlan,
 	index: SessionIndex,
@@ -545,9 +442,10 @@ export async function* buildCut(
 	yield* body;
 	if (!plan.preserved) return;
 
-	const boundaryUuid = inputs.newId();
-	const summaryUuid = inputs.newId();
-	const at = inputs.now().toISOString();
+	const boundaryUuid = inputs.ids.newId();
+	const summaryUuid = inputs.ids.newId();
+	const at = isoTime(inputs.clock.nowMs());
+	if (at === undefined) throw new Error("the clock is outside the time range");
 	const carried = Object.fromEntries(ENVELOPE_KEYS.map((key) => [key, envelope[key]]));
 	const before = tokensOf(plan.keptBytes + plan.droppedBytes) + (index.boundary?.postTokens ?? 0);
 	const after = Math.min(before, tokensOf(plan.keptBytes + Buffer.byteLength(inputs.summaryText ?? "")));
@@ -582,7 +480,7 @@ export async function* buildCut(
 	yield JSON.stringify({
 		parentUuid: boundaryUuid,
 		isSidechain: false,
-		promptId: inputs.newId(),
+		promptId: inputs.ids.newId(),
 		type: "user",
 		message: { role: "user", content: inputs.summaryText ?? "" },
 		isVisibleInTranscriptOnly: true,
@@ -601,10 +499,7 @@ export async function* buildCut(
 	});
 }
 
-/**
- * The read-back: what would stop the built file resuming as planned. Empty when sound.
- * `paired` holds a built segment to its own tool calls; a trim keeps the CLI's own segment as it stood.
- */
+/** `paired` validates new calls; trims retain source segments. */
 export async function verifyCut(lines: AsyncIterable<string>, sessionId: string, paired: boolean): Promise<string[]> {
 	const problems: string[] = [];
 	const seen = new Map<string, number>();
@@ -620,7 +515,7 @@ export async function verifyCut(lines: AsyncIterable<string>, sessionId: string,
 			problems.push(`line ${line} does not parse`);
 			continue;
 		}
-		if (SKIPPED_TYPES.has(String(row.type))) problems.push(`line ${line} is a request log row`);
+		if (SKIPPED_TYPES.has(jsString(row.type))) problems.push(`line ${line} is a request log row`);
 		for (const key of SESSION_KEYS) {
 			if (typeof row[key] === "string" && row[key] !== sessionId)
 				problems.push(`line ${line} names another session`);
@@ -669,12 +564,10 @@ export async function verifyCut(lines: AsyncIterable<string>, sessionId: string,
 	return problems;
 }
 
-const collapsed = (text: string) => text.replace(/\s+/g, " ").trim();
+const SPACE_RUN = Pattern.compile("\\s+");
+const collapsed = (text: string) => SPACE_RUN.replaceAll(text, " ").trim();
 
-/**
- * The turn a chat row names. Its own text finds it, nearest in time; a row that started no turn finds the
- * turn start at or before it. `bodyOf` reads a turn start's text as the message it carried.
- */
+/** Matches text or latest eligible turn. */
 export function pickTurn(
 	index: SessionIndex,
 	pick: TurnPick,
@@ -693,32 +586,24 @@ export function pickTurn(
 			.sort((a, b) => a.gap - b.gap)[0];
 		if (named) return { uuid: named.row.uuid, exact: true };
 	}
-	// A sent message's turn starts after it.
+	// Sent messages start later.
 	const slack = pick.text === undefined ? 0 : PICK_SLACK_MS;
 	const before = starts.filter((row) => timeOf(row) <= pick.at + slack).at(-1);
 	return before ? { uuid: before.uuid, exact: false } : null;
 }
 
-/** A compact's summary row: the summary, framed as the CLI frames its own. */
+/** CLI-shaped compact summary. */
 export function compactedSummary(summary: string, sourcePath: string): string {
-	return `
-This session is being continued from an earlier part of this conversation, which the owner compacted above a message they chose. The summary below covers everything before that message.
-
-${summary.trim()}
-
-If you need specific details from before the compaction, read the full transcript at: ${sourcePath}
-
-The messages after this summary are the conversation from that message on, kept verbatim.
-	`.trim();
+	return compactedPrompt({ summary: summary.trim(), sourcePath });
 }
 
-/** A clear's summary: what stood, then one line saying rows were cleared and where they still are. */
+/** Standing text; cleared note. */
 export function clearedSummary(standing: string | null, plan: CutPlan, sourcePath: string): string {
-	const note = `[The owner cleared ${plan.droppedRows} earlier rows of this conversation without summarizing them. They remain in the transcript at: ${sourcePath}]`;
+	const note = clearedNote({ rows: String(plan.droppedRows), sourcePath });
 	return standing ? `${standing}\n\n${note}` : note;
 }
 
-/** The whole cut over its ports. The caller closes the CLI first and relaunches it after. */
+/** Caller relaunches the CLI. */
 export async function cutSession(ports: CutPorts, request: CutRequest): Promise<CutDone | CutRefused> {
 	const index = await indexSession(ports.read());
 	const plan = planCut(index, request, await ports.cliVersion());
@@ -743,17 +628,23 @@ export async function cutSession(ports: CutPorts, request: CutRequest): Promise<
 		summaryText = compactedSummary(summary, ports.sourcePath);
 	}
 
-	const sessionId = ports.newId();
+	const sessionId = ports.ids.newId();
 	await ports.create(
 		sessionId,
 		buildCut(plan, index, ports.read(), {
 			sessionId,
-			newId: ports.newId,
-			now: ports.now,
+			ids: ports.ids,
+			clock: ports.clock,
 			...(summaryText !== undefined ? { summaryText } : {}),
 		}),
 	);
-	const problems = await verifyCut(ports.readBuilt(sessionId), sessionId, plan.preserved !== null);
+	const problems = await verifyCut(ports.readBuilt(sessionId), sessionId, plan.preserved !== null).catch(
+		async (error: unknown) => {
+			// Preserves the first error.
+			await ports.discard(sessionId).catch(() => undefined);
+			throw error;
+		},
+	);
 	if (problems.length > 0) {
 		await ports.discard(sessionId);
 		throw new Error(`the built session file failed its read-back: ${problems.slice(0, 4).join("; ")}`);

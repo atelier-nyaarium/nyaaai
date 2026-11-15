@@ -1,0 +1,183 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.validate",
+	"name": "issue-order",
+	"input": {
+		"schema": {
+			"type": "object",
+			"required": [
+				"a",
+				"b"
+			],
+			"properties": {
+				"rows": {
+					"type": "array",
+					"minItems": 3,
+					"items": {
+						"type": "object",
+						"required": [
+							"count"
+						],
+						"properties": {
+							"count": {
+								"type": "integer"
+							}
+						}
+					}
+				},
+				"name": {
+					"type": "string",
+					"minLength": 3,
+					"maxLength": 1,
+					"enum": [
+						"abc"
+					],
+					"const": "abc"
+				},
+				"size": {
+					"minimum": 5,
+					"maximum": 1,
+					"enum": [
+						9
+					],
+					"anyOf": [
+						{
+							"type": "string"
+						}
+					],
+					"oneOf": [
+						{},
+						{}
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"texts": [
+			"{\"size\":3,\"extra\":1,\"name\":\"zz\",\"rows\":[{},{\"count\":1.5}],\"other\":[]}"
+		]
+	},
+	"expected": {
+		"issues": [
+			[
+				{
+					"path": [
+						"a"
+					],
+					"code": "required",
+					"message": "missing a"
+				},
+				{
+					"path": [
+						"b"
+					],
+					"code": "required",
+					"message": "missing b"
+				},
+				{
+					"path": [
+						"size"
+					],
+					"code": "enum",
+					"message": "not in enum"
+				},
+				{
+					"path": [
+						"size"
+					],
+					"code": "minimum",
+					"message": "below 5"
+				},
+				{
+					"path": [
+						"size"
+					],
+					"code": "maximum",
+					"message": "above 1"
+				},
+				{
+					"path": [
+						"size"
+					],
+					"code": "no_branch",
+					"message": "no branch matches"
+				},
+				{
+					"path": [
+						"size"
+					],
+					"code": "many_branches",
+					"message": "multiple branches match"
+				},
+				{
+					"path": [
+						"extra"
+					],
+					"code": "additional",
+					"message": "additional extra"
+				},
+				{
+					"path": [
+						"name"
+					],
+					"code": "enum",
+					"message": "not in enum"
+				},
+				{
+					"path": [
+						"name"
+					],
+					"code": "const",
+					"message": "not equal to const"
+				},
+				{
+					"path": [
+						"name"
+					],
+					"code": "min_length",
+					"message": "shorter than 3"
+				},
+				{
+					"path": [
+						"name"
+					],
+					"code": "max_length",
+					"message": "longer than 1"
+				},
+				{
+					"path": [
+						"rows"
+					],
+					"code": "min_items",
+					"message": "fewer than 3"
+				},
+				{
+					"path": [
+						"rows",
+						0,
+						"count"
+					],
+					"code": "required",
+					"message": "missing count"
+				},
+				{
+					"path": [
+						"rows",
+						1,
+						"count"
+					],
+					"code": "type",
+					"message": "expected integer"
+				},
+				{
+					"path": [
+						"other"
+					],
+					"code": "additional",
+					"message": "additional other"
+				}
+			]
+		]
+	}
+}

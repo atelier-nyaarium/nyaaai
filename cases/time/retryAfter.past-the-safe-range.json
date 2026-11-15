@@ -1,0 +1,23 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "time.retryAfter",
+	"name": "past-the-safe-range",
+	"input": {
+		"nowMs": -9007199254740991,
+		"headers": [
+			"Fri, 31 Dec 9999 23:59:59 GMT",
+			"9999-12-31T23:59:59.999Z",
+			"Thu, 01 Jan 1970 00:00:00 GMT",
+			"5"
+		]
+	},
+	"expected": {
+		"results": [
+			null,
+			null,
+			9007199254740991,
+			5000
+		]
+	}
+}

@@ -1,0 +1,274 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.wheel",
+	"name": "timers",
+	"input": {
+		"startMs": 1000,
+		"steps": [
+			{
+				"op": "after",
+				"ms": 50,
+				"tag": "b"
+			},
+			{
+				"op": "after",
+				"ms": 50,
+				"tag": "a"
+			},
+			{
+				"op": "after",
+				"ms": 10,
+				"tag": "c"
+			},
+			{
+				"op": "after",
+				"ms": 200,
+				"tag": "late"
+			},
+			{
+				"op": "advance",
+				"ms": 9
+			},
+			{
+				"op": "advance",
+				"ms": 1
+			},
+			{
+				"op": "after",
+				"ms": 40,
+				"tag": "tie"
+			},
+			{
+				"op": "cancel",
+				"tag": "a"
+			},
+			{
+				"op": "cancel",
+				"tag": "a"
+			},
+			{
+				"op": "advance",
+				"ms": 40
+			},
+			{
+				"op": "after",
+				"ms": 0,
+				"tag": "now"
+			},
+			{
+				"op": "after",
+				"ms": -5,
+				"tag": "past"
+			},
+			{
+				"op": "after",
+				"ms": 30,
+				"tag": "late"
+			},
+			{
+				"op": "advance",
+				"ms": 0
+			},
+			{
+				"op": "advance",
+				"ms": -10
+			},
+			{
+				"op": "advance",
+				"ms": 1000
+			},
+			{
+				"op": "cancel",
+				"tag": "none"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1000,
+				"waiting": [
+					"b"
+				],
+				"fired": [],
+				"cancelled": false
+			},
+			{
+				"nowMs": 1000,
+				"waiting": [
+					"b",
+					"a"
+				],
+				"fired": [],
+				"cancelled": false
+			},
+			{
+				"nowMs": 1000,
+				"waiting": [
+					"b",
+					"a",
+					"c"
+				],
+				"fired": [],
+				"cancelled": false
+			},
+			{
+				"nowMs": 1000,
+				"waiting": [
+					"b",
+					"a",
+					"c",
+					"late"
+				],
+				"fired": [],
+				"cancelled": false
+			},
+			{
+				"nowMs": 1009,
+				"waiting": [
+					"b",
+					"a",
+					"c",
+					"late"
+				],
+				"fired": [],
+				"cancelled": false
+			},
+			{
+				"nowMs": 1010,
+				"waiting": [
+					"b",
+					"a",
+					"late"
+				],
+				"fired": [
+					{
+						"tag": "c",
+						"atMs": 1010
+					}
+				],
+				"cancelled": false
+			},
+			{
+				"nowMs": 1010,
+				"waiting": [
+					"b",
+					"a",
+					"late",
+					"tie"
+				],
+				"fired": [],
+				"cancelled": false
+			},
+			{
+				"nowMs": 1010,
+				"waiting": [
+					"b",
+					"late",
+					"tie"
+				],
+				"fired": [],
+				"cancelled": true
+			},
+			{
+				"nowMs": 1010,
+				"waiting": [
+					"b",
+					"late",
+					"tie"
+				],
+				"fired": [],
+				"cancelled": false
+			},
+			{
+				"nowMs": 1050,
+				"waiting": [
+					"late"
+				],
+				"fired": [
+					{
+						"tag": "b",
+						"atMs": 1050
+					},
+					{
+						"tag": "tie",
+						"atMs": 1050
+					}
+				],
+				"cancelled": false
+			},
+			{
+				"nowMs": 1050,
+				"waiting": [
+					"late",
+					"now"
+				],
+				"fired": [],
+				"cancelled": false
+			},
+			{
+				"nowMs": 1050,
+				"waiting": [
+					"late",
+					"now",
+					"past"
+				],
+				"fired": [],
+				"cancelled": false
+			},
+			{
+				"nowMs": 1050,
+				"waiting": [
+					"now",
+					"past",
+					"late"
+				],
+				"fired": [],
+				"cancelled": false
+			},
+			{
+				"nowMs": 1050,
+				"waiting": [
+					"late"
+				],
+				"fired": [
+					{
+						"tag": "now",
+						"atMs": 1050
+					},
+					{
+						"tag": "past",
+						"atMs": 1050
+					}
+				],
+				"cancelled": false
+			},
+			{
+				"nowMs": 1050,
+				"waiting": [
+					"late"
+				],
+				"fired": [],
+				"cancelled": false
+			},
+			{
+				"nowMs": 2050,
+				"waiting": [],
+				"fired": [
+					{
+						"tag": "late",
+						"atMs": 1080
+					}
+				],
+				"cancelled": false
+			},
+			{
+				"nowMs": 2050,
+				"waiting": [],
+				"fired": [],
+				"cancelled": false
+			}
+		]
+	}
+}

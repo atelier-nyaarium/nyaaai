@@ -1,0 +1,45 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "torture-Span",
+	"input": {
+		"set": "torture",
+		"shape": "Span",
+		"texts": [
+			"{\"from\":1,\"to\":2}",
+			"{\"from\":2,\"to\":2}",
+			"{\"from\":3,\"to\":2}",
+			"{\"from\":1.5,\"to\":2}",
+			"{\"from\":3}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"from\":1,\"to\":2}"
+			},
+			{
+				"ok": true,
+				"text": "{\"from\":2,\"to\":2}"
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": [
+					"from"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"to"
+				]
+			}
+		]
+	}
+}

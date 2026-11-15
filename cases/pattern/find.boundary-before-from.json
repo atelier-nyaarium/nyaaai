@@ -1,0 +1,33 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.find",
+	"name": "boundary-before-from",
+	"input": {
+		"source": "\\ba",
+		"flags": "",
+		"text": "éa",
+		"froms": [
+			0,
+			1,
+			2
+		]
+	},
+	"expected": {
+		"found": [
+			{
+				"start": 1,
+				"end": 2,
+				"text": "a",
+				"captures": []
+			},
+			{
+				"start": 1,
+				"end": 2,
+				"text": "a",
+				"captures": []
+			},
+			null
+		]
+	}
+}

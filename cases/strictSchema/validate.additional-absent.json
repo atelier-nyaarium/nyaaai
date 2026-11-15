@@ -1,0 +1,19 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.validate",
+	"name": "additional-absent",
+	"input": {
+		"schema": {
+			"type": "object"
+		},
+		"texts": [
+			"{\"extra\":1}"
+		]
+	},
+	"expected": {
+		"issues": [
+			[]
+		]
+	}
+}

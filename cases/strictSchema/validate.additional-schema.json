@@ -1,0 +1,30 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.validate",
+	"name": "additional-schema",
+	"input": {
+		"schema": {
+			"type": "object",
+			"additionalProperties": {
+				"type": "integer"
+			}
+		},
+		"texts": [
+			"{\"extra\":\"bad\",\"fine\":1}"
+		]
+	},
+	"expected": {
+		"issues": [
+			[
+				{
+					"path": [
+						"extra"
+					],
+					"code": "type",
+					"message": "expected integer"
+				}
+			]
+		]
+	}
+}

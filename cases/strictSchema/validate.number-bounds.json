@@ -1,0 +1,131 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.validate",
+	"name": "number-bounds",
+	"input": {
+		"schema": {
+			"minimum": 1,
+			"exclusiveMinimum": 1,
+			"maximum": 2,
+			"exclusiveMaximum": 2
+		},
+		"texts": [
+			"0",
+			"1",
+			"1.5",
+			"2",
+			"3",
+			"-0",
+			"5e-324",
+			"9007199254740993",
+			"1e400",
+			"-1e400",
+			"\"1\""
+		]
+	},
+	"expected": {
+		"issues": [
+			[
+				{
+					"path": [],
+					"code": "minimum",
+					"message": "below 1"
+				},
+				{
+					"path": [],
+					"code": "exclusive_minimum",
+					"message": "not above 1"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "exclusive_minimum",
+					"message": "not above 1"
+				}
+			],
+			[],
+			[
+				{
+					"path": [],
+					"code": "exclusive_maximum",
+					"message": "not below 2"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "maximum",
+					"message": "above 2"
+				},
+				{
+					"path": [],
+					"code": "exclusive_maximum",
+					"message": "not below 2"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "minimum",
+					"message": "below 1"
+				},
+				{
+					"path": [],
+					"code": "exclusive_minimum",
+					"message": "not above 1"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "minimum",
+					"message": "below 1"
+				},
+				{
+					"path": [],
+					"code": "exclusive_minimum",
+					"message": "not above 1"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "maximum",
+					"message": "above 2"
+				},
+				{
+					"path": [],
+					"code": "exclusive_maximum",
+					"message": "not below 2"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "maximum",
+					"message": "above 2"
+				},
+				{
+					"path": [],
+					"code": "exclusive_maximum",
+					"message": "not below 2"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "minimum",
+					"message": "below 1"
+				},
+				{
+					"path": [],
+					"code": "exclusive_minimum",
+					"message": "not above 1"
+				}
+			],
+			[]
+		]
+	}
+}

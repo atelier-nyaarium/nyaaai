@@ -1,0 +1,150 @@
+{
+	"format": 2,
+	"type": "run",
+	"kind": "adapter.run",
+	"name": "commands",
+	"script": [
+		{
+			"send": {
+				"type": "hello",
+				"version": "0.1.0"
+			}
+		},
+		{
+			"await": {
+				"type": "welcome"
+			}
+		},
+		{
+			"send": {
+				"type": "start",
+				"run": "none",
+				"command": "no.such",
+				"input": null
+			}
+		},
+		{
+			"await": [
+				{
+					"type": "done",
+					"run": "none"
+				},
+				{
+					"type": "failed",
+					"run": "none"
+				}
+			]
+		},
+		{
+			"send": {
+				"type": "start",
+				"run": "bad",
+				"command": "testkit.converse",
+				"input": {
+					"requests": -1,
+					"together": false
+				}
+			}
+		},
+		{
+			"await": [
+				{
+					"type": "done",
+					"run": "bad"
+				},
+				{
+					"type": "failed",
+					"run": "bad"
+				}
+			]
+		},
+		{
+			"send": {
+				"type": "start",
+				"run": "pure",
+				"command": "case:json.canonical",
+				"input": {
+					"texts": [
+						"{\"b\":1,\"a\":2}"
+					]
+				}
+			}
+		},
+		{
+			"await": [
+				{
+					"type": "done",
+					"run": "pure"
+				},
+				{
+					"type": "failed",
+					"run": "pure"
+				}
+			]
+		},
+		{
+			"send": {
+				"type": "steer",
+				"run": "pure",
+				"text": "too late"
+			}
+		},
+		{
+			"await": {
+				"type": "fault",
+				"code": "unknown_run"
+			}
+		}
+	],
+	"expected": {
+		"exit": 0,
+		"connection": [
+			{
+				"type": "welcome",
+				"version": "0.1.0"
+			},
+			{
+				"type": "fault",
+				"code": "unknown_run",
+				"run": "pure",
+				"message": "no such run"
+			}
+		],
+		"runs": {
+			"bad": [
+				{
+					"type": "failed",
+					"run": "bad",
+					"seq": 1,
+					"code": "bad_input",
+					"path": [
+						"requests"
+					],
+					"message": "the input does not fit the command"
+				}
+			],
+			"none": [
+				{
+					"type": "failed",
+					"run": "none",
+					"seq": 1,
+					"code": "unknown_command",
+					"message": "no command no.such"
+				}
+			],
+			"pure": [
+				{
+					"type": "done",
+					"run": "pure",
+					"seq": 1,
+					"result": {
+						"texts": [
+							"{\"a\":2,\"b\":1}"
+						]
+					}
+				}
+			]
+		},
+		"files": {}
+	}
+}

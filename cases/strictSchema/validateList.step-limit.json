@@ -1,0 +1,32 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.validateList",
+	"name": "step-limit",
+	"input": {
+		"schema": {
+			"items": {
+				"type": "integer"
+			}
+		},
+		"item": "0",
+		"counts": [
+			999998,
+			999999,
+			1000000
+		]
+	},
+	"expected": {
+		"issues": [
+			[],
+			[],
+			[
+				{
+					"path": [],
+					"code": "limit",
+					"message": "past a limit"
+				}
+			]
+		]
+	}
+}

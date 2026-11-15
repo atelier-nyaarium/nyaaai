@@ -1,0 +1,40 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "sessionCut-ApplyCommand",
+	"input": {
+		"set": "sessionCut",
+		"shape": "ApplyCommand",
+		"texts": [
+			"{\"source\":\"/s.jsonl\",\"out\":\"/out\",\"request\":{\"mode\":\"clear\",\"targetUuid\":\"u\"},\"cliVersion\":\"2.1.323\"}",
+			"{\"source\":\"/s.jsonl\",\"out\":\"/out\",\"keepOutOf\":\"/home\",\"request\":{\"mode\":\"trim\"},\"cliVersion\":\"2.1.323\"}",
+			"{\"source\":\"/s.jsonl\",\"out\":\"/out\",\"keepOutOf\":null,\"request\":{\"mode\":\"trim\"},\"cliVersion\":\"2.1.323\"}",
+			"{\"source\":\"/s.jsonl\",\"request\":{\"mode\":\"trim\"},\"cliVersion\":\"2.1.323\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"source\":\"/s.jsonl\",\"out\":\"/out\",\"request\":{\"mode\":\"clear\",\"targetUuid\":\"u\"},\"cliVersion\":\"2.1.323\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"source\":\"/s.jsonl\",\"out\":\"/out\",\"keepOutOf\":\"/home\",\"request\":{\"mode\":\"trim\"},\"cliVersion\":\"2.1.323\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"keepOutOf"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"out"
+				]
+			}
+		]
+	}
+}

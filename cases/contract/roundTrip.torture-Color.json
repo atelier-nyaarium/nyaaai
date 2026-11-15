@@ -1,0 +1,56 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "torture-Color",
+	"input": {
+		"set": "torture",
+		"shape": "Color",
+		"texts": [
+			"\"red\"",
+			"\"light-blue\"",
+			"\"blue\"",
+			"\"Red\"",
+			"5",
+			"null",
+			"\"red",
+			"[]"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "\"red\""
+			},
+			{
+				"ok": true,
+				"text": "\"light-blue\""
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

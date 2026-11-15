@@ -3,7 +3,8 @@
 import { createReadStream } from "node:fs";
 import { mkdir, open, rm } from "node:fs/promises";
 import path from "node:path";
-import { randomUuid } from "@nyaaai/contract/id";
+import { randomIds } from "@nyaaai/contract/id";
+import { systemClock } from "@nyaaai/contract/time";
 import { isInside } from "@nyaaai/process/paths";
 import type { CutPorts, Summarizer } from "./sessionCut";
 
@@ -12,7 +13,7 @@ import type { CutPorts, Summarizer } from "./sessionCut";
 
 export interface FileCutOptions {
 	source: string;
-	/** Built session output directory. */
+	/** Directory for built sessions. */
 	out: string;
 	cliVersion: string;
 	/** Output stays outside. */
@@ -30,10 +31,10 @@ const LF = 0x0a;
 ////////////////////////////////
 //  Functions & Helpers
 
-/** Bad-byte replacement; BOM retained. */
+/** Replaces bad bytes; retains BOM. */
 const decoder = () => new TextDecoder("utf-8", { ignoreBOM: true });
 
-/** LF-delimited; drops unterminated tail. */
+/** LF rows; drops incomplete tails. */
 export function* linesOf(bytes: Uint8Array): Generator<string> {
 	const text = decoder();
 	let from = 0;
@@ -43,7 +44,7 @@ export function* linesOf(bytes: Uint8Array): Generator<string> {
 	}
 }
 
-/** LF-delimited; drops unterminated tail. */
+/** LF rows; drops incomplete tails. */
 export async function* sessionLines(file: string): AsyncGenerator<string> {
 	const text = decoder();
 	let rest: Uint8Array[] = [];
@@ -61,11 +62,17 @@ export async function* sessionLines(file: string): AsyncGenerator<string> {
 }
 
 export function builtFile(out: string, sessionId: string): string {
-	if (sessionId.length === 0 || /[/\\]|^\.\.?$/.test(sessionId)) throw new Error("the session id is not a file name");
+	if (
+		sessionId.length === 0 ||
+		sessionId.includes("/") ||
+		sessionId.includes("\\") ||
+		sessionId === "." ||
+		sessionId === ".."
+	)
+		throw new Error("the session id is not a file name");
 	return path.join(out, `${sessionId}.jsonl`);
 }
 
-/** File-backed cut ports. */
 export function fileCutPorts(options: FileCutOptions): CutPorts {
 	return {
 		read: () => sessionLines(options.source),
@@ -89,7 +96,6 @@ export function fileCutPorts(options: FileCutOptions): CutPorts {
 				await file.write(held);
 				await file.close();
 			} catch (error) {
-				// Remove partial output.
 				await file.close().catch(() => {});
 				await rm(target, { force: true });
 				throw error;
@@ -97,8 +103,8 @@ export function fileCutPorts(options: FileCutOptions): CutPorts {
 		},
 		readBuilt: (sessionId) => sessionLines(builtFile(options.out, sessionId)),
 		discard: (sessionId) => rm(builtFile(options.out, sessionId)),
-		newId: randomUuid,
-		now: () => new Date(),
+		ids: randomIds,
+		clock: systemClock,
 		cliVersion: async () => options.cliVersion,
 		...(options.summarize ? { summarize: options.summarize } : {}),
 	};

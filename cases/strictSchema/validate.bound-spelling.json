@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.validate",
+	"name": "bound-spelling",
+	"input": {
+		"schema": {
+			"minimum": 1e+21,
+			"maximum": -1e-7,
+			"exclusiveMinimum": 0.1,
+			"minLength": 3
+		},
+		"texts": [
+			"0",
+			"\"ab\""
+		]
+	},
+	"expected": {
+		"issues": [
+			[
+				{
+					"path": [],
+					"code": "minimum",
+					"message": "below 1e+21"
+				},
+				{
+					"path": [],
+					"code": "exclusive_minimum",
+					"message": "not above 0.1"
+				},
+				{
+					"path": [],
+					"code": "maximum",
+					"message": "above -1e-7"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "min_length",
+					"message": "shorter than 3"
+				}
+			]
+		]
+	}
+}

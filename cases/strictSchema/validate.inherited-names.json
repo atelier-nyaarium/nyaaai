@@ -1,0 +1,90 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.validate",
+	"name": "inherited-names",
+	"input": {
+		"schema": {
+			"type": "object",
+			"required": [
+				"constructor",
+				"toString",
+				"__proto__",
+				"hasOwnProperty"
+			],
+			"properties": {
+				"valueOf": {
+					"type": "string"
+				}
+			}
+		},
+		"texts": [
+			"{}",
+			"{\"__proto__\":{\"constructor\":1},\"valueOf\":1}"
+		]
+	},
+	"expected": {
+		"issues": [
+			[
+				{
+					"path": [
+						"constructor"
+					],
+					"code": "required",
+					"message": "missing constructor"
+				},
+				{
+					"path": [
+						"toString"
+					],
+					"code": "required",
+					"message": "missing toString"
+				},
+				{
+					"path": [
+						"__proto__"
+					],
+					"code": "required",
+					"message": "missing __proto__"
+				},
+				{
+					"path": [
+						"hasOwnProperty"
+					],
+					"code": "required",
+					"message": "missing hasOwnProperty"
+				}
+			],
+			[
+				{
+					"path": [
+						"constructor"
+					],
+					"code": "required",
+					"message": "missing constructor"
+				},
+				{
+					"path": [
+						"toString"
+					],
+					"code": "required",
+					"message": "missing toString"
+				},
+				{
+					"path": [
+						"hasOwnProperty"
+					],
+					"code": "required",
+					"message": "missing hasOwnProperty"
+				},
+				{
+					"path": [
+						"valueOf"
+					],
+					"code": "type",
+					"message": "expected string"
+				}
+			]
+		]
+	}
+}

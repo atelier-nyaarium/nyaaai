@@ -1,0 +1,78 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.validate",
+	"name": "unions",
+	"input": {
+		"schema": {
+			"anyOf": [
+				{
+					"type": "string"
+				},
+				{
+					"anyOf": [
+						{
+							"type": "integer"
+						},
+						{
+							"const": false
+						}
+					]
+				}
+			],
+			"oneOf": [
+				{
+					"type": "string"
+				},
+				{
+					"type": "number"
+				},
+				{
+					"minimum": 5
+				}
+			]
+		},
+		"texts": [
+			"null",
+			"\"x\"",
+			"1",
+			"7",
+			"false",
+			"1.5"
+		]
+	},
+	"expected": {
+		"issues": [
+			[
+				{
+					"path": [],
+					"code": "no_branch",
+					"message": "no branch matches"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "many_branches",
+					"message": "multiple branches match"
+				}
+			],
+			[],
+			[
+				{
+					"path": [],
+					"code": "many_branches",
+					"message": "multiple branches match"
+				}
+			],
+			[],
+			[
+				{
+					"path": [],
+					"code": "no_branch",
+					"message": "no branch matches"
+				}
+			]
+		]
+	}
+}

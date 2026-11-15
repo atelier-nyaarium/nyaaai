@@ -1,0 +1,77 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "torture-Event",
+	"input": {
+		"set": "torture",
+		"shape": "Event",
+		"texts": [
+			"{\"type\":\"text\",\"text\":\"hello\"}",
+			"{\"type\":\"tool-call\",\"id\":\"c1\",\"input\":{\"any\":[1,null]}}",
+			"{\"type\":\"tool-call\",\"id\":\"c1\",\"input\":null}",
+			"{\"type\":\"tool-call\",\"id\":\"c1\"}",
+			"{\"type\":\"tree\",\"tree\":{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"leaf\",\"value\":1},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]}}",
+			"{\"type\":\"tree\",\"tree\":{\"kind\":\"twig\"}}",
+			"{\"type\":\"text\"}",
+			"{\"type\":\"tool_call\",\"id\":\"c1\",\"input\":1}",
+			"{\"text\":\"untyped\"}",
+			"text"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"type\":\"text\",\"text\":\"hello\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"type\":\"tool-call\",\"id\":\"c1\",\"input\":{\"any\":[1,null]}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"type\":\"tool-call\",\"id\":\"c1\",\"input\":null}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"input"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"type\":\"tree\",\"tree\":{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"leaf\",\"value\":1},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]}}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"tree",
+					"kind"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"text"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"type"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"type"
+				]
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

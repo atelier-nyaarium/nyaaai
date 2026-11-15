@@ -1,18 +1,16 @@
 //! ECMAScript-compatible JSON.
-//!
-//! Shared TypeScript decode rules:
-//! - A lone surrogate escape becomes U+FFFD.
-//! - Nesting past [`MAX_DEPTH`] containers is refused.
 
 use std::collections::{BTreeMap, HashMap};
 use std::fmt::Write as _;
+
+use crate::order::compare_text;
 
 /// Maximum accepted container depth.
 pub const MAX_DEPTH: usize = 1024;
 
 const INDEXED_FROM: usize = 16;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Value {
     Null,
     Bool(bool),
@@ -22,17 +20,35 @@ pub enum Value {
     Object(Object),
 }
 
-/// ECMAScript orders indices ascending, then insertion.
-#[derive(Debug, Clone, Default)]
-pub struct Object {
+/// ECMAScript key order: indices first, then insertion.
+#[derive(Debug, Clone)]
+pub struct Record<T> {
     /// Numeric-indexed keys in order.
-    indexed: BTreeMap<u32, (String, Value)>,
+    indexed: BTreeMap<u32, (String, T)>,
     /// Other keys, insertion order.
-    named: Vec<(String, Value)>,
+    named: Vec<(String, T)>,
     lookup: Option<HashMap<String, usize>>,
 }
 
-impl Object {
+pub type Object = Record<Value>;
+
+impl<T> Default for Record<T> {
+    fn default() -> Self {
+        Self {
+            indexed: BTreeMap::new(),
+            named: Vec::new(),
+            lookup: None,
+        }
+    }
+}
+
+impl<T: PartialEq> PartialEq for Record<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.len() == other.len() && self.iter().eq(other.iter())
+    }
+}
+
+impl<T> Record<T> {
     pub fn new() -> Self {
         Self::default()
     }
@@ -45,7 +61,7 @@ impl Object {
         self.len() == 0
     }
 
-    pub fn get(&self, key: &str) -> Option<&Value> {
+    pub fn get(&self, key: &str) -> Option<&T> {
         match array_index(key) {
             Some(index) => self.indexed.get(&index).map(|(_, value)| value),
             None => self.position(key).map(|at| &self.named[at].1),
@@ -56,15 +72,19 @@ impl Object {
         self.iter().map(|(key, _)| key)
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = (&str, &Value)> {
+    pub fn iter(&self) -> impl Iterator<Item = (&str, &T)> {
         self.indexed
             .values()
             .chain(self.named.iter())
             .map(|(key, value)| (key.as_str(), value))
     }
 
-    /// Repeated keys keep insertion position.
-    pub fn insert(&mut self, key: impl Into<String>, value: Value) {
+    pub fn values(&self) -> impl Iterator<Item = &T> {
+        self.iter().map(|(_, value)| value)
+    }
+
+    /// Repeated keys preserve position.
+    pub fn insert(&mut self, key: impl Into<String>, value: T) {
         let key = key.into();
         if let Some(index) = array_index(&key) {
             self.indexed.insert(index, (key, value));
@@ -89,8 +109,8 @@ impl Object {
         }
     }
 
-    /// Skips absent values like `JSON.stringify`.
-    pub fn insert_some(&mut self, key: impl Into<String>, value: Option<Value>) {
+    /// Omits absent values.
+    pub fn insert_some(&mut self, key: impl Into<String>, value: Option<T>) {
         if let Some(value) = value {
             self.insert(key, value);
         }
@@ -105,7 +125,6 @@ impl Object {
 }
 
 impl Value {
-    /// Gets an object property.
     pub fn get(&self, key: &str) -> Option<&Value> {
         match self {
             Value::Object(object) => object.get(key),
@@ -201,7 +220,7 @@ impl<T: Into<Value>> From<Option<T>> for Value {
     }
 }
 
-/// Canonical indices: 0 to 4294967294, no leading zero.
+/// No leading zeros; below `u32::MAX`.
 fn array_index(key: &str) -> Option<u32> {
     let bytes = key.as_bytes();
     if bytes.is_empty() || bytes.len() > 10 || !bytes.iter().all(u8::is_ascii_digit) {
@@ -216,7 +235,7 @@ fn array_index(key: &str) -> Option<u32> {
         .map(|index| index as u32)
 }
 
-/// ECMAScript `JSON.parse` semantics.
+/// ECMAScript parsing semantics.
 pub fn parse_json(text: &str) -> Option<Value> {
     let mut reader = Reader {
         bytes: text.as_bytes(),
@@ -330,7 +349,7 @@ impl Reader<'_> {
             while !matches!(self.peek()?, b'"' | b'\\' | 0..=0x1F) {
                 self.at += 1;
             }
-            // ASCII delimiters preserve character boundaries.
+            // ASCII delimiters preserve boundaries.
             text.push_str(std::str::from_utf8(&self.bytes[from..self.at]).ok()?);
             match self.peek()? {
                 b'"' => {
@@ -367,7 +386,7 @@ impl Reader<'_> {
         Some(())
     }
 
-    /// Joins surrogate pairs; replaces lone halves.
+    /// Joins pairs; replaces lone surrogates.
     fn scalar(&mut self, unit: u32) -> char {
         if (0xD800..0xDC00).contains(&unit) && self.bytes[self.at..].starts_with(b"\\u") {
             let back = self.at;
@@ -431,7 +450,7 @@ impl Reader<'_> {
     }
 }
 
-/// Compact ECMAScript JSON serialization.
+/// Compact ECMAScript JSON.
 pub fn stringify_json(value: &Value) -> String {
     let mut out = String::new();
     write_value(&mut out, value);
@@ -470,7 +489,44 @@ fn write_value(out: &mut String, value: &Value) {
     }
 }
 
-/// Quotes strings like `JSON.stringify`.
+/// Code-unit sorted JSON for fingerprints.
+pub fn canonical_json(value: &Value) -> String {
+    let mut out = String::new();
+    write_canonical(&mut out, value);
+    out
+}
+
+fn write_canonical(out: &mut String, value: &Value) {
+    match value {
+        Value::Array(items) => {
+            out.push('[');
+            for (at, item) in items.iter().enumerate() {
+                if at > 0 {
+                    out.push(',');
+                }
+                write_canonical(out, item);
+            }
+            out.push(']');
+        }
+        Value::Object(object) => {
+            let mut fields: Vec<(&str, &Value)> = object.iter().collect();
+            fields.sort_by(|(left, _), (right, _)| compare_text(left, right));
+            out.push('{');
+            for (at, (key, held)) in fields.into_iter().enumerate() {
+                if at > 0 {
+                    out.push(',');
+                }
+                write_string(out, key);
+                out.push(':');
+                write_canonical(out, held);
+            }
+            out.push('}');
+        }
+        scalar => write_value(out, scalar),
+    }
+}
+
+/// ECMAScript string quoting.
 pub fn quote_json(text: &str) -> String {
     let mut out = String::with_capacity(text.len() + 2);
     write_string(&mut out, text);
@@ -502,7 +558,7 @@ fn even_on_a_tie(magnitude: f64, digits: String, exponent: i32) -> String {
     let Ok(held) = digits.parse::<u128>() else {
         return digits;
     };
-    // magnitude = odd * 2^power
+    // magnitude = odd * 2^power.
     let bits = magnitude.to_bits();
     let biased = ((bits >> 52) & 0x7FF) as i32;
     let fraction = bits & ((1 << 52) - 1);
@@ -514,7 +570,7 @@ fn even_on_a_tie(magnitude: f64, digits: String, exponent: i32) -> String {
         odd >>= 1;
         power += 1;
     }
-    // Detect halfway values.
+    // Detects a tie.
     let shift = digits.len() as i32 - 1 - exponent;
     let doubled: u128 = if (0..=24).contains(&shift) && power == -(shift + 1) {
         u128::from(odd) * 5u128.pow(shift as u32)
@@ -537,7 +593,7 @@ fn even_on_a_tie(magnitude: f64, digits: String, exponent: i32) -> String {
     if even == held || spelled.len() != digits.len() {
         return digits;
     }
-    // Keep round-tripping runs.
+    // Keep round-tripping digits.
     let reads_back = format!("{spelled}e{}", exponent - (digits.len() as i32 - 1))
         .parse::<f64>()
         .is_ok_and(|read| read == magnitude);
@@ -545,7 +601,7 @@ fn even_on_a_tie(magnitude: f64, digits: String, exponent: i32) -> String {
 }
 
 /// ECMAScript base-10 number text.
-pub(crate) fn number_to_string(number: f64) -> String {
+pub fn number_to_string(number: f64) -> String {
     if number.is_nan() {
         return "NaN".to_owned();
     }
@@ -560,7 +616,7 @@ pub(crate) fn number_to_string(number: f64) -> String {
         }
         .to_owned();
     }
-    // Find shortest round-tripping digits.
+    // Find shortest round-trip digits.
     let magnitude = number.abs();
     let spelled = format!("{magnitude:e}");
     let (mantissa, exponent) = spelled.split_once('e').unwrap_or((&spelled, "0"));

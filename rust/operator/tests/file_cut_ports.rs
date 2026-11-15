@@ -1,10 +1,13 @@
 //! File-backed session cut tests.
 
 use std::fs;
+use std::io;
 use std::path::{Path, PathBuf};
 
+use nyaaai_contract::id::Ids;
+use nyaaai_contract::time::Clock;
 use nyaaai_operator::claude::session_cut::{
-    CutMode, CutPorts, CutRequest, cut_session, verify_cut,
+    CutMode, CutPorts, Lines, cut_session, request_for, verify_cut,
 };
 use nyaaai_operator::claude::session_file::{FileCutPorts, session_lines};
 use nyaaai_testkit::claude_session::{CLI_VERSION, compacted_session};
@@ -32,7 +35,7 @@ fn builds_a_sound_file_in_a_folder_it_makes_and_leaves_the_source_alone() {
         cli_version: CLI_VERSION.to_owned(),
         keep_out_of: Some(folder.join("sessions")),
     };
-    let done = cut_session(&ports, &CutRequest::new(CutMode::Trim))
+    let done = cut_session(&ports, &request_for(CutMode::Trim))
         .unwrap()
         .unwrap();
     let built = ports.built(&done.session_id);
@@ -41,6 +44,49 @@ fn builds_a_sound_file_in_a_folder_it_makes_and_leaves_the_source_alone() {
     assert_eq!(problems, Vec::<String>::new());
     assert_eq!(fs::read(&source).unwrap(), bytes);
     assert_eq!(files_under(&folder.join("sessions")), 1);
+}
+
+/// Read-back always fails.
+struct Unreadable(FileCutPorts);
+
+impl CutPorts for Unreadable {
+    fn read(&self) -> io::Result<Lines<'_>> {
+        self.0.read()
+    }
+    fn source_path(&self) -> String {
+        self.0.source_path()
+    }
+    fn create(&self, session_id: &str, lines: &[String]) -> io::Result<()> {
+        self.0.create(session_id, lines)
+    }
+    fn read_built(&self, _: &str) -> io::Result<Lines<'_>> {
+        Err(io::Error::other("denied"))
+    }
+    fn discard(&self, session_id: &str) -> io::Result<()> {
+        self.0.discard(session_id)
+    }
+    fn ids(&self) -> &dyn Ids {
+        self.0.ids()
+    }
+    fn clock(&self) -> &dyn Clock {
+        self.0.clock()
+    }
+    fn cli_version(&self) -> io::Result<String> {
+        self.0.cli_version()
+    }
+}
+
+#[test]
+fn discards_the_built_file_when_its_read_back_fails() {
+    let (folder, source, _) = scratch("file-ports-unreadable");
+    let ports = Unreadable(FileCutPorts {
+        source,
+        out: folder.join("out"),
+        cli_version: CLI_VERSION.to_owned(),
+        keep_out_of: None,
+    });
+    assert!(cut_session(&ports, &request_for(CutMode::Trim)).is_err());
+    assert_eq!(files_under(&folder.join("out")), 0);
 }
 
 #[test]
@@ -56,7 +102,7 @@ fn refuses_to_build_inside_the_folder_it_is_kept_out_of() {
             cli_version: CLI_VERSION.to_owned(),
             keep_out_of: Some(folder.join("sessions")),
         };
-        assert!(cut_session(&ports, &CutRequest::new(CutMode::Trim)).is_err());
+        assert!(cut_session(&ports, &request_for(CutMode::Trim)).is_err());
     }
     assert_eq!(files_under(&folder.join("sessions")), 1);
     assert_eq!(fs::read(&source).unwrap(), bytes);

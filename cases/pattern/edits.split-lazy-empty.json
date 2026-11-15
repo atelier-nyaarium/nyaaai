@@ -1,0 +1,36 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.edits",
+	"name": "split-lazy-empty",
+	"input": {
+		"source": "a*?",
+		"flags": "",
+		"template": "_",
+		"texts": [
+			"baaac",
+			"aa"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"replaced": "_b_a_a_a_c_",
+				"pieces": [
+					"b",
+					"a",
+					"a",
+					"a",
+					"c"
+				]
+			},
+			{
+				"replaced": "_a_a_",
+				"pieces": [
+					"a",
+					"a"
+				]
+			}
+		]
+	}
+}

@@ -1,0 +1,41 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "sessionCut-SummarizeRequest",
+	"input": {
+		"set": "sessionCut",
+		"shape": "SummarizeRequest",
+		"texts": [
+			"{\"standing\":null,\"rows\":[]}",
+			"{\"standing\":\"what stood\",\"rows\":[\"{}\",\"\"]}",
+			"{\"rows\":[]}",
+			"{\"standing\":null,\"rows\":[1]}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"standing\":null,\"rows\":[]}"
+			},
+			{
+				"ok": true,
+				"text": "{\"standing\":\"what stood\",\"rows\":[\"{}\",\"\"]}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"standing"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"rows",
+					0
+				]
+			}
+		]
+	}
+}

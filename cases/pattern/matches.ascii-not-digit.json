@@ -1,0 +1,57 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.matches",
+	"name": "ascii-not-digit",
+	"input": {
+		"source": "\\D",
+		"flags": "",
+		"texts": [
+			"0",
+			"١",
+			"１",
+			"x"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"test": false,
+				"all": []
+			},
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 1,
+						"text": "١",
+						"captures": []
+					}
+				]
+			},
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 1,
+						"text": "１",
+						"captures": []
+					}
+				]
+			},
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 1,
+						"text": "x",
+						"captures": []
+					}
+				]
+			}
+		]
+	}
+}

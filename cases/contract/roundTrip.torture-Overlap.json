@@ -1,0 +1,106 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "torture-Overlap",
+	"input": {
+		"set": "torture",
+		"shape": "Overlap",
+		"texts": [
+			"{\"a\":\"x\",\"b\":2}",
+			"{\"a\":\"x\",\"b\":\"no\"}",
+			"{\"a\":1,\"b\":2}",
+			"{\"b\":2}",
+			"{\"kind\":\"leaf\",\"value\":1}",
+			"{\"kind\":\"leaf\",\"value\":1,\"a\":\"both\"}",
+			"\"auto\"",
+			"\"other\"",
+			"5",
+			"5.5",
+			"-0",
+			"1e400",
+			"null",
+			"[true,false]",
+			"[]",
+			"[1]",
+			"true",
+			"{}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"a\":\"x\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"a\":\"x\"}"
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"leaf\",\"value\":1}"
+			},
+			{
+				"ok": true,
+				"text": "{\"a\":\"both\"}"
+			},
+			{
+				"ok": true,
+				"text": "\"auto\""
+			},
+			{
+				"ok": true,
+				"text": "\"other\""
+			},
+			{
+				"ok": true,
+				"text": "5"
+			},
+			{
+				"ok": true,
+				"text": "5.5"
+			},
+			{
+				"ok": true,
+				"text": "0"
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": true,
+				"text": "null"
+			},
+			{
+				"ok": true,
+				"text": "[true,false]"
+			},
+			{
+				"ok": true,
+				"text": "[]"
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

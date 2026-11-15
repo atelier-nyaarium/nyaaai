@@ -1,0 +1,83 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "torture-Outer",
+	"input": {
+		"set": "torture",
+		"shape": "Outer",
+		"texts": [
+			"{\"inner\":{\"deep\":{\"x\":1}},\"list\":[{\"color\":\"red\",\"names\":[\"a\"]}],\"type\":\"struct\"}",
+			"{\"inner\":{\"deep\":null},\"list\":[],\"type\":\"enum\"}",
+			"{\"inner\":{\"deep\":{\"x\":\"1\"}},\"list\":[{\"color\":\"red\",\"names\":[\"a\"]}],\"type\":\"struct\"}",
+			"{\"inner\":{},\"list\":[{\"color\":\"red\",\"names\":[\"a\"]}],\"type\":\"struct\"}",
+			"{\"inner\":{\"deep\":{\"x\":1}},\"list\":[{\"color\":\"red\",\"names\":[]},{\"color\":\"pink\",\"names\":[]}],\"type\":\"struct\"}",
+			"{\"inner\":{\"deep\":{\"x\":1}},\"list\":[{\"color\":\"red\",\"names\":[\"a\",\"b\",\"c\"]}],\"type\":\"struct\"}",
+			"{\"inner\":{\"deep\":{\"x\":1}},\"list\":[{\"color\":\"red\",\"names\":[\"a\",\"toolong\"]}],\"type\":\"struct\"}",
+			"{\"inner\":{\"deep\":{\"x\":1}},\"list\":[{\"color\":\"red\",\"names\":[\"a\"]}],\"type\":\"union\"}",
+			"{\"inner\":{\"deep\":{\"x\":1,\"drop\":1},\"drop\":{\"deep\":2}},\"list\":[{\"color\":\"green\",\"names\":[\"a\"],\"drop\":[]}],\"type\":\"struct\",\"drop\":null}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"inner\":{\"deep\":{\"x\":1}},\"list\":[{\"color\":\"red\",\"names\":[\"a\"]}],\"type\":\"struct\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"inner\":{\"deep\":null},\"list\":[],\"type\":\"enum\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"inner",
+					"deep",
+					"x"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"inner",
+					"deep"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"list",
+					1,
+					"color"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"list",
+					0,
+					"names"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"list",
+					0,
+					"names",
+					1
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"type"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"inner\":{\"deep\":{\"x\":1}},\"list\":[{\"color\":\"green\",\"names\":[\"a\"]}],\"type\":\"struct\"}"
+			}
+		]
+	}
+}

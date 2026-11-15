@@ -1,0 +1,30 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.edits",
+	"name": "template-tokens",
+	"input": {
+		"source": "(?:(a)|(b))",
+		"flags": "",
+		"template": "$$:$&:$1:$2:$9:$0:$10:$",
+		"texts": [
+			"ab"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"replaced": "$:a:a:::$0:a0:$$:b::b::$0:0:$",
+				"pieces": [
+					"",
+					"a",
+					"",
+					"",
+					"",
+					"b",
+					""
+				]
+			}
+		]
+	}
+}

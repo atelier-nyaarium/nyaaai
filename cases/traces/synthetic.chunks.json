@@ -1,0 +1,65 @@
+{
+	"format": 1,
+	"exchanges": [
+		{
+			"request": {
+				"model": "synthetic/one",
+				"stream": true,
+				"messages": [
+					{
+						"role": "user",
+						"content": "split me"
+					}
+				]
+			},
+			"status": 200,
+			"headers": {
+				"x-ratelimit-remaining": "7",
+				"content-type": "text/event-stream",
+				"retry-after": "2"
+			},
+			"chunks": [
+				"ZGF0YTogeyJ0ZQ==",
+				"eHQiOiJjYWbD",
+				"qSDwnw==",
+				"mIAifQo=",
+				"",
+				"CmRhdGE6IFtET05FXQoK"
+			]
+		},
+		{
+			"request": null,
+			"status": 429,
+			"headers": {
+				"content-type": "application/json"
+			},
+			"chunks": [
+				"eyJlcnJvciI6eyJtZXNzYWdlIjoic2xvdyBkb3duIiwiY29kZSI6NDI5fX0="
+			]
+		},
+		{
+			"request": [
+				1,
+				{
+					"b": 2,
+					"a": [
+						null
+					]
+				}
+			],
+			"status": 204,
+			"headers": {},
+			"chunks": []
+		},
+		{
+			"request": "text",
+			"status": 500,
+			"headers": {
+				"content-type": "text/plain"
+			},
+			"chunks": [
+				"//4gYmFkIGJ5dGVzIOKC"
+			]
+		}
+	]
+}

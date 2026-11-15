@@ -1,0 +1,42 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.edits",
+	"name": "split-leading-trailing",
+	"input": {
+		"source": ",",
+		"flags": "",
+		"template": "|$&|",
+		"texts": [
+			",a,b,",
+			",",
+			"a"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"replaced": "|,|a|,|b|,|",
+				"pieces": [
+					"",
+					"a",
+					"b",
+					""
+				]
+			},
+			{
+				"replaced": "|,|",
+				"pieces": [
+					"",
+					""
+				]
+			},
+			{
+				"replaced": "a",
+				"pieces": [
+					"a"
+				]
+			}
+		]
+	}
+}

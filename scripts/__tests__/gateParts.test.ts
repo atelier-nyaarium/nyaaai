@@ -15,6 +15,8 @@ import { type CrateSources, checkLock, type LockedCrate } from "../crates";
 const DAY_MS = 86_400_000;
 const NOW = Date.parse("2026-11-15T00:00:00Z");
 const REGISTRY = 'source = "registry+https://github.com/rust-lang/crates.io-index"';
+const NAMED: Record<string, string[]> = { "RUSTSEC-2026-0002": ["young"], "RUSTSEC-2026-0003": ["old"] };
+const EXCUSED = { name: "young", version: "2.0.0", advisory: "RUSTSEC-2026-0002" };
 const LOCK = `
 version = 4
 
@@ -38,7 +40,6 @@ version = "0.0.0"
 
 let temp: string;
 
-/** Lock folder with counted sources. */
 function world(name: string, advisories: Record<string, string[]> = {}) {
 	const folder = path.join(temp, name);
 	mkdirSync(folder);
@@ -51,6 +52,7 @@ function world(name: string, advisories: Record<string, string[]> = {}) {
 			return new Date(NOW - (crate.name === "young" ? 2 : 30) * DAY_MS).toISOString();
 		},
 		advisories: async (crates) => crates.map((crate) => advisories[crate.name] ?? []),
+		advisoryCrates: async (id) => NAMED[id] ?? [],
 		now: () => NOW,
 	};
 	const exempt = (value: unknown) => writeFileSync(path.join(folder, "crate-exemptions.json"), JSON.stringify(value));
@@ -83,26 +85,28 @@ describe("crates", () => {
 		for (const entry of [
 			{ name: "young", version: "2.0.0", advisory: " " },
 			{ name: "young", version: "2.0.0", advisory: "reviewed" },
-			{ name: "young", version: "2.0.1", advisory: "RUSTSEC-0000-0000" },
-			{ name: "old", version: "2.0.0", advisory: "RUSTSEC-0000-0000" },
+			{ ...EXCUSED, version: "2.0.1" },
+			{ ...EXCUSED, name: "old" },
+			{ ...EXCUSED, advisory: "RUSTSEC-0000-0000" },
+			{ ...EXCUSED, advisory: "RUSTSEC-2026-0003" },
 		]) {
 			exempt({ young: [entry], advisories: [] });
 			expect(await checkLock(lock, sources)).toHaveLength(1);
 		}
-		exempt({ young: [{ name: "young", version: "2.0.0", advisory: "RUSTSEC-0000-0000" }], advisories: [] });
+		exempt({ young: [EXCUSED], advisories: [] });
 		expect(await checkLock(lock, sources)).toEqual([]);
 		expect(asked).toEqual(["old", "young"]);
 	});
 
 	it("fails a crate an advisory names until the advisory is accepted", async () => {
 		const { lock, sources, exempt } = world("advisories", { old: ["RUSTSEC-2026-0001"] });
-		exempt({ young: [{ name: "young", version: "2.0.0", advisory: "RUSTSEC-0000-0000" }], advisories: [] });
+		exempt({ young: [EXCUSED], advisories: [] });
 		const problems = await checkLock(lock, sources);
 		expect(problems).toHaveLength(1);
 		expect(problems[0]).toContain("RUSTSEC-2026-0001");
 
 		exempt({
-			young: [{ name: "young", version: "2.0.0", advisory: "RUSTSEC-0000-0000" }],
+			young: [EXCUSED],
 			advisories: [{ id: "RUSTSEC-2026-0001", reason: "not reachable" }],
 		});
 		expect(await checkLock(lock, sources)).toEqual([]);
@@ -110,7 +114,7 @@ describe("crates", () => {
 
 	it("fails a package from a git source or another registry", async () => {
 		const { lock, sources, exempt } = world("foreign");
-		exempt({ young: [{ name: "young", version: "2.0.0", advisory: "RUSTSEC-0000-0000" }], advisories: [] });
+		exempt({ young: [EXCUSED], advisories: [] });
 		const foreign = [
 			'source = "git+https://example.com/forked.git?rev=abc#abc"',
 			'source = "registry+https://example.com/index"',
@@ -127,7 +131,7 @@ describe("crates", () => {
 		expect(problems).toHaveLength(3);
 		expect(problems.every((problem) => problem.includes("foreign-"))).toBe(true);
 
-		// A later table is not the package's.
+		// Ignore non-package tables.
 		writeFileSync(
 			lock,
 			`${LOCK}\n[[patch.unused]]\nname = "unused"\nversion = "1.0.0"\nsource = "git+https://example.com/x.git"\n`,

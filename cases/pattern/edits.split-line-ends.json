@@ -1,0 +1,41 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.edits",
+	"name": "split-line-ends",
+	"input": {
+		"source": "$",
+		"flags": "m",
+		"template": "<",
+		"texts": [
+			"a\nb\n",
+			"\n\n",
+			"a"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"replaced": "a<\nb<\n<",
+				"pieces": [
+					"a",
+					"\nb",
+					"\n"
+				]
+			},
+			{
+				"replaced": "<\n<\n<",
+				"pieces": [
+					"\n",
+					"\n"
+				]
+			},
+			{
+				"replaced": "a<",
+				"pieces": [
+					"a"
+				]
+			}
+		]
+	}
+}

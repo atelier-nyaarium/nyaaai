@@ -1,0 +1,42 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.find",
+	"name": "pair-offsets",
+	"input": {
+		"source": ".",
+		"flags": "",
+		"text": "😀a",
+		"froms": [
+			0,
+			1,
+			2,
+			3,
+			4
+		]
+	},
+	"expected": {
+		"found": [
+			{
+				"start": 0,
+				"end": 2,
+				"text": "😀",
+				"captures": []
+			},
+			{
+				"start": 2,
+				"end": 3,
+				"text": "a",
+				"captures": []
+			},
+			{
+				"start": 2,
+				"end": 3,
+				"text": "a",
+				"captures": []
+			},
+			null,
+			null
+		]
+	}
+}

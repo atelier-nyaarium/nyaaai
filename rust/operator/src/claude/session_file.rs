@@ -3,21 +3,21 @@
 use std::fs::{self, File, OpenOptions};
 use std::io::{self, BufRead, BufReader, BufWriter, Write};
 use std::path::{Path, PathBuf};
-use std::time::{SystemTime, UNIX_EPOCH};
 
-use nyaaai_contract::id::random_uuid;
+use nyaaai_contract::id::{Ids, RandomIds};
+use nyaaai_contract::time::{Clock, SystemClock};
 use nyaaai_process::paths::is_inside;
 
 use super::session_cut::{CutPorts, Lines};
 
 const READ_CHUNK_BYTES: usize = 1 << 20;
 
-/// Replaces invalid bytes; preserves BOM.
+/// Replaces invalid bytes; keeps BOM.
 fn decoded(row: &[u8]) -> String {
     String::from_utf8_lossy(row).into_owned()
 }
 
-/// Splits LF rows; drops incomplete tails.
+/// LF rows; drops incomplete tails.
 pub fn lines_of(bytes: &[u8]) -> Vec<String> {
     let mut rows = Vec::new();
     let mut from = 0;
@@ -28,7 +28,7 @@ pub fn lines_of(bytes: &[u8]) -> Vec<String> {
     rows
 }
 
-/// Streams LF-terminated rows from a read-only file.
+/// Read-only LF row stream.
 pub fn session_lines(file: &Path) -> io::Result<impl Iterator<Item = io::Result<String>> + use<>> {
     let mut reader = BufReader::with_capacity(READ_CHUNK_BYTES, File::open(file)?);
     Ok(std::iter::from_fn(move || {
@@ -50,7 +50,7 @@ pub struct FileCutPorts {
     pub source: PathBuf,
     pub out: PathBuf,
     pub cli_version: String,
-    /// Forbidden output folder.
+    /// Output cannot be inside this folder.
     pub keep_out_of: Option<PathBuf>,
 }
 
@@ -59,7 +59,7 @@ impl FileCutPorts {
         self.out.join(format!("{session_id}.jsonl"))
     }
 
-    /// The built file, for an id that is a file name.
+    /// Filename-only session id.
     fn target(&self, session_id: &str) -> io::Result<PathBuf> {
         let named = !session_id.is_empty()
             && !session_id.contains(['/', '\\'])
@@ -108,7 +108,6 @@ impl CutPorts for FileCutPorts {
             })
             .and_then(|()| out.flush());
         if written.is_err() {
-            // Remove partial output.
             let _ = fs::remove_file(&target);
         }
         written
@@ -122,14 +121,12 @@ impl CutPorts for FileCutPorts {
         fs::remove_file(self.target(session_id)?)
     }
 
-    fn new_id(&self) -> String {
-        random_uuid()
+    fn ids(&self) -> &dyn Ids {
+        &RandomIds
     }
 
-    fn now_ms(&self) -> i64 {
-        SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .map_or(0, |since| since.as_millis() as i64)
+    fn clock(&self) -> &dyn Clock {
+        &SystemClock
     }
 
     fn cli_version(&self) -> io::Result<String> {

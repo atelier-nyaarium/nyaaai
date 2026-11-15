@@ -1,0 +1,33 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "frames-Fixed",
+	"input": {
+		"set": "frames",
+		"shape": "Fixed",
+		"texts": [
+			"{\"nowMs\":5,\"idPrefix\":\"a\"}",
+			"{\"nowMs\":5,\"stepMs\":0,\"idPrefix\":\"a\"}",
+			"{\"nowMs\":5.5,\"idPrefix\":\"a\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"nowMs\":5,\"stepMs\":0,\"idPrefix\":\"a\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"nowMs\":5,\"stepMs\":0,\"idPrefix\":\"a\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"nowMs"
+				]
+			}
+		]
+	}
+}

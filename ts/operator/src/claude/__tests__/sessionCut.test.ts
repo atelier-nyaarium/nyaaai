@@ -1,4 +1,6 @@
 import { describe, expect, it } from "bun:test";
+import { countedIds } from "@nyaaai/contract/id";
+import { steppedClock } from "@nyaaai/contract/time";
 import { CLI_VERSION, compactedSession, SESSION_ID, SyntheticSession } from "@nyaaai/testkit/claudeSession";
 import {
 	type CutPorts,
@@ -18,7 +20,6 @@ async function* each(lines: string[]): AsyncGenerator<string> {
 /** In-memory file ports. */
 function portsOver(source: string[], summarize?: CutPorts["summarize"]) {
 	const built = new Map<string, string[]>();
-	let minted = 0;
 	const ports: CutPorts = {
 		read: () => each(source),
 		sourcePath: "/sessions/old.jsonl",
@@ -29,8 +30,8 @@ function portsOver(source: string[], summarize?: CutPorts["summarize"]) {
 		},
 		readBuilt: (id) => each(built.get(id) ?? []),
 		discard: async (id) => void built.delete(id),
-		newId: () => `new-${++minted}`,
-		now: () => new Date("2026-11-13T02:00:00.000Z"),
+		ids: countedIds("new-"),
+		clock: steppedClock(Date.parse("2026-11-13T02:00:00.000Z")),
 		cliVersion: async () => CLI_VERSION,
 		...(summarize ? { summarize } : {}),
 	};
@@ -251,6 +252,16 @@ describe("claude session cut", () => {
 		expect(pickTurn(index, { at: at(4), text: "typed while it worked" })).toEqual({ uuid: tagged, exact: false });
 		expect(pickTurn(index, { at: at(8) })).toEqual({ uuid: taken, exact: false });
 		expect(pickTurn(index, { at: at(0) - 60_000 })).toBeNull();
+	});
+
+	it("discards the built file when its read-back fails", async () => {
+		const { ports, built } = portsOver(compactedSession().session.lines);
+		ports.readBuilt = async function* () {
+			yield* [];
+			throw new Error("denied");
+		};
+		await expect(cutSession(ports, { mode: "trim" })).rejects.toThrow("denied");
+		expect(built.size).toBe(0);
 	});
 
 	it("reads a built file back for what would stop it resuming", async () => {

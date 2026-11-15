@@ -1,5 +1,6 @@
 {
-	"format": 1,
+	"format": 2,
+	"type": "function",
 	"kind": "sessionCut.index",
 	"name": "compacted",
 	"input": {
@@ -42,36 +43,24 @@
 			"unparsed": 0,
 			"unreadable": [],
 			"version": "2.1.323",
-			"header": [
-				[
-					"mode",
-					23
-				],
-				[
-					"permission-mode",
-					24
-				],
-				[
-					"session-owner",
-					25
-				],
-				[
-					"atis-latch",
-					26
-				]
-			],
+			"header": {
+				"mode": 23,
+				"permission-mode": 24,
+				"session-owner": 25,
+				"atis-latch": 26
+			},
 			"boundary": {
 				"line": 9,
 				"uuid": "b5",
-				"preserved": [
-					"u3",
-					"u4"
-				],
 				"preservedLines": [
 					7,
 					8
 				],
 				"preservedSound": true,
+				"preserved": [
+					"u3",
+					"u4"
+				],
 				"summaryLine": 10,
 				"cumulativeDroppedTokens": 1000,
 				"postTokens": 400,

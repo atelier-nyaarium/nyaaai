@@ -1,5 +1,21 @@
 import { describe, expect, it } from "bun:test";
-import { MAX_DEPTH, parseJson, stringifyJson } from "../json";
+import { jsString, MAX_DEPTH, parseJson, stringifyJson } from "../json";
+
+describe("jsString", () => {
+	it("coerces as String does, and never calls a key named toString", () => {
+		expect(jsString([1, null, [2, [undefined, "x"]], {}])).toBe("1,,2,,x,[object Object]");
+		expect(jsString(parseJson('{"toString":1}'))).toBe("[object Object]");
+		expect(jsString(parseJson('[{"toString":"x","valueOf":2}]'))).toBe("[object Object]");
+		expect([undefined, null, true, -0, 1e21, "t"].map(jsString)).toEqual([
+			"undefined",
+			"null",
+			"true",
+			"0",
+			"1e+21",
+			"t",
+		]);
+	});
+});
 
 describe("parseJson", () => {
 	it("replaces a lone surrogate, in a key too, and keeps a pair", () => {

@@ -1,0 +1,25 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.random",
+	"name": "cycles",
+	"input": {
+		"values": [
+			0,
+			0.5,
+			0.999999
+		],
+		"draws": 7
+	},
+	"expected": {
+		"drawn": [
+			0,
+			0.5,
+			0.999999,
+			0,
+			0.5,
+			0.999999,
+			0
+		]
+	}
+}

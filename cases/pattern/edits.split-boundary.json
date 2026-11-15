@@ -1,0 +1,42 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.edits",
+	"name": "split-boundary",
+	"input": {
+		"source": "\\b",
+		"flags": "",
+		"template": "|",
+		"texts": [
+			"ab cd",
+			" a ",
+			""
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"replaced": "|ab| |cd|",
+				"pieces": [
+					"ab",
+					" ",
+					"cd"
+				]
+			},
+			{
+				"replaced": " |a| ",
+				"pieces": [
+					" ",
+					"a",
+					" "
+				]
+			},
+			{
+				"replaced": "",
+				"pieces": [
+					""
+				]
+			}
+		]
+	}
+}

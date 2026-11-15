@@ -1,0 +1,99 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "torture-Literals",
+	"input": {
+		"set": "torture",
+		"shape": "Literals",
+		"texts": [
+			"{\"yes\":true,\"five\":5,\"nothing\":null,\"word\":\"word\"}",
+			"{\"yes\":true,\"five\":5,\"nothing\":null,\"word\":\"word\",\"maybe\":\"x\"}",
+			"{\"yes\":true,\"five\":5,\"nothing\":null,\"word\":\"word\",\"maybe\":\"y\"}",
+			"{\"yes\":true,\"five\":5,\"nothing\":null,\"word\":\"word\",\"maybe\":null}",
+			"{\"yes\":true,\"five\":5.0,\"nothing\":null,\"word\":\"word\"}",
+			"{\"yes\":true,\"five\":5e0,\"nothing\":null,\"word\":\"word\"}",
+			"{\"yes\":false,\"five\":5,\"nothing\":null,\"word\":\"word\"}",
+			"{\"yes\":1,\"five\":5,\"nothing\":null,\"word\":\"word\"}",
+			"{\"yes\":true,\"five\":6,\"nothing\":null,\"word\":\"word\"}",
+			"{\"yes\":true,\"five\":\"5\",\"nothing\":null,\"word\":\"word\"}",
+			"{\"yes\":true,\"five\":5,\"nothing\":null,\"word\":\"Word\"}",
+			"{\"yes\":true,\"five\":5,\"word\":\"word\"}",
+			"{\"yes\":true,\"five\":5,\"nothing\":0,\"word\":\"word\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"yes\":true,\"five\":5,\"nothing\":null,\"word\":\"word\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"yes\":true,\"five\":5,\"nothing\":null,\"word\":\"word\",\"maybe\":\"x\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"maybe"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"maybe"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"yes\":true,\"five\":5,\"nothing\":null,\"word\":\"word\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"yes\":true,\"five\":5,\"nothing\":null,\"word\":\"word\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"yes"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"yes"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"five"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"five"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"word"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"nothing"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"nothing"
+				]
+			}
+		]
+	}
+}

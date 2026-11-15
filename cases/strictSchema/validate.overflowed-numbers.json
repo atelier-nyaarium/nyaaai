@@ -1,0 +1,66 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.validate",
+	"name": "overflowed-numbers",
+	"input": {
+		"schema": {
+			"enum": [
+				null,
+				[
+					null
+				],
+				{
+					"a": null
+				},
+				0
+			]
+		},
+		"texts": [
+			"1e400",
+			"-1e400",
+			"[1e400]",
+			"{\"a\":1e400}",
+			"null",
+			"[null]",
+			"{\"a\":null}",
+			"-0"
+		]
+	},
+	"expected": {
+		"issues": [
+			[
+				{
+					"path": [],
+					"code": "enum",
+					"message": "not in enum"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "enum",
+					"message": "not in enum"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "enum",
+					"message": "not in enum"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "enum",
+					"message": "not in enum"
+				}
+			],
+			[],
+			[],
+			[],
+			[]
+		]
+	}
+}

@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "frames-Steer",
+	"input": {
+		"set": "frames",
+		"shape": "Steer",
+		"texts": [
+			"{\"type\":\"steer\",\"run\":\"r1\",\"text\":\"\"}",
+			"{\"type\":\"steer\",\"run\":\"r1\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"type\":\"steer\",\"run\":\"r1\",\"text\":\"\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"text"
+				]
+			}
+		]
+	}
+}

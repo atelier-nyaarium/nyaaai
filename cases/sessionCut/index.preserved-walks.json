@@ -1,5 +1,6 @@
 {
-	"format": 1,
+	"format": 2,
+	"type": "function",
 	"kind": "sessionCut.index",
 	"name": "preserved-walks",
 	"input": {
@@ -26,19 +27,19 @@
 			"unparsed": 0,
 			"unreadable": [],
 			"version": "2.1.323",
-			"header": [],
+			"header": {},
 			"boundary": {
 				"line": 11,
 				"uuid": "b3",
-				"preserved": [
-					"k2",
-					"k3"
-				],
 				"preservedLines": [
 					9,
 					10
 				],
 				"preservedSound": true,
+				"preserved": [
+					"k2",
+					"k3"
+				],
 				"summaryLine": 12,
 				"cumulativeDroppedTokens": 1000,
 				"postTokens": 400,

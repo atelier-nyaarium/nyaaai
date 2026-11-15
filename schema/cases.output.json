@@ -1,0 +1,2069 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "cases.output.json",
+	"x-contract-version": "0.1.0",
+	"$defs": {
+		"SessionSource": {
+			"type": "object",
+			"properties": {
+				"lines": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"base64": {
+					"type": "string"
+				},
+				"file": {
+					"type": "string"
+				}
+			},
+			"additionalProperties": false
+		},
+		"BodyOf": {
+			"type": "string",
+			"enum": [
+				"whole",
+				"afterFirstLine"
+			]
+		},
+		"TreeEntry": {
+			"type": "object",
+			"properties": {
+				"path": {
+					"type": "string"
+				},
+				"file": {
+					"type": "boolean",
+					"const": true
+				},
+				"link": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"path"
+			],
+			"additionalProperties": false
+		},
+		"JsonRoundTripInput": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			],
+			"additionalProperties": false
+		},
+		"JsonRoundTripResult": {
+			"type": "object",
+			"properties": {
+				"results": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"ok": {
+								"type": "boolean"
+							},
+							"text": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"ok"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"results"
+			],
+			"additionalProperties": false
+		},
+		"ShapeCompatibleVersionsInput": {
+			"type": "object",
+			"properties": {
+				"pairs": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"left": {
+								"type": "string"
+							},
+							"right": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"left",
+							"right"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"pairs"
+			],
+			"additionalProperties": false
+		},
+		"ShapeCompatibleVersionsResult": {
+			"type": "object",
+			"properties": {
+				"compatible": {
+					"type": "array",
+					"items": {
+						"type": "boolean"
+					}
+				}
+			},
+			"required": [
+				"compatible"
+			],
+			"additionalProperties": false
+		},
+		"Base64DecodeInput": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			],
+			"additionalProperties": false
+		},
+		"Base64DecodeResult": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": [
+							"string",
+							"null"
+						]
+					}
+				}
+			},
+			"required": [
+				"texts"
+			],
+			"additionalProperties": false
+		},
+		"JsStringInput": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			],
+			"additionalProperties": false
+		},
+		"JsStringResult": {
+			"type": "object",
+			"properties": {
+				"strings": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"strings"
+			],
+			"additionalProperties": false
+		},
+		"JsonCanonicalInput": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			],
+			"additionalProperties": false
+		},
+		"JsonCanonicalResult": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": [
+							"string",
+							"null"
+						]
+					}
+				}
+			},
+			"required": [
+				"texts"
+			],
+			"additionalProperties": false
+		},
+		"OrderSortedTextsInput": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			],
+			"additionalProperties": false
+		},
+		"OrderSortedTextsResult": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			],
+			"additionalProperties": false
+		},
+		"ContractRoundTripInput": {
+			"type": "object",
+			"properties": {
+				"set": {
+					"type": "string"
+				},
+				"shape": {
+					"type": "string"
+				},
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"set",
+				"shape",
+				"texts"
+			],
+			"additionalProperties": false
+		},
+		"ContractRoundTripResult": {
+			"type": "object",
+			"properties": {
+				"results": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"ok": {
+								"type": "boolean"
+							},
+							"text": {
+								"type": "string"
+							},
+							"path": {
+								"type": "array",
+								"items": {
+									"$ref": "frames.output.json#/$defs/PathPart"
+								}
+							}
+						},
+						"required": [
+							"ok"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"results"
+			],
+			"additionalProperties": false
+		},
+		"TimeParseIsoInput": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			],
+			"additionalProperties": false
+		},
+		"TimeParseIsoResult": {
+			"type": "object",
+			"properties": {
+				"results": {
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				}
+			},
+			"required": [
+				"results"
+			],
+			"additionalProperties": false
+		},
+		"TimeIsoInput": {
+			"type": "object",
+			"properties": {
+				"times": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"minimum": -9007199254740991,
+						"maximum": 9007199254740991
+					}
+				}
+			},
+			"required": [
+				"times"
+			],
+			"additionalProperties": false
+		},
+		"TimeIsoResult": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": [
+							"string",
+							"null"
+						]
+					}
+				}
+			},
+			"required": [
+				"texts"
+			],
+			"additionalProperties": false
+		},
+		"TimeHttpDateInput": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"nowMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				}
+			},
+			"required": [
+				"texts",
+				"nowMs"
+			],
+			"additionalProperties": false
+		},
+		"TimeHttpDateResult": {
+			"type": "object",
+			"properties": {
+				"results": {
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				}
+			},
+			"required": [
+				"results"
+			],
+			"additionalProperties": false
+		},
+		"TimeRetryAfterInput": {
+			"type": "object",
+			"properties": {
+				"headers": {
+					"type": "array",
+					"items": {
+						"type": [
+							"string",
+							"null"
+						]
+					}
+				},
+				"nowMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				}
+			},
+			"required": [
+				"headers",
+				"nowMs"
+			],
+			"additionalProperties": false
+		},
+		"TimeRetryAfterResult": {
+			"type": "object",
+			"properties": {
+				"results": {
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				}
+			},
+			"required": [
+				"results"
+			],
+			"additionalProperties": false
+		},
+		"TimeResetStampInput": {
+			"type": "object",
+			"properties": {
+				"values": {
+					"type": "array",
+					"items": {}
+				},
+				"nowMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				}
+			},
+			"required": [
+				"values",
+				"nowMs"
+			],
+			"additionalProperties": false
+		},
+		"TimeResetStampResult": {
+			"type": "object",
+			"properties": {
+				"results": {
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				}
+			},
+			"required": [
+				"results"
+			],
+			"additionalProperties": false
+		},
+		"TimeDayKeyInput": {
+			"type": "object",
+			"properties": {
+				"times": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"minimum": -9007199254740991,
+						"maximum": 9007199254740991
+					}
+				},
+				"offsets": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"minimum": -9007199254740991,
+						"maximum": 9007199254740991
+					}
+				}
+			},
+			"required": [
+				"times",
+				"offsets"
+			],
+			"additionalProperties": false
+		},
+		"TimeDayKeyResult": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "array",
+						"items": {
+							"type": [
+								"string",
+								"null"
+							]
+						}
+					}
+				}
+			},
+			"required": [
+				"rows"
+			],
+			"additionalProperties": false
+		},
+		"NumberTextInput": {
+			"type": "object",
+			"properties": {
+				"values": {
+					"type": "array",
+					"items": {
+						"type": "number"
+					}
+				}
+			},
+			"required": [
+				"values"
+			],
+			"additionalProperties": false
+		},
+		"NumberTextResult": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			],
+			"additionalProperties": false
+		},
+		"NumberRoundInput": {
+			"type": "object",
+			"properties": {
+				"values": {
+					"type": "array",
+					"items": {
+						"type": "number"
+					}
+				}
+			},
+			"required": [
+				"values"
+			],
+			"additionalProperties": false
+		},
+		"NumberRoundResult": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			],
+			"additionalProperties": false
+		},
+		"NumberFixedInput": {
+			"type": "object",
+			"properties": {
+				"values": {
+					"type": "array",
+					"items": {
+						"type": "number"
+					}
+				},
+				"digits": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"minimum": 0,
+						"maximum": 9007199254740991
+					}
+				}
+			},
+			"required": [
+				"values",
+				"digits"
+			],
+			"additionalProperties": false
+		},
+		"NumberFixedResult": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					}
+				}
+			},
+			"required": [
+				"rows"
+			],
+			"additionalProperties": false
+		},
+		"NumberOfTextInput": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			],
+			"additionalProperties": false
+		},
+		"NumberOfTextResult": {
+			"type": "object",
+			"properties": {
+				"values": {
+					"type": "array",
+					"items": {
+						"type": [
+							"number",
+							"null"
+						]
+					}
+				}
+			},
+			"required": [
+				"values"
+			],
+			"additionalProperties": false
+		},
+		"NumberIntegerOfTextInput": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			],
+			"additionalProperties": false
+		},
+		"NumberIntegerOfTextResult": {
+			"type": "object",
+			"properties": {
+				"values": {
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				}
+			},
+			"required": [
+				"values"
+			],
+			"additionalProperties": false
+		},
+		"TextCutsInput": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"points": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"minimum": 0,
+						"maximum": 9007199254740991
+					}
+				}
+			},
+			"required": [
+				"texts",
+				"points"
+			],
+			"additionalProperties": false
+		},
+		"TextCutsResult": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"length": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"utf8": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"before": {
+								"type": "array",
+								"items": {
+									"type": "integer",
+									"minimum": -9007199254740991,
+									"maximum": 9007199254740991
+								}
+							},
+							"after": {
+								"type": "array",
+								"items": {
+									"type": "integer",
+									"minimum": -9007199254740991,
+									"maximum": 9007199254740991
+								}
+							},
+							"heads": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"tails": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"bytes": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"lower": {
+								"type": "string"
+							},
+							"upper": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"length",
+							"utf8",
+							"before",
+							"after",
+							"heads",
+							"tails",
+							"bytes",
+							"lower",
+							"upper"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"rows"
+			],
+			"additionalProperties": false
+		},
+		"TextSlicesInput": {
+			"type": "object",
+			"properties": {
+				"text": {
+					"type": "string"
+				},
+				"spans": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"start": {
+								"type": "integer",
+								"minimum": 0,
+								"maximum": 9007199254740991
+							},
+							"end": {
+								"type": "integer",
+								"minimum": 0,
+								"maximum": 9007199254740991
+							}
+						},
+						"required": [
+							"start",
+							"end"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"text",
+				"spans"
+			],
+			"additionalProperties": false
+		},
+		"TextSlicesResult": {
+			"type": "object",
+			"properties": {
+				"slices": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"slices"
+			],
+			"additionalProperties": false
+		},
+		"TextFindInput": {
+			"type": "object",
+			"properties": {
+				"text": {
+					"type": "string"
+				},
+				"needles": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"froms": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"minimum": 0,
+						"maximum": 9007199254740991
+					}
+				}
+			},
+			"required": [
+				"text",
+				"needles",
+				"froms"
+			],
+			"additionalProperties": false
+		},
+		"TextFindResult": {
+			"type": "object",
+			"properties": {
+				"first": {
+					"type": "array",
+					"items": {
+						"type": "array",
+						"items": {
+							"type": "integer",
+							"minimum": -9007199254740991,
+							"maximum": 9007199254740991
+						}
+					}
+				},
+				"last": {
+					"type": "array",
+					"items": {
+						"type": "array",
+						"items": {
+							"type": "integer",
+							"minimum": -9007199254740991,
+							"maximum": 9007199254740991
+						}
+					}
+				}
+			},
+			"required": [
+				"first",
+				"last"
+			],
+			"additionalProperties": false
+		},
+		"SessionCutRehomedInput": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"sessionId": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"rows",
+				"sessionId"
+			],
+			"additionalProperties": false
+		},
+		"SessionCutRehomedResult": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"rows"
+			],
+			"additionalProperties": false
+		},
+		"SessionCutIndexInput": {
+			"type": "object",
+			"properties": {
+				"source": {
+					"$ref": "#/$defs/SessionSource"
+				}
+			},
+			"required": [
+				"source"
+			],
+			"additionalProperties": false
+		},
+		"SessionCutIndexResult": {
+			"type": "object",
+			"properties": {
+				"index": {
+					"$ref": "sessionCut.output.json#/$defs/SessionIndex"
+				}
+			},
+			"required": [
+				"index"
+			],
+			"additionalProperties": false
+		},
+		"SessionCutPlanInput": {
+			"type": "object",
+			"properties": {
+				"source": {
+					"$ref": "#/$defs/SessionSource"
+				},
+				"requests": {
+					"type": "array",
+					"items": {
+						"$ref": "sessionCut.output.json#/$defs/CutRequest"
+					}
+				},
+				"cliVersion": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"source",
+				"requests",
+				"cliVersion"
+			],
+			"additionalProperties": false
+		},
+		"SessionCutPlanResult": {
+			"type": "object",
+			"properties": {
+				"plans": {
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{
+								"$ref": "sessionCut.output.json#/$defs/CutPlan"
+							},
+							{
+								"$ref": "sessionCut.output.json#/$defs/CutRefused"
+							}
+						]
+					}
+				}
+			},
+			"required": [
+				"plans"
+			],
+			"additionalProperties": false
+		},
+		"SessionCutCutInput": {
+			"type": "object",
+			"properties": {
+				"source": {
+					"$ref": "#/$defs/SessionSource"
+				},
+				"request": {
+					"$ref": "sessionCut.output.json#/$defs/CutRequest"
+				},
+				"cliVersion": {
+					"type": "string"
+				},
+				"sourcePath": {
+					"type": "string"
+				},
+				"idPrefix": {
+					"type": "string"
+				},
+				"nowMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"summary": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"source",
+				"request",
+				"cliVersion",
+				"sourcePath",
+				"idPrefix",
+				"nowMs"
+			],
+			"additionalProperties": false
+		},
+		"SessionCutCutResult": {
+			"type": "object",
+			"properties": {
+				"error": {
+					"type": "string"
+				},
+				"result": {
+					"anyOf": [
+						{
+							"$ref": "sessionCut.output.json#/$defs/CutDone"
+						},
+						{
+							"$ref": "sessionCut.output.json#/$defs/CutRefused"
+						}
+					]
+				},
+				"built": {
+					"anyOf": [
+						{
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"summarized": {
+					"anyOf": [
+						{
+							"type": "object",
+							"properties": {
+								"standing": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"rows": {
+									"type": "array",
+									"items": {
+										"type": "string"
+									}
+								}
+							},
+							"required": [
+								"standing",
+								"rows"
+							],
+							"additionalProperties": false
+						},
+						{
+							"type": "null"
+						}
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"SessionCutVerifyInput": {
+			"type": "object",
+			"properties": {
+				"source": {
+					"$ref": "#/$defs/SessionSource"
+				},
+				"sessionId": {
+					"type": "string"
+				},
+				"paired": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"source",
+				"sessionId",
+				"paired"
+			],
+			"additionalProperties": false
+		},
+		"SessionCutVerifyResult": {
+			"type": "object",
+			"properties": {
+				"problems": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"problems"
+			],
+			"additionalProperties": false
+		},
+		"SessionCutPickTurnInput": {
+			"type": "object",
+			"properties": {
+				"source": {
+					"$ref": "#/$defs/SessionSource"
+				},
+				"picks": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"at": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"text": {
+								"type": "string"
+							},
+							"bodyOf": {
+								"$ref": "#/$defs/BodyOf"
+							}
+						},
+						"required": [
+							"at",
+							"bodyOf"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"source",
+				"picks"
+			],
+			"additionalProperties": false
+		},
+		"SessionCutPickTurnResult": {
+			"type": "object",
+			"properties": {
+				"picked": {
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{
+								"$ref": "sessionCut.output.json#/$defs/PickedTurn"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				}
+			},
+			"required": [
+				"picked"
+			],
+			"additionalProperties": false
+		},
+		"SessionFileLinesOfInput": {
+			"type": "object",
+			"properties": {
+				"base64": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"base64"
+			],
+			"additionalProperties": false
+		},
+		"SessionFileLinesOfResult": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"rows"
+			],
+			"additionalProperties": false
+		},
+		"PathsIsInsideInput": {
+			"type": "object",
+			"properties": {
+				"tree": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/TreeEntry"
+					}
+				},
+				"checks": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"child": {
+								"type": "string"
+							},
+							"parent": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"child",
+							"parent"
+						],
+						"additionalProperties": false
+					}
+				},
+				"relative": {
+					"type": "boolean",
+					"const": true
+				}
+			},
+			"required": [
+				"tree",
+				"checks"
+			],
+			"additionalProperties": false
+		},
+		"PathsIsInsideResult": {
+			"type": "object",
+			"properties": {
+				"results": {
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{
+								"type": "boolean"
+							},
+							{
+								"type": "string",
+								"const": "error"
+							}
+						]
+					}
+				}
+			},
+			"required": [
+				"results"
+			],
+			"additionalProperties": false
+		},
+		"ClaudeVersionInInput": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			],
+			"additionalProperties": false
+		},
+		"ClaudeVersionInResult": {
+			"type": "object",
+			"properties": {
+				"found": {
+					"type": "array",
+					"items": {
+						"type": [
+							"string",
+							"null"
+						]
+					}
+				}
+			},
+			"required": [
+				"found"
+			],
+			"additionalProperties": false
+		},
+		"PatternCaseMatch": {
+			"type": "object",
+			"properties": {
+				"start": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				},
+				"end": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				},
+				"text": {
+					"type": "string"
+				},
+				"captures": {
+					"type": "array",
+					"items": {
+						"type": [
+							"string",
+							"null"
+						]
+					}
+				}
+			},
+			"required": [
+				"start",
+				"end",
+				"text",
+				"captures"
+			],
+			"additionalProperties": false
+		},
+		"PatternProblemsInput": {
+			"type": "object",
+			"properties": {
+				"patterns": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"source": {
+								"type": "string"
+							},
+							"flags": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"source",
+							"flags"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"patterns"
+			],
+			"additionalProperties": false
+		},
+		"PatternProblemsResult": {
+			"type": "object",
+			"properties": {
+				"refused": {
+					"type": "array",
+					"items": {
+						"type": "boolean"
+					}
+				}
+			},
+			"required": [
+				"refused"
+			],
+			"additionalProperties": false
+		},
+		"PatternMatchesInput": {
+			"type": "object",
+			"properties": {
+				"source": {
+					"type": "string"
+				},
+				"flags": {
+					"type": "string"
+				},
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"source",
+				"flags",
+				"texts"
+			],
+			"additionalProperties": false
+		},
+		"PatternMatchesResult": {
+			"type": "object",
+			"properties": {
+				"results": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"test": {
+								"type": "boolean"
+							},
+							"all": {
+								"type": "array",
+								"items": {
+									"$ref": "#/$defs/PatternCaseMatch"
+								}
+							}
+						},
+						"required": [
+							"test",
+							"all"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"results"
+			],
+			"additionalProperties": false
+		},
+		"PatternFindInput": {
+			"type": "object",
+			"properties": {
+				"source": {
+					"type": "string"
+				},
+				"flags": {
+					"type": "string"
+				},
+				"text": {
+					"type": "string"
+				},
+				"froms": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"minimum": 0,
+						"maximum": 9007199254740991
+					}
+				}
+			},
+			"required": [
+				"source",
+				"flags",
+				"text",
+				"froms"
+			],
+			"additionalProperties": false
+		},
+		"PatternFindResult": {
+			"type": "object",
+			"properties": {
+				"found": {
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{
+								"$ref": "#/$defs/PatternCaseMatch"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				}
+			},
+			"required": [
+				"found"
+			],
+			"additionalProperties": false
+		},
+		"PatternEditsInput": {
+			"type": "object",
+			"properties": {
+				"source": {
+					"type": "string"
+				},
+				"flags": {
+					"type": "string"
+				},
+				"template": {
+					"type": "string"
+				},
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"source",
+				"flags",
+				"template",
+				"texts"
+			],
+			"additionalProperties": false
+		},
+		"PatternEditsResult": {
+			"type": "object",
+			"properties": {
+				"results": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"replaced": {
+								"type": "string"
+							},
+							"pieces": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							}
+						},
+						"required": [
+							"replaced",
+							"pieces"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"results"
+			],
+			"additionalProperties": false
+		},
+		"StrictSchemaIssue": {
+			"type": "object",
+			"properties": {
+				"path": {
+					"type": "array",
+					"items": {
+						"$ref": "frames.output.json#/$defs/PathPart"
+					}
+				},
+				"code": {
+					"type": "string",
+					"enum": [
+						"type",
+						"enum",
+						"const",
+						"minimum",
+						"exclusive_minimum",
+						"maximum",
+						"exclusive_maximum",
+						"min_length",
+						"max_length",
+						"min_items",
+						"max_items",
+						"required",
+						"additional",
+						"property_name",
+						"no_branch",
+						"many_branches",
+						"unknown_keyword",
+						"bad_keyword",
+						"bad_reference",
+						"reference_loop",
+						"limit"
+					]
+				},
+				"message": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"path",
+				"code",
+				"message"
+			],
+			"additionalProperties": false
+		},
+		"StrictSchemaNormalizeInput": {
+			"type": "object",
+			"properties": {
+				"schemas": {
+					"type": "array",
+					"items": {}
+				}
+			},
+			"required": [
+				"schemas"
+			],
+			"additionalProperties": false
+		},
+		"StrictSchemaNormalizeResult": {
+			"type": "object",
+			"properties": {
+				"schemas": {
+					"type": "array",
+					"items": {}
+				}
+			},
+			"required": [
+				"schemas"
+			],
+			"additionalProperties": false
+		},
+		"StrictSchemaProblemsInput": {
+			"type": "object",
+			"properties": {
+				"schemas": {
+					"type": "array",
+					"items": {}
+				}
+			},
+			"required": [
+				"schemas"
+			],
+			"additionalProperties": false
+		},
+		"StrictSchemaProblemsResult": {
+			"type": "object",
+			"properties": {
+				"problems": {
+					"type": "array",
+					"items": {
+						"type": "array",
+						"items": {
+							"$ref": "#/$defs/StrictSchemaIssue"
+						}
+					}
+				}
+			},
+			"required": [
+				"problems"
+			],
+			"additionalProperties": false
+		},
+		"StrictSchemaValidateInput": {
+			"type": "object",
+			"properties": {
+				"schema": {},
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"schema",
+				"texts"
+			],
+			"additionalProperties": false
+		},
+		"StrictSchemaValidateResult": {
+			"type": "object",
+			"properties": {
+				"issues": {
+					"type": "array",
+					"items": {
+						"type": "array",
+						"items": {
+							"$ref": "#/$defs/StrictSchemaIssue"
+						}
+					}
+				}
+			},
+			"required": [
+				"issues"
+			],
+			"additionalProperties": false
+		},
+		"StrictSchemaValidateListInput": {
+			"type": "object",
+			"properties": {
+				"schema": {},
+				"item": {
+					"type": "string"
+				},
+				"counts": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"minimum": 0,
+						"maximum": 9007199254740991
+					}
+				}
+			},
+			"required": [
+				"schema",
+				"item",
+				"counts"
+			],
+			"additionalProperties": false
+		},
+		"StrictSchemaValidateListResult": {
+			"type": "object",
+			"properties": {
+				"issues": {
+					"type": "array",
+					"items": {
+						"type": "array",
+						"items": {
+							"$ref": "#/$defs/StrictSchemaIssue"
+						}
+					}
+				}
+			},
+			"required": [
+				"issues"
+			],
+			"additionalProperties": false
+		},
+		"TestkitCompactedSessionInput": {
+			"type": "object",
+			"properties": {},
+			"additionalProperties": false
+		},
+		"TestkitCompactedSessionResult": {
+			"type": "object",
+			"properties": {
+				"lines": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"lines"
+			],
+			"additionalProperties": false
+		},
+		"TestkitReplayInput": {
+			"type": "object",
+			"properties": {
+				"file": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"file"
+			],
+			"additionalProperties": false
+		},
+		"TestkitReplayResult": {
+			"type": "object",
+			"properties": {
+				"requests": {
+					"type": "array",
+					"items": {}
+				},
+				"exchanges": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"status": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"headers": {
+								"type": "object",
+								"propertyNames": {
+									"type": "string"
+								},
+								"additionalProperties": {
+									"type": "string"
+								}
+							},
+							"chunks": {
+								"type": "array",
+								"items": {
+									"type": "integer",
+									"minimum": -9007199254740991,
+									"maximum": 9007199254740991
+								}
+							},
+							"body": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"status",
+							"headers",
+							"chunks",
+							"body"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"requests",
+				"exchanges"
+			],
+			"additionalProperties": false
+		},
+		"TestkitWheelInput": {
+			"type": "object",
+			"properties": {
+				"startMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"op": {
+								"type": "string",
+								"enum": [
+									"after",
+									"cancel",
+									"advance"
+								]
+							},
+							"ms": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"tag": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"op"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"startMs",
+				"steps"
+			],
+			"additionalProperties": false
+		},
+		"TestkitWheelResult": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"nowMs": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"waiting": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"fired": {
+								"type": "array",
+								"items": {
+									"type": "object",
+									"properties": {
+										"tag": {
+											"type": "string"
+										},
+										"atMs": {
+											"type": "integer",
+											"minimum": -9007199254740991,
+											"maximum": 9007199254740991
+										}
+									},
+									"required": [
+										"tag",
+										"atMs"
+									],
+									"additionalProperties": false
+								}
+							},
+							"cancelled": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"nowMs",
+							"waiting",
+							"fired",
+							"cancelled"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"steps"
+			],
+			"additionalProperties": false
+		},
+		"TestkitRandomInput": {
+			"type": "object",
+			"properties": {
+				"values": {
+					"type": "array",
+					"items": {
+						"type": "number"
+					}
+				},
+				"draws": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				}
+			},
+			"required": [
+				"values",
+				"draws"
+			],
+			"additionalProperties": false
+		},
+		"TestkitRandomResult": {
+			"type": "object",
+			"properties": {
+				"drawn": {
+					"type": "array",
+					"items": {
+						"type": "number"
+					}
+				}
+			},
+			"required": [
+				"drawn"
+			],
+			"additionalProperties": false
+		},
+		"TestkitConverseInput": {
+			"type": "object",
+			"properties": {
+				"requests": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				},
+				"together": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"requests",
+				"together"
+			],
+			"additionalProperties": false
+		},
+		"TestkitConverseResult": {
+			"type": "object",
+			"properties": {
+				"ids": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"nowMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"steers": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"ids",
+				"nowMs",
+				"steers"
+			],
+			"additionalProperties": false
+		}
+	}
+}

@@ -1,4 +1,4 @@
-//! Tests the cut command.
+//! Cut command tests.
 
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -46,9 +46,14 @@ fn writes_a_sound_cut_beside_an_untouched_source() {
     let out = folder.join("out");
     let third = compacted_session().third;
 
-    for (more, paired) in [
-        (vec!["trim"], false),
-        (vec!["clear", "--target", &third], true),
+    for (more, paired, gone, kept) in [
+        (vec!["trim"], false, "ancient answer", "second turn"),
+        (
+            vec!["clear", "--target", &third],
+            true,
+            "second turn",
+            "third turn",
+        ),
     ] {
         let (code, said) = cut(&source, &out, &more);
         assert_eq!(code, Some(0), "{more:?}");
@@ -63,6 +68,9 @@ fn writes_a_sound_cut_beside_an_untouched_source() {
             verify_cut(session_lines(&file).unwrap(), &session_id, paired).unwrap(),
             Vec::<String>::new()
         );
+        let built = fs::read_to_string(&file).unwrap();
+        assert!(!built.contains(gone), "{more:?} kept {gone}");
+        assert!(built.contains(kept), "{more:?} lost {kept}");
     }
     assert_eq!(fs::read(&source).unwrap(), bytes);
     assert_eq!(fs::read_dir(&folder).unwrap().count(), 2);

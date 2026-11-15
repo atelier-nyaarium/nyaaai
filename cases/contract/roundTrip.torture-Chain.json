@@ -1,0 +1,51 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "torture-Chain",
+	"input": {
+		"set": "torture",
+		"shape": "Chain",
+		"texts": [
+			"{\"value\":1,\"next\":{\"value\":2.5,\"next\":{\"value\":0,\"next\":null}}}",
+			"{\"value\":1}",
+			"{\"value\":1,\"next\":{\"value\":\"x\",\"next\":null}}",
+			"{\"value\":1,\"next\":{\"value\":2}}",
+			"{\"value\":1,\"next\":[]}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"value\":1,\"next\":{\"value\":2.5,\"next\":{\"value\":0,\"next\":null}}}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"next"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"next",
+					"value"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"next",
+					"next"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"next"
+				]
+			}
+		]
+	}
+}

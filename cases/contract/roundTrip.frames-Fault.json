@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "frames-Fault",
+	"input": {
+		"set": "frames",
+		"shape": "Fault",
+		"texts": [
+			"{\"type\":\"fault\",\"code\":\"not_greeted\",\"message\":\"say hello first\"}",
+			"{\"type\":\"fault\",\"code\":\"not_greeted\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"type\":\"fault\",\"code\":\"not_greeted\",\"message\":\"say hello first\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"message"
+				]
+			}
+		]
+	}
+}

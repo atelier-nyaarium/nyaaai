@@ -1,0 +1,530 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "sessionCut.input.json",
+	"x-contract-version": "0.1.0",
+	"$defs": {
+		"CutMode": {
+			"type": "string",
+			"enum": [
+				"trim",
+				"clear",
+				"compact"
+			]
+		},
+		"CutRefusal": {
+			"type": "string",
+			"enum": [
+				"no_rows",
+				"cli_version",
+				"boundary_shape",
+				"unreadable_rows",
+				"nothing_to_trim",
+				"preserved_unresolved",
+				"target_missing",
+				"target_compacted",
+				"target_not_turn_start",
+				"target_mid_tool",
+				"tail_mid_tool",
+				"end_missing",
+				"late_message",
+				"nothing_above",
+				"summary_needed"
+			]
+		},
+		"CutRefused": {
+			"type": "object",
+			"properties": {
+				"ok": {
+					"type": "boolean",
+					"const": false
+				},
+				"reason": {
+					"$ref": "#/$defs/CutRefusal"
+				},
+				"detail": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"ok",
+				"reason",
+				"detail"
+			]
+		},
+		"RowMeta": {
+			"type": "object",
+			"properties": {
+				"line": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				},
+				"bytes": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				},
+				"type": {
+					"type": "string"
+				},
+				"uuid": {
+					"type": "string"
+				},
+				"at": {
+					"type": "string"
+				},
+				"openTools": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				},
+				"delivered": {
+					"type": "boolean"
+				},
+				"text": {
+					"type": "string"
+				},
+				"points": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"line",
+				"bytes",
+				"type",
+				"openTools",
+				"delivered",
+				"points"
+			]
+		},
+		"BoundaryMeta": {
+			"type": "object",
+			"properties": {
+				"line": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				},
+				"uuid": {
+					"type": "string"
+				},
+				"preservedLines": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"minimum": 0,
+						"maximum": 9007199254740991
+					}
+				},
+				"preservedSound": {
+					"type": "boolean"
+				},
+				"preserved": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"summaryLine": {
+					"anyOf": [
+						{
+							"type": "integer",
+							"minimum": 0,
+							"maximum": 9007199254740991
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"cumulativeDroppedTokens": {
+					"type": "number"
+				},
+				"postTokens": {
+					"type": "number"
+				},
+				"known": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"line",
+				"uuid",
+				"preservedLines",
+				"preservedSound",
+				"preserved",
+				"summaryLine",
+				"cumulativeDroppedTokens",
+				"postTokens",
+				"known"
+			]
+		},
+		"SessionIndex": {
+			"type": "object",
+			"properties": {
+				"lines": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				},
+				"unparsed": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				},
+				"unreadable": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"minimum": 0,
+						"maximum": 9007199254740991
+					}
+				},
+				"version": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"header": {
+					"type": "object",
+					"propertyNames": {
+						"type": "string"
+					},
+					"additionalProperties": {
+						"type": "integer",
+						"minimum": 0,
+						"maximum": 9007199254740991
+					}
+				},
+				"boundary": {
+					"anyOf": [
+						{
+							"$ref": "#/$defs/BoundaryMeta"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"boundaries": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				},
+				"standing": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"tail": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/RowMeta"
+					}
+				}
+			},
+			"required": [
+				"lines",
+				"unparsed",
+				"unreadable",
+				"version",
+				"header",
+				"boundary",
+				"boundaries",
+				"standing",
+				"tail"
+			]
+		},
+		"CutRequest": {
+			"type": "object",
+			"properties": {
+				"mode": {
+					"$ref": "#/$defs/CutMode"
+				},
+				"targetUuid": {
+					"type": "string"
+				},
+				"throughUuid": {
+					"type": "string"
+				},
+				"endBefore": {
+					"type": "string"
+				},
+				"summaryText": {
+					"type": "string"
+				},
+				"liveTail": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"mode"
+			]
+		},
+		"TurnPick": {
+			"type": "object",
+			"properties": {
+				"at": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"text": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"at"
+			]
+		},
+		"PickedTurn": {
+			"type": "object",
+			"properties": {
+				"uuid": {
+					"type": "string"
+				},
+				"exact": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"uuid",
+				"exact"
+			]
+		},
+		"Preserved": {
+			"type": "object",
+			"properties": {
+				"head": {
+					"type": "string"
+				},
+				"tail": {
+					"type": "string"
+				},
+				"uuids": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"head",
+				"tail",
+				"uuids"
+			]
+		},
+		"KeptFrom": {
+			"type": "object",
+			"properties": {
+				"at": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"text": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"at",
+				"text"
+			]
+		},
+		"CutPlan": {
+			"type": "object",
+			"properties": {
+				"ok": {
+					"type": "boolean",
+					"const": true
+				},
+				"mode": {
+					"$ref": "#/$defs/CutMode"
+				},
+				"headerLines": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"minimum": 0,
+						"maximum": 9007199254740991
+					}
+				},
+				"keptLines": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"minimum": 0,
+						"maximum": 9007199254740991
+					}
+				},
+				"preserved": {
+					"anyOf": [
+						{
+							"$ref": "#/$defs/Preserved"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"foldLines": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"minimum": 0,
+						"maximum": 9007199254740991
+					}
+				},
+				"keptBytes": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				},
+				"droppedBytes": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				},
+				"droppedRows": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				},
+				"from": {
+					"anyOf": [
+						{
+							"$ref": "#/$defs/KeptFrom"
+						},
+						{
+							"type": "null"
+						}
+					]
+				}
+			},
+			"required": [
+				"ok",
+				"mode",
+				"headerLines",
+				"keptLines",
+				"preserved",
+				"foldLines",
+				"keptBytes",
+				"droppedBytes",
+				"droppedRows",
+				"from"
+			]
+		},
+		"CutDone": {
+			"type": "object",
+			"properties": {
+				"ok": {
+					"type": "boolean",
+					"const": true
+				},
+				"sessionId": {
+					"type": "string"
+				},
+				"plan": {
+					"$ref": "#/$defs/CutPlan"
+				}
+			},
+			"required": [
+				"ok",
+				"sessionId",
+				"plan"
+			]
+		},
+		"PlanCommand": {
+			"type": "object",
+			"properties": {
+				"source": {
+					"type": "string"
+				},
+				"request": {
+					"$ref": "#/$defs/CutRequest"
+				},
+				"cliVersion": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"source",
+				"request",
+				"cliVersion"
+			]
+		},
+		"PlanOutcome": {
+			"anyOf": [
+				{
+					"$ref": "#/$defs/CutPlan"
+				},
+				{
+					"$ref": "#/$defs/CutRefused"
+				}
+			]
+		},
+		"ApplyCommand": {
+			"type": "object",
+			"properties": {
+				"source": {
+					"type": "string"
+				},
+				"out": {
+					"type": "string"
+				},
+				"keepOutOf": {
+					"type": "string"
+				},
+				"request": {
+					"$ref": "#/$defs/CutRequest"
+				},
+				"cliVersion": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"source",
+				"out",
+				"request",
+				"cliVersion"
+			]
+		},
+		"CutOutcome": {
+			"anyOf": [
+				{
+					"$ref": "#/$defs/CutDone"
+				},
+				{
+					"$ref": "#/$defs/CutRefused"
+				}
+			]
+		},
+		"SummarizeRequest": {
+			"type": "object",
+			"properties": {
+				"standing": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"standing",
+				"rows"
+			]
+		}
+	}
+}

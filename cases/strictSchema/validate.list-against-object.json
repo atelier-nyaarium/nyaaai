@@ -1,0 +1,35 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.validate",
+	"name": "list-against-object",
+	"input": {
+		"schema": {
+			"type": "object"
+		},
+		"texts": [
+			"[]",
+			"{}",
+			"null"
+		]
+	},
+	"expected": {
+		"issues": [
+			[
+				{
+					"path": [],
+					"code": "type",
+					"message": "expected object"
+				}
+			],
+			[],
+			[
+				{
+					"path": [],
+					"code": "type",
+					"message": "expected object"
+				}
+			]
+		]
+	}
+}

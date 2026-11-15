@@ -1,0 +1,49 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.validate",
+	"name": "number-types",
+	"input": {
+		"schema": {
+			"type": "number"
+		},
+		"texts": [
+			"1",
+			"1.0",
+			"-0",
+			"1e400",
+			"5e-324",
+			"\"1\"",
+			"null"
+		]
+	},
+	"expected": {
+		"issues": [
+			[],
+			[],
+			[],
+			[
+				{
+					"path": [],
+					"code": "type",
+					"message": "expected number"
+				}
+			],
+			[],
+			[
+				{
+					"path": [],
+					"code": "type",
+					"message": "expected number"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "type",
+					"message": "expected number"
+				}
+			]
+		]
+	}
+}

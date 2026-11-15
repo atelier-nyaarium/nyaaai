@@ -1,5 +1,6 @@
 {
-	"format": 1,
+	"format": 2,
+	"type": "function",
 	"kind": "sessionCut.plan",
 	"name": "boundary-number-in-list",
 	"input": {

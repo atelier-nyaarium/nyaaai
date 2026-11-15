@@ -1,5 +1,6 @@
 {
-	"format": 1,
+	"format": 2,
+	"type": "function",
 	"kind": "sessionCut.index",
 	"name": "row-shapes",
 	"input": {
@@ -18,6 +19,8 @@
 				"{\"type\":null,\"uuid\":\"n4\"}",
 				"{\"type\":true,\"uuid\":\"n5\"}",
 				"{\"type\":1e999,\"uuid\":\"n6\"}",
+				"{\"type\":{\"toString\":1},\"uuid\":\"n7\"}",
+				"{\"type\":[{\"toString\":\"x\",\"valueOf\":2}],\"uuid\":\"n8\"}",
 				"{\"type\":\"user\",\"uuid\":\"\"}",
 				"{\"type\":\"user\",\"uuid\":7}",
 				"{\"type\":\"mode\",\"uuid\":\"h1\",\"version\":\"0.0.1\"}",
@@ -60,7 +63,7 @@
 	},
 	"expected": {
 		"index": {
-			"lines": 50,
+			"lines": 52,
 			"unparsed": 6,
 			"unreadable": [
 				2,
@@ -68,19 +71,13 @@
 				4,
 				5,
 				6,
-				49
+				51
 			],
 			"version": "�",
-			"header": [
-				[
-					"mode",
-					17
-				],
-				[
-					"atis-latch",
-					18
-				]
-			],
+			"header": {
+				"mode": 19,
+				"atis-latch": 20
+			},
 			"boundary": null,
 			"boundaries": 0,
 			"standing": null,
@@ -150,6 +147,24 @@
 				},
 				{
 					"line": 14,
+					"bytes": 36,
+					"type": "[object Object]",
+					"uuid": "n7",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 15,
+					"bytes": 52,
+					"type": "[object Object]",
+					"uuid": "n8",
+					"openTools": 0,
+					"delivered": false,
+					"points": []
+				},
+				{
+					"line": 16,
 					"bytes": 26,
 					"type": "user",
 					"openTools": 0,
@@ -157,7 +172,7 @@
 					"points": []
 				},
 				{
-					"line": 15,
+					"line": 17,
 					"bytes": 25,
 					"type": "user",
 					"openTools": 0,
@@ -165,7 +180,7 @@
 					"points": []
 				},
 				{
-					"line": 16,
+					"line": 18,
 					"bytes": 46,
 					"type": "mode",
 					"uuid": "h1",
@@ -174,7 +189,7 @@
 					"points": []
 				},
 				{
-					"line": 17,
+					"line": 19,
 					"bytes": 16,
 					"type": "mode",
 					"openTools": 0,
@@ -182,7 +197,7 @@
 					"points": []
 				},
 				{
-					"line": 18,
+					"line": 20,
 					"bytes": 34,
 					"type": "atis-latch",
 					"openTools": 0,
@@ -190,7 +205,7 @@
 					"points": []
 				},
 				{
-					"line": 19,
+					"line": 21,
 					"bytes": 78,
 					"type": "user",
 					"uuid": "m-user-7",
@@ -200,7 +215,7 @@
 					"points": []
 				},
 				{
-					"line": 20,
+					"line": 22,
 					"bytes": 73,
 					"type": "user",
 					"uuid": "m-user-2",
@@ -209,7 +224,7 @@
 					"points": []
 				},
 				{
-					"line": 21,
+					"line": 23,
 					"bytes": 161,
 					"type": "user",
 					"uuid": "m-user-89",
@@ -219,7 +234,7 @@
 					"points": []
 				},
 				{
-					"line": 22,
+					"line": 24,
 					"bytes": 140,
 					"type": "user",
 					"uuid": "m-user-68",
@@ -229,7 +244,7 @@
 					"points": []
 				},
 				{
-					"line": 23,
+					"line": 25,
 					"bytes": 154,
 					"type": "user",
 					"uuid": "m-user-82",
@@ -238,7 +253,7 @@
 					"points": []
 				},
 				{
-					"line": 24,
+					"line": 26,
 					"bytes": 112,
 					"type": "user",
 					"uuid": "m-user-40",
@@ -247,7 +262,7 @@
 					"points": []
 				},
 				{
-					"line": 25,
+					"line": 27,
 					"bytes": 106,
 					"type": "user",
 					"uuid": "m-user-34",
@@ -256,7 +271,7 @@
 					"points": []
 				},
 				{
-					"line": 26,
+					"line": 28,
 					"bytes": 73,
 					"type": "user",
 					"uuid": "m-user-2",
@@ -265,7 +280,7 @@
 					"points": []
 				},
 				{
-					"line": 27,
+					"line": 29,
 					"bytes": 75,
 					"type": "user",
 					"uuid": "m-user-4",
@@ -274,7 +289,7 @@
 					"points": []
 				},
 				{
-					"line": 28,
+					"line": 30,
 					"bytes": 32,
 					"type": "user",
 					"uuid": "m-none",
@@ -283,7 +298,7 @@
 					"points": []
 				},
 				{
-					"line": 29,
+					"line": 31,
 					"bytes": 62,
 					"type": "user",
 					"uuid": "m-text-message",
@@ -292,7 +307,7 @@
 					"points": []
 				},
 				{
-					"line": 30,
+					"line": 32,
 					"bytes": 68,
 					"type": "user",
 					"uuid": "m-list-message",
@@ -301,7 +316,7 @@
 					"points": []
 				},
 				{
-					"line": 31,
+					"line": 33,
 					"bytes": 85,
 					"type": "user",
 					"uuid": "m-side",
@@ -310,7 +325,7 @@
 					"points": []
 				},
 				{
-					"line": 32,
+					"line": 34,
 					"bytes": 104,
 					"type": "user",
 					"uuid": "m-sum",
@@ -319,7 +334,7 @@
 					"points": []
 				},
 				{
-					"line": 33,
+					"line": 35,
 					"bytes": 100,
 					"type": "user",
 					"uuid": "m-side-text",
@@ -329,7 +344,7 @@
 					"points": []
 				},
 				{
-					"line": 34,
+					"line": 36,
 					"bytes": 196,
 					"type": "assistant",
 					"uuid": "m-assistant-108",
@@ -338,7 +353,7 @@
 					"points": []
 				},
 				{
-					"line": 35,
+					"line": 37,
 					"bytes": 103,
 					"type": "assistant",
 					"uuid": "m-assistant-16",
@@ -347,7 +362,7 @@
 					"points": []
 				},
 				{
-					"line": 36,
+					"line": 38,
 					"bytes": 203,
 					"type": "user",
 					"uuid": "m-user-130",
@@ -356,7 +371,7 @@
 					"points": []
 				},
 				{
-					"line": 37,
+					"line": 39,
 					"bytes": 108,
 					"type": "assistant",
 					"uuid": "m-user-part",
@@ -365,7 +380,7 @@
 					"points": []
 				},
 				{
-					"line": 38,
+					"line": 40,
 					"bytes": 93,
 					"type": "attachment",
 					"uuid": "a1",
@@ -375,7 +390,7 @@
 					"points": []
 				},
 				{
-					"line": 39,
+					"line": 41,
 					"bytes": 84,
 					"type": "attachment",
 					"uuid": "a2",
@@ -384,7 +399,7 @@
 					"points": []
 				},
 				{
-					"line": 40,
+					"line": 42,
 					"bytes": 88,
 					"type": "attachment",
 					"uuid": "a3",
@@ -393,7 +408,7 @@
 					"points": []
 				},
 				{
-					"line": 41,
+					"line": 43,
 					"bytes": 64,
 					"type": "attachment",
 					"uuid": "a4",
@@ -402,7 +417,7 @@
 					"points": []
 				},
 				{
-					"line": 42,
+					"line": 44,
 					"bytes": 66,
 					"type": "attachment",
 					"uuid": "a5",
@@ -411,7 +426,7 @@
 					"points": []
 				},
 				{
-					"line": 43,
+					"line": 45,
 					"bytes": 34,
 					"type": "attachment",
 					"uuid": "a6",
@@ -420,7 +435,7 @@
 					"points": []
 				},
 				{
-					"line": 44,
+					"line": 46,
 					"bytes": 121,
 					"type": "last-prompt",
 					"at": "2026-11-13T00:00:00.000Z",
@@ -432,7 +447,7 @@
 					]
 				},
 				{
-					"line": 45,
+					"line": 47,
 					"bytes": 90,
 					"type": "file-history-snapshot",
 					"openTools": 1,
@@ -442,7 +457,7 @@
 					]
 				},
 				{
-					"line": 46,
+					"line": 48,
 					"bytes": 93,
 					"type": "api-request",
 					"uuid": "r1",
@@ -451,7 +466,7 @@
 					"points": []
 				},
 				{
-					"line": 47,
+					"line": 49,
 					"bytes": 112,
 					"type": "user",
 					"uuid": "m-escaped",
@@ -461,7 +476,7 @@
 					"points": []
 				},
 				{
-					"line": 48,
+					"line": 50,
 					"bytes": 2099,
 					"type": "user",
 					"uuid": "m-deep",
@@ -471,7 +486,7 @@
 					"points": []
 				},
 				{
-					"line": 50,
+					"line": 52,
 					"bytes": 97,
 					"type": "user",
 					"uuid": "m-last",
@@ -482,7 +497,7 @@
 					"points": []
 				},
 				{
-					"line": 51,
+					"line": 53,
 					"bytes": 0,
 					"type": "end",
 					"openTools": 1,

@@ -1,0 +1,60 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.validate",
+	"name": "on-the-bounds",
+	"input": {
+		"schema": {
+			"minItems": 1,
+			"maxItems": 2,
+			"minLength": 1,
+			"maxLength": 2
+		},
+		"texts": [
+			"[]",
+			"[1]",
+			"[1,2]",
+			"[1,2,3]",
+			"\"\"",
+			"\"a\"",
+			"\"ab\"",
+			"\"abc\""
+		]
+	},
+	"expected": {
+		"issues": [
+			[
+				{
+					"path": [],
+					"code": "min_items",
+					"message": "fewer than 1"
+				}
+			],
+			[],
+			[],
+			[
+				{
+					"path": [],
+					"code": "max_items",
+					"message": "more than 2"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "min_length",
+					"message": "shorter than 1"
+				}
+			],
+			[],
+			[],
+			[
+				{
+					"path": [],
+					"code": "max_length",
+					"message": "longer than 2"
+				}
+			]
+		]
+	}
+}

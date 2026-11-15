@@ -1,0 +1,58 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "trace.input.json",
+	"x-contract-version": "0.1.0",
+	"$defs": {
+		"TraceExchange": {
+			"type": "object",
+			"properties": {
+				"request": {},
+				"status": {
+					"type": "integer",
+					"minimum": 100,
+					"maximum": 599
+				},
+				"headers": {
+					"type": "object",
+					"propertyNames": {
+						"type": "string"
+					},
+					"additionalProperties": {
+						"type": "string"
+					}
+				},
+				"chunks": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"request",
+				"status",
+				"headers",
+				"chunks"
+			]
+		},
+		"Trace": {
+			"type": "object",
+			"properties": {
+				"format": {
+					"type": "number",
+					"const": 1
+				},
+				"exchanges": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/TraceExchange"
+					}
+				}
+			},
+			"required": [
+				"format",
+				"exchanges"
+			]
+		}
+	}
+}

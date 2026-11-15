@@ -1,0 +1,84 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.validate",
+	"name": "unicode-bounds",
+	"input": {
+		"schema": {
+			"minLength": 2,
+			"maxLength": 1
+		},
+		"texts": [
+			"\"\"",
+			"\"x\"",
+			"\"😀\"",
+			"\"é\"",
+			"\"😀😀\"",
+			"\"\\ud83d\"",
+			"\"\\ud83d\\ude00\"",
+			"\"\\ude00\\ud83d\"",
+			"1"
+		]
+	},
+	"expected": {
+		"issues": [
+			[
+				{
+					"path": [],
+					"code": "min_length",
+					"message": "shorter than 2"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "min_length",
+					"message": "shorter than 2"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "min_length",
+					"message": "shorter than 2"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "max_length",
+					"message": "longer than 1"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "max_length",
+					"message": "longer than 1"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "min_length",
+					"message": "shorter than 2"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "min_length",
+					"message": "shorter than 2"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "max_length",
+					"message": "longer than 1"
+				}
+			],
+			[]
+		]
+	}
+}

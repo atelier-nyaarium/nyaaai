@@ -1,0 +1,35 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.validate",
+	"name": "const",
+	"input": {
+		"schema": {
+			"const": {
+				"a": [
+					1,
+					null
+				],
+				"b": "x"
+			}
+		},
+		"texts": [
+			"{\"b\":\"x\",\"a\":[1.0,null]}",
+			"{\"a\":[1,\"null\"],\"b\":\"x\"}",
+			"{\"a\":[1,null],\"b\":\"x\",\"b\":\"x\"}"
+		]
+	},
+	"expected": {
+		"issues": [
+			[],
+			[
+				{
+					"path": [],
+					"code": "const",
+					"message": "not equal to const"
+				}
+			],
+			[]
+		]
+	}
+}

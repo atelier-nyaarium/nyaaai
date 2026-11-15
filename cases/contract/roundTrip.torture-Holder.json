@@ -1,0 +1,85 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "torture-Holder",
+	"input": {
+		"set": "torture",
+		"shape": "Holder",
+		"texts": [
+			"{\"legacy\":{\"id\":\"i\",\"tags\":[]},\"span\":null,\"label\":\"x\",\"spans\":[]}",
+			"{\"legacy\":{\"name\":\"n\",\"tags\":\"t\"},\"span\":{\"from\":1,\"to\":2},\"label\":\"x\",\"spans\":[{\"from\":0,\"to\":0}]}",
+			"{\"legacy\":{\"id\":\"i\",\"tags\":[]},\"span\":null,\"label\":\"  x y  \",\"spans\":[]}",
+			"{\"legacy\":{\"id\":\"i\",\"tags\":[]},\"span\":null,\"label\":\"﻿  x　 \",\"spans\":[]}",
+			"{\"legacy\":{\"id\":\"i\",\"tags\":[]},\"span\":null,\"label\":\"   \",\"spans\":[]}",
+			"{\"legacy\":{\"id\":\"i\",\"tags\":[]},\"span\":null,\"label\":\"\",\"spans\":[]}",
+			"{\"legacy\":{\"id\":\"i\",\"tags\":[]},\"span\":null,\"label\":5,\"spans\":[]}",
+			"{\"legacy\":{\"id\":\"i\",\"tags\":[]},\"span\":{\"from\":2,\"to\":1},\"label\":\"x\",\"spans\":[]}",
+			"{\"legacy\":{\"id\":\"i\",\"tags\":[]},\"span\":null,\"label\":\"x\",\"spans\":[{\"from\":1,\"to\":2},{\"from\":2,\"to\":1}]}",
+			"{\"legacy\":{\"tags\":\"t\"},\"span\":null,\"label\":\"x\",\"spans\":[]}",
+			"{\"legacy\":null,\"span\":null,\"label\":\"x\",\"spans\":[]}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"legacy\":{\"id\":\"i\",\"tags\":[]},\"span\":null,\"label\":\"x\",\"spans\":[]}"
+			},
+			{
+				"ok": true,
+				"text": "{\"legacy\":{\"id\":\"n\",\"tags\":[\"t\"]},\"span\":{\"from\":1,\"to\":2},\"label\":\"x\",\"spans\":[{\"from\":0,\"to\":0}]}"
+			},
+			{
+				"ok": true,
+				"text": "{\"legacy\":{\"id\":\"i\",\"tags\":[]},\"span\":null,\"label\":\"x y\",\"spans\":[]}"
+			},
+			{
+				"ok": true,
+				"text": "{\"legacy\":{\"id\":\"i\",\"tags\":[]},\"span\":null,\"label\":\"x\",\"spans\":[]}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"label"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"legacy\":{\"id\":\"i\",\"tags\":[]},\"span\":null,\"label\":\"\",\"spans\":[]}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"label"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"span"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"spans",
+					1
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"legacy",
+					"id"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"legacy"
+				]
+			}
+		]
+	}
+}

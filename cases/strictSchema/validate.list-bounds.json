@@ -1,0 +1,67 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.validate",
+	"name": "list-bounds",
+	"input": {
+		"schema": {
+			"minItems": 2,
+			"maxItems": 1,
+			"items": {
+				"type": "integer"
+			}
+		},
+		"texts": [
+			"[]",
+			"[\"bad\"]",
+			"[1,\"bad\"]",
+			"[1,2]"
+		]
+	},
+	"expected": {
+		"issues": [
+			[
+				{
+					"path": [],
+					"code": "min_items",
+					"message": "fewer than 2"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "min_items",
+					"message": "fewer than 2"
+				},
+				{
+					"path": [
+						0
+					],
+					"code": "type",
+					"message": "expected integer"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "max_items",
+					"message": "more than 1"
+				},
+				{
+					"path": [
+						1
+					],
+					"code": "type",
+					"message": "expected integer"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "max_items",
+					"message": "more than 1"
+				}
+			]
+		]
+	}
+}

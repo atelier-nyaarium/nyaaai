@@ -1,0 +1,39 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.edits",
+	"name": "empty-a-star",
+	"input": {
+		"source": "a*",
+		"flags": "",
+		"template": "<$&>",
+		"texts": [
+			"abc",
+			"aa",
+			""
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"replaced": "<a><>b<>c<>",
+				"pieces": [
+					"",
+					"b",
+					"c"
+				]
+			},
+			{
+				"replaced": "<aa><>",
+				"pieces": [
+					"",
+					""
+				]
+			},
+			{
+				"replaced": "<>",
+				"pieces": []
+			}
+		]
+	}
+}

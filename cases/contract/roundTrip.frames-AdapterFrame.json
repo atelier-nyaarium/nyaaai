@@ -1,0 +1,108 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "frames-AdapterFrame",
+	"input": {
+		"set": "frames",
+		"shape": "AdapterFrame",
+		"texts": [
+			"{\"type\":\"welcome\",\"version\":\"0.1.0\"}",
+			"{\"type\":\"reject\",\"version\":\"0.1.0\",\"reason\":\"another major version\"}",
+			"{\"type\":\"event\",\"run\":\"r1\",\"seq\":1,\"event\":{\"step\":\"x\"}}",
+			"{\"type\":\"event\",\"run\":\"r1\",\"seq\":0,\"event\":null}",
+			"{\"type\":\"request\",\"run\":\"r1\",\"id\":\"q1\",\"kind\":\"key\",\"input\":{\"provider\":\"p\"}}",
+			"{\"type\":\"done\",\"run\":\"r1\",\"seq\":2,\"result\":[]}",
+			"{\"type\":\"failed\",\"run\":\"r1\",\"seq\":2,\"code\":\"interrupted\",\"message\":\"\"}",
+			"{\"type\":\"failed\",\"run\":\"r1\",\"seq\":2,\"code\":\"crashed\",\"message\":\"\"}",
+			"{\"type\":\"fault\",\"code\":\"bad_frame\",\"path\":[\"input\",0,\"mode\"],\"message\":\"refused\"}",
+			"{\"type\":\"fault\",\"code\":\"unknown_run\",\"run\":\"r9\",\"message\":\"no such run\"}",
+			"{\"type\":\"fault\",\"code\":\"bad_frame\",\"path\":[\"a\",1.5],\"message\":\"\"}",
+			"{\"type\":\"fault\",\"code\":\"bad_frame\",\"path\":[\"a\",-1],\"message\":\"\"}",
+			"{\"type\":\"fault\",\"code\":\"bad_frame\",\"path\":[null],\"message\":\"\"}",
+			"{\"type\":\"fault\",\"code\":\"bad_frame\",\"run\":\"\",\"message\":\"\"}",
+			"{\"type\":\"hello\",\"version\":\"0.1.0\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"type\":\"welcome\",\"version\":\"0.1.0\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"type\":\"reject\",\"version\":\"0.1.0\",\"reason\":\"another major version\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"type\":\"event\",\"run\":\"r1\",\"seq\":1,\"event\":{\"step\":\"x\"}}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"seq"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"type\":\"request\",\"run\":\"r1\",\"id\":\"q1\",\"kind\":\"key\",\"input\":{\"provider\":\"p\"}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"type\":\"done\",\"run\":\"r1\",\"seq\":2,\"result\":[]}"
+			},
+			{
+				"ok": true,
+				"text": "{\"type\":\"failed\",\"run\":\"r1\",\"seq\":2,\"code\":\"interrupted\",\"message\":\"\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"code"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"type\":\"fault\",\"code\":\"bad_frame\",\"path\":[\"input\",0,\"mode\"],\"message\":\"refused\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"type\":\"fault\",\"code\":\"unknown_run\",\"run\":\"r9\",\"message\":\"no such run\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"path",
+					1
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"path",
+					1
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"path",
+					0
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"run"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"type"
+				]
+			}
+		]
+	}
+}

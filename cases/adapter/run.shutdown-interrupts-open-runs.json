@@ -1,0 +1,148 @@
+{
+	"format": 2,
+	"type": "run",
+	"kind": "adapter.run",
+	"name": "shutdown-interrupts-open-runs",
+	"script": [
+		{
+			"send": {
+				"type": "hello",
+				"version": "0.1.0"
+			}
+		},
+		{
+			"await": {
+				"type": "welcome"
+			}
+		},
+		{
+			"send": {
+				"type": "start",
+				"run": "open",
+				"command": "testkit.converse",
+				"input": {
+					"requests": 1,
+					"together": false
+				},
+				"fixed": {
+					"nowMs": 1794535200000,
+					"stepMs": 1000,
+					"idPrefix": "open-"
+				}
+			}
+		},
+		{
+			"send": {
+				"type": "start",
+				"run": "also",
+				"command": "testkit.converse",
+				"input": {
+					"requests": 2,
+					"together": false
+				},
+				"fixed": {
+					"nowMs": 1794535200000,
+					"stepMs": 1000,
+					"idPrefix": "also-"
+				}
+			}
+		},
+		{
+			"await": {
+				"type": "request",
+				"run": "open",
+				"id": "q1"
+			}
+		},
+		{
+			"await": {
+				"type": "request",
+				"run": "also",
+				"id": "q1"
+			}
+		},
+		{
+			"send": {
+				"type": "reply",
+				"run": "also",
+				"id": "q1",
+				"value": 1
+			}
+		},
+		{
+			"await": {
+				"type": "request",
+				"run": "also",
+				"id": "q2"
+			}
+		},
+		{
+			"close": true
+		}
+	],
+	"expected": {
+		"exit": 0,
+		"connection": [
+			{
+				"type": "welcome",
+				"version": "0.1.0"
+			}
+		],
+		"runs": {
+			"also": [
+				{
+					"type": "request",
+					"run": "also",
+					"id": "q1",
+					"kind": "echo",
+					"input": {
+						"count": 1
+					}
+				},
+				{
+					"type": "event",
+					"run": "also",
+					"seq": 1,
+					"event": {
+						"reply": 1
+					}
+				},
+				{
+					"type": "request",
+					"run": "also",
+					"id": "q2",
+					"kind": "echo",
+					"input": {
+						"count": 2
+					}
+				},
+				{
+					"type": "failed",
+					"run": "also",
+					"seq": 2,
+					"code": "interrupted",
+					"message": "interrupted"
+				}
+			],
+			"open": [
+				{
+					"type": "request",
+					"run": "open",
+					"id": "q1",
+					"kind": "echo",
+					"input": {
+						"count": 1
+					}
+				},
+				{
+					"type": "failed",
+					"run": "open",
+					"seq": 1,
+					"code": "interrupted",
+					"message": "interrupted"
+				}
+			]
+		},
+		"files": {}
+	}
+}

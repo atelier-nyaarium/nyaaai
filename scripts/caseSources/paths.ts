@@ -1,6 +1,7 @@
 // Path cases: bun scripts/cases.ts.
 
-import type { CaseSource, TreeEntry } from "../caseAdapter";
+import type { TreeEntry } from "@nyaaai/testkit/caseKinds";
+import type { CaseSource } from "../caseAdapter";
 
 const tree: TreeEntry[] = [
 	{ path: "keep/nested" },

@@ -1,0 +1,40 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.edits",
+	"name": "split-line-starts",
+	"input": {
+		"source": "^",
+		"flags": "m",
+		"template": ">",
+		"texts": [
+			"a\nb\n",
+			"\n\n",
+			"a"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"replaced": ">a\n>b\n>",
+				"pieces": [
+					"a\n",
+					"b\n"
+				]
+			},
+			{
+				"replaced": ">\n>\n>",
+				"pieces": [
+					"\n",
+					"\n"
+				]
+			},
+			{
+				"replaced": ">a",
+				"pieces": [
+					"a"
+				]
+			}
+		]
+	}
+}

@@ -1,0 +1,115 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "torture-Bounded",
+	"input": {
+		"set": "torture",
+		"shape": "Bounded",
+		"texts": [
+			"{\"name\":\"ab\",\"ratio\":0.5,\"few\":[true],\"level\":0,\"count\":0}",
+			"{\"name\":\"😀😀😀\",\"ratio\":1,\"few\":[true,false],\"level\":-2,\"count\":9007199254740991}",
+			"{\"name\":\"ab\",\"ratio\":0,\"few\":[true],\"level\":0,\"count\":0}",
+			"{\"name\":\"ab\",\"ratio\":5e-324,\"few\":[true],\"level\":2,\"count\":-0}",
+			"{\"name\":\"ab\",\"ratio\":1.0000000000000002,\"few\":[true],\"level\":0,\"count\":0}",
+			"{\"name\":\"ab\",\"ratio\":0.5,\"few\":[],\"level\":0,\"count\":0}",
+			"{\"name\":\"ab\",\"ratio\":0.5,\"few\":[true,false,true],\"level\":0,\"count\":0}",
+			"{\"name\":\"ab\",\"ratio\":0.5,\"few\":[true,1,2],\"level\":0,\"count\":0}",
+			"{\"name\":\"ab\",\"ratio\":0.5,\"few\":[true],\"level\":3,\"count\":0}",
+			"{\"name\":\"ab\",\"ratio\":0.5,\"few\":[true],\"level\":-3,\"count\":0}",
+			"{\"name\":\"ab\",\"ratio\":0.5,\"few\":[true],\"level\":2.5,\"count\":0}",
+			"{\"name\":\"ab\",\"ratio\":0.5,\"few\":[true],\"level\":0,\"count\":-1}",
+			"{\"name\":\"ab\",\"ratio\":0.5,\"few\":[true],\"level\":0,\"count\":0.5}",
+			"{\"name\":\"\",\"ratio\":0.5,\"few\":[true],\"level\":0,\"count\":0}",
+			"{\"name\":\"abcd\",\"ratio\":2,\"few\":[true],\"level\":0,\"count\":0}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"name\":\"ab\",\"ratio\":0.5,\"few\":[true],\"level\":0,\"count\":0}"
+			},
+			{
+				"ok": true,
+				"text": "{\"name\":\"😀😀😀\",\"ratio\":1,\"few\":[true,false],\"level\":-2,\"count\":9007199254740991}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"ratio"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"name\":\"ab\",\"ratio\":5e-324,\"few\":[true],\"level\":2,\"count\":0}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"ratio"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"few"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"few"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"few"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"level"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"level"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"level"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"count"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"count"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"name"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"name"
+				]
+			}
+		]
+	}
+}

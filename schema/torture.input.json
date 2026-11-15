@@ -1,0 +1,515 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "torture.input.json",
+	"x-contract-version": "0.1.0",
+	"$defs": {
+		"Color": {
+			"type": "string",
+			"enum": [
+				"red",
+				"green",
+				"light-blue"
+			]
+		},
+		"Name": {
+			"type": "string",
+			"minLength": 1,
+			"maxLength": 3
+		},
+		"Names": {
+			"maxItems": 2,
+			"type": "array",
+			"items": {
+				"$ref": "#/$defs/Name"
+			}
+		},
+		"Leaf": {
+			"type": "object",
+			"properties": {
+				"kind": {
+					"type": "string",
+					"const": "leaf"
+				},
+				"value": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"color": {
+					"$ref": "#/$defs/Color"
+				}
+			},
+			"required": [
+				"kind",
+				"value"
+			]
+		},
+		"Branch": {
+			"type": "object",
+			"properties": {
+				"kind": {
+					"type": "string",
+					"const": "branch"
+				},
+				"kids": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/Tree"
+					}
+				}
+			},
+			"required": [
+				"kind",
+				"kids"
+			]
+		},
+		"Tree": {
+			"oneOf": [
+				{
+					"$ref": "#/$defs/Leaf"
+				},
+				{
+					"$ref": "#/$defs/Branch"
+				}
+			],
+			"x-tag": "kind"
+		},
+		"Chain": {
+			"type": "object",
+			"properties": {
+				"value": {
+					"type": "number"
+				},
+				"next": {
+					"anyOf": [
+						{
+							"$ref": "#/$defs/Chain"
+						},
+						{
+							"type": "null"
+						}
+					]
+				}
+			},
+			"required": [
+				"value",
+				"next"
+			]
+		},
+		"Presence": {
+			"type": "object",
+			"properties": {
+				"optional": {
+					"type": "string"
+				},
+				"nullable": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"both": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"defaulted": {
+					"default": 3,
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"defaultedNull": {
+					"default": null,
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"list": {
+					"default": [
+						"a"
+					],
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"any": {},
+				"must": {}
+			},
+			"required": [
+				"nullable",
+				"must"
+			]
+		},
+		"Overlap": {
+			"anyOf": [
+				{
+					"type": "object",
+					"properties": {
+						"a": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"a"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"a": {
+							"type": "string"
+						},
+						"b": {
+							"type": "number"
+						}
+					},
+					"required": [
+						"a",
+						"b"
+					]
+				},
+				{
+					"$ref": "#/$defs/Leaf"
+				},
+				{
+					"type": "string",
+					"const": "auto"
+				},
+				{
+					"type": "string"
+				},
+				{
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				{
+					"type": "number"
+				},
+				{
+					"type": "null"
+				},
+				{
+					"type": "array",
+					"items": {
+						"type": "boolean"
+					}
+				}
+			]
+		},
+		"Open": {
+			"type": "object",
+			"properties": {
+				"counts": {
+					"type": "object",
+					"propertyNames": {
+						"type": "string"
+					},
+					"additionalProperties": {
+						"type": "integer",
+						"minimum": 0,
+						"maximum": 9007199254740991
+					}
+				},
+				"nested": {
+					"type": "object",
+					"propertyNames": {
+						"type": "string"
+					},
+					"additionalProperties": {
+						"type": "object",
+						"propertyNames": {
+							"type": "string"
+						},
+						"additionalProperties": {
+							"$ref": "#/$defs/Leaf"
+						}
+					}
+				}
+			},
+			"required": [
+				"counts",
+				"nested"
+			]
+		},
+		"Bounded": {
+			"type": "object",
+			"properties": {
+				"name": {
+					"$ref": "#/$defs/Name"
+				},
+				"ratio": {
+					"type": "number",
+					"exclusiveMinimum": 0,
+					"maximum": 1
+				},
+				"few": {
+					"minItems": 1,
+					"maxItems": 2,
+					"type": "array",
+					"items": {
+						"type": "boolean"
+					}
+				},
+				"level": {
+					"type": "integer",
+					"minimum": -2,
+					"maximum": 2
+				},
+				"count": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				}
+			},
+			"required": [
+				"name",
+				"ratio",
+				"few",
+				"level",
+				"count"
+			]
+		},
+		"Literals": {
+			"type": "object",
+			"properties": {
+				"yes": {
+					"type": "boolean",
+					"const": true
+				},
+				"five": {
+					"type": "number",
+					"const": 5
+				},
+				"nothing": {
+					"type": "null"
+				},
+				"word": {
+					"type": "string",
+					"const": "word"
+				},
+				"maybe": {
+					"type": "string",
+					"const": "x"
+				}
+			},
+			"required": [
+				"yes",
+				"five",
+				"nothing",
+				"word"
+			]
+		},
+		"Outer": {
+			"type": "object",
+			"properties": {
+				"inner": {
+					"type": "object",
+					"properties": {
+						"deep": {
+							"anyOf": [
+								{
+									"type": "object",
+									"properties": {
+										"x": {
+											"type": "integer",
+											"minimum": -9007199254740991,
+											"maximum": 9007199254740991
+										}
+									},
+									"required": [
+										"x"
+									]
+								},
+								{
+									"type": "null"
+								}
+							]
+						}
+					},
+					"required": [
+						"deep"
+					]
+				},
+				"list": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"color": {
+								"$ref": "#/$defs/Color"
+							},
+							"names": {
+								"$ref": "#/$defs/Names"
+							}
+						},
+						"required": [
+							"color",
+							"names"
+						]
+					}
+				},
+				"type": {
+					"type": "string",
+					"enum": [
+						"struct",
+						"enum"
+					]
+				}
+			},
+			"required": [
+				"inner",
+				"list",
+				"type"
+			]
+		},
+		"Event": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"type": {
+							"type": "string",
+							"const": "text"
+						},
+						"text": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"type",
+						"text"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"type": {
+							"type": "string",
+							"const": "tool-call"
+						},
+						"id": {
+							"type": "string"
+						},
+						"input": {}
+					},
+					"required": [
+						"type",
+						"id",
+						"input"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"type": {
+							"type": "string",
+							"const": "tree"
+						},
+						"tree": {
+							"$ref": "#/$defs/Tree"
+						}
+					},
+					"required": [
+						"type",
+						"tree"
+					]
+				}
+			],
+			"x-tag": "type"
+		},
+		"Legacy": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "string"
+				},
+				"tags": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"id",
+				"tags"
+			],
+			"x-hooks": [
+				{
+					"kind": "preprocess",
+					"name": "renameLegacy"
+				}
+			]
+		},
+		"Span": {
+			"type": "object",
+			"properties": {
+				"from": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"to": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				}
+			},
+			"required": [
+				"from",
+				"to"
+			],
+			"x-hooks": [
+				{
+					"kind": "refine",
+					"name": "ordered"
+				}
+			]
+		},
+		"Holder": {
+			"type": "object",
+			"properties": {
+				"legacy": {
+					"$ref": "#/$defs/Legacy"
+				},
+				"span": {
+					"anyOf": [
+						{
+							"$ref": "#/$defs/Span"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"label": {
+					"type": "string",
+					"minLength": 1,
+					"x-hooks": [
+						{
+							"kind": "preprocess",
+							"name": "trimmed"
+						}
+					]
+				},
+				"spans": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/Span"
+					}
+				}
+			},
+			"required": [
+				"legacy",
+				"span",
+				"label",
+				"spans"
+			]
+		}
+	}
+}

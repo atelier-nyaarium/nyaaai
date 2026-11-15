@@ -9,7 +9,8 @@
 		"agentic",
 		"operator",
 		"ui",
-		"testkit"
+		"testkit",
+		"cli"
 	],
 	"engines": {
 		"bun": ">=1.4.0"

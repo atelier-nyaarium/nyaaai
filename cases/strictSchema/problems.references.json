@@ -1,0 +1,330 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.problems",
+	"name": "references",
+	"input": {
+		"schemas": [
+			{
+				"$defs": {
+					"Good": {
+						"type": "null"
+					}
+				}
+			},
+			{
+				"$defs": []
+			},
+			{
+				"properties": {
+					"inner": {
+						"$defs": {}
+					}
+				}
+			},
+			{
+				"$ref": "#/$defs/Missing"
+			},
+			{
+				"$ref": "#/$defs/"
+			},
+			{
+				"$ref": "#/$defs/Good/properties",
+				"$defs": {
+					"Good": {}
+				}
+			},
+			{
+				"$ref": 5,
+				"$defs": {
+					"5": {}
+				}
+			},
+			{
+				"$ref": "#/$defs/Good",
+				"$defs": {
+					"Good": {
+						"type": "string"
+					}
+				}
+			},
+			{
+				"$ref": "#/$defs/Good",
+				"$defs": {
+					"Good": {
+						"type": "string"
+					}
+				},
+				"description": "allowed"
+			},
+			{
+				"$ref": "#/$defs/Good",
+				"$defs": {
+					"Good": {
+						"type": "string"
+					}
+				},
+				"type": "string"
+			},
+			{
+				"$ref": "#/$defs/toString",
+				"$defs": {}
+			},
+			{
+				"$defs": {
+					"Good": {
+						"type": "string"
+					}
+				},
+				"properties": {
+					"value": {
+						"$ref": "#/$defs/Good",
+						"description": "allowed"
+					}
+				}
+			},
+			{
+				"$defs": {
+					"Good": {
+						"type": "string"
+					}
+				},
+				"properties": {
+					"value": {
+						"$ref": "#/$defs/Good",
+						"minLength": 1
+					}
+				}
+			},
+			{
+				"$defs": {
+					"Good": {
+						"type": "string"
+					},
+					"Alias": {
+						"$ref": "#/$defs/Good"
+					},
+					"Holder": {
+						"properties": {
+							"value": {
+								"$ref": "#/$defs/Alias"
+							}
+						}
+					},
+					"LoopA": {
+						"$ref": "#/$defs/LoopB"
+					},
+					"LoopB": {
+						"anyOf": [
+							{
+								"$ref": "#/$defs/LoopA"
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"Self": {
+						"oneOf": [
+							{
+								"$ref": "#/$defs/Self"
+							}
+						]
+					},
+					"IntoLoop": {
+						"$ref": "#/$defs/LoopA"
+					},
+					"Node": {
+						"type": "object",
+						"properties": {
+							"next": {
+								"anyOf": [
+									{
+										"type": "null"
+									},
+									{
+										"$ref": "#/$defs/Node"
+									}
+								]
+							}
+						},
+						"required": [
+							"next"
+						]
+					}
+				},
+				"properties": {
+					"value": {
+						"$ref": "#/$defs/Holder"
+					}
+				}
+			},
+			{
+				"anyOf": [
+					{
+						"type": "null"
+					},
+					{
+						"type": "array",
+						"items": {
+							"$ref": "#"
+						}
+					}
+				]
+			},
+			{
+				"$ref": "#"
+			},
+			{
+				"anyOf": [
+					{
+						"$ref": "#"
+					},
+					{
+						"type": "null"
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"problems": [
+			[],
+			[
+				{
+					"path": [
+						"$defs"
+					],
+					"code": "bad_keyword",
+					"message": "invalid keyword $defs"
+				}
+			],
+			[
+				{
+					"path": [
+						"properties",
+						"inner",
+						"$defs"
+					],
+					"code": "bad_keyword",
+					"message": "invalid keyword $defs"
+				}
+			],
+			[
+				{
+					"path": [
+						"$ref"
+					],
+					"code": "bad_reference",
+					"message": "invalid reference"
+				}
+			],
+			[
+				{
+					"path": [
+						"$ref"
+					],
+					"code": "bad_reference",
+					"message": "invalid reference"
+				}
+			],
+			[
+				{
+					"path": [
+						"$ref"
+					],
+					"code": "bad_reference",
+					"message": "invalid reference"
+				}
+			],
+			[
+				{
+					"path": [
+						"$ref"
+					],
+					"code": "bad_reference",
+					"message": "invalid reference"
+				}
+			],
+			[],
+			[],
+			[
+				{
+					"path": [
+						"$ref"
+					],
+					"code": "bad_reference",
+					"message": "invalid reference"
+				}
+			],
+			[
+				{
+					"path": [
+						"$ref"
+					],
+					"code": "bad_reference",
+					"message": "invalid reference"
+				}
+			],
+			[],
+			[
+				{
+					"path": [
+						"properties",
+						"value",
+						"$ref"
+					],
+					"code": "bad_reference",
+					"message": "invalid reference"
+				}
+			],
+			[
+				{
+					"path": [
+						"$defs",
+						"LoopA"
+					],
+					"code": "reference_loop",
+					"message": "reference loop"
+				},
+				{
+					"path": [
+						"$defs",
+						"LoopB"
+					],
+					"code": "reference_loop",
+					"message": "reference loop"
+				},
+				{
+					"path": [
+						"$defs",
+						"Self"
+					],
+					"code": "reference_loop",
+					"message": "reference loop"
+				}
+			],
+			[],
+			[
+				{
+					"path": [
+						"$defs",
+						"Root"
+					],
+					"code": "reference_loop",
+					"message": "reference loop"
+				}
+			],
+			[
+				{
+					"path": [
+						"$defs",
+						"Root"
+					],
+					"code": "reference_loop",
+					"message": "reference loop"
+				}
+			]
+		]
+	}
+}

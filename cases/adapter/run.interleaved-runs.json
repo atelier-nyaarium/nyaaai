@@ -1,0 +1,272 @@
+{
+	"format": 2,
+	"type": "run",
+	"kind": "adapter.run",
+	"name": "interleaved-runs",
+	"script": [
+		{
+			"send": {
+				"type": "hello",
+				"version": "0.1.0"
+			}
+		},
+		{
+			"await": {
+				"type": "welcome"
+			}
+		},
+		{
+			"send": {
+				"type": "start",
+				"run": "a",
+				"command": "testkit.converse",
+				"input": {
+					"requests": 1,
+					"together": false
+				},
+				"fixed": {
+					"nowMs": 1794535200000,
+					"stepMs": 1000,
+					"idPrefix": "a-"
+				}
+			}
+		},
+		{
+			"send": {
+				"type": "start",
+				"run": "b",
+				"command": "testkit.converse",
+				"input": {
+					"requests": 1,
+					"together": false
+				},
+				"fixed": {
+					"nowMs": 1794535200000,
+					"stepMs": 1000,
+					"idPrefix": "b-"
+				}
+			}
+		},
+		{
+			"send": {
+				"type": "start",
+				"run": "a",
+				"command": "testkit.converse",
+				"input": {
+					"requests": 1,
+					"together": false
+				},
+				"fixed": {
+					"nowMs": 1794535200000,
+					"stepMs": 1000,
+					"idPrefix": "a-"
+				}
+			}
+		},
+		{
+			"await": {
+				"type": "fault",
+				"code": "duplicate_run"
+			}
+		},
+		{
+			"await": {
+				"type": "request",
+				"run": "a",
+				"id": "q1"
+			}
+		},
+		{
+			"await": {
+				"type": "request",
+				"run": "b",
+				"id": "q1"
+			}
+		},
+		{
+			"send": {
+				"type": "steer",
+				"run": "b",
+				"text": "for b"
+			}
+		},
+		{
+			"await": {
+				"type": "event",
+				"run": "b",
+				"seq": 1
+			}
+		},
+		{
+			"send": {
+				"type": "reply",
+				"run": "b",
+				"id": "q1",
+				"value": "b first"
+			}
+		},
+		{
+			"await": [
+				{
+					"type": "done",
+					"run": "b"
+				},
+				{
+					"type": "failed",
+					"run": "b"
+				}
+			]
+		},
+		{
+			"send": {
+				"type": "reply",
+				"run": "a",
+				"id": "q1",
+				"value": "a second"
+			}
+		},
+		{
+			"await": [
+				{
+					"type": "done",
+					"run": "a"
+				},
+				{
+					"type": "failed",
+					"run": "a"
+				}
+			]
+		},
+		{
+			"send": {
+				"type": "start",
+				"run": "a",
+				"command": "testkit.converse",
+				"input": {
+					"requests": 0,
+					"together": false
+				},
+				"fixed": {
+					"nowMs": 1794535200000,
+					"stepMs": 1000,
+					"idPrefix": "a-"
+				}
+			}
+		},
+		{
+			"await": [
+				{
+					"type": "done",
+					"run": "a"
+				},
+				{
+					"type": "failed",
+					"run": "a"
+				}
+			]
+		}
+	],
+	"expected": {
+		"exit": 0,
+		"connection": [
+			{
+				"type": "welcome",
+				"version": "0.1.0"
+			},
+			{
+				"type": "fault",
+				"code": "duplicate_run",
+				"run": "a",
+				"message": "the run is open"
+			}
+		],
+		"runs": {
+			"a": [
+				{
+					"type": "request",
+					"run": "a",
+					"id": "q1",
+					"kind": "echo",
+					"input": {
+						"count": 1
+					}
+				},
+				{
+					"type": "event",
+					"run": "a",
+					"seq": 1,
+					"event": {
+						"reply": "a second"
+					}
+				},
+				{
+					"type": "done",
+					"run": "a",
+					"seq": 2,
+					"result": {
+						"ids": [
+							"a-1",
+							"a-2"
+						],
+						"nowMs": 1794535200000,
+						"steers": []
+					}
+				},
+				{
+					"type": "done",
+					"run": "a",
+					"seq": 1,
+					"result": {
+						"ids": [
+							"a-1",
+							"a-2"
+						],
+						"nowMs": 1794535200000,
+						"steers": []
+					}
+				}
+			],
+			"b": [
+				{
+					"type": "request",
+					"run": "b",
+					"id": "q1",
+					"kind": "echo",
+					"input": {
+						"count": 1
+					}
+				},
+				{
+					"type": "event",
+					"run": "b",
+					"seq": 1,
+					"event": {
+						"steer": "for b"
+					}
+				},
+				{
+					"type": "event",
+					"run": "b",
+					"seq": 2,
+					"event": {
+						"reply": "b first"
+					}
+				},
+				{
+					"type": "done",
+					"run": "b",
+					"seq": 3,
+					"result": {
+						"ids": [
+							"b-1",
+							"b-2"
+						],
+						"nowMs": 1794535200000,
+						"steers": []
+					}
+				}
+			]
+		},
+		"files": {}
+	}
+}

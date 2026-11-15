@@ -1,0 +1,41 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "sessionCut-BoundaryMeta",
+	"input": {
+		"set": "sessionCut",
+		"shape": "BoundaryMeta",
+		"texts": [
+			"{\"line\":2,\"uuid\":\"b2\",\"preservedLines\":[1],\"preservedSound\":true,\"preserved\":[\"u1\"],\"summaryLine\":null,\"cumulativeDroppedTokens\":10.5,\"postTokens\":3,\"known\":true}",
+			"{\"line\":2,\"uuid\":\"b2\",\"preservedLines\":[1],\"preservedSound\":true,\"preserved\":[\"u1\"],\"summaryLine\":3,\"cumulativeDroppedTokens\":10.5,\"postTokens\":3,\"known\":true}",
+			"{\"line\":2,\"uuid\":\"b2\",\"preservedLines\":[1],\"preservedSound\":true,\"preserved\":[\"u1\"],\"summaryLine\":null,\"cumulativeDroppedTokens\":1e400,\"postTokens\":3,\"known\":true}",
+			"{\"line\":2,\"uuid\":\"b2\",\"preservedLines\":[1,1.5],\"preservedSound\":true,\"preserved\":[\"u1\"],\"summaryLine\":null,\"cumulativeDroppedTokens\":10.5,\"postTokens\":3,\"known\":true}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"line\":2,\"uuid\":\"b2\",\"preservedLines\":[1],\"preservedSound\":true,\"preserved\":[\"u1\"],\"summaryLine\":null,\"cumulativeDroppedTokens\":10.5,\"postTokens\":3,\"known\":true}"
+			},
+			{
+				"ok": true,
+				"text": "{\"line\":2,\"uuid\":\"b2\",\"preservedLines\":[1],\"preservedSound\":true,\"preserved\":[\"u1\"],\"summaryLine\":3,\"cumulativeDroppedTokens\":10.5,\"postTokens\":3,\"known\":true}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"cumulativeDroppedTokens"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"preservedLines",
+					1
+				]
+			}
+		]
+	}
+}

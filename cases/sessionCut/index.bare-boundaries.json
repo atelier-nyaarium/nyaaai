@@ -1,5 +1,6 @@
 {
-	"format": 1,
+	"format": 2,
+	"type": "function",
 	"kind": "sessionCut.index",
 	"name": "bare-boundaries",
 	"input": {
@@ -30,30 +31,18 @@
 			"unparsed": 0,
 			"unreadable": [],
 			"version": "2.1.323",
-			"header": [
-				[
-					"mode",
-					1
-				],
-				[
-					"permission-mode",
-					2
-				],
-				[
-					"session-owner",
-					3
-				],
-				[
-					"atis-latch",
-					4
-				]
-			],
+			"header": {
+				"mode": 1,
+				"permission-mode": 2,
+				"session-owner": 3,
+				"atis-latch": 4
+			},
 			"boundary": {
 				"line": 14,
 				"uuid": "b-null",
-				"preserved": [],
 				"preservedLines": [],
 				"preservedSound": true,
+				"preserved": [],
 				"summaryLine": 14,
 				"cumulativeDroppedTokens": 0,
 				"postTokens": 0,

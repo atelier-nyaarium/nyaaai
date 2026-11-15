@@ -1,0 +1,298 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.problems",
+	"name": "keywords",
+	"input": {
+		"schemas": [
+			{
+				"anyOf": [
+					{
+						"type": "string"
+					}
+				]
+			},
+			{
+				"allOf": [
+					{
+						"type": "string"
+					}
+				]
+			},
+			{
+				"const": null
+			},
+			{
+				"not": {
+					"const": null
+				}
+			},
+			{
+				"if": {
+					"type": "string"
+				},
+				"then": {
+					"type": "string"
+				},
+				"else": {}
+			},
+			{
+				"items": {
+					"type": "string"
+				}
+			},
+			{
+				"prefixItems": [
+					{
+						"type": "string"
+					}
+				]
+			},
+			{
+				"uniqueItems": true
+			},
+			{
+				"multipleOf": 2
+			},
+			{
+				"properties": {
+					"value": {
+						"type": "string"
+					}
+				}
+			},
+			{
+				"patternProperties": {
+					"^x": {
+						"type": "string"
+					}
+				}
+			},
+			{
+				"contains": {
+					"type": "string"
+				}
+			},
+			{
+				"dependentRequired": {
+					"a": [
+						"b"
+					]
+				}
+			},
+			{
+				"unevaluatedProperties": false
+			},
+			{
+				"nullable": true
+			},
+			{
+				"definitions": {
+					"Name": {
+						"type": "string"
+					}
+				}
+			},
+			{
+				"$id": "local"
+			},
+			{
+				"$anchor": "local"
+			},
+			{
+				"$dynamicRef": "#node"
+			},
+			{
+				"unknownThing": true
+			},
+			{
+				"description": 1,
+				"title": [],
+				"default": {
+					"allOf": []
+				},
+				"examples": "x"
+			},
+			{
+				"properties": {
+					"pattern": {
+						"type": "string",
+						"pattern": "x"
+					},
+					"format": {
+						"format": "uri"
+					}
+				},
+				"$schema": "x"
+			}
+		]
+	},
+	"expected": {
+		"problems": [
+			[],
+			[
+				{
+					"path": [
+						"allOf"
+					],
+					"code": "unknown_keyword",
+					"message": "unsupported keyword allOf"
+				}
+			],
+			[],
+			[
+				{
+					"path": [
+						"not"
+					],
+					"code": "unknown_keyword",
+					"message": "unsupported keyword not"
+				}
+			],
+			[
+				{
+					"path": [
+						"if"
+					],
+					"code": "unknown_keyword",
+					"message": "unsupported keyword if"
+				},
+				{
+					"path": [
+						"then"
+					],
+					"code": "unknown_keyword",
+					"message": "unsupported keyword then"
+				},
+				{
+					"path": [
+						"else"
+					],
+					"code": "unknown_keyword",
+					"message": "unsupported keyword else"
+				}
+			],
+			[],
+			[
+				{
+					"path": [
+						"prefixItems"
+					],
+					"code": "unknown_keyword",
+					"message": "unsupported keyword prefixItems"
+				}
+			],
+			[
+				{
+					"path": [
+						"uniqueItems"
+					],
+					"code": "unknown_keyword",
+					"message": "unsupported keyword uniqueItems"
+				}
+			],
+			[
+				{
+					"path": [
+						"multipleOf"
+					],
+					"code": "unknown_keyword",
+					"message": "unsupported keyword multipleOf"
+				}
+			],
+			[],
+			[
+				{
+					"path": [
+						"patternProperties"
+					],
+					"code": "unknown_keyword",
+					"message": "unsupported keyword patternProperties"
+				}
+			],
+			[
+				{
+					"path": [
+						"contains"
+					],
+					"code": "unknown_keyword",
+					"message": "unsupported keyword contains"
+				}
+			],
+			[
+				{
+					"path": [
+						"dependentRequired"
+					],
+					"code": "unknown_keyword",
+					"message": "unsupported keyword dependentRequired"
+				}
+			],
+			[
+				{
+					"path": [
+						"unevaluatedProperties"
+					],
+					"code": "unknown_keyword",
+					"message": "unsupported keyword unevaluatedProperties"
+				}
+			],
+			[
+				{
+					"path": [
+						"nullable"
+					],
+					"code": "unknown_keyword",
+					"message": "unsupported keyword nullable"
+				}
+			],
+			[
+				{
+					"path": [
+						"definitions"
+					],
+					"code": "unknown_keyword",
+					"message": "unsupported keyword definitions"
+				}
+			],
+			[
+				{
+					"path": [
+						"$id"
+					],
+					"code": "unknown_keyword",
+					"message": "unsupported keyword $id"
+				}
+			],
+			[
+				{
+					"path": [
+						"$anchor"
+					],
+					"code": "unknown_keyword",
+					"message": "unsupported keyword $anchor"
+				}
+			],
+			[
+				{
+					"path": [
+						"$dynamicRef"
+					],
+					"code": "unknown_keyword",
+					"message": "unsupported keyword $dynamicRef"
+				}
+			],
+			[
+				{
+					"path": [
+						"unknownThing"
+					],
+					"code": "unknown_keyword",
+					"message": "unsupported keyword unknownThing"
+				}
+			],
+			[],
+			[]
+		]
+	}
+}

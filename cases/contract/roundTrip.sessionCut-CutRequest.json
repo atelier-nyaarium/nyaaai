@@ -1,0 +1,64 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "sessionCut-CutRequest",
+	"input": {
+		"set": "sessionCut",
+		"shape": "CutRequest",
+		"texts": [
+			"{\"mode\":\"trim\"}",
+			"{\"mode\":\"compact\",\"targetUuid\":\"u\",\"throughUuid\":\"v\",\"endBefore\":\"e\",\"summaryText\":\"s\",\"liveTail\":true}",
+			"{\"mode\":\"clear\",\"unknown\":{\"deep\":1},\"liveTail\":false}",
+			"{\"mode\":\"shrink\"}",
+			"{}",
+			"{\"mode\":\"clear\",\"targetUuid\":null}",
+			"{\"mode\":\"trim\",\"liveTail\":\"yes\"}",
+			"\"trim\""
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"mode\":\"trim\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"mode\":\"compact\",\"targetUuid\":\"u\",\"throughUuid\":\"v\",\"endBefore\":\"e\",\"summaryText\":\"s\",\"liveTail\":true}"
+			},
+			{
+				"ok": true,
+				"text": "{\"mode\":\"clear\",\"liveTail\":false}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"mode"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"mode"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"targetUuid"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"liveTail"
+				]
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

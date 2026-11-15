@@ -1,0 +1,48 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.matches",
+	"name": "nested-captures-each-round",
+	"input": {
+		"source": "((a)(b))+",
+		"flags": "",
+		"texts": [
+			"abab",
+			"ab"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 4,
+						"text": "abab",
+						"captures": [
+							"ab",
+							"a",
+							"b"
+						]
+					}
+				]
+			},
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 2,
+						"text": "ab",
+						"captures": [
+							"ab",
+							"a",
+							"b"
+						]
+					}
+				]
+			}
+		]
+	}
+}

@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "frames-PathPart",
+	"input": {
+		"set": "frames",
+		"shape": "PathPart",
+		"texts": [
+			"\"key\"",
+			"0",
+			"7",
+			"-1",
+			"1.5",
+			"null"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "\"key\""
+			},
+			{
+				"ok": true,
+				"text": "0"
+			},
+			{
+				"ok": true,
+				"text": "7"
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

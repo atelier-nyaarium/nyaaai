@@ -1,0 +1,49 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "trace-Trace",
+	"input": {
+		"set": "trace",
+		"shape": "Trace",
+		"texts": [
+			"{\"format\":1,\"exchanges\":[]}",
+			"{\"format\":1,\"exchanges\":[{\"request\":\"r\",\"status\":204,\"headers\":{},\"chunks\":[]}],\"extra\":true}",
+			"{\"format\":2,\"exchanges\":[]}",
+			"{\"exchanges\":[]}",
+			"{\"format\":1,\"exchanges\":[{\"request\":\"r\"}]}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"format\":1,\"exchanges\":[]}"
+			},
+			{
+				"ok": true,
+				"text": "{\"format\":1,\"exchanges\":[{\"request\":\"r\",\"status\":204,\"headers\":{},\"chunks\":[]}]}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"format"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"format"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"exchanges",
+					0,
+					"status"
+				]
+			}
+		]
+	}
+}

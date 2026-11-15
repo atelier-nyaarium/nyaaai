@@ -43,7 +43,7 @@ function writeJson(file: string, value: unknown): void {
 	writeFileSync(file, `${JSON.stringify(value, null, "\t")}\n`);
 }
 
-/** Tests do not touch this repository's Git state. */
+/** Git state is untouched. */
 function makeSource(): string {
 	const dir = path.join(temp, "source");
 	const files = git(ROOT, ["ls-files", "--cached", "--others", "--exclude-standard"]).split("\n");
@@ -52,9 +52,12 @@ function makeSource(): string {
 		if (!file || !existsSync(from)) continue;
 		cpSync(from, path.join(dir, file), { recursive: true });
 	}
-	const manifest = path.join(dir, "ts/contract/package.json");
-	const parsed = JSON.parse(readFileSync(manifest, "utf8")) as Record<string, unknown>;
-	writeJson(manifest, { ...parsed, dependencies: { "left-pad": "1.3.0" } });
+	for (const name of ["contract", "testkit"]) {
+		const manifest = path.join(dir, "ts", name, "package.json");
+		const parsed = JSON.parse(readFileSync(manifest, "utf8")) as { dependencies?: Record<string, string> };
+		const own = Object.entries(parsed.dependencies ?? {}).filter(([dep]) => dep.startsWith("@nyaaai/"));
+		writeJson(manifest, { ...parsed, dependencies: { ...Object.fromEntries(own), "left-pad": "1.3.0" } });
+	}
 	git(dir, ["init", "-b", "main"]);
 	identify(dir);
 	commitAll(dir, "Source");

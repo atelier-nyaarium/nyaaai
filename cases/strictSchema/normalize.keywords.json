@@ -1,0 +1,513 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.normalize",
+	"name": "keywords",
+	"input": {
+		"schemas": [
+			{
+				"$schema": "dialect",
+				"type": "object",
+				"properties": {
+					"url": {
+						"type": "string",
+						"format": "uri",
+						"pattern": "^https"
+					},
+					"rows": {
+						"type": "array",
+						"items": {
+							"pattern": "x",
+							"type": "string"
+						}
+					},
+					"pattern": {
+						"type": "string",
+						"pattern": "x"
+					},
+					"format": {
+						"enum": [
+							"a"
+						],
+						"format": "f"
+					},
+					"$schema": {
+						"type": "null",
+						"$schema": "inner"
+					}
+				},
+				"required": [
+					"pattern",
+					"format"
+				]
+			},
+			{
+				"additionalProperties": false,
+				"description": "kept",
+				"examples": [
+					{
+						"pattern": "data"
+					}
+				],
+				"default": {
+					"format": "data"
+				},
+				"const": {
+					"pattern": 1
+				},
+				"enum": [
+					{
+						"format": 2,
+						"$schema": 3
+					}
+				]
+			},
+			{
+				"$defs": {
+					"Name": {
+						"pattern": "x",
+						"type": "string"
+					}
+				},
+				"anyOf": [
+					{
+						"format": "f"
+					}
+				],
+				"oneOf": [
+					{
+						"pattern": "p"
+					}
+				],
+				"propertyNames": {
+					"pattern": "^a"
+				},
+				"additionalProperties": {
+					"format": "x"
+				},
+				"items": {
+					"pattern": "y"
+				}
+			},
+			{
+				"allOf": [
+					{
+						"pattern": "kept"
+					}
+				],
+				"not": {
+					"format": "kept"
+				}
+			},
+			{
+				"properties": {
+					"2": {
+						"pattern": "b"
+					},
+					"10": {
+						"format": "a"
+					},
+					"b": {}
+				},
+				"format": "x",
+				"type": "object"
+			},
+			true,
+			null,
+			"text",
+			[
+				{
+					"pattern": "x"
+				}
+			],
+			{
+				"properties": [
+					{
+						"pattern": "x"
+					}
+				],
+				"anyOf": {
+					"format": "x"
+				},
+				"$defs": "x"
+			},
+			{
+				"items": {
+					"items": {
+						"items": {
+							"items": {
+								"items": {
+									"items": {
+										"items": {
+											"items": {
+												"items": {
+													"items": {
+														"items": {
+															"items": {
+																"items": {
+																	"items": {
+																		"items": {
+																			"items": {
+																				"items": {
+																					"items": {
+																						"items": {
+																							"items": {
+																								"items": {
+																									"items": {
+																										"items": {
+																											"items": {
+																												"items": {
+																													"items": {
+																														"items": {
+																															"items": {
+																																"items": {
+																																	"items": {
+																																		"items": {
+																																			"items": {
+																																				"items": {
+																																					"items": {
+																																						"items": {
+																																							"items": {
+																																								"items": {
+																																									"items": {
+																																										"items": {
+																																											"items": {
+																																												"items": {
+																																													"items": {
+																																														"items": {
+																																															"items": {
+																																																"items": {
+																																																	"items": {
+																																																		"items": {
+																																																			"items": {
+																																																				"items": {
+																																																					"items": {
+																																																						"items": {
+																																																							"items": {
+																																																								"items": {
+																																																									"items": {
+																																																										"items": {
+																																																											"items": {
+																																																												"items": {
+																																																													"items": {
+																																																														"items": {
+																																																															"items": {
+																																																																"items": {
+																																																																	"items": {
+																																																																		"items": {
+																																																																			"items": {
+																																																																				"items": {
+																																																																					"items": {
+																																																																						"type": "null"
+																																																																					}
+																																																																				}
+																																																																			}
+																																																																		}
+																																																																	}
+																																																																}
+																																																															}
+																																																														}
+																																																													}
+																																																												}
+																																																											}
+																																																										}
+																																																									}
+																																																								}
+																																																							}
+																																																						}
+																																																					}
+																																																				}
+																																																			}
+																																																		}
+																																																	}
+																																																}
+																																															}
+																																														}
+																																													}
+																																												}
+																																											}
+																																										}
+																																									}
+																																								}
+																																							}
+																																						}
+																																					}
+																																				}
+																																			}
+																																		}
+																																	}
+																																}
+																															}
+																														}
+																													}
+																												}
+																											}
+																										}
+																									}
+																								}
+																							}
+																						}
+																					}
+																				}
+																			}
+																		}
+																	}
+																}
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		]
+	},
+	"expected": {
+		"schemas": [
+			{
+				"type": "object",
+				"properties": {
+					"url": {
+						"type": "string"
+					},
+					"rows": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					},
+					"pattern": {
+						"type": "string"
+					},
+					"format": {
+						"enum": [
+							"a"
+						]
+					},
+					"$schema": {
+						"type": "null"
+					}
+				},
+				"required": [
+					"pattern",
+					"format"
+				]
+			},
+			{
+				"additionalProperties": false,
+				"description": "kept",
+				"examples": [
+					{
+						"pattern": "data"
+					}
+				],
+				"default": {
+					"format": "data"
+				},
+				"const": {
+					"pattern": 1
+				},
+				"enum": [
+					{
+						"format": 2,
+						"$schema": 3
+					}
+				]
+			},
+			{
+				"$defs": {
+					"Name": {
+						"type": "string"
+					}
+				},
+				"anyOf": [
+					{}
+				],
+				"oneOf": [
+					{}
+				],
+				"propertyNames": {},
+				"additionalProperties": {},
+				"items": {}
+			},
+			{
+				"allOf": [
+					{
+						"pattern": "kept"
+					}
+				],
+				"not": {
+					"format": "kept"
+				}
+			},
+			{
+				"properties": {
+					"2": {},
+					"10": {},
+					"b": {}
+				},
+				"type": "object"
+			},
+			true,
+			null,
+			"text",
+			[
+				{
+					"pattern": "x"
+				}
+			],
+			{
+				"properties": [
+					{
+						"pattern": "x"
+					}
+				],
+				"anyOf": {
+					"format": "x"
+				},
+				"$defs": "x"
+			},
+			{
+				"items": {
+					"items": {
+						"items": {
+							"items": {
+								"items": {
+									"items": {
+										"items": {
+											"items": {
+												"items": {
+													"items": {
+														"items": {
+															"items": {
+																"items": {
+																	"items": {
+																		"items": {
+																			"items": {
+																				"items": {
+																					"items": {
+																						"items": {
+																							"items": {
+																								"items": {
+																									"items": {
+																										"items": {
+																											"items": {
+																												"items": {
+																													"items": {
+																														"items": {
+																															"items": {
+																																"items": {
+																																	"items": {
+																																		"items": {
+																																			"items": {
+																																				"items": {
+																																					"items": {
+																																						"items": {
+																																							"items": {
+																																								"items": {
+																																									"items": {
+																																										"items": {
+																																											"items": {
+																																												"items": {
+																																													"items": {
+																																														"items": {
+																																															"items": {
+																																																"items": {
+																																																	"items": {
+																																																		"items": {
+																																																			"items": {
+																																																				"items": {
+																																																					"items": {
+																																																						"items": {
+																																																							"items": {
+																																																								"items": {
+																																																									"items": {
+																																																										"items": {
+																																																											"items": {
+																																																												"items": {
+																																																													"items": {
+																																																														"items": {
+																																																															"items": {
+																																																																"items": {
+																																																																	"items": {
+																																																																		"items": {
+																																																																			"items": {
+																																																																				"items": {
+																																																																					"items": {
+																																																																						"type": "null"
+																																																																					}
+																																																																				}
+																																																																			}
+																																																																		}
+																																																																	}
+																																																																}
+																																																															}
+																																																														}
+																																																													}
+																																																												}
+																																																											}
+																																																										}
+																																																									}
+																																																								}
+																																																							}
+																																																						}
+																																																					}
+																																																				}
+																																																			}
+																																																		}
+																																																	}
+																																																}
+																																															}
+																																														}
+																																													}
+																																												}
+																																											}
+																																										}
+																																									}
+																																								}
+																																							}
+																																						}
+																																					}
+																																				}
+																																			}
+																																		}
+																																	}
+																																}
+																															}
+																														}
+																													}
+																												}
+																											}
+																										}
+																									}
+																								}
+																							}
+																						}
+																					}
+																				}
+																			}
+																		}
+																	}
+																}
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		]
+	}
+}

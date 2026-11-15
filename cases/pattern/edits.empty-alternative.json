@@ -1,0 +1,25 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.edits",
+	"name": "empty-alternative",
+	"input": {
+		"source": "b|",
+		"flags": "",
+		"template": "<$&>",
+		"texts": [
+			"abc"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"replaced": "<>a<b><>c<>",
+				"pieces": [
+					"a",
+					"c"
+				]
+			}
+		]
+	}
+}

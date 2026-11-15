@@ -6,6 +6,16 @@
 	"description": "Fakes for tests",
 	"exports": {
 		".": "./src/index.ts",
-		"./claudeSession": "./src/claudeSession.ts"
+		"./caseFile": "./src/caseFile.ts",
+		"./caseKinds": "./src/caseKinds.ts",
+		"./claudeSession": "./src/claudeSession.ts",
+		"./loopback": "./src/loopback.ts",
+		"./scheduler": "./src/scheduler.ts",
+		"./tortureShapes": "./src/tortureShapes.ts",
+		"./trace": "./src/trace.ts"
+	},
+	"dependencies": {
+		"@nyaaai/contract": "workspace:*",
+		"zod": "4.6.7"
 	}
 }

@@ -4,11 +4,10 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 use nyaaai_contract::json::{Value, stringify_json};
+use nyaaai_contract::shape::Shape;
 use nyaaai_operator::claude::cli_version::installed_version;
-use nyaaai_operator::claude::session_cut::{CutMode, CutRequest, cut_session};
+use nyaaai_operator::claude::session_cut::{CutMode, cut_session, request_for};
 use nyaaai_operator::claude::session_file::FileCutPorts;
-
-use crate::render::{object, plan_json, refused_json};
 
 pub const USAGE: &str = "nyaaai cut <trim|clear|compact> --source <file> --out <folder> [--target <uuid>] \
 [--through <uuid>] [--end-before <text>] [--summary <text>] [--live-tail] [--cli-version <version>]";
@@ -21,13 +20,13 @@ pub fn run(args: &[String]) -> Result<ExitCode, String> {
         .next()
         .and_then(|mode| CutMode::parse(mode))
         .ok_or(USAGE)?;
-    let mut request = CutRequest::new(mode);
+    let mut request = request_for(mode);
     let mut source: Option<PathBuf> = None;
     let mut out: Option<PathBuf> = None;
     let mut cli_version: Option<String> = None;
     while let Some(flag) = args.next() {
         if flag == "--live-tail" {
-            request.live_tail = true;
+            request.live_tail = Some(true);
             continue;
         }
         let value = args.next().ok_or(format!("{flag} needs a value"))?.clone();
@@ -54,17 +53,15 @@ pub fn run(args: &[String]) -> Result<ExitCode, String> {
     match cut_session(&ports, &request).map_err(|error| error.to_string())? {
         Ok(done) => {
             let file = ports.built(&done.session_id);
-            let said = object(vec![
-                ("ok", Value::Bool(true)),
-                ("sessionId", Value::from(done.session_id.as_str())),
-                ("file", Value::from(file.to_string_lossy().into_owned())),
-                ("plan", plan_json(&done.plan)),
-            ]);
+            let mut said = done.encode();
+            if let Value::Object(held) = &mut said {
+                held.insert("file", Value::from(file.to_string_lossy().into_owned()));
+            }
             println!("{}", stringify_json(&said));
             Ok(ExitCode::SUCCESS)
         }
         Err(refused) => {
-            println!("{}", stringify_json(&refused_json(&refused)));
+            println!("{}", stringify_json(&refused.encode()));
             Ok(ExitCode::from(REFUSED))
         }
     }

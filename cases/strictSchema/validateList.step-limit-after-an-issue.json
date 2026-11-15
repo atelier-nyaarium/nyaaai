@@ -1,0 +1,42 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.validateList",
+	"name": "step-limit-after-an-issue",
+	"input": {
+		"schema": {
+			"minItems": 2000000,
+			"items": {
+				"type": "integer"
+			}
+		},
+		"item": "0",
+		"counts": [
+			5,
+			1000000
+		]
+	},
+	"expected": {
+		"issues": [
+			[
+				{
+					"path": [],
+					"code": "min_items",
+					"message": "fewer than 2000000"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "min_items",
+					"message": "fewer than 2000000"
+				},
+				{
+					"path": [],
+					"code": "limit",
+					"message": "past a limit"
+				}
+			]
+		]
+	}
+}

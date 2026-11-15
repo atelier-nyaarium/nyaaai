@@ -1,0 +1,48 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "sessionCut-RowMeta",
+	"input": {
+		"set": "sessionCut",
+		"shape": "RowMeta",
+		"texts": [
+			"{\"line\":3,\"bytes\":40,\"type\":\"user\",\"openTools\":0,\"delivered\":true,\"points\":[]}",
+			"{\"line\":3,\"bytes\":40,\"type\":\"user\",\"openTools\":0,\"delivered\":true,\"points\":[\"u1\",\"u2\"],\"uuid\":\"u3\",\"at\":\"2026-01-01T00:00:00.000Z\",\"text\":\"hi\",\"extra\":1}",
+			"{\"line\":3,\"bytes\":40,\"type\":\"user\",\"openTools\":-1,\"delivered\":true,\"points\":[]}",
+			"{\"line\":3,\"bytes\":40,\"type\":\"user\",\"openTools\":0,\"delivered\":true,\"points\":[\"u1\",2]}",
+			"{\"line\":3,\"bytes\":40,\"type\":\"user\",\"openTools\":0,\"delivered\":\"yes\",\"points\":[]}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"line\":3,\"bytes\":40,\"type\":\"user\",\"openTools\":0,\"delivered\":true,\"points\":[]}"
+			},
+			{
+				"ok": true,
+				"text": "{\"line\":3,\"bytes\":40,\"type\":\"user\",\"uuid\":\"u3\",\"at\":\"2026-01-01T00:00:00.000Z\",\"openTools\":0,\"delivered\":true,\"text\":\"hi\",\"points\":[\"u1\",\"u2\"]}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"openTools"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"points",
+					1
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"delivered"
+				]
+			}
+		]
+	}
+}

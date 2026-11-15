@@ -1,0 +1,45 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.matches",
+	"name": "greedy",
+	"input": {
+		"source": "a.*b",
+		"flags": "",
+		"texts": [
+			"a1b2b",
+			"ab",
+			"a\nb"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 5,
+						"text": "a1b2b",
+						"captures": []
+					}
+				]
+			},
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 2,
+						"text": "ab",
+						"captures": []
+					}
+				]
+			},
+			{
+				"test": false,
+				"all": []
+			}
+		]
+	}
+}

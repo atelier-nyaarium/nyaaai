@@ -1,5 +1,6 @@
 {
-	"format": 1,
+	"format": 2,
+	"type": "function",
 	"kind": "sessionCut.index",
 	"name": "never-compacted",
 	"input": {
@@ -24,24 +25,12 @@
 			"unparsed": 0,
 			"unreadable": [],
 			"version": "2.1.323",
-			"header": [
-				[
-					"mode",
-					1
-				],
-				[
-					"permission-mode",
-					2
-				],
-				[
-					"session-owner",
-					3
-				],
-				[
-					"atis-latch",
-					4
-				]
-			],
+			"header": {
+				"mode": 1,
+				"permission-mode": 2,
+				"session-owner": 3,
+				"atis-latch": 4
+			},
 			"boundary": null,
 			"boundaries": 0,
 			"standing": null,

@@ -1,0 +1,79 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "sessionCut-SessionIndex",
+	"input": {
+		"set": "sessionCut",
+		"shape": "SessionIndex",
+		"texts": [
+			"{\"lines\":3,\"unparsed\":0,\"unreadable\":[],\"version\":null,\"header\":{},\"boundary\":null,\"boundaries\":0,\"standing\":null,\"tail\":[{\"line\":3,\"bytes\":40,\"type\":\"user\",\"openTools\":0,\"delivered\":true,\"points\":[]}]}",
+			"{\"lines\":3,\"unparsed\":0,\"unreadable\":[2],\"version\":\"2.1.323\",\"header\":{\"7\":3,\"mode\":1,\"permission-mode\":2},\"boundary\":{\"line\":2,\"uuid\":\"b2\",\"preservedLines\":[1],\"preservedSound\":true,\"preserved\":[\"u1\"],\"summaryLine\":null,\"cumulativeDroppedTokens\":10.5,\"postTokens\":3,\"known\":true},\"boundaries\":1,\"standing\":\"what stood\",\"tail\":[{\"line\":3,\"bytes\":40,\"type\":\"user\",\"openTools\":0,\"delivered\":true,\"points\":[\"u1\"],\"uuid\":\"u3\",\"at\":\"2026-01-01T00:00:00.000Z\",\"text\":\"hi\"},{\"line\":3,\"bytes\":40,\"type\":\"user\",\"openTools\":0,\"delivered\":true,\"points\":[]}]}",
+			"{\"lines\":3,\"unparsed\":0,\"unreadable\":[],\"version\":null,\"header\":{},\"boundary\":{\"line\":2,\"uuid\":\"b2\",\"preservedLines\":[1],\"preservedSound\":true,\"preserved\":[\"u1\"],\"summaryLine\":4,\"cumulativeDroppedTokens\":10.5,\"postTokens\":3,\"known\":false},\"boundaries\":0,\"standing\":null,\"tail\":[{\"line\":3,\"bytes\":40,\"type\":\"user\",\"openTools\":0,\"delivered\":true,\"points\":[]}]}",
+			"{\"lines\":3,\"unparsed\":0,\"unreadable\":[],\"version\":null,\"header\":{},\"boundary\":{\"line\":2,\"uuid\":\"b2\",\"preservedLines\":[1],\"preservedSound\":true,\"preserved\":[\"u1\"],\"summaryLine\":null,\"cumulativeDroppedTokens\":10.5,\"postTokens\":\"3\",\"known\":true},\"boundaries\":0,\"standing\":null,\"tail\":[{\"line\":3,\"bytes\":40,\"type\":\"user\",\"openTools\":0,\"delivered\":true,\"points\":[]}]}",
+			"{\"lines\":3,\"unparsed\":0,\"unreadable\":[],\"version\":null,\"header\":{\"mode\":-1},\"boundary\":null,\"boundaries\":0,\"standing\":null,\"tail\":[{\"line\":3,\"bytes\":40,\"type\":\"user\",\"openTools\":0,\"delivered\":true,\"points\":[]}]}",
+			"{\"lines\":3,\"unparsed\":0,\"unreadable\":[],\"version\":null,\"header\":[],\"boundary\":null,\"boundaries\":0,\"standing\":null,\"tail\":[{\"line\":3,\"bytes\":40,\"type\":\"user\",\"openTools\":0,\"delivered\":true,\"points\":[]}]}",
+			"{\"lines\":3,\"unparsed\":0,\"unreadable\":[],\"version\":null,\"header\":{},\"boundary\":null,\"boundaries\":0,\"standing\":null,\"tail\":[{\"line\":3,\"bytes\":40,\"type\":\"user\",\"openTools\":0,\"delivered\":true,\"points\":[]},{\"line\":3,\"bytes\":40,\"type\":5,\"openTools\":0,\"delivered\":true,\"points\":[]}]}",
+			"{\"lines\":3,\"unparsed\":0,\"unreadable\":[],\"version\":null,\"header\":{},\"boundary\":null,\"boundaries\":0,\"standing\":null,\"tail\":[{\"line\":3,\"bytes\":40,\"type\":\"user\",\"openTools\":0,\"delivered\":true,\"points\":[],\"uuid\":null}]}",
+			"{\"lines\":9007199254740992,\"unparsed\":0,\"unreadable\":[],\"version\":null,\"header\":{},\"boundary\":null,\"boundaries\":0,\"standing\":null,\"tail\":[{\"line\":3,\"bytes\":40,\"type\":\"user\",\"openTools\":0,\"delivered\":true,\"points\":[]}]}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"lines\":3,\"unparsed\":0,\"unreadable\":[],\"version\":null,\"header\":{},\"boundary\":null,\"boundaries\":0,\"standing\":null,\"tail\":[{\"line\":3,\"bytes\":40,\"type\":\"user\",\"openTools\":0,\"delivered\":true,\"points\":[]}]}"
+			},
+			{
+				"ok": true,
+				"text": "{\"lines\":3,\"unparsed\":0,\"unreadable\":[2],\"version\":\"2.1.323\",\"header\":{\"7\":3,\"mode\":1,\"permission-mode\":2},\"boundary\":{\"line\":2,\"uuid\":\"b2\",\"preservedLines\":[1],\"preservedSound\":true,\"preserved\":[\"u1\"],\"summaryLine\":null,\"cumulativeDroppedTokens\":10.5,\"postTokens\":3,\"known\":true},\"boundaries\":1,\"standing\":\"what stood\",\"tail\":[{\"line\":3,\"bytes\":40,\"type\":\"user\",\"uuid\":\"u3\",\"at\":\"2026-01-01T00:00:00.000Z\",\"openTools\":0,\"delivered\":true,\"text\":\"hi\",\"points\":[\"u1\"]},{\"line\":3,\"bytes\":40,\"type\":\"user\",\"openTools\":0,\"delivered\":true,\"points\":[]}]}"
+			},
+			{
+				"ok": true,
+				"text": "{\"lines\":3,\"unparsed\":0,\"unreadable\":[],\"version\":null,\"header\":{},\"boundary\":{\"line\":2,\"uuid\":\"b2\",\"preservedLines\":[1],\"preservedSound\":true,\"preserved\":[\"u1\"],\"summaryLine\":4,\"cumulativeDroppedTokens\":10.5,\"postTokens\":3,\"known\":false},\"boundaries\":0,\"standing\":null,\"tail\":[{\"line\":3,\"bytes\":40,\"type\":\"user\",\"openTools\":0,\"delivered\":true,\"points\":[]}]}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"boundary",
+					"postTokens"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"header",
+					"mode"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"header"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"tail",
+					1,
+					"type"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"tail",
+					0,
+					"uuid"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"lines"
+				]
+			}
+		]
+	}
+}

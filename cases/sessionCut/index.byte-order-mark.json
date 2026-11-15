@@ -1,5 +1,6 @@
 {
-	"format": 1,
+	"format": 2,
+	"type": "function",
 	"kind": "sessionCut.index",
 	"name": "byte-order-mark",
 	"input": {
@@ -15,20 +16,11 @@
 				1
 			],
 			"version": "2.1.323",
-			"header": [
-				[
-					"permission-mode",
-					2
-				],
-				[
-					"session-owner",
-					3
-				],
-				[
-					"atis-latch",
-					4
-				]
-			],
+			"header": {
+				"permission-mode": 2,
+				"session-owner": 3,
+				"atis-latch": 4
+			},
 			"boundary": null,
 			"boundaries": 0,
 			"standing": null,

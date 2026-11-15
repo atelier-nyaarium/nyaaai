@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "frames-RunFailure",
+	"input": {
+		"set": "frames",
+		"shape": "RunFailure",
+		"texts": [
+			"\"interrupted\"",
+			"\"unknown_command\"",
+			"\"bad_input\"",
+			"\"host_request\"",
+			"\"error\"",
+			"\"fault\""
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "\"interrupted\""
+			},
+			{
+				"ok": true,
+				"text": "\"unknown_command\""
+			},
+			{
+				"ok": true,
+				"text": "\"bad_input\""
+			},
+			{
+				"ok": true,
+				"text": "\"host_request\""
+			},
+			{
+				"ok": true,
+				"text": "\"error\""
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

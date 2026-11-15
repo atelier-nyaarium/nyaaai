@@ -1,0 +1,58 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.matches",
+	"name": "anchors-text",
+	"input": {
+		"source": "^.$",
+		"flags": "",
+		"texts": [
+			"a",
+			"\na",
+			"a\n",
+			"a\r",
+			"a\r\n",
+			"a ",
+			"a "
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 1,
+						"text": "a",
+						"captures": []
+					}
+				]
+			},
+			{
+				"test": false,
+				"all": []
+			},
+			{
+				"test": false,
+				"all": []
+			},
+			{
+				"test": false,
+				"all": []
+			},
+			{
+				"test": false,
+				"all": []
+			},
+			{
+				"test": false,
+				"all": []
+			},
+			{
+				"test": false,
+				"all": []
+			}
+		]
+	}
+}

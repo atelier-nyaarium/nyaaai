@@ -1,12 +1,11 @@
-// Compare sessions without transcript content.
+// Compare real sessions.
 // Run: bun scripts/realSessions.ts
 
-import { spawnSync } from "node:child_process";
-import { mkdtempSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
-import { homedir, tmpdir } from "node:os";
+import { readdirSync, statSync } from "node:fs";
+import { homedir } from "node:os";
 import path from "node:path";
-import { runCase } from "./caseAdapter";
-import { cargoBin, ROOT } from "./child";
+import { runCommands, rustAdapter } from "./adapterHost";
+import { CASE_PREFIX, runCase } from "./caseAdapter";
 
 ////////////////////////////////
 //  Interfaces & Types
@@ -19,6 +18,9 @@ interface IndexResult {
 //  Constants
 
 const PROVEN = "2.1.323";
+
+/** One command's wait. A session file can be large. */
+const LARGE_FILE_MS = 600_000;
 
 ////////////////////////////////
 //  Functions & Helpers
@@ -33,66 +35,59 @@ function sessionFiles(root: string): string[] {
 		);
 }
 
-function rustResult(binary: string, caseFile: string): unknown {
-	const ran = spawnSync(binary, [caseFile], { encoding: "utf8", maxBuffer: 1 << 30 });
-	if (ran.status !== 0) throw new Error(ran.stderr.trim());
-	const line = JSON.parse(ran.stdout) as { actual?: unknown; error?: string };
-	if (line.error !== undefined) throw new Error(line.error);
-	return line.actual;
-}
-
 ////////////////////////////////
 //  Main
 
 if (import.meta.main) {
 	const root = process.argv[2] ?? path.join(homedir(), ".claude", "projects");
-	const built = spawnSync(
-		cargoBin(),
-		[
-			"build",
-			"--quiet",
-			"--locked",
-			"--manifest-path",
-			"rust/Cargo.toml",
-			"-p",
-			"nyaaai-cli",
-			"--features",
-			"cases",
-		],
-		{ cwd: ROOT, stdio: "inherit" },
+	const files = sessionFiles(root);
+	const stamp = (file: string): string => {
+		const held = statSync(file, { throwIfNoEntry: false });
+		return held ? `${held.size} ${held.mtimeMs}` : "gone";
+	};
+	const before = new Map(files.map((file) => [file, stamp(file)]));
+	const cases = files.flatMap((file) => {
+		const source = { file };
+		return [
+			{ file, kind: "sessionCut.index", input: { source } },
+			{ file, kind: "sessionCut.plan", input: { source, requests: [{ mode: "trim" }], cliVersion: PROVEN } },
+		];
+	});
+	const rust = await runCommands(
+		rustAdapter(),
+		cases.map((held, at) => ({ run: String(at), command: `${CASE_PREFIX}${held.kind}`, input: held.input })),
+		LARGE_FILE_MS,
 	);
-	if (built.status !== 0) process.exit(1);
-	const binary = path.join(ROOT, "rust", "target", "debug", "nyaaai-cases");
-	const scratch = mkdtempSync(path.join(tmpdir(), "nyaaai-real-sessions-"));
 	let differing = 0;
-	try {
-		const files = sessionFiles(root);
-		for (const file of files) {
-			const source = { file };
-			const cases = [
-				{ kind: "sessionCut.index", input: { source } },
-				{ kind: "sessionCut.plan", input: { source, requests: [{ mode: "trim" }], cliVersion: PROVEN } },
-			];
-			const verdicts: string[] = [];
-			let facts = "";
-			for (const held of cases) {
-				const caseFile = path.join(scratch, "case.json");
-				writeFileSync(caseFile, JSON.stringify({ format: 1, name: "real", ...held }));
-				const ours = await runCase(held.kind, held.input);
-				const same = Bun.deepEquals(ours, rustResult(binary, caseFile), true);
-				verdicts.push(same ? "same" : "DIFFERS");
-				if (!same) differing += 1;
-				if (held.kind === "sessionCut.index") {
-					const { index } = ours as IndexResult;
-					facts = `lines=${index.lines} boundaries=${index.boundaries} unparsed=${index.unparsed} version=${index.version}`;
-				}
-			}
-			const megabytes = (statSync(file).size / 1_048_576).toFixed(1);
-			console.log(`index ${verdicts[0]}  plan ${verdicts[1]}  ${megabytes} MB  ${facts}  ${path.basename(file)}`);
+	// Detect session changes mid-check.
+	const live = new Set<string>();
+	const odd = new Set<string>();
+	const lines = new Map<string, string[]>();
+	for (const [at, held] of cases.entries()) {
+		// A file may change or go mid-check.
+		const ours = await runCase(held.kind, held.input).catch(() => undefined);
+		const theirs = rust.get(String(at));
+		const same =
+			ours !== undefined &&
+			theirs !== undefined &&
+			"result" in theirs &&
+			JSON.stringify(ours) === JSON.stringify(theirs.result);
+		const moved = !same && before.get(held.file) !== stamp(held.file);
+		if (moved) live.add(held.file);
+		else if (!same) differing += 1;
+		if (!same) odd.add(held.file);
+		const said = lines.get(held.file) ?? [];
+		said.push(`${held.kind.split(".")[1]} ${same ? "same" : moved ? "live" : "DIFFERS"}`);
+		if (held.kind === "sessionCut.index" && ours !== undefined) {
+			const { index } = ours as IndexResult;
+			const megabytes = ((statSync(held.file, { throwIfNoEntry: false })?.size ?? 0) / 1_048_576).toFixed(1);
+			said.push(
+				`${megabytes} MB  lines=${index.lines} boundaries=${index.boundaries} unparsed=${index.unparsed} version=${index.version}`,
+			);
 		}
-		console.log(`real sessions: ${files.length} files, ${differing} differing results`);
-	} finally {
-		rmSync(scratch, { recursive: true, force: true });
+		lines.set(held.file, said);
 	}
+	for (const file of odd) console.log(`${lines.get(file)?.join("  ")}  ${path.basename(file)}`);
+	console.log(`real sessions: ${files.length} files, ${differing} differing results, ${live.size} live`);
 	process.exit(differing === 0 ? 0 : 1);
 }

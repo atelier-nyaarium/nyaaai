@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "frames-Interrupt",
+	"input": {
+		"set": "frames",
+		"shape": "Interrupt",
+		"texts": [
+			"{\"type\":\"interrupt\",\"run\":\"r1\"}",
+			"{\"type\":\"interrupt\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"type\":\"interrupt\",\"run\":\"r1\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"run"
+				]
+			}
+		]
+	}
+}

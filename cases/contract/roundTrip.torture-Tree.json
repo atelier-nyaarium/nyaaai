@@ -1,0 +1,97 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "torture-Tree",
+	"input": {
+		"set": "torture",
+		"shape": "Tree",
+		"texts": [
+			"{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"leaf\",\"value\":1},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]}",
+			"{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"leaf\",\"value\":1},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]}",
+			"{\"kind\":\"twig\"}",
+			"{\"kids\":[]}",
+			"{\"kind\":5}",
+			"{\"kind\":null,\"kids\":[]}",
+			"{\"kind\":\"branch\",\"kids\":[{\"kind\":\"leaf\",\"value\":1},{\"kind\":\"leaf\",\"value\":\"x\"}]}",
+			"{\"kind\":\"branch\",\"kids\":[{\"kind\":\"leaf\",\"value\":1},{\"kind\":\"branch\"}]}",
+			"{\"kind\":\"branch\",\"kids\":[[]]}",
+			"{\"kind\":\"branch\",\"kids\":{}}",
+			"5",
+			"[]"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"leaf\",\"value\":1},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"branch\",\"kids\":[{\"kind\":\"leaf\",\"value\":1},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]},{\"kind\":\"leaf\",\"value\":1,\"color\":\"green\"}]}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kids",
+					1,
+					"value"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kids",
+					1,
+					"kids"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kids",
+					0
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kids"
+				]
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

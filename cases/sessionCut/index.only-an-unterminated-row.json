@@ -1,5 +1,6 @@
 {
-	"format": 1,
+	"format": 2,
+	"type": "function",
 	"kind": "sessionCut.index",
 	"name": "only-an-unterminated-row",
 	"input": {
@@ -13,7 +14,7 @@
 			"unparsed": 0,
 			"unreadable": [],
 			"version": null,
-			"header": [],
+			"header": {},
 			"boundary": null,
 			"boundaries": 0,
 			"standing": null,

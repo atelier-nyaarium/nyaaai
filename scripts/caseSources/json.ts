@@ -87,3 +87,117 @@ export const jsonCases: CaseSource[] = [
 		`[${nested("[", "]", 1023)},${nested("[", "]", 1024)}]`,
 	]),
 ];
+
+const canonical = (name: string, texts: string[]): CaseSource => ({ kind: "json.canonical", name, input: { texts } });
+
+/** UTF-16, scalar, byte ordering. */
+const ORDER_TRAPS = [
+	"\u{e000}",
+	"\u{10000}",
+	"\u{ffff}",
+	"\u{1f600}",
+	"\u{d7ff}",
+	"z",
+	"Z",
+	"\u{e9}",
+	"e\u{301}",
+	"",
+	"10",
+	"9",
+	"1",
+	"01",
+	"a",
+	"A",
+	"_",
+	" ",
+];
+
+export const canonicalCases: CaseSource[] = [
+	canonical("keys", [
+		JSON.stringify(Object.fromEntries(ORDER_TRAPS.map((key, at) => [key, at]))),
+		'{"b":1,"a":{"d":[{"z":1,"y":2},[]],"c":null},"a":2}',
+		'{"10":1,"9":2,"1":3,"01":4,"-1":5,"1.5":6,"4294967295":7,"a":8}',
+		'{"__proto__":{"b":1,"a":2},"constructor":1,"toJSON":2}',
+		"[]",
+		"{}",
+		'{"":{"":[{}]}}',
+	]),
+	canonical("spelling", [
+		"[1e21,1E21,1e-7,0.000001,-0,0.0,1.0,100,1e2,123456789012345680000,5e-324,1.7976931348623157e308,1e400,-1e400]",
+		'["\\u2028\\u2029\\u0000\\u001f\\u007f\\"\\\\\\/\\b\\f\\n\\r\\t","\\ud83d\\ude00","\\ud800","\u{e9}\u{1f600}"]',
+		"  [ true , false , null ]  ",
+		'"text"',
+		"null",
+		"7",
+		"{",
+		"",
+		"[1,]",
+	]),
+	{
+		kind: "js.string",
+		name: "coercions",
+		input: {
+			texts: [
+				"null",
+				"true",
+				"false",
+				'"text"',
+				'""',
+				"0",
+				"-0",
+				"1.50",
+				"1e21",
+				"1e-7",
+				"123456789012345680000",
+				"1e400",
+				"-1e400",
+				"[]",
+				"[null]",
+				"[1,null,2]",
+				'[1,[2,[null,"x"]],[],{}]',
+				"[[]]",
+				"[true,false]",
+				"{}",
+				'{"toString":"mine"}',
+				'["a,b","c"]',
+			],
+		},
+	},
+	{
+		kind: "order.sortedTexts",
+		name: "traps",
+		input: { texts: [...ORDER_TRAPS, ...ORDER_TRAPS.map((text) => `a${text}`), "a"] },
+	},
+];
+
+export const base64Cases: CaseSource[] = [
+	{
+		kind: "base64.decode",
+		name: "texts",
+		input: {
+			texts: [
+				"",
+				"QQ==",
+				"QUI=",
+				"QUJD",
+				"QUJDRA==",
+				Buffer.from(Uint8Array.from({ length: 256 }, (_, at) => at)).toString("base64"),
+				"/+/+",
+				"QQ",
+				"QQ=",
+				"QR==",
+				"QUJ=",
+				"Q===",
+				"====",
+				"QQ==QQ==",
+				"QUJD\n",
+				" QUJD",
+				"QU-D",
+				"QU_D",
+				"QUJ\u{e9}",
+				"=QUJ",
+				"Q=JD",
+			],
+		},
+	},
+];

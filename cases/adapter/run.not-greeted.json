@@ -1,0 +1,82 @@
+{
+	"format": 2,
+	"type": "run",
+	"kind": "adapter.run",
+	"name": "not-greeted",
+	"script": [
+		{
+			"send": {
+				"type": "start",
+				"run": "early",
+				"command": "testkit.converse",
+				"input": {
+					"requests": 0,
+					"together": false
+				},
+				"fixed": {
+					"nowMs": 1794535200000,
+					"stepMs": 1000,
+					"idPrefix": "early-"
+				}
+			}
+		},
+		{
+			"await": {
+				"type": "fault",
+				"code": "not_greeted"
+			}
+		},
+		{
+			"sendText": "not json"
+		},
+		{
+			"send": {
+				"type": "hello",
+				"version": "0.1.0"
+			}
+		},
+		{
+			"await": {
+				"type": "welcome"
+			}
+		},
+		{
+			"send": {
+				"type": "hello",
+				"version": "0.1.0"
+			}
+		},
+		{
+			"await": {
+				"type": "fault",
+				"message": "greeted twice"
+			}
+		}
+	],
+	"expected": {
+		"exit": 0,
+		"connection": [
+			{
+				"type": "fault",
+				"code": "not_greeted",
+				"message": "say hello first"
+			},
+			{
+				"type": "fault",
+				"code": "bad_frame",
+				"message": "not JSON"
+			},
+			{
+				"type": "welcome",
+				"version": "0.1.0"
+			},
+			{
+				"type": "fault",
+				"code": "bad_frame",
+				"message": "greeted twice"
+			}
+		],
+		"runs": {},
+		"files": {}
+	}
+}

@@ -1,263 +1,71 @@
-//! Cuts of a Claude Code session file: trim to the live segment, or clear or compact above a turn.
-//!
-//! The twin of `sessionCut.ts`. Rows are text lines; a kept row is copied as it stands.
+//! Claude session file cuts.
 
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::io;
 
+use nyaaai_contract::id::Ids;
 use nyaaai_contract::js::{collapse_space, strict_equal, to_js_string, trim};
-use nyaaai_contract::json::{Object, Value, parse_json, quote_json, stringify_json};
-use nyaaai_contract::time::{iso_time, parse_iso_time};
+use nyaaai_contract::json::{Object, Record, Value, parse_json, quote_json, stringify_json};
+pub use nyaaai_contract::shapes::session_cut::{
+    BoundaryMeta, CutDone, CutMode, CutPlan, CutRefusal, CutRefused, CutRequest, KeptFrom,
+    PickedTurn, Preserved, RowMeta, SessionIndex, TurnPick,
+};
+use nyaaai_contract::time::{Clock, iso_time, parse_iso_time};
 
-/// CLI versions whose session file shape a built cut is known to resume under.
+use crate::prompts;
+
 pub const CUT_CLI_VERSIONS: &[&str] = &["2.1.323"];
 
-/// Trim keeps the live segment; clear and compact cut above a chosen turn.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum CutMode {
-    Trim,
-    Clear,
-    Compact,
-}
-
-impl CutMode {
-    pub fn as_str(self) -> &'static str {
-        match self {
-            CutMode::Trim => "trim",
-            CutMode::Clear => "clear",
-            CutMode::Compact => "compact",
-        }
+pub fn request_for(mode: CutMode) -> CutRequest {
+    CutRequest {
+        mode,
+        target_uuid: None,
+        through_uuid: None,
+        end_before: None,
+        summary_text: None,
+        live_tail: None,
     }
-
-    pub fn parse(text: &str) -> Option<Self> {
-        [CutMode::Trim, CutMode::Clear, CutMode::Compact]
-            .into_iter()
-            .find(|mode| mode.as_str() == text)
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum CutRefusal {
-    NoRows,
-    CliVersion,
-    BoundaryShape,
-    UnreadableRows,
-    NothingToTrim,
-    PreservedUnresolved,
-    TargetMissing,
-    TargetCompacted,
-    TargetNotTurnStart,
-    TargetMidTool,
-    TailMidTool,
-    EndMissing,
-    LateMessage,
-    NothingAbove,
-    SummaryNeeded,
-}
-
-impl CutRefusal {
-    pub fn as_str(self) -> &'static str {
-        match self {
-            CutRefusal::NoRows => "no_rows",
-            CutRefusal::CliVersion => "cli_version",
-            CutRefusal::BoundaryShape => "boundary_shape",
-            CutRefusal::UnreadableRows => "unreadable_rows",
-            CutRefusal::NothingToTrim => "nothing_to_trim",
-            CutRefusal::PreservedUnresolved => "preserved_unresolved",
-            CutRefusal::TargetMissing => "target_missing",
-            CutRefusal::TargetCompacted => "target_compacted",
-            CutRefusal::TargetNotTurnStart => "target_not_turn_start",
-            CutRefusal::TargetMidTool => "target_mid_tool",
-            CutRefusal::TailMidTool => "tail_mid_tool",
-            CutRefusal::EndMissing => "end_missing",
-            CutRefusal::LateMessage => "late_message",
-            CutRefusal::NothingAbove => "nothing_above",
-            CutRefusal::SummaryNeeded => "summary_needed",
-        }
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct CutRefused {
-    pub reason: CutRefusal,
-    pub detail: String,
-}
-
-/// One row after the live boundary, without its text.
-#[derive(Debug, Clone)]
-pub struct RowMeta {
-    pub line: usize,
-    pub bytes: usize,
-    /// The row's `type`.
-    pub kind: String,
-    pub uuid: Option<String>,
-    pub at: Option<String>,
-    /// Tool calls still unanswered before this row.
-    pub open_tools: usize,
-    /// A message reached the session here: a turn start, or one taken in mid-turn. A cut point.
-    pub delivered: bool,
-    /// A delivered message's own text.
-    pub text: Option<String>,
-    /// Rows this one names: a prompt's leaf, a file snapshot's message.
-    pub points: Vec<String>,
-}
-
-#[derive(Debug, Clone)]
-pub struct BoundaryMeta {
-    pub line: usize,
-    pub uuid: String,
-    /// Its preserved rows, which sit before it in the file.
-    pub preserved_lines: Vec<usize>,
-    /// Every preserved id is a row, and they are the chain from tail back to head.
-    pub preserved_sound: bool,
-    pub preserved: Vec<String>,
-    pub summary_line: Option<usize>,
-    pub cumulative_dropped_tokens: f64,
-    pub post_tokens: f64,
-    /// Its keys and value types are ones a cut knows.
-    pub known: bool,
-}
-
-#[derive(Debug, Clone)]
-pub struct SessionIndex {
-    pub lines: usize,
-    pub unparsed: usize,
-    /// Lines after the live boundary that do not parse. A cut that keeps past one would lose it.
-    pub unreadable: Vec<usize>,
-    pub version: Option<String>,
-    /// The newest of each header row, in first-seen order.
-    pub header: Vec<(String, usize)>,
-    pub boundary: Option<BoundaryMeta>,
-    /// Compaction rows in the whole file.
-    pub boundaries: usize,
-    /// The live boundary's summary text.
-    pub standing: Option<String>,
-    /// Rows after the live boundary, or every row when there is none. The last entry is the file's end.
-    pub tail: Vec<RowMeta>,
-}
-
-#[derive(Debug, Clone)]
-pub struct CutRequest {
-    pub mode: CutMode,
-    /// The turn start to keep from. Unused by trim.
-    pub target_uuid: Option<String>,
-    /// The last row to keep; the file's end when absent.
-    pub through_uuid: Option<String>,
-    /// Ends the kept rows before the first later turn start whose text holds this.
-    pub end_before: Option<String>,
-    /// A compact's summary, when the caller already holds it.
-    pub summary_text: Option<String>,
-    /// A plan while the session still writes: where the kept rows end is checked at the build.
-    pub live_tail: bool,
-}
-
-impl CutRequest {
-    pub fn new(mode: CutMode) -> Self {
-        Self {
-            mode,
-            target_uuid: None,
-            through_uuid: None,
-            end_before: None,
-            summary_text: None,
-            live_tail: false,
-        }
-    }
-}
-
-/// A chat row to find a turn by: its time, and its text when it is a message the session was sent.
-#[derive(Debug, Clone)]
-pub struct TurnPick {
-    pub at: i64,
-    pub text: Option<String>,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct PickedTurn {
-    pub uuid: String,
-    /// The row's own text matched; otherwise the turn at or before its time.
-    pub exact: bool,
-}
-
-/// The segment a built boundary preserves.
-#[derive(Debug, Clone)]
-pub struct Preserved {
-    pub head: String,
-    pub tail: String,
-    pub uuids: Vec<String>,
-}
-
-/// The kept turn, for a confirmation.
-#[derive(Debug, Clone)]
-pub struct KeptFrom {
-    pub at: Option<String>,
-    pub text: String,
-}
-
-#[derive(Debug, Clone)]
-pub struct CutPlan {
-    pub mode: CutMode,
-    /// The newest header rows, written first.
-    pub header_lines: Vec<usize>,
-    /// Lines kept verbatim, ascending.
-    pub kept_lines: Vec<usize>,
-    /// Clear and compact: the segment a built boundary preserves. Trim builds none.
-    pub preserved: Option<Preserved>,
-    /// Rows a summarizer folds: after the standing summary, above the target.
-    pub fold_lines: Vec<usize>,
-    pub kept_bytes: usize,
-    pub dropped_bytes: usize,
-    pub dropped_rows: usize,
-    pub from: Option<KeptFrom>,
 }
 
 pub struct BuildInputs<'a> {
     pub session_id: &'a str,
-    /// Clear and compact: the built summary's text.
+    /// Clear or compact summary.
     pub summary_text: Option<&'a str>,
-    pub new_id: &'a dyn Fn() -> String,
-    pub now_ms: &'a dyn Fn() -> i64,
+    pub ids: &'a dyn Ids,
+    pub clock: &'a dyn Clock,
 }
 
-/// Folds what stood and the rows above the cut into a summary.
+/// Summarizes cut context.
 pub type Summarizer<'a> = dyn Fn(Option<&str>, &[String]) -> io::Result<String> + 'a;
 
-/// Rows of text, each fallible to read.
+/// Fallible text rows.
 pub type Lines<'a> = Box<dyn Iterator<Item = io::Result<String>> + 'a>;
 
 pub trait CutPorts {
-    /// The source's rows, split on LF alone, readable more than once. Never opened for writing.
+    /// Repeatable, read-only LF rows.
     fn read(&self) -> io::Result<Lines<'_>>;
-    /// Where the source is, for the summary to name.
     fn source_path(&self) -> String;
-    /// Exclusive create of the new session's file.
+    /// Creates without overwriting.
     fn create(&self, session_id: &str, lines: &[String]) -> io::Result<()>;
-    /// The built file's rows, for the read-back.
     fn read_built(&self, session_id: &str) -> io::Result<Lines<'_>>;
-    /// Removes a built file that failed its read-back.
+    /// Removes rejected output.
     fn discard(&self, session_id: &str) -> io::Result<()>;
-    fn new_id(&self) -> String;
-    fn now_ms(&self) -> i64;
+    fn ids(&self) -> &dyn Ids;
+    fn clock(&self) -> &dyn Clock;
     fn cli_version(&self) -> io::Result<String>;
-    /// Absent: a compact needs its summary handed over.
+    /// Absent disables summarization.
     fn summarizer(&self) -> Option<&Summarizer<'_>> {
         None
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct CutDone {
-    pub session_id: String,
-    pub plan: CutPlan,
-}
-
-/// A finished cut, or why none was made.
 pub type CutOutcome = Result<CutDone, CutRefused>;
 
 #[derive(Debug)]
 pub enum CutError {
     Io(io::Error),
-    /// What would stop the built file resuming.
+    /// Resume validation.
     ReadBack(Vec<String>),
 }
 
@@ -286,13 +94,13 @@ impl From<io::Error> for CutError {
 }
 
 const HEADER_TYPES: &[&str] = &["mode", "permission-mode", "atis-latch", "session-owner"];
-/// The CLI's request log; a resume reads none of it.
+/// Resume ignores request logs.
 const SKIPPED_TYPES: &[&str] = &["api-request", "api-request-blob", "api-request-shape"];
 const SESSION_KEYS: &[&str] = &["sessionId", "session_id"];
-/// Keys under which a row names another row.
+/// Row-link keys.
 const POINTER_KEYS: &[&str] = &["leafUuid", "messageId", "snapshotMessageId"];
 
-/// The boundary a cut writes, in the CLI's own key order.
+/// Keys follow CLI order.
 const BOUNDARY_KEYS: &[&str] = &[
     "parentUuid",
     "logicalParentUuid",
@@ -312,7 +120,7 @@ const BOUNDARY_KEYS: &[&str] = &[
     "gitBranch",
     "slug",
 ];
-/// An automatic compaction's boundary also carries this.
+/// Compactions add `isMeta`.
 const BOUNDARY_EXTRA_KEYS: &[&str] = &["isMeta"];
 const METADATA_KEYS: &[&str] = &[
     "trigger",
@@ -324,7 +132,7 @@ const METADATA_KEYS: &[&str] = &[
     "preservedMessages",
 ];
 const METADATA_EXTRA_KEYS: &[&str] = &["preCompactArtifactReadVersions"];
-/// A turn starts this long after its message was sent, at most.
+/// Maximum sent-message delay.
 const PICK_SLACK_MS: i64 = 2000;
 
 fn refused(reason: CutRefusal, detail: &str) -> CutRefused {
@@ -354,13 +162,11 @@ fn is_boundary(row: &Object) -> bool {
         && text_of_key(row, "subtype") == Some("compact_boundary")
 }
 
-/// A message's content, when the message is an object.
 fn content_of(row: &Object) -> Option<&Value> {
     row.get("message")
         .and_then(|message| message.get("content"))
 }
 
-/// Content parts that are objects or lists.
 fn parts_of(row: &Object) -> Vec<&Value> {
     match content_of(row) {
         Some(Value::Array(parts)) => parts
@@ -379,7 +185,6 @@ fn part_ids<'a>(row: &'a Object, kind: &str, key: &str) -> Vec<&'a str> {
         .collect()
 }
 
-/// Tool call ids a conversation row opens.
 fn opened_by(row: &Object) -> Vec<&str> {
     if text_of_key(row, "type") == Some("assistant") {
         part_ids(row, "tool_use", "id")
@@ -388,7 +193,6 @@ fn opened_by(row: &Object) -> Vec<&str> {
     }
 }
 
-/// Tool call ids a conversation row answers.
 fn answered_by(row: &Object) -> Vec<&str> {
     if text_of_key(row, "type") == Some("user") {
         part_ids(row, "tool_result", "tool_use_id")
@@ -413,7 +217,7 @@ fn text_of(row: &Object) -> Option<String> {
     Some(texts.join("\n"))
 }
 
-/// A message the CLI took in while a turn ran: its text.
+/// Queued prompt text.
 fn absorbed_text(row: &Object) -> Option<String> {
     if text_of_key(row, "type") != Some("attachment") {
         return None;
@@ -435,7 +239,7 @@ fn points_of(row: &Object) -> Vec<String> {
         .collect()
 }
 
-/// Every required key, and nothing outside the required and the allowed.
+/// Required keys; no extras.
 fn keys_within(object: Option<&Object>, required: &[&str], allowed: &[&str]) -> bool {
     let Some(object) = object else {
         return false;
@@ -452,18 +256,18 @@ fn counted(value: Option<&Value>) -> Option<f64> {
         .filter(|number| number.is_finite())
 }
 
-/// A rough count: the CLI reports these numbers and sums them.
-fn tokens_of(bytes: usize) -> f64 {
-    // Rounds a tie up, as `Math.round` does.
+/// Four-byte token estimate.
+fn tokens_of(bytes: u64) -> f64 {
+    // Matches `Math.round` ties.
     ((bytes + 2) / 4) as f64
 }
 
-/// Whether a resume reads the row.
+/// Whether resume consumes the row.
 fn writes(row: &RowMeta) -> bool {
-    !SKIPPED_TYPES.contains(&row.kind.as_str())
+    !SKIPPED_TYPES.contains(&row.type_.as_str())
 }
 
-/// Written rows whose pointers all land on a held row.
+/// Keeps fully resolved rows.
 fn resolving<'a>(range: &'a [RowMeta], held: &HashSet<&str>) -> Vec<&'a RowMeta> {
     range
         .iter()
@@ -471,11 +275,10 @@ fn resolving<'a>(range: &'a [RowMeta], held: &HashSet<&str>) -> Vec<&'a RowMeta>
         .collect()
 }
 
-fn size_of<'a>(range: impl IntoIterator<Item = &'a RowMeta>) -> usize {
+fn size_of<'a>(range: impl IntoIterator<Item = &'a RowMeta>) -> u64 {
     range.into_iter().map(|row| row.bytes).sum()
 }
 
-/// The end of the JSON string that opens at `from`.
 fn string_end(bytes: &[u8], from: usize) -> usize {
     let mut at = from + 1;
     while at < bytes.len() && bytes[at] != b'"' {
@@ -484,8 +287,7 @@ fn string_end(bytes: &[u8], from: usize) -> usize {
     at
 }
 
-/// A row's text with its own session ids changed and nothing else: only top-level keys, found by depth,
-/// so an id inside a tool input or a path is left alone.
+/// Top-level session IDs only.
 pub fn rehomed(text: &str, session_id: &str) -> String {
     let bytes = text.as_bytes();
     let within = |at: usize| at.min(bytes.len());
@@ -527,23 +329,22 @@ pub fn rehomed(text: &str, session_id: &str) -> String {
     next
 }
 
-/// One pass over the file: the live boundary, the newest header rows, and the rows after it.
+/// Indexes boundary, header, tail.
 pub fn index_session<I>(lines: I) -> io::Result<SessionIndex>
 where
     I: IntoIterator<Item = io::Result<String>>,
 {
-    let mut header: Vec<(String, usize)> = Vec::new();
-    // Each row's line, and its parent when that is an id.
-    let mut segment: HashMap<String, (usize, Option<String>)> = HashMap::new();
+    let mut header: Record<u64> = Record::new();
+    let mut segment: HashMap<String, (u64, Option<String>)> = HashMap::new();
     let mut tail: Vec<RowMeta> = Vec::new();
     let mut boundary: Option<BoundaryMeta> = None;
-    let mut boundaries = 0;
+    let mut boundaries: u64 = 0;
     let mut standing: Option<String> = None;
     let mut open: HashSet<String> = HashSet::new();
     let mut version: Option<String> = None;
-    let mut unparsed = 0;
-    let mut unreadable: Vec<usize> = Vec::new();
-    let mut line = 0;
+    let mut unparsed: u64 = 0;
+    let mut unreadable: Vec<u64> = Vec::new();
+    let mut line: u64 = 0;
 
     for text in lines {
         let text = text?;
@@ -558,10 +359,7 @@ where
         };
         let kind = to_js_string(row.get("type"));
         if HEADER_TYPES.contains(&kind.as_str()) {
-            match header.iter_mut().find(|(held, _)| *held == kind) {
-                Some(entry) => entry.1 = line,
-                None => header.push((kind.clone(), line)),
-            }
+            header.insert(kind.clone(), line);
         }
         if let Some(held) = text_of_key(&row, "version") {
             version = Some(held.to_owned());
@@ -647,7 +445,7 @@ where
             standing = text_of(&row);
         }
 
-        let open_tools = open.len();
+        let open_tools = open.len() as u64;
         for id in opened_by(&row) {
             open.insert(id.to_owned());
         }
@@ -665,8 +463,8 @@ where
         let message = opens.or_else(|| absorbed_text(&row));
         tail.push(RowMeta {
             line,
-            bytes: text.len() + 1,
-            kind,
+            bytes: (text.len() + 1) as u64,
+            type_: kind,
             uuid: uuid.filter(|held| !held.is_empty()).map(str::to_owned),
             at: text_of_key(&row, "timestamp").map(str::to_owned),
             open_tools,
@@ -678,10 +476,10 @@ where
     tail.push(RowMeta {
         line: line + 1,
         bytes: 0,
-        kind: "end".to_owned(),
+        type_: "end".to_owned(),
         uuid: None,
         at: None,
-        open_tools: open.len(),
+        open_tools: open.len() as u64,
         delivered: false,
         text: None,
         points: Vec::new(),
@@ -699,7 +497,6 @@ where
     })
 }
 
-/// What a cut keeps and drops, or why it is refused. Writes nothing.
 pub fn plan_cut(
     index: &SessionIndex,
     request: &CutRequest,
@@ -732,7 +529,7 @@ pub fn plan_cut(
             "The session's last compaction is in a format compacting does not support.",
         ));
     }
-    let unreadable = |from: usize, to: usize| -> Result<(), CutRefused> {
+    let unreadable = |from: u64, to: u64| -> Result<(), CutRefused> {
         if index
             .unreadable
             .iter()
@@ -745,7 +542,7 @@ pub fn plan_cut(
         }
         Ok(())
     };
-    let mut header_lines: Vec<usize> = index.header.iter().map(|(_, line)| *line).collect();
+    let mut header_lines: Vec<u64> = index.header.values().copied().collect();
     header_lines.sort_unstable();
 
     if request.mode == CutMode::Trim {
@@ -769,7 +566,7 @@ pub fn plan_cut(
             .chain(rows.iter().filter_map(|row| row.uuid.as_deref()))
             .collect();
         let kept = resolving(rows, &held);
-        let mut kept_lines: Vec<usize> = live
+        let mut kept_lines: Vec<u64> = live
             .preserved_lines
             .iter()
             .copied()
@@ -784,7 +581,7 @@ pub fn plan_cut(
             fold_lines: Vec::new(),
             kept_bytes: size_of(kept),
             dropped_bytes: 0,
-            dropped_rows: (live.line - 1).saturating_sub(live.preserved_lines.len()),
+            dropped_rows: (live.line - 1).saturating_sub(live.preserved_lines.len() as u64),
             from: None,
         });
     }
@@ -856,7 +653,7 @@ pub fn plan_cut(
         ));
     };
     unreadable(target.line, rows[through].line)?;
-    if !request.live_tail && rows.get(through + 1).unwrap_or(end).open_tools > 0 {
+    if request.live_tail != Some(true) && rows.get(through + 1).unwrap_or(end).open_tools > 0 {
         return Err(refused(
             CutRefusal::TailMidTool,
             "The kept part would end inside an open tool call.",
@@ -896,7 +693,7 @@ pub fn plan_cut(
             .collect(),
         kept_bytes,
         dropped_bytes: size_of(rows) - kept_bytes,
-        dropped_rows: above.len() + preserved_lines.len(),
+        dropped_rows: (above.len() + preserved_lines.len()) as u64,
         from: Some(KeptFrom {
             at: target.at.clone(),
             text: target.text.clone().unwrap_or_default(),
@@ -905,7 +702,6 @@ pub fn plan_cut(
     })
 }
 
-/// The new file's rows: the header, the kept rows, then for a clear or compact a built boundary and summary.
 pub fn build_cut<I>(
     plan: &CutPlan,
     index: &SessionIndex,
@@ -915,15 +711,15 @@ pub fn build_cut<I>(
 where
     I: IntoIterator<Item = io::Result<String>>,
 {
-    let header: HashSet<usize> = plan.header_lines.iter().copied().collect();
-    let kept: HashSet<usize> = plan.kept_lines.iter().copied().collect();
+    let header: HashSet<u64> = plan.header_lines.iter().copied().collect();
+    let kept: HashSet<u64> = plan.kept_lines.iter().copied().collect();
     let mut headers: Vec<String> = Vec::new();
     let mut body: Vec<String> = Vec::new();
     let mut envelope = Object::new();
     let mut position: Option<Value> = None;
     for (at, text) in lines.into_iter().enumerate() {
         let text = text?;
-        let line = at + 1;
+        let line = (at + 1) as u64;
         if header.contains(&line) {
             headers.push(rehomed(&text, inputs.session_id));
         }
@@ -946,15 +742,15 @@ where
         return Ok(built);
     };
 
-    let boundary_uuid = (inputs.new_id)();
-    let summary_uuid = (inputs.new_id)();
-    let at = iso_time((inputs.now_ms)())
+    let boundary_uuid = inputs.ids.new_id();
+    let summary_uuid = inputs.ids.new_id();
+    let at = iso_time(inputs.clock.now_ms())
         .ok_or_else(|| io::Error::other("the clock is outside the time range"))?;
     let summary_text = inputs.summary_text.unwrap_or("");
     let live = index.boundary.as_ref();
     let before =
         tokens_of(plan.kept_bytes + plan.dropped_bytes) + live.map_or(0.0, |live| live.post_tokens);
-    let after = before.min(tokens_of(plan.kept_bytes + summary_text.len()));
+    let after = before.min(tokens_of(plan.kept_bytes + summary_text.len() as u64));
     let uuids = || Value::from(preserved.uuids.clone());
     let carry = |row: &mut Object, key: &str| row.insert_some(key, envelope.get(key).cloned());
 
@@ -1004,7 +800,7 @@ where
     let mut summary = Object::new();
     summary.insert("parentUuid", Value::from(boundary_uuid.as_str()));
     summary.insert("isSidechain", Value::Bool(false));
-    summary.insert("promptId", Value::from((inputs.new_id)()));
+    summary.insert("promptId", Value::from(inputs.ids.new_id()));
     summary.insert("type", Value::from("user"));
     summary.insert("message", Value::Object(message));
     summary.insert("isVisibleInTranscriptOnly", Value::Bool(true));
@@ -1024,8 +820,7 @@ where
     Ok(built)
 }
 
-/// The read-back: what would stop the built file resuming as planned. Empty when sound.
-/// `paired` holds a built segment to its own tool calls; a trim keeps the CLI's own segment as it stood.
+/// `paired` validates new calls; trims retain source segments.
 pub fn verify_cut<I>(lines: I, session_id: &str, paired: bool) -> io::Result<Vec<String>>
 where
     I: IntoIterator<Item = io::Result<String>>,
@@ -1148,8 +943,7 @@ where
     Ok(problems)
 }
 
-/// The turn a chat row names. Its own text finds it, nearest in time; a row that started no turn finds the
-/// turn start at or before it. `body_of` reads a turn start's text as the message it carried.
+/// Matches text or latest eligible turn.
 pub fn pick_turn(
     index: &SessionIndex,
     pick: &TurnPick,
@@ -1182,7 +976,7 @@ pub fn pick_turn(
             });
         }
     }
-    // A sent message's turn starts after it.
+    // Sent messages start later.
     let slack = if pick.text.is_some() {
         PICK_SLACK_MS
     } else {
@@ -1197,31 +991,21 @@ pub fn pick_turn(
         })
 }
 
-/// A compact's summary row: the summary, framed as the CLI frames its own.
+/// CLI-shaped compact summary.
 pub fn compacted_summary(summary: &str, source_path: &str) -> String {
-    format!(
-        "This session is being continued from an earlier part of this conversation, which the owner compacted \
-         above a message they chose. The summary below covers everything before that message.\n\n{}\n\nIf you \
-         need specific details from before the compaction, read the full transcript at: {source_path}\n\nThe \
-         messages after this summary are the conversation from that message on, kept verbatim.",
-        trim(summary)
-    )
+    prompts::compacted_summary(trim(summary), source_path)
 }
 
-/// A clear's summary: what stood, then one line saying rows were cleared and where they still are.
+/// Standing text; cleared note.
 pub fn cleared_summary(standing: Option<&str>, plan: &CutPlan, source_path: &str) -> String {
-    let note = format!(
-        "[The owner cleared {} earlier rows of this conversation without summarizing them. They remain in the \
-         transcript at: {source_path}]",
-        plan.dropped_rows
-    );
+    let note = prompts::cleared_note(&plan.dropped_rows.to_string(), source_path);
     match standing.filter(|standing| !standing.is_empty()) {
         Some(standing) => format!("{standing}\n\n{note}"),
         None => note,
     }
 }
 
-/// The whole cut over its ports. The caller closes the CLI first and relaunches it after.
+/// Caller relaunches the CLI.
 pub fn cut_session(ports: &dyn CutPorts, request: &CutRequest) -> Result<CutOutcome, CutError> {
     let index = index_session(ports.read()?)?;
     let plan = match plan_cut(&index, request, &ports.cli_version()?) {
@@ -1247,11 +1031,11 @@ pub fn cut_session(ports: &dyn CutPorts, request: &CutRequest) -> Result<CutOutc
                         "No summary was handed over.",
                     )));
                 };
-                let fold: HashSet<usize> = plan.fold_lines.iter().copied().collect();
+                let fold: HashSet<u64> = plan.fold_lines.iter().copied().collect();
                 let mut rows: Vec<String> = Vec::new();
                 for (at, text) in ports.read()?.enumerate() {
                     let text = text?;
-                    if fold.contains(&(at + 1)) {
+                    if fold.contains(&((at + 1) as u64)) {
                         rows.push(text);
                     }
                 }
@@ -1267,7 +1051,7 @@ pub fn cut_session(ports: &dyn CutPorts, request: &CutRequest) -> Result<CutOutc
         summary_text = Some(compacted_summary(&summary, &ports.source_path()));
     }
 
-    let session_id = ports.new_id();
+    let session_id = ports.ids().new_id();
     let built = build_cut(
         &plan,
         &index,
@@ -1275,16 +1059,22 @@ pub fn cut_session(ports: &dyn CutPorts, request: &CutRequest) -> Result<CutOutc
         &BuildInputs {
             session_id: &session_id,
             summary_text: summary_text.as_deref(),
-            new_id: &|| ports.new_id(),
-            now_ms: &|| ports.now_ms(),
+            ids: ports.ids(),
+            clock: ports.clock(),
         },
     )?;
     ports.create(&session_id, &built)?;
-    let problems = verify_cut(
-        ports.read_built(&session_id)?,
-        &session_id,
-        plan.preserved.is_some(),
-    )?;
+    let read_back = ports
+        .read_built(&session_id)
+        .and_then(|lines| verify_cut(lines, &session_id, plan.preserved.is_some()));
+    let problems = match read_back {
+        Ok(problems) => problems,
+        Err(error) => {
+            // Preserves the first error.
+            let _ = ports.discard(&session_id);
+            return Err(error.into());
+        }
+    };
     if !problems.is_empty() {
         ports.discard(&session_id)?;
         return Err(CutError::ReadBack(problems));

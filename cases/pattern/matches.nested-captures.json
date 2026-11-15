@@ -1,0 +1,84 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.matches",
+	"name": "nested-captures",
+	"input": {
+		"source": "((a)(b))?",
+		"flags": "",
+		"texts": [
+			"ab",
+			"",
+			"b"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 2,
+						"text": "ab",
+						"captures": [
+							"ab",
+							"a",
+							"b"
+						]
+					},
+					{
+						"start": 2,
+						"end": 2,
+						"text": "",
+						"captures": [
+							null,
+							null,
+							null
+						]
+					}
+				]
+			},
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 0,
+						"text": "",
+						"captures": [
+							null,
+							null,
+							null
+						]
+					}
+				]
+			},
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 0,
+						"text": "",
+						"captures": [
+							null,
+							null,
+							null
+						]
+					},
+					{
+						"start": 1,
+						"end": 1,
+						"text": "",
+						"captures": [
+							null,
+							null,
+							null
+						]
+					}
+				]
+			}
+		]
+	}
+}

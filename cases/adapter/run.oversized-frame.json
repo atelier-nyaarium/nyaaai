@@ -1,0 +1,103 @@
+{
+	"format": 2,
+	"type": "run",
+	"kind": "adapter.run",
+	"name": "oversized-frame",
+	"script": [
+		{
+			"send": {
+				"type": "hello",
+				"version": "0.1.0"
+			}
+		},
+		{
+			"await": {
+				"type": "welcome"
+			}
+		},
+		{
+			"sendOverCap": 1
+		},
+		{
+			"await": {
+				"type": "fault",
+				"code": "oversized_frame"
+			}
+		},
+		{
+			"sendOverCap": 0
+		},
+		{
+			"await": {
+				"type": "fault",
+				"code": "bad_frame"
+			}
+		},
+		{
+			"send": {
+				"type": "start",
+				"run": "after",
+				"command": "testkit.converse",
+				"input": {
+					"requests": 0,
+					"together": false
+				},
+				"fixed": {
+					"nowMs": 1794535200000,
+					"stepMs": 1000,
+					"idPrefix": "after-"
+				}
+			}
+		},
+		{
+			"await": [
+				{
+					"type": "done",
+					"run": "after"
+				},
+				{
+					"type": "failed",
+					"run": "after"
+				}
+			]
+		}
+	],
+	"expected": {
+		"exit": 0,
+		"connection": [
+			{
+				"type": "welcome",
+				"version": "0.1.0"
+			},
+			{
+				"type": "fault",
+				"code": "oversized_frame",
+				"message": "the frame is over the size cap"
+			},
+			{
+				"type": "fault",
+				"code": "bad_frame",
+				"path": [],
+				"message": "not a host frame"
+			}
+		],
+		"runs": {
+			"after": [
+				{
+					"type": "done",
+					"run": "after",
+					"seq": 1,
+					"result": {
+						"ids": [
+							"after-1",
+							"after-2"
+						],
+						"nowMs": 1794535200000,
+						"steers": []
+					}
+				}
+			]
+		},
+		"files": {}
+	}
+}

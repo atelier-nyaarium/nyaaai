@@ -1,0 +1,20 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.validate",
+	"name": "outside-the-subset",
+	"input": {
+		"schema": {
+			"$ref": "#/$defs/Missing",
+			"type": "string"
+		},
+		"texts": [
+			"1"
+		]
+	},
+	"expected": {
+		"issues": [
+			[]
+		]
+	}
+}

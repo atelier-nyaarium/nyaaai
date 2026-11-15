@@ -1,0 +1,216 @@
+{
+	"format": 2,
+	"type": "run",
+	"kind": "adapter.run",
+	"name": "steer-and-interrupt-while-asking",
+	"script": [
+		{
+			"send": {
+				"type": "hello",
+				"version": "0.1.0"
+			}
+		},
+		{
+			"await": {
+				"type": "welcome"
+			}
+		},
+		{
+			"send": {
+				"type": "start",
+				"run": "talk",
+				"command": "testkit.converse",
+				"input": {
+					"requests": 2,
+					"together": false
+				},
+				"fixed": {
+					"nowMs": 1794535200000,
+					"stepMs": 1000,
+					"idPrefix": "talk-"
+				}
+			}
+		},
+		{
+			"await": {
+				"type": "request",
+				"run": "talk",
+				"id": "q1"
+			}
+		},
+		{
+			"send": {
+				"type": "steer",
+				"run": "talk",
+				"text": "first"
+			}
+		},
+		{
+			"await": {
+				"type": "event",
+				"run": "talk",
+				"seq": 1
+			}
+		},
+		{
+			"send": {
+				"type": "reply",
+				"run": "talk",
+				"id": "q9",
+				"value": 0
+			}
+		},
+		{
+			"await": {
+				"type": "fault",
+				"code": "unknown_reply"
+			}
+		},
+		{
+			"send": {
+				"type": "reply",
+				"run": "talk",
+				"id": "q1",
+				"value": {
+					"answered": [
+						1,
+						null
+					]
+				}
+			}
+		},
+		{
+			"await": {
+				"type": "request",
+				"run": "talk",
+				"id": "q2"
+			}
+		},
+		{
+			"send": {
+				"type": "reply",
+				"run": "talk",
+				"id": "q1",
+				"value": "twice"
+			}
+		},
+		{
+			"await": {
+				"type": "fault",
+				"code": "unknown_reply"
+			}
+		},
+		{
+			"send": {
+				"type": "steer",
+				"run": "talk",
+				"text": "second"
+			}
+		},
+		{
+			"await": {
+				"type": "event",
+				"run": "talk",
+				"seq": 3
+			}
+		},
+		{
+			"send": {
+				"type": "interrupt",
+				"run": "talk"
+			}
+		},
+		{
+			"await": [
+				{
+					"type": "done",
+					"run": "talk"
+				},
+				{
+					"type": "failed",
+					"run": "talk"
+				}
+			]
+		}
+	],
+	"expected": {
+		"exit": 0,
+		"connection": [
+			{
+				"type": "welcome",
+				"version": "0.1.0"
+			},
+			{
+				"type": "fault",
+				"code": "unknown_reply",
+				"run": "talk",
+				"message": "no such request"
+			},
+			{
+				"type": "fault",
+				"code": "unknown_reply",
+				"run": "talk",
+				"message": "no such request"
+			}
+		],
+		"runs": {
+			"talk": [
+				{
+					"type": "request",
+					"run": "talk",
+					"id": "q1",
+					"kind": "echo",
+					"input": {
+						"count": 1
+					}
+				},
+				{
+					"type": "event",
+					"run": "talk",
+					"seq": 1,
+					"event": {
+						"steer": "first"
+					}
+				},
+				{
+					"type": "event",
+					"run": "talk",
+					"seq": 2,
+					"event": {
+						"reply": {
+							"answered": [
+								1,
+								null
+							]
+						}
+					}
+				},
+				{
+					"type": "request",
+					"run": "talk",
+					"id": "q2",
+					"kind": "echo",
+					"input": {
+						"count": 2
+					}
+				},
+				{
+					"type": "event",
+					"run": "talk",
+					"seq": 3,
+					"event": {
+						"steer": "second"
+					}
+				},
+				{
+					"type": "failed",
+					"run": "talk",
+					"seq": 4,
+					"code": "interrupted",
+					"message": "interrupted"
+				}
+			]
+		},
+		"files": {}
+	}
+}

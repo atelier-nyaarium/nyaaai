@@ -1,0 +1,440 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "frames.output.json",
+	"x-contract-version": "0.1.0",
+	"$defs": {
+		"PathPart": {
+			"anyOf": [
+				{
+					"type": "string"
+				},
+				{
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				}
+			]
+		},
+		"Fixed": {
+			"type": "object",
+			"properties": {
+				"nowMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"stepMs": {
+					"default": 0,
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				},
+				"idPrefix": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"nowMs",
+				"stepMs",
+				"idPrefix"
+			],
+			"additionalProperties": false
+		},
+		"Hello": {
+			"type": "object",
+			"properties": {
+				"type": {
+					"type": "string",
+					"const": "hello"
+				},
+				"version": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"type",
+				"version"
+			],
+			"additionalProperties": false
+		},
+		"Start": {
+			"type": "object",
+			"properties": {
+				"type": {
+					"type": "string",
+					"const": "start"
+				},
+				"run": {
+					"type": "string",
+					"minLength": 1
+				},
+				"command": {
+					"type": "string",
+					"minLength": 1
+				},
+				"input": {},
+				"fixed": {
+					"$ref": "#/$defs/Fixed"
+				}
+			},
+			"required": [
+				"type",
+				"run",
+				"command",
+				"input"
+			],
+			"additionalProperties": false
+		},
+		"Steer": {
+			"type": "object",
+			"properties": {
+				"type": {
+					"type": "string",
+					"const": "steer"
+				},
+				"run": {
+					"type": "string",
+					"minLength": 1
+				},
+				"text": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"type",
+				"run",
+				"text"
+			],
+			"additionalProperties": false
+		},
+		"Interrupt": {
+			"type": "object",
+			"properties": {
+				"type": {
+					"type": "string",
+					"const": "interrupt"
+				},
+				"run": {
+					"type": "string",
+					"minLength": 1
+				}
+			},
+			"required": [
+				"type",
+				"run"
+			],
+			"additionalProperties": false
+		},
+		"Reply": {
+			"type": "object",
+			"properties": {
+				"type": {
+					"type": "string",
+					"const": "reply"
+				},
+				"run": {
+					"type": "string",
+					"minLength": 1
+				},
+				"id": {
+					"type": "string",
+					"minLength": 1
+				},
+				"value": {}
+			},
+			"required": [
+				"type",
+				"run",
+				"id",
+				"value"
+			],
+			"additionalProperties": false
+		},
+		"ReplyFailed": {
+			"type": "object",
+			"properties": {
+				"type": {
+					"type": "string",
+					"const": "reply-failed"
+				},
+				"run": {
+					"type": "string",
+					"minLength": 1
+				},
+				"id": {
+					"type": "string",
+					"minLength": 1
+				},
+				"message": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"type",
+				"run",
+				"id",
+				"message"
+			],
+			"additionalProperties": false
+		},
+		"HostFrame": {
+			"oneOf": [
+				{
+					"$ref": "#/$defs/Hello"
+				},
+				{
+					"$ref": "#/$defs/Start"
+				},
+				{
+					"$ref": "#/$defs/Steer"
+				},
+				{
+					"$ref": "#/$defs/Interrupt"
+				},
+				{
+					"$ref": "#/$defs/Reply"
+				},
+				{
+					"$ref": "#/$defs/ReplyFailed"
+				}
+			],
+			"x-tag": "type"
+		},
+		"Welcome": {
+			"type": "object",
+			"properties": {
+				"type": {
+					"type": "string",
+					"const": "welcome"
+				},
+				"version": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"type",
+				"version"
+			],
+			"additionalProperties": false
+		},
+		"Reject": {
+			"type": "object",
+			"properties": {
+				"type": {
+					"type": "string",
+					"const": "reject"
+				},
+				"version": {
+					"type": "string"
+				},
+				"reason": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"type",
+				"version",
+				"reason"
+			],
+			"additionalProperties": false
+		},
+		"RunEvent": {
+			"type": "object",
+			"properties": {
+				"type": {
+					"type": "string",
+					"const": "event"
+				},
+				"run": {
+					"type": "string",
+					"minLength": 1
+				},
+				"seq": {
+					"type": "integer",
+					"minimum": 1,
+					"maximum": 9007199254740991
+				},
+				"event": {}
+			},
+			"required": [
+				"type",
+				"run",
+				"seq",
+				"event"
+			],
+			"additionalProperties": false
+		},
+		"Request": {
+			"type": "object",
+			"properties": {
+				"type": {
+					"type": "string",
+					"const": "request"
+				},
+				"run": {
+					"type": "string",
+					"minLength": 1
+				},
+				"id": {
+					"type": "string",
+					"minLength": 1
+				},
+				"kind": {
+					"type": "string",
+					"minLength": 1
+				},
+				"input": {}
+			},
+			"required": [
+				"type",
+				"run",
+				"id",
+				"kind",
+				"input"
+			],
+			"additionalProperties": false
+		},
+		"Done": {
+			"type": "object",
+			"properties": {
+				"type": {
+					"type": "string",
+					"const": "done"
+				},
+				"run": {
+					"type": "string",
+					"minLength": 1
+				},
+				"seq": {
+					"type": "integer",
+					"minimum": 1,
+					"maximum": 9007199254740991
+				},
+				"result": {}
+			},
+			"required": [
+				"type",
+				"run",
+				"seq",
+				"result"
+			],
+			"additionalProperties": false
+		},
+		"Failed": {
+			"type": "object",
+			"properties": {
+				"type": {
+					"type": "string",
+					"const": "failed"
+				},
+				"run": {
+					"type": "string",
+					"minLength": 1
+				},
+				"seq": {
+					"type": "integer",
+					"minimum": 1,
+					"maximum": 9007199254740991
+				},
+				"code": {
+					"$ref": "#/$defs/RunFailure"
+				},
+				"path": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/PathPart"
+					}
+				},
+				"message": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"type",
+				"run",
+				"seq",
+				"code",
+				"message"
+			],
+			"additionalProperties": false
+		},
+		"FaultCode": {
+			"type": "string",
+			"enum": [
+				"bad_frame",
+				"oversized_frame",
+				"not_greeted",
+				"unknown_run",
+				"duplicate_run",
+				"unknown_reply"
+			]
+		},
+		"RunFailure": {
+			"type": "string",
+			"enum": [
+				"interrupted",
+				"unknown_command",
+				"bad_input",
+				"host_request",
+				"error"
+			]
+		},
+		"Fault": {
+			"type": "object",
+			"properties": {
+				"type": {
+					"type": "string",
+					"const": "fault"
+				},
+				"code": {
+					"$ref": "#/$defs/FaultCode"
+				},
+				"run": {
+					"type": "string",
+					"minLength": 1
+				},
+				"path": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/PathPart"
+					}
+				},
+				"message": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"type",
+				"code",
+				"message"
+			],
+			"additionalProperties": false
+		},
+		"AdapterFrame": {
+			"oneOf": [
+				{
+					"$ref": "#/$defs/Welcome"
+				},
+				{
+					"$ref": "#/$defs/Reject"
+				},
+				{
+					"$ref": "#/$defs/RunEvent"
+				},
+				{
+					"$ref": "#/$defs/Request"
+				},
+				{
+					"$ref": "#/$defs/Done"
+				},
+				{
+					"$ref": "#/$defs/Failed"
+				},
+				{
+					"$ref": "#/$defs/Fault"
+				}
+			],
+			"x-tag": "type"
+		}
+	}
+}

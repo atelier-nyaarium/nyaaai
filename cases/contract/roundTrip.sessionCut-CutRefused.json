@@ -1,0 +1,47 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "sessionCut-CutRefused",
+	"input": {
+		"set": "sessionCut",
+		"shape": "CutRefused",
+		"texts": [
+			"{\"ok\":false,\"reason\":\"no_rows\",\"detail\":\"The session file is empty.\"}",
+			"{\"ok\":false,\"reason\":\"summary_needed\",\"detail\":\"\"}",
+			"{\"ok\":false,\"reason\":\"no rows\",\"detail\":\"\"}",
+			"{\"ok\":true,\"reason\":\"no_rows\",\"detail\":\"\"}",
+			"{\"ok\":false,\"reason\":\"no_rows\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"ok\":false,\"reason\":\"no_rows\",\"detail\":\"The session file is empty.\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"ok\":false,\"reason\":\"summary_needed\",\"detail\":\"\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"reason"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"ok"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"detail"
+				]
+			}
+		]
+	}
+}

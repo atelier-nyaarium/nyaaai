@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "frames-RunEvent",
+	"input": {
+		"set": "frames",
+		"shape": "RunEvent",
+		"texts": [
+			"{\"type\":\"event\",\"run\":\"r1\",\"seq\":1,\"event\":1}",
+			"{\"type\":\"event\",\"run\":\"r1\",\"seq\":1}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"type\":\"event\",\"run\":\"r1\",\"seq\":1,\"event\":1}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"event"
+				]
+			}
+		]
+	}
+}

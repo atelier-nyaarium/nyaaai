@@ -1,0 +1,52 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.matches",
+	"name": "scalar-dot",
+	"input": {
+		"source": ".",
+		"flags": "",
+		"texts": [
+			"😀a",
+			"😀😀"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 2,
+						"text": "😀",
+						"captures": []
+					},
+					{
+						"start": 2,
+						"end": 3,
+						"text": "a",
+						"captures": []
+					}
+				]
+			},
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 2,
+						"text": "😀",
+						"captures": []
+					},
+					{
+						"start": 2,
+						"end": 4,
+						"text": "😀",
+						"captures": []
+					}
+				]
+			}
+		]
+	}
+}

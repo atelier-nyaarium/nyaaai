@@ -1,0 +1,16 @@
+{
+	"name": "@nyaaai/cli",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"description": "The command line tool and the stdio adapter",
+	"exports": {
+		".": "./src/index.ts",
+		"./adapter": "./src/adapter.ts",
+		"./commands": "./src/commands.ts"
+	},
+	"dependencies": {
+		"@nyaaai/contract": "workspace:*",
+		"@nyaaai/operator": "workspace:*"
+	}
+}

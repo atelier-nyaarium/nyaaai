@@ -1,5 +1,6 @@
 {
-	"format": 1,
+	"format": 2,
+	"type": "function",
 	"kind": "sessionCut.cut",
 	"name": "clear-above-a-turn",
 	"input": {

@@ -1,0 +1,58 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "js.string",
+	"name": "coercions",
+	"input": {
+		"texts": [
+			"null",
+			"true",
+			"false",
+			"\"text\"",
+			"\"\"",
+			"0",
+			"-0",
+			"1.50",
+			"1e21",
+			"1e-7",
+			"123456789012345680000",
+			"1e400",
+			"-1e400",
+			"[]",
+			"[null]",
+			"[1,null,2]",
+			"[1,[2,[null,\"x\"]],[],{}]",
+			"[[]]",
+			"[true,false]",
+			"{}",
+			"{\"toString\":\"mine\"}",
+			"[\"a,b\",\"c\"]"
+		]
+	},
+	"expected": {
+		"strings": [
+			"null",
+			"true",
+			"false",
+			"text",
+			"",
+			"0",
+			"0",
+			"1.5",
+			"1e+21",
+			"1e-7",
+			"123456789012345680000",
+			"Infinity",
+			"-Infinity",
+			"",
+			"",
+			"1,,2",
+			"1,2,,x,,[object Object]",
+			"",
+			"true,false",
+			"[object Object]",
+			"[object Object]",
+			"a,b,c"
+		]
+	}
+}

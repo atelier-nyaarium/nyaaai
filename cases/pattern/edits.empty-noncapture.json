@@ -1,0 +1,38 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.edits",
+	"name": "empty-noncapture",
+	"input": {
+		"source": "(?:)",
+		"flags": "",
+		"template": "-",
+		"texts": [
+			"ab",
+			"",
+			"😀a"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"replaced": "-a-b-",
+				"pieces": [
+					"a",
+					"b"
+				]
+			},
+			{
+				"replaced": "-",
+				"pieces": []
+			},
+			{
+				"replaced": "-😀-a-",
+				"pieces": [
+					"😀",
+					"a"
+				]
+			}
+		]
+	}
+}

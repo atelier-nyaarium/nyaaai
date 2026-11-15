@@ -1,0 +1,89 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "torture-Open",
+	"input": {
+		"set": "torture",
+		"shape": "Open",
+		"texts": [
+			"{\"counts\":{},\"nested\":{}}",
+			"{\"counts\":{\"b\":1,\"2\":2,\"a\":3,\"1\":4,\"__proto__\":5,\"01\":6},\"nested\":{}}",
+			"{\"counts\":{\"__proto__\":\"dropped\"},\"nested\":{\"__proto__\":{\"a\":5}}}",
+			"{\"counts\":{\"a\":1,\"a\":2,\"b\":3,\"a\":4},\"nested\":{}}",
+			"{\"counts\":{\"ok\":1,\"bad\":-1},\"nested\":{}}",
+			"{\"counts\":{\"half\":0.5},\"nested\":{}}",
+			"{\"counts\":[],\"nested\":{}}",
+			"{\"counts\":{},\"nested\":{\"0\":{},\"a\":{\"b\":{\"kind\":\"leaf\",\"value\":1},\"c\":{\"kind\":\"leaf\",\"value\":1,\"extra\":1}}}}",
+			"{\"counts\":{},\"nested\":{\"a\":{\"b\":{\"kind\":\"leaf\",\"value\":\"x\"}}}}",
+			"{\"counts\":{},\"nested\":{\"a\":[]}}",
+			"{\"nested\":{}}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"counts\":{},\"nested\":{}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"counts\":{\"1\":4,\"2\":2,\"b\":1,\"a\":3,\"01\":6},\"nested\":{}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"counts\":{},\"nested\":{}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"counts\":{\"a\":4,\"b\":3},\"nested\":{}}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"counts",
+					"bad"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"counts",
+					"half"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"counts"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"counts\":{},\"nested\":{\"0\":{},\"a\":{\"b\":{\"kind\":\"leaf\",\"value\":1},\"c\":{\"kind\":\"leaf\",\"value\":1}}}}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"nested",
+					"a",
+					"b",
+					"value"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"nested",
+					"a"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"counts"
+				]
+			}
+		]
+	}
+}

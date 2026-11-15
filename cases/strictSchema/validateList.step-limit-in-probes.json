@@ -1,0 +1,37 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.validateList",
+	"name": "step-limit-in-probes",
+	"input": {
+		"schema": {
+			"items": {
+				"anyOf": [
+					{
+						"type": "string"
+					},
+					{
+						"type": "integer"
+					}
+				]
+			}
+		},
+		"item": "0",
+		"counts": [
+			333333,
+			333334
+		]
+	},
+	"expected": {
+		"issues": [
+			[],
+			[
+				{
+					"path": [],
+					"code": "limit",
+					"message": "past a limit"
+				}
+			]
+		]
+	}
+}

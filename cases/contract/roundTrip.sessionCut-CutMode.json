@@ -1,0 +1,41 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "sessionCut-CutMode",
+	"input": {
+		"set": "sessionCut",
+		"shape": "CutMode",
+		"texts": [
+			"\"trim\"",
+			"\"clear\"",
+			"\"compact\"",
+			"\"Trim\"",
+			"1"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "\"trim\""
+			},
+			{
+				"ok": true,
+				"text": "\"clear\""
+			},
+			{
+				"ok": true,
+				"text": "\"compact\""
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

@@ -1,0 +1,35 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "sessionCut-Preserved",
+	"input": {
+		"set": "sessionCut",
+		"shape": "Preserved",
+		"texts": [
+			"{\"head\":\"a\",\"tail\":\"b\",\"uuids\":[]}",
+			"{\"head\":\"a\",\"tail\":\"b\",\"uuids\":\"a\"}",
+			"{\"head\":\"a\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"head\":\"a\",\"tail\":\"b\",\"uuids\":[]}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"uuids"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"tail"
+				]
+			}
+		]
+	}
+}

@@ -1,0 +1,170 @@
+{
+	"format": 2,
+	"type": "run",
+	"kind": "adapter.run",
+	"name": "replies",
+	"script": [
+		{
+			"send": {
+				"type": "hello",
+				"version": "0.1.0"
+			}
+		},
+		{
+			"await": {
+				"type": "welcome"
+			}
+		},
+		{
+			"send": {
+				"type": "start",
+				"run": "told",
+				"command": "testkit.converse",
+				"input": {
+					"requests": 3,
+					"together": false
+				},
+				"fixed": {
+					"nowMs": 1794535200000,
+					"stepMs": 1000,
+					"idPrefix": "told-"
+				}
+			}
+		},
+		{
+			"await": {
+				"type": "request",
+				"run": "told",
+				"id": "q1"
+			}
+		},
+		{
+			"send": {
+				"type": "reply-failed",
+				"run": "told",
+				"id": "q1",
+				"message": "the host has no key"
+			}
+		},
+		{
+			"await": {
+				"type": "request",
+				"run": "told",
+				"id": "q2"
+			}
+		},
+		{
+			"send": {
+				"type": "reply",
+				"run": "told",
+				"id": "q2",
+				"value": null
+			}
+		},
+		{
+			"await": {
+				"type": "request",
+				"run": "told",
+				"id": "q3"
+			}
+		},
+		{
+			"send": {
+				"type": "reply",
+				"run": "told",
+				"id": "q3",
+				"value": "last"
+			}
+		},
+		{
+			"await": [
+				{
+					"type": "done",
+					"run": "told"
+				},
+				{
+					"type": "failed",
+					"run": "told"
+				}
+			]
+		}
+	],
+	"expected": {
+		"exit": 0,
+		"connection": [
+			{
+				"type": "welcome",
+				"version": "0.1.0"
+			}
+		],
+		"runs": {
+			"told": [
+				{
+					"type": "request",
+					"run": "told",
+					"id": "q1",
+					"kind": "echo",
+					"input": {
+						"count": 1
+					}
+				},
+				{
+					"type": "event",
+					"run": "told",
+					"seq": 1,
+					"event": {
+						"failed": "the host has no key"
+					}
+				},
+				{
+					"type": "request",
+					"run": "told",
+					"id": "q2",
+					"kind": "echo",
+					"input": {
+						"count": 2
+					}
+				},
+				{
+					"type": "event",
+					"run": "told",
+					"seq": 2,
+					"event": {
+						"reply": null
+					}
+				},
+				{
+					"type": "request",
+					"run": "told",
+					"id": "q3",
+					"kind": "echo",
+					"input": {
+						"count": 3
+					}
+				},
+				{
+					"type": "event",
+					"run": "told",
+					"seq": 3,
+					"event": {
+						"reply": "last"
+					}
+				},
+				{
+					"type": "done",
+					"run": "told",
+					"seq": 4,
+					"result": {
+						"ids": [
+							"told-1",
+							"told-2"
+						],
+						"nowMs": 1794535200000,
+						"steers": []
+					}
+				}
+			]
+		},
+		"files": {}
+	}
+}

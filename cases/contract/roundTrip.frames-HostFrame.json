@@ -1,0 +1,138 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "frames-HostFrame",
+	"input": {
+		"set": "frames",
+		"shape": "HostFrame",
+		"texts": [
+			"{\"type\":\"hello\",\"version\":\"0.1.0\"}",
+			"{\"type\":\"start\",\"run\":\"r1\",\"command\":\"sessionCut.plan\",\"input\":{\"any\":[1]}}",
+			"{\"type\":\"start\",\"run\":\"r1\",\"command\":\"sessionCut.plan\",\"input\":{\"any\":[1]},\"fixed\":{\"nowMs\":1794528000000,\"idPrefix\":\"id-\"}}",
+			"{\"type\":\"start\",\"run\":\"r1\",\"command\":\"sessionCut.plan\",\"input\":{\"any\":[1]},\"fixed\":{\"nowMs\":0,\"stepMs\":250,\"idPrefix\":\"\"}}",
+			"{\"type\":\"start\",\"run\":\"r1\",\"command\":\"sessionCut.plan\",\"input\":{\"any\":[1]},\"fixed\":{\"nowMs\":0,\"stepMs\":-1,\"idPrefix\":\"\"}}",
+			"{\"type\":\"start\",\"run\":\"r1\",\"command\":\"sessionCut.plan\",\"input\":{\"any\":[1]},\"fixed\":{\"idPrefix\":\"x\"}}",
+			"{\"type\":\"start\",\"run\":\"r1\",\"command\":\"c\"}",
+			"{\"type\":\"start\",\"run\":\"\",\"command\":\"sessionCut.plan\",\"input\":{\"any\":[1]}}",
+			"{\"type\":\"start\",\"run\":\"r1\",\"command\":\"\",\"input\":{\"any\":[1]}}",
+			"{\"type\":\"steer\",\"run\":\"r1\",\"text\":\"more\"}",
+			"{\"type\":\"interrupt\",\"run\":\"r1\",\"extra\":true}",
+			"{\"type\":\"reply\",\"run\":\"r1\",\"id\":\"q1\",\"value\":null}",
+			"{\"type\":\"reply\",\"run\":\"r1\",\"id\":\"q1\"}",
+			"{\"type\":\"reply-failed\",\"run\":\"r1\",\"id\":\"q1\",\"message\":\"no key\"}",
+			"{\"type\":\"welcome\",\"version\":\"0.1.0\"}",
+			"{\"type\":\"Hello\",\"version\":\"0.1.0\"}",
+			"{\"version\":\"0.1.0\"}",
+			"{\"type\":1}",
+			"[]",
+			"{"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"type\":\"hello\",\"version\":\"0.1.0\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"type\":\"start\",\"run\":\"r1\",\"command\":\"sessionCut.plan\",\"input\":{\"any\":[1]}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"type\":\"start\",\"run\":\"r1\",\"command\":\"sessionCut.plan\",\"input\":{\"any\":[1]},\"fixed\":{\"nowMs\":1794528000000,\"stepMs\":0,\"idPrefix\":\"id-\"}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"type\":\"start\",\"run\":\"r1\",\"command\":\"sessionCut.plan\",\"input\":{\"any\":[1]},\"fixed\":{\"nowMs\":0,\"stepMs\":250,\"idPrefix\":\"\"}}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"fixed",
+					"stepMs"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"fixed",
+					"nowMs"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"input"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"run"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"command"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"type\":\"steer\",\"run\":\"r1\",\"text\":\"more\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"type\":\"interrupt\",\"run\":\"r1\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"type\":\"reply\",\"run\":\"r1\",\"id\":\"q1\",\"value\":null}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"value"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"type\":\"reply-failed\",\"run\":\"r1\",\"id\":\"q1\",\"message\":\"no key\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"type"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"type"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"type"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"type"
+				]
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

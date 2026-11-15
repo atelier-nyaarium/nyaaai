@@ -1,0 +1,54 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.validate",
+	"name": "references",
+	"input": {
+		"schema": {
+			"type": "object",
+			"$defs": {
+				"Count": {
+					"type": "integer",
+					"minimum": 2
+				},
+				"Alias": {
+					"$ref": "#/$defs/Count",
+					"description": "beside"
+				}
+			},
+			"properties": {
+				"value": {
+					"$ref": "#/$defs/Alias"
+				}
+			}
+		},
+		"texts": [
+			"{\"value\":1}",
+			"{\"value\":2}",
+			"{\"value\":\"2\"}"
+		]
+	},
+	"expected": {
+		"issues": [
+			[
+				{
+					"path": [
+						"value"
+					],
+					"code": "minimum",
+					"message": "below 2"
+				}
+			],
+			[],
+			[
+				{
+					"path": [
+						"value"
+					],
+					"code": "type",
+					"message": "expected integer"
+				}
+			]
+		]
+	}
+}

@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "frames-Start",
+	"input": {
+		"set": "frames",
+		"shape": "Start",
+		"texts": [
+			"{\"type\":\"start\",\"run\":\"r1\",\"command\":\"sessionCut.plan\",\"input\":{\"any\":[1]}}",
+			"{\"type\":\"steer\",\"run\":\"r1\",\"command\":\"sessionCut.plan\",\"input\":{\"any\":[1]}}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"type\":\"start\",\"run\":\"r1\",\"command\":\"sessionCut.plan\",\"input\":{\"any\":[1]}}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"type"
+				]
+			}
+		]
+	}
+}

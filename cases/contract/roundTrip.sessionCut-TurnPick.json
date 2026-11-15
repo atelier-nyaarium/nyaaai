@@ -1,0 +1,47 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "sessionCut-TurnPick",
+	"input": {
+		"set": "sessionCut",
+		"shape": "TurnPick",
+		"texts": [
+			"{\"at\":1794528000000}",
+			"{\"at\":-5,\"text\":\"sent\"}",
+			"{\"at\":1.5}",
+			"{\"text\":\"no time\"}",
+			"{\"at\":\"1\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"at\":1794528000000}"
+			},
+			{
+				"ok": true,
+				"text": "{\"at\":-5,\"text\":\"sent\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"at"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"at"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"at"
+				]
+			}
+		]
+	}
+}

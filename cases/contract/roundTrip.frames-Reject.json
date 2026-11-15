@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "frames-Reject",
+	"input": {
+		"set": "frames",
+		"shape": "Reject",
+		"texts": [
+			"{\"type\":\"reject\",\"version\":\"0.1.0\",\"reason\":\"r\"}",
+			"{\"type\":\"reject\",\"version\":\"0.1.0\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"type\":\"reject\",\"version\":\"0.1.0\",\"reason\":\"r\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"reason"
+				]
+			}
+		]
+	}
+}

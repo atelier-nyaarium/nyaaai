@@ -1,0 +1,35 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "sessionCut-PlanCommand",
+	"input": {
+		"set": "sessionCut",
+		"shape": "PlanCommand",
+		"texts": [
+			"{\"source\":\"/s.jsonl\",\"request\":{\"mode\":\"trim\"},\"cliVersion\":\"2.1.323\"}",
+			"{\"source\":\"/s.jsonl\",\"request\":{\"mode\":\"trim\"}}",
+			"{\"source\":5,\"request\":{\"mode\":\"trim\"},\"cliVersion\":\"2.1.323\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"source\":\"/s.jsonl\",\"request\":{\"mode\":\"trim\"},\"cliVersion\":\"2.1.323\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"cliVersion"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"source"
+				]
+			}
+		]
+	}
+}

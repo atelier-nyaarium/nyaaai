@@ -1,4 +1,4 @@
-// Gate: bun scripts/gate.ts
+// Gate runner. Run: bun scripts/gate.ts
 
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
@@ -30,6 +30,7 @@ function parts(): Part[] {
 	const demo = existsSync(demoManifest);
 	return [
 		{ name: "link", command: "bun", args: ["scripts/consumer.ts", "link"] },
+		{ name: "contract", command: "bun", args: ["scripts/contract.ts"] },
 		{ name: "biome", command: path.join(BIN, "biome"), args: ["ci", "."] },
 		{ name: "tsc", command: path.join(BIN, "tsc"), args: ["--build"] },
 		{ name: "test", command: "bun", args: ["test"] },
@@ -44,6 +45,21 @@ function parts(): Part[] {
 				"--workspace",
 				"--all-targets",
 				"--all-features",
+				"--locked",
+				"--",
+				"-D",
+				"warnings",
+			],
+		},
+		{
+			name: "clippy-plain",
+			command: cargo,
+			args: [
+				"clippy",
+				"--manifest-path",
+				MANIFEST,
+				"--workspace",
+				"--all-targets",
 				"--locked",
 				"--",
 				"-D",

@@ -1,0 +1,35 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "frames-Hello",
+	"input": {
+		"set": "frames",
+		"shape": "Hello",
+		"texts": [
+			"{\"type\":\"hello\",\"version\":\"0.1.0\"}",
+			"{\"type\":\"hello\"}",
+			"{\"type\":\"welcome\",\"version\":\"0.1.0\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"type\":\"hello\",\"version\":\"0.1.0\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"version"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"type"
+				]
+			}
+		]
+	}
+}

@@ -1,0 +1,41 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "sessionCut-PlanOutcome",
+	"input": {
+		"set": "sessionCut",
+		"shape": "PlanOutcome",
+		"texts": [
+			"{\"ok\":true,\"mode\":\"clear\",\"headerLines\":[1,2],\"keptLines\":[5,6],\"preserved\":{\"head\":\"u5\",\"tail\":\"u6\",\"uuids\":[\"u5\",\"u6\"]},\"foldLines\":[3],\"keptBytes\":120,\"droppedBytes\":40,\"droppedRows\":2,\"from\":{\"at\":null,\"text\":\"kept\"}}",
+			"{\"ok\":false,\"reason\":\"no_rows\",\"detail\":\"d\"}",
+			"{\"ok\":true}",
+			"{\"ok\":false}",
+			"null"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"ok\":true,\"mode\":\"clear\",\"headerLines\":[1,2],\"keptLines\":[5,6],\"preserved\":{\"head\":\"u5\",\"tail\":\"u6\",\"uuids\":[\"u5\",\"u6\"]},\"foldLines\":[3],\"keptBytes\":120,\"droppedBytes\":40,\"droppedRows\":2,\"from\":{\"at\":null,\"text\":\"kept\"}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"ok\":false,\"reason\":\"no_rows\",\"detail\":\"d\"}"
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

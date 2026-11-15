@@ -1,0 +1,51 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.validate",
+	"name": "const-null",
+	"input": {
+		"schema": {
+			"const": null
+		},
+		"texts": [
+			"null",
+			"0",
+			"false",
+			"\"\"",
+			"1e400"
+		]
+	},
+	"expected": {
+		"issues": [
+			[],
+			[
+				{
+					"path": [],
+					"code": "const",
+					"message": "not equal to const"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "const",
+					"message": "not equal to const"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "const",
+					"message": "not equal to const"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "const",
+					"message": "not equal to const"
+				}
+			]
+		]
+	}
+}

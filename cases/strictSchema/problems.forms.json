@@ -1,0 +1,414 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "strictSchema.problems",
+	"name": "forms",
+	"input": {
+		"schemas": [
+			true,
+			false,
+			null,
+			[],
+			{},
+			{
+				"type": []
+			},
+			{
+				"type": [
+					"number",
+					"number"
+				]
+			},
+			{
+				"type": [
+					"text"
+				]
+			},
+			{
+				"type": [
+					"null",
+					1
+				]
+			},
+			{
+				"type": 1
+			},
+			{
+				"type": [
+					"null",
+					"array"
+				]
+			},
+			{
+				"enum": []
+			},
+			{
+				"enum": [
+					null
+				]
+			},
+			{
+				"enum": "a"
+			},
+			{
+				"required": [
+					"a",
+					"a"
+				]
+			},
+			{
+				"required": [
+					"a",
+					1
+				]
+			},
+			{
+				"required": [
+					"a",
+					"b"
+				]
+			},
+			{
+				"required": "a"
+			},
+			{
+				"properties": []
+			},
+			{
+				"properties": {
+					"child": false
+				}
+			},
+			{
+				"items": true
+			},
+			{
+				"items": {}
+			},
+			{
+				"propertyNames": false
+			},
+			{
+				"propertyNames": {
+					"type": "string"
+				}
+			},
+			{
+				"anyOf": []
+			},
+			{
+				"anyOf": [
+					true
+				]
+			},
+			{
+				"anyOf": {}
+			},
+			{
+				"oneOf": [
+					{}
+				]
+			},
+			{
+				"additionalProperties": null
+			},
+			{
+				"additionalProperties": true
+			},
+			{
+				"additionalProperties": false
+			},
+			{
+				"additionalProperties": {
+					"type": "integer"
+				}
+			},
+			{
+				"minimum": 1
+			},
+			{
+				"minimum": "1"
+			},
+			{
+				"maximum": 1.5
+			},
+			{
+				"exclusiveMinimum": null
+			},
+			{
+				"exclusiveMaximum": 2
+			},
+			{
+				"minLength": 0
+			},
+			{
+				"minLength": -1
+			},
+			{
+				"maxLength": 1.5
+			},
+			{
+				"minItems": 2
+			},
+			{
+				"maxItems": -1
+			}
+		]
+	},
+	"expected": {
+		"problems": [
+			[
+				{
+					"path": [],
+					"code": "bad_keyword",
+					"message": "invalid keyword schema"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "bad_keyword",
+					"message": "invalid keyword schema"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "bad_keyword",
+					"message": "invalid keyword schema"
+				}
+			],
+			[
+				{
+					"path": [],
+					"code": "bad_keyword",
+					"message": "invalid keyword schema"
+				}
+			],
+			[],
+			[
+				{
+					"path": [
+						"type"
+					],
+					"code": "bad_keyword",
+					"message": "invalid keyword type"
+				}
+			],
+			[
+				{
+					"path": [
+						"type"
+					],
+					"code": "bad_keyword",
+					"message": "invalid keyword type"
+				}
+			],
+			[
+				{
+					"path": [
+						"type"
+					],
+					"code": "bad_keyword",
+					"message": "invalid keyword type"
+				}
+			],
+			[
+				{
+					"path": [
+						"type"
+					],
+					"code": "bad_keyword",
+					"message": "invalid keyword type"
+				}
+			],
+			[
+				{
+					"path": [
+						"type"
+					],
+					"code": "bad_keyword",
+					"message": "invalid keyword type"
+				}
+			],
+			[],
+			[
+				{
+					"path": [
+						"enum"
+					],
+					"code": "bad_keyword",
+					"message": "invalid keyword enum"
+				}
+			],
+			[],
+			[
+				{
+					"path": [
+						"enum"
+					],
+					"code": "bad_keyword",
+					"message": "invalid keyword enum"
+				}
+			],
+			[
+				{
+					"path": [
+						"required"
+					],
+					"code": "bad_keyword",
+					"message": "invalid keyword required"
+				}
+			],
+			[
+				{
+					"path": [
+						"required"
+					],
+					"code": "bad_keyword",
+					"message": "invalid keyword required"
+				}
+			],
+			[],
+			[
+				{
+					"path": [
+						"required"
+					],
+					"code": "bad_keyword",
+					"message": "invalid keyword required"
+				}
+			],
+			[
+				{
+					"path": [
+						"properties"
+					],
+					"code": "bad_keyword",
+					"message": "invalid keyword properties"
+				}
+			],
+			[
+				{
+					"path": [
+						"properties",
+						"child"
+					],
+					"code": "bad_keyword",
+					"message": "invalid keyword schema"
+				}
+			],
+			[
+				{
+					"path": [
+						"items"
+					],
+					"code": "bad_keyword",
+					"message": "invalid keyword schema"
+				}
+			],
+			[],
+			[
+				{
+					"path": [
+						"propertyNames"
+					],
+					"code": "bad_keyword",
+					"message": "invalid keyword schema"
+				}
+			],
+			[],
+			[
+				{
+					"path": [
+						"anyOf"
+					],
+					"code": "bad_keyword",
+					"message": "invalid keyword anyOf"
+				}
+			],
+			[
+				{
+					"path": [
+						"anyOf",
+						0
+					],
+					"code": "bad_keyword",
+					"message": "invalid keyword schema"
+				}
+			],
+			[
+				{
+					"path": [
+						"anyOf"
+					],
+					"code": "bad_keyword",
+					"message": "invalid keyword anyOf"
+				}
+			],
+			[],
+			[
+				{
+					"path": [
+						"additionalProperties"
+					],
+					"code": "bad_keyword",
+					"message": "invalid keyword schema"
+				}
+			],
+			[],
+			[],
+			[],
+			[],
+			[
+				{
+					"path": [
+						"minimum"
+					],
+					"code": "bad_keyword",
+					"message": "invalid keyword minimum"
+				}
+			],
+			[],
+			[
+				{
+					"path": [
+						"exclusiveMinimum"
+					],
+					"code": "bad_keyword",
+					"message": "invalid keyword exclusiveMinimum"
+				}
+			],
+			[],
+			[],
+			[
+				{
+					"path": [
+						"minLength"
+					],
+					"code": "bad_keyword",
+					"message": "invalid keyword minLength"
+				}
+			],
+			[
+				{
+					"path": [
+						"maxLength"
+					],
+					"code": "bad_keyword",
+					"message": "invalid keyword maxLength"
+				}
+			],
+			[],
+			[
+				{
+					"path": [
+						"maxItems"
+					],
+					"code": "bad_keyword",
+					"message": "invalid keyword maxItems"
+				}
+			]
+		]
+	}
+}
