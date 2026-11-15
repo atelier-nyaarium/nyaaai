@@ -10,6 +10,16 @@ Shared AI framework for Nyaarium tools. TypeScript and Rust twins, judged by one
   - A case is data. `paths` cases also name a folder tree, built in a temp folder by each language.
 - `scripts/`: gate, case runner, crate check, snapshot, consumer script.
 
+## Modules
+
+Same names in both languages; Rust files are snake case.
+
+- `contract`: `json` (`parseJson`, `stringifyJson`), `time` (`parseIsoTime`, `isoTime`), `id` (`randomUuid`). Rust adds `js`.
+- `process`: `paths` (`resolvedPath`, `isInside`).
+- `operator`: `claude/sessionCut` cuts a Claude Code session file. `claude/sessionFile` reads its rows and holds cut ports over files. `claude/cliVersion` reads the installed version.
+- `testkit`: `claudeSession` builds synthetic session files.
+- `agentic`, `ui`: empty.
+
 ## Commands
 
 Run from the repository root.
@@ -38,6 +48,14 @@ cargo run --manifest-path rust/Cargo.toml -p nyaaai-cli -- cut trim --source <fi
 ```
 
 `cut` only reads its source. Exit 0 done, 2 refused, 1 failed.
+
+## Cases
+
+A case kind is `<group>.<operation>`. To add one:
+
+1. Handler in `scripts/caseAdapter.ts` (`HANDLERS`) and in `rust/cli/src/cases.rs` (`run_file`).
+2. Inputs in `scripts/caseSources/`, listed in `SOURCES` of `scripts/cases.ts`.
+3. `bun scripts/cases.ts --refresh`, then read the diff under `cases/`.
 
 ## Consumers
 
@@ -91,7 +109,8 @@ Same in both languages. `parseJson` and `parse_json` apply them.
 - Seven days old, or named by an advisory. `ts/bunfig.toml` enforces the age for Bun.
 - `scripts/crates.ts` checks `Cargo.lock` against crates.io publish dates and OSV advisories.
   - `crate-ages.json` beside a lock holds the dates.
-  - `crate-exemptions.json` beside a lock lists reviewed exceptions.
+  - `crate-exemptions.json` beside a lock lists reviewed exceptions: `young` crates, each with its advisory id, and accepted `advisories`.
+  - A package from a git source or another registry fails.
 
 ## Public repository
 
