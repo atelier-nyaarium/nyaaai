@@ -3,50 +3,6 @@
 	"$id": "cases.output.json",
 	"x-contract-version": "0.1.0",
 	"$defs": {
-		"SessionSource": {
-			"type": "object",
-			"properties": {
-				"lines": {
-					"type": "array",
-					"items": {
-						"type": "string"
-					}
-				},
-				"base64": {
-					"type": "string"
-				},
-				"file": {
-					"type": "string"
-				}
-			},
-			"additionalProperties": false
-		},
-		"BodyOf": {
-			"type": "string",
-			"enum": [
-				"whole",
-				"afterFirstLine"
-			]
-		},
-		"TreeEntry": {
-			"type": "object",
-			"properties": {
-				"path": {
-					"type": "string"
-				},
-				"file": {
-					"type": "boolean",
-					"const": true
-				},
-				"link": {
-					"type": "string"
-				}
-			},
-			"required": [
-				"path"
-			],
-			"additionalProperties": false
-		},
 		"JsonRoundTripInput": {
 			"type": "object",
 			"properties": {
@@ -89,50 +45,7 @@
 			],
 			"additionalProperties": false
 		},
-		"ShapeCompatibleVersionsInput": {
-			"type": "object",
-			"properties": {
-				"pairs": {
-					"type": "array",
-					"items": {
-						"type": "object",
-						"properties": {
-							"left": {
-								"type": "string"
-							},
-							"right": {
-								"type": "string"
-							}
-						},
-						"required": [
-							"left",
-							"right"
-						],
-						"additionalProperties": false
-					}
-				}
-			},
-			"required": [
-				"pairs"
-			],
-			"additionalProperties": false
-		},
-		"ShapeCompatibleVersionsResult": {
-			"type": "object",
-			"properties": {
-				"compatible": {
-					"type": "array",
-					"items": {
-						"type": "boolean"
-					}
-				}
-			},
-			"required": [
-				"compatible"
-			],
-			"additionalProperties": false
-		},
-		"Base64DecodeInput": {
+		"JsonCanonicalInput": {
 			"type": "object",
 			"properties": {
 				"texts": {
@@ -147,7 +60,7 @@
 			],
 			"additionalProperties": false
 		},
-		"Base64DecodeResult": {
+		"JsonCanonicalResult": {
 			"type": "object",
 			"properties": {
 				"texts": {
@@ -195,39 +108,6 @@
 			],
 			"additionalProperties": false
 		},
-		"JsonCanonicalInput": {
-			"type": "object",
-			"properties": {
-				"texts": {
-					"type": "array",
-					"items": {
-						"type": "string"
-					}
-				}
-			},
-			"required": [
-				"texts"
-			],
-			"additionalProperties": false
-		},
-		"JsonCanonicalResult": {
-			"type": "object",
-			"properties": {
-				"texts": {
-					"type": "array",
-					"items": {
-						"type": [
-							"string",
-							"null"
-						]
-					}
-				}
-			},
-			"required": [
-				"texts"
-			],
-			"additionalProperties": false
-		},
 		"OrderSortedTextsInput": {
 			"type": "object",
 			"properties": {
@@ -255,6 +135,82 @@
 			},
 			"required": [
 				"texts"
+			],
+			"additionalProperties": false
+		},
+		"Base64DecodeInput": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			],
+			"additionalProperties": false
+		},
+		"Base64DecodeResult": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": [
+							"string",
+							"null"
+						]
+					}
+				}
+			},
+			"required": [
+				"texts"
+			],
+			"additionalProperties": false
+		},
+		"ShapeCompatibleVersionsInput": {
+			"type": "object",
+			"properties": {
+				"pairs": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"left": {
+								"type": "string"
+							},
+							"right": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"left",
+							"right"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"pairs"
+			],
+			"additionalProperties": false
+		},
+		"ShapeCompatibleVersionsResult": {
+			"type": "object",
+			"properties": {
+				"compatible": {
+					"type": "array",
+					"items": {
+						"type": "boolean"
+					}
+				}
+			},
+			"required": [
+				"compatible"
 			],
 			"additionalProperties": false
 		},
@@ -300,6 +256,9 @@
 								"items": {
 									"$ref": "frames.output.json#/$defs/PathPart"
 								}
+							},
+							"message": {
+								"type": "string"
 							}
 						},
 						"required": [
@@ -899,6 +858,43 @@
 			],
 			"additionalProperties": false
 		},
+		"TextSpacesInput": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			],
+			"additionalProperties": false
+		},
+		"TextSpacesResult": {
+			"type": "object",
+			"properties": {
+				"trimmed": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"collapsed": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"trimmed",
+				"collapsed"
+			],
+			"additionalProperties": false
+		},
 		"TextFindInput": {
 			"type": "object",
 			"properties": {
@@ -956,423 +952,6 @@
 			"required": [
 				"first",
 				"last"
-			],
-			"additionalProperties": false
-		},
-		"SessionCutRehomedInput": {
-			"type": "object",
-			"properties": {
-				"rows": {
-					"type": "array",
-					"items": {
-						"type": "string"
-					}
-				},
-				"sessionId": {
-					"type": "string"
-				}
-			},
-			"required": [
-				"rows",
-				"sessionId"
-			],
-			"additionalProperties": false
-		},
-		"SessionCutRehomedResult": {
-			"type": "object",
-			"properties": {
-				"rows": {
-					"type": "array",
-					"items": {
-						"type": "string"
-					}
-				}
-			},
-			"required": [
-				"rows"
-			],
-			"additionalProperties": false
-		},
-		"SessionCutIndexInput": {
-			"type": "object",
-			"properties": {
-				"source": {
-					"$ref": "#/$defs/SessionSource"
-				}
-			},
-			"required": [
-				"source"
-			],
-			"additionalProperties": false
-		},
-		"SessionCutIndexResult": {
-			"type": "object",
-			"properties": {
-				"index": {
-					"$ref": "sessionCut.output.json#/$defs/SessionIndex"
-				}
-			},
-			"required": [
-				"index"
-			],
-			"additionalProperties": false
-		},
-		"SessionCutPlanInput": {
-			"type": "object",
-			"properties": {
-				"source": {
-					"$ref": "#/$defs/SessionSource"
-				},
-				"requests": {
-					"type": "array",
-					"items": {
-						"$ref": "sessionCut.output.json#/$defs/CutRequest"
-					}
-				},
-				"cliVersion": {
-					"type": "string"
-				}
-			},
-			"required": [
-				"source",
-				"requests",
-				"cliVersion"
-			],
-			"additionalProperties": false
-		},
-		"SessionCutPlanResult": {
-			"type": "object",
-			"properties": {
-				"plans": {
-					"type": "array",
-					"items": {
-						"anyOf": [
-							{
-								"$ref": "sessionCut.output.json#/$defs/CutPlan"
-							},
-							{
-								"$ref": "sessionCut.output.json#/$defs/CutRefused"
-							}
-						]
-					}
-				}
-			},
-			"required": [
-				"plans"
-			],
-			"additionalProperties": false
-		},
-		"SessionCutCutInput": {
-			"type": "object",
-			"properties": {
-				"source": {
-					"$ref": "#/$defs/SessionSource"
-				},
-				"request": {
-					"$ref": "sessionCut.output.json#/$defs/CutRequest"
-				},
-				"cliVersion": {
-					"type": "string"
-				},
-				"sourcePath": {
-					"type": "string"
-				},
-				"idPrefix": {
-					"type": "string"
-				},
-				"nowMs": {
-					"type": "integer",
-					"minimum": -9007199254740991,
-					"maximum": 9007199254740991
-				},
-				"summary": {
-					"type": "string"
-				}
-			},
-			"required": [
-				"source",
-				"request",
-				"cliVersion",
-				"sourcePath",
-				"idPrefix",
-				"nowMs"
-			],
-			"additionalProperties": false
-		},
-		"SessionCutCutResult": {
-			"type": "object",
-			"properties": {
-				"error": {
-					"type": "string"
-				},
-				"result": {
-					"anyOf": [
-						{
-							"$ref": "sessionCut.output.json#/$defs/CutDone"
-						},
-						{
-							"$ref": "sessionCut.output.json#/$defs/CutRefused"
-						}
-					]
-				},
-				"built": {
-					"anyOf": [
-						{
-							"type": "array",
-							"items": {
-								"type": "string"
-							}
-						},
-						{
-							"type": "null"
-						}
-					]
-				},
-				"summarized": {
-					"anyOf": [
-						{
-							"type": "object",
-							"properties": {
-								"standing": {
-									"type": [
-										"string",
-										"null"
-									]
-								},
-								"rows": {
-									"type": "array",
-									"items": {
-										"type": "string"
-									}
-								}
-							},
-							"required": [
-								"standing",
-								"rows"
-							],
-							"additionalProperties": false
-						},
-						{
-							"type": "null"
-						}
-					]
-				}
-			},
-			"additionalProperties": false
-		},
-		"SessionCutVerifyInput": {
-			"type": "object",
-			"properties": {
-				"source": {
-					"$ref": "#/$defs/SessionSource"
-				},
-				"sessionId": {
-					"type": "string"
-				},
-				"paired": {
-					"type": "boolean"
-				}
-			},
-			"required": [
-				"source",
-				"sessionId",
-				"paired"
-			],
-			"additionalProperties": false
-		},
-		"SessionCutVerifyResult": {
-			"type": "object",
-			"properties": {
-				"problems": {
-					"type": "array",
-					"items": {
-						"type": "string"
-					}
-				}
-			},
-			"required": [
-				"problems"
-			],
-			"additionalProperties": false
-		},
-		"SessionCutPickTurnInput": {
-			"type": "object",
-			"properties": {
-				"source": {
-					"$ref": "#/$defs/SessionSource"
-				},
-				"picks": {
-					"type": "array",
-					"items": {
-						"type": "object",
-						"properties": {
-							"at": {
-								"type": "integer",
-								"minimum": -9007199254740991,
-								"maximum": 9007199254740991
-							},
-							"text": {
-								"type": "string"
-							},
-							"bodyOf": {
-								"$ref": "#/$defs/BodyOf"
-							}
-						},
-						"required": [
-							"at",
-							"bodyOf"
-						],
-						"additionalProperties": false
-					}
-				}
-			},
-			"required": [
-				"source",
-				"picks"
-			],
-			"additionalProperties": false
-		},
-		"SessionCutPickTurnResult": {
-			"type": "object",
-			"properties": {
-				"picked": {
-					"type": "array",
-					"items": {
-						"anyOf": [
-							{
-								"$ref": "sessionCut.output.json#/$defs/PickedTurn"
-							},
-							{
-								"type": "null"
-							}
-						]
-					}
-				}
-			},
-			"required": [
-				"picked"
-			],
-			"additionalProperties": false
-		},
-		"SessionFileLinesOfInput": {
-			"type": "object",
-			"properties": {
-				"base64": {
-					"type": "string"
-				}
-			},
-			"required": [
-				"base64"
-			],
-			"additionalProperties": false
-		},
-		"SessionFileLinesOfResult": {
-			"type": "object",
-			"properties": {
-				"rows": {
-					"type": "array",
-					"items": {
-						"type": "string"
-					}
-				}
-			},
-			"required": [
-				"rows"
-			],
-			"additionalProperties": false
-		},
-		"PathsIsInsideInput": {
-			"type": "object",
-			"properties": {
-				"tree": {
-					"type": "array",
-					"items": {
-						"$ref": "#/$defs/TreeEntry"
-					}
-				},
-				"checks": {
-					"type": "array",
-					"items": {
-						"type": "object",
-						"properties": {
-							"child": {
-								"type": "string"
-							},
-							"parent": {
-								"type": "string"
-							}
-						},
-						"required": [
-							"child",
-							"parent"
-						],
-						"additionalProperties": false
-					}
-				},
-				"relative": {
-					"type": "boolean",
-					"const": true
-				}
-			},
-			"required": [
-				"tree",
-				"checks"
-			],
-			"additionalProperties": false
-		},
-		"PathsIsInsideResult": {
-			"type": "object",
-			"properties": {
-				"results": {
-					"type": "array",
-					"items": {
-						"anyOf": [
-							{
-								"type": "boolean"
-							},
-							{
-								"type": "string",
-								"const": "error"
-							}
-						]
-					}
-				}
-			},
-			"required": [
-				"results"
-			],
-			"additionalProperties": false
-		},
-		"ClaudeVersionInInput": {
-			"type": "object",
-			"properties": {
-				"texts": {
-					"type": "array",
-					"items": {
-						"type": "string"
-					}
-				}
-			},
-			"required": [
-				"texts"
-			],
-			"additionalProperties": false
-		},
-		"ClaudeVersionInResult": {
-			"type": "object",
-			"properties": {
-				"found": {
-					"type": "array",
-					"items": {
-						"type": [
-							"string",
-							"null"
-						]
-					}
-				}
-			},
-			"required": [
-				"found"
 			],
 			"additionalProperties": false
 		},
@@ -1795,6 +1374,494 @@
 			],
 			"additionalProperties": false
 		},
+		"SessionSource": {
+			"type": "object",
+			"properties": {
+				"lines": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"base64": {
+					"type": "string"
+				},
+				"file": {
+					"type": "string"
+				}
+			},
+			"additionalProperties": false
+		},
+		"BodyOf": {
+			"type": "string",
+			"enum": [
+				"whole",
+				"afterFirstLine"
+			]
+		},
+		"SessionCutRehomedInput": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"sessionId": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"rows",
+				"sessionId"
+			],
+			"additionalProperties": false
+		},
+		"SessionCutRehomedResult": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"rows"
+			],
+			"additionalProperties": false
+		},
+		"SessionCutIndexInput": {
+			"type": "object",
+			"properties": {
+				"source": {
+					"$ref": "#/$defs/SessionSource"
+				}
+			},
+			"required": [
+				"source"
+			],
+			"additionalProperties": false
+		},
+		"SessionCutIndexResult": {
+			"type": "object",
+			"properties": {
+				"index": {
+					"$ref": "sessionCut.output.json#/$defs/SessionIndex"
+				}
+			},
+			"required": [
+				"index"
+			],
+			"additionalProperties": false
+		},
+		"SessionCutPlanInput": {
+			"type": "object",
+			"properties": {
+				"source": {
+					"$ref": "#/$defs/SessionSource"
+				},
+				"requests": {
+					"type": "array",
+					"items": {
+						"$ref": "sessionCut.output.json#/$defs/CutRequest"
+					}
+				},
+				"cliVersion": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"source",
+				"requests",
+				"cliVersion"
+			],
+			"additionalProperties": false
+		},
+		"SessionCutPlanResult": {
+			"type": "object",
+			"properties": {
+				"plans": {
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{
+								"$ref": "sessionCut.output.json#/$defs/CutPlan"
+							},
+							{
+								"$ref": "sessionCut.output.json#/$defs/CutRefused"
+							}
+						]
+					}
+				}
+			},
+			"required": [
+				"plans"
+			],
+			"additionalProperties": false
+		},
+		"SessionCutCutInput": {
+			"type": "object",
+			"properties": {
+				"source": {
+					"$ref": "#/$defs/SessionSource"
+				},
+				"request": {
+					"$ref": "sessionCut.output.json#/$defs/CutRequest"
+				},
+				"cliVersion": {
+					"type": "string"
+				},
+				"sourcePath": {
+					"type": "string"
+				},
+				"idPrefix": {
+					"type": "string"
+				},
+				"nowMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"summary": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"source",
+				"request",
+				"cliVersion",
+				"sourcePath",
+				"idPrefix",
+				"nowMs"
+			],
+			"additionalProperties": false
+		},
+		"SessionCutCutResult": {
+			"type": "object",
+			"properties": {
+				"error": {
+					"type": "string"
+				},
+				"result": {
+					"anyOf": [
+						{
+							"$ref": "sessionCut.output.json#/$defs/CutDone"
+						},
+						{
+							"$ref": "sessionCut.output.json#/$defs/CutRefused"
+						}
+					]
+				},
+				"built": {
+					"anyOf": [
+						{
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"summarized": {
+					"anyOf": [
+						{
+							"type": "object",
+							"properties": {
+								"standing": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"rows": {
+									"type": "array",
+									"items": {
+										"type": "string"
+									}
+								}
+							},
+							"required": [
+								"standing",
+								"rows"
+							],
+							"additionalProperties": false
+						},
+						{
+							"type": "null"
+						}
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"SessionCutVerifyInput": {
+			"type": "object",
+			"properties": {
+				"source": {
+					"$ref": "#/$defs/SessionSource"
+				},
+				"sessionId": {
+					"type": "string"
+				},
+				"paired": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"source",
+				"sessionId",
+				"paired"
+			],
+			"additionalProperties": false
+		},
+		"SessionCutVerifyResult": {
+			"type": "object",
+			"properties": {
+				"problems": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"problems"
+			],
+			"additionalProperties": false
+		},
+		"SessionCutPickTurnInput": {
+			"type": "object",
+			"properties": {
+				"source": {
+					"$ref": "#/$defs/SessionSource"
+				},
+				"picks": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"at": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"text": {
+								"type": "string"
+							},
+							"bodyOf": {
+								"$ref": "#/$defs/BodyOf"
+							}
+						},
+						"required": [
+							"at",
+							"bodyOf"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"source",
+				"picks"
+			],
+			"additionalProperties": false
+		},
+		"SessionCutPickTurnResult": {
+			"type": "object",
+			"properties": {
+				"picked": {
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{
+								"$ref": "sessionCut.output.json#/$defs/PickedTurn"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				}
+			},
+			"required": [
+				"picked"
+			],
+			"additionalProperties": false
+		},
+		"SessionFileLinesOfInput": {
+			"type": "object",
+			"properties": {
+				"base64": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"base64"
+			],
+			"additionalProperties": false
+		},
+		"SessionFileLinesOfResult": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"rows"
+			],
+			"additionalProperties": false
+		},
+		"PathsIsInsideInput": {
+			"type": "object",
+			"properties": {
+				"tree": {
+					"type": "array",
+					"items": {
+						"$ref": "tree.output.json#/$defs/TreeEntry"
+					}
+				},
+				"checks": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"child": {
+								"type": "string"
+							},
+							"parent": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"child",
+							"parent"
+						],
+						"additionalProperties": false
+					}
+				},
+				"relative": {
+					"type": "boolean",
+					"const": true
+				}
+			},
+			"required": [
+				"tree",
+				"checks"
+			],
+			"additionalProperties": false
+		},
+		"PathsIsInsideResult": {
+			"type": "object",
+			"properties": {
+				"results": {
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{
+								"type": "boolean"
+							},
+							{
+								"type": "string",
+								"const": "error"
+							}
+						]
+					}
+				}
+			},
+			"required": [
+				"results"
+			],
+			"additionalProperties": false
+		},
+		"ClaudeVersionInInput": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			],
+			"additionalProperties": false
+		},
+		"ClaudeVersionInResult": {
+			"type": "object",
+			"properties": {
+				"found": {
+					"type": "array",
+					"items": {
+						"type": [
+							"string",
+							"null"
+						]
+					}
+				}
+			},
+			"required": [
+				"found"
+			],
+			"additionalProperties": false
+		},
+		"TestkitConverseInput": {
+			"type": "object",
+			"properties": {
+				"requests": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				},
+				"together": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"requests",
+				"together"
+			],
+			"additionalProperties": false
+		},
+		"TestkitConverseResult": {
+			"type": "object",
+			"properties": {
+				"ids": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"nowMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"steers": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"ids",
+				"nowMs",
+				"steers"
+			],
+			"additionalProperties": false
+		},
 		"TestkitCompactedSessionInput": {
 			"type": "object",
 			"properties": {},
@@ -1812,72 +1879,6 @@
 			},
 			"required": [
 				"lines"
-			],
-			"additionalProperties": false
-		},
-		"TestkitReplayInput": {
-			"type": "object",
-			"properties": {
-				"file": {
-					"type": "string"
-				}
-			},
-			"required": [
-				"file"
-			],
-			"additionalProperties": false
-		},
-		"TestkitReplayResult": {
-			"type": "object",
-			"properties": {
-				"requests": {
-					"type": "array",
-					"items": {}
-				},
-				"exchanges": {
-					"type": "array",
-					"items": {
-						"type": "object",
-						"properties": {
-							"status": {
-								"type": "integer",
-								"minimum": -9007199254740991,
-								"maximum": 9007199254740991
-							},
-							"headers": {
-								"type": "object",
-								"propertyNames": {
-									"type": "string"
-								},
-								"additionalProperties": {
-									"type": "string"
-								}
-							},
-							"chunks": {
-								"type": "array",
-								"items": {
-									"type": "integer",
-									"minimum": -9007199254740991,
-									"maximum": 9007199254740991
-								}
-							},
-							"body": {
-								"type": "string"
-							}
-						},
-						"required": [
-							"status",
-							"headers",
-							"chunks",
-							"body"
-						],
-						"additionalProperties": false
-					}
-				}
-			},
-			"required": [
-				"requests",
-				"exchanges"
 			],
 			"additionalProperties": false
 		},
@@ -2019,25 +2020,85 @@
 			],
 			"additionalProperties": false
 		},
-		"TestkitConverseInput": {
+		"TestkitReplayInput": {
+			"type": "object",
+			"properties": {
+				"file": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"file"
+			],
+			"additionalProperties": false
+		},
+		"TestkitReplayResult": {
 			"type": "object",
 			"properties": {
 				"requests": {
-					"type": "integer",
-					"minimum": 0,
-					"maximum": 9007199254740991
+					"type": "array",
+					"items": {}
 				},
-				"together": {
-					"type": "boolean"
+				"exchanges": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"status": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"headers": {
+								"type": "object",
+								"propertyNames": {
+									"type": "string"
+								},
+								"additionalProperties": {
+									"type": "string"
+								}
+							},
+							"chunks": {
+								"type": "array",
+								"items": {
+									"type": "integer",
+									"minimum": -9007199254740991,
+									"maximum": 9007199254740991
+								}
+							},
+							"body": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"status",
+							"headers",
+							"chunks",
+							"body"
+						],
+						"additionalProperties": false
+					}
 				}
 			},
 			"required": [
 				"requests",
-				"together"
+				"exchanges"
 			],
 			"additionalProperties": false
 		},
-		"TestkitConverseResult": {
+		"TestkitContextInput": {
+			"type": "object",
+			"properties": {
+				"folder": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"folder"
+			],
+			"additionalProperties": false
+		},
+		"TestkitContextResult": {
 			"type": "object",
 			"properties": {
 				"ids": {
@@ -2046,22 +2107,30 @@
 						"type": "string"
 					}
 				},
-				"nowMs": {
-					"type": "integer",
-					"minimum": -9007199254740991,
-					"maximum": 9007199254740991
-				},
-				"steers": {
+				"times": {
 					"type": "array",
 					"items": {
-						"type": "string"
+						"type": "integer",
+						"minimum": -9007199254740991,
+						"maximum": 9007199254740991
 					}
+				},
+				"tmp": {
+					"type": "string"
+				},
+				"root": {
+					"type": "string"
+				},
+				"planted": {
+					"type": "boolean"
 				}
 			},
 			"required": [
 				"ids",
-				"nowMs",
-				"steers"
+				"times",
+				"tmp",
+				"root",
+				"planted"
 			],
 			"additionalProperties": false
 		}

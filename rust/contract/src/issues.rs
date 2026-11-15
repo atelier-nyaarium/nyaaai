@@ -1,4 +1,4 @@
-//! Generated.
+//! Generated from the issue table by scripts/contract.ts. Do not edit.
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum IssueCode {

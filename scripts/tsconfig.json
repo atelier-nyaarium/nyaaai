@@ -6,5 +6,5 @@
 		"typeRoots": ["../ts/node_modules"]
 	},
 	"include": ["**/*.ts"],
-	"references": [{ "path": "../ts/contract" }, { "path": "../ts/operator" }, { "path": "../ts/testkit" }, { "path": "../ts/cli" }]
+	"references": [{ "path": "../ts/contract" }, { "path": "../ts/operator" }, { "path": "../ts/testkit" }, { "path": "../ts/adapter" }, { "path": "../ts/cli" }]
 }

@@ -6,10 +6,17 @@
     clippy::ptr_arg
 )]
 
+use std::sync::LazyLock;
+
 use nyaaai_contract::json::{Object, Record, Value};
+use nyaaai_contract::pattern::Pattern;
 use nyaaai_contract::shape::{self, Path, Refused, Shape};
 
 use super::torture_shapes_hooks as hooks;
+
+static PATTERN_1: LazyLock<Option<Pattern>> =
+    LazyLock::new(|| Pattern::compile("^[a-z]+-\\d+$", "i").ok());
+static PATTERN_2: LazyLock<Option<Pattern>> = LazyLock::new(|| Pattern::compile("^\\S+$", "").ok());
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Color {
@@ -65,6 +72,20 @@ pub fn decode_names(value: &Value, at: &mut Path) -> Result<Names, Refused> {
 
 pub fn encode_names(held: &Names) -> Value {
     Value::Array(held.iter().map(encode_name).collect())
+}
+
+pub type Several = Vec<i64>;
+
+pub fn decode_several(value: &Value, at: &mut Path) -> Result<Several, Refused> {
+    shape::list_within(value, at, Some(2), Some(3), shape::integer)
+}
+
+pub fn encode_several(held: &Several) -> Value {
+    Value::Array(
+        held.iter()
+            .map(|held| Value::Number(*held as f64))
+            .collect(),
+    )
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -778,7 +799,8 @@ impl Span {
 
 impl Shape for Span {
     fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
-        Self::decode_plain(value, at).and_then(|held| shape::holds(hooks::ordered(&held), held, at))
+        Self::decode_plain(value, at)
+            .and_then(|held| shape::holds(hooks::ordered(&held), held, at, None))
     }
 
     fn encode(&self) -> Value {
@@ -835,6 +857,300 @@ impl Shape for Holder {
     }
 }
 
+pub type Pair = (Name, u64);
+
+pub fn decode_pair(value: &Value, at: &mut Path) -> Result<Pair, Refused> {
+    shape::tuple(value, at, 2).and_then(|items| {
+        Ok((
+            shape::place(items, 0, at, decode_name)?,
+            shape::place(items, 1, at, shape::natural)?,
+        ))
+    })
+}
+
+pub fn encode_pair(held: &Pair) -> Value {
+    Value::Array(vec![encode_name(&held.0), Value::Number(held.1 as f64)])
+}
+
+pub type Code = String;
+
+pub fn decode_code(value: &Value, at: &mut Path) -> Result<Code, Refused> {
+    shape::text_within(value, at, None, Some(8)).and_then(|held| {
+        shape::matches(
+            PATTERN_1.as_ref(),
+            held,
+            at,
+            Some("A code reads like abc-123."),
+        )
+    })
+}
+
+pub fn encode_code(held: &Code) -> Value {
+    Value::from(held.as_str())
+}
+
+pub type Even = i64;
+
+pub fn decode_even(value: &Value, at: &mut Path) -> Result<Even, Refused> {
+    shape::integer(value, at)
+        .and_then(|held| shape::holds(hooks::even(&held), held, at, Some("An even number.")))
+        .and_then(|held| shape::holds(hooks::small(&held), held, at, None))
+}
+
+pub fn encode_even(held: &Even) -> Value {
+    Value::Number(*held as f64)
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Tupled {
+    pub pair: Pair,
+    pub single: (TupledSingleItem0,),
+    pub nested: Vec<(bool, Option<(String, Leaf)>)>,
+    pub code: Code,
+    pub word: String,
+    pub even: Even,
+    pub range: (i64, i64),
+}
+
+impl Shape for Tupled {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let pair = shape::required(object, "pair", at, decode_pair)?;
+        let single = shape::required(object, "single", at, |value, at| {
+            shape::tuple(value, at, 1)
+                .and_then(|items| Ok((shape::place(items, 0, at, TupledSingleItem0::decode_at)?,)))
+        })?;
+        let nested = shape::required(object, "nested", at, |value, at| {
+            shape::list(value, at, |value, at| {
+                shape::tuple(value, at, 2).and_then(|items| {
+                    Ok((
+                        shape::place(items, 0, at, shape::flag)?,
+                        shape::place(items, 1, at, |value, at| {
+                            shape::nullable(value, at, |value, at| {
+                                shape::tuple(value, at, 2).and_then(|items| {
+                                    Ok((
+                                        shape::place(items, 0, at, shape::text)?,
+                                        shape::place(items, 1, at, Leaf::decode_at)?,
+                                    ))
+                                })
+                            })
+                        })?,
+                    ))
+                })
+            })
+        })?;
+        let code = shape::required(object, "code", at, decode_code)?;
+        let word = shape::required(object, "word", at, |value, at| {
+            shape::text(value, at)
+                .and_then(|held| shape::matches(PATTERN_2.as_ref(), held, at, None))
+        })?;
+        let even = shape::required(object, "even", at, decode_even)?;
+        let range = shape::required(object, "range", at, |value, at| {
+            shape::tuple(value, at, 2)
+                .and_then(|items| {
+                    Ok((
+                        shape::place(items, 0, at, shape::integer)?,
+                        shape::place(items, 1, at, shape::integer)?,
+                    ))
+                })
+                .and_then(|held| {
+                    shape::holds(hooks::ascending(&held), held, at, Some("A range ascends."))
+                })
+        })?;
+        Ok(Self {
+            pair,
+            single,
+            nested,
+            code,
+            word,
+            even,
+            range,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("pair", encode_pair(&self.pair));
+        object.insert("single", Value::Array(vec![self.single.0.encode()]));
+        object.insert(
+            "nested",
+            Value::Array(
+                self.nested
+                    .iter()
+                    .map(|held| {
+                        Value::Array(vec![
+                            Value::Bool(held.0),
+                            held.1.as_ref().map_or(Value::Null, |held| {
+                                Value::Array(vec![Value::from(held.0.as_str()), held.1.encode()])
+                            }),
+                        ])
+                    })
+                    .collect(),
+            ),
+        );
+        object.insert("code", encode_code(&self.code));
+        object.insert("word", Value::from(self.word.as_str()));
+        object.insert("even", encode_even(&self.even));
+        object.insert(
+            "range",
+            Value::Array(vec![
+                Value::Number(self.range.0 as f64),
+                Value::Number(self.range.1 as f64),
+            ]),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TupledSingleItem0 {
+    pub x: f64,
+}
+
+impl Shape for TupledSingleItem0 {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let x = shape::required(object, "x", at, shape::number)?;
+        Ok(Self { x })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("x", Value::Number(self.x));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum Choice {
+    Object(ChoiceObject),
+    Integer(i64),
+    Off,
+}
+
+impl Shape for Choice {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        if let Ok(held) = ChoiceObject::decode_at(value, at) {
+            return Ok(Self::Object(held));
+        }
+        if let Ok(held) = shape::integer(value, at)
+            .and_then(|held| shape::holds(hooks::even(&held), held, at, Some("An even number.")))
+        {
+            return Ok(Self::Integer(held));
+        }
+        if shape::is_text(value, at, "off").is_ok() {
+            return Ok(Self::Off);
+        }
+        Err(shape::refused(at, "no branch matches"))
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Object(held) => held.encode(),
+            Self::Integer(held) => Value::Number(*held as f64),
+            Self::Off => Value::from("off"),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ChoiceObject {
+    pub name: Name,
+    pub more: Vec<u64>,
+}
+
+impl Shape for ChoiceObject {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let name = shape::required(object, "name", at, decode_name)?;
+        let more = shape::required(object, "more", at, |value, at| {
+            shape::list(value, at, shape::natural)
+        })?;
+        Ok(Self { name, more })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("name", encode_name(&self.name));
+        object.insert(
+            "more",
+            Value::Array(
+                self.more
+                    .iter()
+                    .map(|held| Value::Number(*held as f64))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Wrapped {
+    pub choice: Choice,
+    pub list: Vec<Choice>,
+    pub event: Event,
+}
+
+impl Shape for Wrapped {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let choice = shape::required(object, "choice", at, Choice::decode_at)?;
+        let list = shape::required(object, "list", at, |value, at| {
+            shape::list(value, at, Choice::decode_at)
+        })?;
+        let event = shape::required(object, "event", at, Event::decode_at)?;
+        Ok(Self {
+            choice,
+            list,
+            event,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("choice", self.choice.encode());
+        object.insert(
+            "list",
+            Value::Array(self.list.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert("event", self.event.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum NotFive {
+    Integer(i64),
+    Text(String),
+}
+
+impl NotFive {
+    fn decode_plain(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        if let Ok(held) = shape::integer(value, at) {
+            return Ok(Self::Integer(held));
+        }
+        if let Ok(held) = shape::text(value, at) {
+            return Ok(Self::Text(held));
+        }
+        Err(shape::refused(at, "no branch matches"))
+    }
+}
+
+impl Shape for NotFive {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        Self::decode_plain(value, at)
+            .and_then(|held| shape::holds(hooks::not_five(&held), held, at, Some("Not five.")))
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Integer(held) => Value::Number(*held as f64),
+            Self::Text(held) => Value::from(held.as_str()),
+        }
+    }
+}
+
 /// Decodes then encodes a named shape.
 pub fn normalize(shape: &str, value: &Value) -> Option<Result<Value, Refused>> {
     let at = &mut Path::new();
@@ -842,6 +1158,7 @@ pub fn normalize(shape: &str, value: &Value) -> Option<Result<Value, Refused>> {
         "Color" => Color::decode_at(value, at).map(|held| held.encode()),
         "Name" => decode_name(value, at).map(|held| encode_name(&held)),
         "Names" => decode_names(value, at).map(|held| encode_names(&held)),
+        "Several" => decode_several(value, at).map(|held| encode_several(&held)),
         "Leaf" => Leaf::decode_at(value, at).map(|held| held.encode()),
         "Branch" => Branch::decode_at(value, at).map(|held| held.encode()),
         "Tree" => Tree::decode_at(value, at).map(|held| held.encode()),
@@ -856,6 +1173,13 @@ pub fn normalize(shape: &str, value: &Value) -> Option<Result<Value, Refused>> {
         "Legacy" => Legacy::decode_at(value, at).map(|held| held.encode()),
         "Span" => Span::decode_at(value, at).map(|held| held.encode()),
         "Holder" => Holder::decode_at(value, at).map(|held| held.encode()),
+        "Pair" => decode_pair(value, at).map(|held| encode_pair(&held)),
+        "Code" => decode_code(value, at).map(|held| encode_code(&held)),
+        "Even" => decode_even(value, at).map(|held| encode_even(&held)),
+        "Tupled" => Tupled::decode_at(value, at).map(|held| held.encode()),
+        "Choice" => Choice::decode_at(value, at).map(|held| held.encode()),
+        "Wrapped" => Wrapped::decode_at(value, at).map(|held| held.encode()),
+        "NotFive" => NotFive::decode_at(value, at).map(|held| held.encode()),
         _ => return None,
     })
 }

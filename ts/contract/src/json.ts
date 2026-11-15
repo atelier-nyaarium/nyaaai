@@ -8,11 +8,10 @@ import { compareText } from "./order";
 /** Maximum container depth. */
 export const MAX_DEPTH = 1024;
 
-const SURROGATE_ESCAPE = /\\u[dD][89a-fA-F]/;
-const ESCAPES =
-	/\\(?:u[dD][89abAB][0-9a-fA-F]{2}\\u[dD][c-fC-F][0-9a-fA-F]{2}|(u[dD][89a-fA-F][0-9a-fA-F]{2})|[\s\S])/g;
-const LONE_SURROGATE = /[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]/;
-const LONE_SURROGATES = new RegExp(LONE_SURROGATE, "g");
+/** The library target predates it. */
+type WellFormable = string & { toWellFormed(): string };
+
+const HEX = "0123456789abcdefABCDEF";
 
 ////////////////////////////////
 //  Functions & Helpers
@@ -32,15 +31,60 @@ function deeperThan(value: unknown, limit: number): boolean {
 
 /** Replaces lone surrogates. */
 function wellFormed(text: string): string {
-	return LONE_SURROGATE.test(text) ? text.replace(LONE_SURROGATES, "\u{fffd}") : text;
+	return (text as WellFormable).toWellFormed();
+}
+
+/** Four hex digits at `at`, as a number. */
+function hexUnit(text: string, at: number): number | undefined {
+	if (at + 4 > text.length) return undefined;
+	let unit = 0;
+	for (let place = at; place < at + 4; place++) {
+		const digit = HEX.indexOf(text[place] as string);
+		if (digit < 0) return undefined;
+		unit = unit * 16 + (digit > 15 ? digit - 6 : digit);
+	}
+	return unit;
+}
+
+/** Escape unit at `at`. */
+function escapedUnit(text: string, at: number): number | undefined {
+	return text[at] === "\\" && text[at + 1] === "u" ? hexUnit(text, at + 2) : undefined;
 }
 
 /** Decoding may merge keys. */
 function decodable(text: string): string {
-	const escaped = SURROGATE_ESCAPE.test(text)
-		? text.replace(ESCAPES, (held, lone?: string) => (lone === undefined ? held : "\\ufffd"))
-		: text;
-	return wellFormed(escaped);
+	let out = "";
+	let from = 0;
+	let inString = false;
+	for (let at = 0; at < text.length; ) {
+		const held = text[at];
+		if (held === '"') {
+			inString = !inString;
+			at += 1;
+		} else if (held === "\\" && inString) {
+			const unit = escapedUnit(text, at);
+			const next = escapedUnit(text, at + 6);
+			if (
+				unit !== undefined &&
+				unit >= 0xd800 &&
+				unit <= 0xdbff &&
+				next !== undefined &&
+				next >= 0xdc00 &&
+				next <= 0xdfff
+			) {
+				at += 12;
+			} else if (unit !== undefined && unit >= 0xd800 && unit <= 0xdfff) {
+				out += `${text.slice(from, at)}\\ufffd`;
+				at += 6;
+				from = at;
+			} else {
+				at += 2;
+			}
+		} else {
+			at += 1;
+		}
+	}
+	return wellFormed(from === 0 ? text : out + text.slice(from));
 }
 
 /** Normalizes surrogates. Limits nesting. */

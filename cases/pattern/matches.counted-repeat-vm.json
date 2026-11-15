@@ -1,0 +1,45 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.matches",
+	"name": "counted-repeat-vm",
+	"input": {
+		"source": "a{2,4}",
+		"flags": "",
+		"texts": [
+			"a",
+			"aa",
+			"aaaaa"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"test": false,
+				"all": []
+			},
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 2,
+						"text": "aa",
+						"captures": []
+					}
+				]
+			},
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 4,
+						"text": "aaaa",
+						"captures": []
+					}
+				]
+			}
+		]
+	}
+}

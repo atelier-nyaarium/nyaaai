@@ -1,6 +1,6 @@
-// Contract generator test shapes.
+// Contract test shapes.
 
-import { preprocessed, refined, shapeSet } from "@nyaaai/contract/shape";
+import { matching, preprocessed, refined, shapeSet } from "@nyaaai/contract/shape";
 import { z } from "zod";
 
 ////////////////////////////////
@@ -19,6 +19,8 @@ function renameLegacy(raw: unknown): unknown {
 
 const trimmed = (raw: unknown): unknown => (typeof raw === "string" ? raw.trim() : raw);
 
+const isEven = (value: number): boolean => value % 2 === 0;
+
 ////////////////////////////////
 //  Shapes
 
@@ -30,6 +32,10 @@ export type Name = z.infer<typeof Name>;
 
 export const Names = z.array(Name).max(2);
 export type Names = z.infer<typeof Names>;
+
+/** A list short of its minimum can still hold a bad item. */
+export const Several = z.array(z.int()).min(2).max(3);
+export type Several = z.infer<typeof Several>;
 
 export const Leaf = z.object({
 	kind: z.literal("leaf"),
@@ -58,7 +64,7 @@ export interface Chain {
 	next: Chain | null;
 }
 
-/** Recursive by-value shape. */
+/** By-value recursion. */
 export const Chain: z.ZodType<Chain> = z.object({
 	value: z.number(),
 	get next() {
@@ -149,10 +155,47 @@ export const Holder = z.object({
 });
 export type Holder = z.infer<typeof Holder>;
 
+export const Pair = z.tuple([Name, z.int().min(0)]);
+export type Pair = z.infer<typeof Pair>;
+
+export const Code = matching(z.string().max(8), "^[a-z]+-\\d+$", "i", "A code reads like abc-123.");
+export type Code = z.infer<typeof Code>;
+
+/** Stacks two refinements. */
+export const Even = refined("small", refined("even", z.int(), isEven, "An even number."), (value) => value < 100);
+export type Even = z.infer<typeof Even>;
+
+/** Branches that hold bounds and a hook. */
+export const Choice = z.union([
+	z.object({ name: Name, more: z.array(z.int().min(0)) }),
+	refined("even", z.int(), isEven, "An even number."),
+	z.literal("off"),
+]);
+export type Choice = z.infer<typeof Choice>;
+
+export const Wrapped = z.object({ choice: Choice, list: z.array(Choice), event: Event });
+export type Wrapped = z.infer<typeof Wrapped>;
+
+/** A hook on the union itself. */
+export const NotFive = refined("notFive", z.union([z.int(), z.string()]), (value) => value !== 5, "Not five.");
+export type NotFive = z.infer<typeof NotFive>;
+
+export const Tupled = z.object({
+	pair: Pair,
+	single: z.tuple([z.object({ x: z.number() })]),
+	nested: z.array(z.tuple([z.boolean(), z.tuple([z.string(), Leaf]).nullable()])),
+	code: Code,
+	word: matching(z.string(), "^\\S+$"),
+	even: Even,
+	range: refined("ascending", z.tuple([z.int(), z.int()]), ([from, to]) => from <= to, "A range ascends."),
+});
+export type Tupled = z.infer<typeof Tupled>;
+
 export const tortureSet = shapeSet("torture", {
 	Color,
 	Name,
 	Names,
+	Several,
 	Leaf,
 	Branch,
 	Tree,
@@ -167,4 +210,11 @@ export const tortureSet = shapeSet("torture", {
 	Legacy,
 	Span,
 	Holder,
+	Pair,
+	Code,
+	Even,
+	Tupled,
+	Choice,
+	Wrapped,
+	NotFive,
 });

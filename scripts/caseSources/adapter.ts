@@ -186,6 +186,8 @@ export const adapterCases: RunSource[] = [
 		ended("none"),
 		{ send: { type: "start", run: "bad", command: "testkit.converse", input: { requests: -1, together: false } } },
 		ended("bad"),
+		{ send: { type: "start", run: "crash", command: "testkit.crash", input: null } },
+		ended("crash"),
 		{ send: { type: "start", run: "pure", command: "case:json.canonical", input: { texts: ['{"b":1,"a":2}'] } } },
 		ended("pure"),
 		{ send: { type: "steer", run: "pure", text: "too late" } },

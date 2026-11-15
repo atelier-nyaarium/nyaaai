@@ -1,0 +1,21 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.matches",
+	"name": "linear-duplicate-alternative",
+	"input": {
+		"source": "(?:a|a)*c",
+		"flags": "",
+		"texts": [
+			"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"test": false,
+				"all": []
+			}
+		]
+	}
+}

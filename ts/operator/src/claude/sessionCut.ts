@@ -1,6 +1,6 @@
 import type { Ids } from "@nyaaai/contract/id";
-import { jsString, parseJson } from "@nyaaai/contract/json";
-import { Pattern } from "@nyaaai/contract/pattern";
+import { jsString, parseJson, stringifyJson } from "@nyaaai/contract/json";
+import { numberText, roundHalfUp } from "@nyaaai/contract/number";
 import type {
 	BoundaryMeta,
 	CutDone,
@@ -13,6 +13,7 @@ import type {
 	SessionIndex,
 	TurnPick,
 } from "@nyaaai/contract/shapes/sessionCut";
+import { collapseSpace, trimText, utf8Length } from "@nyaaai/contract/text";
 import { type Clock, isoTime, parseIsoTime } from "@nyaaai/contract/time";
 import { clearedNote, compactedSummary as compactedPrompt } from "../prompts";
 
@@ -155,7 +156,7 @@ function absorbedText(row: Row): string | undefined {
 const pointsOf = (row: Row): string[] =>
 	POINTER_KEYS.map((key) => row[key]).filter((id): id is string => typeof id === "string");
 
-/** Required keys; no extras. */
+/** Requires keys; rejects extras. */
 const keysWithin = (value: unknown, required: string[], allowed: string[]) => {
 	if (value === null || typeof value !== "object") return false;
 	const keys = Object.keys(value as Row);
@@ -167,8 +168,7 @@ const keysWithin = (value: unknown, required: string[], allowed: string[]) => {
 
 const counted = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value);
 
-/** Four-byte token estimate. */
-const tokensOf = (bytes: number) => Math.round(bytes / 4);
+const tokensOf = (bytes: number) => roundHalfUp(bytes / 4);
 
 function stringEnd(text: string, from: number): number {
 	let at = from + 1;
@@ -195,7 +195,7 @@ export function rehomed(text: string, sessionId: string): string {
 		}
 	}
 	let next = text;
-	for (const [from, to] of spans.reverse()) next = next.slice(0, from) + JSON.stringify(sessionId) + next.slice(to);
+	for (const [from, to] of spans.reverse()) next = next.slice(0, from) + stringifyJson(sessionId) + next.slice(to);
 	return next;
 }
 
@@ -287,7 +287,7 @@ export async function indexSession(lines: AsyncIterable<string>): Promise<Sessio
 		const message = opens ?? absorbedText(row);
 		tail.push({
 			line,
-			bytes: Buffer.byteLength(text) + 1,
+			bytes: utf8Length(text) + 1,
 			type,
 			...(uuid ? { uuid } : {}),
 			...(typeof row.timestamp === "string" ? { at: row.timestamp } : {}),
@@ -448,7 +448,7 @@ export async function* buildCut(
 	if (at === undefined) throw new Error("the clock is outside the time range");
 	const carried = Object.fromEntries(ENVELOPE_KEYS.map((key) => [key, envelope[key]]));
 	const before = tokensOf(plan.keptBytes + plan.droppedBytes) + (index.boundary?.postTokens ?? 0);
-	const after = Math.min(before, tokensOf(plan.keptBytes + Buffer.byteLength(inputs.summaryText ?? "")));
+	const after = Math.min(before, tokensOf(plan.keptBytes + utf8Length(inputs.summaryText ?? "")));
 	const boundary: Row = {
 		parentUuid: null,
 		logicalParentUuid: plan.preserved.tail,
@@ -476,8 +476,8 @@ export async function* buildCut(
 		gitBranch: carried.gitBranch,
 		slug: carried.slug,
 	};
-	yield JSON.stringify(boundary);
-	yield JSON.stringify({
+	yield stringifyJson(boundary);
+	yield stringifyJson({
 		parentUuid: boundaryUuid,
 		isSidechain: false,
 		promptId: inputs.ids.newId(),
@@ -499,7 +499,7 @@ export async function* buildCut(
 	});
 }
 
-/** `paired` validates new calls; trims retain source segments. */
+/** Paired cuts validate calls; trims preserve source. */
 export async function verifyCut(lines: AsyncIterable<string>, sessionId: string, paired: boolean): Promise<string[]> {
 	const problems: string[] = [];
 	const seen = new Map<string, number>();
@@ -564,10 +564,7 @@ export async function verifyCut(lines: AsyncIterable<string>, sessionId: string,
 	return problems;
 }
 
-const SPACE_RUN = Pattern.compile("\\s+");
-const collapsed = (text: string) => SPACE_RUN.replaceAll(text, " ").trim();
-
-/** Matches text or latest eligible turn. */
+/** Text or latest eligible turn. */
 export function pickTurn(
 	index: SessionIndex,
 	pick: TurnPick,
@@ -577,10 +574,10 @@ export function pickTurn(
 		(row): row is RowMeta & { uuid: string } => row.delivered && row.openTools === 0 && row.uuid !== undefined,
 	);
 	const timeOf = (row: RowMeta) => (row.at === undefined ? Number.NaN : parseIsoTime(row.at));
-	if (pick.text !== undefined && collapsed(pick.text).length > 0) {
-		const wanted = collapsed(pick.text);
+	if (pick.text !== undefined && collapseSpace(pick.text).length > 0) {
+		const wanted = collapseSpace(pick.text);
 		const named = starts
-			.filter((row) => collapsed(bodyOf(row.text ?? "")) === wanted)
+			.filter((row) => collapseSpace(bodyOf(row.text ?? "")) === wanted)
 			.map((row) => ({ row, gap: Math.abs(timeOf(row) - pick.at) }))
 			.filter((held) => !Number.isNaN(held.gap))
 			.sort((a, b) => a.gap - b.gap)[0];
@@ -594,12 +591,12 @@ export function pickTurn(
 
 /** CLI-shaped compact summary. */
 export function compactedSummary(summary: string, sourcePath: string): string {
-	return compactedPrompt({ summary: summary.trim(), sourcePath });
+	return compactedPrompt({ summary: trimText(summary), sourcePath });
 }
 
 /** Standing text; cleared note. */
 export function clearedSummary(standing: string | null, plan: CutPlan, sourcePath: string): string {
-	const note = clearedNote({ rows: String(plan.droppedRows), sourcePath });
+	const note = clearedNote({ rows: numberText(plan.droppedRows), sourcePath });
 	return standing ? `${standing}\n\n${note}` : note;
 }
 
@@ -624,7 +621,7 @@ export async function cutSession(ports: CutPorts, request: CutRequest): Promise<
 			}
 			summary = await ports.summarize({ standing: index.standing, rows });
 		}
-		if (summary.trim().length === 0) return refused("summary_needed", "The summary is empty.");
+		if (trimText(summary).length === 0) return refused("summary_needed", "The summary is empty.");
 		summaryText = compactedSummary(summary, ports.sourcePath);
 	}
 

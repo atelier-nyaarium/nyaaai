@@ -5,12 +5,13 @@ use std::fmt;
 use std::io;
 
 use nyaaai_contract::id::Ids;
-use nyaaai_contract::js::{collapse_space, strict_equal, to_js_string, trim};
+use nyaaai_contract::js::{strict_equal, to_js_string};
 use nyaaai_contract::json::{Object, Record, Value, parse_json, quote_json, stringify_json};
 pub use nyaaai_contract::shapes::session_cut::{
     BoundaryMeta, CutDone, CutMode, CutPlan, CutRefusal, CutRefused, CutRequest, KeptFrom,
     PickedTurn, Preserved, RowMeta, SessionIndex, TurnPick,
 };
+use nyaaai_contract::text::{collapse_space, trim_text};
 use nyaaai_contract::time::{Clock, iso_time, parse_iso_time};
 
 use crate::prompts;
@@ -43,7 +44,7 @@ pub type Summarizer<'a> = dyn Fn(Option<&str>, &[String]) -> io::Result<String> 
 pub type Lines<'a> = Box<dyn Iterator<Item = io::Result<String>> + 'a>;
 
 pub trait CutPorts {
-    /// Repeatable, read-only LF rows.
+    /// Repeatable read-only LF rows.
     fn read(&self) -> io::Result<Lines<'_>>;
     fn source_path(&self) -> String;
     /// Creates without overwriting.
@@ -65,7 +66,7 @@ pub type CutOutcome = Result<CutDone, CutRefused>;
 #[derive(Debug)]
 pub enum CutError {
     Io(io::Error),
-    /// Resume validation.
+    /// Read-back validation failures.
     ReadBack(Vec<String>),
 }
 
@@ -239,7 +240,7 @@ fn points_of(row: &Object) -> Vec<String> {
         .collect()
 }
 
-/// Required keys; no extras.
+/// Requires keys, rejects extras.
 fn keys_within(object: Option<&Object>, required: &[&str], allowed: &[&str]) -> bool {
     let Some(object) = object else {
         return false;
@@ -262,7 +263,7 @@ fn tokens_of(bytes: u64) -> f64 {
     ((bytes + 2) / 4) as f64
 }
 
-/// Whether resume consumes the row.
+/// Resume writes this row.
 fn writes(row: &RowMeta) -> bool {
     !SKIPPED_TYPES.contains(&row.type_.as_str())
 }
@@ -820,7 +821,7 @@ where
     Ok(built)
 }
 
-/// `paired` validates new calls; trims retain source segments.
+/// Paired cuts validate calls; trims preserve source.
 pub fn verify_cut<I>(lines: I, session_id: &str, paired: bool) -> io::Result<Vec<String>>
 where
     I: IntoIterator<Item = io::Result<String>>,
@@ -993,7 +994,7 @@ pub fn pick_turn(
 
 /// CLI-shaped compact summary.
 pub fn compacted_summary(summary: &str, source_path: &str) -> String {
-    prompts::compacted_summary(trim(summary), source_path)
+    prompts::compacted_summary(trim_text(summary), source_path)
 }
 
 /// Standing text; cleared note.
@@ -1042,7 +1043,7 @@ pub fn cut_session(ports: &dyn CutPorts, request: &CutRequest) -> Result<CutOutc
                 summarize(index.standing.as_deref(), &rows)?
             }
         };
-        if trim(&summary).is_empty() {
+        if trim_text(&summary).is_empty() {
             return Ok(Err(refused(
                 CutRefusal::SummaryNeeded,
                 "The summary is empty.",

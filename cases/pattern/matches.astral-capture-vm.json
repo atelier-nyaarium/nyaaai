@@ -1,0 +1,44 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.matches",
+	"name": "astral-capture-vm",
+	"input": {
+		"source": "(\\u{1f600}|x)+",
+		"flags": "",
+		"texts": [
+			"x😀x",
+			"😀😀"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 4,
+						"text": "x😀x",
+						"captures": [
+							"x"
+						]
+					}
+				]
+			},
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 4,
+						"text": "😀😀",
+						"captures": [
+							"😀"
+						]
+					}
+				]
+			}
+		]
+	}
+}

@@ -1,7 +1,8 @@
 // Gate runner. Run: bun scripts/gate.ts
 
 import { spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { closeSync, existsSync, mkdtempSync, openSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { cargoBin, ROOT } from "./child";
 
@@ -19,6 +20,7 @@ interface Part {
 
 const BIN = path.join(ROOT, "ts", "node_modules", ".bin");
 const MANIFEST = path.join("rust", "Cargo.toml");
+const TAIL_LINES = 60;
 const DEMO = path.resolve(ROOT, process.env.NYAAAI_DEMO_DIR ?? "../nyaaai-demo");
 
 ////////////////////////////////
@@ -81,6 +83,7 @@ function parts(): Part[] {
 			],
 		},
 		{ name: "cases", command: "bun", args: ["scripts/cases.ts"] },
+		{ name: "samples", command: "bun", args: ["scripts/samples.ts"] },
 		{ name: "symbols", command: "bun", args: ["scripts/bannedSymbols.ts"] },
 		...(demo
 			? [{ name: "demo", command: cargo, args: ["test", "--manifest-path", demoManifest, "--locked"] }]
@@ -88,18 +91,40 @@ function parts(): Part[] {
 	];
 }
 
+/** Runs a part, output kept in order. */
+function runQuiet(part: Part): { ok: boolean; output: string } {
+	const scratch = mkdtempSync(path.join(tmpdir(), "nyaaai-gate-"));
+	const file = path.join(scratch, "output");
+	const fd = openSync(file, "w");
+	try {
+		const ran = spawnSync(part.command, part.args, { cwd: ROOT, stdio: ["ignore", fd, fd] });
+		closeSync(fd);
+		return { ok: ran.status === 0, output: readFileSync(file, "utf8") };
+	} finally {
+		rmSync(scratch, { recursive: true, force: true });
+	}
+}
+
 ////////////////////////////////
 //  Main
 
 if (import.meta.main) {
-	const wanted = new Set(process.argv.slice(2));
+	const args = process.argv.slice(2);
+	const flags = args.filter((arg) => arg.startsWith("--"));
+	const quiet = flags.includes("--quiet");
+	const badFlags = flags.filter((flag) => flag !== "--quiet");
+	if (badFlags.length > 0) {
+		console.error(`no such flag: ${badFlags.join(", ")}`);
+		process.exit(1);
+	}
+	const wanted = new Set(args.filter((arg) => !arg.startsWith("--")));
 	let interrupted = false;
 	process.on("SIGINT", () => {
 		interrupted = true;
 	});
 	const results: Array<{ name: string; ok: boolean }> = [];
 	const held = parts();
-	const unknown = [...wanted].filter((name) => name !== "demo" && !held.some((part) => part.name === name));
+	const unknown = [...wanted].filter((name) => !held.some((part) => part.name === name));
 	if (unknown.length > 0) {
 		console.error(`no such part: ${unknown.join(", ")}`);
 		process.exit(1);
@@ -111,11 +136,27 @@ if (import.meta.main) {
 			results.push({ name: part.name, ok: false });
 			continue;
 		}
+		if (quiet) {
+			const ran = runQuiet(part);
+			if (!ran.ok) {
+				console.log(`\n[${part.name}]`);
+				console.log(ran.output.trimEnd().split("\n").slice(-TAIL_LINES).join("\n"));
+			}
+			results.push({ name: part.name, ok: ran.ok });
+			continue;
+		}
 		console.log(`\n[${part.name}]`);
 		const ran = spawnSync(part.command, part.args, { cwd: ROOT, stdio: "inherit" });
 		results.push({ name: part.name, ok: ran.status === 0 });
 	}
-	console.log("");
-	for (const { name, ok } of results) console.log(`${name}: ${ok ? "ok" : "FAILED"}`);
-	process.exit(results.length > 0 && results.every((result) => result.ok) ? 0 : 1);
+	const ok = results.length > 0 && results.every((result) => result.ok);
+	if (quiet) {
+		console.log("");
+		for (const { name } of results.filter((result) => !result.ok)) console.log(`${name}: FAILED`);
+		console.log(ok ? `gate: ok (${results.length} parts)` : "gate: FAILED");
+	} else {
+		console.log("");
+		for (const result of results) console.log(`${result.name}: ${result.ok ? "ok" : "FAILED"}`);
+	}
+	process.exit(ok ? 0 : 1);
 }

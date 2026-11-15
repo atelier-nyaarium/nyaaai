@@ -3,6 +3,7 @@ import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSyn
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { CLI_VERSION, compactedSession } from "@nyaaai/testkit/claudeSession";
+import { rethrown } from "@nyaaai/testkit/rejection";
 import { cutSession, verifyCut } from "../sessionCut";
 import { builtFile, fileCutPorts, linesOf, sessionLines } from "../sessionFile";
 
@@ -66,7 +67,7 @@ describe("session file rows", () => {
 				[path.join(folder, "out"), path.parse(folder).root],
 			] as const) {
 				const ports = fileCutPorts({ source, out, cliVersion: CLI_VERSION, keepOutOf });
-				await expect(cutSession(ports, { mode: "trim" })).rejects.toThrow();
+				expect(await rethrown(cutSession(ports, { mode: "trim" }))).toThrow();
 			}
 			expect(readdirSync(folder)).toEqual(["sessions"]);
 			expect(readdirSync(sessions)).toEqual(["source.jsonl"]);
@@ -85,7 +86,7 @@ describe("session file rows", () => {
 				yield "{}";
 				throw new Error("the source went away");
 			}
-			await expect(ports.create("half", torn())).rejects.toThrow();
+			expect(await rethrown(ports.create("half", torn()))).toThrow();
 			expect(readdirSync(out)).toEqual([]);
 
 			async function* rows(): AsyncGenerator<string> {
@@ -93,10 +94,10 @@ describe("session file rows", () => {
 			}
 			for (const id of ["../outside", "a/b", "..", "", "a\\b"]) {
 				expect(() => ports.discard(id)).toThrow();
-				await expect(ports.create(id, rows())).rejects.toThrow();
+				expect(await rethrown(ports.create(id, rows()))).toThrow();
 			}
 			await ports.create("taken", rows());
-			await expect(ports.create("taken", torn())).rejects.toThrow();
+			expect(await rethrown(ports.create("taken", torn()))).toThrow();
 			expect(readFileSync(path.join(out, "taken.jsonl"), "utf8")).toBe("{}\n");
 		} finally {
 			rmSync(folder, { recursive: true, force: true });

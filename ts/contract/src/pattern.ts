@@ -24,7 +24,8 @@ type Expr =
 	| { kind: "boundary"; negated: boolean }
 	| { kind: "sequence"; items: Expr[] }
 	| { kind: "alternative"; items: Expr[] }
-	| { kind: "group"; item: Expr; capture: boolean }
+	/** Indices start at 1. */
+	| { kind: "group"; item: Expr; capture: number | undefined }
 	| { kind: "repeat"; item: Expr; min: number; max: number | undefined; lazy: boolean };
 
 type ClassAtom = { kind: "literal"; value: number } | { kind: "ranges"; value: Ranges } | { kind: "hyphen" };
@@ -52,9 +53,8 @@ const SCALARS: Ranges = [
 	[0, 0xd7ff],
 	[0xe000, 0x10ffff],
 ];
-const HEX = /^[0-9a-fA-F]+$/;
-
 const MAX_DEPTH = 32;
+const MAX_CAPTURES = 99;
 
 /** Expanded atoms and ranges. */
 const MAX_COST = 10_000;
@@ -131,9 +131,22 @@ function scalar(source: string, at: number): [number, number] {
 	return [value, at + (value > 0xffff ? 2 : 1)];
 }
 
+function isDigit(value: string | undefined): boolean {
+	return value !== undefined && value >= "0" && value <= "9";
+}
+
+function isHex(value: string | undefined): boolean {
+	return (
+		(value !== undefined && value >= "0" && value <= "9") ||
+		(value !== undefined && value >= "a" && value <= "f") ||
+		(value !== undefined && value >= "A" && value <= "F")
+	);
+}
+
 class Parser {
 	private at = 0;
 	private depth = 0;
+	captures = 0;
 
 	constructor(
 		private readonly source: string,
@@ -202,7 +215,7 @@ class Parser {
 			return { kind: "class", ranges: escaped.ranges };
 		}
 		if (held === ")") throw new PatternError("unbalanced group");
-		if (held === "]" || held === "{") throw new PatternError("unexpected delimiter");
+		if (held === "]" || held === "{" || held === "}") throw new PatternError("unexpected delimiter");
 		const [value, after] = scalar(this.source, this.at);
 		this.at = after;
 		return { kind: "literal", value };
@@ -212,11 +225,10 @@ class Parser {
 		this.at += 1;
 		this.depth += 1;
 		if (this.depth > MAX_DEPTH) throw new PatternError("groups nest too deep");
-		let capture = true;
+		let capture: number | undefined;
 		if (this.peek() === "?") {
 			this.at += 1;
 			if (this.peek() === ":") {
-				capture = false;
 				this.at += 1;
 			} else {
 				if (this.peek() === "=" || this.peek() === "!")
@@ -229,6 +241,9 @@ class Parser {
 				}
 				throw new PatternError("unsupported group syntax");
 			}
+		} else {
+			this.captures += 1;
+			capture = this.captures;
 		}
 		const item = this.expression();
 		if (this.peek() !== ")") throw new PatternError("unbalanced group");
@@ -254,14 +269,23 @@ class Parser {
 			max = 1;
 			this.at += 1;
 		} else {
-			const start = this.at;
 			this.at += 1;
-			const body = /^\{([0-9]+)(?:,([0-9]*))?\}/.exec(this.source.slice(start));
-			if (!body) throw new PatternError("invalid quantifier");
-			this.at = start + body[0].length;
-			min = Number(body[1]);
-			const hasComma = body[2] !== undefined;
-			max = hasComma ? (body[2] === "" ? undefined : Number(body[2])) : min;
+			const minStart = this.at;
+			while (isDigit(this.peek())) this.at += 1;
+			if (this.at === minStart) throw new PatternError("invalid quantifier");
+			min = Number(this.source.slice(minStart, this.at));
+			let hasComma = false;
+			let maxText = "";
+			if (this.peek() === ",") {
+				hasComma = true;
+				this.at += 1;
+				const maxStart = this.at;
+				while (isDigit(this.peek())) this.at += 1;
+				maxText = this.source.slice(maxStart, this.at);
+			}
+			if (this.peek() !== "}") throw new PatternError("invalid quantifier");
+			this.at += 1;
+			max = hasComma ? (maxText === "" ? undefined : Number(maxText)) : min;
 			if (
 				!Number.isSafeInteger(min) ||
 				min > 1000 ||
@@ -339,8 +363,7 @@ class Parser {
 		this.at += 1;
 		const simple: Record<string, number> = { n: 0x0a, r: 0x0d, t: 0x09, f: 0x0c, v: 0x0b, "0": 0 };
 		if (simple[code] !== undefined) {
-			if (code === "0" && /[0-9]/.test(this.peek() ?? ""))
-				throw new PatternError("decimal escapes are outside the dialect");
+			if (code === "0" && isDigit(this.peek())) throw new PatternError("decimal escapes are outside the dialect");
 			return { kind: "literal", value: simple[code] as number };
 		}
 		if ("dwsDWS".includes(code))
@@ -354,7 +377,7 @@ class Parser {
 			if (this.peek() === "{") {
 				this.at += 1;
 				const start = this.at;
-				while (/[0-9a-fA-F]/.test(this.peek() ?? "")) this.at += 1;
+				while (isHex(this.peek())) this.at += 1;
 				const digits = this.source.slice(start, this.at);
 				if (digits.length < 1 || digits.length > 6 || this.peek() !== "}")
 					throw new PatternError("invalid Unicode escape");
@@ -369,14 +392,15 @@ class Parser {
 		if (code === "p" || code === "P") throw new PatternError("Unicode properties are outside the dialect");
 		if (code === "c") throw new PatternError("control escapes are outside the dialect");
 		if (code === "k") throw new PatternError("backreferences are outside the dialect");
-		if (/[1-9]/.test(code)) throw new PatternError("backreferences are outside the dialect");
-		if ("\\/.*+?()[]{}|^$-".includes(code)) return { kind: "literal", value: code.codePointAt(0) as number };
+		if (code >= "1" && code <= "9") throw new PatternError("backreferences are outside the dialect");
+		if ("\\/.*+?()[]{}|^$".includes(code) || (inClass && code === "-"))
+			return { kind: "literal", value: code.codePointAt(0) as number };
 		throw new PatternError("unsupported escape");
 	}
 
 	private hexEscape(count: number): number {
 		const digits = this.source.slice(this.at, this.at + count);
-		if (digits.length !== count || !HEX.test(digits)) throw new PatternError("invalid hexadecimal escape");
+		if (digits.length !== count || ![...digits].every(isHex)) throw new PatternError("invalid hexadecimal escape");
 		this.at += count;
 		const value = Number.parseInt(digits, 16);
 		if (value >= 0xd800 && value <= 0xdfff) throw new PatternError("surrogate code points are refused");
@@ -420,7 +444,7 @@ function traitsOf(expr: Expr): Traits {
 		}
 		case "group": {
 			const item = traitsOf(expr.item);
-			return { ...item, captures: item.captures || expr.capture };
+			return { ...item, captures: item.captures || expr.capture !== undefined };
 		}
 		case "repeat": {
 			const item = traitsOf(expr.item);
@@ -437,73 +461,6 @@ function traitsOf(expr: Expr): Traits {
 	}
 }
 
-function codePointText(value: number): string {
-	return (value >= 0x30 && value <= 0x39) ||
-		(value >= 0x41 && value <= 0x5a) ||
-		value === 0x5f ||
-		(value >= 0x61 && value <= 0x7a)
-		? String.fromCodePoint(value)
-		: `\\u{${value.toString(16)}}`;
-}
-
-function emitRanges(ranges: Ranges): string {
-	return `[${ranges
-		.map(([start, end]) => `${codePointText(start)}${start === end ? "" : `-${codePointText(end)}`}`)
-		.join("")}]`;
-}
-
-function emit(expr: Expr, flags: Set<string>): string {
-	switch (expr.kind) {
-		case "empty":
-			return "(?:)";
-		case "literal": {
-			if (
-				flags.has("i") &&
-				((expr.value >= 0x41 && expr.value <= 0x5a) || (expr.value >= 0x61 && expr.value <= 0x7a))
-			) {
-				const folded = expr.value >= 0x41 && expr.value <= 0x5a ? expr.value + 0x20 : expr.value - 0x20;
-				return emitRanges(
-					normalizeRanges([
-						[expr.value, expr.value],
-						[folded, folded],
-					]),
-				);
-			}
-			return codePointText(expr.value);
-		}
-		case "class":
-			return emitRanges(expr.ranges);
-		case "dot":
-			return flags.has("s") ? "[\\s\\S]" : "[^\\n]";
-		case "anchor":
-			if (!flags.has("m")) return expr.value === "start" ? "^" : "(?![\\s\\S])";
-			return expr.value === "start" ? "(?<![^\\n])" : "(?![^\\n])";
-		case "boundary":
-			return expr.negated ? "\\B" : "\\b";
-		case "sequence":
-			return expr.items.map((item) => emit(item, flags)).join("");
-		case "alternative":
-			return `(?:${expr.items.map((item) => emit(item, flags)).join("|")})`;
-		case "group":
-			return `${expr.capture ? "(" : "(?:"}${emit(expr.item, flags)})`;
-		case "repeat": {
-			const quantifier =
-				expr.max === undefined
-					? expr.min === 0
-						? "*"
-						: expr.min === 1
-							? "+"
-							: `{${expr.min},}`
-					: expr.min === 0 && expr.max === 1
-						? "?"
-						: expr.min === expr.max
-							? `{${expr.min}}`
-							: `{${expr.min},${expr.max}}`;
-			return `(?:${emit(expr.item, flags)})${quantifier}${expr.lazy ? "?" : ""}`;
-		}
-	}
-}
-
 function flagsOf(flags: string): Set<string> {
 	const seen = new Set<string>();
 	for (const flag of flags) {
@@ -513,15 +470,302 @@ function flagsOf(flags: string): Set<string> {
 	return seen;
 }
 
-function compiled(source: string, flagText: string): { regex: RegExp; flags: Set<string> } {
-	const flags = flagsOf(flagText);
-	const tree = new Parser(source, flags.has("i")).parse();
-	if (traitsOf(tree).cost > MAX_COST) throw new PatternError("the pattern is too large");
-	try {
-		return { regex: new RegExp(emit(tree, flags), "gu"), flags };
-	} catch (error) {
-		throw new PatternError(error instanceof Error ? error.message : "pattern refused");
+type AssertKind = "Start" | "End" | "LineStart" | "LineEnd" | "Boundary" | "NotBoundary";
+
+type Instruction =
+	| { kind: "Char"; ranges: Ranges }
+	| { kind: "Split"; first: number; second: number }
+	| { kind: "Jump"; target: number }
+	| { kind: "Save"; slot: number }
+	| { kind: "Assert"; assertion: AssertKind }
+	| { kind: "Match" };
+
+interface Thread {
+	pc: number;
+	captures: Int32Array;
+	startIndex: number;
+}
+
+interface TextInput {
+	text: string;
+	values: Uint32Array;
+	starts: Uint32Array;
+	length: number;
+}
+
+interface VmMatch {
+	startIndex: number;
+	endIndex: number;
+	captures: Int32Array;
+}
+
+function compileExpression(expr: Expr, program: Instruction[], flags: Set<string>): void {
+	switch (expr.kind) {
+		case "empty":
+			return;
+		case "literal": {
+			let ranges: Ranges = [[expr.value, expr.value]];
+			if (flags.has("i")) ranges = foldAscii(ranges);
+			program.push({ kind: "Char", ranges });
+			return;
+		}
+		case "class":
+			program.push({ kind: "Char", ranges: expr.ranges });
+			return;
+		case "dot":
+			program.push({ kind: "Char", ranges: flags.has("s") ? SCALARS : complementRanges([[0x0a, 0x0a]]) });
+			return;
+		case "anchor":
+			program.push({
+				kind: "Assert",
+				assertion:
+					expr.value === "start"
+						? flags.has("m")
+							? "LineStart"
+							: "Start"
+						: flags.has("m")
+							? "LineEnd"
+							: "End",
+			});
+			return;
+		case "boundary":
+			program.push({ kind: "Assert", assertion: expr.negated ? "NotBoundary" : "Boundary" });
+			return;
+		case "sequence":
+			for (const item of expr.items) compileExpression(item, program, flags);
+			return;
+		case "alternative": {
+			const jumps: number[] = [];
+			for (let index = 0; index < expr.items.length - 1; index += 1) {
+				const split = program.length;
+				program.push({ kind: "Split", first: split + 1, second: -1 });
+				compileExpression(expr.items[index] as Expr, program, flags);
+				jumps.push(program.length);
+				program.push({ kind: "Jump", target: -1 });
+				(program[split] as Extract<Instruction, { kind: "Split" }>).second = program.length;
+			}
+			compileExpression(expr.items[expr.items.length - 1] as Expr, program, flags);
+			for (const jump of jumps) (program[jump] as Extract<Instruction, { kind: "Jump" }>).target = program.length;
+			return;
+		}
+		case "group": {
+			const { capture } = expr;
+			if (capture !== undefined) program.push({ kind: "Save", slot: capture * 2 });
+			compileExpression(expr.item, program, flags);
+			if (capture !== undefined) program.push({ kind: "Save", slot: capture * 2 + 1 });
+			return;
+		}
+		case "repeat": {
+			for (let index = 0; index < expr.min; index += 1) compileExpression(expr.item, program, flags);
+			if (expr.max === undefined) {
+				const split = program.length;
+				program.push({ kind: "Split", first: -1, second: -1 });
+				const body = program.length;
+				compileExpression(expr.item, program, flags);
+				program.push({ kind: "Jump", target: split });
+				const out = program.length;
+				const held = program[split] as Extract<Instruction, { kind: "Split" }>;
+				held.first = expr.lazy ? out : body;
+				held.second = expr.lazy ? body : out;
+			} else {
+				for (let index = expr.min; index < expr.max; index += 1) {
+					const split = program.length;
+					program.push({ kind: "Split", first: -1, second: -1 });
+					const body = program.length;
+					compileExpression(expr.item, program, flags);
+					const out = program.length;
+					const held = program[split] as Extract<Instruction, { kind: "Split" }>;
+					held.first = expr.lazy ? out : body;
+					held.second = expr.lazy ? body : out;
+				}
+			}
+			return;
+		}
 	}
+}
+
+function compileProgram(tree: Expr, flags: Set<string>): Instruction[] {
+	const program: Instruction[] = [{ kind: "Save", slot: 0 }];
+	compileExpression(tree, program, flags);
+	program.push({ kind: "Save", slot: 1 }, { kind: "Match" });
+	return program;
+}
+
+function textInput(text: string): TextInput {
+	let count = 0;
+	for (let at = 0; at < text.length; ) {
+		const value = text.codePointAt(at) as number;
+		at += value > 0xffff ? 2 : 1;
+		count += 1;
+	}
+	const values = new Uint32Array(count);
+	const starts = new Uint32Array(count);
+	let index = 0;
+	for (let at = 0; at < text.length; ) {
+		const value = text.codePointAt(at) as number;
+		values[index] = value >= 0xd800 && value <= 0xdfff ? 0xfffd : value;
+		starts[index] = at;
+		at += value > 0xffff ? 2 : 1;
+		index += 1;
+	}
+	return { text, values, starts, length: text.length };
+}
+
+function offsetIndex(input: TextInput, offset: number): number {
+	let low = 0;
+	let high = input.values.length;
+	while (low < high) {
+		const middle = (low + high) >>> 1;
+		if ((input.starts[middle] as number) < offset) low = middle + 1;
+		else high = middle;
+	}
+	return low;
+}
+
+function offsetAt(input: TextInput, index: number): number {
+	return index >= input.values.length ? input.length : (input.starts[index] as number);
+}
+
+function isWord(value: number | undefined): boolean {
+	return (
+		value !== undefined &&
+		((value >= 0x30 && value <= 0x39) ||
+			(value >= 0x41 && value <= 0x5a) ||
+			value === 0x5f ||
+			(value >= 0x61 && value <= 0x7a))
+	);
+}
+
+function holdsAssertion(assertion: AssertKind, input: TextInput, index: number): boolean {
+	const left = index > 0 ? input.values[index - 1] : undefined;
+	const right = index < input.values.length ? input.values[index] : undefined;
+	switch (assertion) {
+		case "Start":
+			return index === 0;
+		case "End":
+			return index === input.values.length;
+		case "LineStart":
+			return index === 0 || left === 0x0a;
+		case "LineEnd":
+			return index === input.values.length || right === 0x0a;
+		case "Boundary":
+			return isWord(left) !== isWord(right);
+		case "NotBoundary":
+			return isWord(left) === isWord(right);
+	}
+}
+
+function addThread(
+	program: Instruction[],
+	threads: Thread[],
+	seen: Float64Array,
+	step: number,
+	pc: number,
+	captures: Int32Array,
+	startIndex: number,
+	input: TextInput,
+	index: number,
+): void {
+	const stack: Thread[] = [{ pc, captures, startIndex }];
+	while (stack.length > 0) {
+		const held = stack.pop() as Thread;
+		if (seen[held.pc] === step) continue;
+		seen[held.pc] = step;
+		const instruction = program[held.pc] as Instruction;
+		switch (instruction.kind) {
+			case "Jump":
+				stack.push({ pc: instruction.target, captures: held.captures, startIndex: held.startIndex });
+				break;
+			case "Split":
+				stack.push({ pc: instruction.second, captures: held.captures, startIndex: held.startIndex });
+				stack.push({ pc: instruction.first, captures: held.captures, startIndex: held.startIndex });
+				break;
+			case "Save": {
+				const saved = held.captures.slice();
+				saved[instruction.slot] = offsetAt(input, index);
+				stack.push({
+					pc: held.pc + 1,
+					captures: saved,
+					startIndex: held.startIndex,
+				});
+				break;
+			}
+			case "Assert":
+				if (holdsAssertion(instruction.assertion, input, index))
+					stack.push({ pc: held.pc + 1, captures: held.captures, startIndex: held.startIndex });
+				break;
+			case "Char":
+			case "Match":
+				threads.push(held);
+				break;
+		}
+	}
+}
+
+function hasScalar(ranges: Ranges, value: number): boolean {
+	for (const [start, end] of ranges) if (value >= start && value <= end) return true;
+	return false;
+}
+
+function runProgram(
+	program: Instruction[],
+	input: TextInput,
+	startIndex: number,
+	captureCount: number,
+): VmMatch | undefined {
+	let current: Thread[] = [];
+	let currentSeen = new Float64Array(program.length);
+	let nextSeen = new Float64Array(program.length);
+	let currentStep = 1;
+	let nextStep = 2;
+	const emptyCaptures = new Int32Array((captureCount + 1) * 2);
+	emptyCaptures.fill(-1);
+	let candidate: VmMatch | undefined;
+	for (let index = startIndex; index <= input.values.length; index += 1) {
+		if (candidate === undefined)
+			addThread(program, current, currentSeen, currentStep, 0, emptyCaptures, index, input, index);
+		const next: Thread[] = [];
+		for (const thread of current) {
+			const instruction = program[thread.pc] as Instruction;
+			if (instruction.kind === "Match") {
+				candidate = { startIndex: thread.startIndex, endIndex: index, captures: thread.captures };
+				break;
+			}
+			if (
+				instruction.kind === "Char" &&
+				index < input.values.length &&
+				hasScalar(instruction.ranges, input.values[index] as number)
+			)
+				addThread(
+					program,
+					next,
+					nextSeen,
+					nextStep,
+					thread.pc + 1,
+					thread.captures,
+					thread.startIndex,
+					input,
+					index + 1,
+				);
+		}
+		if (candidate !== undefined && next.length === 0) break;
+		current = next;
+		const previousSeen = currentSeen;
+		currentSeen = nextSeen;
+		nextSeen = previousSeen;
+		currentStep = nextStep;
+		nextStep += 1;
+	}
+	return candidate;
+}
+
+function compiled(source: string, flagText: string): { program: Instruction[]; captures: number } {
+	const flags = flagsOf(flagText);
+	const parser = new Parser(source, flags.has("i"));
+	const tree = parser.parse();
+	if (traitsOf(tree).cost > MAX_COST) throw new PatternError("the pattern is too large");
+	if (parser.captures > MAX_CAPTURES) throw new PatternError("too many capture groups");
+	return { program: compileProgram(tree, flags), captures: parser.captures };
 }
 
 function offset(text: string, value: number): number {
@@ -535,11 +779,6 @@ function offset(text: string, value: number): number {
 		text.charCodeAt(held) <= 0xdfff
 		? held + 1
 		: held;
-}
-
-function nextOffset(text: string, at: number): number {
-	if (at >= text.length) return text.length + 1;
-	return at + ((text.codePointAt(at) ?? 0) > 0xffff ? 2 : 1);
 }
 
 function substitute(match: PatternMatch, template: string): string {
@@ -557,7 +796,7 @@ function substitute(match: PatternMatch, template: string): string {
 		} else if (next === "&") {
 			result += match.text;
 			at += 2;
-		} else if (/[1-9]/.test(next)) {
+		} else if (next >= "1" && next <= "9") {
 			result += match.captures[Number(next) - 1] ?? "";
 			at += 2;
 		} else {
@@ -572,12 +811,13 @@ export class Pattern {
 	private constructor(
 		readonly source: string,
 		readonly flags: string,
-		private readonly regex: RegExp,
+		private readonly program: Instruction[],
+		private readonly captures: number,
 	) {}
 
 	static compile(source: string, flags = ""): Pattern {
 		const held = compiled(source, flags);
-		return new Pattern(source, flags, held.regex);
+		return new Pattern(source, flags, held.program, held.captures);
 	}
 
 	test(text: string): boolean {
@@ -585,33 +825,14 @@ export class Pattern {
 	}
 
 	find(text: string, from = 0): PatternMatch | undefined {
-		this.regex.lastIndex = offset(text, from);
-		const found = this.regex.exec(text);
-		if (!found) return undefined;
-		const start = found.index;
-		const end = start + found[0].length;
-		return {
-			start,
-			end,
-			text: found[0],
-			captures: found.slice(1).map((capture) => capture ?? null),
-		};
+		const input = textInput(text);
+		const index = offsetIndex(input, offset(text, from));
+		const found = runProgram(this.program, input, index, this.captures);
+		return found === undefined ? undefined : this.materialize(input, found);
 	}
 
 	findAll(text: string): PatternMatch[] {
-		const found: PatternMatch[] = [];
-		let from = 0;
-		while (from <= text.length) {
-			const match = this.find(text, from);
-			if (!match) break;
-			found.push(match);
-			if (match.end > match.start) from = match.end;
-			else {
-				from = nextOffset(text, match.end);
-				if (from > text.length) break;
-			}
-		}
-		return found;
+		return this.all(textInput(text));
 	}
 
 	replaceAll(text: string, template: string): string {
@@ -621,7 +842,7 @@ export class Pattern {
 	replaceWith(text: string, each: (match: PatternMatch) => string): string {
 		let result = "";
 		let tail = 0;
-		for (const match of this.findAll(text)) {
+		for (const match of this.all(textInput(text))) {
 			result += text.slice(tail, match.start) + each(match);
 			tail = match.end;
 		}
@@ -633,21 +854,38 @@ export class Pattern {
 		if (text.length === 0) return this.find(text) ? [] : [""];
 		const pieces: string[] = [];
 		let piece = 0;
-		let from = 0;
-		while (from < text.length) {
-			const match = this.find(text, from);
-			if (!match || match.start >= text.length) break;
-			// Skip piece-start empty matches.
-			if (match.end === piece) {
-				from = nextOffset(text, from);
-				continue;
-			}
+		for (const match of this.all(textInput(text))) {
+			if (match.start >= text.length) break;
+			if (match.end === piece) continue;
 			pieces.push(text.slice(piece, match.start), ...match.captures.map((capture) => capture ?? ""));
 			piece = match.end;
-			from = match.end;
 		}
 		pieces.push(text.slice(piece));
 		return pieces;
+	}
+
+	private all(input: TextInput): PatternMatch[] {
+		const found: PatternMatch[] = [];
+		let from = 0;
+		while (from <= input.values.length) {
+			const held = runProgram(this.program, input, from, this.captures);
+			if (held === undefined) break;
+			found.push(this.materialize(input, held));
+			from = held.endIndex > held.startIndex ? held.endIndex : held.endIndex + 1;
+		}
+		return found;
+	}
+
+	private materialize(input: TextInput, found: VmMatch): PatternMatch {
+		const start = found.captures[0] as number;
+		const end = found.captures[1] as number;
+		const captures: Array<string | null> = [];
+		for (let group = 1; group <= this.captures; group += 1) {
+			const captureStart = found.captures[group * 2] as number;
+			const captureEnd = found.captures[group * 2 + 1] as number;
+			captures.push(captureStart < 0 || captureEnd < 0 ? null : input.text.slice(captureStart, captureEnd));
+		}
+		return { start, end, text: input.text.slice(start, end), captures };
 	}
 }
 

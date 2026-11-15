@@ -1,0 +1,21 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.matches",
+	"name": "linear-alternative-failure",
+	"input": {
+		"source": "^(a|aa)+$",
+		"flags": "",
+		"texts": [
+			"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"test": false,
+				"all": []
+			}
+		]
+	}
+}

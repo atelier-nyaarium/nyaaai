@@ -1,0 +1,57 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "tree-TreeEntry",
+	"input": {
+		"set": "tree",
+		"shape": "TreeEntry",
+		"texts": [
+			"{\"path\":\"a/b\"}",
+			"{\"path\":\"f\",\"text\":\"\"}",
+			"{\"path\":\"f\",\"base64\":\"QQ==\",\"extra\":1}",
+			"{\"path\":\"l\",\"link\":\"$TMP/a\"}",
+			"{\"path\":5}",
+			"{\"text\":\"no path\"}",
+			"{\"path\":\"f\",\"text\":null}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"path\":\"a/b\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"path\":\"f\",\"text\":\"\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"path\":\"f\",\"base64\":\"QQ==\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"path\":\"l\",\"link\":\"$TMP/a\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"path"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"path"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"text"
+				]
+			}
+		]
+	}
+}

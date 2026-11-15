@@ -1,6 +1,7 @@
-// Millisecond and ISO times.
+// Time primitives.
 
 import { numberOfText } from "./number";
+import { trimText } from "./text";
 
 ////////////////////////////////
 //  Interfaces & Types
@@ -19,19 +20,10 @@ export interface Scheduler extends Clock {
 //  Constants
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const MONTH = `(${MONTHS.join("|")})`;
-const SHORT_DAY = "(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)";
-const LONG_DAY = "(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)";
-const CLOCK = "(\\d{2}):(\\d{2}):(\\d{2})";
-/** IMF-fixdate format. */
-const IMF_DATE = new RegExp(`^${SHORT_DAY}, (\\d{2}) ${MONTH} (\\d{4}) ${CLOCK} GMT$`);
-/** RFC 850 format. */
-const RFC850_DATE = new RegExp(`^${LONG_DAY}, (\\d{2})-${MONTH}-(\\d{2}) ${CLOCK} GMT$`);
-/** Asctime format. */
-const ASCTIME_DATE = new RegExp(`^${SHORT_DAY} ${MONTH} ( \\d|\\d{2}) ${CLOCK} (\\d{4})$`);
+const SHORT_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const LONG_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 /** Below this: seconds. */
 const SECONDS_BELOW = 1e11;
-const ISO = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,9}))?(?:Z|([+-])(\d{2}):(\d{2}))$/;
 const DAY_MS = 86_400_000;
 
 ////////////////////////////////
@@ -52,63 +44,156 @@ function daysFromCivil(year: number, month: number, day: number): number {
 	return era * 146_097 + dayOfEra - 719_468;
 }
 
+interface Cursor {
+	text: string;
+	at: number;
+}
+
+/** Exactly `count` ASCII digits. */
+function digits(cursor: Cursor, count: number): number | undefined {
+	let number = 0;
+	for (let place = cursor.at; place < cursor.at + count; place++) {
+		const code = cursor.text.charCodeAt(place);
+		if (!(code >= 0x30 && code <= 0x39)) return undefined;
+		number = number * 10 + (code - 0x30);
+	}
+	cursor.at += count;
+	return number;
+}
+
+const isDigitAt = (text: string, at: number) => text.charCodeAt(at) >= 0x30 && text.charCodeAt(at) <= 0x39;
+
+function literal(cursor: Cursor, wanted: string): boolean {
+	if (!cursor.text.startsWith(wanted, cursor.at)) return false;
+	cursor.at += wanted.length;
+	return true;
+}
+
+/** One of `names`, case-sensitive. */
+function name(cursor: Cursor, names: string[]): string | undefined {
+	const found = names.find((held) => cursor.text.startsWith(held, cursor.at));
+	if (found !== undefined) cursor.at += found.length;
+	return found;
+}
+
+/** `hh:mm:ss`. */
+function clock(cursor: Cursor): [number, number, number] | undefined {
+	const hour = digits(cursor, 2);
+	if (hour === undefined || !literal(cursor, ":")) return undefined;
+	const minute = digits(cursor, 2);
+	if (minute === undefined || !literal(cursor, ":")) return undefined;
+	const second = digits(cursor, 2);
+	return second === undefined ? undefined : [hour, minute, second];
+}
+
 /** Drops submillisecond precision. */
 export function parseIsoTime(text: string): number {
-	const parts = ISO.exec(text);
-	if (!parts) return Number.NaN;
-	const [year, month, day, hour, minute, second] = parts.slice(1, 7).map(Number) as [
-		number,
-		number,
-		number,
-		number,
-		number,
-		number,
-	];
-	const offsetHour = Number(parts[9] ?? 0);
-	const offsetMinute = Number(parts[10] ?? 0);
+	const cursor: Cursor = { text, at: 0 };
+	const year = digits(cursor, 4);
+	if (year === undefined || !literal(cursor, "-")) return Number.NaN;
+	const month = digits(cursor, 2);
+	if (month === undefined || !literal(cursor, "-")) return Number.NaN;
+	const day = digits(cursor, 2);
+	if (day === undefined || !literal(cursor, "T")) return Number.NaN;
+	const time = clock(cursor);
+	if (time === undefined) return Number.NaN;
+	const [hour, minute, second] = time;
+
+	let fraction = "";
+	if (literal(cursor, ".")) {
+		const from = cursor.at;
+		while (isDigitAt(text, cursor.at)) cursor.at += 1;
+		fraction = text.slice(from, cursor.at);
+		if (fraction.length < 1 || fraction.length > 9) return Number.NaN;
+	}
+
+	let offsetHour = 0;
+	let offsetMinute = 0;
+	let sign = 1;
+	if (!literal(cursor, "Z")) {
+		if (literal(cursor, "-")) sign = -1;
+		else if (!literal(cursor, "+")) return Number.NaN;
+		const heldHour = digits(cursor, 2);
+		if (heldHour === undefined || !literal(cursor, ":")) return Number.NaN;
+		const heldMinute = digits(cursor, 2);
+		if (heldMinute === undefined) return Number.NaN;
+		offsetHour = heldHour;
+		offsetMinute = heldMinute;
+		if (offsetHour > 23 || offsetMinute > 59) return Number.NaN;
+	}
+	if (cursor.at !== text.length) return Number.NaN;
 	if (month < 1 || month > 12 || day < 1 || day > daysIn(year, month)) return Number.NaN;
-	if (hour > 23 || minute > 59 || second > 59 || offsetHour > 23 || offsetMinute > 59) return Number.NaN;
-	const millis = Number((parts[7] ?? "").padEnd(3, "0").slice(0, 3));
-	const offset = (parts[8] === "-" ? -1 : 1) * (offsetHour * 60 + offsetMinute) * 60_000;
+	if (hour > 23 || minute > 59 || second > 59) return Number.NaN;
+	const millis = Number(fraction.padEnd(3, "0").slice(0, 3));
+	const offset = sign * (offsetHour * 60 + offsetMinute) * 60_000;
 	return daysFromCivil(year, month, day) * DAY_MS + ((hour * 60 + minute) * 60 + second) * 1000 + millis - offset;
 }
 
 /** ECMAScript Date limit. */
 const LAST_MS = 8_640_000_000_000_000;
 
-/** Formats valid Date milliseconds. */
+/** Valid Date milliseconds only. */
 export function isoTime(ms: number): string | undefined {
 	return Number.isInteger(ms) && Math.abs(ms) <= LAST_MS ? new Date(ms).toISOString() : undefined;
 }
 
-function civilMs(year: number, month: number, day: number, hour: number, minute: number, second: number) {
+function civilMs(year: number, month: number, day: number, time: [number, number, number]) {
+	const [hour, minute, second] = time;
 	if (month < 1 || month > 12 || day < 1 || day > daysIn(year, month)) return undefined;
 	if (hour > 23 || minute > 59 || second > 59) return undefined;
 	return daysFromCivil(year, month, day) * DAY_MS + ((hour * 60 + minute) * 60 + second) * 1000;
 }
 
-/** Exact-case HTTP dates; RFC 850 uses a 50-year pivot. */
+const monthOf = (held: string) => MONTHS.indexOf(held) + 1;
+
+function imfDate(text: string): number | undefined {
+	const cursor: Cursor = { text, at: 0 };
+	if (name(cursor, SHORT_DAYS) === undefined || !literal(cursor, ", ")) return undefined;
+	const day = digits(cursor, 2);
+	if (day === undefined || !literal(cursor, " ")) return undefined;
+	const month = name(cursor, MONTHS);
+	if (month === undefined || !literal(cursor, " ")) return undefined;
+	const year = digits(cursor, 4);
+	if (year === undefined || !literal(cursor, " ")) return undefined;
+	const time = clock(cursor);
+	if (time === undefined || !literal(cursor, " GMT") || cursor.at !== text.length) return undefined;
+	return civilMs(year, monthOf(month), day, time);
+}
+
+function rfc850Date(text: string, nowMs: number): number | undefined {
+	const cursor: Cursor = { text, at: 0 };
+	if (name(cursor, LONG_DAYS) === undefined || !literal(cursor, ", ")) return undefined;
+	const day = digits(cursor, 2);
+	if (day === undefined || !literal(cursor, "-")) return undefined;
+	const month = name(cursor, MONTHS);
+	if (month === undefined || !literal(cursor, "-")) return undefined;
+	const short = digits(cursor, 2);
+	if (short === undefined || !literal(cursor, " ")) return undefined;
+	const time = clock(cursor);
+	if (time === undefined || !literal(cursor, " GMT") || cursor.at !== text.length) return undefined;
+	const nowYear = Number((dayKey(nowMs) ?? "1970").slice(0, 4));
+	const near = Math.floor(nowYear / 100) * 100 + short;
+	const year = near - nowYear > 50 ? near - 100 : nowYear - near >= 50 ? near + 100 : near;
+	return civilMs(year, monthOf(month), day, time);
+}
+
+function asctimeDate(text: string): number | undefined {
+	const cursor: Cursor = { text, at: 0 };
+	if (name(cursor, SHORT_DAYS) === undefined || !literal(cursor, " ")) return undefined;
+	const month = name(cursor, MONTHS);
+	if (month === undefined || !literal(cursor, " ")) return undefined;
+	const day = literal(cursor, " ") ? digits(cursor, 1) : digits(cursor, 2);
+	if (day === undefined || !literal(cursor, " ")) return undefined;
+	const time = clock(cursor);
+	if (time === undefined || !literal(cursor, " ")) return undefined;
+	const year = digits(cursor, 4);
+	if (year === undefined || cursor.at !== text.length) return undefined;
+	return civilMs(year, monthOf(month), day, time);
+}
+
+/** RFC 850 uses a 50-year pivot. */
 export function parseHttpDate(text: string, nowMs: number): number | undefined {
-	const month = (name: string | undefined) => MONTHS.indexOf(name as string) + 1;
-	const imf = IMF_DATE.exec(text);
-	if (imf) {
-		const [day, name, year, hour, minute, second] = imf.slice(1);
-		return civilMs(Number(year), month(name), Number(day), Number(hour), Number(minute), Number(second));
-	}
-	const old = RFC850_DATE.exec(text);
-	if (old) {
-		const [day, name, short, hour, minute, second] = old.slice(1);
-		const nowYear = Number((dayKey(nowMs) ?? "1970").slice(0, 4));
-		const near = Math.floor(nowYear / 100) * 100 + Number(short);
-		const year = near - nowYear > 50 ? near - 100 : nowYear - near >= 50 ? near + 100 : near;
-		return civilMs(year, month(name), Number(day), Number(hour), Number(minute), Number(second));
-	}
-	const asc = ASCTIME_DATE.exec(text);
-	if (asc) {
-		const [name, day, hour, minute, second, year] = asc.slice(1);
-		return civilMs(Number(year), month(name), Number(day), Number(hour), Number(minute), Number(second));
-	}
-	return undefined;
+	return imfDate(text) ?? rfc850Date(text, nowMs) ?? asctimeDate(text);
 }
 
 function parseStamp(text: string, nowMs: number): number | undefined {
@@ -121,7 +206,7 @@ const wholeMs = (ms: number): number | undefined =>
 
 /** Nonnegative wait in milliseconds. */
 export function parseRetryAfter(header: string | null | undefined, nowMs: number): number | undefined {
-	const text = (header ?? "").trim();
+	const text = trimText(header ?? "");
 	if (text.length === 0) return undefined;
 	const seconds = numberOfText(text);
 	const wait = seconds === undefined ? parseStamp(text, nowMs) : wholeMs(seconds * 1000);
@@ -132,7 +217,7 @@ export function parseRetryAfter(header: string | null | undefined, nowMs: number
 /** Seconds, milliseconds, or dates. */
 export function resetStampMs(value: unknown, nowMs: number): number | undefined {
 	if (typeof value === "number") return wholeMs(Math.abs(value) < SECONDS_BELOW ? value * 1000 : value);
-	return typeof value === "string" ? parseStamp(value.trim(), nowMs) : undefined;
+	return typeof value === "string" ? parseStamp(trimText(value), nowMs) : undefined;
 }
 
 /** UTC-offset day; years 0000-9999. */

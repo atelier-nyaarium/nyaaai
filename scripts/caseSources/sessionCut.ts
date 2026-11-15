@@ -1,9 +1,9 @@
 // Synthetic session-cut cases.
 
 import type { CutRequest, TurnPick } from "@nyaaai/operator/claude/sessionCut";
-import type { BodyOf, SessionCutCutInput, SessionSource } from "@nyaaai/testkit/caseKinds";
 import { CLI_VERSION, compactedSession, SESSION_ID, SyntheticSession } from "@nyaaai/testkit/claudeSession";
 import type { CaseSource } from "../caseAdapter";
+import type { BodyOf, SessionCutCutInput, SessionSource } from "../caseGroups/sessionCut";
 
 ////////////////////////////////
 //  Constants

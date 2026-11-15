@@ -8,7 +8,7 @@ import { CONTRACT_VERSION, type Hook, hooks, type ShapeSet, shapeIds, shapeSets 
 
 export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 
-/** Peer input, decoded output. */
+/** Raw input; decoded output. */
 export type SchemaForm = "input" | "output";
 
 export interface SetSchema {
@@ -20,7 +20,6 @@ export interface SetSchema {
 
 export interface Exported {
 	docs: Map<string, Record<SchemaForm, SetSchema>>;
-	/** Unsupported shapes. */
 	problems: string[];
 }
 
@@ -32,6 +31,8 @@ interface Def {
 	catchall?: unknown;
 	shape?: Record<string, Schema>;
 	element?: Schema;
+	items?: Schema[];
+	rest?: Schema | null;
 	keyType?: Schema;
 	valueType?: Schema;
 	options?: Schema[];
@@ -66,6 +67,7 @@ const TYPES = new Set([
 	"literal",
 	"enum",
 	"array",
+	"tuple",
 	"record",
 	"object",
 	"union",
@@ -82,18 +84,81 @@ const CHECKS: Record<string, ReadonlySet<string>> = {
 	array: new Set(["min_length", "max_length"]),
 };
 
-/** ECMAScript orders indices first. */
-const INDEX_KEY = /^(?:0|[1-9]\d*)$/;
+/** Rust derives its traits for tuples this long. */
+const MAX_PLACES = 12;
 
 ////////////////////////////////
 //  Functions & Helpers
 
+/** ECMAScript orders indices first. */
+function isIndexKey(key: string): boolean {
+	if (key.length === 0 || (key[0] === "0" && key.length > 1)) return false;
+	for (let at = 0; at < key.length; at++) {
+		if (key.charCodeAt(at) < 0x30 || key.charCodeAt(at) > 0x39) return false;
+	}
+	return true;
+}
+
+/** Word characters from `from`, the next index. */
+function wordEnd(text: string, from: number): number {
+	let end = from;
+	for (; end < text.length; end++) {
+		const unit = text.charCodeAt(end);
+		const word =
+			(unit >= 0x30 && unit <= 0x39) ||
+			(unit >= 0x41 && unit <= 0x5a) ||
+			unit === 0x5f ||
+			(unit >= 0x61 && unit <= 0x7a);
+		if (!word) break;
+	}
+	return end;
+}
+
+export interface SchemaRef {
+	set?: string;
+	form?: "input" | "output";
+	name: string;
+}
+
+/** Reads `#/$defs/Name` or `<set>.<form>.json#/$defs/Name`. */
+export function refOf(target: string): SchemaRef | undefined {
+	const defs = "#/$defs/";
+	let at = 0;
+	let set: string | undefined;
+	let form: "input" | "output" | undefined;
+	if (!target.startsWith(defs)) {
+		const end = wordEnd(target, 0);
+		if (end === 0) return undefined;
+		set = target.slice(0, end);
+		const suffix = target.startsWith(".input.json", end)
+			? "input"
+			: target.startsWith(".output.json", end)
+				? "output"
+				: undefined;
+		if (suffix === undefined) return undefined;
+		form = suffix;
+		at = end + `.${suffix}.json`.length;
+	}
+	if (!target.startsWith(defs, at)) return undefined;
+	const from = at + defs.length;
+	const end = wordEnd(target, from);
+	if (end === from || end !== target.length) return undefined;
+	const name = target.slice(from, end);
+	return set === undefined || form === undefined ? { name } : { set, form, name };
+}
+
 const defOf = (schema: Schema) => schema._zod.def as unknown as Def;
 
-/** Node-local faults. */
+/** A pipe, under any nullable. */
+function readsMissing(schema: Schema): boolean {
+	let def = defOf(schema);
+	while (def.type === "nullable" && def.innerType) def = defOf(def.innerType);
+	return def.type === "pipe";
+}
+
 function faults(schema: Schema, slot: Slot): string[] {
 	const def = defOf(schema);
-	const hook = hooks.get(schema);
+	const held = hooks.get(schema)?.list ?? [];
 	const found: string[] = [];
 	if (!TYPES.has(def.type)) return [`${def.type} is outside the dialect`];
 	if ((def.type === "optional" || def.type === "default") && slot !== "property") {
@@ -105,8 +170,16 @@ function faults(schema: Schema, slot: Slot): string[] {
 	if (def.type === "object") {
 		if (def.catchall !== undefined) found.push("an object keeps no unknown keys; use a record");
 		for (const key of Object.keys(def.shape ?? {})) {
-			if (key === "__proto__" || INDEX_KEY.test(key)) found.push(`property ${key} would move or vanish`);
+			if (key === "__proto__" || isIndexKey(key)) found.push(`property ${key} would move or vanish`);
 		}
+	}
+	if (def.type === "tuple") {
+		const places = def.items ?? [];
+		if (def.rest) found.push("a tuple holds no rest");
+		if (places.length === 0) found.push("a tuple holds an item");
+		if (places.length > MAX_PLACES) found.push(`a tuple holds at most ${MAX_PLACES} places`);
+		// Zod lets a pipe's place go missing.
+		if (places.some(readsMissing)) found.push("a tuple place holds no preprocess");
 	}
 	if (def.type === "record") {
 		const key = def.keyType ? defOf(def.keyType) : undefined;
@@ -124,10 +197,10 @@ function faults(schema: Schema, slot: Slot): string[] {
 	if (def.type === "union" && def.discriminator === undefined && def.inclusive === false) {
 		found.push("an exclusive union needs a discriminator");
 	}
-	if (def.type === "pipe" && (hook?.kind !== "preprocess" || (def.in && defOf(def.in).type) !== "transform")) {
+	if (def.type === "pipe" && (held[0]?.kind !== "preprocess" || (def.in && defOf(def.in).type) !== "transform")) {
 		found.push("a pipe must be a registered preprocess");
 	}
-	if (def.type === "nullable" && def.innerType && hooks.has(def.innerType) && !shapeIds.has(def.innerType)) {
+	if (def.type === "nullable" && def.innerType && hooks.get(def.innerType) && !shapeIds.has(def.innerType)) {
 		found.push("a hook wraps nullable, not the reverse");
 	}
 	if (def.type === "default" && def.innerType) {
@@ -136,13 +209,17 @@ function faults(schema: Schema, slot: Slot): string[] {
 			found.push("a default must be a decoded value");
 		}
 	}
-	for (const check of def.checks ?? []) {
-		const { check: name } = check._zod.def;
-		if (name === "custom") {
-			if (hook?.kind !== "refine") found.push("a refinement must be registered");
-		} else if (!CHECKS[def.type]?.has(name)) {
-			found.push(`check ${name} is outside the dialect`);
-		}
+	const checks = (def.checks ?? []).map((check) => check._zod.def.check);
+	for (const name of checks) {
+		if (name !== "custom" && !CHECKS[def.type]?.has(name)) found.push(`check ${name} is outside the dialect`);
+	}
+	const hooked = checks.indexOf("custom");
+	if (hooked !== -1 && checks.slice(hooked).some((name) => name !== "custom")) {
+		found.push("a bound sits before a hook");
+	}
+	const custom = checks.filter((name) => name === "custom").length;
+	if (custom !== held.filter((hook) => hook.kind !== "preprocess").length) {
+		found.push("a refinement must be registered");
 	}
 	return found;
 }
@@ -155,6 +232,8 @@ function children(def: Def): Array<[string, Schema, Slot]> {
 			return Object.entries(def.shape ?? {}).map(([key, schema]) => [`.${key}`, schema, "property"]);
 		case "array":
 			return inner("[]", def.element);
+		case "tuple":
+			return (def.items ?? []).map((item, at) => [`[${at}]`, item, "value"]);
 		case "record":
 			return inner("{}", def.valueType);
 		case "union":
@@ -188,7 +267,6 @@ function walk(schema: Schema, where: string, slot: Slot, open: Set<Schema>, prob
 	open.delete(schema);
 }
 
-/** Lists unsupported shapes. */
 export function dialectProblems(sets: ShapeSet[] = shapeSets()): string[] {
 	const problems: string[] = [];
 	for (const set of sets) {
@@ -199,10 +277,9 @@ export function dialectProblems(sets: ShapeSet[] = shapeSets()): string[] {
 	return problems;
 }
 
-/** Wrappers copy inner annotations. */
 function annotate(schema: Schema, json: Record<string, unknown>): void {
-	const hook = hooks.get(schema);
-	if (hook) json["x-hooks"] = [...((json["x-hooks"] as Hook[] | undefined) ?? []), hook];
+	const held = hooks.get(schema)?.list;
+	if (held) json["x-hooks"] = [...((json["x-hooks"] as Hook[] | undefined) ?? []), ...held];
 	const { discriminator } = defOf(schema);
 	if (discriminator !== undefined) json["x-tag"] = discriminator;
 }

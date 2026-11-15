@@ -19,6 +19,7 @@ name = "nyaaai"
 path = "src/main.rs"
 
 [dependencies]
+nyaaai-adapter.workspace = true
 nyaaai-contract.workspace = true
 nyaaai-operator.workspace = true
 nyaaai-process.workspace = true

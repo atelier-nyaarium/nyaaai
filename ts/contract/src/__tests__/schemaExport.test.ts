@@ -1,9 +1,9 @@
-// Contract dialect tests.
+// Dialect tests: bun test.
 
 import { describe, expect, it } from "bun:test";
 import { z } from "zod";
 import { dialectProblems } from "../schemaExport";
-import { preprocessed, refined } from "../shape";
+import { matching, preprocessed, refined } from "../shape";
 
 ////////////////////////////////
 //  Functions & Helpers
@@ -19,14 +19,19 @@ interface Loop {
 
 describe("the contract dialect", () => {
 	it("takes a hook only when it is registered", () => {
+		const positive = refined("positive", z.number(), (ratio) => ratio > 0);
 		const registered = z.object({
-			ratio: refined("positive", z.number(), (ratio) => ratio > 0),
+			ratio: positive,
+			small: refined("small", positive, (ratio) => ratio < 9, "Stay small."),
 			label: preprocessed("trimmed", (raw) => raw, z.string()),
+			code: matching(z.string().max(9), "^[a-z]+$", "i"),
+			pair: z.tuple([z.string(), z.tuple([z.number()]).nullable()]),
 		});
 		expect(problemsOf(registered)).toEqual([]);
 
 		const bare: Array<[string, z.ZodType]> = [
 			["t.Shape.ratio", z.object({ ratio: z.number().refine((ratio) => ratio > 0) })],
+			["t.Shape.ratio", z.object({ ratio: positive.refine((ratio) => ratio < 9) })],
 			["t.Shape.label", z.object({ label: z.preprocess((raw) => raw, z.string()) })],
 			["t.Shape.size", z.object({ size: z.string().transform((text) => text.length) })],
 		];
@@ -44,7 +49,18 @@ describe("the contract dialect", () => {
 			},
 		});
 		const refusedAt: Array<[string, z.ZodType]> = [
-			["t.Shape.pair", z.object({ pair: z.tuple([z.string(), z.number()]) })],
+			["t.Shape.pair", z.object({ pair: z.tuple([z.string()], z.number()) })],
+			["t.Shape.none", z.object({ none: z.tuple([]) })],
+			[
+				"t.Shape.wide",
+				z.object({ wide: z.tuple(Array.from({ length: 13 }, () => z.string()) as [z.ZodString]) }),
+			],
+			[
+				"t.Shape.fixed",
+				z.object({ fixed: z.tuple([z.string(), preprocessed("fix", (raw) => raw, z.string())]) }),
+			],
+			["t.Shape.pair[1]", z.object({ pair: z.tuple([z.string(), z.number().optional()]) })],
+			["t.Shape.code", z.object({ code: matching(z.string(), "^a").max(3) })],
 			["t.Shape.any", z.object({ any: z.any() })],
 			["t.Shape.when", z.object({ when: z.date() })],
 			["t.Shape.open", z.object({ open: z.looseObject({ a: z.string() }) })],

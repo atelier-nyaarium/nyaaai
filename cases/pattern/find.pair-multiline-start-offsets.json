@@ -1,0 +1,47 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.find",
+	"name": "pair-multiline-start-offsets",
+	"input": {
+		"source": "^a",
+		"flags": "m",
+		"text": "😀\na",
+		"froms": [
+			0,
+			1,
+			2,
+			3,
+			4
+		]
+	},
+	"expected": {
+		"found": [
+			{
+				"start": 3,
+				"end": 4,
+				"text": "a",
+				"captures": []
+			},
+			{
+				"start": 3,
+				"end": 4,
+				"text": "a",
+				"captures": []
+			},
+			{
+				"start": 3,
+				"end": 4,
+				"text": "a",
+				"captures": []
+			},
+			{
+				"start": 3,
+				"end": 4,
+				"text": "a",
+				"captures": []
+			},
+			null
+		]
+	}
+}

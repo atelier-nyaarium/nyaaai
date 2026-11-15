@@ -1,8 +1,9 @@
-// Claude Code version lookup.
+// Claude Code version.
 
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { Pattern } from "@nyaaai/contract/pattern";
+import { trimText } from "@nyaaai/contract/text";
 
 ////////////////////////////////
 //  Constants
@@ -18,5 +19,5 @@ export const versionIn = (text: string): string | undefined => VERSION_PATTERN.f
 
 export async function installedVersion(): Promise<string> {
 	const { stdout } = await promisify(execFile)("claude", ["--version"], { timeout: VERSION_WAIT_MS });
-	return versionIn(stdout) ?? stdout.trim();
+	return versionIn(stdout) ?? trimText(stdout);
 }

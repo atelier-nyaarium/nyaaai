@@ -1,0 +1,21 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.matches",
+	"name": "linear-nested-failure",
+	"input": {
+		"source": "(?:a+)+b",
+		"flags": "",
+		"texts": [
+			"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"test": false,
+				"all": []
+			}
+		]
+	}
+}

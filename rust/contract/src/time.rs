@@ -3,13 +3,13 @@
 use std::sync::atomic::{AtomicI64, Ordering};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use crate::js::trim;
 use crate::json::Value;
 use crate::number::{number_of_text, round_half_up};
+use crate::text::trim_text;
 
 const DAY_MS: i64 = 86_400_000;
 
-/// Time in milliseconds.
+/// Clock values use milliseconds.
 pub trait Clock {
     fn now_ms(&self) -> i64;
 }
@@ -89,51 +89,92 @@ fn civil_from_days(days: i64) -> (i64, i64, i64) {
     (year, month, day)
 }
 
-fn digits(bytes: &[u8], at: &mut usize, count: usize) -> Option<i64> {
-    let held = bytes.get(*at..*at + count)?;
-    let mut number = 0;
-    for digit in held {
-        if !digit.is_ascii_digit() {
-            return None;
-        }
-        number = number * 10 + i64::from(digit - b'0');
-    }
-    *at += count;
-    Some(number)
+struct Cursor<'a> {
+    bytes: &'a [u8],
+    at: usize,
 }
 
-fn literal(bytes: &[u8], at: &mut usize, wanted: u8) -> Option<()> {
-    (bytes.get(*at) == Some(&wanted)).then(|| *at += 1)
+impl<'a> Cursor<'a> {
+    fn new(text: &'a str) -> Self {
+        Self {
+            bytes: text.as_bytes(),
+            at: 0,
+        }
+    }
+
+    fn is_digit_at(&self, at: usize) -> bool {
+        self.bytes.get(at).is_some_and(u8::is_ascii_digit)
+    }
+
+    /// Exactly `count` ASCII digits.
+    fn digits(&mut self, count: usize) -> Option<i64> {
+        let held = self.bytes.get(self.at..self.at + count)?;
+        let mut number = 0;
+        for digit in held {
+            if !digit.is_ascii_digit() {
+                return None;
+            }
+            number = number * 10 + i64::from(digit - b'0');
+        }
+        self.at += count;
+        Some(number)
+    }
+
+    fn literal(&mut self, wanted: &str) -> bool {
+        let found = self.bytes[self.at..].starts_with(wanted.as_bytes());
+        if found {
+            self.at += wanted.len();
+        }
+        found
+    }
+
+    /// One of `names`, case-sensitive.
+    fn name(&mut self, names: &[&'static str]) -> Option<&'static str> {
+        let found = names
+            .iter()
+            .find(|held| self.bytes[self.at..].starts_with(held.as_bytes()))?;
+        self.at += found.len();
+        Some(found)
+    }
+
+    /// `hh:mm:ss`.
+    fn clock(&mut self) -> Option<(i64, i64, i64)> {
+        let hour = self.digits(2)?;
+        self.literal(":").then_some(())?;
+        let minute = self.digits(2)?;
+        self.literal(":").then_some(())?;
+        Some((hour, minute, self.digits(2)?))
+    }
+
+    fn at_end(&self) -> bool {
+        self.at == self.bytes.len()
+    }
 }
 
 /// Millisecond-precision ISO parsing.
 pub fn parse_iso_time(text: &str) -> Option<i64> {
-    let bytes = text.as_bytes();
-    let mut at = 0;
-    let year = digits(bytes, &mut at, 4)?;
-    literal(bytes, &mut at, b'-')?;
-    let month = digits(bytes, &mut at, 2)?;
-    literal(bytes, &mut at, b'-')?;
-    let day = digits(bytes, &mut at, 2)?;
-    literal(bytes, &mut at, b'T')?;
-    let hour = digits(bytes, &mut at, 2)?;
-    literal(bytes, &mut at, b':')?;
-    let minute = digits(bytes, &mut at, 2)?;
-    literal(bytes, &mut at, b':')?;
-    let second = digits(bytes, &mut at, 2)?;
+    let mut cursor = Cursor::new(text);
+    let year = cursor.digits(4)?;
+    cursor.literal("-").then_some(())?;
+    let month = cursor.digits(2)?;
+    cursor.literal("-").then_some(())?;
+    let day = cursor.digits(2)?;
+    cursor.literal("T").then_some(())?;
+    let (hour, minute, second) = cursor.clock()?;
 
     let mut millis = 0;
-    if literal(bytes, &mut at, b'.').is_some() {
-        let from = at;
-        while bytes.get(at).is_some_and(u8::is_ascii_digit) {
-            at += 1;
+    if cursor.literal(".") {
+        let from = cursor.at;
+        while cursor.is_digit_at(cursor.at) {
+            cursor.at += 1;
         }
-        let count = at - from;
+        let count = cursor.at - from;
         if !(1..=9).contains(&count) {
             return None;
         }
         for place in 0..3 {
-            let digit = bytes
+            let digit = cursor
+                .bytes
                 .get(from + place)
                 .filter(|_| place < count)
                 .map_or(0, |digit| digit - b'0');
@@ -142,22 +183,23 @@ pub fn parse_iso_time(text: &str) -> Option<i64> {
     }
 
     let mut offset = 0;
-    if literal(bytes, &mut at, b'Z').is_none() {
-        let sign = match bytes.get(at)? {
-            b'+' => 1,
-            b'-' => -1,
-            _ => return None,
+    if !cursor.literal("Z") {
+        let sign = if cursor.literal("-") {
+            -1
+        } else if cursor.literal("+") {
+            1
+        } else {
+            return None;
         };
-        at += 1;
-        let offset_hour = digits(bytes, &mut at, 2)?;
-        literal(bytes, &mut at, b':')?;
-        let offset_minute = digits(bytes, &mut at, 2)?;
+        let offset_hour = cursor.digits(2)?;
+        cursor.literal(":").then_some(())?;
+        let offset_minute = cursor.digits(2)?;
         if offset_hour > 23 || offset_minute > 59 {
             return None;
         }
         offset = sign * (offset_hour * 60 + offset_minute) * 60_000;
     }
-    if at != bytes.len() {
+    if !cursor.at_end() {
         return None;
     }
     if !(1..=12).contains(&month) || day < 1 || day > days_in(year, month) {
@@ -217,25 +259,16 @@ const SECONDS_BELOW: f64 = 1e11;
 /// Largest exact double integer.
 const SAFE: f64 = 9_007_199_254_740_991.0;
 
-/// Exactly `count` ASCII digits.
-fn number_of(text: &str, count: usize) -> Option<i64> {
-    let mut at = 0;
-    digits(text.as_bytes(), &mut at, count).filter(|_| text.len() == count)
-}
-
-fn month_of(name: &str) -> Option<i64> {
+fn month_of(name: &str) -> i64 {
     MONTHS
         .iter()
         .position(|held| *held == name)
-        .map(|at| at as i64 + 1)
+        .map_or(0, |at| at as i64 + 1)
 }
 
-fn civil_ms(year: i64, month: i64, day: i64, clock: &str) -> Option<i64> {
-    let mut parts = clock.split(':');
-    let hour = number_of(parts.next()?, 2)?;
-    let minute = number_of(parts.next()?, 2)?;
-    let second = number_of(parts.next()?, 2)?;
-    if parts.next().is_some() || day < 1 || day > days_in(year, month) {
+fn civil_ms(year: i64, month: i64, day: i64, time: (i64, i64, i64)) -> Option<i64> {
+    let (hour, minute, second) = time;
+    if !(1..=12).contains(&month) || day < 1 || day > days_in(year, month) {
         return None;
     }
     if hour > 23 || minute > 59 || second > 59 {
@@ -244,42 +277,41 @@ fn civil_ms(year: i64, month: i64, day: i64, clock: &str) -> Option<i64> {
     Some(days_from_civil(year, month, day) * DAY_MS + ((hour * 60 + minute) * 60 + second) * 1000)
 }
 
-/// IMF-fixdate format.
 fn imf_date(text: &str) -> Option<i64> {
-    let (day_name, rest) = text.split_once(", ")?;
-    let parts: Vec<&str> = rest.split(' ').collect();
-    let [day, month, year, clock, "GMT"] = parts.as_slice() else {
-        return None;
-    };
-    if !SHORT_DAYS.contains(&day_name) {
+    let mut cursor = Cursor::new(text);
+    cursor.name(&SHORT_DAYS)?;
+    cursor.literal(", ").then_some(())?;
+    let day = cursor.digits(2)?;
+    cursor.literal(" ").then_some(())?;
+    let month = cursor.name(&MONTHS)?;
+    cursor.literal(" ").then_some(())?;
+    let year = cursor.digits(4)?;
+    cursor.literal(" ").then_some(())?;
+    let time = cursor.clock()?;
+    if !cursor.literal(" GMT") || !cursor.at_end() {
         return None;
     }
-    civil_ms(
-        number_of(year, 4)?,
-        month_of(month)?,
-        number_of(day, 2)?,
-        clock,
-    )
+    civil_ms(year, month_of(month), day, time)
 }
 
-/// RFC 850 format.
 fn rfc850_date(text: &str, now_ms: i64) -> Option<i64> {
-    let (day_name, rest) = text.split_once(", ")?;
-    let parts: Vec<&str> = rest.split(' ').collect();
-    let [date, clock, "GMT"] = parts.as_slice() else {
-        return None;
-    };
-    let date: Vec<&str> = date.split('-').collect();
-    let [day, month, short] = date.as_slice() else {
-        return None;
-    };
-    if !LONG_DAYS.contains(&day_name) {
+    let mut cursor = Cursor::new(text);
+    cursor.name(&LONG_DAYS)?;
+    cursor.literal(", ").then_some(())?;
+    let day = cursor.digits(2)?;
+    cursor.literal("-").then_some(())?;
+    let month = cursor.name(&MONTHS)?;
+    cursor.literal("-").then_some(())?;
+    let short = cursor.digits(2)?;
+    cursor.literal(" ").then_some(())?;
+    let time = cursor.clock()?;
+    if !cursor.literal(" GMT") || !cursor.at_end() {
         return None;
     }
     let now_year = day_key(now_ms, 0)
         .and_then(|key| key[..4].parse::<i64>().ok())
         .unwrap_or(1970);
-    let near = now_year.div_euclid(100) * 100 + number_of(short, 2)?;
+    let near = now_year.div_euclid(100) * 100 + short;
     let year = if near - now_year > 50 {
         near - 100
     } else if now_year - near >= 50 {
@@ -287,29 +319,31 @@ fn rfc850_date(text: &str, now_ms: i64) -> Option<i64> {
     } else {
         near
     };
-    civil_ms(year, month_of(month)?, number_of(day, 2)?, clock)
+    civil_ms(year, month_of(month), day, time)
 }
 
-/// Asctime format.
 fn asctime_date(text: &str) -> Option<i64> {
-    if !text.is_ascii() || text.len() != 24 {
+    let mut cursor = Cursor::new(text);
+    cursor.name(&SHORT_DAYS)?;
+    cursor.literal(" ").then_some(())?;
+    let month = cursor.name(&MONTHS)?;
+    cursor.literal(" ").then_some(())?;
+    let day = if cursor.literal(" ") {
+        cursor.digits(1)?
+    } else {
+        cursor.digits(2)?
+    };
+    cursor.literal(" ").then_some(())?;
+    let time = cursor.clock()?;
+    cursor.literal(" ").then_some(())?;
+    let year = cursor.digits(4)?;
+    if !cursor.at_end() {
         return None;
     }
-    let spaced = [3, 7, 10, 19].iter().all(|at| text.as_bytes()[*at] == b' ');
-    if !spaced || !SHORT_DAYS.contains(&&text[..3]) {
-        return None;
-    }
-    let day = &text[8..10];
-    let day = number_of(day.strip_prefix(' ').unwrap_or(day), day.trim_start().len())?;
-    civil_ms(
-        number_of(&text[20..], 4)?,
-        month_of(&text[4..7])?,
-        day,
-        &text[11..19],
-    )
+    civil_ms(year, month_of(month), day, time)
 }
 
-/// Exact-case HTTP dates; RFC 850 uses a 50-year pivot.
+/// Case-sensitive; RFC 850 uses a 50-year pivot.
 pub fn parse_http_date(text: &str, now_ms: i64) -> Option<i64> {
     imf_date(text)
         .or_else(|| rfc850_date(text, now_ms))
@@ -326,7 +360,7 @@ fn whole_ms(ms: f64) -> Option<i64> {
 
 /// Nonnegative wait in milliseconds.
 pub fn parse_retry_after(header: Option<&str>, now_ms: i64) -> Option<i64> {
-    let text = trim(header.unwrap_or(""));
+    let text = trim_text(header.unwrap_or(""));
     if text.is_empty() {
         return None;
     }
@@ -342,7 +376,7 @@ pub fn reset_stamp_ms(value: &Value, now_ms: i64) -> Option<i64> {
     match value {
         Value::Number(held) if held.abs() < SECONDS_BELOW => whole_ms(held * 1000.0),
         Value::Number(held) => whole_ms(*held),
-        Value::String(text) => parse_stamp(trim(text), now_ms),
+        Value::String(text) => parse_stamp(trim_text(text), now_ms),
         _ => None,
     }
 }

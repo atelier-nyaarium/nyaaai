@@ -3,17 +3,18 @@
 import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { MAX_FRAME_BYTES } from "@nyaaai/cli/adapter";
+import { MAX_FRAME_BYTES } from "@nyaaai/adapter/runtime";
 import { compareText } from "@nyaaai/contract/order";
-import type { Played, RunCase, RunStep } from "@nyaaai/testkit/caseFile";
+import { type Played, type RunStep, unhandled } from "@nyaaai/testkit/caseFile";
+import type { RunSource } from "@nyaaai/testkit/project";
 import { type AdapterCommand, AdapterHost } from "./adapterHost";
+
+export type { RunSource } from "@nyaaai/testkit/project";
 
 ////////////////////////////////
 //  Interfaces & Types
 
 export type Step = RunStep;
-
-export type RunSource = Omit<RunCase, "format" | "expected">;
 
 ////////////////////////////////
 //  Constants
@@ -42,7 +43,8 @@ export async function play(adapter: AdapterCommand, source: RunSource): Promise<
 			else if ("sendTail" in step) host.sendTail(step.sendTail);
 			else if ("sendOverCap" in step) host.sendText(`"${"a".repeat(MAX_FRAME_BYTES + step.sendOverCap - 2)}"`);
 			else if ("await" in step) await host.awaitFrame(...[step.await].flat());
-			else exit = await host.close();
+			else if ("close" in step) exit = await host.close();
+			else unhandled(step);
 		}
 		exit ??= await host.close();
 		const played: Played = { exit, connection: [], runs: {}, files: {} };

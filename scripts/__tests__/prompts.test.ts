@@ -51,7 +51,7 @@ describe("the prompt generator", () => {
 		// biome-ignore lint/suspicious/noTemplateCurlyInString: a prompt may hold one.
 		const text = 'Tick ` and ${not a slot} and \\ and "quotes"\n{{first}} then {{second}} and {{first}} again\ttab';
 		const root = world("tricky", { "agentic/odd-one.md": `${text}\n`, "agentic/plain.md": "no slots `here`\n" });
-		const { typescript, rust, problems } = promptFiles(root);
+		const { typescript, rust, problems } = promptFiles(root, "prompts");
 		expect(problems).toEqual([]);
 		const file = path.join(root, "generated.ts");
 		writeFileSync(file, typescript.get("ts/agentic/src/prompts.ts") as string);
@@ -65,6 +65,12 @@ describe("the prompt generator", () => {
 		);
 	});
 
+	it("reads no prompt folder unless the project names one", () => {
+		const root = world("optin", { "agentic/Bad_Name.md": "x\n" });
+		expect(promptFiles(root, undefined)).toEqual({ typescript: new Map(), rust: new Map(), problems: [] });
+		expect(promptFiles(root, "nowhere").problems).toHaveLength(1);
+	});
+
 	it("names a prompt it cannot generate", () => {
 		const root = world("bad", {
 			"agentic/Bad_Name.md": "x\n",
@@ -74,7 +80,7 @@ describe("the prompt generator", () => {
 			"agentic/fine.md": "x\n",
 		});
 		mkdirSync(path.join(root, "prompts", "nowhere"));
-		const { problems } = promptFiles(root);
+		const { problems } = promptFiles(root, "prompts");
 		expect(problems.map((problem) => problem.slice(0, problem.indexOf(":"))).sort()).toEqual([
 			"prompts/agentic/Bad_Name.md",
 			"prompts/agentic/half-slot.md",

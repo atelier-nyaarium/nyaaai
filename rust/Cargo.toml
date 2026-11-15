@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["contract", "process", "agentic", "operator", "testkit", "cli"]
+members = ["contract", "process", "agentic", "operator", "testkit", "adapter", "cli"]
 
 [workspace.package]
 version = "0.0.0"
@@ -17,3 +17,4 @@ nyaaai-process = { path = "process" }
 nyaaai-agentic = { path = "agentic" }
 nyaaai-operator = { path = "operator" }
 nyaaai-testkit = { path = "testkit" }
+nyaaai-adapter = { path = "adapter" }

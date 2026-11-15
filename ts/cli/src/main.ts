@@ -1,6 +1,6 @@
 // CLI entry point. Run: bun ts/cli/src/main.ts serve
 
-import { serve } from "./adapter";
+import { serveStdio } from "@nyaaai/adapter/stdio";
 import { COMMANDS } from "./commands";
 
 ////////////////////////////////
@@ -12,6 +12,5 @@ if (import.meta.main) {
 		console.error("usage:\n  nyaaai serve");
 		process.exit(1);
 	}
-	const write = (line: string) => void process.stdout.write(`${line}\n`);
-	process.exit(await serve({ input: Bun.stdin.stream(), write, commands: COMMANDS }));
+	process.exit(await serveStdio(COMMANDS));
 }

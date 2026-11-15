@@ -1,12 +1,9 @@
 use std::error::Error;
 use std::fmt::{self, Display, Formatter};
-
-use regex::{Captures, Regex, RegexBuilder};
-
-/// Caps compiled regex size.
-const SIZE_LIMIT: usize = 32 * 1024 * 1024;
+use std::rc::Rc;
 
 const MAX_DEPTH: usize = 32;
+const MAX_CAPTURES: usize = 99;
 
 /// Expanded atoms and ranges.
 const MAX_COST: usize = 10_000;
@@ -53,9 +50,10 @@ enum Expr {
     Boundary(bool),
     Sequence(Vec<Expr>),
     Alternative(Vec<Expr>),
+    /// Captures are one-based.
     Group {
         item: Box<Expr>,
-        capture: bool,
+        capture: Option<usize>,
     },
     Repeat {
         item: Box<Expr>,
@@ -105,7 +103,6 @@ fn capped(cost: usize) -> usize {
     cost.min(MAX_COST + 1)
 }
 
-/// Rejects cross-engine differences.
 fn traits_of(expression: &Expr) -> Result<Traits, PatternError> {
     Ok(match expression {
         Expr::Empty | Expr::Anchor(_) | Expr::Boundary(_) => ASSERTION,
@@ -144,7 +141,7 @@ fn traits_of(expression: &Expr) -> Result<Traits, PatternError> {
         Expr::Group { item, capture } => {
             let item = traits_of(item)?;
             Traits {
-                captures: item.captures || *capture,
+                captures: item.captures || capture.is_some(),
                 ..item
             }
         }
@@ -176,6 +173,7 @@ struct Parser<'a> {
     source: &'a str,
     at: usize,
     depth: usize,
+    captures: usize,
     insensitive: bool,
 }
 
@@ -185,16 +183,17 @@ impl<'a> Parser<'a> {
             source,
             at: 0,
             depth: 0,
+            captures: 0,
             insensitive,
         }
     }
 
-    fn parse(mut self) -> Result<Expr, PatternError> {
+    fn parse(mut self) -> Result<(Expr, usize), PatternError> {
         let expression = self.expression()?;
         if self.at != self.source.len() {
             return Err(PatternError::new("unbalanced group"));
         }
-        Ok(expression)
+        Ok((expression, self.captures))
     }
 
     fn peek(&self) -> Option<char> {
@@ -265,7 +264,7 @@ impl<'a> Parser<'a> {
                 Escaped::Boundary(negated) => Ok(Expr::Boundary(negated)),
             },
             Some(')') => Err(PatternError::new("unbalanced group")),
-            Some(']') | Some('{') => Err(PatternError::new("unexpected delimiter")),
+            Some(']') | Some('{') | Some('}') => Err(PatternError::new("unexpected delimiter")),
             Some(value) => {
                 self.bump();
                 Ok(Expr::Literal(value as u32))
@@ -285,7 +284,7 @@ impl<'a> Parser<'a> {
             match self.peek() {
                 Some(':') => {
                     self.bump();
-                    false
+                    None
                 }
                 Some('=') | Some('!') => {
                     return Err(PatternError::new("lookaround is outside the dialect"));
@@ -300,7 +299,8 @@ impl<'a> Parser<'a> {
                 _ => return Err(PatternError::new("unsupported group syntax")),
             }
         } else {
-            true
+            self.captures += 1;
+            Some(self.captures)
         };
         let item = self.expression()?;
         if self.peek() != Some(')') {
@@ -509,7 +509,7 @@ impl<'a> Parser<'a> {
         if code == 'k' || code.is_ascii_digit() && code != '0' {
             return Err(PatternError::new("backreferences are outside the dialect"));
         }
-        if "\\/.*+?()[]{}|^$-".contains(code) {
+        if "\\/.*+?()[]{}|^$".contains(code) || (in_class && code == '-') {
             return Ok(Escaped::Literal(code as u32));
         }
         Err(PatternError::new("unsupported escape"))
@@ -628,106 +628,379 @@ fn fold_ascii(ranges: &Ranges) -> Ranges {
     normalize_ranges(result)
 }
 
-fn escaped(value: u32) -> String {
-    if matches!(value, 0x30..=0x39 | 0x41..=0x5a | 0x5f | 0x61..=0x7a) {
-        char::from_u32(value).unwrap().to_string()
-    } else {
-        format!(r"\u{{{value:x}}}")
+#[derive(Clone, Copy, Debug)]
+enum AssertKind {
+    Start,
+    End,
+    LineStart,
+    LineEnd,
+    Boundary,
+    NotBoundary,
+}
+
+#[derive(Clone, Debug)]
+enum Instruction {
+    Char(Ranges),
+    Split { first: usize, second: usize },
+    Jump(usize),
+    Save(usize),
+    Assert(AssertKind),
+    Match,
+}
+
+struct Scalar {
+    value: u32,
+    start: usize,
+    byte_start: usize,
+    byte_end: usize,
+}
+
+struct TextInput<'a> {
+    text: &'a str,
+    scalars: Vec<Scalar>,
+    length: usize,
+}
+
+impl<'a> TextInput<'a> {
+    fn new(text: &'a str) -> Self {
+        let mut units = 0;
+        let scalars = text
+            .char_indices()
+            .map(|(byte_start, value)| {
+                let held = Scalar {
+                    value: value as u32,
+                    start: units,
+                    byte_start,
+                    byte_end: byte_start + value.len_utf8(),
+                };
+                units += value.len_utf16();
+                held
+            })
+            .collect();
+        Self {
+            text,
+            scalars,
+            length: units,
+        }
+    }
+
+    fn index_at(&self, offset: usize) -> usize {
+        self.scalars.partition_point(|scalar| scalar.start < offset)
+    }
+
+    fn offset_at(&self, index: usize) -> usize {
+        self.scalars
+            .get(index)
+            .map_or(self.length, |scalar| scalar.start)
+    }
+
+    fn byte_at(&self, offset: usize) -> usize {
+        let index = self.index_at(offset);
+        match self.scalars.get(index) {
+            Some(scalar) if scalar.start == offset => scalar.byte_start,
+            Some(scalar) => scalar.byte_end,
+            None => self.text.len(),
+        }
     }
 }
 
-fn emit_ranges(ranges: &Ranges) -> String {
-    let body = ranges
-        .iter()
-        .map(|(start, end)| {
-            if start == end {
-                escaped(*start)
-            } else {
-                format!("{}-{}", escaped(*start), escaped(*end))
-            }
-        })
-        .collect::<String>();
-    format!("[{body}]")
+#[derive(Clone)]
+struct Thread {
+    pc: usize,
+    captures: Rc<Vec<Option<usize>>>,
+    start_index: usize,
 }
 
-fn emit(expression: &Expr, insensitive: bool, multiline: bool, dot_all: bool) -> String {
+struct VmMatch {
+    start_index: usize,
+    end_index: usize,
+    captures: Rc<Vec<Option<usize>>>,
+}
+
+fn compile_expression(
+    expression: &Expr,
+    program: &mut Vec<Instruction>,
+    insensitive: bool,
+    multiline: bool,
+    dot_all: bool,
+) {
     match expression {
-        Expr::Empty => "(?:)".to_owned(),
+        Expr::Empty => {}
         Expr::Literal(value) => {
-            if insensitive && (0x41..=0x5a).contains(value) {
-                emit_ranges(&normalize_ranges(vec![
-                    (*value, *value),
-                    (*value + 0x20, *value + 0x20),
-                ]))
-            } else if insensitive && (0x61..=0x7a).contains(value) {
-                emit_ranges(&normalize_ranges(vec![
-                    (*value, *value),
-                    (*value - 0x20, *value - 0x20),
-                ]))
+            let ranges = if insensitive {
+                fold_ascii(&vec![(*value, *value)])
             } else {
-                escaped(*value)
+                vec![(*value, *value)]
+            };
+            program.push(Instruction::Char(ranges));
+        }
+        Expr::Class(ranges) => program.push(Instruction::Char(ranges.clone())),
+        Expr::Dot => program.push(Instruction::Char(if dot_all {
+            vec![(0, 0xd7ff), (0xe000, 0x10ffff)]
+        } else {
+            complement_ranges(&vec![(0x0a, 0x0a)])
+        })),
+        Expr::Anchor(start) => program.push(Instruction::Assert(match (*start, multiline) {
+            (true, true) => AssertKind::LineStart,
+            (false, true) => AssertKind::LineEnd,
+            (true, false) => AssertKind::Start,
+            (false, false) => AssertKind::End,
+        })),
+        Expr::Boundary(negated) => program.push(Instruction::Assert(if *negated {
+            AssertKind::NotBoundary
+        } else {
+            AssertKind::Boundary
+        })),
+        Expr::Sequence(items) => {
+            for item in items {
+                compile_expression(item, program, insensitive, multiline, dot_all);
             }
         }
-        Expr::Class(ranges) => emit_ranges(ranges),
-        Expr::Dot => {
-            if dot_all {
-                "(?s:.)".to_owned()
-            } else {
-                r"[^\n]".to_owned()
+        Expr::Alternative(items) => {
+            let mut jumps = Vec::new();
+            let Some((last, earlier)) = items.split_last() else {
+                return;
+            };
+            for item in earlier {
+                let split = program.len();
+                program.push(Instruction::Split {
+                    first: split + 1,
+                    second: usize::MAX,
+                });
+                compile_expression(item, program, insensitive, multiline, dot_all);
+                jumps.push(program.len());
+                program.push(Instruction::Jump(usize::MAX));
+                let next = program.len();
+                if let Instruction::Split { second, .. } = &mut program[split] {
+                    *second = next;
+                }
+            }
+            compile_expression(last, program, insensitive, multiline, dot_all);
+            let end = program.len();
+            for jump in jumps {
+                if let Instruction::Jump(target) = &mut program[jump] {
+                    *target = end;
+                }
             }
         }
-        Expr::Anchor(start) => match (*start, multiline) {
-            (true, true) => "(?m:^)".to_owned(),
-            (false, true) => "(?m:$)".to_owned(),
-            (true, false) => r"\A".to_owned(),
-            (false, false) => r"\z".to_owned(),
-        },
-        Expr::Boundary(negated) => {
-            if *negated {
-                r"(?-u:\B)".to_owned()
-            } else {
-                r"(?-u:\b)".to_owned()
+        Expr::Group { item, capture } => {
+            if let Some(capture) = capture {
+                program.push(Instruction::Save(capture * 2));
+            }
+            compile_expression(item, program, insensitive, multiline, dot_all);
+            if let Some(capture) = capture {
+                program.push(Instruction::Save(capture * 2 + 1));
             }
         }
-        Expr::Sequence(items) => items
-            .iter()
-            .map(|item| emit(item, insensitive, multiline, dot_all))
-            .collect(),
-        Expr::Alternative(items) => format!(
-            "(?:{})",
-            items
-                .iter()
-                .map(|item| emit(item, insensitive, multiline, dot_all))
-                .collect::<Vec<_>>()
-                .join("|")
-        ),
-        Expr::Group { item, capture } => format!(
-            "{}{})",
-            if *capture { "(" } else { "(?:" },
-            emit(item, insensitive, multiline, dot_all)
-        ),
         Expr::Repeat {
             item,
             min,
             max,
             lazy,
         } => {
-            let quantifier = match max {
-                None if *min == 0 => "*".to_owned(),
-                None if *min == 1 => "+".to_owned(),
-                None => format!("{{{min},}}"),
-                Some(1) if *min == 0 => "?".to_owned(),
-                Some(end) if end == min => format!("{{{min}}}"),
-                Some(end) => format!("{{{min},{end}}}"),
-            };
-            format!(
-                "(?:{}){}{}",
-                emit(item, insensitive, multiline, dot_all),
-                quantifier,
-                if *lazy { "?" } else { "" }
-            )
+            for _ in 0..*min {
+                compile_expression(item, program, insensitive, multiline, dot_all);
+            }
+            if max.is_none() {
+                let split = program.len();
+                program.push(Instruction::Split {
+                    first: usize::MAX,
+                    second: usize::MAX,
+                });
+                let body = program.len();
+                compile_expression(item, program, insensitive, multiline, dot_all);
+                program.push(Instruction::Jump(split));
+                let out = program.len();
+                if let Instruction::Split { first, second } = &mut program[split] {
+                    *first = if *lazy { out } else { body };
+                    *second = if *lazy { body } else { out };
+                }
+            } else if let Some(max) = max {
+                for _ in *min..*max {
+                    let split = program.len();
+                    program.push(Instruction::Split {
+                        first: usize::MAX,
+                        second: usize::MAX,
+                    });
+                    let body = program.len();
+                    compile_expression(item, program, insensitive, multiline, dot_all);
+                    let out = program.len();
+                    if let Instruction::Split { first, second } = &mut program[split] {
+                        *first = if *lazy { out } else { body };
+                        *second = if *lazy { body } else { out };
+                    }
+                }
+            }
         }
     }
+}
+
+fn compile_program(
+    tree: &Expr,
+    insensitive: bool,
+    multiline: bool,
+    dot_all: bool,
+) -> Vec<Instruction> {
+    let mut program = vec![Instruction::Save(0)];
+    compile_expression(tree, &mut program, insensitive, multiline, dot_all);
+    program.extend([Instruction::Save(1), Instruction::Match]);
+    program
+}
+
+fn is_word(value: Option<u32>) -> bool {
+    value.is_some_and(|value| matches!(value, 0x30..=0x39 | 0x41..=0x5a | 0x5f | 0x61..=0x7a))
+}
+
+fn holds_assertion(assertion: AssertKind, input: &TextInput<'_>, index: usize) -> bool {
+    let left = index.checked_sub(1).and_then(|at| input.scalars.get(at));
+    let right = input.scalars.get(index);
+    match assertion {
+        AssertKind::Start => index == 0,
+        AssertKind::End => index == input.scalars.len(),
+        AssertKind::LineStart => index == 0 || left.is_some_and(|scalar| scalar.value == 0x0a),
+        AssertKind::LineEnd => {
+            index == input.scalars.len() || right.is_some_and(|scalar| scalar.value == 0x0a)
+        }
+        AssertKind::Boundary => {
+            is_word(left.map(|scalar| scalar.value)) != is_word(right.map(|scalar| scalar.value))
+        }
+        AssertKind::NotBoundary => {
+            is_word(left.map(|scalar| scalar.value)) == is_word(right.map(|scalar| scalar.value))
+        }
+    }
+}
+
+fn add_thread(
+    program: &[Instruction],
+    threads: &mut Vec<Thread>,
+    seen: &mut [u64],
+    step: u64,
+    thread: Thread,
+    input: &TextInput<'_>,
+    index: usize,
+) {
+    let mut stack = vec![thread];
+    while let Some(held) = stack.pop() {
+        if seen[held.pc] == step {
+            continue;
+        }
+        seen[held.pc] = step;
+        match &program[held.pc] {
+            Instruction::Jump(target) => stack.push(Thread {
+                pc: *target,
+                captures: held.captures,
+                start_index: held.start_index,
+            }),
+            Instruction::Split { first, second } => {
+                stack.push(Thread {
+                    pc: *second,
+                    captures: held.captures.clone(),
+                    start_index: held.start_index,
+                });
+                stack.push(Thread {
+                    pc: *first,
+                    captures: held.captures,
+                    start_index: held.start_index,
+                });
+            }
+            Instruction::Save(slot) => {
+                let mut captures = (*held.captures).clone();
+                captures[*slot] = Some(input.offset_at(index));
+                stack.push(Thread {
+                    pc: held.pc + 1,
+                    captures: Rc::new(captures),
+                    start_index: held.start_index,
+                });
+            }
+            Instruction::Assert(assertion) => {
+                if holds_assertion(*assertion, input, index) {
+                    stack.push(Thread {
+                        pc: held.pc + 1,
+                        captures: held.captures,
+                        start_index: held.start_index,
+                    });
+                }
+            }
+            Instruction::Char(_) | Instruction::Match => threads.push(held),
+        }
+    }
+}
+
+fn has_scalar(ranges: &[(u32, u32)], value: u32) -> bool {
+    ranges
+        .iter()
+        .any(|(start, end)| value >= *start && value <= *end)
+}
+
+fn run_program(
+    program: &[Instruction],
+    input: &TextInput<'_>,
+    start_index: usize,
+    capture_count: usize,
+) -> Option<VmMatch> {
+    let mut current = Vec::new();
+    let mut current_seen = vec![0_u64; program.len()];
+    let mut next_seen = vec![0_u64; program.len()];
+    let empty_captures = Rc::new(vec![None; (capture_count + 1) * 2]);
+    let mut candidate = None;
+    for (step, index) in (start_index..=input.scalars.len()).enumerate() {
+        let current_step = step as u64 + 1;
+        let next_step = current_step + 1;
+        if candidate.is_none() {
+            add_thread(
+                program,
+                &mut current,
+                &mut current_seen,
+                current_step,
+                Thread {
+                    pc: 0,
+                    captures: empty_captures.clone(),
+                    start_index: index,
+                },
+                input,
+                index,
+            );
+        }
+        let mut next = Vec::new();
+        for thread in current {
+            match &program[thread.pc] {
+                Instruction::Match => {
+                    candidate = Some(VmMatch {
+                        start_index: thread.start_index,
+                        end_index: index,
+                        captures: thread.captures,
+                    });
+                    break;
+                }
+                Instruction::Char(ranges)
+                    if index < input.scalars.len()
+                        && has_scalar(ranges, input.scalars[index].value) =>
+                {
+                    add_thread(
+                        program,
+                        &mut next,
+                        &mut next_seen,
+                        next_step,
+                        Thread {
+                            pc: thread.pc + 1,
+                            captures: thread.captures,
+                            start_index: thread.start_index,
+                        },
+                        input,
+                        index + 1,
+                    );
+                }
+                // Epsilon instructions are expanded.
+                _ => {}
+            }
+        }
+        if candidate.is_some() && next.is_empty() {
+            break;
+        }
+        current = next;
+        std::mem::swap(&mut current_seen, &mut next_seen);
+    }
+    candidate
 }
 
 fn flag_set(flags: &str) -> Result<(bool, bool, bool), PatternError> {
@@ -753,63 +1026,60 @@ fn flag_set(flags: &str) -> Result<(bool, bool, bool), PatternError> {
 pub struct Pattern {
     pub source: String,
     pub flags: String,
-    regex: Regex,
+    program: Vec<Instruction>,
+    captures: usize,
 }
 
 impl Pattern {
     pub fn compile(source: &str, flags: &str) -> Result<Self, PatternError> {
         let (insensitive, multiline, dot_all) = flag_set(flags)?;
-        let tree = Parser::new(source, insensitive).parse()?;
+        let (tree, captures) = Parser::new(source, insensitive).parse()?;
         if traits_of(&tree)?.cost > MAX_COST {
             return Err(PatternError::new("the pattern is too large"));
         }
-        let emitted = emit(&tree, insensitive, multiline, dot_all);
-        let regex = RegexBuilder::new(&emitted)
-            .size_limit(SIZE_LIMIT)
-            .build()
-            .map_err(|error| PatternError::new(error.to_string()))?;
+        if captures > MAX_CAPTURES {
+            return Err(PatternError::new("too many capture groups"));
+        }
+        let program = compile_program(&tree, insensitive, multiline, dot_all);
         Ok(Self {
             source: source.to_owned(),
             flags: flags.to_owned(),
-            regex,
+            program,
+            captures,
         })
     }
 
     pub fn test(&self, text: &str) -> bool {
-        self.regex.is_match(text)
+        self.find(text, 0).is_some()
     }
 
-    /// Finds from UTF-16 offsets.
+    /// Find accepts UTF-16 offsets.
     pub fn find(&self, text: &str, from: usize) -> Option<PatternMatch> {
-        let found = self.regex.captures_at(text, byte_at_utf16(text, from))?;
-        Some(Units::new(text).matched(&found))
+        let input = TextInput::new(text);
+        self.find_input(&input, from)
     }
 
     /// Empty matches advance one scalar.
-    fn each<'t>(&self, text: &'t str) -> Vec<Captures<'t>> {
+    fn each(&self, input: &TextInput<'_>) -> Vec<PatternMatch> {
         let mut found = Vec::new();
         let mut from = 0;
-        while from <= text.len() {
-            let Some(held) = self.regex.captures_at(text, from) else {
+        while from <= input.scalars.len() {
+            let Some(held) = run_program(&self.program, input, from, self.captures) else {
                 break;
             };
-            let (start, end) = span(&held);
-            from = if start == end {
-                next_boundary(text, end)
+            from = if held.start_index == held.end_index {
+                held.end_index + 1
             } else {
-                end
+                held.end_index
             };
-            found.push(held);
+            found.push(self.materialize(input, held));
         }
         found
     }
 
     pub fn find_all(&self, text: &str) -> Vec<PatternMatch> {
-        let mut units = Units::new(text);
-        self.each(text)
-            .iter()
-            .map(|held| units.matched(held))
-            .collect()
+        let input = TextInput::new(text);
+        self.each(&input)
     }
 
     pub fn replace_all(&self, text: &str, template: &str) -> String {
@@ -820,13 +1090,14 @@ impl Pattern {
     where
         F: FnMut(&PatternMatch) -> String,
     {
-        let mut units = Units::new(text);
+        let input = TextInput::new(text);
         let mut result = String::new();
         let mut tail = 0;
-        for held in self.each(text) {
-            let (start, end) = span(&held);
+        for held in self.each(&input) {
+            let start = input.byte_at(held.start);
+            let end = input.byte_at(held.end);
             result.push_str(&text[tail..start]);
-            result.push_str(&each(&units.matched(&held)));
+            result.push_str(&each(&held));
             tail = end;
         }
         result.push_str(&text[tail..]);
@@ -835,40 +1106,65 @@ impl Pattern {
 
     /// Unmatched captures become empty.
     pub fn split(&self, text: &str) -> Vec<String> {
+        let input = TextInput::new(text);
         if text.is_empty() {
-            return if self.regex.is_match(text) {
+            return if self.find_input(&input, 0).is_some() {
                 Vec::new()
             } else {
                 vec![String::new()]
             };
         }
         let mut pieces = Vec::new();
-        let mut piece = 0;
-        let mut from = 0;
-        while from < text.len() {
-            let Some(held) = self.regex.captures_at(text, from) else {
-                break;
-            };
-            let (start, end) = span(&held);
-            if start >= text.len() {
+        let mut piece_units = 0;
+        let mut piece_byte = 0;
+        for held in self.each(&input) {
+            if held.start >= input.length {
                 break;
             }
-            // Skip piece-start empty matches.
-            if end == piece {
-                from = next_boundary(text, from);
+            if held.end == piece_units {
                 continue;
             }
-            pieces.push(text[piece..start].to_owned());
+            let start = input.byte_at(held.start);
+            let end = input.byte_at(held.end);
+            pieces.push(text[piece_byte..start].to_owned());
             pieces.extend(
-                held.iter().skip(1).map(|capture| {
-                    capture.map_or_else(String::new, |part| part.as_str().to_owned())
-                }),
+                held.captures
+                    .iter()
+                    .map(|capture| capture.clone().unwrap_or_default()),
             );
-            piece = end;
-            from = end;
+            piece_units = held.end;
+            piece_byte = end;
         }
-        pieces.push(text[piece..].to_owned());
+        pieces.push(text[piece_byte..].to_owned());
         pieces
+    }
+
+    fn find_input(&self, input: &TextInput<'_>, from: usize) -> Option<PatternMatch> {
+        let start_index = input.index_at(from.min(input.length));
+        let found = run_program(&self.program, input, start_index, self.captures)?;
+        Some(self.materialize(input, found))
+    }
+
+    fn materialize(&self, input: &TextInput<'_>, found: VmMatch) -> PatternMatch {
+        let slots = &found.captures;
+        let start = slots[0].expect("the whole match has a start");
+        let end = slots[1].expect("the whole match has an end");
+        let start_byte = input.byte_at(start);
+        let end_byte = input.byte_at(end);
+        let captures = (1..=self.captures)
+            .map(|group| match (slots[group * 2], slots[group * 2 + 1]) {
+                (Some(start), Some(end)) => {
+                    Some(input.text[input.byte_at(start)..input.byte_at(end)].to_owned())
+                }
+                _ => None,
+            })
+            .collect();
+        PatternMatch {
+            start,
+            end,
+            text: input.text[start_byte..end_byte].to_owned(),
+            captures,
+        }
     }
 }
 
@@ -876,77 +1172,6 @@ pub fn pattern_problem(source: &str, flags: &str) -> Option<String> {
     Pattern::compile(source, flags)
         .err()
         .map(|error| error.to_string())
-}
-
-fn byte_at_utf16(text: &str, offset: usize) -> usize {
-    let mut units = 0;
-    for (byte, value) in text.char_indices() {
-        if units >= offset {
-            return byte;
-        }
-        let next = units + value.len_utf16();
-        if offset < next {
-            return byte + value.len_utf8();
-        }
-        units = next;
-    }
-    text.len()
-}
-
-fn span(found: &Captures<'_>) -> (usize, usize) {
-    found
-        .get(0)
-        .map_or((0, 0), |whole| (whole.start(), whole.end()))
-}
-
-/// Next scalar, else sentinel.
-fn next_boundary(text: &str, at: usize) -> usize {
-    match text.get(at..).and_then(|tail| tail.chars().next()) {
-        Some(next) => at + next.len_utf8(),
-        None => text.len() + 1,
-    }
-}
-
-/// Maps byte offsets to UTF-16.
-struct Units<'t> {
-    text: &'t str,
-    byte: usize,
-    units: usize,
-}
-
-impl<'t> Units<'t> {
-    fn new(text: &'t str) -> Self {
-        Self {
-            text,
-            byte: 0,
-            units: 0,
-        }
-    }
-
-    fn at(&mut self, byte: usize) -> usize {
-        if byte < self.byte {
-            self.byte = 0;
-            self.units = 0;
-        }
-        let passed = &self.text[self.byte..byte];
-        self.units += passed.chars().map(char::len_utf16).sum::<usize>();
-        self.byte = byte;
-        self.units
-    }
-
-    fn matched(&mut self, found: &Captures<'_>) -> PatternMatch {
-        let (start, end) = span(found);
-        PatternMatch {
-            start: self.at(start),
-            end: self.at(end),
-            text: self.text[start..end].to_owned(),
-            captures: found
-                .iter()
-                .skip(1)
-                .map(|capture| capture.map(|part| part.as_str().to_owned()))
-                .collect(),
-        }
-    }
 }
 
 fn substitute(matched: &PatternMatch, template: &str) -> String {

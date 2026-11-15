@@ -61,6 +61,26 @@
 		{
 			"send": {
 				"type": "start",
+				"run": "crash",
+				"command": "testkit.crash",
+				"input": null
+			}
+		},
+		{
+			"await": [
+				{
+					"type": "done",
+					"run": "crash"
+				},
+				{
+					"type": "failed",
+					"run": "crash"
+				}
+			]
+		},
+		{
+			"send": {
+				"type": "start",
 				"run": "pure",
 				"command": "case:json.canonical",
 				"input": {
@@ -121,6 +141,15 @@
 						"requests"
 					],
 					"message": "the input does not fit the command"
+				}
+			],
+			"crash": [
+				{
+					"type": "failed",
+					"run": "crash",
+					"seq": 1,
+					"code": "error",
+					"message": "the command crashed"
 				}
 			],
 			"none": [

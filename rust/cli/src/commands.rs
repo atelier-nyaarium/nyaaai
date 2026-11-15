@@ -16,7 +16,7 @@ use nyaaai_operator::claude::session_cut::{
 };
 use nyaaai_operator::claude::session_file::{FileCutPorts, session_lines};
 
-use crate::adapter::{RunContext, RunError};
+use nyaaai_adapter::runtime::{RunContext, RunError, typed};
 
 /// Host summary request.
 pub const SUMMARIZE: &str = "sessionCut.summarize";
@@ -27,15 +27,6 @@ pub fn run(name: &str, input: &Value, context: &RunContext) -> Option<Result<Val
         "sessionCut.apply" => apply(input, context),
         _ => return None,
     })
-}
-
-/// Decodes input; encodes result.
-pub fn typed<Input: Shape, Output: Shape>(
-    input: &Value,
-    run: impl FnOnce(Input) -> Result<Output, RunError>,
-) -> Result<Value, RunError> {
-    let input = Input::decode(input).map_err(|refused| RunError::BadInput(refused.path))?;
-    run(input).map(|result| result.encode())
 }
 
 fn plan(input: &Value) -> Result<Value, RunError> {

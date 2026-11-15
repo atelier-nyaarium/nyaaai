@@ -1,0 +1,30 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.find",
+	"name": "pair-anchor-offsets",
+	"input": {
+		"source": "^",
+		"flags": "",
+		"text": "😀a",
+		"froms": [
+			0,
+			1,
+			2,
+			3
+		]
+	},
+	"expected": {
+		"found": [
+			{
+				"start": 0,
+				"end": 0,
+				"text": "",
+				"captures": []
+			},
+			null,
+			null,
+			null
+		]
+	}
+}

@@ -1,0 +1,68 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "torture-Even",
+	"input": {
+		"set": "torture",
+		"shape": "Even",
+		"texts": [
+			"2",
+			"0",
+			"-0",
+			"-4",
+			"98",
+			"100",
+			"3",
+			"101",
+			"1.5",
+			"\"2\""
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "2"
+			},
+			{
+				"ok": true,
+				"text": "0"
+			},
+			{
+				"ok": true,
+				"text": "0"
+			},
+			{
+				"ok": true,
+				"text": "-4"
+			},
+			{
+				"ok": true,
+				"text": "98"
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": [],
+				"message": "An even number."
+			},
+			{
+				"ok": false,
+				"path": [],
+				"message": "An even number."
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

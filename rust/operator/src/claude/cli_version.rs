@@ -5,6 +5,8 @@ use std::process::{Command, Stdio};
 use std::thread;
 use std::time::{Duration, Instant};
 
+use nyaaai_contract::text::trim_text;
+
 const VERSION_WAIT: Duration = Duration::from_secs(15);
 const POLL: Duration = Duration::from_millis(20);
 
@@ -34,7 +36,7 @@ pub fn version_in(text: &str) -> Option<&str> {
     None
 }
 
-/// Parsed version, or full answer.
+/// Version or full output.
 pub fn installed_version() -> io::Result<String> {
     let mut child = Command::new("claude")
         .arg("--version")
@@ -59,5 +61,5 @@ pub fn installed_version() -> io::Result<String> {
         out.read_to_end(&mut said)?;
     }
     let said = String::from_utf8_lossy(&said);
-    Ok(version_in(&said).unwrap_or(said.trim()).to_owned())
+    Ok(version_in(&said).unwrap_or(trim_text(&said)).to_owned())
 }

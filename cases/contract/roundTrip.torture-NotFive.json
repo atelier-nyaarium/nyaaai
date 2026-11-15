@@ -1,0 +1,58 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "torture-NotFive",
+	"input": {
+		"set": "torture",
+		"shape": "NotFive",
+		"texts": [
+			"4",
+			"\"five\"",
+			"5",
+			"5.0",
+			"5.5",
+			"null",
+			"[5]",
+			"{\"value\":5}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "4"
+			},
+			{
+				"ok": true,
+				"text": "\"five\""
+			},
+			{
+				"ok": false,
+				"path": [],
+				"message": "Not five."
+			},
+			{
+				"ok": false,
+				"path": [],
+				"message": "Not five."
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

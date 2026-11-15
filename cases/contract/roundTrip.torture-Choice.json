@@ -1,0 +1,86 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "torture-Choice",
+	"input": {
+		"set": "torture",
+		"shape": "Choice",
+		"texts": [
+			"{\"name\":\"ab\",\"more\":[1]}",
+			"4",
+			"\"off\"",
+			"{\"name\":\"ab\",\"more\":[1],\"extra\":1}",
+			"{\"name\":\"abcd\",\"more\":[1]}",
+			"{\"name\":\"ab\",\"more\":[1,-1]}",
+			"{\"name\":\"ab\",\"more\":\"x\"}",
+			"{\"name\":\"ab\"}",
+			"3",
+			"1.5",
+			"\"on\"",
+			"null",
+			"[]",
+			"{}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"name\":\"ab\",\"more\":[1]}"
+			},
+			{
+				"ok": true,
+				"text": "4"
+			},
+			{
+				"ok": true,
+				"text": "\"off\""
+			},
+			{
+				"ok": true,
+				"text": "{\"name\":\"ab\",\"more\":[1]}"
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

@@ -1,0 +1,64 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "torture-Code",
+	"input": {
+		"set": "torture",
+		"shape": "Code",
+		"texts": [
+			"\"abc-123\"",
+			"\"ABC-9\"",
+			"\"abc\"",
+			"\"abc-123456\"",
+			"\"abcdefghij\"",
+			"\"x-1\\n\"",
+			"\"\"",
+			"5",
+			"null"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "\"abc-123\""
+			},
+			{
+				"ok": true,
+				"text": "\"ABC-9\""
+			},
+			{
+				"ok": false,
+				"path": [],
+				"message": "A code reads like abc-123."
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": [],
+				"message": "A code reads like abc-123."
+			},
+			{
+				"ok": false,
+				"path": [],
+				"message": "A code reads like abc-123."
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

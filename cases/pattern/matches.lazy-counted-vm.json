@@ -1,0 +1,40 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.matches",
+	"name": "lazy-counted-vm",
+	"input": {
+		"source": "(?:ab){2,3}?",
+		"flags": "",
+		"texts": [
+			"abababx",
+			"xabab"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 4,
+						"text": "abab",
+						"captures": []
+					}
+				]
+			},
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 1,
+						"end": 5,
+						"text": "abab",
+						"captures": []
+					}
+				]
+			}
+		]
+	}
+}

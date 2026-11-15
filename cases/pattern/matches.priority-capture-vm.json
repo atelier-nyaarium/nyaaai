@@ -1,0 +1,64 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.matches",
+	"name": "priority-capture-vm",
+	"input": {
+		"source": "(a|ab)(c|bcd)(d*)",
+		"flags": "",
+		"texts": [
+			"abcd",
+			"abcdd",
+			"abccd"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 4,
+						"text": "abcd",
+						"captures": [
+							"a",
+							"bcd",
+							""
+						]
+					}
+				]
+			},
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 5,
+						"text": "abcdd",
+						"captures": [
+							"a",
+							"bcd",
+							"d"
+						]
+					}
+				]
+			},
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 3,
+						"text": "abc",
+						"captures": [
+							"ab",
+							"c",
+							""
+						]
+					}
+				]
+			}
+		]
+	}
+}

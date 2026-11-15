@@ -10,6 +10,7 @@
 		"operator",
 		"ui",
 		"testkit",
+		"adapter",
 		"cli"
 	],
 	"engines": {

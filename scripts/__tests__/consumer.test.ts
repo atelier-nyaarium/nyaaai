@@ -233,6 +233,14 @@ describe("consumer", () => {
 			link(alone.consumer, alone.submodule);
 			expect(failure(() => assertConsumer(alone.consumer, alone.submodule, false))).toContain("@nyaaai/contract");
 
+			writeFileSync(path.join(alone.consumer, "parity.ts"), "export default {};\n");
+			writeJson(path.join(alone.consumer, "package.json"), {
+				...JSON.parse(readFileSync(path.join(alone.consumer, "package.json"), "utf8")),
+				nyaaai: { packages: ["contract", "operator"] },
+			});
+			link(alone.consumer, alone.submodule);
+			expect(failure(() => assertConsumer(alone.consumer, alone.submodule, false))).toContain("@nyaaai/testkit");
+
 			identify(world.submodule);
 			writeFileSync(path.join(world.submodule, "README.md"), "never pushed\n");
 			commitAll(world.submodule, "Unpushed");

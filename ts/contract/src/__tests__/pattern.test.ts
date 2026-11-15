@@ -27,6 +27,15 @@ const SOURCES: Array<[source: string, flags: string]> = [
 	["^", "m"],
 	["$", "m"],
 	["A", "i"],
+	["a|ab", ""],
+	["(a|ab)(c|bcd)(d*)", ""],
+	["a+?b*", ""],
+	["(?:ab){2,3}?", ""],
+	["(?:a+)+b", ""],
+	["a{2,4}", ""],
+	["(?:^a|b$|\\ba)", "m"],
+	["(a|b)*c", ""],
+	["(\\u{1f600}|x)+", ""],
 ];
 
 const TEXTS = [
@@ -43,6 +52,12 @@ const TEXTS = [
 	"\n\n",
 	"\u{1f600}",
 	"x\u{1f600}a\u{1f600}",
+	"abcd",
+	"aaabbb",
+	"abababx",
+	"aaabaaaab",
+	"x\na\nb\nx",
+	"\u{1f600}x\u{1f600}",
 ];
 
 describe("Pattern", () => {
@@ -66,5 +81,20 @@ describe("Pattern", () => {
 				expect(pattern.replaceAll(text, template), told).toBe(text.replaceAll(native(), template));
 			}
 		}
+	});
+
+	it("handles ambiguous input within a second", () => {
+		const pattern = Pattern.compile("^(a|aa)+$");
+		const text = `${"a".repeat(40)}!`;
+		const started = performance.now();
+		expect(pattern.test(text)).toBe(false);
+		expect(performance.now() - started).toBeLessThan(1000);
+	});
+
+	it("matches a lone surrogate as U+FFFD at the original offsets", () => {
+		const text = "a\ud800b";
+		const found = Pattern.compile(".", "s").findAll(text.slice(1, 2));
+		expect(found).toEqual([{ start: 0, end: 1, text: "\ud800", captures: [] }]);
+		expect(Pattern.compile("a.b", "s").findAll(text)).toEqual([{ start: 0, end: 3, text, captures: [] }]);
 	});
 });

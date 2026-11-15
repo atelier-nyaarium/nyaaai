@@ -27,7 +27,7 @@ export interface RunContext {
 	clock: Clock;
 	ids: Ids;
 	emit: (event: unknown) => void;
-	/** Returns host request id. */
+	/** Returns request ID. */
 	ask: (kind: string, input: unknown) => string;
 	/** Interrupts repeat forever. */
 	receive: () => Promise<Inbound>;
@@ -56,6 +56,9 @@ export const MAX_FRAME_BYTES = 8 * 1024 * 1024;
 
 const LF = 0x0a;
 
+/** Rust shares this message. */
+const CRASHED = "the command crashed";
+
 export const EXIT_REJECTED = 2;
 
 ////////////////////////////////
@@ -77,7 +80,7 @@ export class BadInput extends Error {
 
 class UnknownCommand extends Error {}
 
-/** Validates both boundaries. */
+/** Validates input and output. */
 export function command<In extends AnyShape, Out extends AnyShape>(
 	input: In,
 	result: Out,
@@ -86,7 +89,9 @@ export function command<In extends AnyShape, Out extends AnyShape>(
 	return async (raw, context) => {
 		const given = decode(input, raw);
 		if (!given.ok) throw new BadInput(given.path);
-		const made = decode(result, JSON.parse(JSON.stringify(await run(given.value, context))));
+		const plain = parseJson(stringifyJson(await run(given.value, context)));
+		if (plain === undefined) throw new Error("the result is not JSON");
+		const made = decode(result, plain);
 		if (!made.ok) throw new Error("the result does not fit the command");
 		return made.value;
 	};
@@ -206,7 +211,7 @@ function concat(parts: Uint8Array[], size: number): Uint8Array {
 	return whole;
 }
 
-/** LF framing. Tails drop. One oversize notice. */
+/** LF frames drop tails and signal oversize once. */
 async function* frameLines(input: AsyncIterable<Uint8Array>): AsyncGenerator<Uint8Array | null> {
 	let parts: Uint8Array[] = [];
 	let size = 0;
@@ -223,7 +228,7 @@ async function* frameLines(input: AsyncIterable<Uint8Array>): AsyncGenerator<Uin
 					parts = [];
 					yield null;
 				} else if (end > from) {
-					// Input buffers are reusable.
+					// Input buffers get reused.
 					parts.push(chunk.slice(from, end));
 				}
 			}
@@ -242,14 +247,13 @@ function failureOf(error: unknown): { code: RunFailure; path?: PathPart[]; messa
 	if (error instanceof BadInput) return { code: "bad_input", path: error.path, message: error.message };
 	if (error instanceof HostRequestFailed) return { code: "host_request", message: error.message };
 	if (error instanceof UnknownCommand) return { code: "unknown_command", message: error.message };
-	return { code: "error", message: error instanceof Error ? error.message : String(error) };
+	return { code: "error", message: error instanceof Error ? error.message : CRASHED };
 }
 
-/** Serves until EOF. */
 export async function serve(options: ServeOptions): Promise<number> {
 	const write = (frame: AdapterFrame): void => {
 		const held = decode(AdapterFrame, frame);
-		if (!held.ok) throw new Error(`an adapter frame at ${JSON.stringify(held.path)}: ${held.message}`);
+		if (!held.ok) throw new Error(`an adapter frame at ${stringifyJson(held.path)}: ${held.message}`);
 		options.write(stringifyJson(held.value));
 	};
 	const fault = (code: FaultCode, message: string, more: { run?: string; path?: PathPart[] } = {}): void =>

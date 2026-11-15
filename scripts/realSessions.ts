@@ -6,6 +6,7 @@ import { homedir } from "node:os";
 import path from "node:path";
 import { runCommands, rustAdapter } from "./adapterHost";
 import { CASE_PREFIX, runCase } from "./caseAdapter";
+import { loadProject } from "./project";
 
 ////////////////////////////////
 //  Interfaces & Types
@@ -19,7 +20,7 @@ interface IndexResult {
 
 const PROVEN = "2.1.323";
 
-/** One command's wait. A session file can be large. */
+/** Large session-file timeout. */
 const LARGE_FILE_MS = 600_000;
 
 ////////////////////////////////
@@ -39,6 +40,7 @@ function sessionFiles(root: string): string[] {
 //  Main
 
 if (import.meta.main) {
+	const project = await loadProject();
 	const root = process.argv[2] ?? path.join(homedir(), ".claude", "projects");
 	const files = sessionFiles(root);
 	const stamp = (file: string): string => {
@@ -54,18 +56,18 @@ if (import.meta.main) {
 		];
 	});
 	const rust = await runCommands(
-		rustAdapter(),
+		rustAdapter(project),
 		cases.map((held, at) => ({ run: String(at), command: `${CASE_PREFIX}${held.kind}`, input: held.input })),
 		LARGE_FILE_MS,
 	);
 	let differing = 0;
-	// Detect session changes mid-check.
+	// Exclude changed sessions.
 	const live = new Set<string>();
 	const odd = new Set<string>();
 	const lines = new Map<string, string[]>();
 	for (const [at, held] of cases.entries()) {
-		// A file may change or go mid-check.
-		const ours = await runCase(held.kind, held.input).catch(() => undefined);
+		// Mid-check session changes.
+		const ours = await runCase(project, held.kind, held.input).catch(() => undefined);
 		const theirs = rust.get(String(at));
 		const same =
 			ours !== undefined &&

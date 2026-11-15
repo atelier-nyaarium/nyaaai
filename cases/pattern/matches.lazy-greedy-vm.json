@@ -1,0 +1,58 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.matches",
+	"name": "lazy-greedy-vm",
+	"input": {
+		"source": "a+?b*",
+		"flags": "",
+		"texts": [
+			"aaabbb",
+			"baab"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 0,
+						"end": 1,
+						"text": "a",
+						"captures": []
+					},
+					{
+						"start": 1,
+						"end": 2,
+						"text": "a",
+						"captures": []
+					},
+					{
+						"start": 2,
+						"end": 6,
+						"text": "abbb",
+						"captures": []
+					}
+				]
+			},
+			{
+				"test": true,
+				"all": [
+					{
+						"start": 1,
+						"end": 2,
+						"text": "a",
+						"captures": []
+					},
+					{
+						"start": 2,
+						"end": 4,
+						"text": "ab",
+						"captures": []
+					}
+				]
+			}
+		]
+	}
+}

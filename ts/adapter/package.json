@@ -1,0 +1,15 @@
+{
+	"name": "@nyaaai/adapter",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"description": "The stdio adapter runtime",
+	"exports": {
+		".": "./src/index.ts",
+		"./runtime": "./src/runtime.ts",
+		"./stdio": "./src/stdio.ts"
+	},
+	"dependencies": {
+		"@nyaaai/contract": "workspace:*"
+	}
+}

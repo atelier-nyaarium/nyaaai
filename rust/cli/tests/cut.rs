@@ -5,6 +5,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use nyaaai_contract::json::{Value, parse_json};
+use nyaaai_contract::text::trim_text;
 use nyaaai_operator::claude::session_cut::verify_cut;
 use nyaaai_operator::claude::session_file::session_lines;
 use nyaaai_testkit::claude_session::{CLI_VERSION, compacted_session};
@@ -36,7 +37,7 @@ fn cut(source: &Path, out: &Path, more: &[&str]) -> (Option<i32>, Value) {
     let said = String::from_utf8(ran.stdout).unwrap();
     (
         ran.status.code(),
-        parse_json(said.trim()).unwrap_or(Value::Null),
+        parse_json(trim_text(&said)).unwrap_or(Value::Null),
     )
 }
 

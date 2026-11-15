@@ -3,48 +3,6 @@
 	"$id": "cases.input.json",
 	"x-contract-version": "0.1.0",
 	"$defs": {
-		"SessionSource": {
-			"type": "object",
-			"properties": {
-				"lines": {
-					"type": "array",
-					"items": {
-						"type": "string"
-					}
-				},
-				"base64": {
-					"type": "string"
-				},
-				"file": {
-					"type": "string"
-				}
-			}
-		},
-		"BodyOf": {
-			"type": "string",
-			"enum": [
-				"whole",
-				"afterFirstLine"
-			]
-		},
-		"TreeEntry": {
-			"type": "object",
-			"properties": {
-				"path": {
-					"type": "string"
-				},
-				"file": {
-					"type": "boolean",
-					"const": true
-				},
-				"link": {
-					"type": "string"
-				}
-			},
-			"required": [
-				"path"
-			]
-		},
 		"JsonRoundTripInput": {
 			"type": "object",
 			"properties": {
@@ -84,47 +42,7 @@
 				"results"
 			]
 		},
-		"ShapeCompatibleVersionsInput": {
-			"type": "object",
-			"properties": {
-				"pairs": {
-					"type": "array",
-					"items": {
-						"type": "object",
-						"properties": {
-							"left": {
-								"type": "string"
-							},
-							"right": {
-								"type": "string"
-							}
-						},
-						"required": [
-							"left",
-							"right"
-						]
-					}
-				}
-			},
-			"required": [
-				"pairs"
-			]
-		},
-		"ShapeCompatibleVersionsResult": {
-			"type": "object",
-			"properties": {
-				"compatible": {
-					"type": "array",
-					"items": {
-						"type": "boolean"
-					}
-				}
-			},
-			"required": [
-				"compatible"
-			]
-		},
-		"Base64DecodeInput": {
+		"JsonCanonicalInput": {
 			"type": "object",
 			"properties": {
 				"texts": {
@@ -138,7 +56,7 @@
 				"texts"
 			]
 		},
-		"Base64DecodeResult": {
+		"JsonCanonicalResult": {
 			"type": "object",
 			"properties": {
 				"texts": {
@@ -183,37 +101,6 @@
 				"strings"
 			]
 		},
-		"JsonCanonicalInput": {
-			"type": "object",
-			"properties": {
-				"texts": {
-					"type": "array",
-					"items": {
-						"type": "string"
-					}
-				}
-			},
-			"required": [
-				"texts"
-			]
-		},
-		"JsonCanonicalResult": {
-			"type": "object",
-			"properties": {
-				"texts": {
-					"type": "array",
-					"items": {
-						"type": [
-							"string",
-							"null"
-						]
-					}
-				}
-			},
-			"required": [
-				"texts"
-			]
-		},
 		"OrderSortedTextsInput": {
 			"type": "object",
 			"properties": {
@@ -240,6 +127,77 @@
 			},
 			"required": [
 				"texts"
+			]
+		},
+		"Base64DecodeInput": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			]
+		},
+		"Base64DecodeResult": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": [
+							"string",
+							"null"
+						]
+					}
+				}
+			},
+			"required": [
+				"texts"
+			]
+		},
+		"ShapeCompatibleVersionsInput": {
+			"type": "object",
+			"properties": {
+				"pairs": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"left": {
+								"type": "string"
+							},
+							"right": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"left",
+							"right"
+						]
+					}
+				}
+			},
+			"required": [
+				"pairs"
+			]
+		},
+		"ShapeCompatibleVersionsResult": {
+			"type": "object",
+			"properties": {
+				"compatible": {
+					"type": "array",
+					"items": {
+						"type": "boolean"
+					}
+				}
+			},
+			"required": [
+				"compatible"
 			]
 		},
 		"ContractRoundTripInput": {
@@ -283,6 +241,9 @@
 								"items": {
 									"$ref": "frames.input.json#/$defs/PathPart"
 								}
+							},
+							"message": {
+								"type": "string"
 							}
 						},
 						"required": [
@@ -852,6 +813,41 @@
 				"slices"
 			]
 		},
+		"TextSpacesInput": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			]
+		},
+		"TextSpacesResult": {
+			"type": "object",
+			"properties": {
+				"trimmed": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"collapsed": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"trimmed",
+				"collapsed"
+			]
+		},
 		"TextFindInput": {
 			"type": "object",
 			"properties": {
@@ -908,402 +904,6 @@
 			"required": [
 				"first",
 				"last"
-			]
-		},
-		"SessionCutRehomedInput": {
-			"type": "object",
-			"properties": {
-				"rows": {
-					"type": "array",
-					"items": {
-						"type": "string"
-					}
-				},
-				"sessionId": {
-					"type": "string"
-				}
-			},
-			"required": [
-				"rows",
-				"sessionId"
-			]
-		},
-		"SessionCutRehomedResult": {
-			"type": "object",
-			"properties": {
-				"rows": {
-					"type": "array",
-					"items": {
-						"type": "string"
-					}
-				}
-			},
-			"required": [
-				"rows"
-			]
-		},
-		"SessionCutIndexInput": {
-			"type": "object",
-			"properties": {
-				"source": {
-					"$ref": "#/$defs/SessionSource"
-				}
-			},
-			"required": [
-				"source"
-			]
-		},
-		"SessionCutIndexResult": {
-			"type": "object",
-			"properties": {
-				"index": {
-					"$ref": "sessionCut.input.json#/$defs/SessionIndex"
-				}
-			},
-			"required": [
-				"index"
-			]
-		},
-		"SessionCutPlanInput": {
-			"type": "object",
-			"properties": {
-				"source": {
-					"$ref": "#/$defs/SessionSource"
-				},
-				"requests": {
-					"type": "array",
-					"items": {
-						"$ref": "sessionCut.input.json#/$defs/CutRequest"
-					}
-				},
-				"cliVersion": {
-					"type": "string"
-				}
-			},
-			"required": [
-				"source",
-				"requests",
-				"cliVersion"
-			]
-		},
-		"SessionCutPlanResult": {
-			"type": "object",
-			"properties": {
-				"plans": {
-					"type": "array",
-					"items": {
-						"anyOf": [
-							{
-								"$ref": "sessionCut.input.json#/$defs/CutPlan"
-							},
-							{
-								"$ref": "sessionCut.input.json#/$defs/CutRefused"
-							}
-						]
-					}
-				}
-			},
-			"required": [
-				"plans"
-			]
-		},
-		"SessionCutCutInput": {
-			"type": "object",
-			"properties": {
-				"source": {
-					"$ref": "#/$defs/SessionSource"
-				},
-				"request": {
-					"$ref": "sessionCut.input.json#/$defs/CutRequest"
-				},
-				"cliVersion": {
-					"type": "string"
-				},
-				"sourcePath": {
-					"type": "string"
-				},
-				"idPrefix": {
-					"type": "string"
-				},
-				"nowMs": {
-					"type": "integer",
-					"minimum": -9007199254740991,
-					"maximum": 9007199254740991
-				},
-				"summary": {
-					"type": "string"
-				}
-			},
-			"required": [
-				"source",
-				"request",
-				"cliVersion",
-				"sourcePath",
-				"idPrefix",
-				"nowMs"
-			]
-		},
-		"SessionCutCutResult": {
-			"type": "object",
-			"properties": {
-				"error": {
-					"type": "string"
-				},
-				"result": {
-					"anyOf": [
-						{
-							"$ref": "sessionCut.input.json#/$defs/CutDone"
-						},
-						{
-							"$ref": "sessionCut.input.json#/$defs/CutRefused"
-						}
-					]
-				},
-				"built": {
-					"anyOf": [
-						{
-							"type": "array",
-							"items": {
-								"type": "string"
-							}
-						},
-						{
-							"type": "null"
-						}
-					]
-				},
-				"summarized": {
-					"anyOf": [
-						{
-							"type": "object",
-							"properties": {
-								"standing": {
-									"type": [
-										"string",
-										"null"
-									]
-								},
-								"rows": {
-									"type": "array",
-									"items": {
-										"type": "string"
-									}
-								}
-							},
-							"required": [
-								"standing",
-								"rows"
-							]
-						},
-						{
-							"type": "null"
-						}
-					]
-				}
-			}
-		},
-		"SessionCutVerifyInput": {
-			"type": "object",
-			"properties": {
-				"source": {
-					"$ref": "#/$defs/SessionSource"
-				},
-				"sessionId": {
-					"type": "string"
-				},
-				"paired": {
-					"type": "boolean"
-				}
-			},
-			"required": [
-				"source",
-				"sessionId",
-				"paired"
-			]
-		},
-		"SessionCutVerifyResult": {
-			"type": "object",
-			"properties": {
-				"problems": {
-					"type": "array",
-					"items": {
-						"type": "string"
-					}
-				}
-			},
-			"required": [
-				"problems"
-			]
-		},
-		"SessionCutPickTurnInput": {
-			"type": "object",
-			"properties": {
-				"source": {
-					"$ref": "#/$defs/SessionSource"
-				},
-				"picks": {
-					"type": "array",
-					"items": {
-						"type": "object",
-						"properties": {
-							"at": {
-								"type": "integer",
-								"minimum": -9007199254740991,
-								"maximum": 9007199254740991
-							},
-							"text": {
-								"type": "string"
-							},
-							"bodyOf": {
-								"$ref": "#/$defs/BodyOf"
-							}
-						},
-						"required": [
-							"at",
-							"bodyOf"
-						]
-					}
-				}
-			},
-			"required": [
-				"source",
-				"picks"
-			]
-		},
-		"SessionCutPickTurnResult": {
-			"type": "object",
-			"properties": {
-				"picked": {
-					"type": "array",
-					"items": {
-						"anyOf": [
-							{
-								"$ref": "sessionCut.input.json#/$defs/PickedTurn"
-							},
-							{
-								"type": "null"
-							}
-						]
-					}
-				}
-			},
-			"required": [
-				"picked"
-			]
-		},
-		"SessionFileLinesOfInput": {
-			"type": "object",
-			"properties": {
-				"base64": {
-					"type": "string"
-				}
-			},
-			"required": [
-				"base64"
-			]
-		},
-		"SessionFileLinesOfResult": {
-			"type": "object",
-			"properties": {
-				"rows": {
-					"type": "array",
-					"items": {
-						"type": "string"
-					}
-				}
-			},
-			"required": [
-				"rows"
-			]
-		},
-		"PathsIsInsideInput": {
-			"type": "object",
-			"properties": {
-				"tree": {
-					"type": "array",
-					"items": {
-						"$ref": "#/$defs/TreeEntry"
-					}
-				},
-				"checks": {
-					"type": "array",
-					"items": {
-						"type": "object",
-						"properties": {
-							"child": {
-								"type": "string"
-							},
-							"parent": {
-								"type": "string"
-							}
-						},
-						"required": [
-							"child",
-							"parent"
-						]
-					}
-				},
-				"relative": {
-					"type": "boolean",
-					"const": true
-				}
-			},
-			"required": [
-				"tree",
-				"checks"
-			]
-		},
-		"PathsIsInsideResult": {
-			"type": "object",
-			"properties": {
-				"results": {
-					"type": "array",
-					"items": {
-						"anyOf": [
-							{
-								"type": "boolean"
-							},
-							{
-								"type": "string",
-								"const": "error"
-							}
-						]
-					}
-				}
-			},
-			"required": [
-				"results"
-			]
-		},
-		"ClaudeVersionInInput": {
-			"type": "object",
-			"properties": {
-				"texts": {
-					"type": "array",
-					"items": {
-						"type": "string"
-					}
-				}
-			},
-			"required": [
-				"texts"
-			]
-		},
-		"ClaudeVersionInResult": {
-			"type": "object",
-			"properties": {
-				"found": {
-					"type": "array",
-					"items": {
-						"type": [
-							"string",
-							"null"
-						]
-					}
-				}
-			},
-			"required": [
-				"found"
 			]
 		},
 		"PatternCaseMatch": {
@@ -1704,6 +1304,470 @@
 				"issues"
 			]
 		},
+		"SessionSource": {
+			"type": "object",
+			"properties": {
+				"lines": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"base64": {
+					"type": "string"
+				},
+				"file": {
+					"type": "string"
+				}
+			}
+		},
+		"BodyOf": {
+			"type": "string",
+			"enum": [
+				"whole",
+				"afterFirstLine"
+			]
+		},
+		"SessionCutRehomedInput": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"sessionId": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"rows",
+				"sessionId"
+			]
+		},
+		"SessionCutRehomedResult": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"rows"
+			]
+		},
+		"SessionCutIndexInput": {
+			"type": "object",
+			"properties": {
+				"source": {
+					"$ref": "#/$defs/SessionSource"
+				}
+			},
+			"required": [
+				"source"
+			]
+		},
+		"SessionCutIndexResult": {
+			"type": "object",
+			"properties": {
+				"index": {
+					"$ref": "sessionCut.input.json#/$defs/SessionIndex"
+				}
+			},
+			"required": [
+				"index"
+			]
+		},
+		"SessionCutPlanInput": {
+			"type": "object",
+			"properties": {
+				"source": {
+					"$ref": "#/$defs/SessionSource"
+				},
+				"requests": {
+					"type": "array",
+					"items": {
+						"$ref": "sessionCut.input.json#/$defs/CutRequest"
+					}
+				},
+				"cliVersion": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"source",
+				"requests",
+				"cliVersion"
+			]
+		},
+		"SessionCutPlanResult": {
+			"type": "object",
+			"properties": {
+				"plans": {
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{
+								"$ref": "sessionCut.input.json#/$defs/CutPlan"
+							},
+							{
+								"$ref": "sessionCut.input.json#/$defs/CutRefused"
+							}
+						]
+					}
+				}
+			},
+			"required": [
+				"plans"
+			]
+		},
+		"SessionCutCutInput": {
+			"type": "object",
+			"properties": {
+				"source": {
+					"$ref": "#/$defs/SessionSource"
+				},
+				"request": {
+					"$ref": "sessionCut.input.json#/$defs/CutRequest"
+				},
+				"cliVersion": {
+					"type": "string"
+				},
+				"sourcePath": {
+					"type": "string"
+				},
+				"idPrefix": {
+					"type": "string"
+				},
+				"nowMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"summary": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"source",
+				"request",
+				"cliVersion",
+				"sourcePath",
+				"idPrefix",
+				"nowMs"
+			]
+		},
+		"SessionCutCutResult": {
+			"type": "object",
+			"properties": {
+				"error": {
+					"type": "string"
+				},
+				"result": {
+					"anyOf": [
+						{
+							"$ref": "sessionCut.input.json#/$defs/CutDone"
+						},
+						{
+							"$ref": "sessionCut.input.json#/$defs/CutRefused"
+						}
+					]
+				},
+				"built": {
+					"anyOf": [
+						{
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"summarized": {
+					"anyOf": [
+						{
+							"type": "object",
+							"properties": {
+								"standing": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"rows": {
+									"type": "array",
+									"items": {
+										"type": "string"
+									}
+								}
+							},
+							"required": [
+								"standing",
+								"rows"
+							]
+						},
+						{
+							"type": "null"
+						}
+					]
+				}
+			}
+		},
+		"SessionCutVerifyInput": {
+			"type": "object",
+			"properties": {
+				"source": {
+					"$ref": "#/$defs/SessionSource"
+				},
+				"sessionId": {
+					"type": "string"
+				},
+				"paired": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"source",
+				"sessionId",
+				"paired"
+			]
+		},
+		"SessionCutVerifyResult": {
+			"type": "object",
+			"properties": {
+				"problems": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"problems"
+			]
+		},
+		"SessionCutPickTurnInput": {
+			"type": "object",
+			"properties": {
+				"source": {
+					"$ref": "#/$defs/SessionSource"
+				},
+				"picks": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"at": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"text": {
+								"type": "string"
+							},
+							"bodyOf": {
+								"$ref": "#/$defs/BodyOf"
+							}
+						},
+						"required": [
+							"at",
+							"bodyOf"
+						]
+					}
+				}
+			},
+			"required": [
+				"source",
+				"picks"
+			]
+		},
+		"SessionCutPickTurnResult": {
+			"type": "object",
+			"properties": {
+				"picked": {
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{
+								"$ref": "sessionCut.input.json#/$defs/PickedTurn"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				}
+			},
+			"required": [
+				"picked"
+			]
+		},
+		"SessionFileLinesOfInput": {
+			"type": "object",
+			"properties": {
+				"base64": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"base64"
+			]
+		},
+		"SessionFileLinesOfResult": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"rows"
+			]
+		},
+		"PathsIsInsideInput": {
+			"type": "object",
+			"properties": {
+				"tree": {
+					"type": "array",
+					"items": {
+						"$ref": "tree.input.json#/$defs/TreeEntry"
+					}
+				},
+				"checks": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"child": {
+								"type": "string"
+							},
+							"parent": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"child",
+							"parent"
+						]
+					}
+				},
+				"relative": {
+					"type": "boolean",
+					"const": true
+				}
+			},
+			"required": [
+				"tree",
+				"checks"
+			]
+		},
+		"PathsIsInsideResult": {
+			"type": "object",
+			"properties": {
+				"results": {
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{
+								"type": "boolean"
+							},
+							{
+								"type": "string",
+								"const": "error"
+							}
+						]
+					}
+				}
+			},
+			"required": [
+				"results"
+			]
+		},
+		"ClaudeVersionInInput": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			]
+		},
+		"ClaudeVersionInResult": {
+			"type": "object",
+			"properties": {
+				"found": {
+					"type": "array",
+					"items": {
+						"type": [
+							"string",
+							"null"
+						]
+					}
+				}
+			},
+			"required": [
+				"found"
+			]
+		},
+		"TestkitConverseInput": {
+			"type": "object",
+			"properties": {
+				"requests": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				},
+				"together": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"requests",
+				"together"
+			]
+		},
+		"TestkitConverseResult": {
+			"type": "object",
+			"properties": {
+				"ids": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"nowMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"steers": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"ids",
+				"nowMs",
+				"steers"
+			]
+		},
 		"TestkitCompactedSessionInput": {
 			"type": "object",
 			"properties": {}
@@ -1720,69 +1784,6 @@
 			},
 			"required": [
 				"lines"
-			]
-		},
-		"TestkitReplayInput": {
-			"type": "object",
-			"properties": {
-				"file": {
-					"type": "string"
-				}
-			},
-			"required": [
-				"file"
-			]
-		},
-		"TestkitReplayResult": {
-			"type": "object",
-			"properties": {
-				"requests": {
-					"type": "array",
-					"items": {}
-				},
-				"exchanges": {
-					"type": "array",
-					"items": {
-						"type": "object",
-						"properties": {
-							"status": {
-								"type": "integer",
-								"minimum": -9007199254740991,
-								"maximum": 9007199254740991
-							},
-							"headers": {
-								"type": "object",
-								"propertyNames": {
-									"type": "string"
-								},
-								"additionalProperties": {
-									"type": "string"
-								}
-							},
-							"chunks": {
-								"type": "array",
-								"items": {
-									"type": "integer",
-									"minimum": -9007199254740991,
-									"maximum": 9007199254740991
-								}
-							},
-							"body": {
-								"type": "string"
-							}
-						},
-						"required": [
-							"status",
-							"headers",
-							"chunks",
-							"body"
-						]
-					}
-				}
-			},
-			"required": [
-				"requests",
-				"exchanges"
 			]
 		},
 		"TestkitWheelInput": {
@@ -1916,24 +1917,81 @@
 				"drawn"
 			]
 		},
-		"TestkitConverseInput": {
+		"TestkitReplayInput": {
+			"type": "object",
+			"properties": {
+				"file": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"file"
+			]
+		},
+		"TestkitReplayResult": {
 			"type": "object",
 			"properties": {
 				"requests": {
-					"type": "integer",
-					"minimum": 0,
-					"maximum": 9007199254740991
+					"type": "array",
+					"items": {}
 				},
-				"together": {
-					"type": "boolean"
+				"exchanges": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"status": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"headers": {
+								"type": "object",
+								"propertyNames": {
+									"type": "string"
+								},
+								"additionalProperties": {
+									"type": "string"
+								}
+							},
+							"chunks": {
+								"type": "array",
+								"items": {
+									"type": "integer",
+									"minimum": -9007199254740991,
+									"maximum": 9007199254740991
+								}
+							},
+							"body": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"status",
+							"headers",
+							"chunks",
+							"body"
+						]
+					}
 				}
 			},
 			"required": [
 				"requests",
-				"together"
+				"exchanges"
 			]
 		},
-		"TestkitConverseResult": {
+		"TestkitContextInput": {
+			"type": "object",
+			"properties": {
+				"folder": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"folder"
+			]
+		},
+		"TestkitContextResult": {
 			"type": "object",
 			"properties": {
 				"ids": {
@@ -1942,22 +2000,30 @@
 						"type": "string"
 					}
 				},
-				"nowMs": {
-					"type": "integer",
-					"minimum": -9007199254740991,
-					"maximum": 9007199254740991
-				},
-				"steers": {
+				"times": {
 					"type": "array",
 					"items": {
-						"type": "string"
+						"type": "integer",
+						"minimum": -9007199254740991,
+						"maximum": 9007199254740991
 					}
+				},
+				"tmp": {
+					"type": "string"
+				},
+				"root": {
+					"type": "string"
+				},
+				"planted": {
+					"type": "boolean"
 				}
 			},
 			"required": [
 				"ids",
-				"nowMs",
-				"steers"
+				"times",
+				"tmp",
+				"root",
+				"planted"
 			]
 		}
 	}

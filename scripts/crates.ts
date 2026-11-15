@@ -44,19 +44,24 @@ const ADVISORY_ID = /^(RUSTSEC-\d{4}-\d{4}|GHSA(-[0-9a-z]{4}){3}|CVE-\d{4}-\d{4,
 
 /** Path packages omit sources. */
 function lockedPackages(lock: string): Array<LockedCrate & { source: string | undefined }> {
-	return lock
-		.split("[[package]]")
-		.slice(1)
-		.flatMap((held) => {
-			// Stop at next table.
-			const block = held.split(/^\[/m)[0] as string;
-			if (/^(name|version|source) = (?!"[^"]*"$)/m.test(block))
-				throw new Error("a lock entry is not as Cargo writes it");
-			const field = (key: string) => new RegExp(`^${key} = "([^"]*)"$`, "m").exec(block)?.[1];
-			const name = field("name");
-			const version = field("version");
-			return name && version ? [{ name, version, source: field("source") }] : [];
-		});
+	let table: { package?: unknown };
+	try {
+		table = Bun.TOML.parse(lock) as { package?: unknown };
+	} catch (error) {
+		throw new Error(`the lock is not TOML: ${error instanceof Error ? error.message : error}`);
+	}
+	if (table.package === undefined) return [];
+	if (!Array.isArray(table.package)) throw new Error("a lock entry is not as Cargo writes it");
+	return table.package.map((held: Record<string, unknown>) => {
+		const { name, version, source } = held;
+		if (
+			typeof name !== "string" ||
+			typeof version !== "string" ||
+			(source !== undefined && typeof source !== "string")
+		)
+			throw new Error("a lock entry is not as Cargo writes it");
+		return { name, version, source };
+	});
 }
 
 export function lockedCrates(lock: string): LockedCrate[] {

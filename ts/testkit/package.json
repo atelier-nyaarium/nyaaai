@@ -3,18 +3,24 @@
 	"version": "0.0.0",
 	"private": true,
 	"type": "module",
-	"description": "Fakes for tests",
+	"description": "Fakes, case groups and the project file",
 	"exports": {
 		".": "./src/index.ts",
+		"./caseContext": "./src/caseContext.ts",
 		"./caseFile": "./src/caseFile.ts",
-		"./caseKinds": "./src/caseKinds.ts",
+		"./caseGroup": "./src/caseGroup.ts",
 		"./claudeSession": "./src/claudeSession.ts",
 		"./loopback": "./src/loopback.ts",
+		"./project": "./src/project.ts",
+		"./rejection": "./src/rejection.ts",
+		"./samples": "./src/samples.ts",
 		"./scheduler": "./src/scheduler.ts",
 		"./tortureShapes": "./src/tortureShapes.ts",
-		"./trace": "./src/trace.ts"
+		"./trace": "./src/trace.ts",
+		"./tree": "./src/tree.ts"
 	},
 	"dependencies": {
+		"@nyaaai/adapter": "workspace:*",
 		"@nyaaai/contract": "workspace:*",
 		"zod": "4.6.7"
 	}

@@ -1,5 +1,6 @@
 // Adapter commands.
 
+import { type Command, command, HostRequestFailed } from "@nyaaai/adapter/runtime";
 import {
 	ApplyCommand,
 	CutOutcome,
@@ -9,7 +10,6 @@ import {
 } from "@nyaaai/contract/shapes/sessionCut";
 import { cutSession, indexSession, planCut } from "@nyaaai/operator/claude/sessionCut";
 import { fileCutPorts, sessionLines } from "@nyaaai/operator/claude/sessionFile";
-import { type Command, command, HostRequestFailed } from "./adapter";
 
 ////////////////////////////////
 //  Constants

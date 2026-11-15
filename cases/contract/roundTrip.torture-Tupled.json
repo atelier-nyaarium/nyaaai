@@ -1,0 +1,162 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "torture-Tupled",
+	"input": {
+		"set": "torture",
+		"shape": "Tupled",
+		"texts": [
+			"{\"pair\":[\"ab\",0],\"single\":[{\"x\":1.5}],\"nested\":[],\"code\":\"abc-123\",\"word\":\"x\",\"even\":2,\"range\":[1,2]}",
+			"{\"pair\":[\"ab\",0],\"single\":[{\"x\":1,\"drop\":2}],\"nested\":[[true,null],[false,[\"s\",{\"kind\":\"leaf\",\"value\":1,\"drop\":1}]]],\"code\":\"abc-123\",\"word\":\"x\",\"even\":2,\"range\":[1,2],\"extra\":1}",
+			"{\"pair\":[\"ab\",0],\"single\":[],\"nested\":[],\"code\":\"abc-123\",\"word\":\"x\",\"even\":2,\"range\":[1,2]}",
+			"{\"pair\":[\"ab\",0],\"single\":[{\"x\":\"1\"}],\"nested\":[],\"code\":\"abc-123\",\"word\":\"x\",\"even\":2,\"range\":[1,2]}",
+			"{\"pair\":[\"ab\",0],\"single\":{\"x\":1},\"nested\":[],\"code\":\"abc-123\",\"word\":\"x\",\"even\":2,\"range\":[1,2]}",
+			"{\"pair\":[\"ab\",0],\"single\":[{\"x\":1.5}],\"nested\":[[true]],\"code\":\"abc-123\",\"word\":\"x\",\"even\":2,\"range\":[1,2]}",
+			"{\"pair\":[\"ab\",0],\"single\":[{\"x\":1.5}],\"nested\":[[true,[\"s\"]]],\"code\":\"abc-123\",\"word\":\"x\",\"even\":2,\"range\":[1,2]}",
+			"{\"pair\":[\"ab\",0],\"single\":[{\"x\":1.5}],\"nested\":[[true,[\"s\",{\"kind\":\"leaf\"}]]],\"code\":\"abc-123\",\"word\":\"x\",\"even\":2,\"range\":[1,2]}",
+			"{\"pair\":[\"ab\",0],\"single\":[{\"x\":1.5}],\"nested\":[[1,null]],\"code\":\"abc-123\",\"word\":\"x\",\"even\":2,\"range\":[1,2]}",
+			"{\"pair\":[\"ab\",0],\"single\":[{\"x\":1.5}],\"nested\":[[true,null,null]],\"code\":\"abc-123\",\"word\":\"x\",\"even\":2,\"range\":[1,2]}",
+			"{\"pair\":[\"abcd\",-1],\"single\":[{\"x\":1.5}],\"nested\":[],\"code\":\"abc-123\",\"word\":\"x\",\"even\":2,\"range\":[1,2]}",
+			"{\"pair\":[\"ab\",0],\"single\":[{\"x\":1.5}],\"nested\":[],\"code\":\"nope\",\"word\":\"x\",\"even\":2,\"range\":[1,2]}",
+			"{\"pair\":[\"ab\",0],\"single\":[{\"x\":1.5}],\"nested\":[],\"code\":\"abc-123\",\"word\":\"two words\",\"even\":2,\"range\":[1,2]}",
+			"{\"pair\":[\"ab\",0],\"single\":[{\"x\":1.5}],\"nested\":[],\"code\":\"abc-123\",\"word\":\"\",\"even\":2,\"range\":[1,2]}",
+			"{\"pair\":[\"ab\",0],\"single\":[{\"x\":1.5}],\"nested\":[],\"code\":\"abc-123\",\"word\":\"x\",\"even\":3,\"range\":[1,2]}",
+			"{\"pair\":[\"ab\",0],\"single\":[{\"x\":1.5}],\"nested\":[],\"code\":\"abc-123\",\"word\":\"x\",\"even\":100,\"range\":[1,2]}",
+			"{\"pair\":[\"ab\",0],\"single\":[{\"x\":1.5}],\"nested\":[],\"code\":\"abc-123\",\"word\":\"x\",\"even\":2,\"range\":[2,1]}",
+			"{\"pair\":[\"ab\",0],\"single\":[{\"x\":1.5}],\"nested\":[],\"code\":\"abc-123\",\"word\":\"x\",\"even\":2,\"range\":[1]}",
+			"{\"pair\":[\"ab\",0],\"single\":[{\"x\":1.5}],\"nested\":[],\"code\":\"abc-123\",\"word\":\"x\",\"even\":2,\"range\":[1.5,2]}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"pair\":[\"ab\",0],\"single\":[{\"x\":1.5}],\"nested\":[],\"code\":\"abc-123\",\"word\":\"x\",\"even\":2,\"range\":[1,2]}"
+			},
+			{
+				"ok": true,
+				"text": "{\"pair\":[\"ab\",0],\"single\":[{\"x\":1}],\"nested\":[[true,null],[false,[\"s\",{\"kind\":\"leaf\",\"value\":1}]]],\"code\":\"abc-123\",\"word\":\"x\",\"even\":2,\"range\":[1,2]}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"single"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"single",
+					0,
+					"x"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"single"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"nested",
+					0
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"nested",
+					0,
+					1
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"nested",
+					0,
+					1,
+					1,
+					"value"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"nested",
+					0,
+					0
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"nested",
+					0
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"pair",
+					0
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"code"
+				],
+				"message": "A code reads like abc-123."
+			},
+			{
+				"ok": false,
+				"path": [
+					"word"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"word"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"even"
+				],
+				"message": "An even number."
+			},
+			{
+				"ok": false,
+				"path": [
+					"even"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"range"
+				],
+				"message": "A range ascends."
+			},
+			{
+				"ok": false,
+				"path": [
+					"range"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"range",
+					0
+				]
+			}
+		]
+	}
+}

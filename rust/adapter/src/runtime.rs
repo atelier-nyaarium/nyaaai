@@ -25,6 +25,9 @@ pub const EXIT_REJECTED: u8 = 2;
 
 const READ_CHUNK_BYTES: usize = 1 << 16;
 
+/// Shared crash message.
+const CRASHED: &str = "the command crashed";
+
 pub enum Inbound {
     Steer(String),
     Interrupt,
@@ -53,6 +56,15 @@ impl From<std::io::Error> for RunError {
 }
 
 pub type Commands = fn(&str, &Value, &RunContext) -> Option<Result<Value, RunError>>;
+
+/// Decodes input and encodes output.
+pub fn typed<Input: Shape, Output: Shape>(
+    input: &Value,
+    run: impl FnOnce(Input) -> Result<Output, RunError>,
+) -> Result<Value, RunError> {
+    let input = Input::decode(input).map_err(|refused| RunError::BadInput(refused.path))?;
+    run(input).map(|result| result.encode())
+}
 
 fn locked<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
     mutex.lock().unwrap_or_else(PoisonError::into_inner)
@@ -95,7 +107,7 @@ pub struct RunContext {
     pub ids: Box<dyn Ids + Send>,
     out: Arc<Out>,
     inbox: Receiver<Inbound>,
-    /// Pulled, not yet consumed.
+    /// Pulled but unconsumed messages.
     queued: RefCell<VecDeque<Inbound>>,
     pending: Pending,
     seq: Cell<u64>,
@@ -109,7 +121,6 @@ impl RunContext {
         self.seq.get()
     }
 
-    #[cfg_attr(not(feature = "cases"), expect(dead_code))]
     pub fn emit(&self, event: Value) {
         self.out.frame(&AdapterFrame::Event(RunEvent {
             run: self.run.clone(),
@@ -147,7 +158,6 @@ impl RunContext {
     }
 
     /// Interrupts repeat forever.
-    #[cfg_attr(not(feature = "cases"), expect(dead_code))]
     pub fn receive(&self) -> Inbound {
         let queued = self.queued.borrow_mut().pop_front();
         queued.or_else(|| self.pull()).unwrap_or(Inbound::Interrupt)
@@ -181,7 +191,6 @@ impl RunContext {
         self.reply(&self.ask(kind, input))
     }
 
-    #[cfg_attr(not(feature = "cases"), expect(dead_code))]
     pub fn steers(&self) -> Vec<String> {
         let mut queued = self.queued.borrow_mut();
         while !self.interrupted.get() {
@@ -342,10 +351,7 @@ fn start(frame: Start, commands: Commands, out: &Arc<Out>, runs: &Runs) -> JoinH
                 result,
             }),
             Ok(Err(error)) => failed(&context, error),
-            Err(_) => failed(
-                &context,
-                RunError::Failed("the command panicked".to_owned()),
-            ),
+            Err(_) => failed(&context, RunError::Failed(CRASHED.to_owned())),
         };
         locked(&runs).remove(&context.run);
         context.out.frame(&terminal);

@@ -1,14 +1,14 @@
-// Path cases: bun scripts/cases.ts.
+// Path cases; bun scripts/cases.ts.
 
-import type { TreeEntry } from "@nyaaai/testkit/caseKinds";
+import type { TreeEntry } from "@nyaaai/testkit/tree";
 import type { CaseSource } from "../caseAdapter";
 
 const tree: TreeEntry[] = [
 	{ path: "keep/nested" },
 	{ path: "out" },
-	{ path: "out/file", file: true },
+	{ path: "out/file", text: "" },
 	{ path: "link-in", link: "keep/nested" },
-	{ path: "abs-link", link: "$ROOT/keep" },
+	{ path: "abs-link", link: "$TMP/keep" },
 	{ path: "dangling", link: "nowhere/else" },
 	{ path: "loop-a", link: "loop-b" },
 	{ path: "loop-b", link: "loop-a" },

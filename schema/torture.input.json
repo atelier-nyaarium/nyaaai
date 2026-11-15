@@ -23,6 +23,16 @@
 				"$ref": "#/$defs/Name"
 			}
 		},
+		"Several": {
+			"minItems": 2,
+			"maxItems": 3,
+			"type": "array",
+			"items": {
+				"type": "integer",
+				"minimum": -9007199254740991,
+				"maximum": 9007199254740991
+			}
+		},
 		"Leaf": {
 			"type": "object",
 			"properties": {
@@ -509,6 +519,243 @@
 				"span",
 				"label",
 				"spans"
+			]
+		},
+		"Pair": {
+			"type": "array",
+			"prefixItems": [
+				{
+					"$ref": "#/$defs/Name"
+				},
+				{
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				}
+			],
+			"items": false,
+			"minItems": 2,
+			"maxItems": 2
+		},
+		"Code": {
+			"type": "string",
+			"maxLength": 8,
+			"x-hooks": [
+				{
+					"kind": "match",
+					"source": "^[a-z]+-\\d+$",
+					"flags": "i",
+					"message": "A code reads like abc-123."
+				}
+			]
+		},
+		"Even": {
+			"type": "integer",
+			"minimum": -9007199254740991,
+			"maximum": 9007199254740991,
+			"x-hooks": [
+				{
+					"kind": "refine",
+					"name": "even",
+					"message": "An even number."
+				},
+				{
+					"kind": "refine",
+					"name": "small"
+				}
+			]
+		},
+		"Tupled": {
+			"type": "object",
+			"properties": {
+				"pair": {
+					"$ref": "#/$defs/Pair"
+				},
+				"single": {
+					"type": "array",
+					"prefixItems": [
+						{
+							"type": "object",
+							"properties": {
+								"x": {
+									"type": "number"
+								}
+							},
+							"required": [
+								"x"
+							]
+						}
+					],
+					"items": false,
+					"minItems": 1,
+					"maxItems": 1
+				},
+				"nested": {
+					"type": "array",
+					"items": {
+						"type": "array",
+						"prefixItems": [
+							{
+								"type": "boolean"
+							},
+							{
+								"anyOf": [
+									{
+										"type": "array",
+										"prefixItems": [
+											{
+												"type": "string"
+											},
+											{
+												"$ref": "#/$defs/Leaf"
+											}
+										],
+										"items": false,
+										"minItems": 2,
+										"maxItems": 2
+									},
+									{
+										"type": "null"
+									}
+								]
+							}
+						],
+						"items": false,
+						"minItems": 2,
+						"maxItems": 2
+					}
+				},
+				"code": {
+					"$ref": "#/$defs/Code"
+				},
+				"word": {
+					"type": "string",
+					"x-hooks": [
+						{
+							"kind": "match",
+							"source": "^\\S+$",
+							"flags": ""
+						}
+					]
+				},
+				"even": {
+					"$ref": "#/$defs/Even"
+				},
+				"range": {
+					"type": "array",
+					"prefixItems": [
+						{
+							"type": "integer",
+							"minimum": -9007199254740991,
+							"maximum": 9007199254740991
+						},
+						{
+							"type": "integer",
+							"minimum": -9007199254740991,
+							"maximum": 9007199254740991
+						}
+					],
+					"items": false,
+					"minItems": 2,
+					"maxItems": 2,
+					"x-hooks": [
+						{
+							"kind": "refine",
+							"name": "ascending",
+							"message": "A range ascends."
+						}
+					]
+				}
+			},
+			"required": [
+				"pair",
+				"single",
+				"nested",
+				"code",
+				"word",
+				"even",
+				"range"
+			]
+		},
+		"Choice": {
+			"anyOf": [
+				{
+					"type": "object",
+					"properties": {
+						"name": {
+							"$ref": "#/$defs/Name"
+						},
+						"more": {
+							"type": "array",
+							"items": {
+								"type": "integer",
+								"minimum": 0,
+								"maximum": 9007199254740991
+							}
+						}
+					},
+					"required": [
+						"name",
+						"more"
+					]
+				},
+				{
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991,
+					"x-hooks": [
+						{
+							"kind": "refine",
+							"name": "even",
+							"message": "An even number."
+						}
+					]
+				},
+				{
+					"type": "string",
+					"const": "off"
+				}
+			]
+		},
+		"Wrapped": {
+			"type": "object",
+			"properties": {
+				"choice": {
+					"$ref": "#/$defs/Choice"
+				},
+				"list": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/Choice"
+					}
+				},
+				"event": {
+					"$ref": "#/$defs/Event"
+				}
+			},
+			"required": [
+				"choice",
+				"list",
+				"event"
+			]
+		},
+		"NotFive": {
+			"anyOf": [
+				{
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				{
+					"type": "string"
+				}
+			],
+			"x-hooks": [
+				{
+					"kind": "refine",
+					"name": "notFive",
+					"message": "Not five."
+				}
 			]
 		}
 	}

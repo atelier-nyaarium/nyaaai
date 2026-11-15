@@ -1,0 +1,82 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "torture-Pair",
+	"input": {
+		"set": "torture",
+		"shape": "Pair",
+		"texts": [
+			"[\"a\",1]",
+			"[\"abc\",9007199254740991]",
+			"[\"a\"]",
+			"[\"a\",1,2]",
+			"[]",
+			"[\"\",1]",
+			"[\"a\",-1]",
+			"[1,-1]",
+			"[[\"a\",1]]",
+			"\"a\"",
+			"{}",
+			"null"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "[\"a\",1]"
+			},
+			{
+				"ok": true,
+				"text": "[\"abc\",9007199254740991]"
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": [
+					0
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					1
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					0
+				]
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

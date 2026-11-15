@@ -10,7 +10,7 @@ enum Side {
     After,
 }
 
-/// Maps clamped UTF-16 offsets to bytes.
+/// UTF-16 offset mapping.
 fn place(text: &str, at: usize, side: Side) -> (usize, usize) {
     let mut units = 0;
     for (byte, char) in text.char_indices() {
@@ -29,12 +29,12 @@ fn place(text: &str, at: usize, side: Side) -> (usize, usize) {
     (text.len(), units)
 }
 
-/// Clamps, then rounds down.
+/// Clamps; rounds down.
 pub fn cut_before(text: &str, at: usize) -> usize {
     place(text, at, Side::Before).1
 }
 
-/// Clamps, then rounds up.
+/// Clamps; rounds up.
 pub fn cut_after(text: &str, at: usize) -> usize {
     place(text, at, Side::After).1
 }
@@ -48,14 +48,14 @@ pub fn tail_of(text: &str, max: usize) -> &str {
     &text[place(text, from, Side::After).0..]
 }
 
-/// Keeps bounds outside surrogate pairs.
+/// Surrogate-safe bounds.
 pub fn slice_text(text: &str, start: usize, end: usize) -> &str {
     let from = place(text, start, Side::Before).0;
     let to = place(text, end, Side::Before).0;
     &text[from..to.max(from)]
 }
 
-/// Empty needles match at `from`.
+/// Empty-needle offset is clamped.
 pub fn index_of_text(text: &str, needle: &str, from: usize) -> Option<usize> {
     if needle.is_empty() {
         return Some(from.min(text_length(text)));
@@ -65,7 +65,7 @@ pub fn index_of_text(text: &str, needle: &str, from: usize) -> Option<usize> {
     Some(units + text_length(&text[byte..byte + found]))
 }
 
-/// Empty needles match at `from`.
+/// Empty-needle offset is clamped.
 pub fn last_index_of_text(text: &str, needle: &str, from: usize) -> Option<usize> {
     if needle.is_empty() {
         return Some(from.min(text_length(text)));
@@ -96,4 +96,32 @@ pub fn ascii_lower(text: &str) -> String {
 
 pub fn ascii_upper(text: &str) -> String {
     text.to_ascii_uppercase()
+}
+
+/// ECMAScript whitespace.
+pub fn is_space(char: char) -> bool {
+    matches!(
+        char,
+        '\t' | '\n' | '\u{B}' | '\u{C}' | '\r' | ' ' | '\u{A0}' | '\u{1680}' | '\u{2000}'
+            ..='\u{200A}'
+                | '\u{2028}'
+                | '\u{2029}'
+                | '\u{202F}'
+                | '\u{205F}'
+                | '\u{3000}'
+                | '\u{FEFF}'
+    )
+}
+
+/// Trims ECMAScript whitespace.
+pub fn trim_text(text: &str) -> &str {
+    text.trim_matches(is_space)
+}
+
+/// Trims and collapses whitespace.
+pub fn collapse_space(text: &str) -> String {
+    text.split(is_space)
+        .filter(|word| !word.is_empty())
+        .collect::<Vec<_>>()
+        .join(" ")
 }

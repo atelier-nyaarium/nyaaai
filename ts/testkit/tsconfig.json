@@ -4,12 +4,6 @@
 		"rootDir": "src",
 		"outDir": ".tsbuild"
 	},
-	"include": [
-		"src/**/*.ts"
-	],
-	"references": [
-		{
-			"path": "../contract"
-		}
-	]
+	"include": ["src/**/*.ts"],
+	"references": [{ "path": "../contract" }, { "path": "../adapter" }]
 }

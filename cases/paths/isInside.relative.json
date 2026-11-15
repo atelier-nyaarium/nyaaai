@@ -13,7 +13,7 @@
 			},
 			{
 				"path": "out/file",
-				"file": true
+				"text": ""
 			},
 			{
 				"path": "link-in",
@@ -21,7 +21,7 @@
 			},
 			{
 				"path": "abs-link",
-				"link": "$ROOT/keep"
+				"link": "$TMP/keep"
 			},
 			{
 				"path": "dangling",

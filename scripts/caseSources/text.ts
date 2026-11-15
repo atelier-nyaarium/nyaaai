@@ -45,6 +45,28 @@ export const textCases: CaseSource[] = [
 		},
 	},
 	{
+		kind: "text.spaces",
+		name: "ecmascript-whitespace",
+		input: {
+			texts: [
+				"",
+				"   ",
+				"a  b",
+				" a\tb\nc\r\nd ",
+				"\u{FEFF}\u{A0} one\u{2028}\u{3000}two \t\n",
+				"\u{B}\u{C}x\u{B}\u{C}y",
+				"\u{1680}a\u{2000}\u{2005}\u{200A}b\u{202F}\u{205F}",
+				"\u{2028}\u{2029}",
+				// Not ECMAScript whitespace.
+				"\u{85}x\u{85}",
+				"\u{180E}x \u{180E}",
+				"\u{2060}x \u{2060} y\u{2060}",
+				"\u{1C}\u{1F}x",
+				`${GRIN} x  ${GRIN}`,
+			],
+		},
+	},
+	{
 		kind: "text.find",
 		name: "matches",
 		input: {

@@ -22,6 +22,9 @@ interface Manifest {
 
 const SCOPE = "@nyaaai/";
 
+/** Packages a parity.ts imports. */
+const REQUIRED = ["contract", "testkit", "adapter"];
+
 ////////////////////////////////
 //  Functions & Helpers
 
@@ -127,6 +130,11 @@ export function assertConsumer(root: string, submodule: string, packageMode: boo
 	}
 
 	const used = usedPackages(root, submodule);
+	if (existsSync(path.join(root, "parity.ts"))) {
+		for (const name of REQUIRED) {
+			if (!used.includes(name)) failures.push(`parity.ts needs @nyaaai/${name}, which is not used`);
+		}
+	}
 	const folders = [
 		submodule,
 		path.join(submodule, "ts"),

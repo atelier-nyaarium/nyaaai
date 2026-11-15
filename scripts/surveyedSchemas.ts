@@ -3,6 +3,7 @@ import path from "node:path";
 import type { Json } from "@nyaaai/contract/schemaExport";
 import { type Issue, normalizeSchema, schemaProblems } from "@nyaaai/contract/strictSchema";
 import { runCommands, rustAdapter } from "./adapterHost";
+import { loadProject } from "./project";
 
 interface ProblemResult {
 	problems: Issue[][];
@@ -28,7 +29,7 @@ if (import.meta.main) {
 	const schemas = files.map((file) => JSON.parse(readFileSync(file, "utf8")) as Json);
 	const checked = schemas.map((schema) => schemaProblems(normalizeSchema(schema)));
 	const rust = await runCommands(
-		rustAdapter(),
+		rustAdapter(await loadProject()),
 		schemas.map((schema, index) => ({
 			run: String(index),
 			command: "case:strictSchema.problems",

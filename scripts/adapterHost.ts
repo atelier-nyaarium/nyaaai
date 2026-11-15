@@ -3,7 +3,9 @@
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { CONTRACT_VERSION } from "@nyaaai/contract/shape";
+import type { Project } from "@nyaaai/testkit/project";
 import { cargoBin, ROOT } from "./child";
+import { PROJECT_ROOT } from "./project";
 
 ////////////////////////////////
 //  Interfaces & Types
@@ -20,30 +22,21 @@ export interface AdapterCommand {
 
 const AWAIT_MS = 30_000;
 
-/** TypeScript case adapter. */
 export const TS_ADAPTER: AdapterCommand = { name: "TypeScript", argv: ["bun", path.join(ROOT, "scripts", "serve.ts")] };
 
 ////////////////////////////////
 //  Functions & Helpers
 
-export function rustAdapter(): AdapterCommand {
-	const built = spawnSync(
-		cargoBin(),
-		[
-			"build",
-			"--quiet",
-			"--locked",
-			"--manifest-path",
-			"rust/Cargo.toml",
-			"-p",
-			"nyaaai-cli",
-			"--features",
-			"cases",
-		],
-		{ cwd: ROOT, stdio: ["ignore", "inherit", "inherit"] },
-	);
+/** Builds the project's Rust adapter. `cargo` resolves as the gate's does. */
+export function rustAdapter(project: Project): AdapterCommand {
+	const [program, ...args] = project.rustAdapter.build as [string, ...string[]];
+	const built = spawnSync(program === "cargo" ? cargoBin() : program, args, {
+		cwd: PROJECT_ROOT,
+		stdio: ["ignore", "inherit", "inherit"],
+	});
 	if (built.status !== 0) throw new Error("the Rust adapter did not build");
-	return { name: "Rust", argv: [path.join(ROOT, "rust", "target", "debug", "nyaaai"), "serve"] };
+	const [binary, ...rest] = project.rustAdapter.run as [string, ...string[]];
+	return { name: "Rust", argv: [path.join(PROJECT_ROOT, binary), ...rest] };
 }
 
 const matches = (frame: Frame, wanted: Frame): boolean =>
@@ -57,13 +50,12 @@ export class AdapterHost {
 	private waiting: (() => void) | undefined;
 	private ended = false;
 
-	/** Rewrite lines before parsing. */
 	constructor(
 		command: AdapterCommand,
 		private readonly rewrite: (line: string) => string = (line) => line,
 		private readonly awaitMs = AWAIT_MS,
 	) {
-		this.child = Bun.spawn(command.argv, { cwd: ROOT, stdin: "pipe", stdout: "pipe", stderr: "inherit" });
+		this.child = Bun.spawn(command.argv, { cwd: PROJECT_ROOT, stdin: "pipe", stdout: "pipe", stderr: "inherit" });
 		this.reading = this.read();
 	}
 
@@ -112,7 +104,7 @@ export class AdapterHost {
 		this.send({ type: "hello", version: CONTRACT_VERSION });
 	}
 
-	/** Fails if the adapter ends first. */
+	/** Fails on adapter exit. */
 	async awaitFrame(...wanted: Frame[]): Promise<Frame> {
 		const deadline = Date.now() + this.awaitMs;
 		for (;;) {
@@ -136,7 +128,6 @@ export class AdapterHost {
 		}
 	}
 
-	/** Ends input; returns exit code. */
 	async close(): Promise<number> {
 		await this.child.stdin.end();
 		await this.reading;

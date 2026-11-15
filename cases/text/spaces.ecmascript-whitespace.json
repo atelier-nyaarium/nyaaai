@@ -1,0 +1,55 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "text.spaces",
+	"name": "ecmascript-whitespace",
+	"input": {
+		"texts": [
+			"",
+			"   ",
+			"a  b",
+			" a\tb\nc\r\nd ",
+			"﻿  one 　two \t\n",
+			"\u000b\fx\u000b\fy",
+			" a   b  ",
+			"  ",
+			"x",
+			"᠎x ᠎",
+			"⁠x ⁠ y⁠",
+			"\u001c\u001fx",
+			"😀 x  😀"
+		]
+	},
+	"expected": {
+		"trimmed": [
+			"",
+			"",
+			"a  b",
+			"a\tb\nc\r\nd",
+			"one 　two",
+			"x\u000b\fy",
+			"a   b",
+			"",
+			"x",
+			"᠎x ᠎",
+			"⁠x ⁠ y⁠",
+			"\u001c\u001fx",
+			"😀 x  😀"
+		],
+		"collapsed": [
+			"",
+			"",
+			"a b",
+			"a b c d",
+			"one two",
+			"x y",
+			"a b",
+			"",
+			"x",
+			"᠎x ᠎",
+			"⁠x ⁠ y⁠",
+			"\u001c\u001fx",
+			"😀 x 😀"
+		]
+	}
+}

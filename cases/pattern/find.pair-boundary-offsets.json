@@ -1,0 +1,45 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pattern.find",
+	"name": "pair-boundary-offsets",
+	"input": {
+		"source": "\\b",
+		"flags": "",
+		"text": "😀a",
+		"froms": [
+			0,
+			1,
+			2,
+			3
+		]
+	},
+	"expected": {
+		"found": [
+			{
+				"start": 2,
+				"end": 2,
+				"text": "",
+				"captures": []
+			},
+			{
+				"start": 2,
+				"end": 2,
+				"text": "",
+				"captures": []
+			},
+			{
+				"start": 2,
+				"end": 2,
+				"text": "",
+				"captures": []
+			},
+			{
+				"start": 3,
+				"end": 3,
+				"text": "",
+				"captures": []
+			}
+		]
+	}
+}

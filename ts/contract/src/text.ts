@@ -1,4 +1,4 @@
-// UTF-16 cuts preserve pairs.
+// UTF-16 text helpers.
 
 ////////////////////////////////
 //  Functions & Helpers
@@ -36,10 +36,8 @@ export function sliceText(text: string, start: number, end: number = text.length
 	return text.slice(from, Math.max(from, cutBefore(text, end)));
 }
 
-/** Empty needles match at `from`. */
 export const indexOfText = (text: string, needle: string, from = 0): number => text.indexOf(needle, within(text, from));
 
-/** Empty needles match at `from`. */
 export const lastIndexOfText = (text: string, needle: string, from: number = text.length): number =>
 	text.lastIndexOf(needle, within(text, from));
 
@@ -59,6 +57,56 @@ export function cutUtf8(text: string, maxBytes: number): string {
 	return text.slice(0, end);
 }
 
-export const asciiLower = (text: string): string => text.replace(/[A-Z]/g, (char) => char.toLowerCase());
+function mapAscii(text: string, from: number, to: number, shift: number): string {
+	let out = "";
+	for (let at = 0; at < text.length; at++) {
+		const unit = text.charCodeAt(at);
+		out += unit >= from && unit <= to ? String.fromCharCode(unit + shift) : text[at];
+	}
+	return out;
+}
 
-export const asciiUpper = (text: string): string => text.replace(/[a-z]/g, (char) => char.toUpperCase());
+export const asciiLower = (text: string): string => mapAscii(text, 0x41, 0x5a, 0x20);
+
+export const asciiUpper = (text: string): string => mapAscii(text, 0x61, 0x7a, -0x20);
+
+/** ECMAScript whitespace. */
+export function isSpace(unit: number): boolean {
+	return (
+		(unit >= 0x09 && unit <= 0x0d) ||
+		unit === 0x20 ||
+		unit === 0xa0 ||
+		unit === 0x1680 ||
+		(unit >= 0x2000 && unit <= 0x200a) ||
+		unit === 0x2028 ||
+		unit === 0x2029 ||
+		unit === 0x202f ||
+		unit === 0x205f ||
+		unit === 0x3000 ||
+		unit === 0xfeff
+	);
+}
+
+/** Trims ECMAScript whitespace. */
+export function trimText(text: string): string {
+	let start = 0;
+	let end = text.length;
+	while (start < end && isSpace(text.charCodeAt(start))) start += 1;
+	while (end > start && isSpace(text.charCodeAt(end - 1))) end -= 1;
+	return text.slice(start, end);
+}
+
+/** Collapses whitespace runs to spaces. */
+export function collapseSpace(text: string): string {
+	const words: string[] = [];
+	let from = -1;
+	for (let at = 0; at <= text.length; at++) {
+		if (at === text.length || isSpace(text.charCodeAt(at))) {
+			if (from >= 0) words.push(text.slice(from, at));
+			from = -1;
+		} else if (from < 0) {
+			from = at;
+		}
+	}
+	return words.join(" ");
+}

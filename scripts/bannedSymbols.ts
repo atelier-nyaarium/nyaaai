@@ -8,7 +8,7 @@ import { git, ROOT } from "./child";
 ////////////////////////////////
 //  Constants
 
-const BANNED = /[\u{2014}\u{2018}\u{2019}\u{201c}\u{201d}\u{200b}\u{200c}\u{200d}]/u;
+const BANNED = new Set([0x2014, 0x2018, 0x2019, 0x201c, 0x201d, 0x200b, 0x200c, 0x200d]);
 
 ////////////////////////////////
 //  Functions & Helpers
@@ -26,7 +26,7 @@ export function bannedSymbols(root: string): string[] {
 			continue;
 		}
 		text.split("\n").forEach((line, at) => {
-			if (BANNED.test(line)) hits.push(`${file}:${at + 1}`);
+			if ([...line].some((char) => BANNED.has(char.codePointAt(0) as number))) hits.push(`${file}:${at + 1}`);
 		});
 	}
 	return hits;

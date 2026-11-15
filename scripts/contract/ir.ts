@@ -1,6 +1,6 @@
 // Contract intermediate form.
 
-import type { Json, SetSchema } from "@nyaaai/contract/schemaExport";
+import { type Json, refOf, type SetSchema } from "@nyaaai/contract/schemaExport";
 import type { Hook } from "@nyaaai/contract/shape";
 
 ////////////////////////////////
@@ -28,6 +28,8 @@ export type Node = Hooked &
 		| { kind: "literal"; value: string | number | boolean }
 		| { kind: "enum"; values: string[] }
 		| { kind: "array"; items: Node; minItems?: number; maxItems?: number }
+		/** Fixed-length tuples. */
+		| { kind: "tuple"; items: Node[] }
 		| { kind: "record"; values: Node }
 		| { kind: "object"; fields: Field[] }
 		| { kind: "nullable"; inner: Node }
@@ -72,7 +74,7 @@ const SAFE = Number.MAX_SAFE_INTEGER;
 //  Functions & Helpers
 
 class Reader {
-	/** Tagged nodes awaiting branch values. */
+	/** Pending tagged branch values. */
 	readonly tagged: Array<{ node: Extract<Node, { kind: "tagged" }>; where: string }> = [];
 
 	constructor(private readonly set: string) {}
@@ -81,9 +83,14 @@ class Reader {
 		if (json === null || typeof json !== "object" || Array.isArray(json)) {
 			throw new Error(`${where}: not a schema`);
 		}
-		const { "x-hooks": hooks, ...rest } = json;
+		const { "x-hooks": listed, ...rest } = json;
 		const node = this.bare(rest, where);
-		return hooks === undefined ? node : { ...node, hooks: hooks as unknown as Hook[] };
+		if (listed === undefined) return node;
+		const hooks = listed as unknown as Hook[];
+		if (node.kind !== "string" && hooks.some((hook) => hook.kind === "match")) {
+			throw new Error(`${where}: a pattern checks text`);
+		}
+		return { ...node, hooks };
 	}
 
 	private bare(json: JsonObject, where: string): Node {
@@ -168,6 +175,7 @@ class Reader {
 				only("type");
 				return { kind: "null" };
 			case "array":
+				if ("prefixItems" in json) return this.tuple(json, where, only);
 				only("type", "items", "minItems", "maxItems");
 				if (json.items === undefined) throw new Error(`${where}: an array names its items`);
 				return {
@@ -181,6 +189,18 @@ class Reader {
 			default:
 				throw new Error(`${where}: type ${JSON.stringify(type)} is outside the dialect`);
 		}
+	}
+
+	private tuple(json: JsonObject, where: string, only: (...allowed: string[]) => void): Node {
+		only("type", "prefixItems", "items", "minItems", "maxItems");
+		const places = json.prefixItems;
+		const fixed = (count: Json | undefined) => Array.isArray(places) && count === places.length;
+		if (!Array.isArray(places) || places.length === 0 || json.items !== false) {
+			throw new Error(`${where}: a tuple holds fixed places`);
+		}
+		if (!fixed(json.minItems) || !fixed(json.maxItems)) throw new Error(`${where}: a tuple fills every place`);
+		if (places.length > 12) throw new Error(`${where}: a tuple holds at most 12 places`);
+		return { kind: "tuple", items: places.map((place, at) => this.node(place, `${where}[${at}]`)) };
 	}
 
 	private record(json: JsonObject, where: string, only: (...allowed: string[]) => void): Node {
@@ -217,10 +237,9 @@ class Reader {
 	}
 
 	private ref(target: string, where: string): Node {
-		const local = /^#\/\$defs\/(\w+)$/.exec(target);
-		if (local?.[1]) return { kind: "ref", set: this.set, name: local[1] };
-		const other = /^(\w+)\.output\.json#\/\$defs\/(\w+)$/.exec(target);
-		if (other?.[1] && other[2]) return { kind: "ref", set: other[1], name: other[2] };
+		const held = refOf(target);
+		if (held?.set === undefined && held) return { kind: "ref", set: this.set, name: held.name };
+		if (held?.set !== undefined && held.form === "output") return { kind: "ref", set: held.set, name: held.name };
 		throw new Error(`${where}: reference ${target}`);
 	}
 }
@@ -269,7 +288,7 @@ export function irOf(docs: Map<string, SetSchema>): Map<string, SetIr> {
 	return sets;
 }
 
-/** Output schema as peer input. */
+/** Output-to-input conversion. */
 function asInput(node: Json): Json {
 	if (Array.isArray(node)) return node.map(asInput);
 	if (node === null || typeof node !== "object") return node;
@@ -291,7 +310,7 @@ function asInput(node: Json): Json {
 	return held;
 }
 
-/** Forms differ only by defaults. */
+/** Forms differ by defaults. */
 export function formProblems(set: string, input: SetSchema, output: SetSchema): string[] {
 	const problems: string[] = [];
 	for (const [name, schema] of Object.entries(output.$defs)) {

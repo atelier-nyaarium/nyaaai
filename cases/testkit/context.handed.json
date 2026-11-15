@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.context",
+	"name": "handed",
+	"input": {
+		"folder": "a/b"
+	},
+	"expected": {
+		"ids": [
+			"case-1",
+			"case-2"
+		],
+		"times": [
+			1794535200000,
+			1794535201000
+		],
+		"tmp": "$TMP/a/b",
+		"root": "$ROOT/a/b",
+		"planted": true
+	}
+}

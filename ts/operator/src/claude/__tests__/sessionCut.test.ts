@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test";
 import { countedIds } from "@nyaaai/contract/id";
 import { steppedClock } from "@nyaaai/contract/time";
 import { CLI_VERSION, compactedSession, SESSION_ID, SyntheticSession } from "@nyaaai/testkit/claudeSession";
+import { rethrown } from "@nyaaai/testkit/rejection";
 import {
 	type CutPorts,
 	type CutRequest,
@@ -17,7 +18,6 @@ async function* each(lines: string[]): AsyncGenerator<string> {
 	yield* lines;
 }
 
-/** In-memory file ports. */
 function portsOver(source: string[], summarize?: CutPorts["summarize"]) {
 	const built = new Map<string, string[]>();
 	const ports: CutPorts = {
@@ -260,7 +260,7 @@ describe("claude session cut", () => {
 			yield* [];
 			throw new Error("denied");
 		};
-		await expect(cutSession(ports, { mode: "trim" })).rejects.toThrow("denied");
+		expect(await rethrown(cutSession(ports, { mode: "trim" }))).toThrow("denied");
 		expect(built.size).toBe(0);
 	});
 

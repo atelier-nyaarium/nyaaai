@@ -1,14 +1,10 @@
 //! Contract shape runtime.
-//!
-//! Shared decode rules:
-//! - Drops unknown keys at every depth.
-//! - Defaults fill absent keys.
-//! - Unions take the first match.
-//! - Refusals name the first path by declaration order.
 
+use std::cmp::Ordering;
 use std::fmt;
 
 use crate::json::{Object, Record, Value, parse_json};
+use crate::pattern::Pattern;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum PathPart {
@@ -22,6 +18,8 @@ pub type Path = Vec<PathPart>;
 pub struct Refused {
     pub path: Path,
     pub message: &'static str,
+    /// Marks an authored message.
+    pub fixed: bool,
 }
 
 impl fmt::Display for Refused {
@@ -49,21 +47,19 @@ pub trait Shape: Sized {
     }
 
     fn decode_text(text: &str) -> Result<Self, Refused> {
-        let value = parse_json(text).ok_or(Refused {
-            path: Path::new(),
-            message: "not JSON",
-        })?;
+        let value = parse_json(text).ok_or_else(|| refused(&Path::new(), "not JSON"))?;
         Self::decode(&value)
     }
 }
 
-/// Largest exactly representable integer.
+/// Largest exact integer.
 const SAFE: f64 = 9_007_199_254_740_991.0;
 
 pub fn refused(at: &Path, message: &'static str) -> Refused {
     Refused {
         path: at.clone(),
         message,
+        fixed: false,
     }
 }
 
@@ -263,7 +259,7 @@ pub fn list<T>(
     list_within(value, at, None, None, decode)
 }
 
-/// Excess fails before items; shortage after.
+/// Excess before items; shortage after.
 pub fn list_within<T>(
     value: &Value,
     at: &mut Path,
@@ -284,6 +280,28 @@ pub fn list_within<T>(
         return Err(refused(at, "too few"));
     }
     Ok(held)
+}
+
+/// Requires exactly `count` items.
+pub fn tuple<'a>(value: &'a Value, at: &Path, count: usize) -> Result<&'a [Value], Refused> {
+    let items = value.as_array().ok_or_else(|| refused(at, "not a list"))?;
+    match items.len().cmp(&count) {
+        Ordering::Less => Err(refused(at, "too few")),
+        Ordering::Greater => Err(refused(at, "too many")),
+        Ordering::Equal => Ok(items),
+    }
+}
+
+pub fn place<T>(
+    items: &[Value],
+    index: usize,
+    at: &mut Path,
+    decode: impl FnOnce(&Value, &mut Path) -> Result<T, Refused>,
+) -> Result<T, Refused> {
+    under(at, PathPart::Index(index), |at| {
+        let item = items.get(index).ok_or_else(|| refused(at, "absent"))?;
+        decode(item, at)
+    })
 }
 
 /// Drops JavaScript's "__proto__" key.
@@ -336,18 +354,48 @@ pub fn no_branch(at: &Path, key: &str) -> Refused {
     Refused {
         path,
         message: "names no branch",
+        fixed: false,
     }
 }
 
-pub fn holds<T>(verdict: bool, held: T, at: &Path) -> Result<T, Refused> {
+/// Authored messages override fallback.
+fn checked<T>(
+    verdict: bool,
+    held: T,
+    at: &Path,
+    message: Option<&'static str>,
+    plain: &'static str,
+) -> Result<T, Refused> {
     if verdict {
-        Ok(held)
-    } else {
-        Err(refused(at, "refined away"))
+        return Ok(held);
     }
+    Err(Refused {
+        path: at.clone(),
+        message: message.unwrap_or(plain),
+        fixed: message.is_some(),
+    })
 }
 
-/// Drops leading zeros.
+pub fn holds<T>(
+    verdict: bool,
+    held: T,
+    at: &Path,
+    message: Option<&'static str>,
+) -> Result<T, Refused> {
+    checked(verdict, held, at, message, "refined away")
+}
+
+/// Unsupported patterns match nothing.
+pub fn matches(
+    pattern: Option<&Pattern>,
+    held: String,
+    at: &Path,
+    message: Option<&'static str>,
+) -> Result<String, Refused> {
+    let found = pattern.is_some_and(|pattern| pattern.test(&held));
+    checked(found, held, at, message, "no match")
+}
+
 fn bare(part: &str) -> Option<&str> {
     if part.is_empty() || !part.bytes().all(|byte| byte.is_ascii_digit()) {
         return None;

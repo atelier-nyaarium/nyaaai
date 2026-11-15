@@ -1,0 +1,77 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "torture-Several",
+	"input": {
+		"set": "torture",
+		"shape": "Several",
+		"texts": [
+			"[1,2]",
+			"[1,2,3]",
+			"[1]",
+			"[\"x\"]",
+			"[1.5]",
+			"[]",
+			"[1,\"x\"]",
+			"[1,2,3,4]",
+			"[1,2,3,\"x\"]",
+			"\"12\"",
+			"null"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "[1,2]"
+			},
+			{
+				"ok": true,
+				"text": "[1,2,3]"
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": [
+					0
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					0
+				]
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": [
+					1
+				]
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

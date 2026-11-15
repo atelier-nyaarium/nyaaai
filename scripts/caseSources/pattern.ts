@@ -178,10 +178,21 @@ export const refused = [
 	pattern("(?:[^a]{1000}){3}[^a]{334}"),
 	pattern("(?:[\\u{80}-\\u{10ffff}]{1000}){10}"),
 	pattern("a".repeat(10_001)),
+	pattern("}"),
+	pattern("a}"),
+	pattern("\\-"),
+	pattern("a\\-b"),
+	pattern("]"),
+	pattern("a{"),
 ];
+
+/** Capture count limit cases. */
+export const acceptedCaptures = pattern("()".repeat(99));
+export const refusedCaptures = pattern("()".repeat(100));
 
 export const patternCases: CaseSource[] = [
 	{ kind: "pattern.problems", name: "dialect", input: { patterns: [...accepted, ...refused] } },
+	{ kind: "pattern.problems", name: "capture-limit", input: { patterns: [acceptedCaptures, refusedCaptures] } },
 	matches("ascii-word", "\\w", "", ["a", "_", "9", "é", "ſ", "K", "١", "１", "\u{85}"]),
 	matches("ascii-not-word", "\\W", "", ["a", "_", "9", "é", "ſ", "K", "١", "１"]),
 	matches("ascii-digit", "\\d", "", ["0", "9", "١", "۲", "１", "x"]),
@@ -246,6 +257,21 @@ export const patternCases: CaseSource[] = [
 	edits("split-lazy-empty", "a*?", "", "_", ["baaac", "aa"]),
 	edits("split-optional-captures", "(a)|(b)|c", "", "[$1$2]", ["xaybzc", "abc", "c"]),
 	edits("split-whole-text", "a+", "", "-", ["aaa", "a"]),
+	matches("priority-alternation-vm", "a|ab", "", ["ab", "ba"]),
+	matches("priority-capture-vm", "(a|ab)(c|bcd)(d*)", "", ["abcd", "abcdd", "abccd"]),
+	matches("lazy-greedy-vm", "a+?b*", "", ["aaabbb", "baab"]),
+	matches("lazy-counted-vm", "(?:ab){2,3}?", "", ["abababx", "xabab"]),
+	matches("nested-repeat-vm", "(?:a+)+b", "", ["aaabaaaab", "a".repeat(30)]),
+	matches("counted-repeat-vm", "a{2,4}", "", ["a", "aa", "aaaaa"]),
+	matches("alternative-assertions-vm", "(?:^a|b$|\\ba)", "m", ["x\na\nb\nx", "ab\n"]),
+	matches("astral-capture-vm", "(\\u{1f600}|x)+", "", ["x\u{1f600}x", "\u{1f600}\u{1f600}"]),
+	matches("linear-alternative-failure", "^(a|aa)+$", "", [`${"a".repeat(40)}!`]),
+	matches("linear-nested-failure", "(?:a+)+b", "", ["a".repeat(30)]),
+	matches("linear-duplicate-alternative", "(?:a|a)*c", "", ["a".repeat(40)]),
+	finds("pair-anchor-offsets", "^", "", "\u{1f600}a", [0, 1, 2, 3]),
+	finds("pair-multiline-start-offsets", "^a", "m", "\u{1f600}\na", [0, 1, 2, 3, 4]),
+	finds("pair-multiline-end-offsets", "$", "m", "\u{1f600}\na", [0, 1, 2, 3, 4]),
+	finds("pair-boundary-offsets", "\\b", "", "\u{1f600}a", [0, 1, 2, 3]),
 	matches("capture-each-round", "(a|b)*c", "", ["abc", "bac", "c"]),
 	matches("captures-each-round", "(?:(\\d+)(,|$))+", "", ["1,22,333", "7"]),
 	matches("nested-captures-each-round", "((a)(b))+", "", ["abab", "ab"]),

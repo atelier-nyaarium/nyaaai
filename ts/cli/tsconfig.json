@@ -5,5 +5,5 @@
 		"outDir": ".tsbuild"
 	},
 	"include": ["src/**/*.ts"],
-	"references": [{ "path": "../contract" }, { "path": "../operator" }]
+	"references": [{ "path": "../contract" }, { "path": "../adapter" }, { "path": "../operator" }]
 }
