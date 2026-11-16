@@ -88,6 +88,7 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
         "text.find" => {
             run::<shapes::TextFindInput, shapes::TextFindResult>(input, super::text::find)
         }
+        "text.nfc" => run::<shapes::TextNfcInput, shapes::TextNfcResult>(input, super::text::nfc),
         "pattern.problems" => run::<shapes::PatternProblemsInput, shapes::PatternProblemsResult>(
             input,
             super::pattern::problems,

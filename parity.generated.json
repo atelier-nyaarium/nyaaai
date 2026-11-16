@@ -358,6 +358,7 @@
 		"cases/testkit/wheel.timers.json",
 		"cases/text/cuts.pairs.json",
 		"cases/text/find.matches.json",
+		"cases/text/nfc.forms.json",
 		"cases/text/slices.spans.json",
 		"cases/text/spaces.ecmascript-whitespace.json",
 		"cases/time/dayKey.days.json",

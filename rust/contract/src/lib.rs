@@ -3,6 +3,7 @@ pub mod id;
 pub mod issues;
 pub mod js;
 pub mod json;
+pub mod nfc_tables;
 pub mod number;
 pub mod order;
 pub mod pattern;

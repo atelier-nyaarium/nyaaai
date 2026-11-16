@@ -1,5 +1,7 @@
 // UTF-16 text helpers.
 
+import { CCC, COMPOSE, DECOMP } from "./nfcTables";
+
 ////////////////////////////////
 //  Functions & Helpers
 
@@ -109,4 +111,154 @@ export function collapseSpace(text: string): string {
 		}
 	}
 	return words.join(" ");
+}
+
+////////////////////////////////
+//  NFC normalization
+
+const S_BASE = 0xac00;
+const L_BASE = 0x1100;
+const V_BASE = 0x1161;
+const T_BASE = 0x11a7;
+const L_COUNT = 19;
+const V_COUNT = 21;
+const T_COUNT = 28;
+const N_COUNT = V_COUNT * T_COUNT;
+const S_COUNT = L_COUNT * N_COUNT;
+
+const cccOf = (cp: number): number => {
+	let lo = 0;
+	let hi = CCC.length;
+	while (lo < hi) {
+		const mid = (lo + hi) >>> 1;
+		if (CCC[mid]! >>> 8 < cp) lo = mid + 1;
+		else hi = mid;
+	}
+	return lo < CCC.length && CCC[lo]! >>> 8 === cp ? CCC[lo]! & 0xff : 0;
+};
+
+const decompOf = (cp: number): number[] | undefined => {
+	let lo = 0;
+	let hi = DECOMP.length / 3;
+	while (lo < hi) {
+		const mid = (lo + hi) >>> 1;
+		if (DECOMP[mid * 3]! < cp) lo = mid + 1;
+		else hi = mid;
+	}
+	if (lo >= DECOMP.length / 3 || DECOMP[lo * 3]! !== cp) return undefined;
+	const second = DECOMP[lo * 3 + 2]!;
+	return second === 0 ? [DECOMP[lo * 3 + 1]!] : [DECOMP[lo * 3 + 1]!, second];
+};
+
+const composeOf = (first: number, second: number): number | undefined => {
+	let lo = 0;
+	let hi = COMPOSE.length / 3;
+	while (lo < hi) {
+		const mid = (lo + hi) >>> 1;
+		const held = COMPOSE[mid * 3]!;
+		if (held < first || (held === first && COMPOSE[mid * 3 + 1]! < second)) lo = mid + 1;
+		else hi = mid;
+	}
+	if (lo >= COMPOSE.length / 3) return undefined;
+	const held = COMPOSE[lo * 3]!;
+	return held === first && COMPOSE[lo * 3 + 1]! === second ? COMPOSE[lo * 3 + 2]! : undefined;
+};
+
+const appendDecomposed = (cp: number, out: number[]): void => {
+	if (cp >= S_BASE && cp < S_BASE + S_COUNT) {
+		const index = cp - S_BASE;
+		out.push(L_BASE + Math.floor(index / N_COUNT), V_BASE + Math.floor((index % N_COUNT) / T_COUNT));
+		const tail = T_BASE + (index % T_COUNT);
+		if (tail !== T_BASE) out.push(tail);
+		return;
+	}
+	const parts = decompOf(cp);
+	if (parts === undefined) {
+		out.push(cp);
+		return;
+	}
+	for (const part of parts) appendDecomposed(part, out);
+};
+
+const isAscii = (text: string): boolean => {
+	for (let at = 0; at < text.length; at++) if (text.charCodeAt(at) >= 0x80) return false;
+	return true;
+};
+
+/** Unicode 17.0 NFC. */
+export function nfc(text: string): string {
+	if (isAscii(text)) return text;
+	const codes: number[] = [];
+	for (let at = 0; at < text.length; at++) {
+		const unit = text.charCodeAt(at);
+		if (unit >= 0xd800 && unit <= 0xdbff) {
+			const next = text.charCodeAt(at + 1);
+			if (at + 1 < text.length && next >= 0xdc00 && next <= 0xdfff) {
+				codes.push(0x10000 + (unit - 0xd800) * 0x400 + (next - 0xdc00));
+				at += 1;
+			} else {
+				codes.push(0xfffd);
+			}
+		} else if (unit >= 0xdc00 && unit <= 0xdfff) {
+			codes.push(0xfffd);
+		} else {
+			codes.push(unit);
+		}
+	}
+	const decomposed: number[] = [];
+	for (const cp of codes) appendDecomposed(cp, decomposed);
+	let at = 0;
+	while (at < decomposed.length) {
+		if (cccOf(decomposed[at]!) === 0) {
+			at += 1;
+			continue;
+		}
+		let end = at;
+		while (end < decomposed.length && cccOf(decomposed[end]!) !== 0) end += 1;
+		const run = decomposed.slice(at, end).map((cp) => [cp, cccOf(cp)] as [number, number]);
+		run.sort((left, right) => left[1] - right[1]);
+		for (let cursor = 0; cursor < run.length; cursor++) decomposed[at + cursor] = run[cursor]![0];
+		at = end;
+	}
+	const composed: number[] = [decomposed[0]!];
+	let starter = 0;
+	let lastClass = -1;
+	for (let cursor = 1; cursor < decomposed.length; cursor++) {
+		const cp = decomposed[cursor]!;
+		const previous = composed[composed.length - 1]!;
+		if (previous >= L_BASE && previous < L_BASE + L_COUNT && cp >= V_BASE && cp < V_BASE + V_COUNT) {
+			composed[composed.length - 1] = S_BASE + (previous - L_BASE) * N_COUNT + (cp - V_BASE) * T_COUNT;
+			starter = composed.length - 1;
+			lastClass = -1;
+			continue;
+		}
+		if (
+			previous >= S_BASE &&
+			previous < S_BASE + S_COUNT &&
+			(previous - S_BASE) % T_COUNT === 0 &&
+			cp > T_BASE &&
+			cp < T_BASE + T_COUNT
+		) {
+			composed[composed.length - 1] = previous + (cp - T_BASE);
+			starter = composed.length - 1;
+			lastClass = -1;
+			continue;
+		}
+		const class_ = cccOf(cp);
+		if (lastClass < class_) {
+			const pair = composeOf(composed[starter]!, cp);
+			if (pair !== undefined) {
+				composed[starter] = pair;
+				continue;
+			}
+		}
+		composed.push(cp);
+		if (class_ === 0) {
+			starter = composed.length - 1;
+			lastClass = -1;
+		} else {
+			lastClass = class_;
+		}
+	}
+	return composed.map((cp) => String.fromCodePoint(cp)).join("");
 }

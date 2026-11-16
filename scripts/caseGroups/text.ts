@@ -9,6 +9,7 @@ import {
 	headOf,
 	indexOfText,
 	lastIndexOfText,
+	nfc,
 	sliceText,
 	tailOf,
 	textLength,
@@ -72,6 +73,9 @@ export const text = caseGroup("text", {
 				),
 			}),
 		),
+		nfc: kind(z.object({ texts: z.array(z.string()) }), z.object({ texts: z.array(z.string()) }), (input) => ({
+			texts: input.texts.map(nfc),
+		})),
 	},
 	sources: casesFor("text", textCases),
 });

@@ -70,3 +70,8 @@ pub fn find(input: TextFindInput) -> Outcome<TextFindResult> {
         last: table(&|needle, from| text::last_index_of_text(&input.text, needle, from)),
     })
 }
+
+pub fn nfc(input: TextNfcInput) -> Outcome<TextNfcResult> {
+    let texts = input.texts.iter().map(|held| text::nfc(held)).collect();
+    Ok(TextNfcResult { texts })
+}

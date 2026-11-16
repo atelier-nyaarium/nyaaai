@@ -22,7 +22,7 @@ Same names in both languages; Rust files are snake case.
 
 - `contract`: primitives, ports and shapes. Rust adds `js`.
   - `json`: `parseJson`, `stringifyJson`, `canonicalJson`, `jsString` (Rust: `js::to_js_string`).
-  - `text`: UTF-16 lengths, pair-safe cuts, finds, `trimText`, `collapseSpace`. `order`: `compareText`, `sortedTexts`. `base64`.
+  - `text`: UTF-16 lengths, pair-safe cuts, finds, `trimText`, `collapseSpace`, `nfc`. `order`: `compareText`, `sortedTexts`. `base64`.
   - `number`: `numberText`, `roundHalfUp`, `fixedText`, `numberOfText`, `integerOfText`.
   - `time`: `parseIsoTime`, `isoTime`, `parseHttpDate`, `parseRetryAfter`, `resetStampMs`, `dayKey`. Ports `Clock`, `Scheduler` (TypeScript only); scripted `steppedClock`.
   - `id`: `randomUuid`. Port `Ids`; scripted `countedIds`. `random`: port `Random`; scripted `sequenceRandom`.
@@ -71,6 +71,7 @@ bun scripts/cases.ts --refresh    # rewrite case files from TypeScript
 bun scripts/samples.ts            # values sampled from every schema, decoded in both languages
 bun scripts/serve.ts              # the TypeScript adapter, with the case kinds
 bun scripts/convertTrace.ts <trace.jsonl> <out.json>   # an old recorded trace into the byte form, scrubbed
+bun scripts/unicodeTables.ts <ucd folder>              # the NFC tables, from Unicode 17.0 files; run by hand
 bun scripts/crates.ts             # crate ages and advisories
 bun scripts/snapshot.ts           # commit the working tree for a consumer, print {ref, sha, subject}
 bun scripts/realSessions.ts       # both languages on this machine's real session files; prints counts, and names a file only when a result differs or the file changed mid-run (`live`)
@@ -165,6 +166,7 @@ Engine code calls these, never the platform's own. Each is judged by cases. A ne
 - `rust/clippy.toml` refuses Rust's diverging methods through Clippy's `disallowed-methods`: trimming, case mapping, rounding, whitespace splits, `lines`, character classes. `contract` allows one where it implements the primitive.
 - Text is measured in UTF-16 code units. A cut never splits a surrogate pair.
 - Whitespace is ECMAScript's: `trimText`, `collapseSpace`.
+- `nfc` is Unicode NFC on tables frozen at 17.0, never the platform's. A lone surrogate becomes U+FFFD first. A code point unassigned in 17.0 passes through. `bun scripts/unicodeTables.ts <ucd folder>` writes both table modules from `UnicodeData.txt` and `CompositionExclusions.txt`; a later Unicode version is added beside them, never in place.
 - Order is by code unit. No locale compare.
 - `canonicalJson` sorts keys by code unit. Fingerprints and dedup keys use it.
 - `roundHalfUp` is `Math.round`. `fixedText` is `toFixed`. `numberOfText` takes a JSON number spelling and nothing else.

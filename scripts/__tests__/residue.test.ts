@@ -109,7 +109,7 @@ const PLATFORM_METHODS = new Map([
 	["toLocaleLowerCase", "asciiLower"],
 	["toLocaleUpperCase", "asciiUpper"],
 	["localeCompare", "compareText"],
-	["normalize", "no primitive yet"],
+	["normalize", "nfc"],
 	["toFixed", "fixedText"],
 	["toPrecision", "numberText"],
 	["toExponential", "numberText"],
