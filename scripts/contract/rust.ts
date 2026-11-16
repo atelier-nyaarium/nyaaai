@@ -119,7 +119,9 @@ class Emitter {
 		const body = items.join("\n\n");
 		const root = own.crate === "nyaaai_contract" ? "crate" : "nyaaai_contract";
 		const json = (["Object", "Record", "Value"] as const).filter((name) => this.needs.has(name));
-		const stem = own.module.split("::").at(-1);
+		const stem = own.module.split("::").at(-1) as string;
+		// A keyword set's file ends in an underscore; its hooks do not.
+		const plain = stem.endsWith("_") ? stem.slice(0, -1) : stem;
 		const statics = [...this.patterns.values()].map(
 			({ name, source, flags }) =>
 				`static ${name}: LazyLock<Option<Pattern>> = LazyLock::new(|| Pattern::compile(${quote(source)}, ${quote(flags)}).ok());`,
@@ -133,7 +135,7 @@ class Emitter {
 			`use ${root}::json::{${json.join(", ")}};`,
 			...(statics.length > 0 ? [`use ${root}::pattern::Pattern;`] : []),
 			`use ${root}::shape::{self, Path, Refused${this.needs.has("Shape") ? ", Shape" : ""}};`,
-			...(this.hookUses.size > 0 ? ["", `use super::${stem}_hooks as hooks;`] : []),
+			...(this.hookUses.size > 0 ? ["", `use super::${plain}_hooks as hooks;`] : []),
 			"",
 			...(statics.length > 0 ? [...statics, ""] : []),
 			body,

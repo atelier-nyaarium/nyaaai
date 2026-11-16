@@ -194,17 +194,21 @@ To add a set:
 
 `samples` holds every shape to more than its hand-written cases. For each named shape it derives values from the exported schema: a full one, a minimal one, each branch, an unknown key, then one broken rule at a time. Both languages decode each through the project's `roundTrip` kind, and a difference fails the gate. A shape's values go out 2,000 a request, and none is dropped. It stores nothing.
 
-Dialect. `contract` fails on anything else:
+Dialect. `dialectProblems` lists, at once and by shape path, what `contract` refuses about a shape; `contract.ts` runs it before it generates:
 
 - Object, array, tuple of fixed places, record with text keys, nullable, union, discriminated union with a text tag.
 - String, number, `z.int()`, boolean, null, unknown, one-value literal, enum of texts.
 - Bounds: `min`, `max`, `gt`, `lt` on numbers; `min`, `max` on strings and arrays. String bounds count code points.
 - No string format (`z.base64()`, `z.email()`, `z.uuid()`, `z.iso.datetime()`): write `matching`, or a `refined` hook over a primitive.
+- No `.describe()` or `.meta()`: write a comment.
+- A discriminated union holds objects, each with a required one-value text literal tag. A boolean tag is a plain union; an enum tag is one branch per value, each a one-value literal.
+- A shape name is PascalCase. A property, hook, enum value, tag value and literal union branch each come to a Rust name: `a-b` and `a_b` come to one, and `.` to none. Two that come to one are refused; so is one that comes to none: name the shape, or use other values.
+- An integer bound is whole. `matching` takes a string.
 - Optional and default sit on an object property, outermost. Use `exactOptional`. No optional property holds a default.
 - Recursion passes through a named shape.
 - A tuple holds no rest, no optional place, no preprocess place, and at most 12 places.
 - A named shape that is not an object or a union never names itself, through other such shapes either. A recursive shape is an object or a union.
-- Hooks, ported by hand: `preprocessed(name, fix, schema)` maps the raw value before the decode, and never sees a missing one; `refined(name, schema, holds, message?)` judges the decoded value. Rust holds them in `<module>_hooks.rs`, snake case: one function per name, serving one type. A transform is written as a preprocess.
+- Hooks, ported by hand: `preprocessed(name, fix, schema)` maps the raw value before the decode, and never sees a missing one; `refined(name, schema, holds, message?)` judges the decoded value. Rust holds them in `<module>_hooks.rs`, snake case, beside a keyword set's `move_.rs` as `move_hooks.rs`: one function per name, serving one type. A transform is written as a preprocess.
 - `matching(schema, source, flags, message?)` checks text through `Pattern`. Rust is generated.
 - Hooks stack, innermost first. A bound comes before a hook. A hook wraps nullable, not the reverse.
 - A `message` is the refusal's text in both languages; `fixed` marks such a refusal. Any other refusal text is the language's own.
