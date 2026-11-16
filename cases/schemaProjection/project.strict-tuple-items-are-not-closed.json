@@ -1,0 +1,56 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "strict-tuple-items-are-not-closed",
+	"input": {
+		"projection": "strict",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"list": {
+					"type": "array",
+					"items": [
+						{
+							"type": "object",
+							"properties": {
+								"a": {
+									"type": "string"
+								}
+							}
+						}
+					]
+				}
+			},
+			"required": [
+				"list"
+			]
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"properties": {
+				"list": {
+					"type": "array",
+					"items": [
+						{
+							"type": "object",
+							"properties": {
+								"a": {
+									"type": "string"
+								}
+							}
+						}
+					]
+				}
+			},
+			"required": [
+				"list"
+			],
+			"additionalProperties": false
+		},
+		"refusal": null
+	}
+}

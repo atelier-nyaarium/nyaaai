@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "colon-in-value",
+	"input": {
+		"chunks": [
+			"ZGF0YTogYTpiOiBjCgpkYXRhOgl4Cgo="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[
+				{
+					"kind": "data",
+					"data": "a:b: c"
+				},
+				{
+					"kind": "data",
+					"data": "\tx"
+				}
+			]
+		],
+		"ended": []
+	}
+}

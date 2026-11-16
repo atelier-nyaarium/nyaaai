@@ -1,0 +1,13 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "no-chunks",
+	"input": {
+		"chunks": []
+	},
+	"expected": {
+		"pushed": [],
+		"ended": []
+	}
+}

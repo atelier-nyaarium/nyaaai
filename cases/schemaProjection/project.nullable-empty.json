@@ -1,0 +1,15 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "nullable-empty",
+	"input": {
+		"projection": "nullable",
+		"schema": {},
+		"value": null
+	},
+	"expected": {
+		"output": {},
+		"refusal": null
+	}
+}

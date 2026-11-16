@@ -1,0 +1,54 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "nullable-non-schema-properties",
+	"input": {
+		"projection": "nullable",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"a": true,
+				"b": false,
+				"c": "text",
+				"d": null,
+				"e": [
+					1
+				],
+				"f": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"f"
+			]
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"properties": {
+				"a": true,
+				"b": false,
+				"c": "text",
+				"d": null,
+				"e": [
+					1
+				],
+				"f": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"a",
+				"b",
+				"c",
+				"d",
+				"e",
+				"f"
+			]
+		},
+		"refusal": null
+	}
+}

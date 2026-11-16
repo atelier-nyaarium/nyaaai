@@ -1,0 +1,30 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "strict-refuses-defs-before-ref",
+	"input": {
+		"projection": "strict",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"$ref": "#/$defs/A"
+				}
+			},
+			"required": [
+				"a"
+			],
+			"$defs": {
+				"A": {
+					"type": "string"
+				}
+			}
+		},
+		"value": null
+	},
+	"expected": {
+		"output": null,
+		"refusal": "A strict json_schema cannot carry `$defs`; reshape the answer without it."
+	}
+}

@@ -1,0 +1,59 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "call-empty-id-filled-with-empty-generation",
+	"input": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": ""
+				}
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "",
+				"name": "read",
+				"argumentsText": "{}"
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			false,
+			true
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {
+			"generationId": ""
+		},
+		"snapshot": [
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "",
+				"name": "read",
+				"argumentsText": "{}"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "_0",
+					"name": "read",
+					"argumentsText": "{}"
+				}
+			],
+			"finish": "",
+			"serving": {
+				"generationId": ""
+			}
+		}
+	}
+}

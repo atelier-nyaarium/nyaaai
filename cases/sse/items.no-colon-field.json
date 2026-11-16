@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "no-colon-field",
+	"input": {
+		"chunks": [
+			"ZGF0YQoK"
+		]
+	},
+	"expected": {
+		"pushed": [
+			[
+				{
+					"kind": "data",
+					"data": ""
+				}
+			]
+		],
+		"ended": []
+	}
+}

@@ -1,0 +1,169 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "nullable-optionals",
+	"input": {
+		"projection": "nullable",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"note": {
+					"type": "string",
+					"description": "A note."
+				},
+				"count": {
+					"type": "integer"
+				},
+				"kind": {
+					"type": "string",
+					"enum": [
+						"a",
+						"b"
+					]
+				},
+				"fixed": {
+					"const": "x"
+				},
+				"list": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"tag": {
+								"type": "string"
+							}
+						}
+					}
+				},
+				"at": {
+					"anyOf": [
+						{
+							"type": "object",
+							"properties": {
+								"line": {
+									"type": "number"
+								}
+							}
+						},
+						{
+							"type": "string"
+						}
+					]
+				},
+				"sure": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"sure"
+			]
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"properties": {
+				"note": {
+					"type": [
+						"string",
+						"null"
+					],
+					"description": "A note."
+				},
+				"count": {
+					"type": [
+						"integer",
+						"null"
+					]
+				},
+				"kind": {
+					"anyOf": [
+						{
+							"type": "string",
+							"enum": [
+								"a",
+								"b"
+							]
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"fixed": {
+					"anyOf": [
+						{
+							"const": "x"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"list": {
+					"type": [
+						"array",
+						"null"
+					],
+					"items": {
+						"type": "object",
+						"properties": {
+							"tag": {
+								"type": [
+									"string",
+									"null"
+								]
+							}
+						},
+						"required": [
+							"tag"
+						]
+					}
+				},
+				"at": {
+					"anyOf": [
+						{
+							"anyOf": [
+								{
+									"type": "object",
+									"properties": {
+										"line": {
+											"type": [
+												"number",
+												"null"
+											]
+										}
+									},
+									"required": [
+										"line"
+									]
+								},
+								{
+									"type": "string"
+								}
+							]
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"sure": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"note",
+				"count",
+				"kind",
+				"fixed",
+				"list",
+				"at",
+				"sure"
+			]
+		},
+		"refusal": null
+	}
+}

@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "truncated-character-before-newline",
+	"input": {
+		"chunks": [
+			"ZGF0YTogY2Fm",
+			"ww==",
+			"Cg=="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[],
+			[],
+			[]
+		],
+		"ended": [
+			{
+				"kind": "data",
+				"data": "caf�"
+			}
+		]
+	}
+}

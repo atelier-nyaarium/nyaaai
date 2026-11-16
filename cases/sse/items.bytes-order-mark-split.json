@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "bytes-order-mark-split",
+	"input": {
+		"chunks": [
+			"7w==",
+			"u79k",
+			"YXRhOiB4Cgo="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[],
+			[],
+			[
+				{
+					"kind": "data",
+					"data": "x"
+				}
+			]
+		],
+		"ended": []
+	}
+}

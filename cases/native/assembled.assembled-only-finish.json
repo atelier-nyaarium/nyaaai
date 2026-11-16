@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.assembled",
+	"name": "assembled-only-finish",
+	"input": {
+		"events": [
+			{
+				"kind": "finish",
+				"reason": "stop"
+			}
+		]
+	},
+	"expected": {
+		"result": {
+			"parts": [],
+			"finish": "stop",
+			"serving": {}
+		},
+		"failure": null
+	}
+}

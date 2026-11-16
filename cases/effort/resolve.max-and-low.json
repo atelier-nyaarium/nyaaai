@@ -1,0 +1,36 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "effort.resolve",
+	"name": "max-and-low",
+	"input": {
+		"offered": [
+			"max",
+			"low"
+		],
+		"wanted": [
+			"none",
+			"minimal",
+			"low",
+			"medium",
+			"high",
+			"xhigh",
+			"max",
+			"turbo",
+			""
+		]
+	},
+	"expected": {
+		"values": [
+			"low",
+			"low",
+			"low",
+			"low",
+			"low",
+			"low",
+			"max",
+			"low",
+			"low"
+		]
+	}
+}

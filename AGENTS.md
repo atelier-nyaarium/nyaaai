@@ -45,7 +45,16 @@ Same names in both languages; Rust files are snake case.
   - `rejection` (TypeScript): `rejection`, `rethrown` read what a promise rejects with.
   - `samples` (TypeScript): `sampleTexts` derives round-trip inputs from an exported schema.
   - `rustNames`: `snake`, `pascal`, `quote`, for a `parity.ts`'s generated Rust.
-- `agentic`: `noticeText` (`overloadedText`, `unavailableText`), the sentences a notice shows.
+- `agentic`: each module an entry (`@nyaaai/agentic/sse`); only `noticeText` is a browser entry.
+  - `noticeText`: `overloadedText`, `unavailableText`, the sentences a notice shows.
+  - `effort`: `EFFORTS`, `resolveEffort`.
+  - `sse`: `SseDecoder` (`push`, `end`).
+  - `step`: `StepAssembler`, `replyText`, `replyCalls`, `replyThoughts`.
+  - `failure`: `WireError`, `ProviderError`, `failed`, `failureOf`, `messageOf`.
+    Rust adds `NumberOrText`, `FailureExtra` (what `failed` takes beside the category and message); `ProviderError` boxes its `Failure`; `failure_of` reads a `dyn Error`.
+  - `native`: `Host` and the helpers that read loose provider JSON: `isJson`, `stringOf`, `numberOf`, `argumentsOf`, `parsedChunk`, `wireError`, `streamFailure`, `assembled`, `servingEvents`, `schemaPrompt`, `systemTexts`, `currentTurnFrom`.
+    Rust adds `HostStatus` (`Http` or `Stream`); `Host` is a trait.
+  - `schemaProjection`: `cleanSchema`, `nullableOptionals`, `withoutNulls`, `strictSchema`.
 - `ui`: empty.
 
 ## Patterns

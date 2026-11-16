@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.systemTexts",
+	"name": "system-plain",
+	"input": {
+		"rows": [
+			{
+				"summary": null,
+				"prompted": null,
+				"system": [
+					"Rules.",
+					"More rules."
+				]
+			}
+		]
+	},
+	"expected": {
+		"texts": [
+			[
+				"Rules.",
+				"More rules."
+			]
+		]
+	}
+}

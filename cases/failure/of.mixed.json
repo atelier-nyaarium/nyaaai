@@ -1,0 +1,47 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "failure.of",
+	"name": "mixed",
+	"input": {
+		"thrown": [
+			{
+				"make": "error",
+				"message": "plain"
+			},
+			{
+				"make": "failed",
+				"category": "truncated",
+				"message": "Cut."
+			},
+			{
+				"make": "value",
+				"value": 1
+			},
+			{
+				"make": "provider",
+				"failure": {
+					"category": "unavailable",
+					"status": 503,
+					"message": "Down."
+				}
+			}
+		]
+	},
+	"expected": {
+		"failures": [
+			null,
+			{
+				"category": "truncated",
+				"status": "truncated",
+				"message": "Cut."
+			},
+			null,
+			{
+				"category": "unavailable",
+				"status": 503,
+				"message": "Down."
+			}
+		]
+	}
+}

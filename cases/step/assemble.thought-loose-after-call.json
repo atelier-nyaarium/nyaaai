@@ -1,0 +1,116 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "thought-loose-after-call",
+	"input": {
+		"events": [
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "a"
+						}
+					]
+				}
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "c0",
+				"name": "read",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "b"
+						}
+					]
+				}
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true,
+			true,
+			true
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "thought",
+				"type": "t",
+				"segments": [
+					{
+						"kind": "content",
+						"text": "a"
+					}
+				]
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "c0",
+				"name": "read",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "thought",
+				"type": "t",
+				"segments": [
+					{
+						"kind": "content",
+						"text": "b"
+					}
+				]
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "a"
+						}
+					]
+				},
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "c0",
+					"name": "read",
+					"argumentsText": "{}"
+				},
+				{
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "b"
+						}
+					]
+				}
+			],
+			"finish": "",
+			"serving": {}
+		}
+	}
+}

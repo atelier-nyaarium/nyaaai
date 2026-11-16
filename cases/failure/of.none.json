@@ -1,0 +1,12 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "failure.of",
+	"name": "none",
+	"input": {
+		"thrown": []
+	},
+	"expected": {
+		"failures": []
+	}
+}

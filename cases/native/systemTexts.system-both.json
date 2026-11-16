@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.systemTexts",
+	"name": "system-both",
+	"input": {
+		"rows": [
+			{
+				"summary": "S",
+				"prompted": "P",
+				"system": [
+					"A",
+					"B"
+				]
+			}
+		]
+	},
+	"expected": {
+		"texts": [
+			[
+				"A",
+				"B",
+				"S",
+				"P"
+			]
+		]
+	}
+}

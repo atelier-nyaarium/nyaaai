@@ -1,0 +1,30 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "clean-no-dollar-schema",
+	"input": {
+		"projection": "clean",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"type": "string"
+				}
+			}
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"type": "string"
+				}
+			},
+			"additionalProperties": false
+		},
+		"refusal": null
+	}
+}

@@ -1,0 +1,77 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "thought-split-false-joins",
+	"input": {
+		"events": [
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "summary",
+							"text": "one"
+						}
+					]
+				},
+				"block": "i1"
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "summary",
+							"text": "two"
+						}
+					]
+				},
+				"block": "i1",
+				"split": false
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true,
+			true
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "thought",
+				"type": "t",
+				"segments": [
+					{
+						"kind": "summary",
+						"text": "onetwo"
+					}
+				]
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "summary",
+							"text": "onetwo"
+						}
+					]
+				}
+			],
+			"finish": "",
+			"serving": {}
+		}
+	}
+}

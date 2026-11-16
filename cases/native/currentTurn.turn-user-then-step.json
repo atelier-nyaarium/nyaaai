@@ -1,0 +1,30 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.currentTurn",
+	"name": "turn-user-then-step",
+	"input": {
+		"histories": [
+			[
+				{
+					"role": "user",
+					"text": "a"
+				},
+				{
+					"role": "step",
+					"parts": [
+						{
+							"kind": "text",
+							"text": "a"
+						}
+					]
+				}
+			]
+		]
+	},
+	"expected": {
+		"indexes": [
+			1
+		]
+	}
+}

@@ -1,0 +1,41 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "nullable-arrays-and-branches",
+	"input": {
+		"projection": "nullable",
+		"schema": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"a": {
+						"type": "string"
+					}
+				}
+			}
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"a": {
+						"type": [
+							"string",
+							"null"
+						]
+					}
+				},
+				"required": [
+					"a"
+				]
+			}
+		},
+		"refusal": null
+	}
+}

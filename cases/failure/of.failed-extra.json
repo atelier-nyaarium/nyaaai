@@ -1,0 +1,129 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "failure.of",
+	"name": "failed-extra",
+	"input": {
+		"thrown": [
+			{
+				"make": "failed",
+				"category": "stream",
+				"message": "Bad chunk.",
+				"extra": {
+					"status": "gemini"
+				}
+			},
+			{
+				"make": "failed",
+				"category": "rateLimited",
+				"message": "Slow.",
+				"extra": {
+					"status": 429,
+					"retryAfterMs": 7000
+				}
+			},
+			{
+				"make": "failed",
+				"category": "allowance",
+				"message": "Used up.",
+				"extra": {
+					"resetsAt": 1794535200000
+				}
+			},
+			{
+				"make": "failed",
+				"category": "refused",
+				"message": "No.",
+				"extra": {
+					"reasons": [
+						"a",
+						"b"
+					]
+				}
+			},
+			{
+				"make": "failed",
+				"category": "stream",
+				"message": "Cut.",
+				"extra": {
+					"billed": {
+						"usage": {
+							"input": 3,
+							"output": 1
+						},
+						"host": "h",
+						"generationId": "g"
+					}
+				}
+			},
+			{
+				"make": "failed",
+				"category": "stream",
+				"message": "Cut.",
+				"extra": {
+					"billed": {}
+				}
+			},
+			{
+				"make": "failed",
+				"category": "overloaded",
+				"message": "Busy.",
+				"extra": {}
+			}
+		]
+	},
+	"expected": {
+		"failures": [
+			{
+				"category": "stream",
+				"status": "gemini",
+				"message": "Bad chunk."
+			},
+			{
+				"category": "rateLimited",
+				"status": 429,
+				"retryAfterMs": 7000,
+				"message": "Slow."
+			},
+			{
+				"category": "allowance",
+				"status": "allowance",
+				"resetsAt": 1794535200000,
+				"message": "Used up."
+			},
+			{
+				"category": "refused",
+				"status": "refused",
+				"message": "No.",
+				"reasons": [
+					"a",
+					"b"
+				]
+			},
+			{
+				"category": "stream",
+				"status": "stream",
+				"message": "Cut.",
+				"billed": {
+					"usage": {
+						"input": 3,
+						"output": 1
+					},
+					"host": "h",
+					"generationId": "g"
+				}
+			},
+			{
+				"category": "stream",
+				"status": "stream",
+				"message": "Cut.",
+				"billed": {}
+			},
+			{
+				"category": "overloaded",
+				"status": "overloaded",
+				"message": "Busy."
+			}
+		]
+	}
+}

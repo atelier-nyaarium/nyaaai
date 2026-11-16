@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "invalid-byte",
+	"input": {
+		"chunks": [
+			"ZGF0YTogYQ==",
+			"/w==",
+			"YgoK"
+		]
+	},
+	"expected": {
+		"pushed": [
+			[],
+			[],
+			[
+				{
+					"kind": "data",
+					"data": "a�b"
+				}
+			]
+		],
+		"ended": []
+	}
+}

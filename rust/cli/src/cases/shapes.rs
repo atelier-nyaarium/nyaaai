@@ -4381,3 +4381,1787 @@ impl Shape for NoticeTextTextsResult {
         Value::Object(object)
     }
 }
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct EffortLadderInput {}
+
+impl Shape for EffortLadderInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        shape::object(value, at)?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        Value::Object(Object::new())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct EffortLadderResult {
+    pub efforts: Vec<nyaaai_contract::shapes::step::Effort>,
+}
+
+impl Shape for EffortLadderResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let efforts = shape::required(object, "efforts", at, |value, at| {
+            shape::list(value, at, nyaaai_contract::shapes::step::Effort::decode_at)
+        })?;
+        Ok(Self { efforts })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "efforts",
+            Value::Array(self.efforts.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct EffortResolveInput {
+    pub offered: Vec<String>,
+    pub wanted: Vec<String>,
+}
+
+impl Shape for EffortResolveInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let offered = shape::required(object, "offered", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let wanted = shape::required(object, "wanted", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { offered, wanted })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "offered",
+            Value::Array(
+                self.offered
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "wanted",
+            Value::Array(
+                self.wanted
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct EffortResolveResult {
+    pub values: Vec<Option<String>>,
+}
+
+impl Shape for EffortResolveResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let values = shape::required(object, "values", at, |value, at| {
+            shape::list(value, at, |value, at| {
+                shape::nullable(value, at, shape::text)
+            })
+        })?;
+        Ok(Self { values })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "values",
+            Value::Array(
+                self.values
+                    .iter()
+                    .map(|held| {
+                        held.as_ref()
+                            .map_or(Value::Null, |held| Value::from(held.as_str()))
+                    })
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct SseItemsInput {
+    pub chunks: Vec<String>,
+}
+
+impl Shape for SseItemsInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let chunks = shape::required(object, "chunks", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { chunks })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "chunks",
+            Value::Array(
+                self.chunks
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct SseItemsResult {
+    pub pushed: Vec<Vec<nyaaai_contract::shapes::step::SseItem>>,
+    pub ended: Vec<nyaaai_contract::shapes::step::SseItem>,
+}
+
+impl Shape for SseItemsResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let pushed = shape::required(object, "pushed", at, |value, at| {
+            shape::list(value, at, |value, at| {
+                shape::list(value, at, nyaaai_contract::shapes::step::SseItem::decode_at)
+            })
+        })?;
+        let ended = shape::required(object, "ended", at, |value, at| {
+            shape::list(value, at, nyaaai_contract::shapes::step::SseItem::decode_at)
+        })?;
+        Ok(Self { pushed, ended })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "pushed",
+            Value::Array(
+                self.pushed
+                    .iter()
+                    .map(|held| Value::Array(held.iter().map(|held| held.encode()).collect()))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "ended",
+            Value::Array(self.ended.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct SseSplitsInput {
+    pub bytes: String,
+}
+
+impl Shape for SseSplitsInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let bytes = shape::required(object, "bytes", at, shape::text)?;
+        Ok(Self { bytes })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("bytes", Value::from(self.bytes.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct SseSplitsResult {
+    pub items: Vec<nyaaai_contract::shapes::step::SseItem>,
+    pub agree: bool,
+    pub first_different: Option<i64>,
+    pub bytewise: bool,
+}
+
+impl Shape for SseSplitsResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let items = shape::required(object, "items", at, |value, at| {
+            shape::list(value, at, nyaaai_contract::shapes::step::SseItem::decode_at)
+        })?;
+        let agree = shape::required(object, "agree", at, shape::flag)?;
+        let first_different = shape::required(object, "firstDifferent", at, |value, at| {
+            shape::nullable(value, at, shape::integer)
+        })?;
+        let bytewise = shape::required(object, "bytewise", at, shape::flag)?;
+        Ok(Self {
+            items,
+            agree,
+            first_different,
+            bytewise,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "items",
+            Value::Array(self.items.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert("agree", Value::Bool(self.agree));
+        object.insert(
+            "firstDifferent",
+            self.first_different
+                .as_ref()
+                .map_or(Value::Null, |held| Value::Number(*held as f64)),
+        );
+        object.insert("bytewise", Value::Bool(self.bytewise));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct StepBilled {
+    pub usage: Option<nyaaai_contract::shapes::step::NormalizedUsage>,
+    pub host: Option<String>,
+    pub generation_id: Option<String>,
+}
+
+impl Shape for StepBilled {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let usage = shape::optional(
+            object,
+            "usage",
+            at,
+            nyaaai_contract::shapes::step::NormalizedUsage::decode_at,
+        )?;
+        let host = shape::optional(object, "host", at, shape::text)?;
+        let generation_id = shape::optional(object, "generationId", at, shape::text)?;
+        Ok(Self {
+            usage,
+            host,
+            generation_id,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        if let Some(held) = &self.usage {
+            object.insert("usage", held.encode());
+        }
+        if let Some(held) = &self.host {
+            object.insert("host", Value::from(held.as_str()));
+        }
+        if let Some(held) = &self.generation_id {
+            object.insert("generationId", Value::from(held.as_str()));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct StepAssembleInput {
+    pub events: Vec<nyaaai_contract::shapes::step::StepEvent>,
+}
+
+impl Shape for StepAssembleInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let events = shape::required(object, "events", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::step::StepEvent::decode_at,
+            )
+        })?;
+        Ok(Self { events })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "events",
+            Value::Array(self.events.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct StepAssembleResult {
+    pub added: Vec<bool>,
+    pub failed_at: Option<i64>,
+    pub failure: Option<nyaaai_contract::shapes::step::Failure>,
+    pub output_seen: bool,
+    pub billed: Option<StepBilled>,
+    pub snapshot: Vec<nyaaai_contract::shapes::step::ReplyPart>,
+    pub result: Option<nyaaai_contract::shapes::step::StepResult>,
+}
+
+impl Shape for StepAssembleResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let added = shape::required(object, "added", at, |value, at| {
+            shape::list(value, at, shape::flag)
+        })?;
+        let failed_at = shape::required(object, "failedAt", at, |value, at| {
+            shape::nullable(value, at, shape::integer)
+        })?;
+        let failure = shape::required(object, "failure", at, |value, at| {
+            shape::nullable(value, at, nyaaai_contract::shapes::step::Failure::decode_at)
+        })?;
+        let output_seen = shape::required(object, "outputSeen", at, shape::flag)?;
+        let billed = shape::required(object, "billed", at, |value, at| {
+            shape::nullable(value, at, StepBilled::decode_at)
+        })?;
+        let snapshot = shape::required(object, "snapshot", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::step::ReplyPart::decode_at,
+            )
+        })?;
+        let result = shape::required(object, "result", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                nyaaai_contract::shapes::step::StepResult::decode_at,
+            )
+        })?;
+        Ok(Self {
+            added,
+            failed_at,
+            failure,
+            output_seen,
+            billed,
+            snapshot,
+            result,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "added",
+            Value::Array(self.added.iter().map(|held| Value::Bool(*held)).collect()),
+        );
+        object.insert(
+            "failedAt",
+            self.failed_at
+                .as_ref()
+                .map_or(Value::Null, |held| Value::Number(*held as f64)),
+        );
+        object.insert(
+            "failure",
+            self.failure
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert("outputSeen", Value::Bool(self.output_seen));
+        object.insert(
+            "billed",
+            self.billed
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert(
+            "snapshot",
+            Value::Array(self.snapshot.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "result",
+            self.result
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct StepRepliesInput {
+    pub result: nyaaai_contract::shapes::step::StepResult,
+}
+
+impl Shape for StepRepliesInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let result = shape::required(
+            object,
+            "result",
+            at,
+            nyaaai_contract::shapes::step::StepResult::decode_at,
+        )?;
+        Ok(Self { result })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("result", self.result.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct StepRepliesResult {
+    pub text: String,
+    pub calls: Vec<nyaaai_contract::shapes::step::ReplyPart>,
+    pub thoughts: Vec<nyaaai_contract::shapes::step::ThoughtPart>,
+}
+
+impl Shape for StepRepliesResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let text = shape::required(object, "text", at, shape::text)?;
+        let calls = shape::required(object, "calls", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::step::ReplyPart::decode_at,
+            )
+        })?;
+        let thoughts = shape::required(object, "thoughts", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::step::ThoughtPart::decode_at,
+            )
+        })?;
+        Ok(Self {
+            text,
+            calls,
+            thoughts,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("text", Value::from(self.text.as_str()));
+        object.insert(
+            "calls",
+            Value::Array(self.calls.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "thoughts",
+            Value::Array(self.thoughts.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct WireError {
+    pub code: Option<WireErrorCode>,
+    pub type_: Option<String>,
+    pub message: Option<String>,
+    pub metadata: Option<Record<Value>>,
+    pub resets_at: Option<WireErrorResetsAt>,
+}
+
+impl Shape for WireError {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let code = shape::optional(object, "code", at, WireErrorCode::decode_at)?;
+        let type_ = shape::optional(object, "type", at, shape::text)?;
+        let message = shape::optional(object, "message", at, shape::text)?;
+        let metadata = shape::optional(object, "metadata", at, |value, at| {
+            shape::record(value, at, shape::any)
+        })?;
+        let resets_at = shape::optional(object, "resetsAt", at, WireErrorResetsAt::decode_at)?;
+        Ok(Self {
+            code,
+            type_,
+            message,
+            metadata,
+            resets_at,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        if let Some(held) = &self.code {
+            object.insert("code", held.encode());
+        }
+        if let Some(held) = &self.type_ {
+            object.insert("type", Value::from(held.as_str()));
+        }
+        if let Some(held) = &self.message {
+            object.insert("message", Value::from(held.as_str()));
+        }
+        if let Some(held) = &self.metadata {
+            object.insert("metadata", shape::record_value(held, |held| held.clone()));
+        }
+        if let Some(held) = &self.resets_at {
+            object.insert("resetsAt", held.encode());
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum WireErrorCode {
+    Number(f64),
+    Text(String),
+}
+
+impl Shape for WireErrorCode {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        if let Ok(held) = shape::number(value, at) {
+            return Ok(Self::Number(held));
+        }
+        if let Ok(held) = shape::text(value, at) {
+            return Ok(Self::Text(held));
+        }
+        Err(shape::refused(at, "no branch matches"))
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Number(held) => Value::Number(*held),
+            Self::Text(held) => Value::from(held.as_str()),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum WireErrorResetsAt {
+    Number(f64),
+    Text(String),
+}
+
+impl Shape for WireErrorResetsAt {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        if let Ok(held) = shape::number(value, at) {
+            return Ok(Self::Number(held));
+        }
+        if let Ok(held) = shape::text(value, at) {
+            return Ok(Self::Text(held));
+        }
+        Err(shape::refused(at, "no branch matches"))
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Number(held) => Value::Number(*held),
+            Self::Text(held) => Value::from(held.as_str()),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct FailureExtra {
+    pub status: Option<FailureExtraStatus>,
+    pub retry_after_ms: Option<i64>,
+    pub resets_at: Option<i64>,
+    pub reasons: Option<Vec<String>>,
+    pub billed: Option<FailureExtraBilled>,
+}
+
+impl Shape for FailureExtra {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let status = shape::optional(object, "status", at, FailureExtraStatus::decode_at)?;
+        let retry_after_ms = shape::optional(object, "retryAfterMs", at, shape::integer)?;
+        let resets_at = shape::optional(object, "resetsAt", at, shape::integer)?;
+        let reasons = shape::optional(object, "reasons", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let billed = shape::optional(object, "billed", at, FailureExtraBilled::decode_at)?;
+        Ok(Self {
+            status,
+            retry_after_ms,
+            resets_at,
+            reasons,
+            billed,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        if let Some(held) = &self.status {
+            object.insert("status", held.encode());
+        }
+        if let Some(held) = &self.retry_after_ms {
+            object.insert("retryAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.resets_at {
+            object.insert("resetsAt", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.reasons {
+            object.insert(
+                "reasons",
+                Value::Array(held.iter().map(|held| Value::from(held.as_str())).collect()),
+            );
+        }
+        if let Some(held) = &self.billed {
+            object.insert("billed", held.encode());
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum FailureExtraStatus {
+    Number(f64),
+    Text(String),
+}
+
+impl Shape for FailureExtraStatus {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        if let Ok(held) = shape::number(value, at) {
+            return Ok(Self::Number(held));
+        }
+        if let Ok(held) = shape::text(value, at) {
+            return Ok(Self::Text(held));
+        }
+        Err(shape::refused(at, "no branch matches"))
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Number(held) => Value::Number(*held),
+            Self::Text(held) => Value::from(held.as_str()),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct FailureExtraBilled {
+    pub usage: Option<nyaaai_contract::shapes::step::NormalizedUsage>,
+    pub host: Option<String>,
+    pub generation_id: Option<String>,
+}
+
+impl Shape for FailureExtraBilled {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let usage = shape::optional(
+            object,
+            "usage",
+            at,
+            nyaaai_contract::shapes::step::NormalizedUsage::decode_at,
+        )?;
+        let host = shape::optional(object, "host", at, shape::text)?;
+        let generation_id = shape::optional(object, "generationId", at, shape::text)?;
+        Ok(Self {
+            usage,
+            host,
+            generation_id,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        if let Some(held) = &self.usage {
+            object.insert("usage", held.encode());
+        }
+        if let Some(held) = &self.host {
+            object.insert("host", Value::from(held.as_str()));
+        }
+        if let Some(held) = &self.generation_id {
+            object.insert("generationId", Value::from(held.as_str()));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct FailureMessageInput {
+    pub values: Vec<Value>,
+}
+
+impl Shape for FailureMessageInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let values = shape::required(object, "values", at, |value, at| {
+            shape::list(value, at, shape::any)
+        })?;
+        Ok(Self { values })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("values", Value::Array(self.values.clone()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct FailureMessageResult {
+    pub messages: Vec<Option<String>>,
+}
+
+impl Shape for FailureMessageResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let messages = shape::required(object, "messages", at, |value, at| {
+            shape::list(value, at, |value, at| {
+                shape::nullable(value, at, shape::text)
+            })
+        })?;
+        Ok(Self { messages })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "messages",
+            Value::Array(
+                self.messages
+                    .iter()
+                    .map(|held| {
+                        held.as_ref()
+                            .map_or(Value::Null, |held| Value::from(held.as_str()))
+                    })
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct FailureOfInput {
+    pub thrown: Vec<FailureOfInputThrownItem>,
+}
+
+impl Shape for FailureOfInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let thrown = shape::required(object, "thrown", at, |value, at| {
+            shape::list(value, at, FailureOfInputThrownItem::decode_at)
+        })?;
+        Ok(Self { thrown })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "thrown",
+            Value::Array(self.thrown.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum FailureOfInputThrownItem {
+    Failed(FailureOfInputThrownItemFailed),
+    Provider(FailureOfInputThrownItemProvider),
+    Error(FailureOfInputThrownItemError),
+    Value(FailureOfInputThrownItemValue),
+}
+
+impl Shape for FailureOfInputThrownItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "make", at)? {
+            "failed" => FailureOfInputThrownItemFailed::decode_at(value, at).map(Self::Failed),
+            "provider" => {
+                FailureOfInputThrownItemProvider::decode_at(value, at).map(Self::Provider)
+            }
+            "error" => FailureOfInputThrownItemError::decode_at(value, at).map(Self::Error),
+            "value" => FailureOfInputThrownItemValue::decode_at(value, at).map(Self::Value),
+            _ => Err(shape::no_branch(at, "make")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Failed(held) => held.encode(),
+            Self::Provider(held) => held.encode(),
+            Self::Error(held) => held.encode(),
+            Self::Value(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct FailureOfInputThrownItemFailed {
+    pub category: nyaaai_contract::shapes::step::FailureCategory,
+    pub message: String,
+    pub extra: Option<FailureExtra>,
+}
+
+impl Shape for FailureOfInputThrownItemFailed {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "make", at, |value, at| {
+            shape::is_text(value, at, "failed")
+        })?;
+        let category = shape::required(
+            object,
+            "category",
+            at,
+            nyaaai_contract::shapes::step::FailureCategory::decode_at,
+        )?;
+        let message = shape::required(object, "message", at, shape::text)?;
+        let extra = shape::optional(object, "extra", at, FailureExtra::decode_at)?;
+        Ok(Self {
+            category,
+            message,
+            extra,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("make", Value::from("failed"));
+        object.insert("category", self.category.encode());
+        object.insert("message", Value::from(self.message.as_str()));
+        if let Some(held) = &self.extra {
+            object.insert("extra", held.encode());
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct FailureOfInputThrownItemProvider {
+    pub failure: nyaaai_contract::shapes::step::Failure,
+}
+
+impl Shape for FailureOfInputThrownItemProvider {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "make", at, |value, at| {
+            shape::is_text(value, at, "provider")
+        })?;
+        let failure = shape::required(
+            object,
+            "failure",
+            at,
+            nyaaai_contract::shapes::step::Failure::decode_at,
+        )?;
+        Ok(Self { failure })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("make", Value::from("provider"));
+        object.insert("failure", self.failure.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct FailureOfInputThrownItemError {
+    pub message: String,
+}
+
+impl Shape for FailureOfInputThrownItemError {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "make", at, |value, at| {
+            shape::is_text(value, at, "error")
+        })?;
+        let message = shape::required(object, "message", at, shape::text)?;
+        Ok(Self { message })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("make", Value::from("error"));
+        object.insert("message", Value::from(self.message.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct FailureOfInputThrownItemValue {
+    pub value: Value,
+}
+
+impl Shape for FailureOfInputThrownItemValue {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "make", at, |value, at| {
+            shape::is_text(value, at, "value")
+        })?;
+        let value_field = shape::required(object, "value", at, shape::any)?;
+        Ok(Self { value: value_field })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("make", Value::from("value"));
+        object.insert("value", self.value.clone());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct FailureOfResult {
+    pub failures: Vec<Option<nyaaai_contract::shapes::step::Failure>>,
+}
+
+impl Shape for FailureOfResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let failures = shape::required(object, "failures", at, |value, at| {
+            shape::list(value, at, |value, at| {
+                shape::nullable(value, at, nyaaai_contract::shapes::step::Failure::decode_at)
+            })
+        })?;
+        Ok(Self { failures })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "failures",
+            Value::Array(
+                self.failures
+                    .iter()
+                    .map(|held| held.as_ref().map_or(Value::Null, |held| held.encode()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NativeReadersInput {
+    pub texts: Vec<String>,
+}
+
+impl Shape for NativeReadersInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let texts = shape::required(object, "texts", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { texts })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "texts",
+            Value::Array(
+                self.texts
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NativeReadersResult {
+    pub rows: Vec<NativeReadersResultRowsItem>,
+}
+
+impl Shape for NativeReadersResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, NativeReadersResultRowsItem::decode_at)
+        })?;
+        Ok(Self { rows })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "rows",
+            Value::Array(self.rows.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NativeReadersResultRowsItem {
+    pub is_json: bool,
+    pub string: String,
+    pub number: Option<f64>,
+}
+
+impl Shape for NativeReadersResultRowsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let is_json = shape::required(object, "isJson", at, shape::flag)?;
+        let string = shape::required(object, "string", at, shape::text)?;
+        let number = shape::required(object, "number", at, |value, at| {
+            shape::nullable(value, at, shape::number)
+        })?;
+        Ok(Self {
+            is_json,
+            string,
+            number,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("isJson", Value::Bool(self.is_json));
+        object.insert("string", Value::from(self.string.as_str()));
+        object.insert(
+            "number",
+            self.number
+                .as_ref()
+                .map_or(Value::Null, |held| Value::Number(*held)),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NativeSchemaPromptInput {
+    pub schemas: Vec<Record<Value>>,
+}
+
+impl Shape for NativeSchemaPromptInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let schemas = shape::required(object, "schemas", at, |value, at| {
+            shape::list(value, at, |value, at| shape::record(value, at, shape::any))
+        })?;
+        Ok(Self { schemas })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "schemas",
+            Value::Array(
+                self.schemas
+                    .iter()
+                    .map(|held| shape::record_value(held, |held| held.clone()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NativeSchemaPromptResult {
+    pub texts: Vec<String>,
+}
+
+impl Shape for NativeSchemaPromptResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let texts = shape::required(object, "texts", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { texts })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "texts",
+            Value::Array(
+                self.texts
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NativeSystemTextsInput {
+    pub rows: Vec<NativeSystemTextsInputRowsItem>,
+}
+
+impl Shape for NativeSystemTextsInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, NativeSystemTextsInputRowsItem::decode_at)
+        })?;
+        Ok(Self { rows })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "rows",
+            Value::Array(self.rows.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NativeSystemTextsInputRowsItem {
+    pub system: Vec<String>,
+    pub summary: Option<String>,
+    pub prompted: Option<String>,
+}
+
+impl Shape for NativeSystemTextsInputRowsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let system = shape::required(object, "system", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let summary = shape::required(object, "summary", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let prompted = shape::required(object, "prompted", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        Ok(Self {
+            system,
+            summary,
+            prompted,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "system",
+            Value::Array(
+                self.system
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "summary",
+            self.summary
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "prompted",
+            self.prompted
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NativeSystemTextsResult {
+    pub texts: Vec<Vec<String>>,
+}
+
+impl Shape for NativeSystemTextsResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let texts = shape::required(object, "texts", at, |value, at| {
+            shape::list(value, at, |value, at| shape::list(value, at, shape::text))
+        })?;
+        Ok(Self { texts })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "texts",
+            Value::Array(
+                self.texts
+                    .iter()
+                    .map(|held| {
+                        Value::Array(held.iter().map(|held| Value::from(held.as_str())).collect())
+                    })
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NativeArgumentsInput {
+    pub texts: Vec<String>,
+}
+
+impl Shape for NativeArgumentsInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let texts = shape::required(object, "texts", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { texts })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "texts",
+            Value::Array(
+                self.texts
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NativeArgumentsResult {
+    pub values: Vec<Record<Value>>,
+}
+
+impl Shape for NativeArgumentsResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let values = shape::required(object, "values", at, |value, at| {
+            shape::list(value, at, |value, at| shape::record(value, at, shape::any))
+        })?;
+        Ok(Self { values })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "values",
+            Value::Array(
+                self.values
+                    .iter()
+                    .map(|held| shape::record_value(held, |held| held.clone()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NativeCurrentTurnInput {
+    pub histories: Vec<Vec<nyaaai_contract::shapes::step::Turn>>,
+}
+
+impl Shape for NativeCurrentTurnInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let histories = shape::required(object, "histories", at, |value, at| {
+            shape::list(value, at, |value, at| {
+                shape::list(value, at, nyaaai_contract::shapes::step::Turn::decode_at)
+            })
+        })?;
+        Ok(Self { histories })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "histories",
+            Value::Array(
+                self.histories
+                    .iter()
+                    .map(|held| Value::Array(held.iter().map(|held| held.encode()).collect()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NativeCurrentTurnResult {
+    pub indexes: Vec<i64>,
+}
+
+impl Shape for NativeCurrentTurnResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let indexes = shape::required(object, "indexes", at, |value, at| {
+            shape::list(value, at, shape::integer)
+        })?;
+        Ok(Self { indexes })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "indexes",
+            Value::Array(
+                self.indexes
+                    .iter()
+                    .map(|held| Value::Number(*held as f64))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NativeChunkInput {
+    pub texts: Vec<String>,
+}
+
+impl Shape for NativeChunkInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let texts = shape::required(object, "texts", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { texts })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "texts",
+            Value::Array(
+                self.texts
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NativeChunkResult {
+    pub rows: Vec<NativeChunkResultRowsItem>,
+}
+
+impl Shape for NativeChunkResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, NativeChunkResultRowsItem::decode_at)
+        })?;
+        Ok(Self { rows })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "rows",
+            Value::Array(self.rows.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NativeChunkResultRowsItem {
+    pub chunk: Option<Record<Value>>,
+    pub failure: Option<nyaaai_contract::shapes::step::Failure>,
+}
+
+impl Shape for NativeChunkResultRowsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let chunk = shape::required(object, "chunk", at, |value, at| {
+            shape::nullable(value, at, |value, at| shape::record(value, at, shape::any))
+        })?;
+        let failure = shape::required(object, "failure", at, |value, at| {
+            shape::nullable(value, at, nyaaai_contract::shapes::step::Failure::decode_at)
+        })?;
+        Ok(Self { chunk, failure })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "chunk",
+            self.chunk.as_ref().map_or(Value::Null, |held| {
+                shape::record_value(held, |held| held.clone())
+            }),
+        );
+        object.insert(
+            "failure",
+            self.failure
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NativeWireErrorInput {
+    pub rows: Vec<NativeWireErrorInputRowsItem>,
+}
+
+impl Shape for NativeWireErrorInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, NativeWireErrorInputRowsItem::decode_at)
+        })?;
+        Ok(Self { rows })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "rows",
+            Value::Array(self.rows.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NativeWireErrorInputRowsItem {
+    pub status: i64,
+    pub body: String,
+}
+
+impl Shape for NativeWireErrorInputRowsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let status = shape::required(object, "status", at, shape::integer)?;
+        let body = shape::required(object, "body", at, shape::text)?;
+        Ok(Self { status, body })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("status", Value::Number(self.status as f64));
+        object.insert("body", Value::from(self.body.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NativeWireErrorResult {
+    pub errors: Vec<WireError>,
+}
+
+impl Shape for NativeWireErrorResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let errors = shape::required(object, "errors", at, |value, at| {
+            shape::list(value, at, WireError::decode_at)
+        })?;
+        Ok(Self { errors })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "errors",
+            Value::Array(self.errors.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NativeStreamFailureInput {
+    pub error: WireError,
+    pub usage: Option<nyaaai_contract::shapes::step::NormalizedUsage>,
+    pub serving: nyaaai_contract::shapes::step::Serving,
+}
+
+impl Shape for NativeStreamFailureInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let error = shape::required(object, "error", at, WireError::decode_at)?;
+        let usage = shape::required(object, "usage", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                nyaaai_contract::shapes::step::NormalizedUsage::decode_at,
+            )
+        })?;
+        let serving = shape::required(
+            object,
+            "serving",
+            at,
+            nyaaai_contract::shapes::step::Serving::decode_at,
+        )?;
+        Ok(Self {
+            error,
+            usage,
+            serving,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("error", self.error.encode());
+        object.insert(
+            "usage",
+            self.usage
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert("serving", self.serving.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NativeStreamFailureResult {
+    pub failure: nyaaai_contract::shapes::step::Failure,
+}
+
+impl Shape for NativeStreamFailureResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let failure = shape::required(
+            object,
+            "failure",
+            at,
+            nyaaai_contract::shapes::step::Failure::decode_at,
+        )?;
+        Ok(Self { failure })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("failure", self.failure.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NativeAssembledInput {
+    pub events: Vec<nyaaai_contract::shapes::step::StepEvent>,
+}
+
+impl Shape for NativeAssembledInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let events = shape::required(object, "events", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::step::StepEvent::decode_at,
+            )
+        })?;
+        Ok(Self { events })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "events",
+            Value::Array(self.events.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NativeAssembledResult {
+    pub result: Option<nyaaai_contract::shapes::step::StepResult>,
+    pub failure: Option<nyaaai_contract::shapes::step::Failure>,
+}
+
+impl Shape for NativeAssembledResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let result = shape::required(object, "result", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                nyaaai_contract::shapes::step::StepResult::decode_at,
+            )
+        })?;
+        let failure = shape::required(object, "failure", at, |value, at| {
+            shape::nullable(value, at, nyaaai_contract::shapes::step::Failure::decode_at)
+        })?;
+        Ok(Self { result, failure })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "result",
+            self.result
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert(
+            "failure",
+            self.failure
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NativeServingInput {
+    pub ids: Vec<Value>,
+}
+
+impl Shape for NativeServingInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let ids = shape::required(object, "ids", at, |value, at| {
+            shape::list(value, at, shape::any)
+        })?;
+        Ok(Self { ids })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("ids", Value::Array(self.ids.clone()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NativeServingResult {
+    pub events: Vec<Vec<nyaaai_contract::shapes::step::StepEvent>>,
+}
+
+impl Shape for NativeServingResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let events = shape::required(object, "events", at, |value, at| {
+            shape::list(value, at, |value, at| {
+                shape::list(
+                    value,
+                    at,
+                    nyaaai_contract::shapes::step::StepEvent::decode_at,
+                )
+            })
+        })?;
+        Ok(Self { events })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "events",
+            Value::Array(
+                self.events
+                    .iter()
+                    .map(|held| Value::Array(held.iter().map(|held| held.encode()).collect()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct SchemaProjectionProjectInput {
+    pub projection: SchemaProjectionProjectInputProjection,
+    pub schema: Record<Value>,
+    pub value: Value,
+}
+
+impl Shape for SchemaProjectionProjectInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let projection = shape::required(
+            object,
+            "projection",
+            at,
+            SchemaProjectionProjectInputProjection::decode_at,
+        )?;
+        let schema = shape::required(object, "schema", at, |value, at| {
+            shape::record(value, at, shape::any)
+        })?;
+        let value_field = shape::required(object, "value", at, shape::any)?;
+        Ok(Self {
+            projection,
+            schema,
+            value: value_field,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("projection", self.projection.encode());
+        object.insert(
+            "schema",
+            shape::record_value(&self.schema, |held| held.clone()),
+        );
+        object.insert("value", self.value.clone());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum SchemaProjectionProjectInputProjection {
+    Clean,
+    Nullable,
+    WithoutNulls,
+    Strict,
+}
+
+impl SchemaProjectionProjectInputProjection {
+    pub const ALL: [Self; 4] = [
+        Self::Clean,
+        Self::Nullable,
+        Self::WithoutNulls,
+        Self::Strict,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Clean => "clean",
+            Self::Nullable => "nullable",
+            Self::WithoutNulls => "withoutNulls",
+            Self::Strict => "strict",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for SchemaProjectionProjectInputProjection {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct SchemaProjectionProjectResult {
+    pub output: Value,
+    pub refusal: Option<String>,
+}
+
+impl Shape for SchemaProjectionProjectResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let output = shape::required(object, "output", at, shape::any)?;
+        let refusal = shape::required(object, "refusal", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        Ok(Self { output, refusal })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("output", self.output.clone());
+        object.insert(
+            "refusal",
+            self.refusal
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        Value::Object(object)
+    }
+}

@@ -1,0 +1,124 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "thought-block-adopts-loose-tail",
+	"input": {
+		"events": [
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "a"
+						}
+					]
+				}
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "b"
+						}
+					]
+				},
+				"block": "b0"
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "c"
+						}
+					]
+				},
+				"block": "b0"
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "d"
+						}
+					]
+				}
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true,
+			true,
+			true,
+			true
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "thought",
+				"type": "t",
+				"segments": [
+					{
+						"kind": "content",
+						"text": "abc"
+					}
+				]
+			},
+			{
+				"kind": "thought",
+				"type": "t",
+				"segments": [
+					{
+						"kind": "content",
+						"text": "d"
+					}
+				]
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "abc"
+						}
+					]
+				},
+				{
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "d"
+						}
+					]
+				}
+			],
+			"finish": "",
+			"serving": {}
+		}
+	}
+}

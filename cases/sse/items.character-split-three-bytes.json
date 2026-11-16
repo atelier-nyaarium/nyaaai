@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "character-split-three-bytes",
+	"input": {
+		"chunks": [
+			"ZGF0YTog",
+			"4oI=",
+			"rA==",
+			"Cgo="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[],
+			[],
+			[],
+			[
+				{
+					"kind": "data",
+					"data": "€"
+				}
+			]
+		],
+		"ended": []
+	}
+}

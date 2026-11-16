@@ -1,0 +1,23 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "event-after-data",
+	"input": {
+		"chunks": [
+			"ZGF0YTogMQpldmVudDogegoK"
+		]
+	},
+	"expected": {
+		"pushed": [
+			[
+				{
+					"kind": "data",
+					"data": "1",
+					"event": "z"
+				}
+			]
+		],
+		"ended": []
+	}
+}

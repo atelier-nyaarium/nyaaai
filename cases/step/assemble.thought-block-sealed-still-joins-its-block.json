@@ -1,0 +1,94 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "thought-block-sealed-still-joins-its-block",
+	"input": {
+		"events": [
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "a"
+						}
+					]
+				},
+				"block": "b0"
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "b"
+						}
+					],
+					"opaque": "sig"
+				},
+				"block": "b0"
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "c"
+						}
+					]
+				},
+				"block": "b0"
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true,
+			true,
+			true
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "thought",
+				"type": "t",
+				"segments": [
+					{
+						"kind": "content",
+						"text": "abc"
+					}
+				],
+				"opaque": "sig"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "abc"
+						}
+					],
+					"opaque": "sig"
+				}
+			],
+			"finish": "",
+			"serving": {}
+		}
+	}
+}

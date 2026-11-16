@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "multi-line-data",
+	"input": {
+		"chunks": [
+			"ZGF0YTogb25lCmRhdGE6dHdvCmRhdGE6ICB0aHJlZQpkYXRhCgo="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[
+				{
+					"kind": "data",
+					"data": "one\ntwo\n three\n"
+				}
+			]
+		],
+		"ended": []
+	}
+}

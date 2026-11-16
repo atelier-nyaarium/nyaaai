@@ -1,0 +1,37 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "clean-format-named-property",
+	"input": {
+		"projection": "clean",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"format": {
+					"type": "string"
+				},
+				"other": {
+					"type": "string",
+					"format": "uri"
+				}
+			}
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"properties": {
+				"format": {
+					"type": "string"
+				},
+				"other": {
+					"type": "string"
+				}
+			},
+			"additionalProperties": false
+		},
+		"refusal": null
+	}
+}

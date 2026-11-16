@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.currentTurn",
+	"name": "turn-step-only",
+	"input": {
+		"histories": [
+			[
+				{
+					"role": "step",
+					"parts": [
+						{
+							"kind": "text",
+							"text": "a"
+						}
+					]
+				}
+			]
+		]
+	},
+	"expected": {
+		"indexes": [
+			0
+		]
+	}
+}

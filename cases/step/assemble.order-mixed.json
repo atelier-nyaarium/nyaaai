@@ -1,0 +1,143 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "order-mixed",
+	"input": {
+		"events": [
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "a"
+						}
+					]
+				}
+			},
+			{
+				"kind": "text",
+				"text": "x"
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "c0",
+				"name": "read",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "text",
+				"text": "y"
+			},
+			{
+				"kind": "call",
+				"index": 1,
+				"wireId": "c1",
+				"name": "read",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "",
+				"name": "",
+				"argumentsText": "!"
+			},
+			{
+				"kind": "finish",
+				"reason": "tool_calls"
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true,
+			true,
+			true,
+			true,
+			true,
+			true,
+			false
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "thought",
+				"type": "t",
+				"segments": [
+					{
+						"kind": "content",
+						"text": "a"
+					}
+				]
+			},
+			{
+				"kind": "text",
+				"text": "x"
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "c0",
+				"name": "read",
+				"argumentsText": "{}!"
+			},
+			{
+				"kind": "text",
+				"text": "y"
+			},
+			{
+				"kind": "call",
+				"index": 1,
+				"wireId": "c1",
+				"name": "read",
+				"argumentsText": "{}"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "a"
+						}
+					]
+				},
+				{
+					"kind": "text",
+					"text": "x"
+				},
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "c0",
+					"name": "read",
+					"argumentsText": "{}!"
+				},
+				{
+					"kind": "text",
+					"text": "y"
+				},
+				{
+					"kind": "call",
+					"index": 1,
+					"wireId": "c1",
+					"name": "read",
+					"argumentsText": "{}"
+				}
+			],
+			"finish": "tool_calls",
+			"serving": {}
+		}
+	}
+}

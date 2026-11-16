@@ -1,0 +1,31 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.streamFailure",
+	"name": "stream-failure-usage",
+	"input": {
+		"error": {
+			"message": "Cut."
+		},
+		"usage": {
+			"input": 5,
+			"output": 2,
+			"cost": 0.25
+		},
+		"serving": {}
+	},
+	"expected": {
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": "Cut.",
+			"billed": {
+				"usage": {
+					"input": 5,
+					"output": 2,
+					"cost": 0.25
+				}
+			}
+		}
+	}
+}

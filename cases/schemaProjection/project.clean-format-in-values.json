@@ -1,0 +1,57 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "clean-format-in-values",
+	"input": {
+		"projection": "clean",
+		"schema": {
+			"type": "object",
+			"default": {
+				"format": "uri",
+				"keep": "uri"
+			},
+			"properties": {
+				"u": {
+					"type": "string",
+					"enum": [
+						"uri"
+					],
+					"examples": [
+						{
+							"format": "uri-reference"
+						},
+						{
+							"format": "other"
+						}
+					]
+				}
+			}
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"default": {
+				"keep": "uri"
+			},
+			"properties": {
+				"u": {
+					"type": "string",
+					"enum": [
+						"uri"
+					],
+					"examples": [
+						{},
+						{
+							"format": "other"
+						}
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"refusal": null
+	}
+}

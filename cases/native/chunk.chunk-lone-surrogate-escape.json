@@ -1,0 +1,21 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.chunk",
+	"name": "chunk-lone-surrogate-escape",
+	"input": {
+		"texts": [
+			"{\"a\":\"\\ud800\"}"
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"chunk": {
+					"a": "�"
+				},
+				"failure": null
+			}
+		]
+	}
+}

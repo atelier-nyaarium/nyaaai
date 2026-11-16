@@ -1,0 +1,31 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "strict-refuses-first-optional",
+	"input": {
+		"projection": "strict",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"type": "string"
+				},
+				"b": {
+					"type": "string"
+				},
+				"c": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"a"
+			]
+		},
+		"value": null
+	},
+	"expected": {
+		"output": null,
+		"refusal": "A strict json_schema cannot carry an optional field `b`; make it `.nullable()`, which is what strict mode sends."
+	}
+}

@@ -1,0 +1,18 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.streamFailure",
+	"name": "stream-failure-no-message",
+	"input": {
+		"error": {},
+		"usage": null,
+		"serving": {}
+	},
+	"expected": {
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": ""
+		}
+	}
+}

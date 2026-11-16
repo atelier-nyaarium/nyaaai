@@ -1,0 +1,70 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.wireError",
+	"name": "wire-error-fields",
+	"input": {
+		"rows": [
+			{
+				"status": 502,
+				"body": "{\"error\":{\"type\":\"overloaded_error\",\"message\":\"Busy.\"}}"
+			},
+			{
+				"status": 429,
+				"body": "{\"error\":{\"type\":\"rate_limit\",\"message\":\"Slow.\",\"resetsAt\":1794535200}}"
+			},
+			{
+				"status": 429,
+				"body": "{\"error\":{\"message\":\"Slow.\",\"resetsAt\":\"2026-11-11T10:00:00Z\"}}"
+			},
+			{
+				"status": 400,
+				"body": "{\"error\":{\"status\":\"INVALID_ARGUMENT\",\"message\":\"Bad.\"}}"
+			},
+			{
+				"status": 400,
+				"body": "{\"error\":{\"type\":\"t\",\"status\":\"S\",\"message\":\"Both.\"}}"
+			},
+			{
+				"status": 400,
+				"body": "{\"error\":{\"type\":5,\"status\":\"S\",\"message\":\"Type is not text.\"}}"
+			},
+			{
+				"status": 400,
+				"body": "{\"error\":{\"type\":5,\"status\":6,\"message\":\"Neither.\"}}"
+			}
+		]
+	},
+	"expected": {
+		"errors": [
+			{
+				"type": "overloaded_error",
+				"message": "Busy."
+			},
+			{
+				"type": "rate_limit",
+				"message": "Slow.",
+				"resetsAt": 1794535200
+			},
+			{
+				"message": "Slow.",
+				"resetsAt": "2026-11-11T10:00:00Z"
+			},
+			{
+				"type": "INVALID_ARGUMENT",
+				"message": "Bad."
+			},
+			{
+				"type": "t",
+				"message": "Both."
+			},
+			{
+				"type": "S",
+				"message": "Type is not text."
+			},
+			{
+				"message": "Neither."
+			}
+		]
+	}
+}

@@ -1,0 +1,41 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "clean-refs-and-defs-untouched",
+	"input": {
+		"projection": "clean",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"$ref": "#/$defs/A"
+				}
+			},
+			"$defs": {
+				"A": {
+					"type": "string",
+					"format": "uri"
+				}
+			}
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"$ref": "#/$defs/A"
+				}
+			},
+			"$defs": {
+				"A": {
+					"type": "string"
+				}
+			},
+			"additionalProperties": false
+		},
+		"refusal": null
+	}
+}

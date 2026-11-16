@@ -1,0 +1,38 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "strict-boolean-additional-properties-is-fine",
+	"input": {
+		"projection": "strict",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"type": "object",
+					"additionalProperties": false
+				}
+			},
+			"required": [
+				"a"
+			]
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"type": "object",
+					"additionalProperties": false
+				}
+			},
+			"required": [
+				"a"
+			],
+			"additionalProperties": false
+		},
+		"refusal": null
+	}
+}

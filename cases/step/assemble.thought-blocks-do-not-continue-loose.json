@@ -1,0 +1,95 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "thought-blocks-do-not-continue-loose",
+	"input": {
+		"events": [
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "a"
+						}
+					]
+				},
+				"block": "b0"
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "b"
+						}
+					]
+				}
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true,
+			true
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "thought",
+				"type": "t",
+				"segments": [
+					{
+						"kind": "content",
+						"text": "a"
+					}
+				]
+			},
+			{
+				"kind": "thought",
+				"type": "t",
+				"segments": [
+					{
+						"kind": "content",
+						"text": "b"
+					}
+				]
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "a"
+						}
+					]
+				},
+				{
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "b"
+						}
+					]
+				}
+			],
+			"finish": "",
+			"serving": {}
+		}
+	}
+}

@@ -1,0 +1,76 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.replies",
+	"name": "replies-calls-ties-keep-order",
+	"input": {
+		"result": {
+			"parts": [
+				{
+					"kind": "call",
+					"index": 1,
+					"wireId": "first",
+					"name": "r",
+					"argumentsText": "{}"
+				},
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "zero",
+					"name": "r",
+					"argumentsText": "{}"
+				},
+				{
+					"kind": "call",
+					"index": 1,
+					"wireId": "second",
+					"name": "r",
+					"argumentsText": "{}"
+				},
+				{
+					"kind": "call",
+					"index": 1,
+					"wireId": "third",
+					"name": "r",
+					"argumentsText": "{}"
+				}
+			],
+			"finish": "stop",
+			"serving": {}
+		}
+	},
+	"expected": {
+		"text": "",
+		"calls": [
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "zero",
+				"name": "r",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "call",
+				"index": 1,
+				"wireId": "first",
+				"name": "r",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "call",
+				"index": 1,
+				"wireId": "second",
+				"name": "r",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "call",
+				"index": 1,
+				"wireId": "third",
+				"name": "r",
+				"argumentsText": "{}"
+			}
+		],
+		"thoughts": []
+	}
+}

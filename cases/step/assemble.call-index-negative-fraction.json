@@ -1,0 +1,30 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "call-index-negative-fraction",
+	"input": {
+		"events": [
+			{
+				"kind": "call",
+				"index": -0.5,
+				"wireId": "a",
+				"name": "r",
+				"argumentsText": "{}"
+			}
+		]
+	},
+	"expected": {
+		"added": [],
+		"failedAt": 0,
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": "A tool call had no valid index."
+		},
+		"outputSeen": false,
+		"billed": {},
+		"snapshot": [],
+		"result": null
+	}
+}

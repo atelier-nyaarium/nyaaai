@@ -1,0 +1,17 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "blank-lines-only",
+	"input": {
+		"chunks": [
+			"CgoKDQo="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[]
+		],
+		"ended": []
+	}
+}

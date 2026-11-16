@@ -1,0 +1,63 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "withoutNulls-values-stay",
+	"input": {
+		"projection": "withoutNulls",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"note": {
+					"type": "string"
+				},
+				"items": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"tag": {
+								"type": "string"
+							}
+						}
+					}
+				},
+				"at": {
+					"anyOf": [
+						{
+							"type": "object",
+							"properties": {
+								"line": {
+									"type": "number"
+								}
+							}
+						},
+						{
+							"type": "string"
+						}
+					]
+				}
+			},
+			"required": []
+		},
+		"value": {
+			"note": "text",
+			"items": [
+				{
+					"tag": "t"
+				}
+			]
+		}
+	},
+	"expected": {
+		"output": {
+			"note": "text",
+			"items": [
+				{
+					"tag": "t"
+				}
+			]
+		},
+		"refusal": null
+	}
+}

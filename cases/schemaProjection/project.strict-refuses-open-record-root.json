@@ -1,0 +1,23 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "strict-refuses-open-record-root",
+	"input": {
+		"projection": "strict",
+		"schema": {
+			"type": "object",
+			"additionalProperties": {
+				"type": "string"
+			}
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"refusal": null
+	}
+}

@@ -1,0 +1,122 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "thought-loose-seam-kinds-differ",
+	"input": {
+		"events": [
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "summary",
+							"text": "s1"
+						}
+					]
+				}
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "c1"
+						}
+					]
+				}
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "c2"
+						},
+						{
+							"kind": "summary",
+							"text": "s2"
+						}
+					]
+				}
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "summary",
+							"text": "s3"
+						}
+					]
+				}
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true,
+			true,
+			true,
+			true
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "thought",
+				"type": "t",
+				"segments": [
+					{
+						"kind": "summary",
+						"text": "s1"
+					},
+					{
+						"kind": "content",
+						"text": "c1c2"
+					},
+					{
+						"kind": "summary",
+						"text": "s2s3"
+					}
+				]
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "summary",
+							"text": "s1"
+						},
+						{
+							"kind": "content",
+							"text": "c1c2"
+						},
+						{
+							"kind": "summary",
+							"text": "s2s3"
+						}
+					]
+				}
+			],
+			"finish": "",
+			"serving": {}
+		}
+	}
+}

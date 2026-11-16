@@ -1,0 +1,57 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.wireError",
+	"name": "wire-error-messages",
+	"input": {
+		"rows": [
+			{
+				"status": 503,
+				"body": "{\"error\":{\"message\":\"\"}}"
+			},
+			{
+				"status": 503,
+				"body": "{\"error\":{\"message\":\"   \"}}"
+			},
+			{
+				"status": 503,
+				"body": "{\"error\":{\"message\":5}}"
+			},
+			{
+				"status": 503,
+				"body": "{\"error\":{}}"
+			},
+			{
+				"status": 418,
+				"body": "{\"error\":{\"type\":\"x\"}}"
+			},
+			{
+				"status": 500,
+				"body": "{\"error\":{\"message\":\" kept \"}}"
+			}
+		]
+	},
+	"expected": {
+		"errors": [
+			{
+				"message": "HTTP 503"
+			},
+			{
+				"message": "HTTP 503"
+			},
+			{
+				"message": "HTTP 503"
+			},
+			{
+				"message": "HTTP 503"
+			},
+			{
+				"type": "x",
+				"message": "HTTP 418"
+			},
+			{
+				"message": " kept "
+			}
+		]
+	}
+}

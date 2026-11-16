@@ -1,0 +1,39 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "seen-by-text",
+	"input": {
+		"events": [
+			{
+				"kind": "text",
+				"text": "a"
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "text",
+				"text": "a"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "a"
+				}
+			],
+			"finish": "",
+			"serving": {}
+		}
+	}
+}

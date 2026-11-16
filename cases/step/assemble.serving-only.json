@@ -1,0 +1,38 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "serving-only",
+	"input": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"host": "h1",
+					"generationId": "g1"
+				}
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			false
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": false,
+		"billed": {
+			"host": "h1",
+			"generationId": "g1"
+		},
+		"snapshot": [],
+		"result": {
+			"parts": [],
+			"finish": "",
+			"serving": {
+				"host": "h1",
+				"generationId": "g1"
+			}
+		}
+	}
+}

@@ -1,0 +1,25 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.streamFailure",
+	"name": "stream-failure-empty-generation",
+	"input": {
+		"error": {
+			"message": "Cut."
+		},
+		"usage": null,
+		"serving": {
+			"generationId": ""
+		}
+	},
+	"expected": {
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": "Cut.",
+			"billed": {
+				"generationId": ""
+			}
+		}
+	}
+}

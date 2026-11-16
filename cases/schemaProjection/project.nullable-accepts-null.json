@@ -1,0 +1,119 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "nullable-accepts-null",
+	"input": {
+		"projection": "nullable",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"listed": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"member": {
+					"type": "null"
+				},
+				"branch": {
+					"anyOf": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"oneBranch": {
+					"oneOf": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"enumNull": {
+					"type": "string",
+					"enum": [
+						"a",
+						null
+					]
+				},
+				"constNull": {
+					"const": null
+				},
+				"untyped": {},
+				"untypedWithKeys": {
+					"description": "Anything."
+				}
+			}
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"properties": {
+				"listed": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"member": {
+					"type": "null"
+				},
+				"branch": {
+					"anyOf": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"oneBranch": {
+					"oneOf": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"enumNull": {
+					"type": "string",
+					"enum": [
+						"a",
+						null
+					]
+				},
+				"constNull": {
+					"const": null
+				},
+				"untyped": {},
+				"untypedWithKeys": {
+					"description": "Anything."
+				}
+			},
+			"required": [
+				"listed",
+				"member",
+				"branch",
+				"oneBranch",
+				"enumNull",
+				"constNull",
+				"untyped",
+				"untypedWithKeys"
+			]
+		},
+		"refusal": null
+	}
+}

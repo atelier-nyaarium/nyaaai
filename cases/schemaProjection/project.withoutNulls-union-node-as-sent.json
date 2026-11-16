@@ -1,0 +1,66 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "withoutNulls-union-node-as-sent",
+	"input": {
+		"projection": "withoutNulls",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"note": {
+					"type": "string"
+				},
+				"items": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"tag": {
+								"type": "string"
+							}
+						}
+					}
+				},
+				"at": {
+					"anyOf": [
+						{
+							"type": "object",
+							"properties": {
+								"line": {
+									"type": "number"
+								}
+							}
+						},
+						{
+							"type": "string"
+						}
+					]
+				}
+			},
+			"required": []
+		},
+		"value": {
+			"at": null,
+			"items": [
+				null,
+				{
+					"tag": "x"
+				}
+			],
+			"note": "kept"
+		}
+	},
+	"expected": {
+		"output": {
+			"items": [
+				null,
+				{
+					"tag": "x"
+				}
+			],
+			"note": "kept"
+		},
+		"refusal": null
+	}
+}

@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "unterminated-no-blank-line",
+	"input": {
+		"chunks": [
+			"ZGF0YTogeAo="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[]
+		],
+		"ended": [
+			{
+				"kind": "data",
+				"data": "x"
+			}
+		]
+	}
+}

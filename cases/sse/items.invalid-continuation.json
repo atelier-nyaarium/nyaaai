@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "invalid-continuation",
+	"input": {
+		"chunks": [
+			"ZGF0YTog",
+			"4kE=",
+			"Cgo="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[],
+			[],
+			[
+				{
+					"kind": "data",
+					"data": "�A"
+				}
+			]
+		],
+		"ended": []
+	}
+}

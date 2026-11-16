@@ -1,0 +1,52 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "nullable-optional-object",
+	"input": {
+		"projection": "nullable",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"opt": {
+					"type": "object",
+					"properties": {
+						"leaf": {
+							"type": "string"
+						}
+					},
+					"required": []
+				}
+			}
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"properties": {
+				"opt": {
+					"type": [
+						"object",
+						"null"
+					],
+					"properties": {
+						"leaf": {
+							"type": [
+								"string",
+								"null"
+							]
+						}
+					},
+					"required": [
+						"leaf"
+					]
+				}
+			},
+			"required": [
+				"opt"
+			]
+		},
+		"refusal": null
+	}
+}

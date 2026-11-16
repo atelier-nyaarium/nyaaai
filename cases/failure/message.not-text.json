@@ -1,0 +1,36 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "failure.message",
+	"name": "not-text",
+	"input": {
+		"values": [
+			5,
+			0,
+			null,
+			true,
+			false,
+			[],
+			[
+				"a"
+			],
+			{},
+			{
+				"message": "x"
+			}
+		]
+	},
+	"expected": {
+		"messages": [
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null
+		]
+	}
+}

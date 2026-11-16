@@ -1,0 +1,52 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "serving-first-wins",
+	"input": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"host": "h1"
+				}
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"host": "h2",
+					"generationId": "g1"
+				}
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "g2"
+				}
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			false,
+			false,
+			false
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": false,
+		"billed": {
+			"host": "h1",
+			"generationId": "g1"
+		},
+		"snapshot": [],
+		"result": {
+			"parts": [],
+			"finish": "",
+			"serving": {
+				"host": "h1",
+				"generationId": "g1"
+			}
+		}
+	}
+}

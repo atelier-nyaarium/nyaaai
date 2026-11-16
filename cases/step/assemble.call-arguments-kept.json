@@ -1,0 +1,92 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "call-arguments-kept",
+	"input": {
+		"events": [
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "a",
+				"name": "r",
+				"argumentsText": "{not json"
+			},
+			{
+				"kind": "call",
+				"index": 1,
+				"wireId": "b",
+				"name": "r",
+				"argumentsText": "[1]"
+			},
+			{
+				"kind": "call",
+				"index": 2,
+				"wireId": "c",
+				"name": "r",
+				"argumentsText": " 0 "
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true,
+			true,
+			true
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "a",
+				"name": "r",
+				"argumentsText": "{not json"
+			},
+			{
+				"kind": "call",
+				"index": 1,
+				"wireId": "b",
+				"name": "r",
+				"argumentsText": "[1]"
+			},
+			{
+				"kind": "call",
+				"index": 2,
+				"wireId": "c",
+				"name": "r",
+				"argumentsText": " 0 "
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "a",
+					"name": "r",
+					"argumentsText": "{not json"
+				},
+				{
+					"kind": "call",
+					"index": 1,
+					"wireId": "b",
+					"name": "r",
+					"argumentsText": "[1]"
+				},
+				{
+					"kind": "call",
+					"index": 2,
+					"wireId": "c",
+					"name": "r",
+					"argumentsText": " 0 "
+				}
+			],
+			"finish": "",
+			"serving": {}
+		}
+	}
+}

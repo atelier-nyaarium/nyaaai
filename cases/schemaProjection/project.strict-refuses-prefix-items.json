@@ -1,0 +1,33 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "strict-refuses-prefix-items",
+	"input": {
+		"projection": "strict",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"type": "array",
+					"prefixItems": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "number"
+						}
+					]
+				}
+			},
+			"required": [
+				"a"
+			]
+		},
+		"value": null
+	},
+	"expected": {
+		"output": null,
+		"refusal": "A strict json_schema cannot carry `prefixItems`; reshape the answer without it."
+	}
+}

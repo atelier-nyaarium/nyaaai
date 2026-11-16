@@ -1,0 +1,25 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.systemTexts",
+	"name": "system-prompted",
+	"input": {
+		"rows": [
+			{
+				"summary": null,
+				"prompted": "Answer in JSON.",
+				"system": [
+					"Rules."
+				]
+			}
+		]
+	},
+	"expected": {
+		"texts": [
+			[
+				"Rules.",
+				"Answer in JSON."
+			]
+		]
+	}
+}

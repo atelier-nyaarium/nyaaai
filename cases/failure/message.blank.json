@@ -1,0 +1,38 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "failure.message",
+	"name": "blank",
+	"input": {
+		"values": [
+			"",
+			" ",
+			"  \t\n\r",
+			" ",
+			" ",
+			" ",
+			" ",
+			"\ufeff",
+			"　",
+			" ",
+			"  ",
+			"\u000b\f"
+		]
+	},
+	"expected": {
+		"messages": [
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null
+		]
+	}
+}

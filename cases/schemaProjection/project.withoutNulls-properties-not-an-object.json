@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "withoutNulls-properties-not-an-object",
+	"input": {
+		"projection": "withoutNulls",
+		"schema": {
+			"type": "object",
+			"properties": [
+				{
+					"type": "string"
+				}
+			]
+		},
+		"value": {
+			"a": null
+		}
+	},
+	"expected": {
+		"output": {
+			"a": null
+		},
+		"refusal": null
+	}
+}

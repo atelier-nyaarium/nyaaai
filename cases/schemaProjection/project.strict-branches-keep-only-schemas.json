@@ -1,0 +1,52 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "strict-branches-keep-only-schemas",
+	"input": {
+		"projection": "strict",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"anyOf": [
+						{
+							"type": "string"
+						},
+						true,
+						"x",
+						{
+							"type": "number"
+						}
+					]
+				}
+			},
+			"required": [
+				"a"
+			]
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"anyOf": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "number"
+						}
+					]
+				}
+			},
+			"required": [
+				"a"
+			],
+			"additionalProperties": false
+		},
+		"refusal": null
+	}
+}

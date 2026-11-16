@@ -1,0 +1,27 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "effort.resolve",
+	"name": "case-matters",
+	"input": {
+		"offered": [
+			"Low",
+			"HIGH",
+			"low"
+		],
+		"wanted": [
+			"low",
+			"Low",
+			"high",
+			"HIGH"
+		]
+	},
+	"expected": {
+		"values": [
+			"low",
+			"Low",
+			"low",
+			"HIGH"
+		]
+	}
+}

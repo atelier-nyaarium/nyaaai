@@ -1,0 +1,42 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "withoutNulls-nested-objects",
+	"input": {
+		"projection": "withoutNulls",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"outer": {
+					"type": "object",
+					"properties": {
+						"leaf": {
+							"type": "string"
+						},
+						"sure": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"sure"
+					]
+				}
+			}
+		},
+		"value": {
+			"outer": {
+				"leaf": null,
+				"sure": null
+			}
+		}
+	},
+	"expected": {
+		"output": {
+			"outer": {
+				"sure": null
+			}
+		},
+		"refusal": null
+	}
+}

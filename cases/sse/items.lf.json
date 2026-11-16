@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "lf",
+	"input": {
+		"chunks": [
+			"ZGF0YTogeyJhIjoxfQoKZGF0YTogeyJhIjoyfQoK"
+		]
+	},
+	"expected": {
+		"pushed": [
+			[
+				{
+					"kind": "data",
+					"data": "{\"a\":1}"
+				},
+				{
+					"kind": "data",
+					"data": "{\"a\":2}"
+				}
+			]
+		],
+		"ended": []
+	}
+}

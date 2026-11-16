@@ -1,0 +1,98 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "thought-loose-several-segments",
+	"input": {
+		"events": [
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "summary",
+							"text": "a"
+						},
+						{
+							"kind": "content",
+							"text": "b"
+						}
+					]
+				}
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "c"
+						},
+						{
+							"kind": "content",
+							"text": "d"
+						}
+					]
+				}
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true,
+			true
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "thought",
+				"type": "t",
+				"segments": [
+					{
+						"kind": "summary",
+						"text": "a"
+					},
+					{
+						"kind": "content",
+						"text": "bc"
+					},
+					{
+						"kind": "content",
+						"text": "d"
+					}
+				]
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "summary",
+							"text": "a"
+						},
+						{
+							"kind": "content",
+							"text": "bc"
+						},
+						{
+							"kind": "content",
+							"text": "d"
+						}
+					]
+				}
+			],
+			"finish": "",
+			"serving": {}
+		}
+	}
+}

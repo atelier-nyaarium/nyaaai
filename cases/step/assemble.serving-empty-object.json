@@ -1,0 +1,44 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "serving-empty-object",
+	"input": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {}
+			},
+			{
+				"kind": "text",
+				"text": "a"
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			false,
+			true
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "text",
+				"text": "a"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "a"
+				}
+			],
+			"finish": "",
+			"serving": {}
+		}
+	}
+}

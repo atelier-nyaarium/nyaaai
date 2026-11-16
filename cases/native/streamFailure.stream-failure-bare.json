@@ -1,0 +1,20 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.streamFailure",
+	"name": "stream-failure-bare",
+	"input": {
+		"error": {
+			"message": "Cut."
+		},
+		"usage": null,
+		"serving": {}
+	},
+	"expected": {
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": "Cut."
+		}
+	}
+}

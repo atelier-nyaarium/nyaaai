@@ -1,0 +1,71 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "text-phase-then-none",
+	"input": {
+		"events": [
+			{
+				"kind": "text",
+				"text": "a",
+				"phase": "final"
+			},
+			{
+				"kind": "text",
+				"text": "b"
+			},
+			{
+				"kind": "text",
+				"text": "c",
+				"phase": "final"
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true,
+			true,
+			true
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "text",
+				"text": "a",
+				"phase": "final"
+			},
+			{
+				"kind": "text",
+				"text": "b"
+			},
+			{
+				"kind": "text",
+				"text": "c",
+				"phase": "final"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "a",
+					"phase": "final"
+				},
+				{
+					"kind": "text",
+					"text": "b"
+				},
+				{
+					"kind": "text",
+					"text": "c",
+					"phase": "final"
+				}
+			],
+			"finish": "",
+			"serving": {}
+		}
+	}
+}

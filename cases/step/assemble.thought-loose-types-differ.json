@@ -1,0 +1,108 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "thought-loose-types-differ",
+	"input": {
+		"events": [
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "reasoning.text",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "a"
+						}
+					]
+				}
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "reasoning.summary",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "b"
+						}
+					]
+				}
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "reasoning.summary",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "c"
+						}
+					]
+				}
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true,
+			true,
+			true
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "thought",
+				"type": "reasoning.text",
+				"segments": [
+					{
+						"kind": "content",
+						"text": "a"
+					}
+				]
+			},
+			{
+				"kind": "thought",
+				"type": "reasoning.summary",
+				"segments": [
+					{
+						"kind": "content",
+						"text": "bc"
+					}
+				]
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "reasoning.text",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "a"
+						}
+					]
+				},
+				{
+					"kind": "thought",
+					"type": "reasoning.summary",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "bc"
+						}
+					]
+				}
+			],
+			"finish": "",
+			"serving": {}
+		}
+	}
+}

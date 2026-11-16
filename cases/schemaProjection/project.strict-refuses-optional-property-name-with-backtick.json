@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "strict-refuses-optional-property-name-with-backtick",
+	"input": {
+		"projection": "strict",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"a`b": {
+					"type": "string"
+				}
+			}
+		},
+		"value": null
+	},
+	"expected": {
+		"output": null,
+		"refusal": "A strict json_schema cannot carry an optional field `a`b`; make it `.nullable()`, which is what strict mode sends."
+	}
+}

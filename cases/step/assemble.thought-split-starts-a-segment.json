@@ -1,0 +1,124 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "thought-split-starts-a-segment",
+	"input": {
+		"events": [
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "summary",
+							"text": "one"
+						}
+					]
+				},
+				"block": "i1"
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "summary",
+							"text": "two"
+						}
+					]
+				},
+				"block": "i1",
+				"split": true
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "summary",
+							"text": "three"
+						}
+					]
+				},
+				"block": "i1"
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "four"
+						}
+					]
+				},
+				"block": "i1",
+				"split": true
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true,
+			true,
+			true,
+			true
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "thought",
+				"type": "t",
+				"segments": [
+					{
+						"kind": "summary",
+						"text": "one"
+					},
+					{
+						"kind": "summary",
+						"text": "twothree"
+					},
+					{
+						"kind": "content",
+						"text": "four"
+					}
+				]
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "summary",
+							"text": "one"
+						},
+						{
+							"kind": "summary",
+							"text": "twothree"
+						},
+						{
+							"kind": "content",
+							"text": "four"
+						}
+					]
+				}
+			],
+			"finish": "",
+			"serving": {}
+		}
+	}
+}

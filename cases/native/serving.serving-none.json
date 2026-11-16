@@ -1,0 +1,12 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.serving",
+	"name": "serving-none",
+	"input": {
+		"ids": []
+	},
+	"expected": {
+		"events": []
+	}
+}

@@ -1,0 +1,23 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "clean-root-record-becomes-closed",
+	"input": {
+		"projection": "clean",
+		"schema": {
+			"type": "object",
+			"additionalProperties": {
+				"type": "string"
+			}
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"refusal": null
+	}
+}

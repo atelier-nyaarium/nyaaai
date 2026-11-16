@@ -1,0 +1,37 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "strict-root-open-flag-is-overwritten",
+	"input": {
+		"projection": "strict",
+		"schema": {
+			"type": "object",
+			"additionalProperties": true,
+			"properties": {
+				"a": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"a"
+			]
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"a": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"a"
+			]
+		},
+		"refusal": null
+	}
+}

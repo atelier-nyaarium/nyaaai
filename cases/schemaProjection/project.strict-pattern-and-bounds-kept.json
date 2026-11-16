@@ -1,0 +1,50 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "strict-pattern-and-bounds-kept",
+	"input": {
+		"projection": "strict",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"type": "string",
+					"pattern": "^x$",
+					"minLength": 1
+				},
+				"b": {
+					"type": "integer",
+					"minimum": 0
+				}
+			},
+			"required": [
+				"a",
+				"b"
+			]
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"type": "string",
+					"pattern": "^x$",
+					"minLength": 1
+				},
+				"b": {
+					"type": "integer",
+					"minimum": 0
+				}
+			},
+			"required": [
+				"a",
+				"b"
+			],
+			"additionalProperties": false
+		},
+		"refusal": null
+	}
+}

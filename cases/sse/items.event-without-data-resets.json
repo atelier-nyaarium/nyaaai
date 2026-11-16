@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "event-without-data-resets",
+	"input": {
+		"chunks": [
+			"ZXZlbnQ6IGxvbmUKCmRhdGE6IGFmdGVyCgo="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[
+				{
+					"kind": "data",
+					"data": "after"
+				}
+			]
+		],
+		"ended": []
+	}
+}

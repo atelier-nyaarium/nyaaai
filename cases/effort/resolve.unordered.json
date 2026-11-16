@@ -1,0 +1,37 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "effort.resolve",
+	"name": "unordered",
+	"input": {
+		"offered": [
+			"xhigh",
+			"low",
+			"high"
+		],
+		"wanted": [
+			"none",
+			"minimal",
+			"low",
+			"medium",
+			"high",
+			"xhigh",
+			"max",
+			"turbo",
+			""
+		]
+	},
+	"expected": {
+		"values": [
+			"low",
+			"low",
+			"low",
+			"low",
+			"high",
+			"xhigh",
+			"xhigh",
+			"low",
+			"low"
+		]
+	}
+}

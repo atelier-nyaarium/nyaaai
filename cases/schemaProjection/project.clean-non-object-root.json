@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "clean-non-object-root",
+	"input": {
+		"projection": "clean",
+		"schema": {
+			"$schema": "https://json-schema.org/draft/2020-12/schema",
+			"type": "string",
+			"format": "uri"
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "string",
+			"format": "uri"
+		},
+		"refusal": null
+	}
+}

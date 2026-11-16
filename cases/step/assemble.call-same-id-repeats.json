@@ -1,0 +1,56 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "call-same-id-repeats",
+	"input": {
+		"events": [
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "c0",
+				"name": "read",
+				"argumentsText": "a"
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "c0",
+				"name": "read",
+				"argumentsText": "b"
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true,
+			true
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "c0",
+				"name": "read",
+				"argumentsText": "ab"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "c0",
+					"name": "read",
+					"argumentsText": "ab"
+				}
+			],
+			"finish": "",
+			"serving": {}
+		}
+	}
+}

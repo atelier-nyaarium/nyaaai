@@ -1,0 +1,65 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "nullable-integer-like-property-names",
+	"input": {
+		"projection": "nullable",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"1": {
+					"type": "string"
+				},
+				"2": {
+					"type": "string"
+				},
+				"b": {
+					"type": "string"
+				},
+				"a": {
+					"type": "string"
+				}
+			}
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"properties": {
+				"1": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"2": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"b": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"a": {
+					"type": [
+						"string",
+						"null"
+					]
+				}
+			},
+			"required": [
+				"1",
+				"2",
+				"b",
+				"a"
+			]
+		},
+		"refusal": null
+	}
+}

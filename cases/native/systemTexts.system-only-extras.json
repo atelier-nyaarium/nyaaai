@@ -1,0 +1,23 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.systemTexts",
+	"name": "system-only-extras",
+	"input": {
+		"rows": [
+			{
+				"summary": "S",
+				"prompted": "P",
+				"system": []
+			}
+		]
+	},
+	"expected": {
+		"texts": [
+			[
+				"S",
+				"P"
+			]
+		]
+	}
+}

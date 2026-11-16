@@ -2351,6 +2351,939 @@
 				"overloaded",
 				"unavailable"
 			]
+		},
+		"EffortLadderInput": {
+			"type": "object",
+			"properties": {}
+		},
+		"EffortLadderResult": {
+			"type": "object",
+			"properties": {
+				"efforts": {
+					"type": "array",
+					"items": {
+						"$ref": "step.input.json#/$defs/Effort"
+					}
+				}
+			},
+			"required": [
+				"efforts"
+			]
+		},
+		"EffortResolveInput": {
+			"type": "object",
+			"properties": {
+				"offered": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"wanted": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"offered",
+				"wanted"
+			]
+		},
+		"EffortResolveResult": {
+			"type": "object",
+			"properties": {
+				"values": {
+					"type": "array",
+					"items": {
+						"type": [
+							"string",
+							"null"
+						]
+					}
+				}
+			},
+			"required": [
+				"values"
+			]
+		},
+		"SseItemsInput": {
+			"type": "object",
+			"properties": {
+				"chunks": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"chunks"
+			]
+		},
+		"SseItemsResult": {
+			"type": "object",
+			"properties": {
+				"pushed": {
+					"type": "array",
+					"items": {
+						"type": "array",
+						"items": {
+							"$ref": "step.input.json#/$defs/SseItem"
+						}
+					}
+				},
+				"ended": {
+					"type": "array",
+					"items": {
+						"$ref": "step.input.json#/$defs/SseItem"
+					}
+				}
+			},
+			"required": [
+				"pushed",
+				"ended"
+			]
+		},
+		"SseSplitsInput": {
+			"type": "object",
+			"properties": {
+				"bytes": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"bytes"
+			]
+		},
+		"SseSplitsResult": {
+			"type": "object",
+			"properties": {
+				"items": {
+					"type": "array",
+					"items": {
+						"$ref": "step.input.json#/$defs/SseItem"
+					}
+				},
+				"agree": {
+					"type": "boolean"
+				},
+				"firstDifferent": {
+					"anyOf": [
+						{
+							"type": "integer",
+							"minimum": -9007199254740991,
+							"maximum": 9007199254740991
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"bytewise": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"items",
+				"agree",
+				"firstDifferent",
+				"bytewise"
+			]
+		},
+		"StepBilled": {
+			"type": "object",
+			"properties": {
+				"usage": {
+					"$ref": "step.input.json#/$defs/NormalizedUsage"
+				},
+				"host": {
+					"type": "string"
+				},
+				"generationId": {
+					"type": "string"
+				}
+			}
+		},
+		"StepAssembleInput": {
+			"type": "object",
+			"properties": {
+				"events": {
+					"type": "array",
+					"items": {
+						"$ref": "step.input.json#/$defs/StepEvent"
+					}
+				}
+			},
+			"required": [
+				"events"
+			]
+		},
+		"StepAssembleResult": {
+			"type": "object",
+			"properties": {
+				"added": {
+					"type": "array",
+					"items": {
+						"type": "boolean"
+					}
+				},
+				"failedAt": {
+					"anyOf": [
+						{
+							"type": "integer",
+							"minimum": -9007199254740991,
+							"maximum": 9007199254740991
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"failure": {
+					"anyOf": [
+						{
+							"$ref": "step.input.json#/$defs/Failure"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"outputSeen": {
+					"type": "boolean"
+				},
+				"billed": {
+					"anyOf": [
+						{
+							"$ref": "#/$defs/StepBilled"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"snapshot": {
+					"type": "array",
+					"items": {
+						"$ref": "step.input.json#/$defs/ReplyPart"
+					}
+				},
+				"result": {
+					"anyOf": [
+						{
+							"$ref": "step.input.json#/$defs/StepResult"
+						},
+						{
+							"type": "null"
+						}
+					]
+				}
+			},
+			"required": [
+				"added",
+				"failedAt",
+				"failure",
+				"outputSeen",
+				"billed",
+				"snapshot",
+				"result"
+			]
+		},
+		"StepRepliesInput": {
+			"type": "object",
+			"properties": {
+				"result": {
+					"$ref": "step.input.json#/$defs/StepResult"
+				}
+			},
+			"required": [
+				"result"
+			]
+		},
+		"StepRepliesResult": {
+			"type": "object",
+			"properties": {
+				"text": {
+					"type": "string"
+				},
+				"calls": {
+					"type": "array",
+					"items": {
+						"$ref": "step.input.json#/$defs/ReplyPart"
+					}
+				},
+				"thoughts": {
+					"type": "array",
+					"items": {
+						"$ref": "step.input.json#/$defs/ThoughtPart"
+					}
+				}
+			},
+			"required": [
+				"text",
+				"calls",
+				"thoughts"
+			]
+		},
+		"WireError": {
+			"type": "object",
+			"properties": {
+				"code": {
+					"type": [
+						"number",
+						"string"
+					]
+				},
+				"type": {
+					"type": "string"
+				},
+				"message": {
+					"type": "string"
+				},
+				"metadata": {
+					"type": "object",
+					"propertyNames": {
+						"type": "string"
+					},
+					"additionalProperties": {}
+				},
+				"resetsAt": {
+					"type": [
+						"number",
+						"string"
+					]
+				}
+			}
+		},
+		"FailureExtra": {
+			"type": "object",
+			"properties": {
+				"status": {
+					"type": [
+						"number",
+						"string"
+					]
+				},
+				"retryAfterMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"resetsAt": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"reasons": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"billed": {
+					"type": "object",
+					"properties": {
+						"usage": {
+							"$ref": "step.input.json#/$defs/NormalizedUsage"
+						},
+						"host": {
+							"type": "string"
+						},
+						"generationId": {
+							"type": "string"
+						}
+					}
+				}
+			}
+		},
+		"FailureMessageInput": {
+			"type": "object",
+			"properties": {
+				"values": {
+					"type": "array",
+					"items": {}
+				}
+			},
+			"required": [
+				"values"
+			]
+		},
+		"FailureMessageResult": {
+			"type": "object",
+			"properties": {
+				"messages": {
+					"type": "array",
+					"items": {
+						"type": [
+							"string",
+							"null"
+						]
+					}
+				}
+			},
+			"required": [
+				"messages"
+			]
+		},
+		"FailureOfInput": {
+			"type": "object",
+			"properties": {
+				"thrown": {
+					"type": "array",
+					"items": {
+						"oneOf": [
+							{
+								"type": "object",
+								"properties": {
+									"make": {
+										"type": "string",
+										"const": "failed"
+									},
+									"category": {
+										"$ref": "step.input.json#/$defs/FailureCategory"
+									},
+									"message": {
+										"type": "string"
+									},
+									"extra": {
+										"$ref": "#/$defs/FailureExtra"
+									}
+								},
+								"required": [
+									"make",
+									"category",
+									"message"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"make": {
+										"type": "string",
+										"const": "provider"
+									},
+									"failure": {
+										"$ref": "step.input.json#/$defs/Failure"
+									}
+								},
+								"required": [
+									"make",
+									"failure"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"make": {
+										"type": "string",
+										"const": "error"
+									},
+									"message": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"make",
+									"message"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"make": {
+										"type": "string",
+										"const": "value"
+									},
+									"value": {}
+								},
+								"required": [
+									"make",
+									"value"
+								]
+							}
+						],
+						"x-tag": "make"
+					}
+				}
+			},
+			"required": [
+				"thrown"
+			]
+		},
+		"FailureOfResult": {
+			"type": "object",
+			"properties": {
+				"failures": {
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{
+								"$ref": "step.input.json#/$defs/Failure"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				}
+			},
+			"required": [
+				"failures"
+			]
+		},
+		"NativeReadersInput": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			]
+		},
+		"NativeReadersResult": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"isJson": {
+								"type": "boolean"
+							},
+							"string": {
+								"type": "string"
+							},
+							"number": {
+								"type": [
+									"number",
+									"null"
+								]
+							}
+						},
+						"required": [
+							"isJson",
+							"string",
+							"number"
+						]
+					}
+				}
+			},
+			"required": [
+				"rows"
+			]
+		},
+		"NativeSchemaPromptInput": {
+			"type": "object",
+			"properties": {
+				"schemas": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"propertyNames": {
+							"type": "string"
+						},
+						"additionalProperties": {}
+					}
+				}
+			},
+			"required": [
+				"schemas"
+			]
+		},
+		"NativeSchemaPromptResult": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			]
+		},
+		"NativeSystemTextsInput": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"system": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"summary": {
+								"type": [
+									"string",
+									"null"
+								]
+							},
+							"prompted": {
+								"type": [
+									"string",
+									"null"
+								]
+							}
+						},
+						"required": [
+							"system",
+							"summary",
+							"prompted"
+						]
+					}
+				}
+			},
+			"required": [
+				"rows"
+			]
+		},
+		"NativeSystemTextsResult": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					}
+				}
+			},
+			"required": [
+				"texts"
+			]
+		},
+		"NativeArgumentsInput": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			]
+		},
+		"NativeArgumentsResult": {
+			"type": "object",
+			"properties": {
+				"values": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"propertyNames": {
+							"type": "string"
+						},
+						"additionalProperties": {}
+					}
+				}
+			},
+			"required": [
+				"values"
+			]
+		},
+		"NativeCurrentTurnInput": {
+			"type": "object",
+			"properties": {
+				"histories": {
+					"type": "array",
+					"items": {
+						"type": "array",
+						"items": {
+							"$ref": "step.input.json#/$defs/Turn"
+						}
+					}
+				}
+			},
+			"required": [
+				"histories"
+			]
+		},
+		"NativeCurrentTurnResult": {
+			"type": "object",
+			"properties": {
+				"indexes": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"minimum": -9007199254740991,
+						"maximum": 9007199254740991
+					}
+				}
+			},
+			"required": [
+				"indexes"
+			]
+		},
+		"NativeChunkInput": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			]
+		},
+		"NativeChunkResult": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"chunk": {
+								"anyOf": [
+									{
+										"type": "object",
+										"propertyNames": {
+											"type": "string"
+										},
+										"additionalProperties": {}
+									},
+									{
+										"type": "null"
+									}
+								]
+							},
+							"failure": {
+								"anyOf": [
+									{
+										"$ref": "step.input.json#/$defs/Failure"
+									},
+									{
+										"type": "null"
+									}
+								]
+							}
+						},
+						"required": [
+							"chunk",
+							"failure"
+						]
+					}
+				}
+			},
+			"required": [
+				"rows"
+			]
+		},
+		"NativeWireErrorInput": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"status": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"body": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"status",
+							"body"
+						]
+					}
+				}
+			},
+			"required": [
+				"rows"
+			]
+		},
+		"NativeWireErrorResult": {
+			"type": "object",
+			"properties": {
+				"errors": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/WireError"
+					}
+				}
+			},
+			"required": [
+				"errors"
+			]
+		},
+		"NativeStreamFailureInput": {
+			"type": "object",
+			"properties": {
+				"error": {
+					"$ref": "#/$defs/WireError"
+				},
+				"usage": {
+					"anyOf": [
+						{
+							"$ref": "step.input.json#/$defs/NormalizedUsage"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"serving": {
+					"$ref": "step.input.json#/$defs/Serving"
+				}
+			},
+			"required": [
+				"error",
+				"usage",
+				"serving"
+			]
+		},
+		"NativeStreamFailureResult": {
+			"type": "object",
+			"properties": {
+				"failure": {
+					"$ref": "step.input.json#/$defs/Failure"
+				}
+			},
+			"required": [
+				"failure"
+			]
+		},
+		"NativeAssembledInput": {
+			"type": "object",
+			"properties": {
+				"events": {
+					"type": "array",
+					"items": {
+						"$ref": "step.input.json#/$defs/StepEvent"
+					}
+				}
+			},
+			"required": [
+				"events"
+			]
+		},
+		"NativeAssembledResult": {
+			"type": "object",
+			"properties": {
+				"result": {
+					"anyOf": [
+						{
+							"$ref": "step.input.json#/$defs/StepResult"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"failure": {
+					"anyOf": [
+						{
+							"$ref": "step.input.json#/$defs/Failure"
+						},
+						{
+							"type": "null"
+						}
+					]
+				}
+			},
+			"required": [
+				"result",
+				"failure"
+			]
+		},
+		"NativeServingInput": {
+			"type": "object",
+			"properties": {
+				"ids": {
+					"type": "array",
+					"items": {}
+				}
+			},
+			"required": [
+				"ids"
+			]
+		},
+		"NativeServingResult": {
+			"type": "object",
+			"properties": {
+				"events": {
+					"type": "array",
+					"items": {
+						"type": "array",
+						"items": {
+							"$ref": "step.input.json#/$defs/StepEvent"
+						}
+					}
+				}
+			},
+			"required": [
+				"events"
+			]
+		},
+		"SchemaProjectionProjectInput": {
+			"type": "object",
+			"properties": {
+				"projection": {
+					"type": "string",
+					"enum": [
+						"clean",
+						"nullable",
+						"withoutNulls",
+						"strict"
+					]
+				},
+				"schema": {
+					"type": "object",
+					"propertyNames": {
+						"type": "string"
+					},
+					"additionalProperties": {}
+				},
+				"value": {}
+			},
+			"required": [
+				"projection",
+				"schema",
+				"value"
+			]
+		},
+		"SchemaProjectionProjectResult": {
+			"type": "object",
+			"properties": {
+				"output": {},
+				"refusal": {
+					"type": [
+						"string",
+						"null"
+					]
+				}
+			},
+			"required": [
+				"output",
+				"refusal"
+			]
 		}
 	}
 }

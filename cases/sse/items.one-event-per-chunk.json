@@ -1,0 +1,36 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "one-event-per-chunk",
+	"input": {
+		"chunks": [
+			"ZGF0YTogYQoK",
+			"ZGF0YTogYgoK",
+			"ZGF0YTogYwoK"
+		]
+	},
+	"expected": {
+		"pushed": [
+			[
+				{
+					"kind": "data",
+					"data": "a"
+				}
+			],
+			[
+				{
+					"kind": "data",
+					"data": "b"
+				}
+			],
+			[
+				{
+					"kind": "data",
+					"data": "c"
+				}
+			]
+		],
+		"ended": []
+	}
+}

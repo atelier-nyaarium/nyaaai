@@ -1,0 +1,15 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "clean-empty-object",
+	"input": {
+		"projection": "clean",
+		"schema": {},
+		"value": null
+	},
+	"expected": {
+		"output": {},
+		"refusal": null
+	}
+}

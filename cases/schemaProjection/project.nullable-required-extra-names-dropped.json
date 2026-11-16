@@ -1,0 +1,36 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "nullable-required-extra-names-dropped",
+	"input": {
+		"projection": "nullable",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"gone",
+				"a"
+			]
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"a"
+			]
+		},
+		"refusal": null
+	}
+}

@@ -1,0 +1,30 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.arguments",
+	"name": "arguments-not-objects",
+	"input": {
+		"texts": [
+			"[1,2]",
+			"[]",
+			"null",
+			"\"text\"",
+			"5",
+			"true",
+			"[{}]",
+			"undefined"
+		]
+	},
+	"expected": {
+		"values": [
+			{},
+			{},
+			{},
+			{},
+			{},
+			{},
+			{},
+			{}
+		]
+	}
+}

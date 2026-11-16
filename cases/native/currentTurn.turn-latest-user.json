@@ -1,0 +1,52 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.currentTurn",
+	"name": "turn-latest-user",
+	"input": {
+		"histories": [
+			[
+				{
+					"role": "user",
+					"text": "a"
+				},
+				{
+					"role": "step",
+					"parts": [
+						{
+							"kind": "text",
+							"text": "a"
+						}
+					]
+				},
+				{
+					"role": "user",
+					"text": "b"
+				},
+				{
+					"role": "step",
+					"parts": [
+						{
+							"kind": "text",
+							"text": "a"
+						}
+					]
+				},
+				{
+					"role": "step",
+					"parts": [
+						{
+							"kind": "text",
+							"text": "a"
+						}
+					]
+				}
+			]
+		]
+	},
+	"expected": {
+		"indexes": [
+			3
+		]
+	}
+}

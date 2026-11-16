@@ -1,0 +1,88 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "strict-zod-union",
+	"input": {
+		"projection": "strict",
+		"schema": {
+			"$schema": "https://json-schema.org/draft/2020-12/schema",
+			"type": "object",
+			"properties": {
+				"pick": {
+					"anyOf": [
+						{
+							"type": "object",
+							"properties": {
+								"a": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"a"
+							],
+							"additionalProperties": false
+						},
+						{
+							"type": "object",
+							"properties": {
+								"b": {
+									"type": "number"
+								}
+							},
+							"required": [
+								"b"
+							],
+							"additionalProperties": false
+						}
+					]
+				}
+			},
+			"required": [
+				"pick"
+			],
+			"additionalProperties": false
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"properties": {
+				"pick": {
+					"anyOf": [
+						{
+							"type": "object",
+							"properties": {
+								"a": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"a"
+							],
+							"additionalProperties": false
+						},
+						{
+							"type": "object",
+							"properties": {
+								"b": {
+									"type": "number"
+								}
+							},
+							"required": [
+								"b"
+							],
+							"additionalProperties": false
+						}
+					]
+				}
+			},
+			"required": [
+				"pick"
+			],
+			"additionalProperties": false
+		},
+		"refusal": null
+	}
+}

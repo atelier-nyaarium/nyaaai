@@ -1,0 +1,24 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.splits",
+	"name": "splits-bytes-order-mark",
+	"input": {
+		"bytes": "77u/ZGF0YTogeAoKZGF0YTogeQ=="
+	},
+	"expected": {
+		"items": [
+			{
+				"kind": "data",
+				"data": "x"
+			},
+			{
+				"kind": "data",
+				"data": "y"
+			}
+		],
+		"agree": true,
+		"firstDifferent": null,
+		"bytewise": true
+	}
+}

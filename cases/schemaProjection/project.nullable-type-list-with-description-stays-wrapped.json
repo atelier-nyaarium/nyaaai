@@ -1,0 +1,45 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "nullable-type-list-with-description-stays-wrapped",
+	"input": {
+		"projection": "nullable",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"type": [
+						"string",
+						"number"
+					]
+				}
+			}
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"anyOf": [
+						{
+							"type": [
+								"string",
+								"number"
+							]
+						},
+						{
+							"type": "null"
+						}
+					]
+				}
+			},
+			"required": [
+				"a"
+			]
+		},
+		"refusal": null
+	}
+}

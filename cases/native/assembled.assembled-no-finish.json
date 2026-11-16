@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.assembled",
+	"name": "assembled-no-finish",
+	"input": {
+		"events": [
+			{
+				"kind": "text",
+				"text": "a"
+			}
+		]
+	},
+	"expected": {
+		"result": null,
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": "The provider ended the step."
+		}
+	}
+}

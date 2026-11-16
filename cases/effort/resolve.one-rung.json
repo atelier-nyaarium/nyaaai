@@ -1,0 +1,35 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "effort.resolve",
+	"name": "one-rung",
+	"input": {
+		"offered": [
+			"medium"
+		],
+		"wanted": [
+			"none",
+			"minimal",
+			"low",
+			"medium",
+			"high",
+			"xhigh",
+			"max",
+			"turbo",
+			""
+		]
+	},
+	"expected": {
+		"values": [
+			"medium",
+			"medium",
+			"medium",
+			"medium",
+			"medium",
+			"medium",
+			"medium",
+			"medium",
+			"medium"
+		]
+	}
+}

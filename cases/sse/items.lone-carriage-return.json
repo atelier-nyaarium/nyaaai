@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "lone-carriage-return",
+	"input": {
+		"chunks": [
+			"ZGF0YTogYQ1kYXRhOiBiCgo="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[
+				{
+					"kind": "data",
+					"data": "a\rdata: b"
+				}
+			]
+		],
+		"ended": []
+	}
+}

@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "clean-empty-dollar-schema",
+	"input": {
+		"projection": "clean",
+		"schema": {
+			"$schema": "",
+			"type": "object"
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"$schema": "",
+			"type": "object",
+			"additionalProperties": false
+		},
+		"refusal": null
+	}
+}

@@ -1,0 +1,16 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "effort.resolve",
+	"name": "no-wanted",
+	"input": {
+		"offered": [
+			"low",
+			"high"
+		],
+		"wanted": []
+	},
+	"expected": {
+		"values": []
+	}
+}

@@ -1,0 +1,55 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "call-index-shared-after-empty-id",
+	"input": {
+		"events": [
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "",
+				"name": "read",
+				"argumentsText": "{"
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "call_b",
+				"name": "",
+				"argumentsText": "}"
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "call_c",
+				"name": "",
+				"argumentsText": ""
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true,
+			true
+		],
+		"failedAt": 2,
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": "Two tool calls shared an index."
+		},
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "call_b",
+				"name": "read",
+				"argumentsText": "{}"
+			}
+		],
+		"result": null
+	}
+}

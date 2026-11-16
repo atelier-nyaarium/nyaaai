@@ -1,0 +1,33 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "strict-refuses-in-items",
+	"input": {
+		"projection": "strict",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"list": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"a": {
+								"type": "string"
+							}
+						}
+					}
+				}
+			},
+			"required": [
+				"list"
+			]
+		},
+		"value": null
+	},
+	"expected": {
+		"output": null,
+		"refusal": "A strict json_schema cannot carry an optional field `a`; make it `.nullable()`, which is what strict mode sends."
+	}
+}

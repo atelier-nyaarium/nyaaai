@@ -1,0 +1,53 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.serving",
+	"name": "serving-ids",
+	"input": {
+		"ids": [
+			"gen-1",
+			"",
+			" ",
+			null,
+			5,
+			true,
+			[],
+			{},
+			"x"
+		]
+	},
+	"expected": {
+		"events": [
+			[
+				{
+					"kind": "serving",
+					"serving": {
+						"generationId": "gen-1"
+					}
+				}
+			],
+			[],
+			[
+				{
+					"kind": "serving",
+					"serving": {
+						"generationId": " "
+					}
+				}
+			],
+			[],
+			[],
+			[],
+			[],
+			[],
+			[
+				{
+					"kind": "serving",
+					"serving": {
+						"generationId": "x"
+					}
+				}
+			]
+		]
+	}
+}

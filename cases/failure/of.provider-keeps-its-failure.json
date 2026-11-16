@@ -1,0 +1,57 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "failure.of",
+	"name": "provider-keeps-its-failure",
+	"input": {
+		"thrown": [
+			{
+				"make": "provider",
+				"failure": {
+					"category": "rateLimited",
+					"status": 429,
+					"retryAfterMs": 3000,
+					"message": "Slow down."
+				}
+			},
+			{
+				"make": "provider",
+				"failure": {
+					"category": "outOfCredit",
+					"status": 402,
+					"message": ""
+				}
+			},
+			{
+				"make": "provider",
+				"failure": {
+					"category": "network",
+					"status": "network",
+					"message": "Down.",
+					"reasons": []
+				}
+			}
+		]
+	},
+	"expected": {
+		"failures": [
+			{
+				"category": "rateLimited",
+				"status": 429,
+				"retryAfterMs": 3000,
+				"message": "Slow down."
+			},
+			{
+				"category": "outOfCredit",
+				"status": 402,
+				"message": ""
+			},
+			{
+				"category": "network",
+				"status": "network",
+				"message": "Down.",
+				"reasons": []
+			}
+		]
+	}
+}

@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "carriage-return-split",
+	"input": {
+		"chunks": [
+			"ZGF0YTogYQ0=",
+			"Cg0=",
+			"Cg=="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[],
+			[],
+			[
+				{
+					"kind": "data",
+					"data": "a"
+				}
+			]
+		],
+		"ended": []
+	}
+}

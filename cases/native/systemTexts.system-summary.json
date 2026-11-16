@@ -1,0 +1,25 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.systemTexts",
+	"name": "system-summary",
+	"input": {
+		"rows": [
+			{
+				"summary": "Earlier.",
+				"prompted": null,
+				"system": [
+					"Rules."
+				]
+			}
+		]
+	},
+	"expected": {
+		"texts": [
+			[
+				"Rules.",
+				"Earlier."
+			]
+		]
+	}
+}

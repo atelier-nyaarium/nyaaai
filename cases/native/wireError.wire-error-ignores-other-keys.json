@@ -1,0 +1,21 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.wireError",
+	"name": "wire-error-ignores-other-keys",
+	"input": {
+		"rows": [
+			{
+				"status": 500,
+				"body": "{\"error\":{\"code\":7,\"metadata\":{\"a\":1},\"message\":\"m\",\"extra\":true}}"
+			}
+		]
+	},
+	"expected": {
+		"errors": [
+			{
+				"message": "m"
+			}
+		]
+	}
+}

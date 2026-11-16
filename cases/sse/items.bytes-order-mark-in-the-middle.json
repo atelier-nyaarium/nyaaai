@@ -1,0 +1,31 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "bytes-order-mark-in-the-middle",
+	"input": {
+		"chunks": [
+			"ZGF0YTogYQoK",
+			"77u/",
+			"ZGF0YTogYgoKZGF0YTogYwoK"
+		]
+	},
+	"expected": {
+		"pushed": [
+			[
+				{
+					"kind": "data",
+					"data": "a"
+				}
+			],
+			[],
+			[
+				{
+					"kind": "data",
+					"data": "c"
+				}
+			]
+		],
+		"ended": []
+	}
+}

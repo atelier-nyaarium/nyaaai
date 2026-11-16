@@ -1,0 +1,37 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "withoutNulls-accepts-null-stays",
+	"input": {
+		"projection": "withoutNulls",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"u": {},
+				"c": {
+					"const": null
+				}
+			}
+		},
+		"value": {
+			"a": null,
+			"u": null,
+			"c": null
+		}
+	},
+	"expected": {
+		"output": {
+			"a": null,
+			"u": null,
+			"c": null
+		},
+		"refusal": null
+	}
+}

@@ -1,0 +1,31 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.assembled",
+	"name": "assembled-error-finish",
+	"input": {
+		"events": [
+			{
+				"kind": "text",
+				"text": "a"
+			},
+			{
+				"kind": "finish",
+				"reason": "error"
+			}
+		]
+	},
+	"expected": {
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "a"
+				}
+			],
+			"finish": "error",
+			"serving": {}
+		},
+		"failure": null
+	}
+}

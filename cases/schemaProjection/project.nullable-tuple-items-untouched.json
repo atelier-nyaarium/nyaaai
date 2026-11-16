@@ -1,0 +1,39 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "nullable-tuple-items-untouched",
+	"input": {
+		"projection": "nullable",
+		"schema": {
+			"type": "array",
+			"items": [
+				{
+					"type": "object",
+					"properties": {
+						"a": {
+							"type": "string"
+						}
+					}
+				}
+			]
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "array",
+			"items": [
+				{
+					"type": "object",
+					"properties": {
+						"a": {
+							"type": "string"
+						}
+					}
+				}
+			]
+		},
+		"refusal": null
+	}
+}

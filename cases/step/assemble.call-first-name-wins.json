@@ -1,0 +1,55 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "call-first-name-wins",
+	"input": {
+		"events": [
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "",
+				"name": "",
+				"argumentsText": "x"
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "c0",
+				"name": "read",
+				"argumentsText": "y"
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "c1x",
+				"name": "other",
+				"argumentsText": "z"
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true,
+			true
+		],
+		"failedAt": 2,
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": "Two tool calls shared an index."
+		},
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "c0",
+				"name": "read",
+				"argumentsText": "xy"
+			}
+		],
+		"result": null
+	}
+}

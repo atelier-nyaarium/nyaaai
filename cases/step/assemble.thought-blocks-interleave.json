@@ -1,0 +1,126 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "thought-blocks-interleave",
+	"input": {
+		"events": [
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "reasoning",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "A1"
+						}
+					]
+				},
+				"block": "reasoning#0"
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "reasoning",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "B1"
+						}
+					]
+				},
+				"block": "reasoning#1"
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "reasoning",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "A2"
+						}
+					]
+				},
+				"block": "reasoning#0"
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "reasoning",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "B2"
+						}
+					]
+				},
+				"block": "reasoning#1"
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true,
+			true,
+			true,
+			true
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "thought",
+				"type": "reasoning",
+				"segments": [
+					{
+						"kind": "content",
+						"text": "A1A2"
+					}
+				]
+			},
+			{
+				"kind": "thought",
+				"type": "reasoning",
+				"segments": [
+					{
+						"kind": "content",
+						"text": "B1B2"
+					}
+				]
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "reasoning",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "A1A2"
+						}
+					]
+				},
+				{
+					"kind": "thought",
+					"type": "reasoning",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "B1B2"
+						}
+					]
+				}
+			],
+			"finish": "",
+			"serving": {}
+		}
+	}
+}

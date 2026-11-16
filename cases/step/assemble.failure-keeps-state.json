@@ -1,0 +1,66 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "failure-keeps-state",
+	"input": {
+		"events": [
+			{
+				"kind": "text",
+				"text": "a"
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"host": "h"
+				}
+			},
+			{
+				"kind": "usage",
+				"usage": {
+					"input": 1,
+					"output": 1
+				}
+			},
+			{
+				"kind": "call",
+				"index": 0.5,
+				"wireId": "a",
+				"name": "r",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "text",
+				"text": "b"
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true,
+			false,
+			false
+		],
+		"failedAt": 3,
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": "A tool call had no valid index."
+		},
+		"outputSeen": true,
+		"billed": {
+			"usage": {
+				"input": 1,
+				"output": 1
+			},
+			"host": "h"
+		},
+		"snapshot": [
+			{
+				"kind": "text",
+				"text": "a"
+			}
+		],
+		"result": null
+	}
+}

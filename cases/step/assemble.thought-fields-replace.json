@@ -1,0 +1,110 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "thought-fields-replace",
+	"input": {
+		"events": [
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "a"
+						}
+					],
+					"id": "i1",
+					"format": "f1",
+					"index": 0,
+					"anchor": "a1"
+				}
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "b"
+						}
+					],
+					"id": "i2",
+					"index": 3
+				}
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t",
+					"opaque": "sig-2",
+					"anchor": "a2"
+				}
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true,
+			true,
+			true
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "thought",
+				"type": "t",
+				"segments": [
+					{
+						"kind": "content",
+						"text": "ab"
+					}
+				],
+				"id": "i2",
+				"format": "f1",
+				"index": 3,
+				"anchor": "a1"
+			},
+			{
+				"kind": "thought",
+				"type": "t",
+				"opaque": "sig-2",
+				"anchor": "a2"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "t",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "ab"
+						}
+					],
+					"id": "i2",
+					"format": "f1",
+					"index": 3,
+					"anchor": "a1"
+				},
+				{
+					"kind": "thought",
+					"type": "t",
+					"opaque": "sig-2",
+					"anchor": "a2"
+				}
+			],
+			"finish": "",
+			"serving": {}
+		}
+	}
+}

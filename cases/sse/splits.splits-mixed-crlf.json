@@ -1,0 +1,41 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.splits",
+	"name": "splits-mixed-crlf",
+	"input": {
+		"bytes": "ZXZlbnQ6IHgNCmlkOiAxDQpkYXRhOiBvbmUNCmRhdGE6dHdvDQoNCmV2ZW50OiBsb25lDQoNCjpwaW5nDQpkYXRhOiB0aHJlZQ0KDQpldmVudDogZTINCjppbm5lcg0KZGF0YTogZm91cg0KDQpkYXRhOiBbRE9ORV0="
+	},
+	"expected": {
+		"items": [
+			{
+				"kind": "data",
+				"data": "one\ntwo",
+				"event": "x"
+			},
+			{
+				"kind": "comment",
+				"text": "ping"
+			},
+			{
+				"kind": "data",
+				"data": "three"
+			},
+			{
+				"kind": "comment",
+				"text": "inner"
+			},
+			{
+				"kind": "data",
+				"data": "four",
+				"event": "e2"
+			},
+			{
+				"kind": "done"
+			}
+		],
+		"agree": true,
+		"firstDifferent": null,
+		"bytewise": true
+	}
+}

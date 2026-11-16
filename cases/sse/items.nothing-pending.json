@@ -1,0 +1,17 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "nothing-pending",
+	"input": {
+		"chunks": [
+			""
+		]
+	},
+	"expected": {
+		"pushed": [
+			[]
+		],
+		"ended": []
+	}
+}

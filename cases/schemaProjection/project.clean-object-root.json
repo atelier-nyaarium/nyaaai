@@ -1,0 +1,105 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "clean-object-root",
+	"input": {
+		"projection": "clean",
+		"schema": {
+			"$schema": "https://json-schema.org/draft/2020-12/schema",
+			"type": "object",
+			"properties": {
+				"url": {
+					"type": "string",
+					"format": "uri"
+				},
+				"ref": {
+					"type": "string",
+					"format": "uri-reference"
+				},
+				"when": {
+					"type": "string",
+					"format": "date-time"
+				},
+				"mail": {
+					"type": "string",
+					"format": "email"
+				},
+				"deep": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"link": {
+								"type": "string",
+								"format": "uri"
+							}
+						}
+					}
+				},
+				"either": {
+					"anyOf": [
+						{
+							"type": "string",
+							"format": "uri"
+						},
+						{
+							"type": "null"
+						}
+					]
+				}
+			},
+			"required": [
+				"url"
+			]
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"properties": {
+				"url": {
+					"type": "string"
+				},
+				"ref": {
+					"type": "string"
+				},
+				"when": {
+					"type": "string",
+					"format": "date-time"
+				},
+				"mail": {
+					"type": "string",
+					"format": "email"
+				},
+				"deep": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"link": {
+								"type": "string"
+							}
+						}
+					}
+				},
+				"either": {
+					"anyOf": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "null"
+						}
+					]
+				}
+			},
+			"required": [
+				"url"
+			],
+			"additionalProperties": false
+		},
+		"refusal": null
+	}
+}

@@ -1,0 +1,23 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.streamFailure",
+	"name": "stream-failure-empty-host",
+	"input": {
+		"error": {},
+		"usage": null,
+		"serving": {
+			"host": ""
+		}
+	},
+	"expected": {
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": "",
+			"billed": {
+				"host": ""
+			}
+		}
+	}
+}

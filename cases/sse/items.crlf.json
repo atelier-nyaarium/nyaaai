@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "crlf",
+	"input": {
+		"chunks": [
+			"ZGF0YTogeyJhIjoxfQ0KDQpkYXRhOiB7ImEiOjJ9DQoNCg=="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[
+				{
+					"kind": "data",
+					"data": "{\"a\":1}"
+				},
+				{
+					"kind": "data",
+					"data": "{\"a\":2}"
+				}
+			]
+		],
+		"ended": []
+	}
+}

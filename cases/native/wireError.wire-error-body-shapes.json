@@ -1,0 +1,91 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.wireError",
+	"name": "wire-error-body-shapes",
+	"input": {
+		"rows": [
+			{
+				"status": 500,
+				"body": "null"
+			},
+			{
+				"status": 500,
+				"body": "[]"
+			},
+			{
+				"status": 500,
+				"body": "5"
+			},
+			{
+				"status": 500,
+				"body": "\"text\""
+			},
+			{
+				"status": 500,
+				"body": "{}"
+			},
+			{
+				"status": 500,
+				"body": "{\"message\":\"top level\"}"
+			},
+			{
+				"status": 500,
+				"body": "{\"error\":\"boom\"}"
+			},
+			{
+				"status": 500,
+				"body": "{\"error\":[]}"
+			},
+			{
+				"status": 500,
+				"body": "{\"error\":null}"
+			},
+			{
+				"status": 500,
+				"body": "{\"error\":[{\"message\":\"in a list\"}]}"
+			},
+			{
+				"status": 200,
+				"body": "{\"error\":{\"message\":\"ok status\"}}"
+			}
+		]
+	},
+	"expected": {
+		"errors": [
+			{
+				"message": "HTTP 500"
+			},
+			{
+				"message": "HTTP 500"
+			},
+			{
+				"message": "HTTP 500"
+			},
+			{
+				"message": "HTTP 500"
+			},
+			{
+				"message": "HTTP 500"
+			},
+			{
+				"message": "HTTP 500"
+			},
+			{
+				"message": "HTTP 500"
+			},
+			{
+				"message": "HTTP 500"
+			},
+			{
+				"message": "HTTP 500"
+			},
+			{
+				"message": "HTTP 500"
+			},
+			{
+				"message": "ok status"
+			}
+		]
+	}
+}

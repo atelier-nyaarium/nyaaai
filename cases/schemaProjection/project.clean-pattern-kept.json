@@ -1,0 +1,32 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "clean-pattern-kept",
+	"input": {
+		"projection": "clean",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"type": "string",
+					"pattern": "^x+$"
+				}
+			}
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"type": "string",
+					"pattern": "^x+$"
+				}
+			},
+			"additionalProperties": false
+		},
+		"refusal": null
+	}
+}

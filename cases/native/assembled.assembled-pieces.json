@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.assembled",
+	"name": "assembled-pieces",
+	"input": {
+		"events": [
+			{
+				"kind": "text",
+				"text": "a"
+			},
+			{
+				"kind": "text",
+				"text": "b"
+			},
+			{
+				"kind": "usage",
+				"usage": {
+					"input": 1,
+					"output": 2
+				}
+			},
+			{
+				"kind": "finish",
+				"reason": "length"
+			}
+		]
+	},
+	"expected": {
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "ab"
+				}
+			],
+			"finish": "length",
+			"usage": {
+				"input": 1,
+				"output": 2
+			},
+			"serving": {}
+		},
+		"failure": null
+	}
+}

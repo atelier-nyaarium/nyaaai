@@ -1,0 +1,51 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "call-index-fraction",
+	"input": {
+		"events": [
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "a",
+				"name": "r",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "call",
+				"index": 0.5,
+				"wireId": "b",
+				"name": "r",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "text",
+				"text": "never"
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true
+		],
+		"failedAt": 1,
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": "A tool call had no valid index."
+		},
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "a",
+				"name": "r",
+				"argumentsText": "{}"
+			}
+		],
+		"result": null
+	}
+}

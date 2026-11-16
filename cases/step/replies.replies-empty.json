@@ -1,0 +1,18 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.replies",
+	"name": "replies-empty",
+	"input": {
+		"result": {
+			"parts": [],
+			"finish": "stop",
+			"serving": {}
+		}
+	},
+	"expected": {
+		"text": "",
+		"calls": [],
+		"thoughts": []
+	}
+}

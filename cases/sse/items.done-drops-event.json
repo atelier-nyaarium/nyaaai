@@ -1,0 +1,21 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "done-drops-event",
+	"input": {
+		"chunks": [
+			"ZXZlbnQ6IGVuZApkYXRhOiBbRE9ORV0KCg=="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[
+				{
+					"kind": "done"
+				}
+			]
+		],
+		"ended": []
+	}
+}

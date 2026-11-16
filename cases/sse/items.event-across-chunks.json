@@ -1,0 +1,35 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "event-across-chunks",
+	"input": {
+		"chunks": [
+			"ZGF0YTogYQ==",
+			"Cg==",
+			"Cg==",
+			"ZGF0YTogYgo=",
+			"Cg=="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[],
+			[],
+			[
+				{
+					"kind": "data",
+					"data": "a"
+				}
+			],
+			[],
+			[
+				{
+					"kind": "data",
+					"data": "b"
+				}
+			]
+		],
+		"ended": []
+	}
+}

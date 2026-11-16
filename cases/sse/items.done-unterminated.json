@@ -1,0 +1,21 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "done-unterminated",
+	"input": {
+		"chunks": [
+			"ZGF0YTogW0RPTkVd"
+		]
+	},
+	"expected": {
+		"pushed": [
+			[]
+		],
+		"ended": [
+			{
+				"kind": "done"
+			}
+		]
+	}
+}

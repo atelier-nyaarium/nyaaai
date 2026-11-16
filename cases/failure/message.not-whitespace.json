@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "failure.message",
+	"name": "not-whitespace",
+	"input": {
+		"values": [
+			"\u200b",
+			"\u200c\u200d",
+			"",
+			"᠎",
+			" x",
+			"⁠",
+			"\ufeffx"
+		]
+	},
+	"expected": {
+		"messages": [
+			"\u200b",
+			"\u200c\u200d",
+			"",
+			"᠎",
+			" x",
+			"⁠",
+			"\ufeffx"
+		]
+	}
+}

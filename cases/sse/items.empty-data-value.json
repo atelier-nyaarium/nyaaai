@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "empty-data-value",
+	"input": {
+		"chunks": [
+			"ZGF0YToKCmRhdGE6IAoK"
+		]
+	},
+	"expected": {
+		"pushed": [
+			[
+				{
+					"kind": "data",
+					"data": ""
+				},
+				{
+					"kind": "data",
+					"data": ""
+				}
+			]
+		],
+		"ended": []
+	}
+}

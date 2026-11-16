@@ -1,0 +1,36 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "withoutNulls-falsy-values-stay",
+	"input": {
+		"projection": "withoutNulls",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"type": "string"
+				},
+				"b": {
+					"type": "string"
+				},
+				"c": {
+					"type": "string"
+				}
+			}
+		},
+		"value": {
+			"a": 0,
+			"b": "",
+			"c": false
+		}
+	},
+	"expected": {
+		"output": {
+			"a": 0,
+			"b": "",
+			"c": false
+		},
+		"refusal": null
+	}
+}

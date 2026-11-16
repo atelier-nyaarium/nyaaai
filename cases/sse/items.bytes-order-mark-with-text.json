@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "bytes-order-mark-with-text",
+	"input": {
+		"chunks": [
+			"77u/ZGF0YTogeAoK"
+		]
+	},
+	"expected": {
+		"pushed": [
+			[
+				{
+					"kind": "data",
+					"data": "x"
+				}
+			]
+		],
+		"ended": []
+	}
+}

@@ -1,0 +1,64 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.currentTurn",
+	"name": "turn-several-histories",
+	"input": {
+		"histories": [
+			[],
+			[
+				{
+					"role": "user",
+					"text": "a"
+				}
+			],
+			[
+				{
+					"role": "step",
+					"parts": [
+						{
+							"kind": "text",
+							"text": "a"
+						}
+					]
+				},
+				{
+					"role": "step",
+					"parts": [
+						{
+							"kind": "text",
+							"text": "a"
+						}
+					]
+				}
+			],
+			[
+				{
+					"role": "user",
+					"text": "a"
+				},
+				{
+					"role": "step",
+					"parts": [
+						{
+							"kind": "text",
+							"text": "a"
+						}
+					]
+				},
+				{
+					"role": "user",
+					"text": "b"
+				}
+			]
+		]
+	},
+	"expected": {
+		"indexes": [
+			0,
+			1,
+			0,
+			3
+		]
+	}
+}

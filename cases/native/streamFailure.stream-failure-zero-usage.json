@@ -1,0 +1,30 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.streamFailure",
+	"name": "stream-failure-zero-usage",
+	"input": {
+		"error": {
+			"type": "t",
+			"code": 7
+		},
+		"usage": {
+			"input": 0,
+			"output": 0
+		},
+		"serving": {}
+	},
+	"expected": {
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": "",
+			"billed": {
+				"usage": {
+					"input": 0,
+					"output": 0
+				}
+			}
+		}
+	}
+}

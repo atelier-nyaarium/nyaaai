@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "character-split-two-bytes",
+	"input": {
+		"chunks": [
+			"ZGF0YTogY2Fm",
+			"ww==",
+			"qQ==",
+			"Cgo="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[],
+			[],
+			[],
+			[
+				{
+					"kind": "data",
+					"data": "café"
+				}
+			]
+		],
+		"ended": []
+	}
+}

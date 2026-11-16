@@ -1,0 +1,47 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "nullable-key-order-kept",
+	"input": {
+		"projection": "nullable",
+		"schema": {
+			"required": [
+				"z"
+			],
+			"properties": {
+				"z": {
+					"type": "string"
+				},
+				"y": {
+					"type": "string"
+				}
+			},
+			"type": "object",
+			"description": "Ordered."
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"required": [
+				"z",
+				"y"
+			],
+			"properties": {
+				"z": {
+					"type": "string"
+				},
+				"y": {
+					"type": [
+						"string",
+						"null"
+					]
+				}
+			},
+			"type": "object",
+			"description": "Ordered."
+		},
+		"refusal": null
+	}
+}

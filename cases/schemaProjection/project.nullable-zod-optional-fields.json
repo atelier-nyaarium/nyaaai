@@ -1,0 +1,63 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "nullable-zod-optional-fields",
+	"input": {
+		"projection": "nullable",
+		"schema": {
+			"$schema": "https://json-schema.org/draft/2020-12/schema",
+			"type": "object",
+			"properties": {
+				"note": {
+					"type": "string"
+				},
+				"n": {
+					"type": [
+						"number",
+						"null"
+					]
+				},
+				"ok": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"n",
+				"ok"
+			],
+			"additionalProperties": false
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"$schema": "https://json-schema.org/draft/2020-12/schema",
+			"type": "object",
+			"properties": {
+				"note": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"n": {
+					"type": [
+						"number",
+						"null"
+					]
+				},
+				"ok": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"note",
+				"n",
+				"ok"
+			],
+			"additionalProperties": false
+		},
+		"refusal": null
+	}
+}

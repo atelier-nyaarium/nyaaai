@@ -1,0 +1,61 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "failure.of",
+	"name": "not-decoded",
+	"input": {
+		"thrown": [
+			{
+				"make": "error",
+				"message": "plain"
+			},
+			{
+				"make": "value",
+				"value": "text"
+			},
+			{
+				"make": "value",
+				"value": null
+			},
+			{
+				"make": "value",
+				"value": 5
+			},
+			{
+				"make": "value",
+				"value": {
+					"failure": {
+						"category": "idle",
+						"status": "idle",
+						"message": "x"
+					}
+				}
+			},
+			{
+				"make": "value",
+				"value": {
+					"category": "idle",
+					"status": "idle",
+					"message": "x"
+				}
+			},
+			{
+				"make": "value",
+				"value": [
+					"failure"
+				]
+			}
+		]
+	},
+	"expected": {
+		"failures": [
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null
+		]
+	}
+}

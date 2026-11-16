@@ -1,0 +1,41 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "call-index-negative",
+	"input": {
+		"events": [
+			{
+				"kind": "text",
+				"text": "a"
+			},
+			{
+				"kind": "call",
+				"index": -1,
+				"wireId": "a",
+				"name": "r",
+				"argumentsText": "{}"
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true
+		],
+		"failedAt": 1,
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": "A tool call had no valid index."
+		},
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "text",
+				"text": "a"
+			}
+		],
+		"result": null
+	}
+}

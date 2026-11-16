@@ -1,0 +1,21 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.currentTurn",
+	"name": "turn-user-only",
+	"input": {
+		"histories": [
+			[
+				{
+					"role": "user",
+					"text": "a"
+				}
+			]
+		]
+	},
+	"expected": {
+		"indexes": [
+			1
+		]
+	}
+}

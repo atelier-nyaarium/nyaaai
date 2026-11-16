@@ -1,0 +1,32 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "character-split-four-bytes",
+	"input": {
+		"chunks": [
+			"ZGF0YTog",
+			"8A==",
+			"nw==",
+			"mA==",
+			"gA==",
+			"Cgo="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[],
+			[],
+			[],
+			[],
+			[],
+			[
+				{
+					"kind": "data",
+					"data": "😀"
+				}
+			]
+		],
+		"ended": []
+	}
+}

@@ -1,0 +1,34 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "finish-empty-first-wins",
+	"input": {
+		"events": [
+			{
+				"kind": "finish",
+				"reason": ""
+			},
+			{
+				"kind": "finish",
+				"reason": "stop"
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			false,
+			false
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": false,
+		"billed": {},
+		"snapshot": [],
+		"result": {
+			"parts": [],
+			"finish": "",
+			"serving": {}
+		}
+	}
+}

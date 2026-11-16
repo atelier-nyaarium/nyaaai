@@ -12,17 +12,23 @@ import "@nyaaai/testkit/trace";
 import { base64 } from "./scripts/caseGroups/base64";
 import { claude } from "./scripts/caseGroups/claude";
 import { contract } from "./scripts/caseGroups/contract";
+import { effort } from "./scripts/caseGroups/effort";
+import { failure } from "./scripts/caseGroups/failure";
 import { headers } from "./scripts/caseGroups/headers";
 import { js } from "./scripts/caseGroups/js";
 import { json } from "./scripts/caseGroups/json";
+import { native } from "./scripts/caseGroups/native";
 import { noticeText } from "./scripts/caseGroups/noticeText";
 import { number } from "./scripts/caseGroups/number";
 import { order } from "./scripts/caseGroups/order";
 import { paths } from "./scripts/caseGroups/paths";
 import { pattern } from "./scripts/caseGroups/pattern";
+import { schemaProjection } from "./scripts/caseGroups/schemaProjection";
 import { sessionCut } from "./scripts/caseGroups/sessionCut";
 import { sessionFile } from "./scripts/caseGroups/sessionFile";
 import { shape } from "./scripts/caseGroups/shape";
+import { sse } from "./scripts/caseGroups/sse";
+import { step } from "./scripts/caseGroups/step";
 import { strictSchema } from "./scripts/caseGroups/strictSchema";
 import { testkit } from "./scripts/caseGroups/testkit";
 import { text } from "./scripts/caseGroups/text";
@@ -101,6 +107,12 @@ export default project({
 		claude,
 		testkit,
 		noticeText,
+		effort,
+		sse,
+		step,
+		failure,
+		native,
+		schemaProjection,
 	],
 	runs: adapterCases,
 	cases: { crate: "nyaaai_cli", module: "cases", dir: "rust/cli/src/cases" },

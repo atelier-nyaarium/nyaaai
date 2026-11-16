@@ -1,0 +1,32 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.readers",
+	"name": "readers-text-keeps-escapes",
+	"input": {
+		"texts": [
+			"\"line\\nbreak\"",
+			"\"é😀\"",
+			"\" \""
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"isJson": false,
+				"string": "line\nbreak",
+				"number": null
+			},
+			{
+				"isJson": false,
+				"string": "é😀",
+				"number": null
+			},
+			{
+				"isJson": false,
+				"string": " ",
+				"number": null
+			}
+		]
+	}
+}

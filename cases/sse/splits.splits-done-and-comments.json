@@ -1,0 +1,31 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.splits",
+	"name": "splits-done-and-comments",
+	"input": {
+		"bytes": "OmEKZGF0YTogW0RPTkVdCgo6YgpkYXRhOiB6Cgo="
+	},
+	"expected": {
+		"items": [
+			{
+				"kind": "comment",
+				"text": "a"
+			},
+			{
+				"kind": "done"
+			},
+			{
+				"kind": "comment",
+				"text": "b"
+			},
+			{
+				"kind": "data",
+				"data": "z"
+			}
+		],
+		"agree": true,
+		"firstDifferent": null,
+		"bytewise": true
+	}
+}

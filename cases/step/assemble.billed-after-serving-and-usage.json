@@ -1,0 +1,60 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "billed-after-serving-and-usage",
+	"input": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"host": "h1"
+				}
+			},
+			{
+				"kind": "usage",
+				"usage": {
+					"input": 4,
+					"output": 2
+				}
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "g9"
+				}
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			false,
+			false,
+			false
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": false,
+		"billed": {
+			"usage": {
+				"input": 4,
+				"output": 2
+			},
+			"host": "h1",
+			"generationId": "g9"
+		},
+		"snapshot": [],
+		"result": {
+			"parts": [],
+			"finish": "",
+			"usage": {
+				"input": 4,
+				"output": 2
+			},
+			"serving": {
+				"host": "h1",
+				"generationId": "g9"
+			}
+		}
+	}
+}

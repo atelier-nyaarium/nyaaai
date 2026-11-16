@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "carriage-return-inside-value",
+	"input": {
+		"chunks": [
+			"ZGF0YTogYQ0NCgo="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[
+				{
+					"kind": "data",
+					"data": "a\r"
+				}
+			]
+		],
+		"ended": []
+	}
+}

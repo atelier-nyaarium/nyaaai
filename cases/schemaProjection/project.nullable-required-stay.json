@@ -1,0 +1,43 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "nullable-required-stay",
+	"input": {
+		"projection": "nullable",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"type": "string"
+				},
+				"b": {
+					"type": "number"
+				}
+			},
+			"required": [
+				"a",
+				"b"
+			]
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"type": "string"
+				},
+				"b": {
+					"type": "number"
+				}
+			},
+			"required": [
+				"a",
+				"b"
+			]
+		},
+		"refusal": null
+	}
+}

@@ -1,0 +1,56 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "no-finish",
+	"input": {
+		"events": [
+			{
+				"kind": "text",
+				"text": "a"
+			},
+			{
+				"kind": "usage",
+				"usage": {
+					"input": 1,
+					"output": 2
+				}
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true,
+			false
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {
+			"usage": {
+				"input": 1,
+				"output": 2
+			}
+		},
+		"snapshot": [
+			{
+				"kind": "text",
+				"text": "a"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "a"
+				}
+			],
+			"finish": "",
+			"usage": {
+				"input": 1,
+				"output": 2
+			},
+			"serving": {}
+		}
+	}
+}

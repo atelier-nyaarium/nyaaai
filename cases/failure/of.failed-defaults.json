@@ -1,0 +1,54 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "failure.of",
+	"name": "failed-defaults",
+	"input": {
+		"thrown": [
+			{
+				"make": "failed",
+				"category": "badRequest",
+				"message": "Bad."
+			},
+			{
+				"make": "failed",
+				"category": "keyMissing",
+				"message": "No key."
+			},
+			{
+				"make": "failed",
+				"category": "stream",
+				"message": "Cut."
+			},
+			{
+				"make": "failed",
+				"category": "idle",
+				"message": ""
+			}
+		]
+	},
+	"expected": {
+		"failures": [
+			{
+				"category": "badRequest",
+				"status": "badRequest",
+				"message": "Bad."
+			},
+			{
+				"category": "keyMissing",
+				"status": "keyMissing",
+				"message": "No key."
+			},
+			{
+				"category": "stream",
+				"status": "stream",
+				"message": "Cut."
+			},
+			{
+				"category": "idle",
+				"status": "idle",
+				"message": ""
+			}
+		]
+	}
+}

@@ -1,0 +1,77 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "nullable-nested-objects",
+	"input": {
+		"projection": "nullable",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"outer": {
+					"type": "object",
+					"properties": {
+						"inner": {
+							"type": "object",
+							"properties": {
+								"leaf": {
+									"type": "string"
+								}
+							}
+						},
+						"sure": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"sure"
+					]
+				}
+			},
+			"required": [
+				"outer"
+			]
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"properties": {
+				"outer": {
+					"type": "object",
+					"properties": {
+						"inner": {
+							"type": [
+								"object",
+								"null"
+							],
+							"properties": {
+								"leaf": {
+									"type": [
+										"string",
+										"null"
+									]
+								}
+							},
+							"required": [
+								"leaf"
+							]
+						},
+						"sure": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"inner",
+						"sure"
+					]
+				}
+			},
+			"required": [
+				"outer"
+			]
+		},
+		"refusal": null
+	}
+}

@@ -1,0 +1,90 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "text-phases",
+	"input": {
+		"events": [
+			{
+				"kind": "text",
+				"text": "a"
+			},
+			{
+				"kind": "text",
+				"text": "b",
+				"phase": "final"
+			},
+			{
+				"kind": "text",
+				"text": "c",
+				"phase": "final"
+			},
+			{
+				"kind": "text",
+				"text": "d"
+			},
+			{
+				"kind": "text",
+				"text": "e",
+				"phase": "commentary"
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true,
+			true,
+			true,
+			true,
+			true
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "text",
+				"text": "a"
+			},
+			{
+				"kind": "text",
+				"text": "bc",
+				"phase": "final"
+			},
+			{
+				"kind": "text",
+				"text": "d"
+			},
+			{
+				"kind": "text",
+				"text": "e",
+				"phase": "commentary"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "a"
+				},
+				{
+					"kind": "text",
+					"text": "bc",
+					"phase": "final"
+				},
+				{
+					"kind": "text",
+					"text": "d"
+				},
+				{
+					"kind": "text",
+					"text": "e",
+					"phase": "commentary"
+				}
+			],
+			"finish": "",
+			"serving": {}
+		}
+	}
+}

@@ -1,0 +1,66 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "strict-zod-nullable-fields",
+	"input": {
+		"projection": "strict",
+		"schema": {
+			"$schema": "https://json-schema.org/draft/2020-12/schema",
+			"type": "object",
+			"properties": {
+				"name": {
+					"type": "string"
+				},
+				"depth": {
+					"type": [
+						"number",
+						"null"
+					]
+				},
+				"tags": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"name",
+				"depth",
+				"tags"
+			],
+			"additionalProperties": false
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"properties": {
+				"name": {
+					"type": "string"
+				},
+				"depth": {
+					"type": [
+						"number",
+						"null"
+					]
+				},
+				"tags": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"name",
+				"depth",
+				"tags"
+			],
+			"additionalProperties": false
+		},
+		"refusal": null
+	}
+}

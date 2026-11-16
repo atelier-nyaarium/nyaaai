@@ -1,0 +1,49 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "text-joins",
+	"input": {
+		"events": [
+			{
+				"kind": "text",
+				"text": "He"
+			},
+			{
+				"kind": "text",
+				"text": "llo"
+			},
+			{
+				"kind": "finish",
+				"reason": "stop"
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true,
+			true,
+			false
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "text",
+				"text": "Hello"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "Hello"
+				}
+			],
+			"finish": "stop",
+			"serving": {}
+		}
+	}
+}

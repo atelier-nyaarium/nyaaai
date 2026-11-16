@@ -1,0 +1,56 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.replies",
+	"name": "replies-text-joins-everything",
+	"input": {
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "a"
+				},
+				{
+					"kind": "thought",
+					"type": "t"
+				},
+				{
+					"kind": "text",
+					"text": "b",
+					"phase": "final"
+				},
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "c0",
+					"name": "r",
+					"argumentsText": "{}"
+				},
+				{
+					"kind": "text",
+					"text": "c"
+				}
+			],
+			"finish": "stop",
+			"serving": {}
+		}
+	},
+	"expected": {
+		"text": "abc",
+		"calls": [
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "c0",
+				"name": "r",
+				"argumentsText": "{}"
+			}
+		],
+		"thoughts": [
+			{
+				"kind": "thought",
+				"type": "t"
+			}
+		]
+	}
+}

@@ -1,0 +1,39 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "strict-zod-uri-format",
+	"input": {
+		"projection": "strict",
+		"schema": {
+			"$schema": "https://json-schema.org/draft/2020-12/schema",
+			"type": "object",
+			"properties": {
+				"home": {
+					"type": "string",
+					"format": "uri"
+				}
+			},
+			"required": [
+				"home"
+			],
+			"additionalProperties": false
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"properties": {
+				"home": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"home"
+			],
+			"additionalProperties": false
+		},
+		"refusal": null
+	}
+}

@@ -1,0 +1,87 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "nullable-wrapped-keeps-description",
+	"input": {
+		"projection": "nullable",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"type": "string",
+					"enum": [
+						"x"
+					],
+					"description": "Pick.",
+					"title": "A"
+				},
+				"b": {
+					"const": 1,
+					"description": "One."
+				},
+				"c": {
+					"type": [
+						"string",
+						"number"
+					],
+					"description": "Either."
+				}
+			}
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"anyOf": [
+						{
+							"type": "string",
+							"enum": [
+								"x"
+							],
+							"title": "A"
+						},
+						{
+							"type": "null"
+						}
+					],
+					"description": "Pick."
+				},
+				"b": {
+					"anyOf": [
+						{
+							"const": 1
+						},
+						{
+							"type": "null"
+						}
+					],
+					"description": "One."
+				},
+				"c": {
+					"anyOf": [
+						{
+							"type": [
+								"string",
+								"number"
+							]
+						},
+						{
+							"type": "null"
+						}
+					],
+					"description": "Either."
+				}
+			},
+			"required": [
+				"a",
+				"b",
+				"c"
+			]
+		},
+		"refusal": null
+	}
+}

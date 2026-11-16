@@ -1,0 +1,27 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "unterminated-last-line",
+	"input": {
+		"chunks": [
+			"ZGF0YTogYQoKZGF0YTogdGFpbA=="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[
+				{
+					"kind": "data",
+					"data": "a"
+				}
+			]
+		],
+		"ended": [
+			{
+				"kind": "data",
+				"data": "tail"
+			}
+		]
+	}
+}

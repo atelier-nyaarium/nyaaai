@@ -1,0 +1,32 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "event-names",
+	"input": {
+		"chunks": [
+			"ZXZlbnQ6IHgKaWQ6IDEKcmV0cnk6IDUKZGF0YTogb25lCgpldmVudDogeQpkYXRhOiB0d28KCmRhdGE6IHRocmVlCgo="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[
+				{
+					"kind": "data",
+					"data": "one",
+					"event": "x"
+				},
+				{
+					"kind": "data",
+					"data": "two",
+					"event": "y"
+				},
+				{
+					"kind": "data",
+					"data": "three"
+				}
+			]
+		],
+		"ended": []
+	}
+}

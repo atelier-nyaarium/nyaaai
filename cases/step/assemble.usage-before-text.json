@@ -1,0 +1,56 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "usage-before-text",
+	"input": {
+		"events": [
+			{
+				"kind": "usage",
+				"usage": {
+					"input": 1,
+					"output": 1
+				}
+			},
+			{
+				"kind": "text",
+				"text": "a"
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			false,
+			true
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {
+			"usage": {
+				"input": 1,
+				"output": 1
+			}
+		},
+		"snapshot": [
+			{
+				"kind": "text",
+				"text": "a"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "a"
+				}
+			],
+			"finish": "",
+			"usage": {
+				"input": 1,
+				"output": 1
+			},
+			"serving": {}
+		}
+	}
+}

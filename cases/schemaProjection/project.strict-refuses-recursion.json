@@ -1,0 +1,52 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "strict-refuses-recursion",
+	"input": {
+		"projection": "strict",
+		"schema": {
+			"$schema": "https://json-schema.org/draft/2020-12/schema",
+			"type": "object",
+			"properties": {
+				"head": {
+					"$ref": "#/$defs/__schema0"
+				}
+			},
+			"required": [
+				"head"
+			],
+			"additionalProperties": false,
+			"$defs": {
+				"__schema0": {
+					"type": "object",
+					"properties": {
+						"value": {
+							"type": "string"
+						},
+						"next": {
+							"anyOf": [
+								{
+									"$ref": "#/$defs/__schema0"
+								},
+								{
+									"type": "null"
+								}
+							]
+						}
+					},
+					"required": [
+						"value",
+						"next"
+					],
+					"additionalProperties": false
+				}
+			}
+		},
+		"value": null
+	},
+	"expected": {
+		"output": null,
+		"refusal": "A strict json_schema cannot carry `$defs`; reshape the answer without it."
+	}
+}

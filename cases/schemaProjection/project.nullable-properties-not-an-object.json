@@ -1,0 +1,35 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "nullable-properties-not-an-object",
+	"input": {
+		"projection": "nullable",
+		"schema": {
+			"type": "object",
+			"properties": [
+				{
+					"type": "string"
+				}
+			],
+			"required": [
+				"a"
+			]
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"properties": [
+				{
+					"type": "string"
+				}
+			],
+			"required": [
+				"a"
+			]
+		},
+		"refusal": null
+	}
+}

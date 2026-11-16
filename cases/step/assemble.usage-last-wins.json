@@ -1,0 +1,81 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "usage-last-wins",
+	"input": {
+		"events": [
+			{
+				"kind": "usage",
+				"usage": {
+					"input": 3,
+					"output": 1
+				}
+			},
+			{
+				"kind": "usage",
+				"usage": {
+					"input": 10,
+					"output": 5,
+					"cached": 2,
+					"cost": 0.5,
+					"byok": true,
+					"billingSource": "credit"
+				}
+			},
+			{
+				"kind": "text",
+				"text": "a"
+			},
+			{
+				"kind": "finish",
+				"reason": "stop"
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			false,
+			false,
+			true,
+			false
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {
+			"usage": {
+				"input": 10,
+				"output": 5,
+				"cached": 2,
+				"cost": 0.5,
+				"byok": true,
+				"billingSource": "credit"
+			}
+		},
+		"snapshot": [
+			{
+				"kind": "text",
+				"text": "a"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "a"
+				}
+			],
+			"finish": "stop",
+			"usage": {
+				"input": 10,
+				"output": 5,
+				"cached": 2,
+				"cost": 0.5,
+				"byok": true,
+				"billingSource": "credit"
+			},
+			"serving": {}
+		}
+	}
+}

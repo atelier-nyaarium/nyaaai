@@ -1,0 +1,29 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.currentTurn",
+	"name": "turn-many-users",
+	"input": {
+		"histories": [
+			[
+				{
+					"role": "user",
+					"text": "a"
+				},
+				{
+					"role": "user",
+					"text": "b"
+				},
+				{
+					"role": "user",
+					"text": "c"
+				}
+			]
+		]
+	},
+	"expected": {
+		"indexes": [
+			3
+		]
+	}
+}

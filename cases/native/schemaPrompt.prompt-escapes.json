@@ -1,0 +1,20 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.schemaPrompt",
+	"name": "prompt-escapes",
+	"input": {
+		"schemas": [
+			{
+				"description": "line\nbreak \"quoted\" \\ back\u0001 ",
+				"text": "é€😀  ",
+				"slash": "a/b"
+			}
+		]
+	},
+	"expected": {
+		"texts": [
+			"Answer with one JSON object matching this JSON Schema, and nothing else:\n{\"description\":\"line\\nbreak \\\"quoted\\\" \\\\ back\\u0001 \",\"text\":\"é€😀  \",\"slash\":\"a/b\"}"
+		]
+	}
+}

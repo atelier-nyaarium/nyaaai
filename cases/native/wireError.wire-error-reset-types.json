@@ -1,0 +1,59 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.wireError",
+	"name": "wire-error-reset-types",
+	"input": {
+		"rows": [
+			{
+				"status": 429,
+				"body": "{\"error\":{\"message\":\"m\",\"resetsAt\":0}}"
+			},
+			{
+				"status": 429,
+				"body": "{\"error\":{\"message\":\"m\",\"resetsAt\":\"\"}}"
+			},
+			{
+				"status": 429,
+				"body": "{\"error\":{\"message\":\"m\",\"resetsAt\":true}}"
+			},
+			{
+				"status": 429,
+				"body": "{\"error\":{\"message\":\"m\",\"resetsAt\":null}}"
+			},
+			{
+				"status": 429,
+				"body": "{\"error\":{\"message\":\"m\",\"resetsAt\":[1]}}"
+			},
+			{
+				"status": 429,
+				"body": "{\"error\":{\"message\":\"m\",\"resetsAt\":1.5}}"
+			}
+		]
+	},
+	"expected": {
+		"errors": [
+			{
+				"message": "m",
+				"resetsAt": 0
+			},
+			{
+				"message": "m",
+				"resetsAt": ""
+			},
+			{
+				"message": "m"
+			},
+			{
+				"message": "m"
+			},
+			{
+				"message": "m"
+			},
+			{
+				"message": "m",
+				"resetsAt": 1.5
+			}
+		]
+	}
+}

@@ -1,0 +1,39 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "finish-first-wins",
+	"input": {
+		"events": [
+			{
+				"kind": "finish",
+				"reason": "stop"
+			},
+			{
+				"kind": "finish",
+				"reason": "length"
+			},
+			{
+				"kind": "finish",
+				"reason": "error"
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			false,
+			false,
+			false
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": false,
+		"billed": {},
+		"snapshot": [],
+		"result": {
+			"parts": [],
+			"finish": "stop",
+			"serving": {}
+		}
+	}
+}

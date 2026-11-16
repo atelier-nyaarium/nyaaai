@@ -1,0 +1,39 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "effort.resolve",
+	"name": "off-ladder-offered",
+	"input": {
+		"offered": [
+			"fast",
+			"low",
+			"high"
+		],
+		"wanted": [
+			"none",
+			"minimal",
+			"low",
+			"medium",
+			"high",
+			"xhigh",
+			"max",
+			"turbo",
+			"",
+			"fast"
+		]
+	},
+	"expected": {
+		"values": [
+			"low",
+			"low",
+			"low",
+			"low",
+			"high",
+			"high",
+			"high",
+			"low",
+			"low",
+			"fast"
+		]
+	}
+}

@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "failure.message",
+	"name": "text",
+	"input": {
+		"values": [
+			"x",
+			"A message.",
+			" padded ",
+			"line\nbreak"
+		]
+	},
+	"expected": {
+		"messages": [
+			"x",
+			"A message.",
+			" padded ",
+			"line\nbreak"
+		]
+	}
+}

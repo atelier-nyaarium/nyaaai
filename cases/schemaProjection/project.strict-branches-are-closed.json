@@ -1,0 +1,85 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "strict-branches-are-closed",
+	"input": {
+		"projection": "strict",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"anyOf": [
+						{
+							"type": "object",
+							"properties": {
+								"x": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"x"
+							]
+						},
+						{
+							"type": "object",
+							"properties": {
+								"y": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"y"
+							],
+							"additionalProperties": true
+						}
+					]
+				}
+			},
+			"required": [
+				"a"
+			]
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"anyOf": [
+						{
+							"type": "object",
+							"properties": {
+								"x": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"x"
+							],
+							"additionalProperties": false
+						},
+						{
+							"type": "object",
+							"properties": {
+								"y": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"y"
+							],
+							"additionalProperties": false
+						}
+					]
+				}
+			},
+			"required": [
+				"a"
+			],
+			"additionalProperties": false
+		},
+		"refusal": null
+	}
+}

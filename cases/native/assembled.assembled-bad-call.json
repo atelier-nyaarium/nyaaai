@@ -1,0 +1,29 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.assembled",
+	"name": "assembled-bad-call",
+	"input": {
+		"events": [
+			{
+				"kind": "call",
+				"index": -1,
+				"wireId": "a",
+				"name": "r",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "finish",
+				"reason": "tool_calls"
+			}
+		]
+	},
+	"expected": {
+		"result": null,
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": "A tool call had no valid index."
+		}
+	}
+}

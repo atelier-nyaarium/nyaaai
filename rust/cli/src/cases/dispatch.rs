@@ -202,6 +202,77 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
             input,
             super::notice_text::texts,
         ),
+        "effort.ladder" => run::<shapes::EffortLadderInput, shapes::EffortLadderResult>(
+            input,
+            super::effort::ladder,
+        ),
+        "effort.resolve" => run::<shapes::EffortResolveInput, shapes::EffortResolveResult>(
+            input,
+            super::effort::resolve,
+        ),
+        "sse.items" => {
+            run::<shapes::SseItemsInput, shapes::SseItemsResult>(input, super::sse::items)
+        }
+        "sse.splits" => {
+            run::<shapes::SseSplitsInput, shapes::SseSplitsResult>(input, super::sse::splits)
+        }
+        "step.assemble" => run::<shapes::StepAssembleInput, shapes::StepAssembleResult>(
+            input,
+            super::step::assemble,
+        ),
+        "step.replies" => {
+            run::<shapes::StepRepliesInput, shapes::StepRepliesResult>(input, super::step::replies)
+        }
+        "failure.message" => run::<shapes::FailureMessageInput, shapes::FailureMessageResult>(
+            input,
+            super::failure::message,
+        ),
+        "failure.of" => {
+            run::<shapes::FailureOfInput, shapes::FailureOfResult>(input, super::failure::of)
+        }
+        "native.readers" => run::<shapes::NativeReadersInput, shapes::NativeReadersResult>(
+            input,
+            super::native::readers,
+        ),
+        "native.schemaPrompt" => run::<
+            shapes::NativeSchemaPromptInput,
+            shapes::NativeSchemaPromptResult,
+        >(input, super::native::schema_prompt),
+        "native.systemTexts" => run::<
+            shapes::NativeSystemTextsInput,
+            shapes::NativeSystemTextsResult,
+        >(input, super::native::system_texts),
+        "native.arguments" => run::<shapes::NativeArgumentsInput, shapes::NativeArgumentsResult>(
+            input,
+            super::native::arguments,
+        ),
+        "native.currentTurn" => run::<
+            shapes::NativeCurrentTurnInput,
+            shapes::NativeCurrentTurnResult,
+        >(input, super::native::current_turn),
+        "native.chunk" => {
+            run::<shapes::NativeChunkInput, shapes::NativeChunkResult>(input, super::native::chunk)
+        }
+        "native.wireError" => run::<shapes::NativeWireErrorInput, shapes::NativeWireErrorResult>(
+            input,
+            super::native::wire_error,
+        ),
+        "native.streamFailure" => run::<
+            shapes::NativeStreamFailureInput,
+            shapes::NativeStreamFailureResult,
+        >(input, super::native::stream_failure),
+        "native.assembled" => run::<shapes::NativeAssembledInput, shapes::NativeAssembledResult>(
+            input,
+            super::native::assembled,
+        ),
+        "native.serving" => run::<shapes::NativeServingInput, shapes::NativeServingResult>(
+            input,
+            super::native::serving,
+        ),
+        "schemaProjection.project" => run::<
+            shapes::SchemaProjectionProjectInput,
+            shapes::SchemaProjectionProjectResult,
+        >(input, super::schema_projection::project),
         _ => return None,
     })
 }

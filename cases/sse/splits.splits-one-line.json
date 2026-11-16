@@ -1,0 +1,20 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.splits",
+	"name": "splits-one-line",
+	"input": {
+		"bytes": "ZGF0YTogeAo="
+	},
+	"expected": {
+		"items": [
+			{
+				"kind": "data",
+				"data": "x"
+			}
+		],
+		"agree": true,
+		"firstDifferent": null,
+		"bytewise": true
+	}
+}

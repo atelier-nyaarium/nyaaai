@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "comment-unterminated",
+	"input": {
+		"chunks": [
+			"OnRhaWw="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[]
+		],
+		"ended": [
+			{
+				"kind": "comment",
+				"text": "tail"
+			}
+		]
+	}
+}

@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.splits",
+	"name": "splits-carriage-returns",
+	"input": {
+		"bytes": "ZGF0YTogYQ0KDQpkYXRhOiBiDWRhdGE6IGMNCg0KOngNCg=="
+	},
+	"expected": {
+		"items": [
+			{
+				"kind": "data",
+				"data": "a"
+			},
+			{
+				"kind": "data",
+				"data": "b\rdata: c"
+			},
+			{
+				"kind": "comment",
+				"text": "x"
+			}
+		],
+		"agree": true,
+		"firstDifferent": null,
+		"bytewise": true
+	}
+}

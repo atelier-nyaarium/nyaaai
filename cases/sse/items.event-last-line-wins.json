@@ -1,0 +1,23 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "event-last-line-wins",
+	"input": {
+		"chunks": [
+			"ZXZlbnQ6IGEKZXZlbnQ6IGIKZGF0YTogeAoK"
+		]
+	},
+	"expected": {
+		"pushed": [
+			[
+				{
+					"kind": "data",
+					"data": "x",
+					"event": "b"
+				}
+			]
+		],
+		"ended": []
+	}
+}

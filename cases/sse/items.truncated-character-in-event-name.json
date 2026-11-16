@@ -1,0 +1,27 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "truncated-character-in-event-name",
+	"input": {
+		"chunks": [
+			"ZXZlbnQ6IGU=",
+			"4oI=",
+			"CmRhdGE6IHgKCg=="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[],
+			[],
+			[
+				{
+					"kind": "data",
+					"data": "x",
+					"event": "e�"
+				}
+			]
+		],
+		"ended": []
+	}
+}

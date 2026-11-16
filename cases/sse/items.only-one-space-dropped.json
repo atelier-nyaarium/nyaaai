@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "only-one-space-dropped",
+	"input": {
+		"chunks": [
+			"ZGF0YTogICB4Cgo="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[
+				{
+					"kind": "data",
+					"data": "  x"
+				}
+			]
+		],
+		"ended": []
+	}
+}

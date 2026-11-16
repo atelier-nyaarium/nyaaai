@@ -1,0 +1,79 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "text-after-call-is-new",
+	"input": {
+		"events": [
+			{
+				"kind": "text",
+				"text": "a"
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "c0",
+				"name": "read",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "text",
+				"text": "b"
+			},
+			{
+				"kind": "text",
+				"text": "c"
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true,
+			true,
+			true,
+			true
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "text",
+				"text": "a"
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "c0",
+				"name": "read",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "text",
+				"text": "bc"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "a"
+				},
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "c0",
+					"name": "read",
+					"argumentsText": "{}"
+				},
+				{
+					"kind": "text",
+					"text": "bc"
+				}
+			],
+			"finish": "",
+			"serving": {}
+		}
+	}
+}

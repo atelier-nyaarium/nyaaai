@@ -1,0 +1,20 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "strict-root-without-properties",
+	"input": {
+		"projection": "strict",
+		"schema": {
+			"type": "object"
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"refusal": null
+	}
+}

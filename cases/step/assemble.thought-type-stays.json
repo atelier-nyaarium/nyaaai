@@ -1,0 +1,77 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "thought-type-stays",
+	"input": {
+		"events": [
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t1",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "a"
+						}
+					]
+				}
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t1",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "b"
+						}
+					],
+					"format": "x"
+				}
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true,
+			true
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "thought",
+				"type": "t1",
+				"segments": [
+					{
+						"kind": "content",
+						"text": "ab"
+					}
+				],
+				"format": "x"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "t1",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "ab"
+						}
+					],
+					"format": "x"
+				}
+			],
+			"finish": "",
+			"serving": {}
+		}
+	}
+}

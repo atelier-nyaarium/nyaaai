@@ -1,0 +1,56 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "call-late-id",
+	"input": {
+		"events": [
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "",
+				"name": "read",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "c9",
+				"name": "",
+				"argumentsText": ""
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true,
+			true
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "c9",
+				"name": "read",
+				"argumentsText": "{}"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "c9",
+					"name": "read",
+					"argumentsText": "{}"
+				}
+			],
+			"finish": "",
+			"serving": {}
+		}
+	}
+}

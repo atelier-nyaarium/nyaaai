@@ -1,0 +1,19 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "withoutNulls-empty-schema",
+	"input": {
+		"projection": "withoutNulls",
+		"schema": {},
+		"value": {
+			"a": null
+		}
+	},
+	"expected": {
+		"output": {
+			"a": null
+		},
+		"refusal": null
+	}
+}

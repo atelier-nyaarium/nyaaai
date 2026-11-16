@@ -1,0 +1,70 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "call-empty-id-filled",
+	"input": {
+		"events": [
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "",
+				"name": "read",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "call",
+				"index": 2,
+				"wireId": "",
+				"name": "write",
+				"argumentsText": "{\"a\":1}"
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true,
+			true
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "",
+				"name": "read",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "call",
+				"index": 2,
+				"wireId": "",
+				"name": "write",
+				"argumentsText": "{\"a\":1}"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "call_0",
+					"name": "read",
+					"argumentsText": "{}"
+				},
+				{
+					"kind": "call",
+					"index": 2,
+					"wireId": "call_2",
+					"name": "write",
+					"argumentsText": "{\"a\":1}"
+				}
+			],
+			"finish": "",
+			"serving": {}
+		}
+	}
+}

@@ -1,0 +1,38 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "effort.resolve",
+	"name": "only-off-ladder",
+	"input": {
+		"offered": [
+			"fast",
+			"slow"
+		],
+		"wanted": [
+			"none",
+			"minimal",
+			"low",
+			"medium",
+			"high",
+			"xhigh",
+			"max",
+			"turbo",
+			"",
+			"fast"
+		]
+	},
+	"expected": {
+		"values": [
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			"fast"
+		]
+	}
+}

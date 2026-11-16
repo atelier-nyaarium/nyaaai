@@ -1,0 +1,33 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "withoutNulls-required-null-stays",
+	"input": {
+		"projection": "withoutNulls",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"type": "string"
+				},
+				"b": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"a"
+			]
+		},
+		"value": {
+			"a": null,
+			"b": null
+		}
+	},
+	"expected": {
+		"output": {
+			"a": null
+		},
+		"refusal": null
+	}
+}

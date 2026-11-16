@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "wide-data-whole",
+	"input": {
+		"chunks": [
+			"ZGF0YTogeyJ0ZXh0IjoiY2Fmw6kg4oKsIPCfmIAifQoK"
+		]
+	},
+	"expected": {
+		"pushed": [
+			[
+				{
+					"kind": "data",
+					"data": "{\"text\":\"café € 😀\"}"
+				}
+			]
+		],
+		"ended": []
+	}
+}

@@ -1,0 +1,17 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "field-names-are-exact",
+	"input": {
+		"chunks": [
+			"RGF0YTogeAoKZGF0YSA6IHgKCiBkYXRhOiB4CgppZDogMwoKcmV0cnk6IDIKCg=="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[]
+		],
+		"ended": []
+	}
+}

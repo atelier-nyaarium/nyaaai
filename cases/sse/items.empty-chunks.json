@@ -1,0 +1,30 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "empty-chunks",
+	"input": {
+		"chunks": [
+			"",
+			"ZGF0YTogYQo=",
+			"",
+			"Cg==",
+			""
+		]
+	},
+	"expected": {
+		"pushed": [
+			[],
+			[],
+			[],
+			[
+				{
+					"kind": "data",
+					"data": "a"
+				}
+			],
+			[]
+		],
+		"ended": []
+	}
+}

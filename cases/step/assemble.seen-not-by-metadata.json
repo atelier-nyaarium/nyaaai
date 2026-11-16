@@ -1,0 +1,56 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "seen-not-by-metadata",
+	"input": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"host": "h"
+				}
+			},
+			{
+				"kind": "usage",
+				"usage": {
+					"input": 1,
+					"output": 1
+				}
+			},
+			{
+				"kind": "finish",
+				"reason": "stop"
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			false,
+			false,
+			false
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": false,
+		"billed": {
+			"usage": {
+				"input": 1,
+				"output": 1
+			},
+			"host": "h"
+		},
+		"snapshot": [],
+		"result": {
+			"parts": [],
+			"finish": "stop",
+			"usage": {
+				"input": 1,
+				"output": 1
+			},
+			"serving": {
+				"host": "h"
+			}
+		}
+	}
+}

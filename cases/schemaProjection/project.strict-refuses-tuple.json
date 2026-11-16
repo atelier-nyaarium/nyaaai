@@ -1,0 +1,38 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "strict-refuses-tuple",
+	"input": {
+		"projection": "strict",
+		"schema": {
+			"$schema": "https://json-schema.org/draft/2020-12/schema",
+			"type": "object",
+			"properties": {
+				"pair": {
+					"type": "array",
+					"prefixItems": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "number"
+						}
+					],
+					"items": false,
+					"minItems": 2,
+					"maxItems": 2
+				}
+			},
+			"required": [
+				"pair"
+			],
+			"additionalProperties": false
+		},
+		"value": null
+	},
+	"expected": {
+		"output": null,
+		"refusal": "A strict json_schema cannot carry `prefixItems`; reshape the answer without it."
+	}
+}

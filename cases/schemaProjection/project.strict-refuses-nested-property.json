@@ -1,0 +1,38 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "strict-refuses-nested-property",
+	"input": {
+		"projection": "strict",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"outer": {
+					"type": "object",
+					"properties": {
+						"inner": {
+							"type": "object",
+							"properties": {
+								"leaf": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"required": [
+						"inner"
+					]
+				}
+			},
+			"required": [
+				"outer"
+			]
+		},
+		"value": null
+	},
+	"expected": {
+		"output": null,
+		"refusal": "A strict json_schema cannot carry an optional field `leaf`; make it `.nullable()`, which is what strict mode sends."
+	}
+}

@@ -1,0 +1,27 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "comment-inside-event",
+	"input": {
+		"chunks": [
+			"ZXZlbnQ6IGUKOmMKZGF0YTogZAoK"
+		]
+	},
+	"expected": {
+		"pushed": [
+			[
+				{
+					"kind": "comment",
+					"text": "c"
+				},
+				{
+					"kind": "data",
+					"data": "d",
+					"event": "e"
+				}
+			]
+		],
+		"ended": []
+	}
+}

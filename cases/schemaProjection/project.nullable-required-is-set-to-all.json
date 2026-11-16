@@ -1,0 +1,45 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "nullable-required-is-set-to-all",
+	"input": {
+		"projection": "nullable",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"b": {
+					"type": "string"
+				},
+				"a": {
+					"type": "string"
+				}
+			}
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"properties": {
+				"b": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"a": {
+					"type": [
+						"string",
+						"null"
+					]
+				}
+			},
+			"required": [
+				"b",
+				"a"
+			]
+		},
+		"refusal": null
+	}
+}

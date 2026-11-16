@@ -1,0 +1,95 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "nullable-branches-are-widened",
+	"input": {
+		"projection": "nullable",
+		"schema": {
+			"anyOf": [
+				{
+					"type": "object",
+					"properties": {
+						"a": {
+							"type": "string"
+						}
+					}
+				},
+				{
+					"type": "object",
+					"properties": {
+						"b": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"b"
+					]
+				},
+				true,
+				"x"
+			],
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"c": {
+							"type": "string"
+						}
+					}
+				}
+			]
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"anyOf": [
+				{
+					"type": "object",
+					"properties": {
+						"a": {
+							"type": [
+								"string",
+								"null"
+							]
+						}
+					},
+					"required": [
+						"a"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"b": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"b"
+					]
+				},
+				true,
+				"x"
+			],
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"c": {
+							"type": [
+								"string",
+								"null"
+							]
+						}
+					},
+					"required": [
+						"c"
+					]
+				}
+			]
+		},
+		"refusal": null
+	}
+}

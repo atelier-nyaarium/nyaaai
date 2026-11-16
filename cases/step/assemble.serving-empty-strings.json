@@ -1,0 +1,52 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "serving-empty-strings",
+	"input": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"host": ""
+				}
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"host": "h2",
+					"generationId": ""
+				}
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "g1"
+				}
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			false,
+			false,
+			false
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": false,
+		"billed": {
+			"host": "",
+			"generationId": ""
+		},
+		"snapshot": [],
+		"result": {
+			"parts": [],
+			"finish": "",
+			"serving": {
+				"host": "",
+				"generationId": ""
+			}
+		}
+	}
+}

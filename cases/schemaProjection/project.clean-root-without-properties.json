@@ -1,0 +1,20 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "clean-root-without-properties",
+	"input": {
+		"projection": "clean",
+		"schema": {
+			"type": "object"
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"refusal": null
+	}
+}

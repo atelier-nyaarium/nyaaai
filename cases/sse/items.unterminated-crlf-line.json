@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "unterminated-crlf-line",
+	"input": {
+		"chunks": [
+			"ZGF0YTogeQ0K"
+		]
+	},
+	"expected": {
+		"pushed": [
+			[]
+		],
+		"ended": [
+			{
+				"kind": "data",
+				"data": "y"
+			}
+		]
+	}
+}

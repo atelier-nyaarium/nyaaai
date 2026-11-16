@@ -1,0 +1,114 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "added-flags",
+	"input": {
+		"events": [
+			{
+				"kind": "text",
+				"text": "a"
+			},
+			{
+				"kind": "text",
+				"text": ""
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "t"
+				}
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "a",
+				"name": "r",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"host": "h"
+				}
+			},
+			{
+				"kind": "usage",
+				"usage": {
+					"input": 1,
+					"output": 1
+				}
+			},
+			{
+				"kind": "finish",
+				"reason": "stop"
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true,
+			false,
+			true,
+			true,
+			false,
+			false,
+			false
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {
+			"usage": {
+				"input": 1,
+				"output": 1
+			},
+			"host": "h"
+		},
+		"snapshot": [
+			{
+				"kind": "text",
+				"text": "a"
+			},
+			{
+				"kind": "thought",
+				"type": "t"
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "a",
+				"name": "r",
+				"argumentsText": "{}"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "a"
+				},
+				{
+					"kind": "thought",
+					"type": "t"
+				},
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "a",
+					"name": "r",
+					"argumentsText": "{}"
+				}
+			],
+			"finish": "stop",
+			"usage": {
+				"input": 1,
+				"output": 1
+			},
+			"serving": {
+				"host": "h"
+			}
+		}
+	}
+}

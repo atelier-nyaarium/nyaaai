@@ -1,0 +1,66 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "withoutNulls-filled-optionals",
+	"input": {
+		"projection": "withoutNulls",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"note": {
+					"type": "string"
+				},
+				"items": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"tag": {
+								"type": "string"
+							}
+						}
+					}
+				},
+				"at": {
+					"anyOf": [
+						{
+							"type": "object",
+							"properties": {
+								"line": {
+									"type": "number"
+								}
+							}
+						},
+						{
+							"type": "string"
+						}
+					]
+				}
+			},
+			"required": []
+		},
+		"value": {
+			"note": null,
+			"items": [
+				{
+					"tag": null
+				}
+			],
+			"at": {
+				"line": null
+			}
+		}
+	},
+	"expected": {
+		"output": {
+			"items": [
+				{}
+			],
+			"at": {
+				"line": null
+			}
+		},
+		"refusal": null
+	}
+}

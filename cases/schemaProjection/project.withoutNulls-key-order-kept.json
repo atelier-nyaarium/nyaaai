@@ -1,0 +1,35 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "withoutNulls-key-order-kept",
+	"input": {
+		"projection": "withoutNulls",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"type": "string"
+				},
+				"b": {
+					"type": "string"
+				},
+				"c": {
+					"type": "string"
+				}
+			}
+		},
+		"value": {
+			"c": 1,
+			"b": null,
+			"a": 2
+		}
+	},
+	"expected": {
+		"output": {
+			"c": 1,
+			"a": 2
+		},
+		"refusal": null
+	}
+}

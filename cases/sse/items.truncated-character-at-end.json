@@ -1,0 +1,24 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "truncated-character-at-end",
+	"input": {
+		"chunks": [
+			"ZGF0YTogY2Fm",
+			"ww=="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[],
+			[]
+		],
+		"ended": [
+			{
+				"kind": "data",
+				"data": "caf�"
+			}
+		]
+	}
+}

@@ -1,0 +1,32 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "withoutNulls-integer-like-keys",
+	"input": {
+		"projection": "withoutNulls",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"1": {
+					"type": "string"
+				},
+				"b": {
+					"type": "string"
+				}
+			}
+		},
+		"value": {
+			"1": null,
+			"2": 3,
+			"b": 1
+		}
+	},
+	"expected": {
+		"output": {
+			"2": 3,
+			"b": 1
+		},
+		"refusal": null
+	}
+}

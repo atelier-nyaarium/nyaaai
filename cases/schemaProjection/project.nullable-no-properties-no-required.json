@@ -1,0 +1,21 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "nullable-no-properties-no-required",
+	"input": {
+		"projection": "nullable",
+		"schema": {
+			"type": "object",
+			"description": "Free."
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"description": "Free."
+		},
+		"refusal": null
+	}
+}

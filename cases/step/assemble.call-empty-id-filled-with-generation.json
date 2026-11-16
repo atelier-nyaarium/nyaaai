@@ -1,0 +1,81 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "call-empty-id-filled-with-generation",
+	"input": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "gen-7"
+				}
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "",
+				"name": "read",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "call",
+				"index": 3,
+				"wireId": "",
+				"name": "write",
+				"argumentsText": "{}"
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			false,
+			true,
+			true
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {
+			"generationId": "gen-7"
+		},
+		"snapshot": [
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "",
+				"name": "read",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "call",
+				"index": 3,
+				"wireId": "",
+				"name": "write",
+				"argumentsText": "{}"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "gen-7_0",
+					"name": "read",
+					"argumentsText": "{}"
+				},
+				{
+					"kind": "call",
+					"index": 3,
+					"wireId": "gen-7_3",
+					"name": "write",
+					"argumentsText": "{}"
+				}
+			],
+			"finish": "",
+			"serving": {
+				"generationId": "gen-7"
+			}
+		}
+	}
+}

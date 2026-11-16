@@ -1,0 +1,23 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "unterminated-event",
+	"input": {
+		"chunks": [
+			"ZXZlbnQ6IGUKZGF0YTogeA=="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[]
+		],
+		"ended": [
+			{
+				"kind": "data",
+				"data": "x",
+				"event": "e"
+			}
+		]
+	}
+}

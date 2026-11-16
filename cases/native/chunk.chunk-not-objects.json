@@ -1,0 +1,68 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.chunk",
+	"name": "chunk-not-objects",
+	"input": {
+		"texts": [
+			"[1]",
+			"[]",
+			"null",
+			"5",
+			"\"x\"",
+			"true"
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"chunk": null,
+				"failure": {
+					"category": "stream",
+					"status": "stream",
+					"message": "A stream chunk was not JSON."
+				}
+			},
+			{
+				"chunk": null,
+				"failure": {
+					"category": "stream",
+					"status": "stream",
+					"message": "A stream chunk was not JSON."
+				}
+			},
+			{
+				"chunk": null,
+				"failure": {
+					"category": "stream",
+					"status": "stream",
+					"message": "A stream chunk was not JSON."
+				}
+			},
+			{
+				"chunk": null,
+				"failure": {
+					"category": "stream",
+					"status": "stream",
+					"message": "A stream chunk was not JSON."
+				}
+			},
+			{
+				"chunk": null,
+				"failure": {
+					"category": "stream",
+					"status": "stream",
+					"message": "A stream chunk was not JSON."
+				}
+			},
+			{
+				"chunk": null,
+				"failure": {
+					"category": "stream",
+					"status": "stream",
+					"message": "A stream chunk was not JSON."
+				}
+			}
+		]
+	}
+}

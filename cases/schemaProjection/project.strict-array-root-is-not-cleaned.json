@@ -1,0 +1,45 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "strict-array-root-is-not-cleaned",
+	"input": {
+		"projection": "strict",
+		"schema": {
+			"$schema": "https://json-schema.org/draft/2020-12/schema",
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"u": {
+						"type": "string",
+						"format": "uri"
+					}
+				},
+				"required": [
+					"u"
+				]
+			}
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"u": {
+						"type": "string",
+						"format": "uri"
+					}
+				},
+				"required": [
+					"u"
+				],
+				"additionalProperties": false
+			}
+		},
+		"refusal": null
+	}
+}

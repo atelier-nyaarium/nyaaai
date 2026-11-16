@@ -1,0 +1,27 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "withoutNulls-array-without-items",
+	"input": {
+		"projection": "withoutNulls",
+		"schema": {
+			"type": "array"
+		},
+		"value": [
+			{
+				"a": null
+			},
+			null
+		]
+	},
+	"expected": {
+		"output": [
+			{
+				"a": null
+			},
+			null
+		],
+		"refusal": null
+	}
+}

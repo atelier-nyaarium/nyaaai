@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "event-empty-name",
+	"input": {
+		"chunks": [
+			"ZXZlbnQKZGF0YTogeAoKZXZlbnQ6CmRhdGE6IHkKCg=="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[
+				{
+					"kind": "data",
+					"data": "x",
+					"event": ""
+				},
+				{
+					"kind": "data",
+					"data": "y",
+					"event": ""
+				}
+			]
+		],
+		"ended": []
+	}
+}

@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "clean-format-not-text",
+	"input": {
+		"projection": "clean",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"format": 1
+				},
+				"b": {
+					"format": null
+				},
+				"c": {
+					"format": [
+						"uri"
+					]
+				}
+			}
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"format": 1
+				},
+				"b": {
+					"format": null
+				},
+				"c": {
+					"format": [
+						"uri"
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"refusal": null
+	}
+}

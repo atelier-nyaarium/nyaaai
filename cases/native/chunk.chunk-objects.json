@@ -1,0 +1,60 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.chunk",
+	"name": "chunk-objects",
+	"input": {
+		"texts": [
+			"{\"a\":1}",
+			"{}",
+			"  {\"a\":1}\n",
+			"{\"b\":1,\"a\":2}",
+			"{\"2\":1,\"1\":2}",
+			"{\"a\":{\"b\":[1]}}"
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"chunk": {
+					"a": 1
+				},
+				"failure": null
+			},
+			{
+				"chunk": {},
+				"failure": null
+			},
+			{
+				"chunk": {
+					"a": 1
+				},
+				"failure": null
+			},
+			{
+				"chunk": {
+					"b": 1,
+					"a": 2
+				},
+				"failure": null
+			},
+			{
+				"chunk": {
+					"1": 2,
+					"2": 1
+				},
+				"failure": null
+			},
+			{
+				"chunk": {
+					"a": {
+						"b": [
+							1
+						]
+					}
+				},
+				"failure": null
+			}
+		]
+	}
+}

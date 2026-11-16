@@ -1,0 +1,56 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "strict-zod-enum-and-literal",
+	"input": {
+		"projection": "strict",
+		"schema": {
+			"$schema": "https://json-schema.org/draft/2020-12/schema",
+			"type": "object",
+			"properties": {
+				"kind": {
+					"type": "string",
+					"enum": [
+						"a",
+						"b"
+					]
+				},
+				"tag": {
+					"type": "string",
+					"const": "x"
+				}
+			},
+			"required": [
+				"kind",
+				"tag"
+			],
+			"additionalProperties": false
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"properties": {
+				"kind": {
+					"type": "string",
+					"enum": [
+						"a",
+						"b"
+					]
+				},
+				"tag": {
+					"type": "string",
+					"const": "x"
+				}
+			},
+			"required": [
+				"kind",
+				"tag"
+			],
+			"additionalProperties": false
+		},
+		"refusal": null
+	}
+}

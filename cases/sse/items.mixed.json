@@ -1,0 +1,44 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "mixed",
+	"input": {
+		"chunks": [
+			"ZXZlbnQ6IHgKaWQ6IDEKZGF0YTogb25lCmRhdGE6dHdvCgpldmVudDogbG9uZQoKOnBpbmcKZGF0YTogdGhyZWUKCmV2ZW50OiBlMgo6aW5uZXIKZGF0YTogZm91cgoKZGF0YTogW0RPTkVd"
+		]
+	},
+	"expected": {
+		"pushed": [
+			[
+				{
+					"kind": "data",
+					"data": "one\ntwo",
+					"event": "x"
+				},
+				{
+					"kind": "comment",
+					"text": "ping"
+				},
+				{
+					"kind": "data",
+					"data": "three"
+				},
+				{
+					"kind": "comment",
+					"text": "inner"
+				},
+				{
+					"kind": "data",
+					"data": "four",
+					"event": "e2"
+				}
+			]
+		],
+		"ended": [
+			{
+				"kind": "done"
+			}
+		]
+	}
+}

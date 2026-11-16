@@ -1,0 +1,18 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "effort.ladder",
+	"name": "ladder",
+	"input": {},
+	"expected": {
+		"efforts": [
+			"none",
+			"minimal",
+			"low",
+			"medium",
+			"high",
+			"xhigh",
+			"max"
+		]
+	}
+}

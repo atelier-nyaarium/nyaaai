@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "no-events",
+	"input": {
+		"events": []
+	},
+	"expected": {
+		"added": [],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": false,
+		"billed": null,
+		"snapshot": [],
+		"result": {
+			"parts": [],
+			"finish": "",
+			"serving": {}
+		}
+	}
+}

@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "surrogate-bytes",
+	"input": {
+		"chunks": [
+			"ZGF0YTog",
+			"7aCA",
+			"Cgo="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[],
+			[],
+			[
+				{
+					"kind": "data",
+					"data": "���"
+				}
+			]
+		],
+		"ended": []
+	}
+}

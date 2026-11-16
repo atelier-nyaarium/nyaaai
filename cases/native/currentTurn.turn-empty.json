@@ -1,0 +1,16 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.currentTurn",
+	"name": "turn-empty",
+	"input": {
+		"histories": [
+			[]
+		]
+	},
+	"expected": {
+		"indexes": [
+			0
+		]
+	}
+}

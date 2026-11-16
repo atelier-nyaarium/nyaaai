@@ -1,0 +1,54 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "strict-nested-open-flag-is-overwritten",
+	"input": {
+		"projection": "strict",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"type": "object",
+					"additionalProperties": true,
+					"properties": {
+						"b": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"b"
+					]
+				}
+			},
+			"required": [
+				"a"
+			]
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"properties": {
+				"a": {
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"b": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"b"
+					]
+				}
+			},
+			"required": [
+				"a"
+			],
+			"additionalProperties": false
+		},
+		"refusal": null
+	}
+}

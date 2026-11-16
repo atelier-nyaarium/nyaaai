@@ -1,0 +1,34 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.streamFailure",
+	"name": "stream-failure-all",
+	"input": {
+		"error": {
+			"message": "Cut."
+		},
+		"usage": {
+			"input": 5,
+			"output": 2
+		},
+		"serving": {
+			"host": "h1",
+			"generationId": "gen-1"
+		}
+	},
+	"expected": {
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": "Cut.",
+			"billed": {
+				"usage": {
+					"input": 5,
+					"output": 2
+				},
+				"host": "h1",
+				"generationId": "gen-1"
+			}
+		}
+	}
+}

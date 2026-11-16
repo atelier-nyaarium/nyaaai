@@ -1,0 +1,24 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.splits",
+	"name": "splits-wide-characters",
+	"input": {
+		"bytes": "ZGF0YTogeyJ0ZXh0IjoiY2Fmw6kg4oKsIPCfmIAifQoKZGF0YTog8JCNiOCggN+/woAKCg=="
+	},
+	"expected": {
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"text\":\"café € 😀\"}"
+			},
+			{
+				"kind": "data",
+				"data": "𐍈ࠀ߿"
+			}
+		],
+		"agree": true,
+		"firstDifferent": null,
+		"bytewise": true
+	}
+}

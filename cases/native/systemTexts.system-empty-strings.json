@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.systemTexts",
+	"name": "system-empty-strings",
+	"input": {
+		"rows": [
+			{
+				"summary": "",
+				"prompted": "",
+				"system": [
+					"",
+					"B"
+				]
+			}
+		]
+	},
+	"expected": {
+		"texts": [
+			[
+				"",
+				"B",
+				"",
+				""
+			]
+		]
+	}
+}

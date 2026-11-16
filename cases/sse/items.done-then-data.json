@@ -1,0 +1,25 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "done-then-data",
+	"input": {
+		"chunks": [
+			"ZGF0YTogW0RPTkVdCgpkYXRhOiBsYXRlCgo="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[
+				{
+					"kind": "done"
+				},
+				{
+					"kind": "data",
+					"data": "late"
+				}
+			]
+		],
+		"ended": []
+	}
+}

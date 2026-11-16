@@ -1,0 +1,25 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.streamFailure",
+	"name": "stream-failure-host",
+	"input": {
+		"error": {
+			"message": "Cut."
+		},
+		"usage": null,
+		"serving": {
+			"host": "h1"
+		}
+	},
+	"expected": {
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": "Cut.",
+			"billed": {
+				"host": "h1"
+			}
+		}
+	}
+}

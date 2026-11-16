@@ -1,0 +1,23 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.schemaPrompt",
+	"name": "prompt-reordered",
+	"input": {
+		"schemas": [
+			{
+				"b": 1,
+				"a": 2,
+				"c": {
+					"z": 1,
+					"y": 2
+				}
+			}
+		]
+	},
+	"expected": {
+		"texts": [
+			"Answer with one JSON object matching this JSON Schema, and nothing else:\n{\"b\":1,\"a\":2,\"c\":{\"z\":1,\"y\":2}}"
+		]
+	}
+}

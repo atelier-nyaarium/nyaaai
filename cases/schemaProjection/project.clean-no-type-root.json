@@ -1,0 +1,30 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "clean-no-type-root",
+	"input": {
+		"projection": "clean",
+		"schema": {
+			"$schema": "https://json-schema.org/draft/2020-12/schema",
+			"properties": {
+				"u": {
+					"type": "string",
+					"format": "uri"
+				}
+			}
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"properties": {
+				"u": {
+					"type": "string",
+					"format": "uri"
+				}
+			}
+		},
+		"refusal": null
+	}
+}

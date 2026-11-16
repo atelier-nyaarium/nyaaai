@@ -12,6 +12,9 @@ dependencies = [
 [[package]]
 name = "nyaaai-agentic"
 version = "0.0.0"
+dependencies = [
+ "nyaaai-contract",
+]
 
 [[package]]
 name = "nyaaai-cli"

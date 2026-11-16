@@ -1,0 +1,45 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "recorded-shape-crlf",
+	"input": {
+		"chunks": [
+			"OiBQUk9DRVNTSU5HDQoNCmRhdGE6IHsiaWQiOiJnZW4tMSIsIm1vZGVsIjoidmVuZG9yL21vZGVsLWEiLCJjaG9pY2VzIjpbeyJkZWx0YSI6eyJyb2xlIjoiYXNzaXN0YW50IiwiY29udGVudCI6IiJ9fV19DQoNCmRhdGE6IHsiaWQiOiJnZW4tMSIsImNob2ljZXMiOlt7ImRlbHRhIjp7ImNvbnRlbnQiOiJIZWwifX1dfQ0KDQpkYXRhOiB7ImlkIjoiZ2VuLTEiLCJjaG9pY2VzIjpbeyJkZWx0YSI6eyJjb250ZW50IjoibG8ifX1dfQ0KDQpkYXRhOiB7ImlkIjoiZ2VuLTEiLCJjaG9pY2VzIjpbeyJkZWx0YSI6e30sImZpbmlzaF9yZWFzb24iOiJzdG9wIn1dLCJ1c2FnZSI6eyJwcm9tcHRfdG9rZW5zIjozLCJjb21wbGV0aW9uX3Rva2VucyI6Mn19DQoNCmRhdGE6IFtET05FXQ0KDQpkYXRhOiB7InRleHQiOiJjYWbDqSDigqwg8J+YgCJ9DQoNCg=="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[
+				{
+					"kind": "comment",
+					"text": " PROCESSING"
+				},
+				{
+					"kind": "data",
+					"data": "{\"id\":\"gen-1\",\"model\":\"vendor/model-a\",\"choices\":[{\"delta\":{\"role\":\"assistant\",\"content\":\"\"}}]}"
+				},
+				{
+					"kind": "data",
+					"data": "{\"id\":\"gen-1\",\"choices\":[{\"delta\":{\"content\":\"Hel\"}}]}"
+				},
+				{
+					"kind": "data",
+					"data": "{\"id\":\"gen-1\",\"choices\":[{\"delta\":{\"content\":\"lo\"}}]}"
+				},
+				{
+					"kind": "data",
+					"data": "{\"id\":\"gen-1\",\"choices\":[{\"delta\":{},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":3,\"completion_tokens\":2}}"
+				},
+				{
+					"kind": "done"
+				},
+				{
+					"kind": "data",
+					"data": "{\"text\":\"café € 😀\"}"
+				}
+			]
+		],
+		"ended": []
+	}
+}

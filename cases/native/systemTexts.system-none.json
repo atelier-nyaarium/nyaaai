@@ -1,0 +1,20 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.systemTexts",
+	"name": "system-none",
+	"input": {
+		"rows": [
+			{
+				"summary": null,
+				"prompted": null,
+				"system": []
+			}
+		]
+	},
+	"expected": {
+		"texts": [
+			[]
+		]
+	}
+}

@@ -1,0 +1,15 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.splits",
+	"name": "splits-empty",
+	"input": {
+		"bytes": ""
+	},
+	"expected": {
+		"items": [],
+		"agree": true,
+		"firstDifferent": null,
+		"bytewise": true
+	}
+}

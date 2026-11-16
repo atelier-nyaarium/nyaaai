@@ -1,0 +1,116 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.readers",
+	"name": "readers-kinds",
+	"input": {
+		"texts": [
+			"\"abc\"",
+			"\"\"",
+			"5",
+			"-3.5",
+			"0",
+			"1e21",
+			"1e-7",
+			"null",
+			"true",
+			"false",
+			"[]",
+			"[1]",
+			"{}",
+			"{\"a\":1}",
+			"\"5\"",
+			"1e999",
+			"-1e999"
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"isJson": false,
+				"string": "abc",
+				"number": null
+			},
+			{
+				"isJson": false,
+				"string": "",
+				"number": null
+			},
+			{
+				"isJson": false,
+				"string": "",
+				"number": 5
+			},
+			{
+				"isJson": false,
+				"string": "",
+				"number": -3.5
+			},
+			{
+				"isJson": false,
+				"string": "",
+				"number": 0
+			},
+			{
+				"isJson": false,
+				"string": "",
+				"number": 1e+21
+			},
+			{
+				"isJson": false,
+				"string": "",
+				"number": 1e-7
+			},
+			{
+				"isJson": false,
+				"string": "",
+				"number": null
+			},
+			{
+				"isJson": false,
+				"string": "",
+				"number": null
+			},
+			{
+				"isJson": false,
+				"string": "",
+				"number": null
+			},
+			{
+				"isJson": false,
+				"string": "",
+				"number": null
+			},
+			{
+				"isJson": false,
+				"string": "",
+				"number": null
+			},
+			{
+				"isJson": true,
+				"string": "",
+				"number": null
+			},
+			{
+				"isJson": true,
+				"string": "",
+				"number": null
+			},
+			{
+				"isJson": false,
+				"string": "5",
+				"number": null
+			},
+			{
+				"isJson": false,
+				"string": "",
+				"number": null
+			},
+			{
+				"isJson": false,
+				"string": "",
+				"number": null
+			}
+		]
+	}
+}

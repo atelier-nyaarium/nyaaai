@@ -1,0 +1,173 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "nullable-does-not-accept-null",
+	"input": {
+		"projection": "nullable",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"plain": {
+					"type": "string"
+				},
+				"enumed": {
+					"type": "string",
+					"enum": [
+						"a",
+						"b"
+					]
+				},
+				"constant": {
+					"type": "string",
+					"const": "x"
+				},
+				"numberList": {
+					"type": [
+						"string",
+						"number"
+					]
+				},
+				"branches": {
+					"anyOf": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "number"
+						}
+					]
+				},
+				"oneBranches": {
+					"oneOf": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "number"
+						}
+					]
+				},
+				"branchNotSchema": {
+					"anyOf": [
+						true,
+						{
+							"type": "string"
+						}
+					]
+				}
+			}
+		},
+		"value": null
+	},
+	"expected": {
+		"output": {
+			"type": "object",
+			"properties": {
+				"plain": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"enumed": {
+					"anyOf": [
+						{
+							"type": "string",
+							"enum": [
+								"a",
+								"b"
+							]
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"constant": {
+					"anyOf": [
+						{
+							"type": "string",
+							"const": "x"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"numberList": {
+					"anyOf": [
+						{
+							"type": [
+								"string",
+								"number"
+							]
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"branches": {
+					"anyOf": [
+						{
+							"anyOf": [
+								{
+									"type": "string"
+								},
+								{
+									"type": "number"
+								}
+							]
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"oneBranches": {
+					"anyOf": [
+						{
+							"oneOf": [
+								{
+									"type": "string"
+								},
+								{
+									"type": "number"
+								}
+							]
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"branchNotSchema": {
+					"anyOf": [
+						{
+							"anyOf": [
+								true,
+								{
+									"type": "string"
+								}
+							]
+						},
+						{
+							"type": "null"
+						}
+					]
+				}
+			},
+			"required": [
+				"plain",
+				"enumed",
+				"constant",
+				"numberList",
+				"branches",
+				"oneBranches",
+				"branchNotSchema"
+			]
+		},
+		"refusal": null
+	}
+}

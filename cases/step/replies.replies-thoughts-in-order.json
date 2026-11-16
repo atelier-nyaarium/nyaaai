@@ -1,0 +1,54 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.replies",
+	"name": "replies-thoughts-in-order",
+	"input": {
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "a",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "1"
+						}
+					]
+				},
+				{
+					"kind": "text",
+					"text": "x"
+				},
+				{
+					"kind": "thought",
+					"type": "b",
+					"opaque": "sig"
+				}
+			],
+			"finish": "stop",
+			"serving": {}
+		}
+	},
+	"expected": {
+		"text": "x",
+		"calls": [],
+		"thoughts": [
+			{
+				"kind": "thought",
+				"type": "a",
+				"segments": [
+					{
+						"kind": "content",
+						"text": "1"
+					}
+				]
+			},
+			{
+				"kind": "thought",
+				"type": "b",
+				"opaque": "sig"
+			}
+		]
+	}
+}

@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "schemaProjection.project",
+	"name": "withoutNulls-nested-arrays",
+	"input": {
+		"projection": "withoutNulls",
+		"schema": {
+			"type": "array",
+			"items": {
+				"type": "array",
+				"items": {
+					"type": "object",
+					"properties": {
+						"a": {
+							"type": "string"
+						}
+					}
+				}
+			}
+		},
+		"value": [
+			[
+				{
+					"a": null
+				}
+			],
+			[],
+			[
+				null
+			]
+		]
+	},
+	"expected": {
+		"output": [
+			[
+				{}
+			],
+			[],
+			[
+				null
+			]
+		],
+		"refusal": null
+	}
+}

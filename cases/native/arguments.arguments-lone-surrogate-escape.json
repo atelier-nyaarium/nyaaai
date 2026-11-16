@@ -1,0 +1,30 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.arguments",
+	"name": "arguments-lone-surrogate-escape",
+	"input": {
+		"texts": [
+			"{\"a\":\"\\ud800\"}",
+			"{\"a\":\"x\\udc00y\"}",
+			"{\"\\ud800\":1}",
+			"{\"a\":\"\\ud83d\\ude00\"}"
+		]
+	},
+	"expected": {
+		"values": [
+			{
+				"a": "�"
+			},
+			{
+				"a": "x�y"
+			},
+			{
+				"�": 1
+			},
+			{
+				"a": "😀"
+			}
+		]
+	}
+}
