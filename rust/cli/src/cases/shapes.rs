@@ -399,6 +399,104 @@ impl Shape for HeadersOfResult {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+pub struct HeadersResponseInput {
+    pub lists: Vec<Vec<(String, String)>>,
+}
+
+impl Shape for HeadersResponseInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let lists = shape::required(object, "lists", at, |value, at| {
+            shape::list(value, at, |value, at| {
+                shape::list(value, at, |value, at| {
+                    shape::tuple(value, at, 2).and_then(|items| {
+                        Ok((
+                            shape::place(items, 0, at, shape::text)?,
+                            shape::place(items, 1, at, shape::text)?,
+                        ))
+                    })
+                })
+            })
+        })?;
+        Ok(Self { lists })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "lists",
+            Value::Array(
+                self.lists
+                    .iter()
+                    .map(|held| {
+                        Value::Array(
+                            held.iter()
+                                .map(|held| {
+                                    Value::Array(vec![
+                                        Value::from(held.0.as_str()),
+                                        Value::from(held.1.as_str()),
+                                    ])
+                                })
+                                .collect(),
+                        )
+                    })
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HeadersResponseResult {
+    pub lists: Vec<Vec<(String, String)>>,
+}
+
+impl Shape for HeadersResponseResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let lists = shape::required(object, "lists", at, |value, at| {
+            shape::list(value, at, |value, at| {
+                shape::list(value, at, |value, at| {
+                    shape::tuple(value, at, 2).and_then(|items| {
+                        Ok((
+                            shape::place(items, 0, at, shape::text)?,
+                            shape::place(items, 1, at, shape::text)?,
+                        ))
+                    })
+                })
+            })
+        })?;
+        Ok(Self { lists })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "lists",
+            Value::Array(
+                self.lists
+                    .iter()
+                    .map(|held| {
+                        Value::Array(
+                            held.iter()
+                                .map(|held| {
+                                    Value::Array(vec![
+                                        Value::from(held.0.as_str()),
+                                        Value::from(held.1.as_str()),
+                                    ])
+                                })
+                                .collect(),
+                        )
+                    })
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct ShapeCompatibleVersionsInput {
     pub pairs: Vec<ShapeCompatibleVersionsInputPairsItem>,
 }
@@ -1756,6 +1854,7 @@ impl Shape for TextUtf8ChunksInput {
 #[derive(Debug, Clone, PartialEq)]
 pub struct TextUtf8ChunksInputRunsItem {
     pub chunks: Vec<String>,
+    pub again: Option<Vec<String>>,
 }
 
 impl Shape for TextUtf8ChunksInputRunsItem {
@@ -1764,7 +1863,10 @@ impl Shape for TextUtf8ChunksInputRunsItem {
         let chunks = shape::required(object, "chunks", at, |value, at| {
             shape::list(value, at, shape::text)
         })?;
-        Ok(Self { chunks })
+        let again = shape::optional(object, "again", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { chunks, again })
     }
 
     fn encode(&self) -> Value {
@@ -1778,6 +1880,12 @@ impl Shape for TextUtf8ChunksInputRunsItem {
                     .collect(),
             ),
         );
+        if let Some(held) = &self.again {
+            object.insert(
+                "again",
+                Value::Array(held.iter().map(|held| Value::from(held.as_str())).collect()),
+            );
+        }
         Value::Object(object)
     }
 }
@@ -1810,9 +1918,55 @@ impl Shape for TextUtf8ChunksResult {
 pub struct TextUtf8ChunksResultRunsItem {
     pub pushed: Vec<String>,
     pub ended: String,
+    pub second: Option<TextUtf8ChunksResultRunsItemSecond>,
 }
 
 impl Shape for TextUtf8ChunksResultRunsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let pushed = shape::required(object, "pushed", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let ended = shape::required(object, "ended", at, shape::text)?;
+        let second = shape::optional(
+            object,
+            "second",
+            at,
+            TextUtf8ChunksResultRunsItemSecond::decode_at,
+        )?;
+        Ok(Self {
+            pushed,
+            ended,
+            second,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "pushed",
+            Value::Array(
+                self.pushed
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert("ended", Value::from(self.ended.as_str()));
+        if let Some(held) = &self.second {
+            object.insert("second", held.encode());
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TextUtf8ChunksResultRunsItemSecond {
+    pub pushed: Vec<String>,
+    pub ended: String,
+}
+
+impl Shape for TextUtf8ChunksResultRunsItemSecond {
     fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
         let object = shape::object(value, at)?;
         let pushed = shape::required(object, "pushed", at, |value, at| {
@@ -3836,6 +3990,7 @@ pub struct TestkitSchedulerInputStepsItem {
     pub op: TestkitSchedulerInputStepsItemOp,
     pub id: Option<String>,
     pub ms: Option<i64>,
+    pub tag: Option<String>,
 }
 
 impl Shape for TestkitSchedulerInputStepsItem {
@@ -3849,7 +4004,8 @@ impl Shape for TestkitSchedulerInputStepsItem {
         )?;
         let id = shape::optional(object, "id", at, shape::text)?;
         let ms = shape::optional(object, "ms", at, shape::integer)?;
-        Ok(Self { op, id, ms })
+        let tag = shape::optional(object, "tag", at, shape::text)?;
+        Ok(Self { op, id, ms, tag })
     }
 
     fn encode(&self) -> Value {
@@ -3861,6 +4017,9 @@ impl Shape for TestkitSchedulerInputStepsItem {
         if let Some(held) = &self.ms {
             object.insert("ms", Value::Number(*held as f64));
         }
+        if let Some(held) = &self.tag {
+            object.insert("tag", Value::from(held.as_str()));
+        }
         Value::Object(object)
     }
 }
@@ -3871,10 +4030,21 @@ pub enum TestkitSchedulerInputStepsItemOp {
     Schedule,
     Cancel,
     Advance,
+    Settle,
+    WheelCancel,
+    WheelAfter,
 }
 
 impl TestkitSchedulerInputStepsItemOp {
-    pub const ALL: [Self; 4] = [Self::Sleep, Self::Schedule, Self::Cancel, Self::Advance];
+    pub const ALL: [Self; 7] = [
+        Self::Sleep,
+        Self::Schedule,
+        Self::Cancel,
+        Self::Advance,
+        Self::Settle,
+        Self::WheelCancel,
+        Self::WheelAfter,
+    ];
 
     pub fn as_str(self) -> &'static str {
         match self {
@@ -3882,6 +4052,9 @@ impl TestkitSchedulerInputStepsItemOp {
             Self::Schedule => "schedule",
             Self::Cancel => "cancel",
             Self::Advance => "advance",
+            Self::Settle => "settle",
+            Self::WheelCancel => "wheelCancel",
+            Self::WheelAfter => "wheelAfter",
         }
     }
 

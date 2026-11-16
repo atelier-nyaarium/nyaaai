@@ -1,0 +1,118 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.scheduler",
+	"name": "cancelled-id",
+	"input": {
+		"startMs": 0,
+		"steps": [
+			{
+				"op": "sleep",
+				"id": "a",
+				"ms": 10
+			},
+			{
+				"op": "cancel",
+				"id": "a"
+			},
+			{
+				"op": "sleep",
+				"id": "a",
+				"ms": 20
+			},
+			{
+				"op": "sleep",
+				"id": "b",
+				"ms": 5
+			},
+			{
+				"op": "settle"
+			},
+			{
+				"op": "advance",
+				"ms": 100
+			},
+			{
+				"op": "settle"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 0,
+				"waiting": [
+					"sleep-1"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 0,
+				"waiting": [],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 0,
+				"waiting": [],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 0,
+				"waiting": [
+					"sleep-2"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 0,
+				"waiting": [
+					"sleep-2"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": [
+					{
+						"id": "a",
+						"outcome": "cancelled"
+					},
+					{
+						"id": "a",
+						"outcome": "cancelled"
+					}
+				]
+			},
+			{
+				"nowMs": 100,
+				"waiting": [],
+				"fired": [
+					{
+						"tag": "sleep-2",
+						"atMs": 5
+					}
+				],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 100,
+				"waiting": [],
+				"fired": [],
+				"ran": [],
+				"ended": [
+					{
+						"id": "b",
+						"outcome": "done"
+					}
+				]
+			}
+		]
+	}
+}

@@ -24,15 +24,16 @@ Same names in both languages; Rust files are snake case.
   - `json`: `parseJson`, `stringifyJson`, `canonicalJson`, `jsString` (Rust: `js::to_js_string`).
   - `text`: UTF-16 lengths, pair-safe cuts, finds, `trimText`, `collapseSpace`, `nfc`, `Utf8Decoder` (`push`, `end`), `encodePathSegment`. `order`: `compareText`, `sortedTexts`. `base64`.
   - `number`: `numberText`, `roundHalfUp`, `fixedText`, `numberOfText`, `integerOfText`.
-  - `time`: `parseIsoTime`, `isoTime`, `parseHttpDate`, `parseRetryAfter`, `resetStampMs`, `dayKey`. Ports `Clock`, `Scheduler` (`sleep`, `schedule`); scripted `steppedClock`. Rust's `Scheduler` is awaited: `sleep` answers `Slept`, `schedule` answers `Scheduled`; `SystemScheduler` runs on `tokio`.
+  - `time`: `parseIsoTime`, `isoTime`, `parseHttpDate`, `parseRetryAfter`, `resetStampMs`, `dayKey`. Ports `Clock`, `Scheduler` (`sleep`, `schedule`); scripted `steppedClock`. Rust's `Scheduler` is awaited: `sleep` answers `Slept`, `schedule` answers `Scheduled`; `SystemScheduler` needs a `tokio` runtime with time enabled and takes its deadline at the call. Delays are whole milliseconds, at most 2^53-1; TypeScript's `systemScheduler` waits zero for a negative or non-finite one and chains timers past 2^31-1.
   - `id`: `randomUuid`. Port `Ids`; scripted `countedIds`. `random`: port `Random`; scripted `sequenceRandom`.
   - `pattern`: `Pattern`, one matcher written in both languages.
   - `shape`: `z`, shape sets, hooks (`preprocessed`, `refined`, `matching`), `decode`, `decodeText`, `CONTRACT_VERSION`. Rust's `shape` is the runtime generated code calls; `version` holds the constant.
   - `schemaExport`: Zod to JSON Schema, with the dialect check.
   - `strictSchema`: the JSON Schema subset: `normalizeSchema`, `schemaProblems`, `validate`. `issues`: its messages; Rust's is generated.
   - `shapes/frames`: stdio adapter frames. `shapes/sessionCut`: the cut's data shapes. `shapes/step`: a model request and its reply, effort, failure, stream items, header list. Rust modules are generated.
-  - `headers`: `headerOf`, the first value of a name, ASCII case aside.
+  - `headers`: `headerOf`, the first value of a name, ASCII case aside. `responseHeaders` (Rust `response_headers`): lowercase names, sorted by code unit, repeats joined with `, `, `set-cookie` one entry per value.
   - `fetch`: port `Fetch`, one call: `FetchRequest` and a cancel signal answer `FetchResponse`, its body read as chunks. Rust: `dyn Fetch`, `Chunks`, `FetchError`.
+    - An adapter owes: the cancel covers the whole exchange, so a pending or later chunk read ends cancelled (Rust `FetchError::Cancelled`; TypeScript rejects with the signal's reason). Response headers are in the `responseHeaders` form. A `GET` carries no body. The connection is released at the end of the chunks, when the reader stops early (iterator `return`, Rust drop), or at the cancel.
   - `future` (Rust): `BoxFuture`. `cancel` (Rust): `CancelToken`, cloneable; `cancel`, `is_cancelled`, `cancelled`, `run_until`.
 - `process`: `paths` (`resolvedPath`, `isInside`).
 - `operator`: `claude/sessionCut` cuts a Claude Code session file. `claude/sessionFile` reads its rows and holds cut ports over files. `claude/cliVersion` reads the installed version. `prompts` is generated.

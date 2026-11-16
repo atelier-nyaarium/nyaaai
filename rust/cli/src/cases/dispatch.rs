@@ -34,6 +34,10 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
         "headers.of" => {
             run::<shapes::HeadersOfInput, shapes::HeadersOfResult>(input, super::headers::of)
         }
+        "headers.response" => run::<shapes::HeadersResponseInput, shapes::HeadersResponseResult>(
+            input,
+            super::headers::response,
+        ),
         "shape.compatibleVersions" => run::<
             shapes::ShapeCompatibleVersionsInput,
             shapes::ShapeCompatibleVersionsResult,

@@ -50,7 +50,7 @@ impl Scheduled {
     }
 }
 
-/// A clock that also waits.
+/// A clock that also waits. Delays are whole milliseconds, at most 2^53-1.
 pub trait Scheduler: Clock + Send + Sync {
     /// A cancelled token ends the sleep early.
     fn sleep(&self, ms: i64, cancel: &CancelToken) -> BoxFuture<'static, Slept>;
@@ -59,7 +59,7 @@ pub trait Scheduler: Clock + Send + Sync {
     fn schedule(&self, ms: i64, run: Box<dyn FnOnce() + Send>) -> Scheduled;
 }
 
-/// Runs on `tokio`; call inside a runtime with time enabled.
+/// Needs a `tokio` runtime with time enabled; deadlines start at the call.
 pub struct SystemScheduler;
 
 fn wait(ms: i64) -> tokio::time::Sleep {
@@ -75,8 +75,9 @@ impl Clock for SystemScheduler {
 impl Scheduler for SystemScheduler {
     fn sleep(&self, ms: i64, cancel: &CancelToken) -> BoxFuture<'static, Slept> {
         let cancel = cancel.clone();
+        let waiting = wait(ms);
         Box::pin(async move {
-            match cancel.run_until(wait(ms)).await {
+            match cancel.run_until(waiting).await {
                 Some(()) => Slept::Done,
                 None => Slept::Cancelled,
             }
@@ -86,8 +87,9 @@ impl Scheduler for SystemScheduler {
     fn schedule(&self, ms: i64, run: Box<dyn FnOnce() + Send>) -> Scheduled {
         let cancel = CancelToken::new();
         let held = cancel.clone();
+        let waiting = wait(ms);
         tokio::spawn(async move {
-            if held.run_until(wait(ms)).await.is_some() {
+            if held.run_until(waiting).await.is_some() {
                 run();
             }
         });

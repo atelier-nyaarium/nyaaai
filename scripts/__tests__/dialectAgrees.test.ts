@@ -67,6 +67,23 @@ describe("the dialect check and the generator", () => {
 				"both come to the variant AB",
 			],
 			["empty twins", { Shape: z.enum(["", "empty"]) }, "Shape", "both come to the variant Empty"],
+			[
+				"empty tag twins",
+				{
+					Shape: z.discriminatedUnion("kind", [
+						z.object({ kind: z.literal("") }),
+						z.object({ kind: z.literal("empty") }),
+					]),
+				},
+				"Shape",
+				"both come to the variant Empty",
+			],
+			[
+				"union twins",
+				{ Shape: z.union([z.literal("text1"), z.string(), z.string()]) },
+				"Shape",
+				"both come to the variant Text1",
+			],
 			["shape name", { bad_name: z.string() }, "bad_name", "PascalCase"],
 			[
 				"field twins",
@@ -108,6 +125,30 @@ describe("the dialect check and the generator", () => {
 		});
 		expect(dialectProblems([set])).toEqual([]);
 		expect(generated(name)).toContain("Root(Root)");
+	});
+
+	it("names an empty tag Empty in both", () => {
+		counter += 1;
+		const name = `agree${counter}`;
+		const set = shapeSet(name, {
+			Shape: z.discriminatedUnion("kind", [
+				z.object({ kind: z.literal("") }),
+				z.object({ kind: z.literal("full") }),
+			]),
+		});
+		expect(dialectProblems([set])).toEqual([]);
+		expect(generated(name)).toContain("Empty(ShapeEmpty)");
+	});
+
+	it("reads a type list of distinct plain types only", () => {
+		const read = (type: string[]) => {
+			const doc = { $schema: "", $id: "", "x-contract-version": "0.0.0", $defs: { Shape: { type } as never } };
+			return irOf(new Map([["lists", doc]]));
+		};
+		expect(runs(() => read(["number", "string"]))).toBe(true);
+		expect(runs(() => read(["string", "string"]))).toBe(false);
+		expect(runs(() => read(["number", "integer"]))).toBe(false);
+		expect(runs(() => read(["integer", "null", "integer"]))).toBe(false);
 	});
 
 	it("refuses an alias that names itself before the generator runs", () => {

@@ -67,10 +67,14 @@ pub fn scheduler(input: TestkitSchedulerInput) -> Outcome<TestkitSchedulerResult
         for step in &input.steps {
             let id = step.id.clone().unwrap_or_default();
             let ms = step.ms.unwrap_or(0);
+            let tag = step.tag.clone().unwrap_or_default();
             let mut fired = Vec::new();
             match step.op {
                 TestkitSchedulerInputStepsItemOp::Sleep => {
-                    let token = CancelToken::new();
+                    let token = match stops.get(&id) {
+                        Some(Stop::Sleep(held)) => held.clone(),
+                        _ => CancelToken::new(),
+                    };
                     let slept = scheduler.sleep(ms, &token);
                     stops.insert(id.clone(), Stop::Sleep(token));
                     let ended = Arc::clone(&ended);
@@ -103,10 +107,16 @@ pub fn scheduler(input: TestkitSchedulerInput) -> Outcome<TestkitSchedulerResult
                     Some(Stop::Call(call)) => call.cancel(),
                     None => {}
                 },
+                TestkitSchedulerInputStepsItemOp::WheelCancel => {
+                    scheduler.wheel().cancel(&tag);
+                }
+                TestkitSchedulerInputStepsItemOp::WheelAfter => scheduler.wheel().after(ms, &tag),
+                TestkitSchedulerInputStepsItemOp::Settle => {
+                    for _ in 0..4 {
+                        tokio::task::yield_now().await;
+                    }
+                }
                 TestkitSchedulerInputStepsItemOp::Advance => fired = scheduler.wheel().advance(ms),
-            }
-            for _ in 0..4 {
-                tokio::task::yield_now().await;
             }
             steps.push(TestkitSchedulerResultStepsItem {
                 now_ms: scheduler.now_ms(),

@@ -22,6 +22,19 @@ export const TestkitConverseResult = z.object({
 });
 
 ////////////////////////////////
+//  Functions & Helpers
+
+interface SchedulerStep {
+	op: string;
+	id?: string;
+	ms?: number;
+	tag?: string;
+}
+
+/** A settle after every step. */
+const settled = (steps: SchedulerStep[]): SchedulerStep[] => steps.flatMap((step) => [step, { op: "settle" }]);
+
+////////////////////////////////
 //  Group
 
 export const testkit = caseGroup("testkit", {
@@ -63,15 +76,16 @@ export const testkit = caseGroup("testkit", {
 				};
 			},
 		),
-		/** Sleeps and calls on one wheel; `cancel` names an earlier `id`. */
+		/** Sleeps and calls on one wheel; runs settle only at `settle`. `cancel` and a repeated `sleep` name an earlier `id`. */
 		scheduler: kind(
 			z.object({
 				startMs: z.int(),
 				steps: z.array(
 					z.object({
-						op: z.enum(["sleep", "schedule", "cancel", "advance"]),
+						op: z.enum(["sleep", "schedule", "cancel", "advance", "settle", "wheelCancel", "wheelAfter"]),
 						id: z.string().exactOptional(),
 						ms: z.int().exactOptional(),
+						tag: z.string().exactOptional(),
 					}),
 				),
 			}),
@@ -90,32 +104,40 @@ export const testkit = caseGroup("testkit", {
 			}),
 			async (input) => {
 				const scheduler = fakeScheduler(new TimerWheel(input.startMs));
-				const cancels = new Map<string, () => void>();
+				const sleepers = new Map<string, AbortController>();
+				const calls = new Map<string, () => void>();
 				let ran: string[] = [];
 				let ended: Array<{ id: string; outcome: string }> = [];
 				const steps = [];
 				for (const step of input.steps) {
 					const id = step.id ?? "";
 					const ms = step.ms ?? 0;
+					const tag = step.tag ?? "";
 					let fired: Array<{ tag: string; atMs: number }> = [];
 					if (step.op === "sleep") {
-						const stop = new AbortController();
-						cancels.set(id, () => stop.abort());
+						const stop = sleepers.get(id) ?? new AbortController();
+						sleepers.set(id, stop);
 						scheduler.sleep(ms, stop.signal).then(
 							() => ended.push({ id, outcome: "done" }),
 							() => ended.push({ id, outcome: "cancelled" }),
 						);
 					} else if (step.op === "schedule") {
-						cancels.set(
+						calls.set(
 							id,
 							scheduler.schedule(ms, () => ran.push(id)),
 						);
 					} else if (step.op === "cancel") {
-						cancels.get(id)?.();
+						sleepers.get(id)?.abort();
+						calls.get(id)?.();
+					} else if (step.op === "wheelCancel") {
+						scheduler.wheel.cancel(tag);
+					} else if (step.op === "wheelAfter") {
+						scheduler.wheel.after(ms, tag);
+					} else if (step.op === "settle") {
+						for (let turn = 0; turn < 4; turn++) await Promise.resolve();
 					} else {
 						fired = scheduler.wheel.advance(ms);
 					}
-					for (let turn = 0; turn < 4; turn++) await Promise.resolve();
 					steps.push({ nowMs: scheduler.nowMs(), waiting: scheduler.wheel.waiting(), fired, ran, ended });
 					ran = [];
 					ended = [];
@@ -223,7 +245,7 @@ export const testkit = caseGroup("testkit", {
 			name: "sleeps-and-calls",
 			input: {
 				startMs: 5000,
-				steps: [
+				steps: settled([
 					{ op: "sleep", id: "s50", ms: 50 },
 					{ op: "schedule", id: "c50", ms: 50 },
 					{ op: "sleep", id: "s10", ms: 10 },
@@ -236,7 +258,7 @@ export const testkit = caseGroup("testkit", {
 					{ op: "advance", ms: 1 },
 					{ op: "advance", ms: 100 },
 					{ op: "advance", ms: 100 },
-				],
+				]),
 			},
 		},
 		{
@@ -244,7 +266,7 @@ export const testkit = caseGroup("testkit", {
 			name: "cancels",
 			input: {
 				startMs: 0,
-				steps: [
+				steps: settled([
 					{ op: "sleep", id: "a", ms: 100 },
 					{ op: "sleep", id: "b", ms: 100 },
 					{ op: "schedule", id: "c", ms: 100 },
@@ -259,6 +281,78 @@ export const testkit = caseGroup("testkit", {
 					{ op: "cancel", id: "d" },
 					{ op: "advance", ms: 100 },
 					{ op: "cancel", id: "e" },
+				]),
+			},
+		},
+		{
+			kind: "testkit.scheduler",
+			name: "unsettled-cancel",
+			input: {
+				startMs: 0,
+				steps: [
+					{ op: "sleep", id: "a", ms: 10 },
+					{ op: "cancel", id: "a" },
+					{ op: "advance", ms: 10 },
+					{ op: "settle" },
+				],
+			},
+		},
+		{
+			kind: "testkit.scheduler",
+			name: "fire-then-cancel",
+			input: {
+				startMs: 0,
+				steps: [
+					{ op: "sleep", id: "a", ms: 10 },
+					{ op: "advance", ms: 10 },
+					{ op: "cancel", id: "a" },
+					{ op: "settle" },
+				],
+			},
+		},
+		{
+			kind: "testkit.scheduler",
+			name: "cancelled-id",
+			input: {
+				startMs: 0,
+				steps: [
+					{ op: "sleep", id: "a", ms: 10 },
+					{ op: "cancel", id: "a" },
+					{ op: "sleep", id: "a", ms: 20 },
+					{ op: "sleep", id: "b", ms: 5 },
+					{ op: "settle" },
+					{ op: "advance", ms: 100 },
+					{ op: "settle" },
+				],
+			},
+		},
+		{
+			kind: "testkit.scheduler",
+			name: "wheel-cancel",
+			input: {
+				startMs: 0,
+				steps: [
+					{ op: "sleep", id: "a", ms: 10 },
+					{ op: "wheelCancel", tag: "sleep-1" },
+					{ op: "advance", ms: 50 },
+					{ op: "settle" },
+					{ op: "cancel", id: "a" },
+					{ op: "settle" },
+				],
+			},
+		},
+		{
+			kind: "testkit.scheduler",
+			name: "wheel-replace",
+			input: {
+				startMs: 0,
+				steps: [
+					{ op: "sleep", id: "a", ms: 10 },
+					{ op: "wheelAfter", tag: "sleep-1", ms: 50 },
+					{ op: "advance", ms: 50 },
+					{ op: "settle" },
+					{ op: "cancel", id: "a" },
+					{ op: "settle" },
 				],
 			},
 		},

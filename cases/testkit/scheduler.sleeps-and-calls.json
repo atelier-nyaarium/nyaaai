@@ -12,9 +12,15 @@
 				"ms": 50
 			},
 			{
+				"op": "settle"
+			},
+			{
 				"op": "schedule",
 				"id": "c50",
 				"ms": 50
+			},
+			{
+				"op": "settle"
 			},
 			{
 				"op": "sleep",
@@ -22,9 +28,15 @@
 				"ms": 10
 			},
 			{
+				"op": "settle"
+			},
+			{
 				"op": "schedule",
 				"id": "c30",
 				"ms": 30
+			},
+			{
+				"op": "settle"
 			},
 			{
 				"op": "sleep",
@@ -32,9 +44,15 @@
 				"ms": 30
 			},
 			{
+				"op": "settle"
+			},
+			{
 				"op": "sleep",
 				"id": "now",
 				"ms": 0
+			},
+			{
+				"op": "settle"
 			},
 			{
 				"op": "sleep",
@@ -42,24 +60,42 @@
 				"ms": -5
 			},
 			{
+				"op": "settle"
+			},
+			{
 				"op": "advance",
 				"ms": 0
+			},
+			{
+				"op": "settle"
 			},
 			{
 				"op": "advance",
 				"ms": 9
 			},
 			{
+				"op": "settle"
+			},
+			{
 				"op": "advance",
 				"ms": 1
 			},
 			{
-				"op": "advance",
-				"ms": 100
+				"op": "settle"
 			},
 			{
 				"op": "advance",
 				"ms": 100
+			},
+			{
+				"op": "settle"
+			},
+			{
+				"op": "advance",
+				"ms": 100
+			},
+			{
+				"op": "settle"
 			}
 		]
 	},
@@ -77,8 +113,38 @@
 			{
 				"nowMs": 5000,
 				"waiting": [
+					"sleep-1"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 5000,
+				"waiting": [
 					"sleep-1",
 					"schedule-1"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 5000,
+				"waiting": [
+					"sleep-1",
+					"schedule-1"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 5000,
+				"waiting": [
+					"sleep-1",
+					"schedule-1",
+					"sleep-2"
 				],
 				"fired": [],
 				"ran": [],
@@ -113,8 +179,47 @@
 					"sleep-1",
 					"schedule-1",
 					"sleep-2",
+					"schedule-2"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 5000,
+				"waiting": [
+					"sleep-1",
+					"schedule-1",
+					"sleep-2",
 					"schedule-2",
 					"sleep-3"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 5000,
+				"waiting": [
+					"sleep-1",
+					"schedule-1",
+					"sleep-2",
+					"schedule-2",
+					"sleep-3"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 5000,
+				"waiting": [
+					"sleep-1",
+					"schedule-1",
+					"sleep-2",
+					"schedule-2",
+					"sleep-3",
+					"sleep-4"
 				],
 				"fired": [],
 				"ran": [],
@@ -156,6 +261,21 @@
 					"schedule-1",
 					"sleep-2",
 					"schedule-2",
+					"sleep-3",
+					"sleep-4",
+					"sleep-5"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 5000,
+				"waiting": [
+					"sleep-1",
+					"schedule-1",
+					"sleep-2",
+					"schedule-2",
 					"sleep-3"
 				],
 				"fired": [
@@ -169,6 +289,19 @@
 					}
 				],
 				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 5000,
+				"waiting": [
+					"sleep-1",
+					"schedule-1",
+					"sleep-2",
+					"schedule-2",
+					"sleep-3"
+				],
+				"fired": [],
+				"ran": [],
 				"ended": [
 					{
 						"id": "now",
@@ -179,6 +312,19 @@
 						"outcome": "done"
 					}
 				]
+			},
+			{
+				"nowMs": 5009,
+				"waiting": [
+					"sleep-1",
+					"schedule-1",
+					"sleep-2",
+					"schedule-2",
+					"sleep-3"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
 			},
 			{
 				"nowMs": 5009,
@@ -207,6 +353,18 @@
 						"atMs": 5010
 					}
 				],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 5010,
+				"waiting": [
+					"sleep-1",
+					"schedule-1",
+					"schedule-2",
+					"sleep-3"
+				],
+				"fired": [],
 				"ran": [],
 				"ended": [
 					{
@@ -240,6 +398,13 @@
 					"c30",
 					"c50"
 				],
+				"ended": []
+			},
+			{
+				"nowMs": 5110,
+				"waiting": [],
+				"fired": [],
+				"ran": [],
 				"ended": [
 					{
 						"id": "s30",
@@ -250,6 +415,13 @@
 						"outcome": "done"
 					}
 				]
+			},
+			{
+				"nowMs": 5210,
+				"waiting": [],
+				"fired": [],
+				"ran": [],
+				"ended": []
 			},
 			{
 				"nowMs": 5210,

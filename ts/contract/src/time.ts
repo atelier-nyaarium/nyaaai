@@ -11,6 +11,7 @@ export interface Clock {
 	nowMs: () => number;
 }
 
+/** Delays are whole milliseconds, at most 2^53-1. */
 export interface Scheduler extends Clock {
 	/** Abort rejects with reason. */
 	sleep: (ms: number, signal?: AbortSignal) => Promise<void>;
@@ -230,25 +231,38 @@ export function dayKey(ms: number, offsetMinutes = 0): string | undefined {
 
 export const systemClock: Clock = { nowMs: () => Date.now() };
 
+/** Longest single platform timer. */
+const MAX_TIMER_MS = 2 ** 31 - 1;
+
+/** Chains timers past the platform's limit; the result cancels. */
+function afterMs(ms: number, run: () => void): () => void {
+	let left = Number.isFinite(ms) && ms > 0 ? ms : 0;
+	let timer: ReturnType<typeof setTimeout> | undefined;
+	const step = () => {
+		const wait = Math.min(left, MAX_TIMER_MS);
+		left -= wait;
+		timer = setTimeout(left > 0 ? step : run, wait);
+	};
+	step();
+	return () => clearTimeout(timer);
+}
+
 export const systemScheduler: Scheduler = {
 	...systemClock,
 	sleep: (ms, signal) =>
 		new Promise((resolve, reject) => {
 			if (signal?.aborted) return reject(signal.reason);
 			const stop = () => {
-				clearTimeout(timer);
+				cancel();
 				reject(signal?.reason);
 			};
-			const timer = setTimeout(() => {
+			const cancel = afterMs(ms, () => {
 				signal?.removeEventListener("abort", stop);
 				resolve();
-			}, ms);
+			});
 			signal?.addEventListener("abort", stop, { once: true });
 		}),
-	schedule: (ms, run) => {
-		const timer = setTimeout(run, ms);
-		return () => clearTimeout(timer);
-	},
+	schedule: afterMs,
 };
 
 /** Advances on each read. */

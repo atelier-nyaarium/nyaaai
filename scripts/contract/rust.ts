@@ -656,6 +656,9 @@ class Emitter {
 				twins > 1 ? `${draft}${drafts.slice(0, at + 1).filter((held) => held === draft).length}` : draft;
 			return { node: branch, rust, hint: `${name}${rust}`, unit: constant(branch) };
 		});
+		if (new Set(branches.map((branch) => branch.rust)).size !== branches.length) {
+			throw new Error(`${name}: two branches share a variant name`);
+		}
 		const decode = branches.map((branch) => {
 			const made = this.decodeOf(branch.node, branch.hint).text;
 			return branch.unit
@@ -685,7 +688,7 @@ class Emitter {
 
 	private tagged(name: string, node: Of<"tagged">): string {
 		const branches = node.branches.map((branch) => {
-			const rust = pascal(branch.value);
+			const rust = variant(branch.value);
 			return { ...branch, rust, hint: `${name}${rust}` };
 		});
 		if (new Set(branches.map((branch) => branch.rust)).size !== branches.length) {

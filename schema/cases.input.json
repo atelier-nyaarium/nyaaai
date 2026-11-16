@@ -203,6 +203,62 @@
 				"value"
 			]
 		},
+		"HeadersResponseInput": {
+			"type": "object",
+			"properties": {
+				"lists": {
+					"type": "array",
+					"items": {
+						"type": "array",
+						"items": {
+							"type": "array",
+							"prefixItems": [
+								{
+									"type": "string"
+								},
+								{
+									"type": "string"
+								}
+							],
+							"items": false,
+							"minItems": 2,
+							"maxItems": 2
+						}
+					}
+				}
+			},
+			"required": [
+				"lists"
+			]
+		},
+		"HeadersResponseResult": {
+			"type": "object",
+			"properties": {
+				"lists": {
+					"type": "array",
+					"items": {
+						"type": "array",
+						"items": {
+							"type": "array",
+							"prefixItems": [
+								{
+									"type": "string"
+								},
+								{
+									"type": "string"
+								}
+							],
+							"items": false,
+							"minItems": 2,
+							"maxItems": 2
+						}
+					}
+				}
+			},
+			"required": [
+				"lists"
+			]
+		},
 		"ShapeCompatibleVersionsInput": {
 			"type": "object",
 			"properties": {
@@ -962,6 +1018,12 @@
 								"items": {
 									"type": "string"
 								}
+							},
+							"again": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
 							}
 						},
 						"required": [
@@ -990,6 +1052,24 @@
 							},
 							"ended": {
 								"type": "string"
+							},
+							"second": {
+								"type": "object",
+								"properties": {
+									"pushed": {
+										"type": "array",
+										"items": {
+											"type": "string"
+										}
+									},
+									"ended": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"pushed",
+									"ended"
+								]
 							}
 						},
 						"required": [
@@ -2055,7 +2135,10 @@
 									"sleep",
 									"schedule",
 									"cancel",
-									"advance"
+									"advance",
+									"settle",
+									"wheelCancel",
+									"wheelAfter"
 								]
 							},
 							"id": {
@@ -2065,6 +2148,9 @@
 								"type": "integer",
 								"minimum": -9007199254740991,
 								"maximum": 9007199254740991
+							},
+							"tag": {
+								"type": "string"
 							}
 						},
 						"required": [

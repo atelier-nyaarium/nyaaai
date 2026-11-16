@@ -81,14 +81,26 @@ pub fn utf8_chunks(input: TextUtf8ChunksInput) -> Outcome<TextUtf8ChunksResult> 
     let mut runs = Vec::new();
     for held in &input.runs {
         let mut decoder = text::Utf8Decoder::new();
-        let mut pushed = Vec::new();
-        for chunk in &held.chunks {
-            let bytes = base64_decode(chunk).ok_or("a chunk is not base64")?;
-            pushed.push(decoder.push(&bytes));
-        }
+        let mut pass = |chunks: &[String]| -> Outcome<(Vec<String>, String)> {
+            let mut pushed = Vec::new();
+            for chunk in chunks {
+                let bytes = base64_decode(chunk).ok_or("a chunk is not base64")?;
+                pushed.push(decoder.push(&bytes));
+            }
+            Ok((pushed, decoder.end()))
+        };
+        let (pushed, ended) = pass(&held.chunks)?;
+        let second = match &held.again {
+            Some(chunks) => {
+                let (pushed, ended) = pass(chunks)?;
+                Some(TextUtf8ChunksResultRunsItemSecond { pushed, ended })
+            }
+            None => None,
+        };
         runs.push(TextUtf8ChunksResultRunsItem {
             pushed,
-            ended: decoder.end(),
+            ended,
+            second,
         });
     }
     Ok(TextUtf8ChunksResult { runs })

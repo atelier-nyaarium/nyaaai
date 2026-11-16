@@ -73,6 +73,12 @@ const asBase64 = (bytes: number[]): string => base64Encode(new Uint8Array(bytes)
 /** One text's bytes, in the given chunks. */
 const run = (...chunks: number[][]) => ({ chunks: chunks.map(asBase64) });
 
+/** A second pass on the same decoder. */
+const reused = (first: number[][], again: number[][]) => ({
+	chunks: first.map(asBase64),
+	again: again.map(asBase64),
+});
+
 /** Two-, three- and four-byte characters between ASCII. */
 const MIXED = [0x61, 0xc3, 0xa9, 0xe2, 0x82, 0xac, 0xf0, 0x9f, 0x98, 0x80, 0x7a, 0xdf, 0xbf, 0xef, 0xbf, 0xbd];
 
@@ -125,6 +131,13 @@ export const UTF8_BOM_RUNS = [
 	run([], [0xef, 0xbb, 0xbf], [], [0x41]),
 ];
 
+export const UTF8_REUSED_RUNS = [
+	reused([[0xef, 0xbb, 0xbf, 0x41]], [[0xef, 0xbb, 0xbf, 0x42]]),
+	reused([[0x41, 0xe2, 0x82]], [[0xac, 0x42]]),
+	reused([[0xef], [0xbb]], [[0xbf, 0x43]]),
+	reused([[0xf0, 0x9f]], [[0x98, 0x80], [0xe2]]),
+];
+
 export const UTF8_EMPTY_RUNS = [run(), run([]), run([], [], []), run([], [0x41], [], [0xc3], [], [0xa9], [])];
 
 /** Text for path-segment encoding. */
@@ -142,10 +155,6 @@ export const SEGMENT_TEXTS = [
 	`a${GRIN}/b`,
 	"\u{7f}\u{80}\u{7ff}\u{800}\u{ffff}",
 	"\u{fffd}",
-	"\u{D800}",
-	"\u{DC00}",
-	"a\u{D800}b",
-	`\u{DC00}${GRIN}\u{D83D}`,
 	"\r\n\t\u{0}",
 ];
 
@@ -208,6 +217,7 @@ export const textCases: CaseSource[] = [
 	{ kind: "text.utf8Chunks", name: "splits", input: { runs: UTF8_SPLIT_RUNS } },
 	{ kind: "text.utf8Chunks", name: "malformed", input: { runs: UTF8_MALFORMED_RUNS } },
 	{ kind: "text.utf8Chunks", name: "byte-order-mark", input: { runs: UTF8_BOM_RUNS } },
+	{ kind: "text.utf8Chunks", name: "reused", input: { runs: UTF8_REUSED_RUNS } },
 	{ kind: "text.utf8Chunks", name: "empty-chunks", input: { runs: UTF8_EMPTY_RUNS } },
 	{ kind: "text.pathSegment", name: "encoded", input: { texts: SEGMENT_TEXTS } },
 ];

@@ -76,19 +76,33 @@ export const text = caseGroup("text", {
 				),
 			}),
 		),
-		/** Chunks are base64; each push's text, then the end's. */
+		/** Chunks are base64; each push's text, then the end's. `again` reuses the decoder. */
 		utf8Chunks: kind(
-			z.object({ runs: z.array(z.object({ chunks: z.array(z.string()) })) }),
-			z.object({ runs: z.array(z.object({ pushed: z.array(z.string()), ended: z.string() })) }),
+			z.object({
+				runs: z.array(z.object({ chunks: z.array(z.string()), again: z.array(z.string()).exactOptional() })),
+			}),
+			z.object({
+				runs: z.array(
+					z.object({
+						pushed: z.array(z.string()),
+						ended: z.string(),
+						second: z.object({ pushed: z.array(z.string()), ended: z.string() }).exactOptional(),
+					}),
+				),
+			}),
 			(input) => ({
 				runs: input.runs.map((held) => {
 					const decoder = new Utf8Decoder();
-					const pushed = held.chunks.map((chunk) => {
-						const bytes = base64Decode(chunk);
-						if (bytes === undefined) throw new Error("a chunk is not base64");
-						return decoder.push(bytes);
-					});
-					return { pushed, ended: decoder.end() };
+					const pass = (chunks: string[]) => {
+						const pushed = chunks.map((chunk) => {
+							const bytes = base64Decode(chunk);
+							if (bytes === undefined) throw new Error("a chunk is not base64");
+							return decoder.push(bytes);
+						});
+						return { pushed, ended: decoder.end() };
+					};
+					const first = pass(held.chunks);
+					return held.again === undefined ? first : { ...first, second: pass(held.again) };
 				}),
 			}),
 		),

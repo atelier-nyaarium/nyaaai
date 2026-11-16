@@ -1,0 +1,95 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.scheduler",
+	"name": "wheel-replace",
+	"input": {
+		"startMs": 0,
+		"steps": [
+			{
+				"op": "sleep",
+				"id": "a",
+				"ms": 10
+			},
+			{
+				"op": "wheelAfter",
+				"tag": "sleep-1",
+				"ms": 50
+			},
+			{
+				"op": "advance",
+				"ms": 50
+			},
+			{
+				"op": "settle"
+			},
+			{
+				"op": "cancel",
+				"id": "a"
+			},
+			{
+				"op": "settle"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 0,
+				"waiting": [
+					"sleep-1"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 0,
+				"waiting": [
+					"sleep-1"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 50,
+				"waiting": [],
+				"fired": [
+					{
+						"tag": "sleep-1",
+						"atMs": 50
+					}
+				],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 50,
+				"waiting": [],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 50,
+				"waiting": [],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 50,
+				"waiting": [],
+				"fired": [],
+				"ran": [],
+				"ended": [
+					{
+						"id": "a",
+						"outcome": "cancelled"
+					}
+				]
+			}
+		]
+	}
+}

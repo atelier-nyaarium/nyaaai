@@ -1,0 +1,98 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "text.utf8Chunks",
+	"name": "reused",
+	"input": {
+		"runs": [
+			{
+				"chunks": [
+					"77u/QQ=="
+				],
+				"again": [
+					"77u/Qg=="
+				]
+			},
+			{
+				"chunks": [
+					"QeKC"
+				],
+				"again": [
+					"rEI="
+				]
+			},
+			{
+				"chunks": [
+					"7w==",
+					"uw=="
+				],
+				"again": [
+					"v0M="
+				]
+			},
+			{
+				"chunks": [
+					"8J8="
+				],
+				"again": [
+					"mIA=",
+					"4g=="
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"pushed": [
+					"A"
+				],
+				"ended": "",
+				"second": {
+					"pushed": [
+						"B"
+					],
+					"ended": ""
+				}
+			},
+			{
+				"pushed": [
+					"A"
+				],
+				"ended": "�",
+				"second": {
+					"pushed": [
+						"�B"
+					],
+					"ended": ""
+				}
+			},
+			{
+				"pushed": [
+					"",
+					""
+				],
+				"ended": "�",
+				"second": {
+					"pushed": [
+						"�C"
+					],
+					"ended": ""
+				}
+			},
+			{
+				"pushed": [
+					""
+				],
+				"ended": "�",
+				"second": {
+					"pushed": [
+						"��",
+						""
+					],
+					"ended": "�"
+				}
+			}
+		]
+	}
+}

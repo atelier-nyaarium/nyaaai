@@ -154,6 +154,12 @@ class Reader {
 			if (held.length < 2 || !held.every((one) => typeof one === "string" && plain.has(one))) {
 				throw new Error(`${where}: type ${JSON.stringify(type)}`);
 			}
+			if (new Set(held).size !== held.length) {
+				throw new Error(`${where}: type ${JSON.stringify(type)} repeats a type`);
+			}
+			if (held.includes("number") && held.includes("integer")) {
+				throw new Error(`${where}: type ${JSON.stringify(type)} holds number beside integer`);
+			}
 			const union: Node = {
 				kind: "union",
 				branches: held.map((one) => this.bare({ type: one as string }, where)),

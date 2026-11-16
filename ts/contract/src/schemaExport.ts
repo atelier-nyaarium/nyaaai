@@ -183,7 +183,7 @@ function tagFaults(def: Def, tag: string): string[] {
 			if (typeof value !== "string") {
 				found.push(`${branch}: the tag ${tag} is not text; write a plain union, not a discriminated one`);
 			} else {
-				const variant = tryPascal(value);
+				const variant = tryVariant(value);
 				const twin = variant === undefined ? undefined : seen.get(variant);
 				if (variant === undefined) {
 					found.push(
@@ -224,10 +224,68 @@ function enumFaults(def: Def): string[] {
 	return found;
 }
 
+/** The generator's first name for a union branch; numbered after twins. */
+function draftOf(schema: Schema): string | undefined {
+	const named = shapeIds.get(schema)?.id;
+	if (named !== undefined) return named.slice(named.indexOf(".") + 1);
+	const def = defOf(schema);
+	switch (def.type) {
+		case "string":
+			return "Text";
+		case "number":
+			return def.format === "safeint" ? "Integer" : "Number";
+		case "boolean":
+			return "Flag";
+		case "null":
+			return "Null";
+		case "unknown":
+			return "Any";
+		case "literal": {
+			const [value] = def.values ?? [];
+			return tryVariant(String(value));
+		}
+		case "enum":
+			return "Choice";
+		case "array":
+			return "List";
+		case "tuple":
+			return "Tuple";
+		case "record":
+			return "Record";
+		case "object":
+			return "Object";
+		case "nullable":
+			return def.innerType === undefined ? undefined : draftOf(def.innerType);
+		case "union":
+			return "Either";
+		default:
+			return undefined;
+	}
+}
+
+/** Branches that come to one variant name once twins are numbered. */
+function twinFaults(def: Def): string[] {
+	const drafts = (def.options ?? []).map(draftOf);
+	const finals = drafts.map((draft, at) => {
+		if (draft === undefined) return undefined;
+		const twins = drafts.filter((held) => held === draft).length;
+		return twins > 1 ? `${draft}${drafts.slice(0, at + 1).filter((held) => held === draft).length}` : draft;
+	});
+	const found: string[] = [];
+	const seen = new Map<string, number>();
+	finals.forEach((final, at) => {
+		if (final === undefined) return;
+		const twin = seen.get(final);
+		if (twin !== undefined) found.push(`branches ${twin} and ${at} both come to the variant ${final}`);
+		else seen.set(final, at);
+	});
+	return found;
+}
+
 /** A literal branch names its variant. */
 function branchFaults(def: Def): string[] {
 	if (isNullable(def)) return [];
-	const found: string[] = [];
+	const found: string[] = [...twinFaults(def)];
 	(def.options ?? []).forEach((option, at) => {
 		let branch = option;
 		let held = defOf(branch);

@@ -10,6 +10,7 @@ pub enum Method {
     Post,
 }
 
+/// A `Get` carries no body.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FetchRequest {
     pub method: Method,
@@ -24,7 +25,8 @@ pub enum FetchError {
     Failed(String),
 }
 
-/// The body, one chunk per read.
+/// A pending or later read ends `Cancelled` at the cancel given to `fetch`.
+/// The connection is released at the end, on drop, or at the cancel.
 pub trait Chunks: Send {
     /// `None` ends the body.
     fn next(&mut self) -> BoxFuture<'_, Result<Option<Vec<u8>>, FetchError>>;
@@ -32,10 +34,12 @@ pub trait Chunks: Send {
 
 pub struct FetchResponse {
     pub status: u16,
+    /// In the `response_headers` form.
     pub headers: HeaderList,
     pub chunks: Box<dyn Chunks>,
 }
 
+/// The cancel covers the whole exchange, body reads included.
 pub trait Fetch: Send + Sync {
     fn fetch(
         &self,

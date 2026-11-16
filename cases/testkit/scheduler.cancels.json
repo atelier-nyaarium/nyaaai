@@ -12,9 +12,15 @@
 				"ms": 100
 			},
 			{
+				"op": "settle"
+			},
+			{
 				"op": "sleep",
 				"id": "b",
 				"ms": 100
+			},
+			{
+				"op": "settle"
 			},
 			{
 				"op": "schedule",
@@ -22,9 +28,15 @@
 				"ms": 100
 			},
 			{
+				"op": "settle"
+			},
+			{
 				"op": "schedule",
 				"id": "d",
 				"ms": 100
+			},
+			{
+				"op": "settle"
 			},
 			{
 				"op": "sleep",
@@ -32,40 +44,70 @@
 				"ms": 200
 			},
 			{
+				"op": "settle"
+			},
+			{
 				"op": "cancel",
 				"id": "a"
 			},
 			{
-				"op": "cancel",
-				"id": "c"
+				"op": "settle"
 			},
 			{
 				"op": "cancel",
 				"id": "c"
+			},
+			{
+				"op": "settle"
+			},
+			{
+				"op": "cancel",
+				"id": "c"
+			},
+			{
+				"op": "settle"
 			},
 			{
 				"op": "cancel",
 				"id": "none"
 			},
 			{
+				"op": "settle"
+			},
+			{
 				"op": "advance",
 				"ms": 100
+			},
+			{
+				"op": "settle"
 			},
 			{
 				"op": "cancel",
 				"id": "b"
 			},
 			{
+				"op": "settle"
+			},
+			{
 				"op": "cancel",
 				"id": "d"
+			},
+			{
+				"op": "settle"
 			},
 			{
 				"op": "advance",
 				"ms": 100
 			},
 			{
+				"op": "settle"
+			},
+			{
 				"op": "cancel",
 				"id": "e"
+			},
+			{
+				"op": "settle"
 			}
 		]
 	},
@@ -83,8 +125,38 @@
 			{
 				"nowMs": 0,
 				"waiting": [
+					"sleep-1"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 0,
+				"waiting": [
 					"sleep-1",
 					"sleep-2"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 0,
+				"waiting": [
+					"sleep-1",
+					"sleep-2"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 0,
+				"waiting": [
+					"sleep-1",
+					"sleep-2",
+					"schedule-1"
 				],
 				"fired": [],
 				"ran": [],
@@ -117,6 +189,43 @@
 				"nowMs": 0,
 				"waiting": [
 					"sleep-1",
+					"sleep-2",
+					"schedule-1",
+					"schedule-2"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 0,
+				"waiting": [
+					"sleep-1",
+					"sleep-2",
+					"schedule-1",
+					"schedule-2",
+					"sleep-3"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 0,
+				"waiting": [
+					"sleep-1",
+					"sleep-2",
+					"schedule-1",
+					"schedule-2",
+					"sleep-3"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 0,
+				"waiting": [
 					"sleep-2",
 					"schedule-1",
 					"schedule-2",
@@ -177,6 +286,39 @@
 				"ended": []
 			},
 			{
+				"nowMs": 0,
+				"waiting": [
+					"sleep-2",
+					"schedule-2",
+					"sleep-3"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 0,
+				"waiting": [
+					"sleep-2",
+					"schedule-2",
+					"sleep-3"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 0,
+				"waiting": [
+					"sleep-2",
+					"schedule-2",
+					"sleep-3"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
 				"nowMs": 100,
 				"waiting": [
 					"sleep-3"
@@ -194,12 +336,39 @@
 				"ran": [
 					"d"
 				],
+				"ended": []
+			},
+			{
+				"nowMs": 100,
+				"waiting": [
+					"sleep-3"
+				],
+				"fired": [],
+				"ran": [],
 				"ended": [
 					{
 						"id": "b",
 						"outcome": "done"
 					}
 				]
+			},
+			{
+				"nowMs": 100,
+				"waiting": [
+					"sleep-3"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 100,
+				"waiting": [
+					"sleep-3"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
 			},
 			{
 				"nowMs": 100,
@@ -229,12 +398,26 @@
 					}
 				],
 				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 200,
+				"waiting": [],
+				"fired": [],
+				"ran": [],
 				"ended": [
 					{
 						"id": "e",
 						"outcome": "done"
 					}
 				]
+			},
+			{
+				"nowMs": 200,
+				"waiting": [],
+				"fired": [],
+				"ran": [],
+				"ended": []
 			},
 			{
 				"nowMs": 200,

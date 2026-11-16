@@ -43,4 +43,39 @@ export const headerCases: CaseSource[] = [
 		],
 		"",
 	),
+	{
+		kind: "headers.response",
+		name: "forms",
+		input: {
+			lists: [
+				[],
+				[["Content-Type", "text/plain"]],
+				[
+					["X-B", "1"],
+					["x-a", "2"],
+					["X-b", "3"],
+					["x-B", "4"],
+				],
+				[
+					["Set-Cookie", "a=1"],
+					["Vary", "Accept"],
+					["set-cookie", "b=2"],
+					["VARY", "Origin"],
+					["SET-COOKIE", "c=3"],
+				],
+				[
+					["b", ""],
+					["a", ""],
+					["b", "x"],
+				],
+				[
+					["\u{e9}tag", "1"],
+					["\u{c9}tag", "2"],
+					["\u{10000}", "3"],
+					["\u{ffff}", "4"],
+					["Z", "5"],
+				],
+			],
+		},
+	},
 ];
