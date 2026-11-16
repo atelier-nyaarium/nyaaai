@@ -69,6 +69,7 @@ export class TimerWheel {
 /** Virtual-time scheduler. */
 export function fakeScheduler(wheel: TimerWheel = new TimerWheel()): Scheduler & { wheel: TimerWheel } {
 	let sleeps = 0;
+	let schedules = 0;
 	return {
 		wheel,
 		nowMs: wheel.nowMs,
@@ -87,5 +88,13 @@ export function fakeScheduler(wheel: TimerWheel = new TimerWheel()): Scheduler &
 				});
 				signal?.addEventListener("abort", stop, { once: true });
 			}),
+		schedule: (ms, run) => {
+			schedules += 1;
+			const tag = `schedule-${schedules}`;
+			wheel.after(ms, tag, run);
+			return () => {
+				wheel.cancel(tag);
+			};
+		},
 	};
 }

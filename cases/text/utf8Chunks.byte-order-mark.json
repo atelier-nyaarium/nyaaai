@@ -1,0 +1,201 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "text.utf8Chunks",
+	"name": "byte-order-mark",
+	"input": {
+		"runs": [
+			{
+				"chunks": [
+					"77u/QQ=="
+				]
+			},
+			{
+				"chunks": [
+					"7w==",
+					"uw==",
+					"vw==",
+					"QQ=="
+				]
+			},
+			{
+				"chunks": [
+					"Qe+7v0I="
+				]
+			},
+			{
+				"chunks": [
+					"QQ==",
+					"7w==",
+					"uw==",
+					"vw==",
+					"Qg=="
+				]
+			},
+			{
+				"chunks": [
+					"77u/77u/QQ=="
+				]
+			},
+			{
+				"chunks": [
+					"7w==",
+					"uw==",
+					"vw==",
+					"7w==",
+					"uw==",
+					"vw==",
+					"QQ=="
+				]
+			},
+			{
+				"chunks": [
+					"/++7v0E="
+				]
+			},
+			{
+				"chunks": [
+					"/w==",
+					"7w==",
+					"uw==",
+					"vw==",
+					"QQ=="
+				]
+			},
+			{
+				"chunks": [
+					"77s="
+				]
+			},
+			{
+				"chunks": [
+					"7w==",
+					"uw=="
+				]
+			},
+			{
+				"chunks": [
+					"7w==",
+					"u79B"
+				]
+			},
+			{
+				"chunks": [
+					"77u/"
+				]
+			},
+			{
+				"chunks": [
+					"",
+					"77u/",
+					"",
+					"QQ=="
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"pushed": [
+					"A"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"",
+					"",
+					"",
+					"A"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"A\ufeffB"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"A",
+					"",
+					"",
+					"\ufeff",
+					"B"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"\ufeffA"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"",
+					"",
+					"",
+					"",
+					"",
+					"\ufeff",
+					"A"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"�\ufeffA"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"�",
+					"",
+					"",
+					"\ufeff",
+					"A"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					""
+				],
+				"ended": "�"
+			},
+			{
+				"pushed": [
+					"",
+					""
+				],
+				"ended": "�"
+			},
+			{
+				"pushed": [
+					"",
+					"A"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					""
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"",
+					"",
+					"",
+					"A"
+				],
+				"ended": ""
+			}
+		]
+	}
+}

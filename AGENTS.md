@@ -20,11 +20,11 @@ Shared AI framework for Nyaarium tools. TypeScript and Rust twins, judged by one
 
 Same names in both languages; Rust files are snake case.
 
-- `contract`: primitives, ports and shapes. Rust adds `js`.
+- `contract`: primitives, ports and shapes. Rust adds `js`, `future`, `cancel`.
   - `json`: `parseJson`, `stringifyJson`, `canonicalJson`, `jsString` (Rust: `js::to_js_string`).
-  - `text`: UTF-16 lengths, pair-safe cuts, finds, `trimText`, `collapseSpace`, `nfc`. `order`: `compareText`, `sortedTexts`. `base64`.
+  - `text`: UTF-16 lengths, pair-safe cuts, finds, `trimText`, `collapseSpace`, `nfc`, `Utf8Decoder` (`push`, `end`), `encodePathSegment`. `order`: `compareText`, `sortedTexts`. `base64`.
   - `number`: `numberText`, `roundHalfUp`, `fixedText`, `numberOfText`, `integerOfText`.
-  - `time`: `parseIsoTime`, `isoTime`, `parseHttpDate`, `parseRetryAfter`, `resetStampMs`, `dayKey`. Ports `Clock`, `Scheduler` (TypeScript only); scripted `steppedClock`.
+  - `time`: `parseIsoTime`, `isoTime`, `parseHttpDate`, `parseRetryAfter`, `resetStampMs`, `dayKey`. Ports `Clock`, `Scheduler` (`sleep`, `schedule`); scripted `steppedClock`. Rust's `Scheduler` is awaited: `sleep` answers `Slept`, `schedule` answers `Scheduled`; `SystemScheduler` runs on `tokio`.
   - `id`: `randomUuid`. Port `Ids`; scripted `countedIds`. `random`: port `Random`; scripted `sequenceRandom`.
   - `pattern`: `Pattern`, one matcher written in both languages.
   - `shape`: `z`, shape sets, hooks (`preprocessed`, `refined`, `matching`), `decode`, `decodeText`, `CONTRACT_VERSION`. Rust's `shape` is the runtime generated code calls; `version` holds the constant.
@@ -32,6 +32,8 @@ Same names in both languages; Rust files are snake case.
   - `strictSchema`: the JSON Schema subset: `normalizeSchema`, `schemaProblems`, `validate`. `issues`: its messages; Rust's is generated.
   - `shapes/frames`: stdio adapter frames. `shapes/sessionCut`: the cut's data shapes. `shapes/step`: a model request and its reply, effort, failure, stream items, header list. Rust modules are generated.
   - `headers`: `headerOf`, the first value of a name, ASCII case aside.
+  - `fetch`: port `Fetch`, one call: `FetchRequest` and a cancel signal answer `FetchResponse`, its body read as chunks. Rust: `dyn Fetch`, `Chunks`, `FetchError`.
+  - `future` (Rust): `BoxFuture`. `cancel` (Rust): `CancelToken`, cloneable; `cancel`, `is_cancelled`, `cancelled`, `run_until`.
 - `process`: `paths` (`resolvedPath`, `isInside`).
 - `operator`: `claude/sessionCut` cuts a Claude Code session file. `claude/sessionFile` reads its rows and holds cut ports over files. `claude/cliVersion` reads the installed version. `prompts` is generated.
 - `adapter`: `runtime` serves commands over frames: `serve`, `command`, `RunContext`. `stdio` (TypeScript): `serveStdio` runs it on the process's own streams and flushes before exit.
@@ -39,7 +41,7 @@ Same names in both languages; Rust files are snake case.
 - `testkit`: what a repository's parity setup is made of.
   - `caseGroup`, `caseContext`, `caseFile` shape the cases. `project` shapes `parity.ts`. `tree` plants a folder tree.
   - `claudeSession` builds synthetic session files. `tortureShapes` holds every contract construct, for the generator.
-  - `trace` reads a recorded trace and replays it. `scheduler` holds a timer wheel on virtual time.
+  - `trace` reads a recorded trace and replays it. `scheduler` holds a timer wheel on virtual time; `fakeScheduler` (Rust `FakeScheduler`) runs sleeps and scheduled calls from it as it advances. `cases` (Rust) holds `block_on`, so a handler can await.
   - `rejection` (TypeScript): `rejection`, `rethrown` read what a promise rejects with.
   - `samples` (TypeScript): `sampleTexts` derives round-trip inputs from an exported schema.
   - `rustNames`: `snake`, `pascal`, `quote`, for a `parity.ts`'s generated Rust.
@@ -179,6 +181,8 @@ Engine code calls these, never the platform's own. Each is judged by cases. A ne
 - Time is integer milliseconds. `parseRetryAfter` takes seconds, an HTTP date or an ISO time. `resetStampMs` reads a number below 1e11 as seconds.
 - `dayKey` takes its offset as an argument.
 - `base64` is the standard alphabet, padded, strict.
+- `Utf8Decoder` is WHATWG's: one U+FFFD per maximal invalid subpart, a split sequence held until it completes, a leading byte order mark dropped once, `end` turns a held tail into U+FFFD. Never the platform's `TextDecoder`.
+- `encodePathSegment` is `encodeURIComponent`: `-_.!~*'()` and ASCII letters and digits kept, UTF-8, uppercase hex. A lone surrogate becomes U+FFFD first.
 
 ## Contract
 
@@ -325,6 +329,7 @@ Same in both languages. `parseJson` and `parse_json` apply them.
 ## Dependencies
 
 - Seven days old, or named by an advisory. `ts/bunfig.toml` enforces the age for Bun.
+- `tokio` (Rust, `rt`, `sync`, `time`) is the one crate: it brings `pin-project-lite`. Engine code uses no `serde`.
 - `zod` is pinned at 4.6.7. An advisory names every version below 4.6.6.
 - `scripts/crates.ts` checks `Cargo.lock` against crates.io publish dates and OSV advisories.
   - `crate-ages.json` beside a lock holds the dates.

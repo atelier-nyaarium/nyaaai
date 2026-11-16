@@ -1,5 +1,6 @@
 // UTF-16 text cases.
 
+import { base64Encode } from "@nyaaai/contract/base64";
 import type { CaseSource } from "../caseAdapter";
 
 const GRIN = "\u{1F600}";
@@ -67,6 +68,87 @@ const NFC_TEXTS = [
 	`a${"\u{301}\u{316}".repeat(5000)}`,
 ];
 
+const asBase64 = (bytes: number[]): string => base64Encode(new Uint8Array(bytes));
+
+/** One text's bytes, in the given chunks. */
+const run = (...chunks: number[][]) => ({ chunks: chunks.map(asBase64) });
+
+/** Two-, three- and four-byte characters between ASCII. */
+const MIXED = [0x61, 0xc3, 0xa9, 0xe2, 0x82, 0xac, 0xf0, 0x9f, 0x98, 0x80, 0x7a, 0xdf, 0xbf, 0xef, 0xbf, 0xbd];
+
+/** Every two-way split, and the bytes one at a time. */
+export const UTF8_SPLIT_RUNS = [
+	...Array.from({ length: MIXED.length + 1 }, (_, at) => run(MIXED.slice(0, at), MIXED.slice(at))),
+	run(...MIXED.map((byte) => [byte])),
+];
+
+/** Each one whole, then one byte at a time. */
+const whole = (...bytes: number[]) => [run(bytes), run(...bytes.map((byte) => [byte]))];
+
+export const UTF8_MALFORMED_RUNS = [
+	// Overlong forms.
+	...whole(0xc0, 0x80),
+	...whole(0xc1, 0xbf),
+	...whole(0xe0, 0x80, 0x80),
+	...whole(0xe0, 0x9f, 0xbf),
+	...whole(0xf0, 0x80, 0x80, 0x80),
+	...whole(0xf0, 0x8f, 0xbf, 0xbf),
+	// Surrogates, and past U+10FFFF.
+	...whole(0xed, 0xa0, 0x80),
+	...whole(0xed, 0xbf, 0xbf),
+	...whole(0xf4, 0x90, 0x80, 0x80),
+	...whole(0xf5, 0x80, 0x80, 0x80),
+	// Stray bytes.
+	...whole(0x80),
+	...whole(0xbf, 0x41),
+	...whole(0xfe, 0xff, 0x42),
+	...whole(0xe2, 0x41),
+	...whole(0xe2, 0x82, 0x41),
+	...whole(0xf0, 0x9f, 0x98, 0x41),
+	...whole(0xf0, 0x9f, 0xc3, 0xa9),
+	// Truncated tails.
+	...whole(0x41, 0xe2, 0x82),
+	...whole(0xf0, 0x9f, 0x98),
+	...whole(0xc3),
+	run([0xe2], [0x82]),
+	run([0xf0, 0x9f], [], [0x98]),
+];
+
+export const UTF8_BOM_RUNS = [
+	...whole(0xef, 0xbb, 0xbf, 0x41),
+	...whole(0x41, 0xef, 0xbb, 0xbf, 0x42),
+	...whole(0xef, 0xbb, 0xbf, 0xef, 0xbb, 0xbf, 0x41),
+	...whole(0xff, 0xef, 0xbb, 0xbf, 0x41),
+	...whole(0xef, 0xbb),
+	run([0xef], [0xbb, 0xbf, 0x41]),
+	run([0xef, 0xbb, 0xbf]),
+	run([], [0xef, 0xbb, 0xbf], [], [0x41]),
+];
+
+export const UTF8_EMPTY_RUNS = [run(), run([]), run([], [], []), run([], [0x41], [], [0xc3], [], [0xa9], [])];
+
+/** Text for path-segment encoding. */
+export const SEGMENT_TEXTS = [
+	"",
+	"plain-Text_09.~",
+	"!*'()",
+	" ",
+	"a b",
+	"/?#[]@:;=&+$,%",
+	'"<>^`{|}',
+	"\u{e9}\u{df}\u{20ac}",
+	"\u{3042}\u{6f22}",
+	GRIN,
+	`a${GRIN}/b`,
+	"\u{7f}\u{80}\u{7ff}\u{800}\u{ffff}",
+	"\u{fffd}",
+	"\u{D800}",
+	"\u{DC00}",
+	"a\u{D800}b",
+	`\u{DC00}${GRIN}\u{D83D}`,
+	"\r\n\t\u{0}",
+];
+
 export const textCases: CaseSource[] = [
 	{ kind: "text.cuts", name: "pairs", input: { texts: TEXTS, points: [0, 1, 2, 3, 4, 5, 7, 8, 9, 100] } },
 	{
@@ -123,4 +205,9 @@ export const textCases: CaseSource[] = [
 		},
 	},
 	{ kind: "text.nfc", name: "forms", input: { texts: NFC_TEXTS } },
+	{ kind: "text.utf8Chunks", name: "splits", input: { runs: UTF8_SPLIT_RUNS } },
+	{ kind: "text.utf8Chunks", name: "malformed", input: { runs: UTF8_MALFORMED_RUNS } },
+	{ kind: "text.utf8Chunks", name: "byte-order-mark", input: { runs: UTF8_BOM_RUNS } },
+	{ kind: "text.utf8Chunks", name: "empty-chunks", input: { runs: UTF8_EMPTY_RUNS } },
+	{ kind: "text.pathSegment", name: "encoded", input: { texts: SEGMENT_TEXTS } },
 ];

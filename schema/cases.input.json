@@ -949,6 +949,88 @@
 				"last"
 			]
 		},
+		"TextUtf8ChunksInput": {
+			"type": "object",
+			"properties": {
+				"runs": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"chunks": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							}
+						},
+						"required": [
+							"chunks"
+						]
+					}
+				}
+			},
+			"required": [
+				"runs"
+			]
+		},
+		"TextUtf8ChunksResult": {
+			"type": "object",
+			"properties": {
+				"runs": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"pushed": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"ended": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"pushed",
+							"ended"
+						]
+					}
+				}
+			},
+			"required": [
+				"runs"
+			]
+		},
+		"TextPathSegmentInput": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			]
+		},
+		"TextPathSegmentResult": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			]
+		},
 		"TextNfcInput": {
 			"type": "object",
 			"properties": {
@@ -1946,6 +2028,126 @@
 							"waiting",
 							"fired",
 							"cancelled"
+						]
+					}
+				}
+			},
+			"required": [
+				"steps"
+			]
+		},
+		"TestkitSchedulerInput": {
+			"type": "object",
+			"properties": {
+				"startMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"op": {
+								"type": "string",
+								"enum": [
+									"sleep",
+									"schedule",
+									"cancel",
+									"advance"
+								]
+							},
+							"id": {
+								"type": "string"
+							},
+							"ms": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							}
+						},
+						"required": [
+							"op"
+						]
+					}
+				}
+			},
+			"required": [
+				"startMs",
+				"steps"
+			]
+		},
+		"TestkitSchedulerResult": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"nowMs": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"waiting": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"fired": {
+								"type": "array",
+								"items": {
+									"type": "object",
+									"properties": {
+										"tag": {
+											"type": "string"
+										},
+										"atMs": {
+											"type": "integer",
+											"minimum": -9007199254740991,
+											"maximum": 9007199254740991
+										}
+									},
+									"required": [
+										"tag",
+										"atMs"
+									]
+								}
+							},
+							"ran": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"ended": {
+								"type": "array",
+								"items": {
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "string"
+										},
+										"outcome": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"id",
+										"outcome"
+									]
+								}
+							}
+						},
+						"required": [
+							"nowMs",
+							"waiting",
+							"fired",
+							"ran",
+							"ended"
 						]
 					}
 				}

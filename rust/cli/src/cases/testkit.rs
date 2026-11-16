@@ -1,13 +1,17 @@
 //! Test kit cases.
 
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
+
+use nyaaai_contract::cancel::CancelToken;
 use nyaaai_contract::id::Ids;
 use nyaaai_contract::json::{Record, Value};
 use nyaaai_contract::order::compare_text;
 use nyaaai_contract::random::{Random, SequenceRandom};
-use nyaaai_contract::time::Clock;
-use nyaaai_testkit::cases::{CaseContext, Outcome, failed};
+use nyaaai_contract::time::{Clock, Scheduled, Scheduler, Slept};
+use nyaaai_testkit::cases::{CaseContext, Outcome, block_on, failed};
 use nyaaai_testkit::claude_session;
-use nyaaai_testkit::scheduler::TimerWheel;
+use nyaaai_testkit::scheduler::{FakeScheduler, TimerWheel};
 use nyaaai_testkit::trace::{ReplayTransport, read_trace};
 
 use super::shapes::*;
@@ -42,6 +46,90 @@ pub fn wheel(input: TestkitWheelInput) -> Outcome<TestkitWheelResult> {
         })
         .collect();
     Ok(TestkitWheelResult { steps })
+}
+
+enum Stop {
+    Sleep(CancelToken),
+    Call(Scheduled),
+}
+
+fn drained<T>(held: &Mutex<Vec<T>>) -> Vec<T> {
+    std::mem::take(&mut *held.lock().unwrap_or_else(|poisoned| poisoned.into_inner()))
+}
+
+pub fn scheduler(input: TestkitSchedulerInput) -> Outcome<TestkitSchedulerResult> {
+    block_on(async move {
+        let scheduler = FakeScheduler::new(Arc::new(TimerWheel::new(input.start_ms)));
+        let ran = Arc::new(Mutex::new(Vec::<String>::new()));
+        let ended = Arc::new(Mutex::new(Vec::<(String, &'static str)>::new()));
+        let mut stops = HashMap::new();
+        let mut steps = Vec::new();
+        for step in &input.steps {
+            let id = step.id.clone().unwrap_or_default();
+            let ms = step.ms.unwrap_or(0);
+            let mut fired = Vec::new();
+            match step.op {
+                TestkitSchedulerInputStepsItemOp::Sleep => {
+                    let token = CancelToken::new();
+                    let slept = scheduler.sleep(ms, &token);
+                    stops.insert(id.clone(), Stop::Sleep(token));
+                    let ended = Arc::clone(&ended);
+                    tokio::spawn(async move {
+                        let outcome = match slept.await {
+                            Slept::Done => "done",
+                            Slept::Cancelled => "cancelled",
+                        };
+                        ended
+                            .lock()
+                            .unwrap_or_else(|poisoned| poisoned.into_inner())
+                            .push((id, outcome));
+                    });
+                }
+                TestkitSchedulerInputStepsItemOp::Schedule => {
+                    let ran = Arc::clone(&ran);
+                    let held = id.clone();
+                    let call = scheduler.schedule(
+                        ms,
+                        Box::new(move || {
+                            ran.lock()
+                                .unwrap_or_else(|poisoned| poisoned.into_inner())
+                                .push(held);
+                        }),
+                    );
+                    stops.insert(id, Stop::Call(call));
+                }
+                TestkitSchedulerInputStepsItemOp::Cancel => match stops.get(&id) {
+                    Some(Stop::Sleep(token)) => token.cancel(),
+                    Some(Stop::Call(call)) => call.cancel(),
+                    None => {}
+                },
+                TestkitSchedulerInputStepsItemOp::Advance => fired = scheduler.wheel().advance(ms),
+            }
+            for _ in 0..4 {
+                tokio::task::yield_now().await;
+            }
+            steps.push(TestkitSchedulerResultStepsItem {
+                now_ms: scheduler.now_ms(),
+                waiting: scheduler.wheel().waiting(),
+                fired: fired
+                    .into_iter()
+                    .map(|held| TestkitSchedulerResultStepsItemFiredItem {
+                        tag: held.tag,
+                        at_ms: held.at_ms,
+                    })
+                    .collect(),
+                ran: drained(&ran),
+                ended: drained(&ended)
+                    .into_iter()
+                    .map(|(id, outcome)| TestkitSchedulerResultStepsItemEndedItem {
+                        id,
+                        outcome: outcome.to_owned(),
+                    })
+                    .collect(),
+            });
+        }
+        TestkitSchedulerResult { steps }
+    })
 }
 
 pub fn random(input: TestkitRandomInput) -> Outcome<TestkitRandomResult> {

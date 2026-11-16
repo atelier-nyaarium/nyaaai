@@ -2,6 +2,7 @@
 
 use std::cell::OnceCell;
 use std::fs;
+use std::future::Future;
 use std::io;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -128,6 +129,15 @@ pub fn run<Input: Shape, Output: Shape>(
 ) -> Outcome<Value> {
     let input = Input::decode(input).map_err(|refused| format!("the input: {refused}"))?;
     handler(input).map(|result| result.encode())
+}
+
+/// Runs a future to its end on a current-thread runtime.
+pub fn block_on<F: Future>(future: F) -> Outcome<F::Output> {
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .enable_time()
+        .build()
+        .map_err(failed)?;
+    Ok(runtime.block_on(future))
 }
 
 /// Adds a per-case context.

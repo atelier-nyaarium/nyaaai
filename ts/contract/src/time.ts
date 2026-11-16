@@ -14,6 +14,8 @@ export interface Clock {
 export interface Scheduler extends Clock {
 	/** Abort rejects with reason. */
 	sleep: (ms: number, signal?: AbortSignal) => Promise<void>;
+	/** Runs once after `ms`; the result cancels it. */
+	schedule: (ms: number, run: () => void) => () => void;
 }
 
 ////////////////////////////////
@@ -243,6 +245,10 @@ export const systemScheduler: Scheduler = {
 			}, ms);
 			signal?.addEventListener("abort", stop, { once: true });
 		}),
+	schedule: (ms, run) => {
+		const timer = setTimeout(run, ms);
+		return () => clearTimeout(timer);
+	},
 };
 
 /** Advances on each read. */

@@ -1,5 +1,6 @@
 //! Text cases.
 
+use nyaaai_contract::base64::base64_decode;
 use nyaaai_contract::text;
 use nyaaai_testkit::cases::Outcome;
 
@@ -74,4 +75,30 @@ pub fn find(input: TextFindInput) -> Outcome<TextFindResult> {
 pub fn nfc(input: TextNfcInput) -> Outcome<TextNfcResult> {
     let texts = input.texts.iter().map(|held| text::nfc(held)).collect();
     Ok(TextNfcResult { texts })
+}
+
+pub fn utf8_chunks(input: TextUtf8ChunksInput) -> Outcome<TextUtf8ChunksResult> {
+    let mut runs = Vec::new();
+    for held in &input.runs {
+        let mut decoder = text::Utf8Decoder::new();
+        let mut pushed = Vec::new();
+        for chunk in &held.chunks {
+            let bytes = base64_decode(chunk).ok_or("a chunk is not base64")?;
+            pushed.push(decoder.push(&bytes));
+        }
+        runs.push(TextUtf8ChunksResultRunsItem {
+            pushed,
+            ended: decoder.end(),
+        });
+    }
+    Ok(TextUtf8ChunksResult { runs })
+}
+
+pub fn path_segment(input: TextPathSegmentInput) -> Outcome<TextPathSegmentResult> {
+    let texts = input
+        .texts
+        .iter()
+        .map(|held| text::encode_path_segment(held))
+        .collect();
+    Ok(TextPathSegmentResult { texts })
 }

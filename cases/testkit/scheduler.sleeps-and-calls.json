@@ -1,0 +1,263 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.scheduler",
+	"name": "sleeps-and-calls",
+	"input": {
+		"startMs": 5000,
+		"steps": [
+			{
+				"op": "sleep",
+				"id": "s50",
+				"ms": 50
+			},
+			{
+				"op": "schedule",
+				"id": "c50",
+				"ms": 50
+			},
+			{
+				"op": "sleep",
+				"id": "s10",
+				"ms": 10
+			},
+			{
+				"op": "schedule",
+				"id": "c30",
+				"ms": 30
+			},
+			{
+				"op": "sleep",
+				"id": "s30",
+				"ms": 30
+			},
+			{
+				"op": "sleep",
+				"id": "now",
+				"ms": 0
+			},
+			{
+				"op": "sleep",
+				"id": "past",
+				"ms": -5
+			},
+			{
+				"op": "advance",
+				"ms": 0
+			},
+			{
+				"op": "advance",
+				"ms": 9
+			},
+			{
+				"op": "advance",
+				"ms": 1
+			},
+			{
+				"op": "advance",
+				"ms": 100
+			},
+			{
+				"op": "advance",
+				"ms": 100
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 5000,
+				"waiting": [
+					"sleep-1"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 5000,
+				"waiting": [
+					"sleep-1",
+					"schedule-1"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 5000,
+				"waiting": [
+					"sleep-1",
+					"schedule-1",
+					"sleep-2"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 5000,
+				"waiting": [
+					"sleep-1",
+					"schedule-1",
+					"sleep-2",
+					"schedule-2"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 5000,
+				"waiting": [
+					"sleep-1",
+					"schedule-1",
+					"sleep-2",
+					"schedule-2",
+					"sleep-3"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 5000,
+				"waiting": [
+					"sleep-1",
+					"schedule-1",
+					"sleep-2",
+					"schedule-2",
+					"sleep-3",
+					"sleep-4"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 5000,
+				"waiting": [
+					"sleep-1",
+					"schedule-1",
+					"sleep-2",
+					"schedule-2",
+					"sleep-3",
+					"sleep-4",
+					"sleep-5"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 5000,
+				"waiting": [
+					"sleep-1",
+					"schedule-1",
+					"sleep-2",
+					"schedule-2",
+					"sleep-3"
+				],
+				"fired": [
+					{
+						"tag": "sleep-4",
+						"atMs": 5000
+					},
+					{
+						"tag": "sleep-5",
+						"atMs": 5000
+					}
+				],
+				"ran": [],
+				"ended": [
+					{
+						"id": "now",
+						"outcome": "done"
+					},
+					{
+						"id": "past",
+						"outcome": "done"
+					}
+				]
+			},
+			{
+				"nowMs": 5009,
+				"waiting": [
+					"sleep-1",
+					"schedule-1",
+					"sleep-2",
+					"schedule-2",
+					"sleep-3"
+				],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			},
+			{
+				"nowMs": 5010,
+				"waiting": [
+					"sleep-1",
+					"schedule-1",
+					"schedule-2",
+					"sleep-3"
+				],
+				"fired": [
+					{
+						"tag": "sleep-2",
+						"atMs": 5010
+					}
+				],
+				"ran": [],
+				"ended": [
+					{
+						"id": "s10",
+						"outcome": "done"
+					}
+				]
+			},
+			{
+				"nowMs": 5110,
+				"waiting": [],
+				"fired": [
+					{
+						"tag": "schedule-2",
+						"atMs": 5030
+					},
+					{
+						"tag": "sleep-3",
+						"atMs": 5030
+					},
+					{
+						"tag": "sleep-1",
+						"atMs": 5050
+					},
+					{
+						"tag": "schedule-1",
+						"atMs": 5050
+					}
+				],
+				"ran": [
+					"c30",
+					"c50"
+				],
+				"ended": [
+					{
+						"id": "s30",
+						"outcome": "done"
+					},
+					{
+						"id": "s50",
+						"outcome": "done"
+					}
+				]
+			},
+			{
+				"nowMs": 5210,
+				"waiting": [],
+				"fired": [],
+				"ran": [],
+				"ended": []
+			}
+		]
+	}
+}

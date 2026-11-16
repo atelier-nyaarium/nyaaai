@@ -577,7 +577,9 @@ describe("residue", () => {
 							.filter(([, version]) => version.startsWith("workspace"))
 							.map(([dependency]) => dependency.replace("@nyaaai/", "")),
 				),
-				...dependencyNames(crateManifest(name)).map((dependency) => dependency.replace("nyaaai-", "")),
+				...dependencyNames(crateManifest(name))
+					.filter((dependency) => dependency.startsWith("nyaaai-"))
+					.map((dependency) => dependency.replace("nyaaai-", "")),
 			];
 			expect([name, needs.filter((other) => !CONSUMER_PACKAGES.includes(other))]).toEqual([name, []]);
 		}

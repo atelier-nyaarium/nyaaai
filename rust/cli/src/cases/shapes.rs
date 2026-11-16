@@ -1730,6 +1730,173 @@ impl Shape for TextFindResult {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+pub struct TextUtf8ChunksInput {
+    pub runs: Vec<TextUtf8ChunksInputRunsItem>,
+}
+
+impl Shape for TextUtf8ChunksInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let runs = shape::required(object, "runs", at, |value, at| {
+            shape::list(value, at, TextUtf8ChunksInputRunsItem::decode_at)
+        })?;
+        Ok(Self { runs })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "runs",
+            Value::Array(self.runs.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TextUtf8ChunksInputRunsItem {
+    pub chunks: Vec<String>,
+}
+
+impl Shape for TextUtf8ChunksInputRunsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let chunks = shape::required(object, "chunks", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { chunks })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "chunks",
+            Value::Array(
+                self.chunks
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TextUtf8ChunksResult {
+    pub runs: Vec<TextUtf8ChunksResultRunsItem>,
+}
+
+impl Shape for TextUtf8ChunksResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let runs = shape::required(object, "runs", at, |value, at| {
+            shape::list(value, at, TextUtf8ChunksResultRunsItem::decode_at)
+        })?;
+        Ok(Self { runs })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "runs",
+            Value::Array(self.runs.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TextUtf8ChunksResultRunsItem {
+    pub pushed: Vec<String>,
+    pub ended: String,
+}
+
+impl Shape for TextUtf8ChunksResultRunsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let pushed = shape::required(object, "pushed", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let ended = shape::required(object, "ended", at, shape::text)?;
+        Ok(Self { pushed, ended })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "pushed",
+            Value::Array(
+                self.pushed
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert("ended", Value::from(self.ended.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TextPathSegmentInput {
+    pub texts: Vec<String>,
+}
+
+impl Shape for TextPathSegmentInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let texts = shape::required(object, "texts", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { texts })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "texts",
+            Value::Array(
+                self.texts
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TextPathSegmentResult {
+    pub texts: Vec<String>,
+}
+
+impl Shape for TextPathSegmentResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let texts = shape::required(object, "texts", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { texts })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "texts",
+            Value::Array(
+                self.texts
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct TextNfcInput {
     pub texts: Vec<String>,
 }
@@ -3633,6 +3800,248 @@ impl Shape for TestkitWheelResultStepsItemFiredItem {
         let mut object = Object::new();
         object.insert("tag", Value::from(self.tag.as_str()));
         object.insert("atMs", Value::Number(self.at_ms as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TestkitSchedulerInput {
+    pub start_ms: i64,
+    pub steps: Vec<TestkitSchedulerInputStepsItem>,
+}
+
+impl Shape for TestkitSchedulerInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let start_ms = shape::required(object, "startMs", at, shape::integer)?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list(value, at, TestkitSchedulerInputStepsItem::decode_at)
+        })?;
+        Ok(Self { start_ms, steps })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("startMs", Value::Number(self.start_ms as f64));
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TestkitSchedulerInputStepsItem {
+    pub op: TestkitSchedulerInputStepsItemOp,
+    pub id: Option<String>,
+    pub ms: Option<i64>,
+}
+
+impl Shape for TestkitSchedulerInputStepsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let op = shape::required(
+            object,
+            "op",
+            at,
+            TestkitSchedulerInputStepsItemOp::decode_at,
+        )?;
+        let id = shape::optional(object, "id", at, shape::text)?;
+        let ms = shape::optional(object, "ms", at, shape::integer)?;
+        Ok(Self { op, id, ms })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("op", self.op.encode());
+        if let Some(held) = &self.id {
+            object.insert("id", Value::from(held.as_str()));
+        }
+        if let Some(held) = &self.ms {
+            object.insert("ms", Value::Number(*held as f64));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum TestkitSchedulerInputStepsItemOp {
+    Sleep,
+    Schedule,
+    Cancel,
+    Advance,
+}
+
+impl TestkitSchedulerInputStepsItemOp {
+    pub const ALL: [Self; 4] = [Self::Sleep, Self::Schedule, Self::Cancel, Self::Advance];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Sleep => "sleep",
+            Self::Schedule => "schedule",
+            Self::Cancel => "cancel",
+            Self::Advance => "advance",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for TestkitSchedulerInputStepsItemOp {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TestkitSchedulerResult {
+    pub steps: Vec<TestkitSchedulerResultStepsItem>,
+}
+
+impl Shape for TestkitSchedulerResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list(value, at, TestkitSchedulerResultStepsItem::decode_at)
+        })?;
+        Ok(Self { steps })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TestkitSchedulerResultStepsItem {
+    pub now_ms: i64,
+    pub waiting: Vec<String>,
+    pub fired: Vec<TestkitSchedulerResultStepsItemFiredItem>,
+    pub ran: Vec<String>,
+    pub ended: Vec<TestkitSchedulerResultStepsItemEndedItem>,
+}
+
+impl Shape for TestkitSchedulerResultStepsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let now_ms = shape::required(object, "nowMs", at, shape::integer)?;
+        let waiting = shape::required(object, "waiting", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let fired = shape::required(object, "fired", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                TestkitSchedulerResultStepsItemFiredItem::decode_at,
+            )
+        })?;
+        let ran = shape::required(object, "ran", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let ended = shape::required(object, "ended", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                TestkitSchedulerResultStepsItemEndedItem::decode_at,
+            )
+        })?;
+        Ok(Self {
+            now_ms,
+            waiting,
+            fired,
+            ran,
+            ended,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("nowMs", Value::Number(self.now_ms as f64));
+        object.insert(
+            "waiting",
+            Value::Array(
+                self.waiting
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "fired",
+            Value::Array(self.fired.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "ran",
+            Value::Array(
+                self.ran
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "ended",
+            Value::Array(self.ended.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TestkitSchedulerResultStepsItemFiredItem {
+    pub tag: String,
+    pub at_ms: i64,
+}
+
+impl Shape for TestkitSchedulerResultStepsItemFiredItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let tag = shape::required(object, "tag", at, shape::text)?;
+        let at_ms = shape::required(object, "atMs", at, shape::integer)?;
+        Ok(Self { tag, at_ms })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("tag", Value::from(self.tag.as_str()));
+        object.insert("atMs", Value::Number(self.at_ms as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TestkitSchedulerResultStepsItemEndedItem {
+    pub id: String,
+    pub outcome: String,
+}
+
+impl Shape for TestkitSchedulerResultStepsItemEndedItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let outcome = shape::required(object, "outcome", at, shape::text)?;
+        Ok(Self { id, outcome })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("id", Value::from(self.id.as_str()));
+        object.insert("outcome", Value::from(self.outcome.as_str()));
         Value::Object(object)
     }
 }

@@ -1,0 +1,276 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "text.utf8Chunks",
+	"name": "splits",
+	"input": {
+		"runs": [
+			{
+				"chunks": [
+					"",
+					"YcOp4oKs8J+YgHrfv++/vQ=="
+				]
+			},
+			{
+				"chunks": [
+					"YQ==",
+					"w6nigqzwn5iAet+/77+9"
+				]
+			},
+			{
+				"chunks": [
+					"YcM=",
+					"qeKCrPCfmIB637/vv70="
+				]
+			},
+			{
+				"chunks": [
+					"YcOp",
+					"4oKs8J+YgHrfv++/vQ=="
+				]
+			},
+			{
+				"chunks": [
+					"YcOp4g==",
+					"gqzwn5iAet+/77+9"
+				]
+			},
+			{
+				"chunks": [
+					"YcOp4oI=",
+					"rPCfmIB637/vv70="
+				]
+			},
+			{
+				"chunks": [
+					"YcOp4oKs",
+					"8J+YgHrfv++/vQ=="
+				]
+			},
+			{
+				"chunks": [
+					"YcOp4oKs8A==",
+					"n5iAet+/77+9"
+				]
+			},
+			{
+				"chunks": [
+					"YcOp4oKs8J8=",
+					"mIB637/vv70="
+				]
+			},
+			{
+				"chunks": [
+					"YcOp4oKs8J+Y",
+					"gHrfv++/vQ=="
+				]
+			},
+			{
+				"chunks": [
+					"YcOp4oKs8J+YgA==",
+					"et+/77+9"
+				]
+			},
+			{
+				"chunks": [
+					"YcOp4oKs8J+YgHo=",
+					"37/vv70="
+				]
+			},
+			{
+				"chunks": [
+					"YcOp4oKs8J+YgHrf",
+					"v++/vQ=="
+				]
+			},
+			{
+				"chunks": [
+					"YcOp4oKs8J+YgHrfvw==",
+					"77+9"
+				]
+			},
+			{
+				"chunks": [
+					"YcOp4oKs8J+YgHrfv+8=",
+					"v70="
+				]
+			},
+			{
+				"chunks": [
+					"YcOp4oKs8J+YgHrfv++/",
+					"vQ=="
+				]
+			},
+			{
+				"chunks": [
+					"YcOp4oKs8J+YgHrfv++/vQ==",
+					""
+				]
+			},
+			{
+				"chunks": [
+					"YQ==",
+					"ww==",
+					"qQ==",
+					"4g==",
+					"gg==",
+					"rA==",
+					"8A==",
+					"nw==",
+					"mA==",
+					"gA==",
+					"eg==",
+					"3w==",
+					"vw==",
+					"7w==",
+					"vw==",
+					"vQ=="
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"pushed": [
+					"",
+					"aé€😀z߿�"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"a",
+					"é€😀z߿�"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"a",
+					"é€😀z߿�"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"aé",
+					"€😀z߿�"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"aé",
+					"€😀z߿�"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"aé",
+					"€😀z߿�"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"aé€",
+					"😀z߿�"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"aé€",
+					"😀z߿�"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"aé€",
+					"😀z߿�"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"aé€",
+					"😀z߿�"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"aé€😀",
+					"z߿�"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"aé€😀z",
+					"߿�"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"aé€😀z",
+					"߿�"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"aé€😀z߿",
+					"�"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"aé€😀z߿",
+					"�"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"aé€😀z߿",
+					"�"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"aé€😀z߿�",
+					""
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"a",
+					"",
+					"é",
+					"",
+					"",
+					"€",
+					"",
+					"",
+					"",
+					"😀",
+					"z",
+					"",
+					"߿",
+					"",
+					"",
+					"�"
+				],
+				"ended": ""
+			}
+		]
+	}
+}

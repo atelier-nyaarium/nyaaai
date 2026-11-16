@@ -1,8 +1,10 @@
 //! Millisecond and ISO times.
 
 use std::sync::atomic::{AtomicI64, Ordering};
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
+use crate::cancel::CancelToken;
+use crate::future::BoxFuture;
 use crate::json::Value;
 use crate::number::{number_of_text, round_half_up};
 use crate::text::trim_text;
@@ -21,6 +23,75 @@ impl Clock for SystemClock {
         SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .map_or(0, |since| since.as_millis() as i64)
+    }
+}
+
+/// How a sleep ended.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Slept {
+    Done,
+    Cancelled,
+}
+
+/// Cancels one scheduled call.
+pub struct Scheduled {
+    cancel: Box<dyn Fn() + Send + Sync>,
+}
+
+impl Scheduled {
+    pub fn new(cancel: impl Fn() + Send + Sync + 'static) -> Self {
+        Self {
+            cancel: Box::new(cancel),
+        }
+    }
+
+    pub fn cancel(&self) {
+        (self.cancel)();
+    }
+}
+
+/// A clock that also waits.
+pub trait Scheduler: Clock + Send + Sync {
+    /// A cancelled token ends the sleep early.
+    fn sleep(&self, ms: i64, cancel: &CancelToken) -> BoxFuture<'static, Slept>;
+
+    /// Runs once after `ms`.
+    fn schedule(&self, ms: i64, run: Box<dyn FnOnce() + Send>) -> Scheduled;
+}
+
+/// Runs on `tokio`; call inside a runtime with time enabled.
+pub struct SystemScheduler;
+
+fn wait(ms: i64) -> tokio::time::Sleep {
+    tokio::time::sleep(Duration::from_millis(ms.max(0).unsigned_abs()))
+}
+
+impl Clock for SystemScheduler {
+    fn now_ms(&self) -> i64 {
+        SystemClock.now_ms()
+    }
+}
+
+impl Scheduler for SystemScheduler {
+    fn sleep(&self, ms: i64, cancel: &CancelToken) -> BoxFuture<'static, Slept> {
+        let cancel = cancel.clone();
+        Box::pin(async move {
+            match cancel.run_until(wait(ms)).await {
+                Some(()) => Slept::Done,
+                None => Slept::Cancelled,
+            }
+        })
+    }
+
+    fn schedule(&self, ms: i64, run: Box<dyn FnOnce() + Send>) -> Scheduled {
+        let cancel = CancelToken::new();
+        let held = cancel.clone();
+        tokio::spawn(async move {
+            if held.run_until(wait(ms)).await.is_some() {
+                run();
+            }
+        });
+        Scheduled::new(move || cancel.cancel())
     }
 }
 
@@ -392,6 +463,41 @@ pub fn day_key(ms: i64, offset_minutes: i64) -> Option<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn the_system_scheduler_sleeps_and_stops() {
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .enable_time()
+            .build()
+            .unwrap();
+        runtime.block_on(async {
+            let scheduler = SystemScheduler;
+            let token = CancelToken::new();
+            assert_eq!(scheduler.sleep(1, &token).await, Slept::Done);
+            let slept = scheduler.sleep(60_000, &token);
+            token.cancel();
+            assert_eq!(slept.await, Slept::Cancelled);
+
+            let (sender, receiver) = tokio::sync::oneshot::channel();
+            scheduler.schedule(
+                1,
+                Box::new(move || {
+                    let _ = sender.send(7);
+                }),
+            );
+            assert_eq!(receiver.await, Ok(7));
+            let (sender, receiver) = tokio::sync::oneshot::channel::<i32>();
+            scheduler
+                .schedule(
+                    1,
+                    Box::new(move || {
+                        let _ = sender.send(7);
+                    }),
+                )
+                .cancel();
+            assert!(receiver.await.is_err());
+        });
+    }
 
     #[test]
     fn reads_back_what_it_writes() {

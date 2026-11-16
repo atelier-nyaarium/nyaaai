@@ -11,3 +11,4 @@ workspace = true
 
 [dependencies]
 nyaaai-contract.workspace = true
+tokio = { workspace = true, features = ["rt", "sync", "time"] }

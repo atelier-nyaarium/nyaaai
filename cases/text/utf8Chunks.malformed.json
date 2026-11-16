@@ -1,0 +1,558 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "text.utf8Chunks",
+	"name": "malformed",
+	"input": {
+		"runs": [
+			{
+				"chunks": [
+					"wIA="
+				]
+			},
+			{
+				"chunks": [
+					"wA==",
+					"gA=="
+				]
+			},
+			{
+				"chunks": [
+					"wb8="
+				]
+			},
+			{
+				"chunks": [
+					"wQ==",
+					"vw=="
+				]
+			},
+			{
+				"chunks": [
+					"4ICA"
+				]
+			},
+			{
+				"chunks": [
+					"4A==",
+					"gA==",
+					"gA=="
+				]
+			},
+			{
+				"chunks": [
+					"4J+/"
+				]
+			},
+			{
+				"chunks": [
+					"4A==",
+					"nw==",
+					"vw=="
+				]
+			},
+			{
+				"chunks": [
+					"8ICAgA=="
+				]
+			},
+			{
+				"chunks": [
+					"8A==",
+					"gA==",
+					"gA==",
+					"gA=="
+				]
+			},
+			{
+				"chunks": [
+					"8I+/vw=="
+				]
+			},
+			{
+				"chunks": [
+					"8A==",
+					"jw==",
+					"vw==",
+					"vw=="
+				]
+			},
+			{
+				"chunks": [
+					"7aCA"
+				]
+			},
+			{
+				"chunks": [
+					"7Q==",
+					"oA==",
+					"gA=="
+				]
+			},
+			{
+				"chunks": [
+					"7b+/"
+				]
+			},
+			{
+				"chunks": [
+					"7Q==",
+					"vw==",
+					"vw=="
+				]
+			},
+			{
+				"chunks": [
+					"9JCAgA=="
+				]
+			},
+			{
+				"chunks": [
+					"9A==",
+					"kA==",
+					"gA==",
+					"gA=="
+				]
+			},
+			{
+				"chunks": [
+					"9YCAgA=="
+				]
+			},
+			{
+				"chunks": [
+					"9Q==",
+					"gA==",
+					"gA==",
+					"gA=="
+				]
+			},
+			{
+				"chunks": [
+					"gA=="
+				]
+			},
+			{
+				"chunks": [
+					"gA=="
+				]
+			},
+			{
+				"chunks": [
+					"v0E="
+				]
+			},
+			{
+				"chunks": [
+					"vw==",
+					"QQ=="
+				]
+			},
+			{
+				"chunks": [
+					"/v9C"
+				]
+			},
+			{
+				"chunks": [
+					"/g==",
+					"/w==",
+					"Qg=="
+				]
+			},
+			{
+				"chunks": [
+					"4kE="
+				]
+			},
+			{
+				"chunks": [
+					"4g==",
+					"QQ=="
+				]
+			},
+			{
+				"chunks": [
+					"4oJB"
+				]
+			},
+			{
+				"chunks": [
+					"4g==",
+					"gg==",
+					"QQ=="
+				]
+			},
+			{
+				"chunks": [
+					"8J+YQQ=="
+				]
+			},
+			{
+				"chunks": [
+					"8A==",
+					"nw==",
+					"mA==",
+					"QQ=="
+				]
+			},
+			{
+				"chunks": [
+					"8J/DqQ=="
+				]
+			},
+			{
+				"chunks": [
+					"8A==",
+					"nw==",
+					"ww==",
+					"qQ=="
+				]
+			},
+			{
+				"chunks": [
+					"QeKC"
+				]
+			},
+			{
+				"chunks": [
+					"QQ==",
+					"4g==",
+					"gg=="
+				]
+			},
+			{
+				"chunks": [
+					"8J+Y"
+				]
+			},
+			{
+				"chunks": [
+					"8A==",
+					"nw==",
+					"mA=="
+				]
+			},
+			{
+				"chunks": [
+					"ww=="
+				]
+			},
+			{
+				"chunks": [
+					"ww=="
+				]
+			},
+			{
+				"chunks": [
+					"4g==",
+					"gg=="
+				]
+			},
+			{
+				"chunks": [
+					"8J8=",
+					"",
+					"mA=="
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"pushed": [
+					"��"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"�",
+					"�"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"��"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"�",
+					"�"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"���"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"",
+					"��",
+					"�"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"���"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"",
+					"��",
+					"�"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"����"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"",
+					"��",
+					"�",
+					"�"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"����"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"",
+					"��",
+					"�",
+					"�"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"���"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"",
+					"��",
+					"�"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"���"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"",
+					"��",
+					"�"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"����"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"",
+					"��",
+					"�",
+					"�"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"����"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"�",
+					"�",
+					"�",
+					"�"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"�"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"�"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"�A"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"�",
+					"A"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"��B"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"�",
+					"�",
+					"B"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"�A"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"",
+					"�A"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"�A"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"",
+					"",
+					"�A"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"�A"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"",
+					"",
+					"",
+					"�A"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"�é"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"",
+					"",
+					"�",
+					"é"
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"A"
+				],
+				"ended": "�"
+			},
+			{
+				"pushed": [
+					"A",
+					"",
+					""
+				],
+				"ended": "�"
+			},
+			{
+				"pushed": [
+					""
+				],
+				"ended": "�"
+			},
+			{
+				"pushed": [
+					"",
+					"",
+					""
+				],
+				"ended": "�"
+			},
+			{
+				"pushed": [
+					""
+				],
+				"ended": "�"
+			},
+			{
+				"pushed": [
+					""
+				],
+				"ended": "�"
+			},
+			{
+				"pushed": [
+					"",
+					""
+				],
+				"ended": "�"
+			},
+			{
+				"pushed": [
+					"",
+					"",
+					""
+				],
+				"ended": "�"
+			}
+		]
+	}
+}

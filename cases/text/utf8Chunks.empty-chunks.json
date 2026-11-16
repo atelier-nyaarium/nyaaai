@@ -1,0 +1,70 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "text.utf8Chunks",
+	"name": "empty-chunks",
+	"input": {
+		"runs": [
+			{
+				"chunks": []
+			},
+			{
+				"chunks": [
+					""
+				]
+			},
+			{
+				"chunks": [
+					"",
+					"",
+					""
+				]
+			},
+			{
+				"chunks": [
+					"",
+					"QQ==",
+					"",
+					"ww==",
+					"",
+					"qQ==",
+					""
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"pushed": [],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					""
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"",
+					"",
+					""
+				],
+				"ended": ""
+			},
+			{
+				"pushed": [
+					"",
+					"A",
+					"",
+					"",
+					"",
+					"é",
+					""
+				],
+				"ended": ""
+			}
+		]
+	}
+}

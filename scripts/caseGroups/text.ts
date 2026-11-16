@@ -1,3 +1,4 @@
+import { base64Decode } from "@nyaaai/contract/base64";
 import { z } from "@nyaaai/contract/shape";
 import {
 	asciiLower,
@@ -6,6 +7,7 @@ import {
 	cutAfter,
 	cutBefore,
 	cutUtf8,
+	encodePathSegment,
 	headOf,
 	indexOfText,
 	lastIndexOfText,
@@ -14,6 +16,7 @@ import {
 	tailOf,
 	textLength,
 	trimText,
+	Utf8Decoder,
 	utf8Length,
 } from "@nyaaai/contract/text";
 import { caseGroup, casesFor, kind } from "@nyaaai/testkit/caseGroup";
@@ -71,6 +74,29 @@ export const text = caseGroup("text", {
 				last: input.needles.map((needle) =>
 					input.froms.map((from) => lastIndexOfText(input.text, needle, from)),
 				),
+			}),
+		),
+		/** Chunks are base64; each push's text, then the end's. */
+		utf8Chunks: kind(
+			z.object({ runs: z.array(z.object({ chunks: z.array(z.string()) })) }),
+			z.object({ runs: z.array(z.object({ pushed: z.array(z.string()), ended: z.string() })) }),
+			(input) => ({
+				runs: input.runs.map((held) => {
+					const decoder = new Utf8Decoder();
+					const pushed = held.chunks.map((chunk) => {
+						const bytes = base64Decode(chunk);
+						if (bytes === undefined) throw new Error("a chunk is not base64");
+						return decoder.push(bytes);
+					});
+					return { pushed, ended: decoder.end() };
+				}),
+			}),
+		),
+		pathSegment: kind(
+			z.object({ texts: z.array(z.string()) }),
+			z.object({ texts: z.array(z.string()) }),
+			(input) => ({
+				texts: input.texts.map(encodePathSegment),
 			}),
 		),
 		nfc: kind(z.object({ texts: z.array(z.string()) }), z.object({ texts: z.array(z.string()) }), (input) => ({

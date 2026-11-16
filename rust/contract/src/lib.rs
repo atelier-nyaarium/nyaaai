@@ -1,4 +1,7 @@
 pub mod base64;
+pub mod cancel;
+pub mod fetch;
+pub mod future;
 pub mod headers;
 pub mod id;
 pub mod issues;

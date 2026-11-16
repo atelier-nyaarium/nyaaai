@@ -298,3 +298,141 @@ pub fn nfc(text: &str) -> String {
         .map(|cp| char::from_u32(cp).expect("scalar"))
         .collect()
 }
+
+/// WHATWG UTF-8 decoding of chunks.
+pub struct Utf8Decoder {
+    point: u32,
+    needed: u8,
+    seen: u8,
+    lower: u8,
+    upper: u8,
+    started: bool,
+}
+
+impl Utf8Decoder {
+    pub fn new() -> Self {
+        Self {
+            point: 0,
+            needed: 0,
+            seen: 0,
+            lower: 0x80,
+            upper: 0xbf,
+            started: false,
+        }
+    }
+
+    /// Holds an incomplete sequence for the next chunk.
+    pub fn push(&mut self, bytes: &[u8]) -> String {
+        let mut out = String::new();
+        let mut at = 0;
+        while at < bytes.len() {
+            let byte = bytes[at];
+            if self.needed == 0 {
+                self.lead(byte, &mut out);
+                at += 1;
+                continue;
+            }
+            if byte < self.lower || byte > self.upper {
+                self.reset();
+                self.emit(0xfffd, &mut out);
+                continue;
+            }
+            self.lower = 0x80;
+            self.upper = 0xbf;
+            self.point = (self.point << 6) | u32::from(byte & 0x3f);
+            self.seen += 1;
+            at += 1;
+            if self.seen == self.needed {
+                let point = self.point;
+                self.reset();
+                self.emit(point, &mut out);
+            }
+        }
+        out
+    }
+
+    /// Turns a held sequence into U+FFFD; the decoder starts over.
+    pub fn end(&mut self) -> String {
+        let mut out = String::new();
+        if self.needed != 0 {
+            self.emit(0xfffd, &mut out);
+        }
+        self.reset();
+        self.started = false;
+        out
+    }
+
+    fn lead(&mut self, byte: u8, out: &mut String) {
+        match byte {
+            0x00..=0x7f => self.emit(u32::from(byte), out),
+            0xc2..=0xdf => {
+                self.needed = 1;
+                self.point = u32::from(byte & 0x1f);
+            }
+            0xe0..=0xef => {
+                if byte == 0xe0 {
+                    self.lower = 0xa0;
+                }
+                if byte == 0xed {
+                    self.upper = 0x9f;
+                }
+                self.needed = 2;
+                self.point = u32::from(byte & 0xf);
+            }
+            0xf0..=0xf4 => {
+                if byte == 0xf0 {
+                    self.lower = 0x90;
+                }
+                if byte == 0xf4 {
+                    self.upper = 0x8f;
+                }
+                self.needed = 3;
+                self.point = u32::from(byte & 7);
+            }
+            _ => self.emit(0xfffd, out),
+        }
+    }
+
+    /// Drops a byte order mark that starts the stream.
+    fn emit(&mut self, point: u32, out: &mut String) {
+        let first = !self.started;
+        self.started = true;
+        if !(first && point == 0xfeff) {
+            out.push(char::from_u32(point).unwrap_or('\u{fffd}'));
+        }
+    }
+
+    fn reset(&mut self) {
+        self.point = 0;
+        self.needed = 0;
+        self.seen = 0;
+        self.lower = 0x80;
+        self.upper = 0xbf;
+    }
+}
+
+impl Default for Utf8Decoder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+const HEX: &[u8; 16] = b"0123456789ABCDEF";
+
+/// Percent-encodes as `encodeURIComponent` does.
+pub fn encode_path_segment(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    for char in text.chars() {
+        if char.is_ascii_alphanumeric() || "-_.!~*'()".contains(char) {
+            out.push(char);
+            continue;
+        }
+        let mut buffer = [0u8; 4];
+        for byte in char.encode_utf8(&mut buffer).bytes() {
+            out.push('%');
+            out.push(char::from(HEX[usize::from(byte >> 4)]));
+            out.push(char::from(HEX[usize::from(byte & 15)]));
+        }
+    }
+    out
+}

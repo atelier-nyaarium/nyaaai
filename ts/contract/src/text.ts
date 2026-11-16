@@ -262,3 +262,126 @@ export function nfc(text: string): string {
 	}
 	return composed.map((cp) => String.fromCodePoint(cp)).join("");
 }
+
+const fromPoint = (point: number): string =>
+	point < 0x10000
+		? String.fromCharCode(point)
+		: String.fromCharCode(0xd800 + ((point - 0x10000) >> 10), 0xdc00 + ((point - 0x10000) & 0x3ff));
+
+/** WHATWG UTF-8 decoding of chunks. */
+export class Utf8Decoder {
+	private point = 0;
+	private needed = 0;
+	private seen = 0;
+	private lower = 0x80;
+	private upper = 0xbf;
+	private started = false;
+
+	/** Holds an incomplete sequence for the next chunk. */
+	push(bytes: Uint8Array): string {
+		let out = "";
+		for (let at = 0; at < bytes.length; at++) {
+			const byte = bytes[at] as number;
+			if (this.needed === 0) {
+				out += this.lead(byte);
+				continue;
+			}
+			if (byte < this.lower || byte > this.upper) {
+				this.reset();
+				out += this.emit(0xfffd);
+				at -= 1;
+				continue;
+			}
+			this.lower = 0x80;
+			this.upper = 0xbf;
+			this.point = (this.point << 6) | (byte & 0x3f);
+			this.seen += 1;
+			if (this.seen === this.needed) {
+				const point = this.point;
+				this.reset();
+				out += this.emit(point);
+			}
+		}
+		return out;
+	}
+
+	/** Turns a held sequence into U+FFFD; the decoder starts over. */
+	end(): string {
+		const out = this.needed === 0 ? "" : this.emit(0xfffd);
+		this.reset();
+		this.started = false;
+		return out;
+	}
+
+	private lead(byte: number): string {
+		if (byte < 0x80) return this.emit(byte);
+		if (byte >= 0xc2 && byte <= 0xdf) {
+			this.needed = 1;
+			this.point = byte & 0x1f;
+		} else if (byte >= 0xe0 && byte <= 0xef) {
+			if (byte === 0xe0) this.lower = 0xa0;
+			if (byte === 0xed) this.upper = 0x9f;
+			this.needed = 2;
+			this.point = byte & 0xf;
+		} else if (byte >= 0xf0 && byte <= 0xf4) {
+			if (byte === 0xf0) this.lower = 0x90;
+			if (byte === 0xf4) this.upper = 0x8f;
+			this.needed = 3;
+			this.point = byte & 7;
+		} else {
+			return this.emit(0xfffd);
+		}
+		return "";
+	}
+
+	/** Drops a byte order mark that starts the stream. */
+	private emit(point: number): string {
+		const first = !this.started;
+		this.started = true;
+		return first && point === 0xfeff ? "" : fromPoint(point);
+	}
+
+	private reset(): void {
+		this.point = 0;
+		this.needed = 0;
+		this.seen = 0;
+		this.lower = 0x80;
+		this.upper = 0xbf;
+	}
+}
+
+const SEGMENT_KEPT = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.!~*'()";
+const HEX = "0123456789ABCDEF";
+
+/** Percent-encodes as `encodeURIComponent` does. */
+export function encodePathSegment(text: string): string {
+	let out = "";
+	for (let at = 0; at < text.length; at++) {
+		let point = text.charCodeAt(at);
+		if (isHigh(point) && at + 1 < text.length && isLow(text.charCodeAt(at + 1))) {
+			point = 0x10000 + ((point - 0xd800) << 10) + (text.charCodeAt(at + 1) - 0xdc00);
+			at += 1;
+		} else if (isHigh(point) || isLow(point)) {
+			point = 0xfffd;
+		}
+		if (point < 0x80 && SEGMENT_KEPT.includes(String.fromCharCode(point))) {
+			out += String.fromCharCode(point);
+			continue;
+		}
+		const bytes =
+			point < 0x80
+				? [point]
+				: point < 0x800
+					? [0xc0 | (point >> 6), 0x80 | (point & 0x3f)]
+					: point < 0x10000
+						? [0xe0 | (point >> 12), 0x80 | ((point >> 6) & 0x3f), 0x80 | (point & 0x3f)]
+						: [
+								0xf0 | (point >> 18),
+								0x80 | ((point >> 12) & 0x3f),
+								0x80 | ((point >> 6) & 0x3f),
+								0x80 | (point & 0x3f),
+							];
+		for (const byte of bytes) out += `%${HEX[byte >> 4]}${HEX[byte & 15]}`;
+	}
+	return out;
+}

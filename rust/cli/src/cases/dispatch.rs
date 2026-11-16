@@ -91,6 +91,14 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
         "text.find" => {
             run::<shapes::TextFindInput, shapes::TextFindResult>(input, super::text::find)
         }
+        "text.utf8Chunks" => run::<shapes::TextUtf8ChunksInput, shapes::TextUtf8ChunksResult>(
+            input,
+            super::text::utf8_chunks,
+        ),
+        "text.pathSegment" => run::<shapes::TextPathSegmentInput, shapes::TextPathSegmentResult>(
+            input,
+            super::text::path_segment,
+        ),
         "text.nfc" => run::<shapes::TextNfcInput, shapes::TextNfcResult>(input, super::text::nfc),
         "pattern.problems" => run::<shapes::PatternProblemsInput, shapes::PatternProblemsResult>(
             input,
@@ -170,6 +178,12 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
             input,
             super::testkit::wheel,
         ),
+        "testkit.scheduler" => {
+            run::<shapes::TestkitSchedulerInput, shapes::TestkitSchedulerResult>(
+                input,
+                super::testkit::scheduler,
+            )
+        }
         "testkit.random" => run::<shapes::TestkitRandomInput, shapes::TestkitRandomResult>(
             input,
             super::testkit::random,
