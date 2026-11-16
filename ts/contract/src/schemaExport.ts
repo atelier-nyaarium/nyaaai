@@ -167,6 +167,10 @@ function faults(schema: Schema, slot: Slot): string[] {
 	if (def.type === "number" && def.format !== undefined && def.format !== "safeint") {
 		found.push(`number format ${def.format} is outside the dialect`);
 	}
+	// Zod checks a string format itself.
+	if (def.type === "string" && def.format !== undefined) {
+		found.push(`string format ${def.format} is outside the dialect`);
+	}
 	if (def.type === "object") {
 		if (def.catchall !== undefined) found.push("an object keeps no unknown keys; use a record");
 		for (const key of Object.keys(def.shape ?? {})) {
@@ -183,7 +187,9 @@ function faults(schema: Schema, slot: Slot): string[] {
 	}
 	if (def.type === "record") {
 		const key = def.keyType ? defOf(def.keyType) : undefined;
-		if (key?.type !== "string" || (key.checks?.length ?? 0) > 0) found.push("a record's keys are any text");
+		if (key?.type !== "string" || key.format !== undefined || (key.checks?.length ?? 0) > 0) {
+			found.push("a record's keys are any text");
+		}
 	}
 	if (def.type === "literal") {
 		const [value, ...rest] = def.values ?? [];

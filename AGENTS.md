@@ -198,6 +198,7 @@ Dialect. `contract` fails on anything else:
 - Object, array, tuple of fixed places, record with text keys, nullable, union, discriminated union with a text tag.
 - String, number, `z.int()`, boolean, null, unknown, one-value literal, enum of texts.
 - Bounds: `min`, `max`, `gt`, `lt` on numbers; `min`, `max` on strings and arrays. String bounds count code points.
+- No string format (`z.base64()`, `z.email()`, `z.uuid()`, `z.iso.datetime()`): write `matching`, or a `refined` hook over a primitive.
 - Optional and default sit on an object property, outermost. Use `exactOptional`. No optional property holds a default.
 - Recursion passes through a named shape.
 - A tuple holds no rest, no optional place, no preprocess place, and at most 12 places.

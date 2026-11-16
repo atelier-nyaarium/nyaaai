@@ -49,6 +49,9 @@ describe("the contract dialect", () => {
 			},
 		});
 		const refusedAt: Array<[string, z.ZodType]> = [
+			["t.Shape.bytes", z.object({ bytes: z.base64() })],
+			["t.Shape.at", z.object({ at: z.iso.datetime() })],
+			["t.Shape.byId", z.object({ byId: z.record(z.uuid(), z.number()) })],
 			["t.Shape.pair", z.object({ pair: z.tuple([z.string()], z.number()) })],
 			["t.Shape.none", z.object({ none: z.tuple([]) })],
 			[
