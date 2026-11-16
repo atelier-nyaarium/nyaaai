@@ -55,6 +55,20 @@
 				}
 			},
 			{
+				"kind": "usage",
+				"usage": {
+					"input": 0,
+					"output": 1
+				}
+			},
+			{
+				"kind": "usage",
+				"usage": {
+					"input": 0,
+					"output": 1
+				}
+			},
+			{
 				"kind": "finish",
 				"reason": "stop"
 			}
@@ -62,6 +76,10 @@
 		"result": {
 			"parts": [],
 			"finish": "stop",
+			"usage": {
+				"input": 0,
+				"output": 1
+			},
 			"serving": {
 				"generationId": "msg_1"
 			}

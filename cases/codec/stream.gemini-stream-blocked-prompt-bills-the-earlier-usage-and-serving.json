@@ -1,0 +1,75 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "gemini-stream-blocked-prompt-bills-the-earlier-usage-and-serving",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"candidates\":[{\"content\":{\"role\":\"model\",\"parts\":[{\"text\":\"Hi\"}]}}],\"responseId\":\"r_1\",\"usageMetadata\":{\"promptTokenCount\":7,\"candidatesTokenCount\":1}}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"promptFeedback\":{\"blockReason\":\"OTHER\"}}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "r_1"
+				}
+			},
+			{
+				"kind": "text",
+				"text": "Hi"
+			},
+			{
+				"kind": "usage",
+				"usage": {
+					"input": 7,
+					"output": 1
+				}
+			}
+		],
+		"result": null,
+		"failure": {
+			"category": "refused",
+			"status": "stream",
+			"message": "The prompt was blocked: OTHER.",
+			"billed": {
+				"usage": {
+					"input": 7,
+					"output": 1
+				},
+				"generationId": "r_1"
+			}
+		}
+	}
+}

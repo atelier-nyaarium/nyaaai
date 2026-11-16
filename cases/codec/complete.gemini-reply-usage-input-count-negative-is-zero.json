@@ -1,0 +1,57 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "gemini-reply-usage-input-count-negative-is-zero",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"body": {
+			"candidates": [
+				{
+					"finishReason": "STOP"
+				}
+			],
+			"responseId": "r",
+			"usageMetadata": {
+				"promptTokenCount": -10,
+				"candidatesTokenCount": 5
+			}
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [],
+			"finish": "stop",
+			"usage": {
+				"input": 0,
+				"output": 5
+			},
+			"serving": {
+				"generationId": "r"
+			}
+		},
+		"failure": null
+	}
+}

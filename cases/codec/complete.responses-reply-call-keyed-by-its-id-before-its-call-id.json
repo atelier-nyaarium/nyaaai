@@ -1,0 +1,76 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "responses-reply-call-keyed-by-its-id-before-its-call-id",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"body": {
+			"id": "resp_1",
+			"status": "completed",
+			"output": [
+				{
+					"type": "function_call",
+					"name": "read",
+					"call_id": "a",
+					"arguments": "{\"x\":\"a\"}",
+					"id": "fc_1"
+				},
+				{
+					"type": "function_call",
+					"name": "read",
+					"call_id": "b",
+					"arguments": "{\"x\":\"b\"}",
+					"id": "fc_2"
+				}
+			]
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "a",
+					"name": "read",
+					"argumentsText": "{\"x\":\"a\"}"
+				},
+				{
+					"kind": "call",
+					"index": 1,
+					"wireId": "b",
+					"name": "read",
+					"argumentsText": "{\"x\":\"b\"}"
+				}
+			],
+			"finish": "tool_calls",
+			"serving": {
+				"generationId": "resp_1"
+			}
+		},
+		"failure": null
+	}
+}

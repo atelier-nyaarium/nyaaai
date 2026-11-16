@@ -1,0 +1,77 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "responses-stream-final-arguments-in-an-item-contradict-the-deltas",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"event": "response.output_item.added",
+				"data": "{\"type\":\"response.output_item.added\",\"item\":{\"type\":\"function_call\",\"name\":\"read\",\"id\":\"fc_1\",\"call_id\":\"a\",\"arguments\":\"\"}}"
+			},
+			{
+				"kind": "data",
+				"event": "response.function_call_arguments.delta",
+				"data": "{\"type\":\"response.function_call_arguments.delta\",\"item_id\":\"fc_1\",\"delta\":\"{\\\"a\\\":\"}"
+			},
+			{
+				"kind": "data",
+				"event": "response.output_item.done",
+				"data": "{\"type\":\"response.output_item.done\",\"item\":{\"type\":\"function_call\",\"name\":\"read\",\"id\":\"fc_1\",\"call_id\":\"a\",\"arguments\":\"{\\\"b\\\":2}\"}}"
+			},
+			{
+				"kind": "data",
+				"event": "response.completed",
+				"data": "{\"type\":\"response.completed\",\"response\":{\"id\":\"resp_1\",\"status\":\"completed\"}}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "a",
+				"name": "read",
+				"argumentsText": ""
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "",
+				"name": "",
+				"argumentsText": "{\"a\":"
+			}
+		],
+		"result": null,
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": "A tool call's final arguments contradict the ones streamed."
+		}
+	}
+}

@@ -503,7 +503,7 @@ const streamsOf: CaseSource[] = [
 		completed(),
 	),
 	streams(
-		"responses-stream-call-final-arguments-that-do-not-extend-are-ignored",
+		"responses-stream-call-final-arguments-that-do-not-extend-fail-the-stream",
 		responses(),
 		added({ ...CALL_ITEM, arguments: "" }),
 		event("response.function_call_arguments.delta", { item_id: "fc_1", delta: '{"path":"a"}' }),
@@ -741,13 +741,13 @@ const streamsOf: CaseSource[] = [
 		completed("completed", undefined, { usage: USAGE }),
 	),
 	streams(
-		"responses-stream-usage-missing-output-is-no-usage",
+		"responses-stream-usage-missing-output-is-zero",
 		responses(),
 		text("Hi"),
 		completed("completed", undefined, { usage: { input_tokens: 4 } }),
 	),
 	streams(
-		"responses-stream-usage-counts-mistyped-is-no-usage",
+		"responses-stream-usage-counts-mistyped-is-zero",
 		responses(),
 		text("Hi"),
 		completed("completed", undefined, { usage: { input_tokens: "4", output_tokens: 2 } }),

@@ -1,0 +1,62 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "gemini-stream-extreme-usage-past-2-53",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"candidates\":[{\"finishReason\":\"STOP\"}],\"usageMetadata\":{\"promptTokenCount\":9007199254740993,\"candidatesTokenCount\":18014398509481985}}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "usage",
+				"usage": {
+					"input": 9007199254740992,
+					"output": 18014398509481984
+				}
+			},
+			{
+				"kind": "finish",
+				"reason": "stop"
+			}
+		],
+		"result": {
+			"parts": [],
+			"finish": "stop",
+			"usage": {
+				"input": 9007199254740992,
+				"output": 18014398509481984
+			},
+			"serving": {}
+		},
+		"failure": null
+	}
+}

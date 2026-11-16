@@ -1,0 +1,62 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "responses-stream-extreme-usage-1e999",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"type\":\"response.completed\",\"response\":{\"status\":\"completed\",\"usage\":{\"input_tokens\":1e999,\"output_tokens\":5,\"input_tokens_details\":{\"cached_tokens\":1e999}}}}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "usage",
+				"usage": {
+					"input": 0,
+					"output": 5
+				}
+			},
+			{
+				"kind": "finish",
+				"reason": "stop"
+			}
+		],
+		"result": {
+			"parts": [],
+			"finish": "stop",
+			"usage": {
+				"input": 0,
+				"output": 5
+			},
+			"serving": {}
+		},
+		"failure": null
+	}
+}

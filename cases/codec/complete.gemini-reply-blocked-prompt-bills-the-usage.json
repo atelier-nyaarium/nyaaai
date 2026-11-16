@@ -1,0 +1,55 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "gemini-reply-blocked-prompt-bills-the-usage",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"body": {
+			"promptFeedback": {
+				"blockReason": "SAFETY"
+			},
+			"usageMetadata": {
+				"promptTokenCount": 10
+			},
+			"responseId": "r"
+		}
+	},
+	"expected": {
+		"result": null,
+		"failure": {
+			"category": "refused",
+			"status": "stream",
+			"message": "The prompt was blocked: SAFETY.",
+			"billed": {
+				"usage": {
+					"input": 10,
+					"output": 0
+				},
+				"generationId": "r"
+			}
+		}
+	}
+}

@@ -5,6 +5,7 @@ import type {
 	CanonicalRequest,
 	CodecFacts,
 	Effort,
+	Failure,
 	FinishReason,
 	NormalizedUsage,
 	Serving,
@@ -17,6 +18,7 @@ import type {
 import { encodePathSegment } from "@nyaaai/contract/text";
 import type { Codec, StepTurn } from "../codec";
 import { failed } from "../failure";
+import { amountAt } from "../hosts/opencode";
 import {
 	argumentsOf,
 	assembled,
@@ -199,14 +201,12 @@ function bodyOf(facts: CodecFacts | undefined, request: CanonicalRequest): Gener
 /** Output includes thoughts. */
 function usageOf(host: Host, raw: unknown): NormalizedUsage | undefined {
 	if (!isJson(raw)) return undefined;
-	const prompt = numberOf(raw["promptTokenCount"]);
-	if (prompt === undefined) return undefined;
-	const reasoning = numberOf(raw["thoughtsTokenCount"]);
-	const cached = numberOf(raw["cachedContentTokenCount"]);
+	const reasoning = amountAt(raw, "thoughtsTokenCount");
+	const cached = amountAt(raw, "cachedContentTokenCount");
 	return host.usage(
 		{
-			input: prompt + (numberOf(raw["toolUsePromptTokenCount"]) ?? 0),
-			output: (numberOf(raw["candidatesTokenCount"]) ?? 0) + (reasoning ?? 0),
+			input: (amountAt(raw, "promptTokenCount") ?? 0) + (amountAt(raw, "toolUsePromptTokenCount") ?? 0),
+			output: (amountAt(raw, "candidatesTokenCount") ?? 0) + (reasoning ?? 0),
 			...(cached === undefined ? {} : { cached }),
 			...(reasoning === undefined ? {} : { reasoning }),
 		},
@@ -267,7 +267,10 @@ class Decoder {
 			Array.isArray(data["candidates"]) && isJson(data["candidates"][0]) ? data["candidates"][0] : undefined;
 		const feedback = isJson(data["promptFeedback"]) ? data["promptFeedback"] : {};
 		if (candidate === undefined && typeof feedback["blockReason"] === "string")
-			throw failed("refused", `The prompt was blocked: ${feedback["blockReason"]}.`, { status: "stream" });
+			throw failed("refused", `The prompt was blocked: ${feedback["blockReason"]}.`, {
+				status: "stream",
+				...this.billed(),
+			});
 		const content = isJson(candidate?.["content"]) ? candidate["content"] : {};
 		for (const part of Array.isArray(content["parts"]) ? content["parts"] : [])
 			if (isJson(part)) yield* this.part(part);
@@ -278,6 +281,12 @@ class Decoder {
 			throw failed("replayRejected", "A thought signature was missing.", { status: "stream" });
 		this.finished = true;
 		yield { kind: "finish", reason: finishOf(reason, this.calls > 0) };
+	}
+
+	/** What was billed so far. */
+	private billed(): { billed?: NonNullable<Failure["billed"]> } {
+		const billed = { ...(this.usage === undefined ? {} : { usage: this.usage }), ...this.serving };
+		return Object.keys(billed).length === 0 ? {} : { billed };
 	}
 
 	/** Call/text signature anchors. */

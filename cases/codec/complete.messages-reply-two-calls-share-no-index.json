@@ -1,0 +1,75 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "messages-reply-two-calls-share-no-index",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			}
+		},
+		"body": {
+			"id": "m",
+			"content": [
+				{
+					"type": "tool_use",
+					"id": "a",
+					"name": "read",
+					"input": {}
+				},
+				{
+					"type": "tool_use",
+					"id": "b",
+					"name": "read",
+					"input": {}
+				}
+			],
+			"stop_reason": "tool_use"
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "a",
+					"name": "read",
+					"argumentsText": "{}"
+				},
+				{
+					"kind": "call",
+					"index": 1,
+					"wireId": "b",
+					"name": "read",
+					"argumentsText": "{}"
+				}
+			],
+			"finish": "tool_calls",
+			"serving": {
+				"generationId": "m"
+			}
+		},
+		"failure": null
+	}
+}

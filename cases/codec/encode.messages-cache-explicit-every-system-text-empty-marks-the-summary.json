@@ -1,0 +1,93 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.encode",
+	"name": "messages-cache-explicit-every-system-text-empty-marks-the-summary",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			}
+		},
+		"request": {
+			"model": "claude-haiku-5-5",
+			"system": [
+				"",
+				""
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Hi"
+				}
+			],
+			"cache": {
+				"kind": "explicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true,
+			"summary": "Earlier."
+		},
+		"mode": "stream"
+	},
+	"expected": {
+		"encoded": {
+			"path": "/anthropic/v1/messages",
+			"body": {
+				"model": "claude-haiku-5-5",
+				"max_tokens": 128000,
+				"system": [
+					{
+						"type": "text",
+						"text": "Earlier.",
+						"cache_control": {
+							"type": "ephemeral"
+						}
+					}
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": [
+							{
+								"type": "text",
+								"text": "Hi",
+								"cache_control": {
+									"type": "ephemeral"
+								}
+							}
+						]
+					}
+				],
+				"thinking": {
+					"type": "adaptive",
+					"display": "summarized"
+				},
+				"stream": true
+			},
+			"headers": {
+				"x-opencode-session": "root-1"
+			}
+		},
+		"refusal": null
+	}
+}

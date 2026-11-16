@@ -47,6 +47,13 @@
 				"text": "Hi"
 			},
 			{
+				"kind": "usage",
+				"usage": {
+					"input": 0,
+					"output": 0
+				}
+			},
+			{
 				"kind": "finish",
 				"reason": "stop"
 			}
@@ -59,6 +66,10 @@
 				}
 			],
 			"finish": "stop",
+			"usage": {
+				"input": 0,
+				"output": 0
+			},
 			"serving": {
 				"generationId": "resp_g"
 			}

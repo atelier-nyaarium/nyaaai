@@ -661,7 +661,7 @@ const streamsOf: CaseSource[] = [
 		STOP,
 	),
 	streams(
-		"messages-stream-usage-needs-both-counts",
+		"messages-stream-usage-missing-count-is-zero",
 		messages(),
 		start({ input_tokens: 4 }),
 		textBlock(0, "Hi"),
@@ -938,7 +938,7 @@ const replies: CaseSource[] = [
 	completes("messages-reply-error-array", messages(), { type: "error", error: ["x"] }),
 	completes("messages-reply-error-null", messages(), { type: "error", error: null }),
 	completes("messages-reply-error-type-without-an-error", messages(), { type: "error" }),
-	completes("messages-reply-error-field-without-the-type-is-no-error", messages(), {
+	completes("messages-reply-error-field-without-the-type-is-an-error", messages(), {
 		error: { message: "x" },
 		content: [],
 		stop_reason: "end_turn",

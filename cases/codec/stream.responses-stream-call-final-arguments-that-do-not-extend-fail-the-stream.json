@@ -1,0 +1,82 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "responses-stream-call-final-arguments-that-do-not-extend-fail-the-stream",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"event": "response.output_item.added",
+				"data": "{\"type\":\"response.output_item.added\",\"item\":{\"type\":\"function_call\",\"id\":\"fc_1\",\"call_id\":\"call_a\",\"name\":\"read\",\"arguments\":\"\"}}"
+			},
+			{
+				"kind": "data",
+				"event": "response.function_call_arguments.delta",
+				"data": "{\"type\":\"response.function_call_arguments.delta\",\"item_id\":\"fc_1\",\"delta\":\"{\\\"path\\\":\\\"a\\\"}\"}"
+			},
+			{
+				"kind": "data",
+				"event": "response.function_call_arguments.done",
+				"data": "{\"type\":\"response.function_call_arguments.done\",\"item_id\":\"fc_1\",\"arguments\":\"{\\\"other\\\":1}\"}"
+			},
+			{
+				"kind": "data",
+				"event": "response.output_item.done",
+				"data": "{\"type\":\"response.output_item.done\",\"item\":{\"type\":\"function_call\",\"id\":\"fc_1\",\"call_id\":\"call_a\",\"name\":\"read\",\"arguments\":\"{\\\"other\\\":1}\"}}"
+			},
+			{
+				"kind": "data",
+				"event": "response.completed",
+				"data": "{\"type\":\"response.completed\",\"response\":{\"id\":\"resp_1\",\"status\":\"completed\"}}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "call_a",
+				"name": "read",
+				"argumentsText": ""
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "",
+				"name": "",
+				"argumentsText": "{\"path\":\"a\"}"
+			}
+		],
+		"result": null,
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": "A tool call's final arguments contradict the ones streamed."
+		}
+	}
+}

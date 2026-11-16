@@ -1,0 +1,59 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "messages-reply-usage-cache-counts-sum-into-the-input",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			}
+		},
+		"body": {
+			"id": "m",
+			"content": [],
+			"stop_reason": "end_turn",
+			"usage": {
+				"input_tokens": 10,
+				"cache_read_input_tokens": 50,
+				"cache_creation_input_tokens": 5,
+				"output_tokens": 5
+			}
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [],
+			"finish": "stop",
+			"usage": {
+				"input": 65,
+				"output": 5,
+				"cached": 50,
+				"cacheWrite": 5
+			},
+			"serving": {
+				"generationId": "m"
+			}
+		},
+		"failure": null
+	}
+}

@@ -1,0 +1,111 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "messages-stream-extreme-index-1e999",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"event": "message_start",
+				"data": "{\"type\":\"message_start\",\"message\":{\"id\":\"msg_1\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"type\":\"content_block_delta\",\"index\":1e999,\"delta\":{\"type\":\"thinking_delta\",\"thinking\":\"A\"}}"
+			},
+			{
+				"kind": "data",
+				"event": "message_delta",
+				"data": "{\"type\":\"message_delta\",\"delta\":{\"stop_reason\":\"end_turn\"}}"
+			},
+			{
+				"kind": "data",
+				"event": "message_stop",
+				"data": "{\"type\":\"message_stop\"}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "msg_1"
+				}
+			},
+			{
+				"kind": "usage",
+				"usage": {
+					"input": 1,
+					"output": 1
+				}
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "thinking",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "A"
+						}
+					]
+				},
+				"block": "0"
+			},
+			{
+				"kind": "finish",
+				"reason": "stop"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "thinking",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "A"
+						}
+					]
+				}
+			],
+			"finish": "stop",
+			"usage": {
+				"input": 1,
+				"output": 1
+			},
+			"serving": {
+				"generationId": "msg_1"
+			}
+		},
+		"failure": null
+	}
+}

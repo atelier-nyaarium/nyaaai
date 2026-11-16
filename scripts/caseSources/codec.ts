@@ -26,6 +26,7 @@ import { geminiCases } from "./codecGemini";
 import { hostCases } from "./codecHost";
 import { completes, encodes, fails, streams } from "./codecKit";
 import { messagesCases } from "./codecMessages";
+import { nativeFixCases } from "./codecNativeFixes";
 import { ALL_FIXTURES } from "./codecNativeFixtures";
 import { responsesCases } from "./codecResponses";
 
@@ -2231,4 +2232,5 @@ export const codecCases: CaseSource[] = [
 	...messagesCases,
 	...geminiCases,
 	...hostCases,
+	...nativeFixCases,
 ];

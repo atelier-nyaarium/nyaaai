@@ -1,5 +1,7 @@
 //! Anthropic Messages codec.
 
+use std::collections::{HashMap, HashSet};
+
 use nyaaai_contract::json::{Object, Record, Value, stringify_json};
 use nyaaai_contract::number::number_text;
 use nyaaai_contract::shapes::step::{
@@ -11,7 +13,9 @@ use nyaaai_contract::shapes::step::{
 
 use crate::codec::{Codec, Mode, StreamDecoder};
 use crate::failure::{FailureExtra, ProviderError, WireError, failed};
-use crate::loose::{error_body, items_at, number_at, object_of, text_at, text_or};
+use crate::loose::{
+    amount_at, amount_of, error_body, errored, items_at, number_at, object_of, text_at, text_or,
+};
 use crate::native::{
     Host, HostStatus, arguments_of, assembled, parsed_chunk, schema_prompt, serving_events,
     stream_failure, system_texts, wire_error,
@@ -69,7 +73,7 @@ fn claude(model: &str) -> bool {
 }
 
 /// Allowed tool ID characters.
-fn block_id(wire_id: &str) -> String {
+fn clean_id(wire_id: &str) -> String {
     let mut id = String::new();
     for char in wire_id.chars() {
         if char.is_ascii_alphanumeric() || char == '_' || char == '-' {
@@ -80,6 +84,54 @@ fn block_id(wire_id: &str) -> String {
         }
     }
     if id.is_empty() { "call".to_owned() } else { id }
+}
+
+/// One block id for each wire id of the request; ids that need no change keep theirs.
+fn block_ids(history: &[Turn]) -> HashMap<String, String> {
+    let wire_ids: Vec<&str> = history
+        .iter()
+        .flat_map(|turn| match turn {
+            Turn::Step(step) => step
+                .parts
+                .iter()
+                .filter_map(|part| match part {
+                    TurnPart::Call(call) => Some(call.wire_id.as_str()),
+                    _ => None,
+                })
+                .collect::<Vec<_>>(),
+            Turn::User(_) => Vec::new(),
+        })
+        .collect();
+    let mut mapped: HashMap<String, String> = HashMap::new();
+    let mut taken: HashSet<String> = HashSet::new();
+    for wire_id in &wire_ids {
+        if !wire_id.is_empty() && clean_id(wire_id) == *wire_id && !mapped.contains_key(*wire_id) {
+            mapped.insert((*wire_id).to_owned(), (*wire_id).to_owned());
+            taken.insert((*wire_id).to_owned());
+        }
+    }
+    for wire_id in &wire_ids {
+        if mapped.contains_key(*wire_id) {
+            continue;
+        }
+        let base = clean_id(wire_id);
+        let mut id = base.clone();
+        let mut count = 2;
+        while taken.contains(&id) {
+            id = format!("{base}_{count}");
+            count += 1;
+        }
+        mapped.insert((*wire_id).to_owned(), id.clone());
+        taken.insert(id);
+    }
+    mapped
+}
+
+fn block_of(blocks: &HashMap<String, String>, wire_id: &str) -> String {
+    blocks
+        .get(wire_id)
+        .cloned()
+        .unwrap_or_else(|| clean_id(wire_id))
 }
 
 fn signed(part: &ThoughtPart) -> bool {
@@ -131,7 +183,11 @@ fn text_block(text: &str) -> Value {
 }
 
 /// User-turn tool results.
-fn step_messages(step: &TurnStep, request: &CanonicalRequest) -> Vec<Message> {
+fn step_messages(
+    step: &TurnStep,
+    request: &CanonicalRequest,
+    blocks: &HashMap<String, String>,
+) -> Vec<Message> {
     let sent = readable(step, request);
     let mut ids: Vec<(f64, &str)> = Vec::new();
     for part in &step.parts {
@@ -149,7 +205,7 @@ fn step_messages(step: &TurnStep, request: &CanonicalRequest) -> Vec<Message> {
             TurnPart::Text(text) if !text.text.is_empty() => content.push(text_block(&text.text)),
             TurnPart::Call(call) => content.push(object_of(vec![
                 ("type", Value::from("tool_use")),
-                ("id", Value::String(block_id(&call.wire_id))),
+                ("id", Value::String(block_of(blocks, &call.wire_id))),
                 ("name", Value::from(call.name.as_str())),
                 ("input", Value::Object(arguments_of(&call.arguments))),
             ])),
@@ -166,7 +222,7 @@ fn step_messages(step: &TurnStep, request: &CanonicalRequest) -> Vec<Message> {
         };
         let mut entries = vec![
             ("type", Value::from("tool_result")),
-            ("tool_use_id", Value::String(block_id(wire_id))),
+            ("tool_use_id", Value::String(block_of(blocks, wire_id))),
             ("content", Value::from(result.output.as_str())),
         ];
         if result.is_error {
@@ -190,13 +246,17 @@ fn step_messages(step: &TurnStep, request: &CanonicalRequest) -> Vec<Message> {
     messages
 }
 
-fn turn_messages(turn: &Turn, request: &CanonicalRequest) -> Vec<Message> {
+fn turn_messages(
+    turn: &Turn,
+    request: &CanonicalRequest,
+    blocks: &HashMap<String, String>,
+) -> Vec<Message> {
     match turn {
         Turn::User(user) => vec![Message {
             role: "user",
             content: vec![text_block(&user.text)],
         }],
-        Turn::Step(step) => step_messages(step, request),
+        Turn::Step(step) => step_messages(step, request, blocks),
     }
 }
 
@@ -295,14 +355,16 @@ fn body_of(
         }
         object_of(entries)
     });
-    let marked = |at: usize| {
-        at + 1 == request.system.len() || (request.summary.is_some() && at == request.system.len())
-    };
-    let mut system = Vec::new();
-    for (at, text) in system_texts(request, prompted.as_deref())
+    let texts = system_texts(request, prompted.as_deref());
+    let last_system = texts
         .iter()
         .enumerate()
-    {
+        .rposition(|(at, text)| at < request.system.len() && !text.is_empty());
+    let marked = |at: usize| {
+        last_system == Some(at) || (request.summary.is_some() && at == request.system.len())
+    };
+    let mut system = Vec::new();
+    for (at, text) in texts.iter().enumerate() {
         if text.is_empty() {
             continue;
         }
@@ -312,11 +374,12 @@ fn body_of(
             _ => block,
         });
     }
+    let blocks = block_ids(&request.history);
     let history = joined(
         request
             .history
             .iter()
-            .flat_map(|turn| turn_messages(turn, request))
+            .flat_map(|turn| turn_messages(turn, request, &blocks))
             .collect(),
     );
     let history = match &control {
@@ -384,15 +447,15 @@ fn body_of(
 }
 
 /// Input includes cache.
-fn usage_of(host: &dyn Host, raw: &Object) -> Option<NormalizedUsage> {
-    let fresh = number_at(raw, "input_tokens")?;
-    let output = number_at(raw, "output_tokens")?;
-    let cached = number_at(raw, "cache_read_input_tokens");
-    let cache_write = number_at(raw, "cache_creation_input_tokens");
-    Some(host.usage(
+fn usage_of(host: &dyn Host, raw: &Object) -> NormalizedUsage {
+    let cached = amount_at(raw, "cache_read_input_tokens");
+    let cache_write = amount_at(raw, "cache_creation_input_tokens");
+    host.usage(
         NormalizedUsage {
-            input: fresh + cached.unwrap_or(0.0) + cache_write.unwrap_or(0.0),
-            output,
+            input: amount_at(raw, "input_tokens").unwrap_or(0.0)
+                + cached.unwrap_or(0.0)
+                + cache_write.unwrap_or(0.0),
+            output: amount_at(raw, "output_tokens").unwrap_or(0.0),
             cached,
             cache_write,
             reasoning: None,
@@ -404,7 +467,7 @@ fn usage_of(host: &dyn Host, raw: &Object) -> Option<NormalizedUsage> {
             allowance: None,
         },
         raw,
-    ))
+    )
 }
 
 fn finish_of(reason: Option<&Value>) -> Option<FinishReason> {
@@ -446,6 +509,7 @@ struct Decoder<'a> {
     host: &'a dyn Host,
     finished: bool,
     calls: Vec<(f64, usize)>,
+    called: usize,
     serving: Serving,
     raw: Object,
     usage: Option<NormalizedUsage>,
@@ -458,6 +522,7 @@ impl<'a> Decoder<'a> {
             host,
             finished: false,
             calls: Vec::new(),
+            called: 0,
             serving: Serving {
                 host: None,
                 generation_id: None,
@@ -474,6 +539,9 @@ impl<'a> Decoder<'a> {
         data: &Object,
         out: Events,
     ) -> Result<(), ProviderError> {
+        if errored(data.get("error")) {
+            return Err(self.failure(&error_body(data.get("error"))));
+        }
         let index = number_at(data, "index").unwrap_or(0.0);
         match type_.unwrap_or("") {
             "message_start" => {
@@ -509,22 +577,23 @@ impl<'a> Decoder<'a> {
                 }
                 self.finished = true;
             }
-            "error" => {
-                let error = error_body(data.get("error"));
-                return Err(stream_failure(
-                    self.host,
-                    &WireError {
-                        message: Some(text_or(text_at(&error, "message"), "The message failed.")),
-                        type_: error.get("type").and_then(Value::as_str).map(str::to_owned),
-                        ..WireError::default()
-                    },
-                    self.usage.clone(),
-                    &self.serving,
-                ));
-            }
+            "error" => return Err(self.failure(&Object::new())),
             _ => {}
         }
         Ok(())
+    }
+
+    fn failure(&self, error: &Object) -> ProviderError {
+        stream_failure(
+            self.host,
+            &WireError {
+                message: Some(text_or(text_at(error, "message"), "The message failed.")),
+                type_: error.get("type").and_then(Value::as_str).map(str::to_owned),
+                ..WireError::default()
+            },
+            self.usage.clone(),
+            &self.serving,
+        )
     }
 
     /// Decode a complete message.
@@ -564,9 +633,11 @@ impl<'a> Decoder<'a> {
             return;
         };
         for (key, value) in usage.iter() {
-            self.raw.insert(key, value.clone());
+            if value.as_object().is_some() || amount_of(value).is_some() {
+                self.raw.insert(key, value.clone());
+            }
         }
-        self.usage = usage_of(self.host, &self.raw).or(self.usage.take());
+        self.usage = Some(usage_of(self.host, &self.raw));
         if let Some(usage) = &self.usage {
             out.push(StepEvent::Usage(StepEventUsage {
                 usage: usage.clone(),
@@ -610,7 +681,8 @@ impl<'a> Decoder<'a> {
                 part_of(REDACTED, None, Some(text_at(block, "data").to_owned())),
             )),
             Some("tool_use") => {
-                let distinct = self.calls.len();
+                let distinct = self.called;
+                self.called += 1;
                 let call = match self.calls.iter_mut().find(|(held, _)| *held == index) {
                     Some(held) => {
                         held.1 = distinct;
@@ -769,7 +841,7 @@ impl<H: Host> Codec for MessagesCodec<H> {
                 FailureExtra::default(),
             ));
         };
-        if body.get("type").and_then(Value::as_str) == Some("error") {
+        if body.get("type").and_then(Value::as_str) == Some("error") || errored(body.get("error")) {
             return Err(stream_failure(
                 &self.host,
                 &reply_error(body),

@@ -1,5 +1,6 @@
 // OpenAI Responses codec.
 
+import { numberText } from "@nyaaai/contract/number";
 import type {
 	CanonicalRequest,
 	CodecFacts,
@@ -15,6 +16,7 @@ import type {
 } from "@nyaaai/contract/shapes/step";
 import type { Codec, StepTurn } from "../codec";
 import { failed } from "../failure";
+import { amountAt } from "../hosts/opencode";
 import {
 	assembled,
 	type Host,
@@ -44,6 +46,14 @@ interface ThoughtState {
 	summary?: number;
 	content?: number;
 	streamed: boolean;
+}
+
+/** What one output item has shown so far. */
+interface ItemState {
+	call?: CallState;
+	thought?: ThoughtState;
+	phase?: string;
+	texted: boolean;
 }
 
 ////////////////////////////////
@@ -169,18 +179,15 @@ function bodyOf(
 
 function usageOf(host: Host, raw: unknown): NormalizedUsage | undefined {
 	if (!isJson(raw)) return undefined;
-	const input = numberOf(raw["input_tokens"]);
-	const output = numberOf(raw["output_tokens"]);
-	if (input === undefined || output === undefined) return undefined;
 	const prompt = isJson(raw["input_tokens_details"]) ? raw["input_tokens_details"] : {};
 	const completion = isJson(raw["output_tokens_details"]) ? raw["output_tokens_details"] : {};
-	const cached = numberOf(prompt["cached_tokens"]);
-	const cacheWrite = numberOf(prompt["cache_write_tokens"]);
-	const reasoning = numberOf(completion["reasoning_tokens"]);
+	const cached = amountAt(prompt, "cached_tokens");
+	const cacheWrite = amountAt(prompt, "cache_write_tokens");
+	const reasoning = amountAt(completion, "reasoning_tokens");
 	return host.usage(
 		{
-			input,
-			output,
+			input: amountAt(raw, "input_tokens") ?? 0,
+			output: amountAt(raw, "output_tokens") ?? 0,
 			...(cached === undefined ? {} : { cached }),
 			...(cacheWrite === undefined ? {} : { cacheWrite }),
 			...(reasoning === undefined ? {} : { reasoning }),
@@ -206,20 +213,37 @@ function segmentsOf(item: Json): NonNullable<ThoughtPart["segments"]> {
 ////////////////////////////////
 //  Classes
 
-/** Response items keyed by ID. */
+/** Where an item sits: its id, its call id, its place in the output. */
+function keysOf(id: string, callId: string, place: number | undefined): string[] {
+	return [
+		...(id.length === 0 ? [] : [`id:${id}`]),
+		...(callId.length === 0 ? [] : [`call:${callId}`]),
+		...(place === undefined ? [] : [`at:${numberText(place)}`]),
+	];
+}
+
+/** A label for a thought block. */
+function labelOf(id: string, place: number | undefined): string {
+	if (id.length > 0) return id;
+	return place === undefined ? "" : `at:${numberText(place)}`;
+}
+
+/** Response items keyed by id, else by place. */
 class Decoder {
 	finished = false;
-	private readonly calls = new Map<string, CallState>();
-	private readonly thoughts = new Map<string, ThoughtState>();
-	private readonly phases = new Map<string, string>();
-	private readonly texts = new Set<string>();
+	private readonly items = new Map<string, ItemState>();
+	private called = 0;
 	private readonly serving: Serving = {};
 	private usage: NormalizedUsage | undefined;
 
 	constructor(private readonly host: Host) {}
 
 	*event(type: unknown, data: Json): Generator<StepEvent> {
+		if (errored(data["error"])) throw this.failure(errorBody(data["error"]));
 		const itemId = stringOf(data["item_id"]);
+		const place = numberOf(data["output_index"]);
+		const keys = keysOf(itemId, "", place);
+		const label = labelOf(itemId, place);
 		const delta = stringOf(data["delta"]);
 		switch (type) {
 			case "response.created":
@@ -227,27 +251,43 @@ class Decoder {
 				yield* this.served(data["response"]);
 				return;
 			case "response.output_item.added":
-				if (isJson(data["item"])) yield* this.added(data["item"]);
+				if (isJson(data["item"])) yield* this.added(data["item"], place);
 				return;
 			case "response.output_item.done":
-				if (isJson(data["item"])) yield* this.done(data["item"]);
+				if (isJson(data["item"])) yield* this.done(data["item"], place);
 				return;
 			case "response.output_text.delta":
-			case "response.refusal.delta":
-				this.texts.add(itemId);
-				yield { kind: "text", text: delta, ...this.phaseOf(itemId) };
+			case "response.refusal.delta": {
+				const state = this.state(keys);
+				state.texted = true;
+				yield { kind: "text", text: delta, ...phaseOf(state) };
 				return;
+			}
 			case "response.function_call_arguments.delta":
-				yield* this.argued(itemId, undefined, delta);
+				yield* this.argued(this.state(keys), undefined, delta);
 				return;
 			case "response.function_call_arguments.done":
-				yield* this.argued(itemId, undefined, undefined, stringOf(data["arguments"]));
+				yield* this.argued(this.state(keys), undefined, undefined, finalOf(data["arguments"]));
 				return;
 			case "response.reasoning_summary_text.delta":
-				yield this.thought(itemId, "summary", numberOf(data["summary_index"]) ?? 0, delta);
+				yield this.thought(
+					this.state(keys),
+					itemId,
+					label,
+					"summary",
+					numberOf(data["summary_index"]) ?? 0,
+					delta,
+				);
 				return;
 			case "response.reasoning_text.delta":
-				yield this.thought(itemId, "content", numberOf(data["content_index"]) ?? 0, delta);
+				yield this.thought(
+					this.state(keys),
+					itemId,
+					label,
+					"content",
+					numberOf(data["content_index"]) ?? 0,
+					delta,
+				);
 				return;
 			case "response.completed":
 				yield* this.ended(data["response"], "completed");
@@ -259,21 +299,33 @@ class Decoder {
 				yield* this.ended(data["response"], "failed");
 				return;
 			case "error":
-				throw streamFailure(
-					this.host,
-					{ message: stringOf(data["message"]) || "The response failed.", ...typeOf(data["code"]) },
-					this.usage,
-					this.serving,
-				);
+				throw this.failure(data);
 		}
 	}
 
 	/** Decode a complete response. */
 	*whole(response: Json): Generator<StepEvent> {
 		yield* this.served(response);
-		for (const item of Array.isArray(response["output"]) ? response["output"] : [])
-			if (isJson(item)) yield* this.done(item);
+		const output = Array.isArray(response["output"]) ? response["output"] : [];
+		for (const [place, item] of output.entries()) if (isJson(item)) yield* this.done(item, place);
 		yield* this.ended(response, "");
+	}
+
+	private failure(error: Json): Error {
+		return streamFailure(
+			this.host,
+			{ message: stringOf(error["message"]) || "The response failed.", ...typeOf(error["code"]) },
+			this.usage,
+			this.serving,
+		);
+	}
+
+	/** The state every key names, made when none has one. */
+	private state(keys: string[]): ItemState {
+		const held = keys.map((key) => this.items.get(key)).find((each) => each !== undefined);
+		const state = held ?? { texted: false };
+		for (const key of keys) if (!this.items.has(key)) this.items.set(key, state);
+		return state;
 	}
 
 	private *served(response: unknown): Generator<StepEvent> {
@@ -285,36 +337,39 @@ class Decoder {
 		}
 	}
 
-	private phaseOf(itemId: string): { phase?: string } {
-		const phase = this.phases.get(itemId);
-		return phase === undefined ? {} : { phase };
+	private *added(item: Json, place: number | undefined): Generator<StepEvent> {
+		const call = item["type"] === "function_call";
+		const state = this.state(keysOf(stringOf(item["id"]), call ? stringOf(item["call_id"]) : "", place));
+		if (item["type"] === "message" && typeof item["phase"] === "string") state.phase = item["phase"];
+		if (call) yield* this.argued(state, item, stringOf(item["arguments"]));
 	}
 
-	private *added(item: Json): Generator<StepEvent> {
+	private *done(item: Json, place: number | undefined): Generator<StepEvent> {
 		const id = stringOf(item["id"]);
-		if (item["type"] === "message" && typeof item["phase"] === "string") this.phases.set(id, item["phase"]);
-		if (item["type"] === "function_call") yield* this.argued(id, item, stringOf(item["arguments"]));
-	}
-
-	private *done(item: Json): Generator<StepEvent> {
-		const id = stringOf(item["id"]);
-		if (item["type"] === "function_call") yield* this.argued(id, item, undefined, stringOf(item["arguments"]));
-		if (item["type"] === "message" && !this.texts.has(id)) {
-			if (typeof item["phase"] === "string" && !this.phases.has(id)) this.phases.set(id, item["phase"]);
-			this.texts.add(id);
-			yield { kind: "text", text: messageText(item), ...this.phaseOf(id) };
+		const call = item["type"] === "function_call";
+		const state = this.state(keysOf(id, call ? stringOf(item["call_id"]) : "", place));
+		if (call) yield* this.argued(state, item, undefined, finalOf(item["arguments"]));
+		if (item["type"] === "message" && !state.texted) {
+			if (typeof item["phase"] === "string" && state.phase === undefined) state.phase = item["phase"];
+			state.texted = true;
+			yield { kind: "text", text: messageText(item), ...phaseOf(state) };
 		}
-		if (item["type"] === REASONING) yield* this.reasoned(id, item);
+		if (item["type"] === REASONING) yield* this.reasoned(state, id, labelOf(id, place), item);
 	}
 
 	/** Final arguments backfill deltas. */
-	private *argued(id: string, item: Json | undefined, delta?: string, whole?: string): Generator<StepEvent> {
-		let call = this.calls.get(id);
+	private *argued(state: ItemState, item: Json | undefined, delta?: string, whole?: string): Generator<StepEvent> {
+		let call = state.call;
 		if (call === undefined) {
-			call = { index: this.calls.size, argumentsText: "" };
-			this.calls.set(id, call);
+			call = { index: this.called++, argumentsText: "" };
+			state.call = call;
 		}
-		const more = delta ?? (whole?.startsWith(call.argumentsText) ? whole.slice(call.argumentsText.length) : "");
+		let more = delta ?? "";
+		if (delta === undefined && whole !== undefined) {
+			if (!whole.startsWith(call.argumentsText))
+				throw failed("stream", "A tool call's final arguments contradict the ones streamed.");
+			more = whole.slice(call.argumentsText.length);
+		}
 		call.argumentsText += more;
 		yield {
 			kind: "call",
@@ -325,24 +380,31 @@ class Decoder {
 		};
 	}
 
-	private thought(id: string, kind: "summary" | "content", at: number, delta: string): StepEvent {
-		const state = this.thoughts.get(id) ?? { streamed: false };
+	private thought(
+		item: ItemState,
+		id: string,
+		label: string,
+		kind: "summary" | "content",
+		at: number,
+		delta: string,
+	): StepEvent {
+		const state = item.thought ?? { streamed: false };
 		const split = state[kind] !== undefined && state[kind] !== at;
 		state[kind] = at;
 		state.streamed = true;
-		this.thoughts.set(id, state);
+		item.thought = state;
 		return {
 			kind: "thought",
 			part: { kind: "thought", type: REASONING, segments: [{ kind, text: delta }], id },
-			block: id,
+			block: label,
 			...(split ? { split: true as const } : {}),
 		};
 	}
 
 	/** Done events add reasoning. */
-	private *reasoned(id: string, item: Json): Generator<StepEvent> {
+	private *reasoned(state: ItemState, id: string, label: string, item: Json): Generator<StepEvent> {
 		const opaque = stringOf(item["encrypted_content"]);
-		const segments = this.thoughts.get(id)?.streamed ? [] : segmentsOf(item);
+		const segments = state.thought?.streamed ? [] : segmentsOf(item);
 		if (segments.length === 0 && opaque.length === 0) return;
 		yield {
 			kind: "thought",
@@ -353,7 +415,7 @@ class Decoder {
 				...(opaque.length === 0 ? {} : { opaque }),
 				id,
 			},
-			block: id,
+			block: label,
 		};
 	}
 
@@ -363,20 +425,26 @@ class Decoder {
 		yield* this.served(body);
 		this.usage = usageOf(this.host, body["usage"]) ?? this.usage;
 		const status = typeof body["status"] === "string" ? body["status"] : fallback;
-		if (status === "failed") {
-			const error = errorBody(body["error"]);
-			throw streamFailure(
-				this.host,
-				{ message: stringOf(error["message"]) || "The response failed.", ...typeOf(error["code"]) },
-				this.usage,
-				this.serving,
-			);
-		}
+		if (status === "failed" || errored(body["error"])) throw this.failure(errorBody(body["error"]));
 		if (status !== "completed" && status !== "incomplete") throw failed("stream", "The provider ended the step.");
 		if (this.usage !== undefined) yield { kind: "usage", usage: this.usage };
-		yield { kind: "finish", reason: finishOf(status, body["incomplete_details"], this.calls.size > 0) };
+		yield { kind: "finish", reason: finishOf(status, body["incomplete_details"], this.called > 0) };
 		this.finished = true;
 	}
+}
+
+function phaseOf(state: ItemState): { phase?: string } {
+	return state.phase === undefined ? {} : { phase: state.phase };
+}
+
+/** Final text counts only when there is some. */
+function finalOf(value: unknown): string | undefined {
+	return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
+/** Empty values are no error. */
+function errored(raw: unknown): boolean {
+	return !(raw === undefined || raw === null || raw === false || raw === 0 || raw === "");
 }
 
 /** A text is the message. */

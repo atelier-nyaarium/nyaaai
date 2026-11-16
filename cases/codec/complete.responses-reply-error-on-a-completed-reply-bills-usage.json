@@ -1,0 +1,58 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "responses-reply-error-on-a-completed-reply-bills-usage",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"body": {
+			"id": "resp_1",
+			"status": "completed",
+			"output": [],
+			"error": {
+				"message": "late"
+			},
+			"usage": {
+				"input_tokens": 4,
+				"output_tokens": 2
+			}
+		}
+	},
+	"expected": {
+		"result": null,
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": "late",
+			"billed": {
+				"usage": {
+					"input": 4,
+					"output": 2
+				},
+				"generationId": "resp_1"
+			}
+		}
+	}
+}

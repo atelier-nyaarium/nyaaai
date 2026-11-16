@@ -1,0 +1,64 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "gemini-stream-extreme-usage-negative-zero",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"candidates\":[{\"finishReason\":\"STOP\"}],\"usageMetadata\":{\"promptTokenCount\":-0,\"candidatesTokenCount\":-0,\"thoughtsTokenCount\":-0}}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "usage",
+				"usage": {
+					"input": 0,
+					"output": 0,
+					"reasoning": 0
+				}
+			},
+			{
+				"kind": "finish",
+				"reason": "stop"
+			}
+		],
+		"result": {
+			"parts": [],
+			"finish": "stop",
+			"usage": {
+				"input": 0,
+				"output": 0,
+				"reasoning": 0
+			},
+			"serving": {}
+		},
+		"failure": null
+	}
+}

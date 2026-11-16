@@ -592,12 +592,12 @@ const streamsOf: CaseSource[] = [
 		finished("STOP", [{ text: "Hi" }], { usageMetadata: { promptTokenCount: 5 } }),
 	),
 	streams(
-		"gemini-stream-usage-without-a-prompt-count-is-no-usage",
+		"gemini-stream-usage-without-a-prompt-count-is-zero",
 		gemini(),
 		finished("STOP", [{ text: "Hi" }], { usageMetadata: { candidatesTokenCount: 5 } }),
 	),
 	streams(
-		"gemini-stream-usage-without-a-prompt-count-repeats-the-last-usage",
+		"gemini-stream-usage-without-a-prompt-count-replaces-the-last-usage",
 		gemini(),
 		chunk([{ text: "Hi" }], {}, { usageMetadata: USAGE }),
 		finished("STOP", [{ text: "!" }], { usageMetadata: {} }),

@@ -11,7 +11,9 @@ use nyaaai_contract::text::encode_path_segment;
 
 use crate::codec::{Codec, Mode, StreamDecoder};
 use crate::failure::{FailureExtra, NumberOrText, ProviderError, WireError, failed};
-use crate::loose::{error_body, items_at, number_at, object_at, object_of, text_at, text_or};
+use crate::loose::{
+    amount_at, error_body, errored, items_at, number_at, object_at, object_of, text_at, text_or,
+};
 use crate::native::{
     Host, HostStatus, arguments_of, assembled, current_turn_from, parsed_chunk, schema_prompt,
     serving_events, stream_failure, system_texts, wire_error,
@@ -45,16 +47,6 @@ fn level_of(effort: Effort) -> Option<&'static str> {
         Effort::Medium => Some("MEDIUM"),
         Effort::High => Some("HIGH"),
         _ => None,
-    }
-}
-
-/// Empty values are no error.
-fn errored(raw: Option<&Value>) -> bool {
-    match raw {
-        None | Some(Value::Null | Value::Bool(false)) => false,
-        Some(Value::Number(number)) => *number != 0.0,
-        Some(Value::String(text)) => !text.is_empty(),
-        Some(_) => true,
     }
 }
 
@@ -313,14 +305,14 @@ fn body_of(facts: Option<&CodecFacts>, request: &CanonicalRequest) -> Result<Val
 /// Output includes thoughts.
 fn usage_of(host: &dyn Host, raw: Option<&Value>) -> Option<NormalizedUsage> {
     let raw = raw?.as_object()?;
-    let prompt = number_at(raw, "promptTokenCount")?;
-    let reasoning = number_at(raw, "thoughtsTokenCount");
+    let reasoning = amount_at(raw, "thoughtsTokenCount");
     Some(host.usage(
         NormalizedUsage {
-            input: prompt + number_at(raw, "toolUsePromptTokenCount").unwrap_or(0.0),
-            output: number_at(raw, "candidatesTokenCount").unwrap_or(0.0)
+            input: amount_at(raw, "promptTokenCount").unwrap_or(0.0)
+                + amount_at(raw, "toolUsePromptTokenCount").unwrap_or(0.0),
+            output: amount_at(raw, "candidatesTokenCount").unwrap_or(0.0)
                 + reasoning.unwrap_or(0.0),
-            cached: number_at(raw, "cachedContentTokenCount"),
+            cached: amount_at(raw, "cachedContentTokenCount"),
             cache_write: None,
             reasoning,
             cost: None,
@@ -457,6 +449,14 @@ impl<'a> Decoder<'a> {
                     status: Some(nyaaai_contract::shapes::step::FailureStatus::Text(
                         "stream".to_owned(),
                     )),
+                    billed: (self.usage.is_some()
+                        || self.serving.generation_id.is_some()
+                        || self.serving.host.is_some())
+                    .then(|| nyaaai_contract::shapes::step::FailureBilled {
+                        usage: self.usage.clone(),
+                        host: self.serving.host.clone(),
+                        generation_id: self.serving.generation_id.clone(),
+                    }),
                     ..FailureExtra::default()
                 },
             ));

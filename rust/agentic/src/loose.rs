@@ -14,6 +14,28 @@ pub fn number_at(object: &Object, key: &str) -> Option<f64> {
     object.get(key).and_then(number_of)
 }
 
+/// A count or an amount: negative reads as mistyped, negative zero as zero.
+pub fn amount_at(object: &Object, key: &str) -> Option<f64> {
+    object.get(key).and_then(amount_of)
+}
+
+/// A finite number that is not negative.
+pub fn amount_of(value: &Value) -> Option<f64> {
+    number_of(value)
+        .filter(|number| *number >= 0.0)
+        .map(|number| number + 0.0)
+}
+
+/// Absent, null, false, zero and empty text are no error.
+pub fn errored(raw: Option<&Value>) -> bool {
+    match raw {
+        None | Some(Value::Null | Value::Bool(false)) => false,
+        Some(Value::Number(number)) => *number != 0.0,
+        Some(Value::String(text)) => !text.is_empty(),
+        Some(_) => true,
+    }
+}
+
 pub fn object_at<'a>(object: &'a Object, key: &str) -> Option<&'a Object> {
     object.get(key).and_then(Value::as_object)
 }

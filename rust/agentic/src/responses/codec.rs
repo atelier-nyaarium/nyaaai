@@ -1,8 +1,9 @@
 //! OpenAI Responses codec.
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 use nyaaai_contract::json::{Object, Record, Value};
+use nyaaai_contract::number::number_text;
 use nyaaai_contract::shapes::step::{
     CanonicalRequest, CodecFacts, Encoded, Failure, FailureCategory, FinishReason, HeaderList,
     NormalizedUsage, Serving, SseItem, StepEvent, StepEventCall, StepEventFinish, StepEventText,
@@ -13,7 +14,8 @@ use nyaaai_contract::shapes::step::{
 use crate::codec::{Codec, Mode, StreamDecoder};
 use crate::failure::{FailureExtra, ProviderError, WireError, failed};
 use crate::loose::{
-    error_body, items_at, number_at, object_at, object_of, text_at, text_or, type_of,
+    amount_at, error_body, errored, items_at, number_at, object_at, object_of, text_at, text_or,
+    type_of,
 };
 use crate::native::{
     Host, HostStatus, assembled, parsed_chunk, schema_prompt, serving_events, stream_failure,
@@ -259,18 +261,16 @@ fn body_of(
 
 fn usage_of(host: &dyn Host, raw: Option<&Value>) -> Option<NormalizedUsage> {
     let raw = raw?.as_object()?;
-    let input = number_at(raw, "input_tokens")?;
-    let output = number_at(raw, "output_tokens")?;
     let empty = Object::new();
     let prompt = object_at(raw, "input_tokens_details").unwrap_or(&empty);
     let completion = object_at(raw, "output_tokens_details").unwrap_or(&empty);
     Some(host.usage(
         NormalizedUsage {
-            input,
-            output,
-            cached: number_at(prompt, "cached_tokens"),
-            cache_write: number_at(prompt, "cache_write_tokens"),
-            reasoning: number_at(completion, "reasoning_tokens"),
+            input: amount_at(raw, "input_tokens").unwrap_or(0.0),
+            output: amount_at(raw, "output_tokens").unwrap_or(0.0),
+            cached: amount_at(prompt, "cached_tokens"),
+            cache_write: amount_at(prompt, "cache_write_tokens"),
+            reasoning: amount_at(completion, "reasoning_tokens"),
             cost: None,
             upstream_cost: None,
             byok: None,
@@ -326,6 +326,15 @@ struct CallState {
     arguments_text: String,
 }
 
+/// What one output item has shown so far.
+#[derive(Default)]
+struct ItemState {
+    call: Option<CallState>,
+    thought: Option<ThoughtState>,
+    phase: Option<String>,
+    texted: bool,
+}
+
 #[derive(Default)]
 struct ThoughtState {
     summary: Option<f64>,
@@ -375,77 +384,123 @@ fn finish_of(status: &str, details: Option<&Value>, called: bool) -> FinishReaso
     }
 }
 
-/// Response items keyed by ID.
+/// Where an item sits: its id, its call id, its place in the output.
+fn keys_of(id: &str, call_id: &str, place: Option<f64>) -> Vec<String> {
+    let mut keys = Vec::new();
+    if !id.is_empty() {
+        keys.push(format!("id:{id}"));
+    }
+    if !call_id.is_empty() {
+        keys.push(format!("call:{call_id}"));
+    }
+    if let Some(place) = place {
+        keys.push(format!("at:{}", number_text(place)));
+    }
+    keys
+}
+
+/// A label for a thought block.
+fn label_of(id: &str, place: Option<f64>) -> String {
+    match (id.is_empty(), place) {
+        (false, _) => id.to_owned(),
+        (true, Some(place)) => format!("at:{}", number_text(place)),
+        (true, None) => String::new(),
+    }
+}
+
+/// Final text counts only when there is some.
+fn final_of(value: Option<&Value>) -> Option<&str> {
+    match value {
+        Some(Value::String(text)) if !text.is_empty() => Some(text.as_str()),
+        _ => None,
+    }
+}
+
+/// Response items keyed by id, else by place.
 struct Decoder<'a> {
     host: &'a dyn Host,
     finished: bool,
-    calls: HashMap<String, CallState>,
-    thoughts: HashMap<String, ThoughtState>,
-    phases: HashMap<String, String>,
-    texts: HashSet<String>,
+    items: Vec<ItemState>,
+    keys: HashMap<String, usize>,
+    called: usize,
     serving: Serving,
     usage: Option<NormalizedUsage>,
 }
 
 type Events<'e> = &'e mut Vec<StepEvent>;
 
-impl Decoder<'_> {
+impl<'a> Decoder<'a> {
+    fn new(host: &'a dyn Host) -> Self {
+        Self {
+            host,
+            finished: false,
+            items: Vec::new(),
+            keys: HashMap::new(),
+            called: 0,
+            serving: Serving {
+                host: None,
+                generation_id: None,
+            },
+            usage: None,
+        }
+    }
+
     fn event(
         &mut self,
         type_: Option<&str>,
         data: &Object,
         out: Events,
     ) -> Result<(), ProviderError> {
+        if errored(data.get("error")) {
+            return Err(self.failure(&error_body(data.get("error"))));
+        }
         let item_id = text_at(data, "item_id").to_owned();
+        let place = number_at(data, "output_index");
+        let keys = keys_of(&item_id, "", place);
+        let label = label_of(&item_id, place);
         let delta = text_at(data, "delta").to_owned();
         match type_.unwrap_or("") {
             "response.created" | "response.in_progress" => self.served(data.get("response"), out),
             "response.output_item.added" => {
                 if let Some(Value::Object(item)) = data.get("item") {
-                    self.added(item, out);
+                    self.added(item, place, out)?;
                 }
             }
             "response.output_item.done" => {
                 if let Some(Value::Object(item)) = data.get("item") {
-                    self.done(item, out);
+                    self.done(item, place, out)?;
                 }
             }
             "response.output_text.delta" | "response.refusal.delta" => {
-                self.texts.insert(item_id.clone());
+                let at = self.state(&keys);
+                self.items[at].texted = true;
                 out.push(StepEvent::Text(StepEventText {
                     text: delta,
-                    phase: self.phases.get(&item_id).cloned(),
+                    phase: self.items[at].phase.clone(),
                 }));
             }
             "response.function_call_arguments.delta" => {
-                self.argued(&item_id, None, Some(&delta), None, out);
+                let at = self.state(&keys);
+                self.argued(at, None, Some(&delta), None, out)?;
             }
             "response.function_call_arguments.done" => {
-                self.argued(&item_id, None, None, Some(text_at(data, "arguments")), out);
+                let at = self.state(&keys);
+                self.argued(at, None, None, final_of(data.get("arguments")), out)?;
             }
             "response.reasoning_summary_text.delta" => {
                 let at = number_at(data, "summary_index").unwrap_or(0.0);
-                out.push(self.thought(&item_id, true, at, &delta));
+                let state = self.state(&keys);
+                out.push(self.thought(state, &item_id, &label, true, at, &delta));
             }
             "response.reasoning_text.delta" => {
                 let at = number_at(data, "content_index").unwrap_or(0.0);
-                out.push(self.thought(&item_id, false, at, &delta));
+                let state = self.state(&keys);
+                out.push(self.thought(state, &item_id, &label, false, at, &delta));
             }
             "response.completed" => return self.ended(data.get("response"), "completed", out),
             "response.incomplete" => return self.ended(data.get("response"), "incomplete", out),
             "response.failed" => return self.ended(data.get("response"), "failed", out),
-            "error" => {
-                return Err(stream_failure(
-                    self.host,
-                    &WireError {
-                        message: Some(text_or(text_at(data, "message"), "The response failed.")),
-                        type_: type_of(data.get("code")),
-                        ..WireError::default()
-                    },
-                    self.usage.clone(),
-                    &self.serving,
-                ));
-            }
+            "error" => return Err(self.failure(data)),
             _ => {}
         }
         Ok(())
@@ -454,12 +509,38 @@ impl Decoder<'_> {
     /// Decode a complete response.
     fn whole(&mut self, response: &Object, out: Events) -> Result<(), ProviderError> {
         self.served(Some(&Value::Object(response.clone())), out);
-        for item in items_at(response, "output") {
+        for (place, item) in items_at(response, "output").iter().enumerate() {
             if let Value::Object(item) = item {
-                self.done(item, out);
+                self.done(item, Some(place as f64), out)?;
             }
         }
         self.ended(Some(&Value::Object(response.clone())), "", out)
+    }
+
+    fn failure(&self, error: &Object) -> ProviderError {
+        stream_failure(
+            self.host,
+            &WireError {
+                message: Some(text_or(text_at(error, "message"), "The response failed.")),
+                type_: type_of(error.get("code")),
+                ..WireError::default()
+            },
+            self.usage.clone(),
+            &self.serving,
+        )
+    }
+
+    /// The state every key names, made when none has one.
+    fn state(&mut self, keys: &[String]) -> usize {
+        let held = keys.iter().find_map(|key| self.keys.get(key).copied());
+        let at = held.unwrap_or_else(|| {
+            self.items.push(ItemState::default());
+            self.items.len() - 1
+        });
+        for key in keys {
+            self.keys.entry(key.clone()).or_insert(at);
+        }
+        at
     }
 
     fn served(&mut self, response: Option<&Value>, out: Events) {
@@ -482,62 +563,90 @@ impl Decoder<'_> {
         }
     }
 
-    fn added(&mut self, item: &Object, out: Events) {
-        let id = text_at(item, "id").to_owned();
+    fn added(
+        &mut self,
+        item: &Object,
+        place: Option<f64>,
+        out: Events,
+    ) -> Result<(), ProviderError> {
         let type_ = item.get("type").and_then(Value::as_str);
+        let call = type_ == Some("function_call");
+        let call_id = if call { text_at(item, "call_id") } else { "" };
+        let at = self.state(&keys_of(text_at(item, "id"), call_id, place));
         if type_ == Some("message")
             && let Some(Value::String(phase)) = item.get("phase")
         {
-            self.phases.insert(id.clone(), phase.clone());
+            self.items[at].phase = Some(phase.clone());
         }
-        if type_ == Some("function_call") {
-            self.argued(&id, Some(item), Some(text_at(item, "arguments")), None, out);
+        if call {
+            self.argued(at, Some(item), Some(text_at(item, "arguments")), None, out)?;
         }
+        Ok(())
     }
 
-    fn done(&mut self, item: &Object, out: Events) {
-        let id = text_at(item, "id").to_owned();
+    fn done(
+        &mut self,
+        item: &Object,
+        place: Option<f64>,
+        out: Events,
+    ) -> Result<(), ProviderError> {
+        let id = text_at(item, "id");
         let type_ = item.get("type").and_then(Value::as_str);
-        if type_ == Some("function_call") {
-            self.argued(&id, Some(item), None, Some(text_at(item, "arguments")), out);
+        let call = type_ == Some("function_call");
+        let call_id = if call { text_at(item, "call_id") } else { "" };
+        let at = self.state(&keys_of(id, call_id, place));
+        if call {
+            self.argued(at, Some(item), None, final_of(item.get("arguments")), out)?;
         }
-        if type_ == Some("message") && !self.texts.contains(&id) {
+        if type_ == Some("message") && !self.items[at].texted {
             if let Some(Value::String(phase)) = item.get("phase")
-                && !self.phases.contains_key(&id)
+                && self.items[at].phase.is_none()
             {
-                self.phases.insert(id.clone(), phase.clone());
+                self.items[at].phase = Some(phase.clone());
             }
-            self.texts.insert(id.clone());
+            self.items[at].texted = true;
             out.push(StepEvent::Text(StepEventText {
                 text: message_text(item),
-                phase: self.phases.get(&id).cloned(),
+                phase: self.items[at].phase.clone(),
             }));
         }
         if type_ == Some(REASONING) {
-            self.reasoned(&id, item, out);
+            self.reasoned(at, id, &label_of(id, place), item, out);
         }
+        Ok(())
     }
 
     /// Final arguments backfill deltas.
     fn argued(
         &mut self,
-        id: &str,
+        at: usize,
         item: Option<&Object>,
         delta: Option<&str>,
         whole: Option<&str>,
         out: Events,
-    ) {
-        let next = self.calls.len();
-        let call = self.calls.entry(id.to_owned()).or_insert(CallState {
-            index: next,
-            arguments_text: String::new(),
-        });
+    ) -> Result<(), ProviderError> {
+        if self.items[at].call.is_none() {
+            self.items[at].call = Some(CallState {
+                index: self.called,
+                arguments_text: String::new(),
+            });
+            self.called += 1;
+        }
+        let Some(call) = self.items[at].call.as_mut() else {
+            return Ok(());
+        };
         let more = match (delta, whole) {
             (Some(delta), _) => delta.to_owned(),
-            (None, Some(whole)) => whole
-                .strip_prefix(call.arguments_text.as_str())
-                .unwrap_or("")
-                .to_owned(),
+            (None, Some(whole)) => match whole.strip_prefix(call.arguments_text.as_str()) {
+                Some(rest) => rest.to_owned(),
+                None => {
+                    return Err(failed(
+                        FailureCategory::Stream,
+                        "A tool call's final arguments contradict the ones streamed.",
+                        FailureExtra::default(),
+                    ));
+                }
+            },
             (None, None) => String::new(),
         };
         call.arguments_text.push_str(&more);
@@ -547,17 +656,26 @@ impl Decoder<'_> {
             name: item.map_or("", |item| text_at(item, "name")).to_owned(),
             arguments_text: more,
         }));
+        Ok(())
     }
 
-    fn thought(&mut self, id: &str, summary: bool, at: f64, delta: &str) -> StepEvent {
-        let state = self.thoughts.entry(id.to_owned()).or_default();
+    fn thought(
+        &mut self,
+        at: usize,
+        id: &str,
+        label: &str,
+        summary: bool,
+        index: f64,
+        delta: &str,
+    ) -> StepEvent {
+        let state = self.items[at].thought.get_or_insert_with(Default::default);
         let slot = if summary {
             &mut state.summary
         } else {
             &mut state.content
         };
-        let split = slot.is_some_and(|held| held != at);
-        *slot = Some(at);
+        let split = slot.is_some_and(|held| held != index);
+        *slot = Some(index);
         state.streamed = true;
         let kind = if summary {
             ThoughtPartSegmentsItemKind::Summary
@@ -568,13 +686,16 @@ impl Decoder<'_> {
             kind,
             text: delta.to_owned(),
         };
-        thought_event(bare_thought(Some(vec![segment]), None, id), id, split)
+        thought_event(bare_thought(Some(vec![segment]), None, id), label, split)
     }
 
     /// Done events add reasoning.
-    fn reasoned(&mut self, id: &str, item: &Object, out: Events) {
+    fn reasoned(&mut self, at: usize, id: &str, label: &str, item: &Object, out: Events) {
         let opaque = text_at(item, "encrypted_content");
-        let streamed = self.thoughts.get(id).is_some_and(|state| state.streamed);
+        let streamed = self.items[at]
+            .thought
+            .as_ref()
+            .is_some_and(|state| state.streamed);
         let segments = if streamed {
             Vec::new()
         } else {
@@ -589,7 +710,7 @@ impl Decoder<'_> {
                 (!opaque.is_empty()).then(|| opaque.to_owned()),
                 id,
             ),
-            id,
+            label,
             false,
         ));
     }
@@ -615,18 +736,8 @@ impl Decoder<'_> {
             Some(Value::String(status)) => status.as_str(),
             _ => fallback,
         };
-        if status == "failed" {
-            let error = error_body(body.get("error"));
-            return Err(stream_failure(
-                self.host,
-                &WireError {
-                    message: Some(text_or(text_at(&error, "message"), "The response failed.")),
-                    type_: type_of(error.get("code")),
-                    ..WireError::default()
-                },
-                self.usage.clone(),
-                &self.serving,
-            ));
+        if status == "failed" || errored(body.get("error")) {
+            return Err(self.failure(&error_body(body.get("error"))));
         }
         if status != "completed" && status != "incomplete" {
             return Err(failed(
@@ -641,11 +752,7 @@ impl Decoder<'_> {
             }));
         }
         out.push(StepEvent::Finish(StepEventFinish {
-            reason: finish_of(
-                status,
-                body.get("incomplete_details"),
-                !self.calls.is_empty(),
-            ),
+            reason: finish_of(status, body.get("incomplete_details"), self.called > 0),
         }));
         self.finished = true;
         Ok(())
@@ -735,19 +842,7 @@ impl<H: Host> Codec for ResponsesCodec<H> {
 
     fn stream(&self) -> Box<dyn StreamDecoder + '_> {
         Box::new(ResponsesStream {
-            decoder: Decoder {
-                host: &self.host,
-                finished: false,
-                calls: HashMap::new(),
-                thoughts: HashMap::new(),
-                phases: HashMap::new(),
-                texts: HashSet::new(),
-                serving: Serving {
-                    host: None,
-                    generation_id: None,
-                },
-                usage: None,
-            },
+            decoder: Decoder::new(&self.host),
             over: false,
             failed: None,
         })
@@ -761,19 +856,7 @@ impl<H: Host> Codec for ResponsesCodec<H> {
                 FailureExtra::default(),
             ));
         };
-        let mut decoder = Decoder {
-            host: &self.host,
-            finished: false,
-            calls: HashMap::new(),
-            thoughts: HashMap::new(),
-            phases: HashMap::new(),
-            texts: HashSet::new(),
-            serving: Serving {
-                host: None,
-                generation_id: None,
-            },
-            usage: None,
-        };
+        let mut decoder = Decoder::new(&self.host);
         let mut events = Vec::new();
         decoder.whole(body, &mut events)?;
         assembled(&events)

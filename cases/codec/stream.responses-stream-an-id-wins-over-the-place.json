@@ -1,0 +1,92 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "responses-stream-an-id-wins-over-the-place",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"event": "response.output_item.added",
+				"data": "{\"type\":\"response.output_item.added\",\"item\":{\"type\":\"function_call\",\"name\":\"read\",\"id\":\"fc_1\",\"call_id\":\"a\",\"arguments\":\"\"},\"output_index\":5}"
+			},
+			{
+				"kind": "data",
+				"event": "response.function_call_arguments.delta",
+				"data": "{\"type\":\"response.function_call_arguments.delta\",\"item_id\":\"fc_1\",\"output_index\":9,\"delta\":\"{}\"}"
+			},
+			{
+				"kind": "data",
+				"event": "response.completed",
+				"data": "{\"type\":\"response.completed\",\"response\":{\"id\":\"resp_1\",\"status\":\"completed\"}}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "a",
+				"name": "read",
+				"argumentsText": ""
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "",
+				"name": "",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "resp_1"
+				}
+			},
+			{
+				"kind": "finish",
+				"reason": "tool_calls"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "a",
+					"name": "read",
+					"argumentsText": "{}"
+				}
+			],
+			"finish": "tool_calls",
+			"serving": {
+				"generationId": "resp_1"
+			}
+		},
+		"failure": null
+	}
+}

@@ -54,6 +54,10 @@
 				}
 			],
 			"finish": "stop",
+			"usage": {
+				"input": 0,
+				"output": 2
+			},
 			"serving": {
 				"generationId": "msg_1"
 			}

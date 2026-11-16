@@ -17,6 +17,7 @@ import type {
 } from "@nyaaai/contract/shapes/step";
 import type { Codec, StepTurn } from "../codec";
 import { failed, type WireError } from "../failure";
+import { amountAt } from "../hosts/opencode";
 import {
 	argumentsOf,
 	assembled,
@@ -69,12 +70,17 @@ function replyError(body: Json): WireError {
 		: wireError(200, body);
 }
 
+/** Empty values are no error. */
+function errored(raw: unknown): boolean {
+	return !(raw === undefined || raw === null || raw === false || raw === 0 || raw === "");
+}
+
 function claude(model: string): boolean {
 	return model.slice(model.lastIndexOf("/") + 1).startsWith("claude-");
 }
 
 /** Allowed tool ID characters. */
-function blockId(wireId: string): string {
+function cleanId(wireId: string): string {
 	let id = "";
 	for (let at = 0; at < wireId.length; at++) {
 		const unit = wireId.charCodeAt(at);
@@ -87,6 +93,30 @@ function blockId(wireId: string): string {
 		id += plain ? wireId.charAt(at) : "_";
 	}
 	return id.length === 0 ? "call" : id;
+}
+
+/** One block id for each wire id of the request; ids that need no change keep theirs. */
+function blockIds(history: readonly Turn[]): Map<string, string> {
+	const wireIds = history.flatMap((turn) =>
+		turn.role === "step" ? turn.parts.flatMap((part) => (part.kind === "call" ? [part.wireId] : [])) : [],
+	);
+	const mapped = new Map<string, string>();
+	const taken = new Set<string>();
+	for (const wireId of wireIds) {
+		if (wireId.length > 0 && cleanId(wireId) === wireId && !mapped.has(wireId)) {
+			mapped.set(wireId, wireId);
+			taken.add(wireId);
+		}
+	}
+	for (const wireId of wireIds) {
+		if (mapped.has(wireId)) continue;
+		const base = cleanId(wireId);
+		let id = base;
+		for (let count = 2; taken.has(id); count++) id = `${base}_${numberText(count)}`;
+		mapped.set(wireId, id);
+		taken.add(id);
+	}
+	return mapped;
 }
 
 function signed(part: ThoughtPart): boolean {
@@ -112,7 +142,7 @@ function thoughtBlock(part: ThoughtPart): Block {
 }
 
 /** User-turn tool results. */
-function stepMessages(step: StepTurn, request: CanonicalRequest): Message[] {
+function stepMessages(step: StepTurn, request: CanonicalRequest, blocks: ReadonlyMap<string, string>): Message[] {
 	const sent = readable(step, request);
 	const ids = new Map(step.parts.flatMap((part) => (part.kind === "call" ? [[part.index, part.wireId]] : [])));
 	const content = step.parts.flatMap((part): Block[] => {
@@ -120,7 +150,12 @@ function stepMessages(step: StepTurn, request: CanonicalRequest): Message[] {
 		if (part.kind === "text") return part.text.length === 0 ? [] : [{ type: "text", text: part.text }];
 		if (part.kind === "call")
 			return [
-				{ type: "tool_use", id: blockId(part.wireId), name: part.name, input: argumentsOf(part.arguments) },
+				{
+					type: "tool_use",
+					id: blocks.get(part.wireId) ?? cleanId(part.wireId),
+					name: part.name,
+					input: argumentsOf(part.arguments),
+				},
 			];
 		return [];
 	});
@@ -130,7 +165,7 @@ function stepMessages(step: StepTurn, request: CanonicalRequest): Message[] {
 		return [
 			{
 				type: "tool_result",
-				tool_use_id: blockId(wireId),
+				tool_use_id: blocks.get(wireId) ?? cleanId(wireId),
 				content: part.output,
 				...(part.isError ? { is_error: true as const } : {}),
 			},
@@ -142,10 +177,10 @@ function stepMessages(step: StepTurn, request: CanonicalRequest): Message[] {
 	];
 }
 
-function turnMessages(turn: Turn, request: CanonicalRequest): Message[] {
+function turnMessages(turn: Turn, request: CanonicalRequest, blocks: ReadonlyMap<string, string>): Message[] {
 	return turn.role === "user"
 		? [{ role: "user", content: [{ type: "text", text: turn.text }] }]
-		: stepMessages(turn, request);
+		: stepMessages(turn, request, blocks);
 }
 
 /** Join messages by role. */
@@ -202,11 +237,10 @@ function bodyOf(
 			: request.cache.ttl === "1h"
 				? { type: "ephemeral", ttl: "1h" }
 				: { type: "ephemeral" };
-	const marked = new Set([
-		request.system.length - 1,
-		...(request.summary === undefined ? [] : [request.system.length]),
-	]);
-	const system = systemTexts(request, prompted).flatMap((text, at) =>
+	const texts = systemTexts(request, prompted);
+	const lastSystem = texts.findLastIndex((text, at) => at < request.system.length && text.length > 0);
+	const marked = new Set([lastSystem, ...(request.summary === undefined ? [] : [request.system.length])]);
+	const system = texts.flatMap((text, at) =>
 		text.length === 0
 			? []
 			: [
@@ -217,7 +251,8 @@ function bodyOf(
 					},
 				],
 	);
-	const history = joined(request.history.flatMap((turn) => turnMessages(turn, request)));
+	const blocks = blockIds(request.history);
+	const history = joined(request.history.flatMap((turn) => turnMessages(turn, request, blocks)));
 	const forced = toolChoice === undefined ? undefined : choiceOf(api?.choice ?? [], toolChoice.name);
 	const efforts = facts?.efforts ?? [];
 	const listed = effort !== undefined && efforts.includes(effort) ? effort : undefined;
@@ -243,15 +278,12 @@ function bodyOf(
 
 /** Input includes cache. */
 function usageOf(host: Host, raw: Json): NormalizedUsage | undefined {
-	const fresh = numberOf(raw["input_tokens"]);
-	const output = numberOf(raw["output_tokens"]);
-	if (fresh === undefined || output === undefined) return undefined;
-	const cached = numberOf(raw["cache_read_input_tokens"]);
-	const cacheWrite = numberOf(raw["cache_creation_input_tokens"]);
+	const cached = amountAt(raw, "cache_read_input_tokens");
+	const cacheWrite = amountAt(raw, "cache_creation_input_tokens");
 	return host.usage(
 		{
-			input: fresh + (cached ?? 0) + (cacheWrite ?? 0),
-			output,
+			input: (amountAt(raw, "input_tokens") ?? 0) + (cached ?? 0) + (cacheWrite ?? 0),
+			output: amountAt(raw, "output_tokens") ?? 0,
 			...(cached === undefined ? {} : { cached }),
 			...(cacheWrite === undefined ? {} : { cacheWrite }),
 		},
@@ -275,6 +307,7 @@ function thoughtOf(block: string, part: Omit<ThoughtPart, "kind">): StepEvent {
 class Decoder {
 	finished = false;
 	private readonly calls = new Map<number, number>();
+	private called = 0;
 	private readonly serving: Serving = {};
 	private raw: Json = {};
 	private usage: NormalizedUsage | undefined;
@@ -283,6 +316,7 @@ class Decoder {
 	constructor(private readonly host: Host) {}
 
 	*event(type: unknown, data: Json): Generator<StepEvent> {
+		if (errored(data["error"])) throw this.failure(errorBody(data["error"]));
 		const index = numberOf(data["index"]) ?? 0;
 		switch (type) {
 			case "message_start":
@@ -302,19 +336,21 @@ class Decoder {
 				if (this.finish === undefined) throw failed("stream", "The provider ended the step.");
 				this.finished = true;
 				return;
-			case "error": {
-				const error = errorBody(data["error"]);
-				throw streamFailure(
-					this.host,
-					{
-						message: stringOf(error["message"]) || "The message failed.",
-						...(typeof error["type"] === "string" ? { type: error["type"] } : {}),
-					},
-					this.usage,
-					this.serving,
-				);
-			}
+			case "error":
+				throw this.failure({});
 		}
+	}
+
+	private failure(error: Json): Error {
+		return streamFailure(
+			this.host,
+			{
+				message: stringOf(error["message"]) || "The message failed.",
+				...(typeof error["type"] === "string" ? { type: error["type"] } : {}),
+			},
+			this.usage,
+			this.serving,
+		);
 	}
 
 	/** Decode a complete message. */
@@ -338,7 +374,14 @@ class Decoder {
 	/** Merge cumulative usage. */
 	private *counted(usage: unknown): Generator<StepEvent> {
 		if (!isJson(usage)) return;
-		this.raw = { ...this.raw, ...usage };
+		this.raw = {
+			...this.raw,
+			...Object.fromEntries(
+				Object.entries(usage).filter(
+					([, value]) => isJson(value) || amountAt({ value }, "value") !== undefined,
+				),
+			),
+		};
 		this.usage = usageOf(this.host, this.raw) ?? this.usage;
 		if (this.usage !== undefined) yield { kind: "usage", usage: this.usage };
 	}
@@ -372,7 +415,7 @@ class Decoder {
 				yield thoughtOf(id, { type: REDACTED, opaque: stringOf(block["data"]) });
 				return;
 			case "tool_use": {
-				const call = this.calls.size;
+				const call = this.called++;
 				this.calls.set(index, call);
 				yield {
 					kind: "call",
@@ -430,7 +473,7 @@ async function* streamed(host: Host, items: AsyncIterable<SseItem>): AsyncGenera
 
 function completed(host: Host, body: unknown): StepResult {
 	if (!isJson(body)) throw failed("stream", "The reply was not JSON.");
-	if (body["type"] === "error") throw streamFailure(host, replyError(body), undefined, {});
+	if (body["type"] === "error" || errored(body["error"])) throw streamFailure(host, replyError(body), undefined, {});
 	return assembled(new Decoder(host).whole(body));
 }
 

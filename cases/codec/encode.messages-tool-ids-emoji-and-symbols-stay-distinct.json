@@ -1,0 +1,175 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.encode",
+	"name": "messages-tool-ids-emoji-and-symbols-stay-distinct",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			}
+		},
+		"request": {
+			"model": "claude-haiku-5-5",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Go."
+				},
+				{
+					"role": "step",
+					"producer": {
+						"model": "claude-haiku-5-5"
+					},
+					"parts": [
+						{
+							"kind": "call",
+							"index": 0,
+							"wireId": "😀",
+							"name": "read",
+							"arguments": "{}"
+						},
+						{
+							"kind": "result",
+							"index": 0,
+							"output": "out 😀",
+							"isError": false
+						},
+						{
+							"kind": "call",
+							"index": 1,
+							"wireId": "__",
+							"name": "read",
+							"arguments": "{}"
+						},
+						{
+							"kind": "result",
+							"index": 1,
+							"output": "out __",
+							"isError": false
+						},
+						{
+							"kind": "call",
+							"index": 2,
+							"wireId": "..",
+							"name": "read",
+							"arguments": "{}"
+						},
+						{
+							"kind": "result",
+							"index": 2,
+							"output": "out ..",
+							"isError": false
+						}
+					]
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true
+		},
+		"mode": "stream"
+	},
+	"expected": {
+		"encoded": {
+			"path": "/anthropic/v1/messages",
+			"body": {
+				"model": "claude-haiku-5-5",
+				"max_tokens": 128000,
+				"system": [
+					{
+						"type": "text",
+						"text": "Rules."
+					}
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": [
+							{
+								"type": "text",
+								"text": "Go."
+							}
+						]
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "tool_use",
+								"id": "___2",
+								"name": "read",
+								"input": {}
+							},
+							{
+								"type": "tool_use",
+								"id": "__",
+								"name": "read",
+								"input": {}
+							},
+							{
+								"type": "tool_use",
+								"id": "___3",
+								"name": "read",
+								"input": {}
+							}
+						]
+					},
+					{
+						"role": "user",
+						"content": [
+							{
+								"type": "tool_result",
+								"tool_use_id": "___2",
+								"content": "out 😀"
+							},
+							{
+								"type": "tool_result",
+								"tool_use_id": "__",
+								"content": "out __"
+							},
+							{
+								"type": "tool_result",
+								"tool_use_id": "___3",
+								"content": "out .."
+							}
+						]
+					}
+				],
+				"thinking": {
+					"type": "adaptive",
+					"display": "summarized"
+				},
+				"stream": true
+			},
+			"headers": {
+				"x-opencode-session": "root-1"
+			}
+		},
+		"refusal": null
+	}
+}

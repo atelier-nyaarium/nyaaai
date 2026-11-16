@@ -56,6 +56,10 @@
 				}
 			],
 			"finish": "stop",
+			"usage": {
+				"input": 0,
+				"output": 0
+			},
 			"serving": {
 				"generationId": "resp_g"
 			}
