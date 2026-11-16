@@ -1,0 +1,61 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "step-Effort",
+	"input": {
+		"set": "step",
+		"shape": "Effort",
+		"texts": [
+			"\"none\"",
+			"\"minimal\"",
+			"\"low\"",
+			"\"medium\"",
+			"\"high\"",
+			"\"xhigh\"",
+			"\"max\"",
+			"\"ultra\"",
+			"1"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "\"none\""
+			},
+			{
+				"ok": true,
+				"text": "\"minimal\""
+			},
+			{
+				"ok": true,
+				"text": "\"low\""
+			},
+			{
+				"ok": true,
+				"text": "\"medium\""
+			},
+			{
+				"ok": true,
+				"text": "\"high\""
+			},
+			{
+				"ok": true,
+				"text": "\"xhigh\""
+			},
+			{
+				"ok": true,
+				"text": "\"max\""
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

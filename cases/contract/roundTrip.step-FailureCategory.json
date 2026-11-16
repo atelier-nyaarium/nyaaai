@@ -1,0 +1,106 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "step-FailureCategory",
+	"input": {
+		"set": "step",
+		"shape": "FailureCategory",
+		"texts": [
+			"\"keyMissing\"",
+			"\"keyRejected\"",
+			"\"outOfCredit\"",
+			"\"allowance\"",
+			"\"refused\"",
+			"\"notFound\"",
+			"\"badRequest\"",
+			"\"replayRejected\"",
+			"\"rateLimited\"",
+			"\"overloaded\"",
+			"\"unavailable\"",
+			"\"network\"",
+			"\"stream\"",
+			"\"empty\"",
+			"\"truncated\"",
+			"\"idle\"",
+			"\"other\"",
+			"\"KeyMissing\""
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "\"keyMissing\""
+			},
+			{
+				"ok": true,
+				"text": "\"keyRejected\""
+			},
+			{
+				"ok": true,
+				"text": "\"outOfCredit\""
+			},
+			{
+				"ok": true,
+				"text": "\"allowance\""
+			},
+			{
+				"ok": true,
+				"text": "\"refused\""
+			},
+			{
+				"ok": true,
+				"text": "\"notFound\""
+			},
+			{
+				"ok": true,
+				"text": "\"badRequest\""
+			},
+			{
+				"ok": true,
+				"text": "\"replayRejected\""
+			},
+			{
+				"ok": true,
+				"text": "\"rateLimited\""
+			},
+			{
+				"ok": true,
+				"text": "\"overloaded\""
+			},
+			{
+				"ok": true,
+				"text": "\"unavailable\""
+			},
+			{
+				"ok": true,
+				"text": "\"network\""
+			},
+			{
+				"ok": true,
+				"text": "\"stream\""
+			},
+			{
+				"ok": true,
+				"text": "\"empty\""
+			},
+			{
+				"ok": true,
+				"text": "\"truncated\""
+			},
+			{
+				"ok": true,
+				"text": "\"idle\""
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

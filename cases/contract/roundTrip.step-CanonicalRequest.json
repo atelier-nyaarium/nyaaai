@@ -1,0 +1,96 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "step-CanonicalRequest",
+	"input": {
+		"set": "step",
+		"shape": "CanonicalRequest",
+		"texts": [
+			"{\"model\":\"m-1\",\"system\":[\"a\",\"b\"],\"history\":[],\"cache\":{\"kind\":\"none\"},\"session\":\"s1\",\"zdrOnly\":false}",
+			"{\"model\":\"m-1\",\"system\":[\"a\",\"b\"],\"history\":[{\"role\":\"user\",\"text\":\"hi\"},{\"role\":\"step\",\"parts\":[{\"kind\":\"text\",\"text\":\"hello\"},{\"kind\":\"call\",\"index\":0,\"wireId\":\"call_1\",\"name\":\"read\",\"arguments\":\"{}\"},{\"kind\":\"result\",\"index\":0,\"output\":\"done\",\"isError\":false}]}],\"cache\":{\"kind\":\"explicit\",\"ttl\":\"1h\"},\"session\":\"s1\",\"zdrOnly\":false,\"summary\":\"earlier\",\"state\":\"now\",\"tools\":[{\"name\":\"read\",\"description\":\"Reads a file.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"p\":{}}}}],\"toolChoice\":{\"name\":\"read\"},\"schema\":{\"name\":\"answer\",\"json\":{\"type\":\"object\"}},\"effort\":\"high\",\"maxTokens\":4096,\"unknown\":[1]}",
+			"{\"model\":\"m-1\",\"system\":[\"a\",\"b\"],\"history\":[],\"cache\":{\"kind\":\"implicit\"},\"session\":\"s1\",\"zdrOnly\":false}",
+			"{\"model\":\"m-1\",\"system\":[\"a\",\"b\"],\"history\":[],\"cache\":{\"kind\":\"explicit\",\"ttl\":\"2h\"},\"session\":\"s1\",\"zdrOnly\":false}",
+			"{\"model\":\"m-1\",\"system\":[\"a\",\"b\"],\"history\":[],\"cache\":{\"kind\":\"never\"},\"session\":\"s1\",\"zdrOnly\":false}",
+			"{\"model\":\"m-1\",\"system\":[\"a\",\"b\"],\"history\":[],\"cache\":{\"kind\":\"none\"},\"session\":\"s1\",\"zdrOnly\":false,\"effort\":\"ultra\"}",
+			"{\"model\":\"m-1\",\"system\":[\"a\",\"b\"],\"history\":[],\"cache\":{\"kind\":\"none\"},\"session\":\"s1\",\"zdrOnly\":false,\"tools\":[]}",
+			"{\"model\":\"m-1\",\"system\":[\"a\",\"b\"],\"history\":[],\"cache\":{\"kind\":\"none\"},\"session\":\"s1\",\"zdrOnly\":false,\"maxTokens\":1.5}",
+			"{\"model\":\"m-1\",\"system\":[1],\"history\":[],\"cache\":{\"kind\":\"none\"},\"session\":\"s1\",\"zdrOnly\":false}",
+			"{\"model\":\"m-1\",\"system\":[\"a\",\"b\"],\"history\":[],\"cache\":{\"kind\":\"none\"},\"session\":\"s1\",\"zdrOnly\":\"yes\"}",
+			"{\"model\":\"m-1\",\"system\":[\"a\",\"b\"],\"history\":[],\"cache\":{\"kind\":\"none\"},\"session\":\"s1\",\"zdrOnly\":false,\"toolChoice\":{}}",
+			"{\"model\":\"m-1\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"model\":\"m-1\",\"system\":[\"a\",\"b\"],\"history\":[],\"cache\":{\"kind\":\"none\"},\"session\":\"s1\",\"zdrOnly\":false}"
+			},
+			{
+				"ok": true,
+				"text": "{\"model\":\"m-1\",\"system\":[\"a\",\"b\"],\"summary\":\"earlier\",\"history\":[{\"role\":\"user\",\"text\":\"hi\"},{\"role\":\"step\",\"parts\":[{\"kind\":\"text\",\"text\":\"hello\"},{\"kind\":\"call\",\"index\":0,\"wireId\":\"call_1\",\"name\":\"read\",\"arguments\":\"{}\"},{\"kind\":\"result\",\"index\":0,\"output\":\"done\",\"isError\":false}]}],\"state\":\"now\",\"tools\":[{\"name\":\"read\",\"description\":\"Reads a file.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"p\":{}}}}],\"toolChoice\":{\"name\":\"read\"},\"schema\":{\"name\":\"answer\",\"json\":{\"type\":\"object\"}},\"effort\":\"high\",\"cache\":{\"kind\":\"explicit\",\"ttl\":\"1h\"},\"maxTokens\":4096,\"session\":\"s1\",\"zdrOnly\":false}"
+			},
+			{
+				"ok": true,
+				"text": "{\"model\":\"m-1\",\"system\":[\"a\",\"b\"],\"history\":[],\"cache\":{\"kind\":\"implicit\"},\"session\":\"s1\",\"zdrOnly\":false}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"cache",
+					"ttl"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"cache",
+					"kind"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"effort"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"model\":\"m-1\",\"system\":[\"a\",\"b\"],\"history\":[],\"tools\":[],\"cache\":{\"kind\":\"none\"},\"session\":\"s1\",\"zdrOnly\":false}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"maxTokens"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"system",
+					0
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"zdrOnly"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"toolChoice",
+					"name"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"system"
+				]
+			}
+		]
+	}
+}

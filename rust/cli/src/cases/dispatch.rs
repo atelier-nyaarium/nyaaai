@@ -31,6 +31,9 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
             input,
             super::base64::decode,
         ),
+        "headers.of" => {
+            run::<shapes::HeadersOfInput, shapes::HeadersOfResult>(input, super::headers::of)
+        }
         "shape.compatibleVersions" => run::<
             shapes::ShapeCompatibleVersionsInput,
             shapes::ShapeCompatibleVersionsResult,

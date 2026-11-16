@@ -1,0 +1,18 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "headers.of",
+	"name": "other-case",
+	"input": {
+		"headers": [
+			[
+				"Content-Type",
+				"text/plain"
+			]
+		],
+		"name": "content-type"
+	},
+	"expected": {
+		"value": "text/plain"
+	}
+}

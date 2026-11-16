@@ -1,0 +1,13 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "headers.of",
+	"name": "empty-list",
+	"input": {
+		"headers": [],
+		"name": "a"
+	},
+	"expected": {
+		"value": null
+	}
+}

@@ -30,7 +30,8 @@ Same names in both languages; Rust files are snake case.
   - `shape`: `z`, shape sets, hooks (`preprocessed`, `refined`, `matching`), `decode`, `decodeText`, `CONTRACT_VERSION`. Rust's `shape` is the runtime generated code calls; `version` holds the constant.
   - `schemaExport`: Zod to JSON Schema, with the dialect check.
   - `strictSchema`: the JSON Schema subset: `normalizeSchema`, `schemaProblems`, `validate`. `issues`: its messages; Rust's is generated.
-  - `shapes/frames`: stdio adapter frames. `shapes/sessionCut`: the cut's data shapes. Rust modules are generated.
+  - `shapes/frames`: stdio adapter frames. `shapes/sessionCut`: the cut's data shapes. `shapes/step`: a model request and its reply, effort, failure, stream items, header list. Rust modules are generated.
+  - `headers`: `headerOf`, the first value of a name, ASCII case aside.
 - `process`: `paths` (`resolvedPath`, `isInside`).
 - `operator`: `claude/sessionCut` cuts a Claude Code session file. `claude/sessionFile` reads its rows and holds cut ports over files. `claude/cliVersion` reads the installed version. `prompts` is generated.
 - `adapter`: `runtime` serves commands over frames: `serve`, `command`, `RunContext`. `stdio` (TypeScript): `serveStdio` runs it on the process's own streams and flushes before exit.
@@ -202,7 +203,7 @@ Dialect. `dialectProblems` lists, at once and by shape path, what `contract` ref
 - No string format (`z.base64()`, `z.email()`, `z.uuid()`, `z.iso.datetime()`): write `matching`, or a `refined` hook over a primitive.
 - No `.describe()` or `.meta()`: write a comment.
 - A discriminated union holds objects, each with a required one-value text literal tag. A boolean tag is a plain union; an enum tag is one branch per value, each a one-value literal.
-- A shape name is PascalCase. A property, hook, enum value, tag value and literal union branch each come to a Rust name: `a-b` and `a_b` come to one, and `.` to none. Two that come to one are refused; so is one that comes to none: name the shape, or use other values.
+- A shape name is PascalCase. A property, hook, enum value, tag value and literal union branch each come to a Rust name: `a-b` and `a_b` come to one, and `.` to none. The empty text comes to `Empty` as an enum value or literal branch, and to none elsewhere. Two that come to one are refused; so is one that comes to none: name the shape, or use other values.
 - An integer bound is whole. `matching` takes a string.
 - Optional and default sit on an object property, outermost. Use `exactOptional`. No optional property holds a default.
 - Recursion passes through a named shape.

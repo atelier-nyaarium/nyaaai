@@ -1,0 +1,18 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "headers.of",
+	"name": "same-case",
+	"input": {
+		"headers": [
+			[
+				"retry-after",
+				"5"
+			]
+		],
+		"name": "retry-after"
+	},
+	"expected": {
+		"value": "5"
+	}
+}

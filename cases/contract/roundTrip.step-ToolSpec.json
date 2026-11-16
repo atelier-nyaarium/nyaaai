@@ -1,0 +1,45 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "step-ToolSpec",
+	"input": {
+		"set": "step",
+		"shape": "ToolSpec",
+		"texts": [
+			"{\"name\":\"read\",\"description\":\"Reads a file.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"p\":{}}}}",
+			"{\"name\":\"read\",\"description\":\"Reads a file.\",\"parameters\":{}}",
+			"{\"name\":\"read\",\"description\":\"Reads a file.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"p\":{}}},\"extra\":1}",
+			"{\"name\":\"n\",\"description\":\"d\"}",
+			"{\"name\":\"read\",\"description\":\"Reads a file.\",\"parameters\":[]}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"name\":\"read\",\"description\":\"Reads a file.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"p\":{}}}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"name\":\"read\",\"description\":\"Reads a file.\",\"parameters\":{}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"name\":\"read\",\"description\":\"Reads a file.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"p\":{}}}}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"parameters"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"parameters"
+				]
+			}
+		]
+	}
+}

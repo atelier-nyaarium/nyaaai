@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "headers.of",
+	"name": "none",
+	"input": {
+		"headers": [
+			[
+				"a",
+				"1"
+			],
+			[
+				"b",
+				"2"
+			]
+		],
+		"name": "c"
+	},
+	"expected": {
+		"value": null
+	}
+}

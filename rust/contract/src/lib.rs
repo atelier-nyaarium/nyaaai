@@ -1,4 +1,5 @@
 pub mod base64;
+pub mod headers;
 pub mod id;
 pub mod issues;
 pub mod js;

@@ -1,0 +1,57 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "step-ApiFacts",
+	"input": {
+		"set": "step",
+		"shape": "ApiFacts",
+		"texts": [
+			"{\"family\":\"responses\",\"structured\":true,\"choice\":[\"auto\",\"none\"],\"strict\":false}",
+			"{\"family\":\"messages\",\"structured\":true,\"choice\":[\"auto\",\"none\"],\"strict\":false,\"reasoning\":\"reasoning_content\",\"toggle\":true,\"extra\":1}",
+			"{\"family\":\"responses\",\"structured\":true,\"choice\":[\"auto\",\"none\"],\"strict\":false,\"toggle\":false}",
+			"{\"family\":\"responses\",\"structured\":true,\"choice\":[],\"strict\":false}",
+			"{\"family\":\"grpc\",\"structured\":true,\"choice\":[\"auto\",\"none\"],\"strict\":false}",
+			"{\"family\":\"responses\",\"structured\":true,\"choice\":[\"auto\",\"none\"],\"strict\":\"no\"}",
+			"{\"family\":\"responses\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"family\":\"responses\",\"structured\":true,\"choice\":[\"auto\",\"none\"],\"strict\":false}"
+			},
+			{
+				"ok": true,
+				"text": "{\"family\":\"messages\",\"structured\":true,\"choice\":[\"auto\",\"none\"],\"strict\":false,\"reasoning\":\"reasoning_content\",\"toggle\":true}"
+			},
+			{
+				"ok": true,
+				"text": "{\"family\":\"responses\",\"structured\":true,\"choice\":[\"auto\",\"none\"],\"strict\":false,\"toggle\":false}"
+			},
+			{
+				"ok": true,
+				"text": "{\"family\":\"responses\",\"structured\":true,\"choice\":[],\"strict\":false}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"family"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"strict"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"structured"
+				]
+			}
+		]
+	}
+}

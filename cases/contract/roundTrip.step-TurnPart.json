@@ -1,0 +1,64 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "step-TurnPart",
+	"input": {
+		"set": "step",
+		"shape": "TurnPart",
+		"texts": [
+			"{\"kind\":\"text\",\"text\":\"hello\"}",
+			"{\"kind\":\"thought\",\"type\":\"thinking\",\"segments\":[{\"kind\":\"summary\",\"text\":\"plan\"},{\"kind\":\"content\",\"text\":\"detail\"}],\"opaque\":\"sig-abc\",\"id\":\"t1\",\"format\":\"anthropic-claude-v1\",\"index\":2,\"anchor\":\"a1\"}",
+			"{\"kind\":\"call\",\"index\":0,\"wireId\":\"call_1\",\"name\":\"read\",\"arguments\":\"{}\"}",
+			"{\"kind\":\"result\",\"index\":0,\"output\":\"done\",\"isError\":false}",
+			"{\"kind\":\"call\",\"index\":0,\"wireId\":\"call_1\",\"name\":\"read\",\"arguments\":1}",
+			"{\"kind\":\"result\",\"index\":0,\"output\":\"done\",\"isError\":\"no\"}",
+			"{\"kind\":\"other\"}",
+			"{}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"kind\":\"text\",\"text\":\"hello\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"thought\",\"type\":\"thinking\",\"segments\":[{\"kind\":\"summary\",\"text\":\"plan\"},{\"kind\":\"content\",\"text\":\"detail\"}],\"opaque\":\"sig-abc\",\"id\":\"t1\",\"format\":\"anthropic-claude-v1\",\"index\":2,\"anchor\":\"a1\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"call\",\"index\":0,\"wireId\":\"call_1\",\"name\":\"read\",\"arguments\":\"{}\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"result\",\"index\":0,\"output\":\"done\",\"isError\":false}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"arguments"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"isError"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			}
+		]
+	}
+}

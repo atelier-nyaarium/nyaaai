@@ -66,6 +66,7 @@ describe("the dialect check and the generator", () => {
 				"Shape",
 				"both come to the variant AB",
 			],
+			["empty twins", { Shape: z.enum(["", "empty"]) }, "Shape", "both come to the variant Empty"],
 			["shape name", { bad_name: z.string() }, "bad_name", "PascalCase"],
 			[
 				"field twins",

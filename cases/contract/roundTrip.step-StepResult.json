@@ -1,0 +1,49 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "step-StepResult",
+	"input": {
+		"set": "step",
+		"shape": "StepResult",
+		"texts": [
+			"{\"parts\":[],\"finish\":\"stop\",\"serving\":{}}",
+			"{\"parts\":[{\"kind\":\"text\",\"text\":\"hello\"},{\"kind\":\"thought\",\"type\":\"thinking\",\"segments\":[{\"kind\":\"summary\",\"text\":\"plan\"},{\"kind\":\"content\",\"text\":\"detail\"}],\"opaque\":\"sig-abc\",\"id\":\"t1\",\"format\":\"anthropic-claude-v1\",\"index\":2,\"anchor\":\"a1\"},{\"kind\":\"call\",\"index\":1,\"wireId\":\"\",\"name\":\"read\",\"argumentsText\":\"{\\\"a\\\":1}\"}],\"finish\":\"tool_calls\",\"usage\":{\"input\":120,\"output\":30,\"cached\":100,\"cacheWrite\":4,\"reasoning\":12,\"cost\":0.0012,\"upstreamCost\":0.001,\"byok\":true,\"billingSource\":\"credit\",\"listCost\":0.002,\"allowance\":0.5},\"serving\":{\"host\":\"h1\",\"generationId\":\"g1\"},\"extra\":1}",
+			"{\"parts\":[{\"kind\":\"call\",\"index\":0,\"wireId\":\"c\",\"name\":\"n\",\"arguments\":\"{}\"}],\"finish\":\"\",\"serving\":{}}",
+			"{\"parts\":[],\"finish\":\"stop\"}",
+			"{\"parts\":[],\"serving\":{}}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"parts\":[],\"finish\":\"stop\",\"serving\":{}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"parts\":[{\"kind\":\"text\",\"text\":\"hello\"},{\"kind\":\"thought\",\"type\":\"thinking\",\"segments\":[{\"kind\":\"summary\",\"text\":\"plan\"},{\"kind\":\"content\",\"text\":\"detail\"}],\"opaque\":\"sig-abc\",\"id\":\"t1\",\"format\":\"anthropic-claude-v1\",\"index\":2,\"anchor\":\"a1\"},{\"kind\":\"call\",\"index\":1,\"wireId\":\"\",\"name\":\"read\",\"argumentsText\":\"{\\\"a\\\":1}\"}],\"finish\":\"tool_calls\",\"usage\":{\"input\":120,\"output\":30,\"cached\":100,\"cacheWrite\":4,\"reasoning\":12,\"cost\":0.0012,\"upstreamCost\":0.001,\"byok\":true,\"billingSource\":\"credit\",\"listCost\":0.002,\"allowance\":0.5},\"serving\":{\"host\":\"h1\",\"generationId\":\"g1\"}}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"parts",
+					0,
+					"argumentsText"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"serving"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"finish"
+				]
+			}
+		]
+	}
+}

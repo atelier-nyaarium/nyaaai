@@ -143,8 +143,22 @@ class Reader {
 		const { type } = json;
 		if (Array.isArray(type)) {
 			const [inner, nothing, ...rest] = type;
-			if (nothing !== "null" || rest.length > 0) throw new Error(`${where}: type ${JSON.stringify(type)}`);
-			return { kind: "nullable", inner: this.bare({ ...json, type: inner as string }, where) };
+			if (nothing === "null" && rest.length === 0) {
+				return { kind: "nullable", inner: this.bare({ ...json, type: inner as string }, where) };
+			}
+			// Plain types alone, with null or without: `["number", "string"]`.
+			only("type");
+			const plain = new Set(["string", "number", "integer", "boolean"]);
+			const nullable = type.includes("null");
+			const held = type.filter((one) => one !== "null");
+			if (held.length < 2 || !held.every((one) => typeof one === "string" && plain.has(one))) {
+				throw new Error(`${where}: type ${JSON.stringify(type)}`);
+			}
+			const union: Node = {
+				kind: "union",
+				branches: held.map((one) => this.bare({ type: one as string }, where)),
+			};
+			return nullable ? { kind: "nullable", inner: union } : union;
 		}
 		switch (type) {
 			case undefined:

@@ -115,6 +115,9 @@ export const tryPascal = (text: string): string | undefined =>
 			.join(""),
 	);
 
+/** A variant name; the empty text is `Empty`. */
+export const tryVariant = (text: string): string | undefined => (text === "" ? "Empty" : tryPascal(text));
+
 function named(text: string, made: string | undefined): string {
 	if (made === undefined) throw new Error(`${JSON.stringify(text)} names no Rust identifier`);
 	return made;
@@ -123,6 +126,8 @@ function named(text: string, made: string | undefined): string {
 export const snake = (text: string): string => named(text, trySnake(text));
 
 export const pascal = (text: string): string => named(text, tryPascal(text));
+
+export const variant = (text: string): string => named(text, tryVariant(text));
 
 /** ASCII-only Rust literal. */
 export function quote(text: string): string {

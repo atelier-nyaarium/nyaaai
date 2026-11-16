@@ -160,6 +160,49 @@
 				"texts"
 			]
 		},
+		"HeadersOfInput": {
+			"type": "object",
+			"properties": {
+				"headers": {
+					"type": "array",
+					"items": {
+						"type": "array",
+						"prefixItems": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "string"
+							}
+						],
+						"items": false,
+						"minItems": 2,
+						"maxItems": 2
+					}
+				},
+				"name": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"headers",
+				"name"
+			]
+		},
+		"HeadersOfResult": {
+			"type": "object",
+			"properties": {
+				"value": {
+					"type": [
+						"string",
+						"null"
+					]
+				}
+			},
+			"required": [
+				"value"
+			]
+		},
 		"ShapeCompatibleVersionsInput": {
 			"type": "object",
 			"properties": {

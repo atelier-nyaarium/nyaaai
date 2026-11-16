@@ -1,0 +1,65 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "step-Turn",
+	"input": {
+		"set": "step",
+		"shape": "Turn",
+		"texts": [
+			"{\"role\":\"user\",\"text\":\"hi\"}",
+			"{\"role\":\"step\",\"parts\":[]}",
+			"{\"role\":\"step\",\"producer\":{\"model\":\"m-1\"},\"parts\":[{\"kind\":\"text\",\"text\":\"hello\"},{\"kind\":\"thought\",\"type\":\"reasoning.text\"},{\"kind\":\"call\",\"index\":0,\"wireId\":\"call_1\",\"name\":\"read\",\"arguments\":\"{}\"},{\"kind\":\"result\",\"index\":0,\"output\":\"done\",\"isError\":false}]}",
+			"{\"role\":\"step\",\"producer\":{\"model\":\"m-1\",\"host\":\"h1\"},\"parts\":[{\"kind\":\"text\",\"text\":\"hello\"}],\"extra\":1}",
+			"{\"role\":\"step\",\"producer\":{},\"parts\":[]}",
+			"{\"role\":\"step\"}",
+			"{\"role\":\"system\",\"text\":\"x\"}",
+			"{\"role\":\"user\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"role\":\"user\",\"text\":\"hi\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"role\":\"step\",\"parts\":[]}"
+			},
+			{
+				"ok": true,
+				"text": "{\"role\":\"step\",\"producer\":{\"model\":\"m-1\"},\"parts\":[{\"kind\":\"text\",\"text\":\"hello\"},{\"kind\":\"thought\",\"type\":\"reasoning.text\"},{\"kind\":\"call\",\"index\":0,\"wireId\":\"call_1\",\"name\":\"read\",\"arguments\":\"{}\"},{\"kind\":\"result\",\"index\":0,\"output\":\"done\",\"isError\":false}]}"
+			},
+			{
+				"ok": true,
+				"text": "{\"role\":\"step\",\"producer\":{\"model\":\"m-1\",\"host\":\"h1\"},\"parts\":[{\"kind\":\"text\",\"text\":\"hello\"}]}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"producer",
+					"model"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"parts"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"role"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"text"
+				]
+			}
+		]
+	}
+}

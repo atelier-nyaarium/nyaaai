@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "step-ThoughtDelta",
+	"input": {
+		"set": "step",
+		"shape": "ThoughtDelta",
+		"texts": [
+			"{\"part\":{\"kind\":\"thought\",\"type\":\"reasoning.text\"}}",
+			"{\"part\":{\"kind\":\"thought\",\"type\":\"thinking\",\"segments\":[{\"kind\":\"summary\",\"text\":\"plan\"},{\"kind\":\"content\",\"text\":\"detail\"}],\"opaque\":\"sig-abc\",\"id\":\"t1\",\"format\":\"anthropic-claude-v1\",\"index\":2,\"anchor\":\"a1\"},\"block\":\"b1\",\"split\":true}",
+			"{\"part\":{\"kind\":\"thought\",\"type\":\"reasoning.text\"},\"split\":false,\"extra\":1}",
+			"{\"block\":\"b1\"}",
+			"{\"part\":{\"kind\":\"text\",\"text\":\"x\"}}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"part\":{\"kind\":\"thought\",\"type\":\"reasoning.text\"}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"part\":{\"kind\":\"thought\",\"type\":\"thinking\",\"segments\":[{\"kind\":\"summary\",\"text\":\"plan\"},{\"kind\":\"content\",\"text\":\"detail\"}],\"opaque\":\"sig-abc\",\"id\":\"t1\",\"format\":\"anthropic-claude-v1\",\"index\":2,\"anchor\":\"a1\"},\"block\":\"b1\",\"split\":true}"
+			},
+			{
+				"ok": true,
+				"text": "{\"part\":{\"kind\":\"thought\",\"type\":\"reasoning.text\"},\"split\":false}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"part"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"part",
+					"kind"
+				]
+			}
+		]
+	}
+}

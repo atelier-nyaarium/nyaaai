@@ -1,0 +1,59 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "step-ThoughtPart",
+	"input": {
+		"set": "step",
+		"shape": "ThoughtPart",
+		"texts": [
+			"{\"kind\":\"thought\",\"type\":\"reasoning.text\"}",
+			"{\"kind\":\"thought\",\"type\":\"thinking\",\"segments\":[{\"kind\":\"summary\",\"text\":\"plan\"},{\"kind\":\"content\",\"text\":\"detail\"}],\"opaque\":\"sig-abc\",\"id\":\"t1\",\"format\":\"anthropic-claude-v1\",\"index\":2,\"anchor\":\"a1\"}",
+			"{\"kind\":\"thought\",\"type\":\"reasoning.text\",\"segments\":[]}",
+			"{\"kind\":\"thought\",\"type\":\"reasoning.text\",\"unknown\":true}",
+			"{\"kind\":\"thought\",\"type\":\"reasoning.text\",\"segments\":[{\"kind\":\"other\",\"text\":\"x\"}]}",
+			"{\"kind\":\"thought\",\"type\":\"reasoning.text\",\"index\":\"2\"}",
+			"{\"kind\":\"thought\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"kind\":\"thought\",\"type\":\"reasoning.text\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"thought\",\"type\":\"thinking\",\"segments\":[{\"kind\":\"summary\",\"text\":\"plan\"},{\"kind\":\"content\",\"text\":\"detail\"}],\"opaque\":\"sig-abc\",\"id\":\"t1\",\"format\":\"anthropic-claude-v1\",\"index\":2,\"anchor\":\"a1\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"thought\",\"type\":\"reasoning.text\",\"segments\":[]}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"thought\",\"type\":\"reasoning.text\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"segments",
+					0,
+					"kind"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"index"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"type"
+				]
+			}
+		]
+	}
+}

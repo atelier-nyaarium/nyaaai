@@ -1,0 +1,55 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "step-SseItem",
+	"input": {
+		"set": "step",
+		"shape": "SseItem",
+		"texts": [
+			"{\"kind\":\"comment\",\"text\":\"ping\"}",
+			"{\"kind\":\"data\",\"data\":\"{\\\"a\\\":1}\"}",
+			"{\"kind\":\"data\",\"data\":\"x\",\"event\":\"message_start\"}",
+			"{\"kind\":\"done\"}",
+			"{\"kind\":\"done\",\"extra\":1}",
+			"{\"kind\":\"data\"}",
+			"{\"kind\":\"other\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"kind\":\"comment\",\"text\":\"ping\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"data\",\"data\":\"{\\\"a\\\":1}\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"data\",\"data\":\"x\",\"event\":\"message_start\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"done\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"done\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"data"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			}
+		]
+	}
+}

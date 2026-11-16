@@ -1,0 +1,78 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "step-Failure",
+	"input": {
+		"set": "step",
+		"shape": "Failure",
+		"texts": [
+			"{\"category\":\"rateLimited\",\"status\":429,\"message\":\"Slow down.\"}",
+			"{\"category\":\"network\",\"status\":\"connect\",\"message\":\"Could not connect.\"}",
+			"{\"category\":\"rateLimited\",\"status\":429,\"message\":\"Slow down.\",\"retryAfterMs\":1500,\"resetsAt\":1800000000000,\"reasons\":[\"a\",\"b\"],\"billed\":{\"usage\":{\"input\":120,\"output\":30},\"host\":\"h1\",\"generationId\":\"g1\"},\"extra\":1}",
+			"{\"category\":\"rateLimited\",\"status\":429,\"message\":\"Slow down.\",\"billed\":{}}",
+			"{\"category\":\"rateLimited\",\"status\":429,\"message\":\"Slow down.\",\"retryAfterMs\":1.5}",
+			"{\"category\":\"rateLimited\",\"status\":429,\"message\":\"Slow down.\",\"resetsAt\":1.5}",
+			"{\"category\":\"rateLimited\",\"status\":null,\"message\":\"Slow down.\"}",
+			"{\"category\":\"rateLimited\",\"status\":true,\"message\":\"Slow down.\"}",
+			"{\"category\":\"other\",\"status\":429,\"message\":\"Slow down.\"}",
+			"{\"category\":\"idle\",\"status\":0}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"category\":\"rateLimited\",\"status\":429,\"message\":\"Slow down.\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"category\":\"network\",\"status\":\"connect\",\"message\":\"Could not connect.\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"category\":\"rateLimited\",\"status\":429,\"retryAfterMs\":1500,\"resetsAt\":1800000000000,\"message\":\"Slow down.\",\"reasons\":[\"a\",\"b\"],\"billed\":{\"usage\":{\"input\":120,\"output\":30},\"host\":\"h1\",\"generationId\":\"g1\"}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"category\":\"rateLimited\",\"status\":429,\"message\":\"Slow down.\",\"billed\":{}}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"retryAfterMs"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"resetsAt"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"status"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"status"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"category"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"message"
+				]
+			}
+		]
+	}
+}

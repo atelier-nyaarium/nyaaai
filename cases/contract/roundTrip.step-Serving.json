@@ -1,0 +1,43 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "step-Serving",
+	"input": {
+		"set": "step",
+		"shape": "Serving",
+		"texts": [
+			"{}",
+			"{\"host\":\"h1\"}",
+			"{\"generationId\":\"g1\"}",
+			"{\"host\":\"h1\",\"generationId\":\"g1\",\"extra\":1}",
+			"{\"host\":1}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{}"
+			},
+			{
+				"ok": true,
+				"text": "{\"host\":\"h1\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"generationId\":\"g1\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"host\":\"h1\",\"generationId\":\"g1\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"host"
+				]
+			}
+		]
+	}
+}

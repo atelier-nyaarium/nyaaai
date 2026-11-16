@@ -1,0 +1,862 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "step.output.json",
+	"x-contract-version": "0.1.0",
+	"$defs": {
+		"Effort": {
+			"type": "string",
+			"enum": [
+				"none",
+				"minimal",
+				"low",
+				"medium",
+				"high",
+				"xhigh",
+				"max"
+			]
+		},
+		"ToolSpec": {
+			"type": "object",
+			"properties": {
+				"name": {
+					"type": "string"
+				},
+				"description": {
+					"type": "string"
+				},
+				"parameters": {
+					"type": "object",
+					"propertyNames": {
+						"type": "string"
+					},
+					"additionalProperties": {}
+				}
+			},
+			"required": [
+				"name",
+				"description",
+				"parameters"
+			],
+			"additionalProperties": false
+		},
+		"TextPart": {
+			"type": "object",
+			"properties": {
+				"kind": {
+					"type": "string",
+					"const": "text"
+				},
+				"text": {
+					"type": "string"
+				},
+				"phase": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"kind",
+				"text"
+			],
+			"additionalProperties": false
+		},
+		"ThoughtPart": {
+			"type": "object",
+			"properties": {
+				"kind": {
+					"type": "string",
+					"const": "thought"
+				},
+				"type": {
+					"type": "string"
+				},
+				"segments": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"kind": {
+								"type": "string",
+								"enum": [
+									"summary",
+									"content"
+								]
+							},
+							"text": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"kind",
+							"text"
+						],
+						"additionalProperties": false
+					}
+				},
+				"opaque": {
+					"type": "string"
+				},
+				"id": {
+					"type": "string"
+				},
+				"format": {
+					"type": "string"
+				},
+				"index": {
+					"type": "number"
+				},
+				"anchor": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"kind",
+				"type"
+			],
+			"additionalProperties": false
+		},
+		"TurnPart": {
+			"oneOf": [
+				{
+					"$ref": "#/$defs/TextPart"
+				},
+				{
+					"$ref": "#/$defs/ThoughtPart"
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "call"
+						},
+						"index": {
+							"type": "number"
+						},
+						"wireId": {
+							"type": "string"
+						},
+						"name": {
+							"type": "string"
+						},
+						"arguments": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"kind",
+						"index",
+						"wireId",
+						"name",
+						"arguments"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "result"
+						},
+						"index": {
+							"type": "number"
+						},
+						"output": {
+							"type": "string"
+						},
+						"isError": {
+							"type": "boolean"
+						}
+					},
+					"required": [
+						"kind",
+						"index",
+						"output",
+						"isError"
+					],
+					"additionalProperties": false
+				}
+			],
+			"x-tag": "kind"
+		},
+		"Turn": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"role": {
+							"type": "string",
+							"const": "user"
+						},
+						"text": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"role",
+						"text"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"role": {
+							"type": "string",
+							"const": "step"
+						},
+						"producer": {
+							"type": "object",
+							"properties": {
+								"model": {
+									"type": "string"
+								},
+								"host": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"model"
+							],
+							"additionalProperties": false
+						},
+						"parts": {
+							"type": "array",
+							"items": {
+								"$ref": "#/$defs/TurnPart"
+							}
+						}
+					},
+					"required": [
+						"role",
+						"parts"
+					],
+					"additionalProperties": false
+				}
+			],
+			"x-tag": "role"
+		},
+		"CanonicalRequest": {
+			"type": "object",
+			"properties": {
+				"model": {
+					"type": "string"
+				},
+				"system": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"summary": {
+					"type": "string"
+				},
+				"history": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/Turn"
+					}
+				},
+				"state": {
+					"type": "string"
+				},
+				"tools": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/ToolSpec"
+					}
+				},
+				"toolChoice": {
+					"type": "object",
+					"properties": {
+						"name": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"name"
+					],
+					"additionalProperties": false
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"name": {
+							"type": "string"
+						},
+						"json": {
+							"type": "object",
+							"propertyNames": {
+								"type": "string"
+							},
+							"additionalProperties": {}
+						}
+					},
+					"required": [
+						"name",
+						"json"
+					],
+					"additionalProperties": false
+				},
+				"effort": {
+					"$ref": "#/$defs/Effort"
+				},
+				"cache": {
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"enum": [
+								"none",
+								"implicit",
+								"explicit"
+							]
+						},
+						"ttl": {
+							"type": "string",
+							"const": "1h"
+						}
+					},
+					"required": [
+						"kind"
+					],
+					"additionalProperties": false
+				},
+				"maxTokens": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"session": {
+					"type": "string"
+				},
+				"zdrOnly": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"model",
+				"system",
+				"history",
+				"cache",
+				"session",
+				"zdrOnly"
+			],
+			"additionalProperties": false
+		},
+		"ThoughtDelta": {
+			"type": "object",
+			"properties": {
+				"part": {
+					"$ref": "#/$defs/ThoughtPart"
+				},
+				"block": {
+					"type": "string"
+				},
+				"split": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"part"
+			],
+			"additionalProperties": false
+		},
+		"StepEvent": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "text"
+						},
+						"text": {
+							"type": "string"
+						},
+						"phase": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"kind",
+						"text"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "thought"
+						},
+						"part": {
+							"$ref": "#/$defs/ThoughtPart"
+						},
+						"block": {
+							"type": "string"
+						},
+						"split": {
+							"type": "boolean"
+						}
+					},
+					"required": [
+						"kind",
+						"part"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "call"
+						},
+						"index": {
+							"type": "number"
+						},
+						"wireId": {
+							"type": "string"
+						},
+						"name": {
+							"type": "string"
+						},
+						"argumentsText": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"kind",
+						"index",
+						"wireId",
+						"name",
+						"argumentsText"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "serving"
+						},
+						"serving": {
+							"$ref": "#/$defs/Serving"
+						}
+					},
+					"required": [
+						"kind",
+						"serving"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "usage"
+						},
+						"usage": {
+							"$ref": "#/$defs/NormalizedUsage"
+						}
+					},
+					"required": [
+						"kind",
+						"usage"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "finish"
+						},
+						"reason": {
+							"$ref": "#/$defs/FinishReason"
+						}
+					},
+					"required": [
+						"kind",
+						"reason"
+					],
+					"additionalProperties": false
+				}
+			],
+			"x-tag": "kind"
+		},
+		"ReplyPart": {
+			"oneOf": [
+				{
+					"$ref": "#/$defs/TextPart"
+				},
+				{
+					"$ref": "#/$defs/ThoughtPart"
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "call"
+						},
+						"index": {
+							"type": "number"
+						},
+						"wireId": {
+							"type": "string"
+						},
+						"name": {
+							"type": "string"
+						},
+						"argumentsText": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"kind",
+						"index",
+						"wireId",
+						"name",
+						"argumentsText"
+					],
+					"additionalProperties": false
+				}
+			],
+			"x-tag": "kind"
+		},
+		"Serving": {
+			"type": "object",
+			"properties": {
+				"host": {
+					"type": "string"
+				},
+				"generationId": {
+					"type": "string"
+				}
+			},
+			"additionalProperties": false
+		},
+		"FinishReason": {
+			"type": "string",
+			"enum": [
+				"stop",
+				"tool_calls",
+				"length",
+				"content_filter",
+				"error",
+				""
+			]
+		},
+		"NormalizedUsage": {
+			"type": "object",
+			"properties": {
+				"input": {
+					"type": "number"
+				},
+				"output": {
+					"type": "number"
+				},
+				"cached": {
+					"type": "number"
+				},
+				"cacheWrite": {
+					"type": "number"
+				},
+				"reasoning": {
+					"type": "number"
+				},
+				"cost": {
+					"type": "number"
+				},
+				"upstreamCost": {
+					"type": "number"
+				},
+				"byok": {
+					"type": "boolean"
+				},
+				"billingSource": {
+					"type": "string"
+				},
+				"listCost": {
+					"type": "number"
+				},
+				"allowance": {
+					"type": "number"
+				}
+			},
+			"required": [
+				"input",
+				"output"
+			],
+			"additionalProperties": false
+		},
+		"StepResult": {
+			"type": "object",
+			"properties": {
+				"parts": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/ReplyPart"
+					}
+				},
+				"finish": {
+					"$ref": "#/$defs/FinishReason"
+				},
+				"usage": {
+					"$ref": "#/$defs/NormalizedUsage"
+				},
+				"serving": {
+					"$ref": "#/$defs/Serving"
+				}
+			},
+			"required": [
+				"parts",
+				"finish",
+				"serving"
+			],
+			"additionalProperties": false
+		},
+		"FailureCategory": {
+			"type": "string",
+			"enum": [
+				"keyMissing",
+				"keyRejected",
+				"outOfCredit",
+				"allowance",
+				"refused",
+				"notFound",
+				"badRequest",
+				"replayRejected",
+				"rateLimited",
+				"overloaded",
+				"unavailable",
+				"network",
+				"stream",
+				"empty",
+				"truncated",
+				"idle"
+			]
+		},
+		"Failure": {
+			"type": "object",
+			"properties": {
+				"category": {
+					"$ref": "#/$defs/FailureCategory"
+				},
+				"status": {
+					"type": [
+						"number",
+						"string"
+					]
+				},
+				"retryAfterMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"resetsAt": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"message": {
+					"type": "string"
+				},
+				"reasons": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"billed": {
+					"type": "object",
+					"properties": {
+						"usage": {
+							"$ref": "#/$defs/NormalizedUsage"
+						},
+						"host": {
+							"type": "string"
+						},
+						"generationId": {
+							"type": "string"
+						}
+					},
+					"additionalProperties": false
+				}
+			},
+			"required": [
+				"category",
+				"status",
+				"message"
+			],
+			"additionalProperties": false
+		},
+		"ApiFamily": {
+			"type": "string",
+			"enum": [
+				"chat-completions",
+				"responses",
+				"messages",
+				"generate-content"
+			]
+		},
+		"ApiFacts": {
+			"type": "object",
+			"properties": {
+				"family": {
+					"$ref": "#/$defs/ApiFamily"
+				},
+				"structured": {
+					"type": "boolean"
+				},
+				"choice": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"strict": {
+					"type": "boolean"
+				},
+				"reasoning": {
+					"type": "string"
+				},
+				"toggle": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"family",
+				"structured",
+				"choice",
+				"strict"
+			],
+			"additionalProperties": false
+		},
+		"CodecFacts": {
+			"type": "object",
+			"properties": {
+				"api": {
+					"$ref": "#/$defs/ApiFacts"
+				},
+				"efforts": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/Effort"
+					}
+				},
+				"outputLimit": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				}
+			},
+			"required": [
+				"api",
+				"efforts"
+			],
+			"additionalProperties": false
+		},
+		"Encoded": {
+			"type": "object",
+			"properties": {
+				"path": {
+					"type": "string"
+				},
+				"body": {},
+				"headers": {
+					"type": "object",
+					"propertyNames": {
+						"type": "string"
+					},
+					"additionalProperties": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"path",
+				"body"
+			],
+			"additionalProperties": false
+		},
+		"SseItem": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "comment"
+						},
+						"text": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"kind",
+						"text"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "data"
+						},
+						"data": {
+							"type": "string"
+						},
+						"event": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"kind",
+						"data"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "done"
+						}
+					},
+					"required": [
+						"kind"
+					],
+					"additionalProperties": false
+				}
+			],
+			"x-tag": "kind"
+		},
+		"HeaderList": {
+			"type": "array",
+			"items": {
+				"type": "array",
+				"prefixItems": [
+					{
+						"type": "string"
+					},
+					{
+						"type": "string"
+					}
+				],
+				"items": false,
+				"minItems": 2,
+				"maxItems": 2
+			}
+		}
+	}
+}

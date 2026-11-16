@@ -171,6 +171,51 @@
 			],
 			"additionalProperties": false
 		},
+		"HeadersOfInput": {
+			"type": "object",
+			"properties": {
+				"headers": {
+					"type": "array",
+					"items": {
+						"type": "array",
+						"prefixItems": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "string"
+							}
+						],
+						"items": false,
+						"minItems": 2,
+						"maxItems": 2
+					}
+				},
+				"name": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"headers",
+				"name"
+			],
+			"additionalProperties": false
+		},
+		"HeadersOfResult": {
+			"type": "object",
+			"properties": {
+				"value": {
+					"type": [
+						"string",
+						"null"
+					]
+				}
+			},
+			"required": [
+				"value"
+			],
+			"additionalProperties": false
+		},
 		"ShapeCompatibleVersionsInput": {
 			"type": "object",
 			"properties": {

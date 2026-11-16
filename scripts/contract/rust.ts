@@ -1,5 +1,6 @@
 // Rust shape emitter.
 
+import { variant } from "@nyaaai/contract/rustNames";
 import type { Hook } from "@nyaaai/contract/shape";
 import type { RustTarget } from "@nyaaai/testkit/project";
 import { pascal, quote, snake } from "@nyaaai/testkit/rustNames";
@@ -580,7 +581,7 @@ class Emitter {
 	}
 
 	private choice(name: string, node: Of<"enum">): string {
-		const variants = node.values.map((value) => ({ value, rust: pascal(value) }));
+		const variants = node.values.map((value) => ({ value, rust: variant(value) }));
 		if (new Set(variants.map((variant) => variant.rust)).size !== variants.length) {
 			throw new Error(`${name}: two values share a variant name`);
 		}
@@ -626,7 +627,7 @@ class Emitter {
 			case "unknown":
 				return "Any";
 			case "literal":
-				return pascal(String(node.value));
+				return variant(String(node.value));
 			case "enum":
 				return "Choice";
 			case "array":

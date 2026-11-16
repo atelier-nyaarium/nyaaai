@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "step-ApiFamily",
+	"input": {
+		"set": "step",
+		"shape": "ApiFamily",
+		"texts": [
+			"\"chat-completions\"",
+			"\"responses\"",
+			"\"messages\"",
+			"\"generate-content\"",
+			"\"other\"",
+			"1"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "\"chat-completions\""
+			},
+			{
+				"ok": true,
+				"text": "\"responses\""
+			},
+			{
+				"ok": true,
+				"text": "\"messages\""
+			},
+			{
+				"ok": true,
+				"text": "\"generate-content\""
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

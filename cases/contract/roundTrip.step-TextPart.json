@@ -1,0 +1,45 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "step-TextPart",
+	"input": {
+		"set": "step",
+		"shape": "TextPart",
+		"texts": [
+			"{\"kind\":\"text\",\"text\":\"hello\"}",
+			"{\"kind\":\"text\",\"text\":\"hello\",\"phase\":\"final_answer\"}",
+			"{\"kind\":\"text\",\"text\":\"hello\",\"extra\":{\"deep\":1}}",
+			"{\"kind\":\"text\"}",
+			"{\"kind\":\"thought\",\"text\":\"x\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"kind\":\"text\",\"text\":\"hello\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"text\",\"text\":\"hello\",\"phase\":\"final_answer\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"text\",\"text\":\"hello\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"text"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			}
+		]
+	}
+}

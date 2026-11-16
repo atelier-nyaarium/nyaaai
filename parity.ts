@@ -4,6 +4,7 @@ import { COMMANDS } from "@nyaaai/cli/commands";
 import { ISSUE_MESSAGES } from "@nyaaai/contract/issues";
 import { CONTRACT_VERSION } from "@nyaaai/contract/shape";
 import "@nyaaai/contract/shapes/sessionCut";
+import "@nyaaai/contract/shapes/step";
 import { NYAAAI_SETS, project } from "@nyaaai/testkit/project";
 import { pascal, quote } from "@nyaaai/testkit/rustNames";
 import "@nyaaai/testkit/tortureShapes";
@@ -11,6 +12,7 @@ import "@nyaaai/testkit/trace";
 import { base64 } from "./scripts/caseGroups/base64";
 import { claude } from "./scripts/caseGroups/claude";
 import { contract } from "./scripts/caseGroups/contract";
+import { headers } from "./scripts/caseGroups/headers";
 import { js } from "./scripts/caseGroups/js";
 import { json } from "./scripts/caseGroups/json";
 import { noticeText } from "./scripts/caseGroups/noticeText";
@@ -74,6 +76,7 @@ export default project({
 			module: "shapes::session_cut",
 			file: "rust/contract/src/shapes/session_cut.rs",
 		},
+		step: { crate: "nyaaai_contract", module: "shapes::step", file: "rust/contract/src/shapes/step.rs" },
 		torture: { crate: "nyaaai_testkit", module: "torture_shapes", file: "rust/testkit/src/torture_shapes.rs" },
 		trace: { crate: "nyaaai_testkit", module: "trace_shapes", file: "rust/testkit/src/trace_shapes.rs" },
 	},
@@ -84,6 +87,7 @@ export default project({
 		js,
 		order,
 		base64,
+		headers,
 		shape,
 		contract,
 		time,

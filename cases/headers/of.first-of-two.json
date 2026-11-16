@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "headers.of",
+	"name": "first-of-two",
+	"input": {
+		"headers": [
+			[
+				"X-Id",
+				"1"
+			],
+			[
+				"x-id",
+				"2"
+			]
+		],
+		"name": "X-ID"
+	},
+	"expected": {
+		"value": "1"
+	}
+}

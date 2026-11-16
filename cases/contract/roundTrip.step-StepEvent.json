@@ -1,0 +1,87 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "step-StepEvent",
+	"input": {
+		"set": "step",
+		"shape": "StepEvent",
+		"texts": [
+			"{\"kind\":\"text\",\"text\":\"hi\"}",
+			"{\"kind\":\"text\",\"text\":\"hi\",\"phase\":\"commentary\"}",
+			"{\"kind\":\"thought\",\"part\":{\"kind\":\"thought\",\"type\":\"reasoning.text\"}}",
+			"{\"kind\":\"thought\",\"part\":{\"kind\":\"thought\",\"type\":\"thinking\",\"segments\":[{\"kind\":\"summary\",\"text\":\"plan\"},{\"kind\":\"content\",\"text\":\"detail\"}],\"opaque\":\"sig-abc\",\"id\":\"t1\",\"format\":\"anthropic-claude-v1\",\"index\":2,\"anchor\":\"a1\"},\"block\":\"b\",\"split\":true,\"extra\":1}",
+			"{\"kind\":\"call\",\"index\":0,\"wireId\":\"c\",\"name\":\"n\",\"argumentsText\":\"{\"}",
+			"{\"kind\":\"serving\",\"serving\":{\"host\":\"h1\",\"generationId\":\"g1\"}}",
+			"{\"kind\":\"serving\",\"serving\":{}}",
+			"{\"kind\":\"usage\",\"usage\":{\"input\":120,\"output\":30,\"cached\":100,\"cacheWrite\":4,\"reasoning\":12,\"cost\":0.0012,\"upstreamCost\":0.001,\"byok\":true,\"billingSource\":\"credit\",\"listCost\":0.002,\"allowance\":0.5}}",
+			"{\"kind\":\"finish\",\"reason\":\"tool_calls\"}",
+			"{\"kind\":\"finish\",\"reason\":\"\"}",
+			"{\"kind\":\"finish\"}",
+			"{\"kind\":\"unknown\"}",
+			"{\"kind\":\"call\",\"index\":0,\"wireId\":\"c\",\"name\":\"n\",\"arguments\":\"{}\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"kind\":\"text\",\"text\":\"hi\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"text\",\"text\":\"hi\",\"phase\":\"commentary\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"thought\",\"part\":{\"kind\":\"thought\",\"type\":\"reasoning.text\"}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"thought\",\"part\":{\"kind\":\"thought\",\"type\":\"thinking\",\"segments\":[{\"kind\":\"summary\",\"text\":\"plan\"},{\"kind\":\"content\",\"text\":\"detail\"}],\"opaque\":\"sig-abc\",\"id\":\"t1\",\"format\":\"anthropic-claude-v1\",\"index\":2,\"anchor\":\"a1\"},\"block\":\"b\",\"split\":true}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"call\",\"index\":0,\"wireId\":\"c\",\"name\":\"n\",\"argumentsText\":\"{\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"serving\",\"serving\":{\"host\":\"h1\",\"generationId\":\"g1\"}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"serving\",\"serving\":{}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"usage\",\"usage\":{\"input\":120,\"output\":30,\"cached\":100,\"cacheWrite\":4,\"reasoning\":12,\"cost\":0.0012,\"upstreamCost\":0.001,\"byok\":true,\"billingSource\":\"credit\",\"listCost\":0.002,\"allowance\":0.5}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"finish\",\"reason\":\"tool_calls\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"finish\",\"reason\":\"\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"reason"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"argumentsText"
+				]
+			}
+		]
+	}
+}

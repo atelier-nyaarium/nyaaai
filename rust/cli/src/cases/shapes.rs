@@ -329,6 +329,76 @@ impl Shape for Base64DecodeResult {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+pub struct HeadersOfInput {
+    pub headers: Vec<(String, String)>,
+    pub name: String,
+}
+
+impl Shape for HeadersOfInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let headers = shape::required(object, "headers", at, |value, at| {
+            shape::list(value, at, |value, at| {
+                shape::tuple(value, at, 2).and_then(|items| {
+                    Ok((
+                        shape::place(items, 0, at, shape::text)?,
+                        shape::place(items, 1, at, shape::text)?,
+                    ))
+                })
+            })
+        })?;
+        let name = shape::required(object, "name", at, shape::text)?;
+        Ok(Self { headers, name })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "headers",
+            Value::Array(
+                self.headers
+                    .iter()
+                    .map(|held| {
+                        Value::Array(vec![
+                            Value::from(held.0.as_str()),
+                            Value::from(held.1.as_str()),
+                        ])
+                    })
+                    .collect(),
+            ),
+        );
+        object.insert("name", Value::from(self.name.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HeadersOfResult {
+    pub value: Option<String>,
+}
+
+impl Shape for HeadersOfResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let value_field = shape::required(object, "value", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        Ok(Self { value: value_field })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "value",
+            self.value
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct ShapeCompatibleVersionsInput {
     pub pairs: Vec<ShapeCompatibleVersionsInputPairsItem>,
 }

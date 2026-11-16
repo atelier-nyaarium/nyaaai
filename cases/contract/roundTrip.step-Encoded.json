@@ -1,0 +1,58 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "step-Encoded",
+	"input": {
+		"set": "step",
+		"shape": "Encoded",
+		"texts": [
+			"{\"path\":\"/v1/chat\",\"body\":{\"model\":\"m\",\"stream\":true}}",
+			"{\"path\":\"/v1/chat\",\"body\":[1,\"two\",null],\"headers\":{\"x-id\":\"a\",\"content-type\":\"application/json\"}}",
+			"{\"path\":\"/p\",\"body\":\"text\",\"headers\":{}}",
+			"{\"path\":\"/p\",\"body\":null,\"extra\":1}",
+			"{\"path\":\"/p\",\"body\":1,\"headers\":{\"a\":1}}",
+			"{\"path\":\"/p\",\"body\":{},\"headers\":[]}",
+			"{\"body\":{}}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"path\":\"/v1/chat\",\"body\":{\"model\":\"m\",\"stream\":true}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"path\":\"/v1/chat\",\"body\":[1,\"two\",null],\"headers\":{\"x-id\":\"a\",\"content-type\":\"application/json\"}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"path\":\"/p\",\"body\":\"text\",\"headers\":{}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"path\":\"/p\",\"body\":null}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"headers",
+					"a"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"headers"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"path"
+				]
+			}
+		]
+	}
+}

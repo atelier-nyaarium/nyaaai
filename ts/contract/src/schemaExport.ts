@@ -1,7 +1,7 @@
 // Zod schema export.
 
 import { z } from "zod";
-import { tryPascal, trySnake } from "./rustNames";
+import { tryPascal, trySnake, tryVariant } from "./rustNames";
 import { CONTRACT_VERSION, type Hook, hooks, type ShapeSet, shapeIds, shapeSets } from "./shape";
 
 ////////////////////////////////
@@ -209,7 +209,7 @@ function enumFaults(def: Def): string[] {
 	const found: string[] = [];
 	const seen = new Map<string, string>();
 	for (const value of Object.keys(def.entries ?? {})) {
-		const variant = tryPascal(value);
+		const variant = tryVariant(value);
 		const twin = variant === undefined ? undefined : seen.get(variant);
 		if (variant === undefined) {
 			found.push(`the value ${JSON.stringify(value)} comes to no Rust variant name; use other values`);
@@ -232,7 +232,7 @@ function branchFaults(def: Def): string[] {
 		let held = defOf(option);
 		while (held.type === "nullable" && held.innerType) held = defOf(held.innerType);
 		const [value] = held.values ?? [];
-		if (held.type === "literal" && value !== null && tryPascal(String(value)) === undefined) {
+		if (held.type === "literal" && value !== null && tryVariant(String(value)) === undefined) {
 			found.push(
 				`branch ${at}: the literal ${JSON.stringify(value)} comes to no Rust variant name; name the shape`,
 			);

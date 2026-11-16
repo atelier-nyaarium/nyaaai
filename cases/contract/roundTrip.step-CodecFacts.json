@@ -1,0 +1,55 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "step-CodecFacts",
+	"input": {
+		"set": "step",
+		"shape": "CodecFacts",
+		"texts": [
+			"{\"api\":{\"family\":\"responses\",\"structured\":true,\"choice\":[\"auto\",\"none\"],\"strict\":false},\"efforts\":[]}",
+			"{\"api\":{\"family\":\"responses\",\"structured\":true,\"choice\":[\"auto\",\"none\"],\"strict\":false},\"efforts\":[\"low\",\"high\",\"max\"],\"outputLimit\":8192,\"extra\":1}",
+			"{\"api\":{\"family\":\"responses\",\"structured\":true,\"choice\":[\"auto\",\"none\"],\"strict\":false},\"efforts\":[\"low\"],\"outputLimit\":1.5}",
+			"{\"api\":{\"family\":\"responses\",\"structured\":true,\"choice\":[\"auto\",\"none\"],\"strict\":false},\"efforts\":[\"ultra\"]}",
+			"{\"api\":{\"family\":\"responses\",\"structured\":true,\"choice\":[\"auto\",\"none\"],\"strict\":false}}",
+			"{\"efforts\":[]}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"api\":{\"family\":\"responses\",\"structured\":true,\"choice\":[\"auto\",\"none\"],\"strict\":false},\"efforts\":[]}"
+			},
+			{
+				"ok": true,
+				"text": "{\"api\":{\"family\":\"responses\",\"structured\":true,\"choice\":[\"auto\",\"none\"],\"strict\":false},\"efforts\":[\"low\",\"high\",\"max\"],\"outputLimit\":8192}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"outputLimit"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"efforts",
+					0
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"efforts"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"api"
+				]
+			}
+		]
+	}
+}

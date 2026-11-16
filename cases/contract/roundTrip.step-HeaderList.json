@@ -1,0 +1,58 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "step-HeaderList",
+	"input": {
+		"set": "step",
+		"shape": "HeaderList",
+		"texts": [
+			"[]",
+			"[[\"content-type\",\"text/plain\"]]",
+			"[[\"Set-Cookie\",\"a=1\"],[\"set-cookie\",\"b=2\"],[\"X\",\"\"]]",
+			"[[\"a\"]]",
+			"[[\"a\",\"b\",\"c\"]]",
+			"[[\"a\",1]]",
+			"{\"a\":\"b\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "[]"
+			},
+			{
+				"ok": true,
+				"text": "[[\"content-type\",\"text/plain\"]]"
+			},
+			{
+				"ok": true,
+				"text": "[[\"Set-Cookie\",\"a=1\"],[\"set-cookie\",\"b=2\"],[\"X\",\"\"]]"
+			},
+			{
+				"ok": false,
+				"path": [
+					0
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					0
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					0,
+					1
+				]
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

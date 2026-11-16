@@ -1,0 +1,61 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "step-FinishReason",
+	"input": {
+		"set": "step",
+		"shape": "FinishReason",
+		"texts": [
+			"\"stop\"",
+			"\"tool_calls\"",
+			"\"length\"",
+			"\"content_filter\"",
+			"\"error\"",
+			"\"\"",
+			"\"other\"",
+			"1",
+			"null"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "\"stop\""
+			},
+			{
+				"ok": true,
+				"text": "\"tool_calls\""
+			},
+			{
+				"ok": true,
+				"text": "\"length\""
+			},
+			{
+				"ok": true,
+				"text": "\"content_filter\""
+			},
+			{
+				"ok": true,
+				"text": "\"error\""
+			},
+			{
+				"ok": true,
+				"text": "\"\""
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

@@ -1,6 +1,7 @@
 // Contract round-trip cases.
 
 import type { CaseSource } from "../caseAdapter";
+import { stepShapeCases } from "./stepShapes";
 
 const roundTrip = (
 	set: string,
@@ -85,6 +86,7 @@ const frame = (shape: string, texts: Array<string | object | number | boolean | 
 const start = { type: "start", run: "r1", command: "sessionCut.plan", input: { any: [1] } };
 
 export const contractCases: CaseSource[] = [
+	...stepShapeCases,
 	cut("CutRequest", [
 		{ mode: "trim" },
 		{ mode: "compact", targetUuid: "u", throughUuid: "v", endBefore: "e", summaryText: "s", liveTail: true },

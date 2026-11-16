@@ -1,0 +1,50 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "step-ReplyPart",
+	"input": {
+		"set": "step",
+		"shape": "ReplyPart",
+		"texts": [
+			"{\"kind\":\"text\",\"text\":\"hello\"}",
+			"{\"kind\":\"thought\",\"type\":\"thinking\",\"segments\":[{\"kind\":\"summary\",\"text\":\"plan\"},{\"kind\":\"content\",\"text\":\"detail\"}],\"opaque\":\"sig-abc\",\"id\":\"t1\",\"format\":\"anthropic-claude-v1\",\"index\":2,\"anchor\":\"a1\"}",
+			"{\"kind\":\"call\",\"index\":1,\"wireId\":\"\",\"name\":\"read\",\"argumentsText\":\"{\\\"a\\\":1}\"}",
+			"{\"kind\":\"call\",\"index\":1,\"wireId\":\"\",\"name\":\"read\",\"argumentsText\":\"{\\\"a\\\":1}\",\"arguments\":\"{}\"}",
+			"{\"kind\":\"result\",\"index\":0,\"output\":\"\",\"isError\":false}",
+			"{\"kind\":1}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"kind\":\"text\",\"text\":\"hello\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"thought\",\"type\":\"thinking\",\"segments\":[{\"kind\":\"summary\",\"text\":\"plan\"},{\"kind\":\"content\",\"text\":\"detail\"}],\"opaque\":\"sig-abc\",\"id\":\"t1\",\"format\":\"anthropic-claude-v1\",\"index\":2,\"anchor\":\"a1\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"call\",\"index\":1,\"wireId\":\"\",\"name\":\"read\",\"argumentsText\":\"{\\\"a\\\":1}\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"call\",\"index\":1,\"wireId\":\"\",\"name\":\"read\",\"argumentsText\":\"{\\\"a\\\":1}\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			}
+		]
+	}
+}

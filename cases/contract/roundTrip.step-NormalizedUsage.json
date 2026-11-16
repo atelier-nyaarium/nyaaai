@@ -1,0 +1,50 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "step-NormalizedUsage",
+	"input": {
+		"set": "step",
+		"shape": "NormalizedUsage",
+		"texts": [
+			"{\"input\":120,\"output\":30}",
+			"{\"input\":120,\"output\":30,\"cached\":100,\"cacheWrite\":4,\"reasoning\":12,\"cost\":0.0012,\"upstreamCost\":0.001,\"byok\":true,\"billingSource\":\"credit\",\"listCost\":0.002,\"allowance\":0.5}",
+			"{\"input\":120,\"output\":30,\"extra\":1}",
+			"{\"input\":1.5,\"output\":30,\"cost\":0}",
+			"{\"input\":120,\"output\":30,\"cached\":\"1\"}",
+			"{\"output\":1}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"input\":120,\"output\":30}"
+			},
+			{
+				"ok": true,
+				"text": "{\"input\":120,\"output\":30,\"cached\":100,\"cacheWrite\":4,\"reasoning\":12,\"cost\":0.0012,\"upstreamCost\":0.001,\"byok\":true,\"billingSource\":\"credit\",\"listCost\":0.002,\"allowance\":0.5}"
+			},
+			{
+				"ok": true,
+				"text": "{\"input\":120,\"output\":30}"
+			},
+			{
+				"ok": true,
+				"text": "{\"input\":1.5,\"output\":30,\"cost\":0}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"cached"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"input"
+				]
+			}
+		]
+	}
+}

@@ -1,0 +1,18 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "headers.of",
+	"name": "non-ascii-no-fold",
+	"input": {
+		"headers": [
+			[
+				"étag",
+				"lower"
+			]
+		],
+		"name": "Étag"
+	},
+	"expected": {
+		"value": null
+	}
+}

@@ -7,6 +7,7 @@ pub mod shapes;
 pub mod base64;
 pub mod claude;
 pub mod contract;
+pub mod headers;
 pub mod js;
 pub mod json;
 pub mod notice_text;
