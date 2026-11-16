@@ -138,7 +138,7 @@ pub struct OpenCodeDialect<C> {
     clock: C,
 }
 
-impl<C: Clock> ChatDialect for OpenCodeDialect<C> {
+impl<C: Clock + Send + Sync> ChatDialect for OpenCodeDialect<C> {
     fn path(&self) -> &str {
         "/openai/v1/chat/completions"
     }
@@ -216,7 +216,7 @@ impl<C: Clock> ChatDialect for OpenCodeDialect<C> {
 }
 
 /// Reset stamps count from the clock.
-pub fn opencode_chat<C: Clock>(
+pub fn opencode_chat<C: Clock + Send + Sync>(
     facts: Option<&CodecFacts>,
     clock: C,
 ) -> ChatCodec<OpenCodeDialect<C>> {
@@ -227,6 +227,6 @@ pub fn opencode_chat<C: Clock>(
 }
 
 /// Failures before model lookup.
-pub fn opencode_errors<C: Clock>(clock: C) -> ChatCodec<OpenCodeDialect<C>> {
+pub fn opencode_errors<C: Clock + Send + Sync>(clock: C) -> ChatCodec<OpenCodeDialect<C>> {
     opencode_chat(None, clock)
 }

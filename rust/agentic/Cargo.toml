@@ -9,5 +9,18 @@ publish.workspace = true
 [lints]
 workspace = true
 
+[features]
+# The `reqwest` Fetch adapter, with TLS from rustls; off by default.
+http = ["dep:reqwest"]
+
 [dependencies]
 nyaaai-contract.workspace = true
+reqwest = { version = "0.13.5", optional = true, default-features = false, features = ["rustls"] }
+
+[dev-dependencies]
+nyaaai-testkit.workspace = true
+tokio = { workspace = true, features = ["rt", "time", "net", "io-util"] }
+
+[[test]]
+name = "reqwest_fetch"
+required-features = ["http"]

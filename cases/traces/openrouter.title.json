@@ -1,0 +1,52 @@
+{
+	"format": 1,
+	"exchanges": [
+		{
+			"request": {
+				"model": "openai/gpt-6-luna",
+				"stream": false,
+				"session_id": "00000000-0000-4000-8000-000000000000",
+				"reasoning": {
+					"effort": "low"
+				},
+				"provider": {
+					"zdr": true,
+					"data_collection": "deny",
+					"require_parameters": true
+				},
+				"messages": [
+					{
+						"role": "user",
+						"content": "Name this conversation in a few words: Rename the tally helper and update its callers."
+					}
+				],
+				"response_format": {
+					"type": "json_schema",
+					"json_schema": {
+						"name": "title",
+						"strict": true,
+						"schema": {
+							"type": "object",
+							"properties": {
+								"title": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"title"
+							],
+							"additionalProperties": false
+						}
+					}
+				}
+			},
+			"status": 200,
+			"headers": {
+				"content-type": "application/json"
+			},
+			"chunks": [
+				"eyJpZCI6Imdlbi0wLXJlY29yZGVkIiwib2JqZWN0IjoiY2hhdC5jb21wbGV0aW9uIiwiY3JlYXRlZCI6MTc5MDM5ODcxNywibW9kZWwiOiJvcGVuYWkvZ3B0LTYtbHVuYSIsInByb3ZpZGVyIjoiQXp1cmUiLCJzeXN0ZW1fZmluZ2VycHJpbnQiOm51bGwsInNlcnZpY2VfdGllciI6ImRlZmF1bHQiLCJjaG9pY2VzIjpbeyJpbmRleCI6MCwibG9ncHJvYnMiOm51bGwsImZpbmlzaF9yZWFzb24iOiJzdG9wIiwibmF0aXZlX2ZpbmlzaF9yZWFzb24iOiJjb21wbGV0ZWQiLCJtZXNzYWdlIjp7InJvbGUiOiJhc3Npc3RhbnQiLCJjb250ZW50Ijoie1widGl0bGVcIjpcIlJlbmFtZSBUYWxseSBIZWxwZXIgYW5kIENhbGxlcnNcIn0iLCJyZWZ1c2FsIjpudWxsLCJyZWFzb25pbmciOm51bGx9fV0sInVzYWdlIjp7InByb21wdF90b2tlbnMiOjQ0LCJjb21wbGV0aW9uX3Rva2VucyI6MTgsInRvdGFsX3Rva2VucyI6NjIsImNvc3QiOjAuMDAwMDEzNCwiaXNfYnlvayI6ZmFsc2UsInByb21wdF90b2tlbnNfZGV0YWlscyI6eyJjYWNoZWRfdG9rZW5zIjowLCJjYWNoZV93cml0ZV90b2tlbnMiOjAsImF1ZGlvX3Rva2VucyI6MCwidmlkZW9fdG9rZW5zIjowfSwiY29zdF9kZXRhaWxzIjp7InVwc3RyZWFtX2luZmVyZW5jZV9jb3N0IjowLjAwMDAxMzQsInVwc3RyZWFtX2luZmVyZW5jZV9wcm9tcHRfY29zdCI6MC4wMDAwMDQ0LCJ1cHN0cmVhbV9pbmZlcmVuY2VfY29tcGxldGlvbnNfY29zdCI6MC4wMDAwMDl9LCJjb21wbGV0aW9uX3Rva2Vuc19kZXRhaWxzIjp7InJlYXNvbmluZ190b2tlbnMiOjAsImltYWdlX3Rva2VucyI6MCwiYXVkaW9fdG9rZW5zIjowfX19"
+			]
+		}
+	]
+}

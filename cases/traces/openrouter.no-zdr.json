@@ -1,0 +1,30 @@
+{
+	"format": 1,
+	"exchanges": [
+		{
+			"request": {
+				"model": "anthropic/claude-fable-5.1",
+				"stream": true,
+				"session_id": "00000000-0000-4000-8000-000000000000",
+				"provider": {
+					"zdr": true,
+					"data_collection": "deny",
+					"require_parameters": true
+				},
+				"messages": [
+					{
+						"role": "user",
+						"content": "Say hi."
+					}
+				]
+			},
+			"status": 404,
+			"headers": {
+				"content-type": "application/json"
+			},
+			"chunks": [
+				"eyJlcnJvciI6eyJtZXNzYWdlIjoiTm8gZW5kcG9pbnRzIGZvdW5kIG1hdGNoaW5nIHlvdXIgZGF0YSBwb2xpY3kgKFplcm8gZGF0YSByZXRlbnRpb24pLiBDb25maWd1cmU6IGh0dHBzOi8vb3BlbnJvdXRlci5haS9zZXR0aW5ncy9wcml2YWN5IiwiY29kZSI6NDA0LCJtZXRhZGF0YSI6eyJyb3V0aW5nX2Z1bm5lbCI6W3sic3RlcCI6IkluaXRpYWwgRW5kcG9pbnRzIiwiZW5kcG9pbnRfY291bnQiOjR9XSwiZmFpbGVkX3JvdXRpbmdfc3RlcCI6IkZpbHRlciBieSBEYXRhIFBvbGljeSJ9fX0="
+			]
+		}
+	]
+}

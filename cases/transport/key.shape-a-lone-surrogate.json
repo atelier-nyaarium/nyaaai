@@ -1,0 +1,13 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.key",
+	"name": "shape-a-lone-surrogate",
+	"input": {
+		"text": "key-\ud800"
+	},
+	"expected": {
+		"shape": false,
+		"normalized": null
+	}
+}

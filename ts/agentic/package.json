@@ -26,6 +26,7 @@
 		"./responses/wire": "./src/responses/wire.ts",
 		"./schemaProjection": "./src/schemaProjection.ts",
 		"./sse": "./src/sse.ts",
-		"./step": "./src/step.ts"
+		"./step": "./src/step.ts",
+		"./transport": "./src/transport.ts"
 	}
 }

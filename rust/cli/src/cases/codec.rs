@@ -53,7 +53,7 @@ fn host_of(name: &CodecName) -> Outcome<OpenCodeHost<SteppedClock>> {
 }
 
 /// A later family adds one arm here, and one row in `codecOf.ts`.
-fn codec_of(name: &CodecName) -> Outcome<Built> {
+pub(super) fn codec_of(name: &CodecName) -> Outcome<Built> {
     let key = format!("{}/{}", name.family.as_str(), name.dialect);
     match key.as_str() {
         "chat-completions/openrouter" => Ok(Box::new(OPENROUTER_CHAT)),

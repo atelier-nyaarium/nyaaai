@@ -20,7 +20,7 @@ pub enum HostStatus {
 }
 
 /// Gateway-specific API behavior.
-pub trait Host {
+pub trait Host: Send + Sync {
     /// API path prefix.
     fn prefix(&self) -> &str;
 

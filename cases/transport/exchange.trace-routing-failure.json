@@ -1,0 +1,96 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.exchange",
+	"name": "trace-routing-failure",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"baseUrl": "https://openrouter.ai/api/v1",
+		"label": "OpenRouter",
+		"userAgent": "lab-app/1.0",
+		"keys": [
+			"key-0123456789abcdef"
+		],
+		"startMs": 1800000000000,
+		"script": {
+			"kind": "trace",
+			"file": "cases/traces/openrouter.no-zdr.json"
+		},
+		"calls": [
+			{
+				"kind": "stream",
+				"request": {
+					"model": "anthropic/claude-fable-5.1",
+					"system": [],
+					"history": [
+						{
+							"role": "user",
+							"text": "Say hi."
+						}
+					],
+					"cache": {
+						"kind": "none"
+					},
+					"session": "00000000-0000-4000-8000-000000000000",
+					"zdrOnly": true
+				}
+			}
+		]
+	},
+	"expected": {
+		"calls": [
+			{
+				"events": [],
+				"result": null,
+				"answer": null,
+				"failure": {
+					"category": "notFound",
+					"status": 404,
+					"message": "No endpoints found matching your data policy (Zero data retention). Configure: https://openrouter.ai/settings/privacy"
+				},
+				"thrown": null,
+				"aborted": false,
+				"nowMs": 1800000000000
+			}
+		],
+		"requests": [
+			{
+				"method": "POST",
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"headers": [
+					[
+						"Content-Type",
+						"application/json"
+					],
+					[
+						"Accept",
+						"text/event-stream"
+					],
+					[
+						"Authorization",
+						"Bearer key-0123456789abcdef"
+					],
+					[
+						"User-Agent",
+						"lab-app/1.0"
+					]
+				],
+				"body": "{\"model\":\"anthropic/claude-fable-5.1\",\"messages\":[{\"role\":\"user\",\"content\":\"Say hi.\"}],\"stream\":true,\"session_id\":\"00000000-0000-4000-8000-000000000000\",\"provider\":{\"zdr\":true,\"data_collection\":\"deny\",\"require_parameters\":true}}"
+			}
+		],
+		"log": [
+			"OpenRouter 404 - -"
+		],
+		"settled": [
+			"anthropic/claude-fable-5.1"
+		],
+		"keyReads": 1,
+		"read": [
+			1
+		],
+		"waiting": []
+	}
+}

@@ -1,0 +1,13 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.key",
+	"name": "shape-a-carriage-return",
+	"input": {
+		"text": "key-or\r"
+	},
+	"expected": {
+		"shape": false,
+		"normalized": "key-or"
+	}
+}

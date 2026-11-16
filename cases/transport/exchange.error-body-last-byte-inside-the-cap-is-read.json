@@ -1,0 +1,121 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.exchange",
+	"name": "error-body-last-byte-inside-the-cap-is-read",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"baseUrl": "https://openrouter.ai/api/v1",
+		"label": "OpenRouter",
+		"userAgent": "lab-app/1.0",
+		"keys": [
+			"key-0123456789abcdef"
+		],
+		"startMs": 1800000000000,
+		"script": {
+			"kind": "inline",
+			"exchanges": [
+				{
+					"status": 500,
+					"headers": [
+						[
+							"content-type",
+							"application/json"
+						]
+					],
+					"chunks": [
+						{
+							"kind": "text",
+							"text": "{\"error\":{\"message\":\"m\"}}"
+						},
+						{
+							"kind": "repeat",
+							"text": " ",
+							"times": 65510
+						},
+						{
+							"kind": "text",
+							"text": "x"
+						}
+					]
+				}
+			]
+		},
+		"calls": [
+			{
+				"kind": "stream",
+				"request": {
+					"model": "openai/gpt-6-luna",
+					"system": [],
+					"history": [
+						{
+							"role": "user",
+							"text": "Hi"
+						}
+					],
+					"cache": {
+						"kind": "none"
+					},
+					"session": "root-1",
+					"zdrOnly": true
+				}
+			}
+		]
+	},
+	"expected": {
+		"calls": [
+			{
+				"events": [],
+				"result": null,
+				"answer": null,
+				"failure": {
+					"category": "unavailable",
+					"status": 500,
+					"message": "HTTP 500"
+				},
+				"thrown": null,
+				"aborted": false,
+				"nowMs": 1800000000000
+			}
+		],
+		"requests": [
+			{
+				"method": "POST",
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"headers": [
+					[
+						"Content-Type",
+						"application/json"
+					],
+					[
+						"Accept",
+						"text/event-stream"
+					],
+					[
+						"Authorization",
+						"Bearer key-0123456789abcdef"
+					],
+					[
+						"User-Agent",
+						"lab-app/1.0"
+					]
+				],
+				"body": "{\"model\":\"openai/gpt-6-luna\",\"messages\":[{\"role\":\"user\",\"content\":\"Hi\"}],\"stream\":true,\"session_id\":\"root-1\",\"provider\":{\"zdr\":true,\"data_collection\":\"deny\",\"require_parameters\":true}}"
+			}
+		],
+		"log": [
+			"OpenRouter 500 - -"
+		],
+		"settled": [
+			"openai/gpt-6-luna"
+		],
+		"keyReads": 1,
+		"read": [
+			3
+		],
+		"waiting": []
+	}
+}

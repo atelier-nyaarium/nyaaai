@@ -1,0 +1,130 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.exchange",
+	"name": "local-codec-without-a-key",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "opencode"
+		},
+		"baseUrl": "http://lab.local:11434/v1",
+		"label": "Lab",
+		"userAgent": "lab-app/1.0",
+		"keys": [
+			null
+		],
+		"startMs": 1800000000000,
+		"script": {
+			"kind": "inline",
+			"exchanges": [
+				{
+					"status": 200,
+					"headers": [
+						[
+							"content-type",
+							"text/event-stream"
+						]
+					],
+					"chunks": [
+						{
+							"kind": "text",
+							"text": "data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Hi\"}}]}\n\ndata: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n"
+						}
+					]
+				}
+			]
+		},
+		"calls": [
+			{
+				"kind": "stream",
+				"request": {
+					"model": "openai/gpt-6-luna",
+					"system": [],
+					"history": [
+						{
+							"role": "user",
+							"text": "Hi"
+						}
+					],
+					"cache": {
+						"kind": "none"
+					},
+					"session": "root-1",
+					"zdrOnly": true
+				}
+			}
+		],
+		"auth": "optional"
+	},
+	"expected": {
+		"calls": [
+			{
+				"events": [
+					{
+						"kind": "serving",
+						"serving": {
+							"generationId": "gen-1"
+						}
+					},
+					{
+						"kind": "text",
+						"text": "Hi"
+					},
+					{
+						"kind": "serving",
+						"serving": {
+							"generationId": "gen-1"
+						}
+					},
+					{
+						"kind": "finish",
+						"reason": "stop"
+					}
+				],
+				"result": null,
+				"answer": null,
+				"failure": null,
+				"thrown": null,
+				"aborted": false,
+				"nowMs": 1800000000000
+			}
+		],
+		"requests": [
+			{
+				"method": "POST",
+				"url": "http://lab.local:11434/v1/openai/v1/chat/completions",
+				"headers": [
+					[
+						"x-opencode-session",
+						"root-1"
+					],
+					[
+						"Content-Type",
+						"application/json"
+					],
+					[
+						"Accept",
+						"text/event-stream"
+					],
+					[
+						"User-Agent",
+						"lab-app/1.0"
+					]
+				],
+				"body": "{\"model\":\"openai/gpt-6-luna\",\"messages\":[{\"role\":\"user\",\"content\":\"Hi\"}],\"stream\":true,\"stream_options\":{\"include_usage\":true}}"
+			}
+		],
+		"log": [
+			"Lab 200 gen-1 -"
+		],
+		"settled": [
+			"openai/gpt-6-luna"
+		],
+		"keyReads": 1,
+		"read": [
+			1
+		],
+		"waiting": []
+	}
+}

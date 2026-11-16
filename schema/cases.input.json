@@ -3641,6 +3641,554 @@
 			"required": [
 				"failure"
 			]
+		},
+		"TransportChunk": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "text"
+						},
+						"text": {
+							"type": "string"
+						},
+						"delayMs": {
+							"type": "integer",
+							"minimum": -9007199254740991,
+							"maximum": 9007199254740991
+						}
+					},
+					"required": [
+						"kind",
+						"text"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "bytes"
+						},
+						"base64": {
+							"type": "string"
+						},
+						"delayMs": {
+							"type": "integer",
+							"minimum": -9007199254740991,
+							"maximum": 9007199254740991
+						}
+					},
+					"required": [
+						"kind",
+						"base64"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "repeat"
+						},
+						"text": {
+							"type": "string"
+						},
+						"times": {
+							"type": "integer",
+							"minimum": 0,
+							"maximum": 9007199254740991
+						},
+						"delayMs": {
+							"type": "integer",
+							"minimum": -9007199254740991,
+							"maximum": 9007199254740991
+						}
+					},
+					"required": [
+						"kind",
+						"text",
+						"times"
+					]
+				}
+			],
+			"x-tag": "kind"
+		},
+		"TransportExchange": {
+			"type": "object",
+			"properties": {
+				"status": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"headers": {
+					"$ref": "step.input.json#/$defs/HeaderList"
+				},
+				"chunks": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/TransportChunk"
+					}
+				},
+				"headMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"end": {
+					"type": "string",
+					"enum": [
+						"closed",
+						"dropped",
+						"refused"
+					]
+				},
+				"error": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"status",
+				"headers",
+				"chunks"
+			]
+		},
+		"TransportKeyAuth": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "none"
+						}
+					},
+					"required": [
+						"kind"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "stored"
+						}
+					},
+					"required": [
+						"kind"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "key"
+						},
+						"key": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"kind",
+						"key"
+					]
+				}
+			],
+			"x-tag": "kind"
+		},
+		"TransportCall": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "stream"
+						},
+						"request": {
+							"$ref": "step.input.json#/$defs/CanonicalRequest"
+						},
+						"abortAfterMs": {
+							"type": "integer",
+							"minimum": -9007199254740991,
+							"maximum": 9007199254740991
+						},
+						"abortedBefore": {
+							"type": "boolean"
+						}
+					},
+					"required": [
+						"kind",
+						"request"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "complete"
+						},
+						"request": {
+							"$ref": "step.input.json#/$defs/CanonicalRequest"
+						},
+						"abortAfterMs": {
+							"type": "integer",
+							"minimum": -9007199254740991,
+							"maximum": 9007199254740991
+						},
+						"abortedBefore": {
+							"type": "boolean"
+						}
+					},
+					"required": [
+						"kind",
+						"request"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "getJson"
+						},
+						"path": {
+							"type": "string"
+						},
+						"keyAuth": {
+							"$ref": "#/$defs/TransportKeyAuth"
+						},
+						"abortAfterMs": {
+							"type": "integer",
+							"minimum": -9007199254740991,
+							"maximum": 9007199254740991
+						},
+						"abortedBefore": {
+							"type": "boolean"
+						}
+					},
+					"required": [
+						"kind",
+						"path"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "postJson"
+						},
+						"path": {
+							"type": "string"
+						},
+						"body": {},
+						"keyAuth": {
+							"$ref": "#/$defs/TransportKeyAuth"
+						},
+						"abortAfterMs": {
+							"type": "integer",
+							"minimum": -9007199254740991,
+							"maximum": 9007199254740991
+						},
+						"abortedBefore": {
+							"type": "boolean"
+						}
+					},
+					"required": [
+						"kind",
+						"path"
+					]
+				}
+			],
+			"x-tag": "kind"
+		},
+		"TransportScript": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "inline"
+						},
+						"exchanges": {
+							"type": "array",
+							"items": {
+								"$ref": "#/$defs/TransportExchange"
+							}
+						}
+					},
+					"required": [
+						"kind",
+						"exchanges"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "trace"
+						},
+						"file": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"kind",
+						"file"
+					]
+				}
+			],
+			"x-tag": "kind"
+		},
+		"TransportSent": {
+			"type": "object",
+			"properties": {
+				"method": {
+					"type": "string"
+				},
+				"url": {
+					"type": "string"
+				},
+				"headers": {
+					"$ref": "step.input.json#/$defs/HeaderList"
+				},
+				"body": {
+					"type": [
+						"string",
+						"null"
+					]
+				}
+			},
+			"required": [
+				"method",
+				"url",
+				"headers",
+				"body"
+			]
+		},
+		"TransportOutcome": {
+			"type": "object",
+			"properties": {
+				"events": {
+					"type": "array",
+					"items": {
+						"$ref": "step.input.json#/$defs/StepEvent"
+					}
+				},
+				"result": {
+					"anyOf": [
+						{
+							"$ref": "step.input.json#/$defs/StepResult"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"answer": {},
+				"failure": {
+					"anyOf": [
+						{
+							"$ref": "step.input.json#/$defs/Failure"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"thrown": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"aborted": {
+					"type": "boolean"
+				},
+				"nowMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				}
+			},
+			"required": [
+				"events",
+				"result",
+				"answer",
+				"failure",
+				"thrown",
+				"aborted",
+				"nowMs"
+			]
+		},
+		"TransportExchangeInput": {
+			"type": "object",
+			"properties": {
+				"codec": {
+					"$ref": "#/$defs/CodecName"
+				},
+				"codecHeaders": {
+					"type": "object",
+					"propertyNames": {
+						"type": "string"
+					},
+					"additionalProperties": {
+						"type": "string"
+					}
+				},
+				"baseUrl": {
+					"type": "string"
+				},
+				"label": {
+					"type": "string"
+				},
+				"userAgent": {
+					"type": "string"
+				},
+				"auth": {
+					"type": "string",
+					"enum": [
+						"bearer",
+						"none",
+						"optional"
+					]
+				},
+				"idleMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"keys": {
+					"minItems": 1,
+					"type": "array",
+					"items": {
+						"type": [
+							"string",
+							"null"
+						]
+					}
+				},
+				"startMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"script": {
+					"$ref": "#/$defs/TransportScript"
+				},
+				"calls": {
+					"minItems": 1,
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/TransportCall"
+					}
+				}
+			},
+			"required": [
+				"codec",
+				"baseUrl",
+				"label",
+				"userAgent",
+				"keys",
+				"startMs",
+				"script",
+				"calls"
+			]
+		},
+		"TransportExchangeResult": {
+			"type": "object",
+			"properties": {
+				"calls": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/TransportOutcome"
+					}
+				},
+				"requests": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/TransportSent"
+					}
+				},
+				"log": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"settled": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"keyReads": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"read": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"minimum": -9007199254740991,
+						"maximum": 9007199254740991
+					}
+				},
+				"waiting": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"calls",
+				"requests",
+				"log",
+				"settled",
+				"keyReads",
+				"read",
+				"waiting"
+			]
+		},
+		"TransportKeyInput": {
+			"type": "object",
+			"properties": {
+				"text": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"text"
+			]
+		},
+		"TransportKeyResult": {
+			"type": "object",
+			"properties": {
+				"shape": {
+					"type": "boolean"
+				},
+				"normalized": {
+					"type": [
+						"string",
+						"null"
+					]
+				}
+			},
+			"required": [
+				"shape",
+				"normalized"
+			]
 		}
 	}
 }

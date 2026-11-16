@@ -1,0 +1,13 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.key",
+	"name": "shape-a-space",
+	"input": {
+		"text": "sk or"
+	},
+	"expected": {
+		"shape": false,
+		"normalized": null
+	}
+}

@@ -1,0 +1,13 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.key",
+	"name": "shape-wide-text",
+	"input": {
+		"text": "キー"
+	},
+	"expected": {
+		"shape": false,
+		"normalized": null
+	}
+}

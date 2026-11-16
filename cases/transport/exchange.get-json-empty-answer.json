@@ -1,0 +1,85 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.exchange",
+	"name": "get-json-empty-answer",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"baseUrl": "https://openrouter.ai/api/v1",
+		"label": "OpenRouter",
+		"userAgent": "lab-app/1.0",
+		"keys": [
+			"key-0123456789abcdef"
+		],
+		"startMs": 1800000000000,
+		"script": {
+			"kind": "inline",
+			"exchanges": [
+				{
+					"status": 200,
+					"headers": [
+						[
+							"content-type",
+							"application/json"
+						]
+					],
+					"chunks": []
+				}
+			]
+		},
+		"calls": [
+			{
+				"kind": "getJson",
+				"path": "/models"
+			}
+		]
+	},
+	"expected": {
+		"calls": [
+			{
+				"events": [],
+				"result": null,
+				"answer": null,
+				"failure": {
+					"category": "network",
+					"status": "network",
+					"message": "/models did not answer JSON."
+				},
+				"thrown": null,
+				"aborted": false,
+				"nowMs": 1800000000000
+			}
+		],
+		"requests": [
+			{
+				"method": "GET",
+				"url": "https://openrouter.ai/api/v1/models",
+				"headers": [
+					[
+						"Accept",
+						"application/json"
+					],
+					[
+						"User-Agent",
+						"lab-app/1.0"
+					],
+					[
+						"Authorization",
+						"Bearer key-0123456789abcdef"
+					]
+				],
+				"body": null
+			}
+		],
+		"log": [],
+		"settled": [],
+		"keyReads": 1,
+		"read": [
+			0
+		],
+		"waiting": []
+	}
+}

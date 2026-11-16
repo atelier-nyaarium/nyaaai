@@ -1,0 +1,98 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.exchange",
+	"name": "key-refusal-names-the-label",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"baseUrl": "https://openrouter.ai/api/v1",
+		"label": "Lab",
+		"userAgent": "lab-app/1.0",
+		"keys": [
+			null,
+			"bad key"
+		],
+		"startMs": 1800000000000,
+		"script": {
+			"kind": "inline",
+			"exchanges": []
+		},
+		"calls": [
+			{
+				"kind": "stream",
+				"request": {
+					"model": "openai/gpt-6-luna",
+					"system": [],
+					"history": [
+						{
+							"role": "user",
+							"text": "Hi"
+						}
+					],
+					"cache": {
+						"kind": "none"
+					},
+					"session": "root-1",
+					"zdrOnly": true
+				}
+			},
+			{
+				"kind": "stream",
+				"request": {
+					"model": "openai/gpt-6-luna",
+					"system": [],
+					"history": [
+						{
+							"role": "user",
+							"text": "Hi"
+						}
+					],
+					"cache": {
+						"kind": "none"
+					},
+					"session": "root-1",
+					"zdrOnly": true
+				}
+			}
+		]
+	},
+	"expected": {
+		"calls": [
+			{
+				"events": [],
+				"result": null,
+				"answer": null,
+				"failure": {
+					"category": "keyMissing",
+					"status": "keyMissing",
+					"message": "No Lab key is set."
+				},
+				"thrown": null,
+				"aborted": false,
+				"nowMs": 1800000000000
+			},
+			{
+				"events": [],
+				"result": null,
+				"answer": null,
+				"failure": {
+					"category": "keyRejected",
+					"status": 401,
+					"message": "The Lab key is malformed."
+				},
+				"thrown": null,
+				"aborted": false,
+				"nowMs": 1800000000000
+			}
+		],
+		"requests": [],
+		"log": [],
+		"settled": [],
+		"keyReads": 2,
+		"read": [],
+		"waiting": []
+	}
+}

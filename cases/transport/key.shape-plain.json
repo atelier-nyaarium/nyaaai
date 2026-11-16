@@ -1,0 +1,13 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.key",
+	"name": "shape-plain",
+	"input": {
+		"text": "key-v1-abc"
+	},
+	"expected": {
+		"shape": true,
+		"normalized": "key-v1-abc"
+	}
+}

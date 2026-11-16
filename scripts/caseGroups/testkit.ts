@@ -1,13 +1,12 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
-import { stringifyJson } from "@nyaaai/contract/json";
-import { compareText } from "@nyaaai/contract/order";
+import { parseJson, stringifyJson } from "@nyaaai/contract/json";
 import { sequenceRandom } from "@nyaaai/contract/random";
 import { z } from "@nyaaai/contract/shape";
 import { caseGroup, kind } from "@nyaaai/testkit/caseGroup";
 import { compactedSession } from "@nyaaai/testkit/claudeSession";
 import { fakeScheduler, TimerWheel } from "@nyaaai/testkit/scheduler";
-import { readTrace, replayTransport } from "@nyaaai/testkit/trace";
+import { readTrace, replayFetch } from "@nyaaai/testkit/trace";
 
 ////////////////////////////////
 //  Shapes
@@ -174,23 +173,34 @@ export const testkit = caseGroup("testkit", {
 			}),
 			async (input, context) => {
 				const trace = await readTrace(path.join(context.root, input.file));
-				const transport = replayTransport(trace);
+				const replay = replayFetch(trace);
+				const signal = new AbortController().signal;
 				const exchanges = [];
 				for (const exchange of trace.exchanges) {
-					const response = await transport.fetch("http://replay.invalid/", {
-						body: stringifyJson(exchange.request),
-					});
+					const response = await replay.fetch(
+						{
+							method: "POST",
+							url: "http://replay.invalid/",
+							headers: [],
+							body: stringifyJson(exchange.request),
+						},
+						signal,
+					);
 					const chunks: Uint8Array[] = [];
-					for await (const chunk of response.body as unknown as AsyncIterable<Uint8Array>) chunks.push(chunk);
-					const headers = [...response.headers].sort(([left], [right]) => compareText(left, right));
+					for await (const chunk of response.chunks) chunks.push(chunk);
 					exchanges.push({
 						status: response.status,
-						headers: Object.fromEntries(headers),
+						headers: Object.fromEntries(response.headers),
 						chunks: chunks.map((chunk) => chunk.length),
 						body: Buffer.concat(chunks).toString("utf8"),
 					});
 				}
-				return { requests: transport.requests, exchanges };
+				return {
+					requests: replay.requests.map((request) =>
+						request.body === undefined ? null : (parseJson(request.body) ?? null),
+					),
+					exchanges,
+				};
 			},
 			{ context: true },
 		),

@@ -1,0 +1,13 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.key",
+	"name": "shape-del",
+	"input": {
+		"text": "key-or"
+	},
+	"expected": {
+		"shape": false,
+		"normalized": null
+	}
+}

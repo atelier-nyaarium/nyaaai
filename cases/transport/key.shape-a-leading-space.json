@@ -1,0 +1,13 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.key",
+	"name": "shape-a-leading-space",
+	"input": {
+		"text": " key-or"
+	},
+	"expected": {
+		"shape": false,
+		"normalized": "key-or"
+	}
+}

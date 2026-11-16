@@ -173,7 +173,7 @@ pub struct OpenCodeHost<C> {
     clock: C,
 }
 
-impl<C: Clock> Host for OpenCodeHost<C> {
+impl<C: Clock + Send + Sync> Host for OpenCodeHost<C> {
     fn prefix(&self) -> &str {
         &self.prefix
     }

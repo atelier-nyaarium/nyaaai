@@ -1,0 +1,13 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.key",
+	"name": "shape-an-emoji",
+	"input": {
+		"text": "key-😀"
+	},
+	"expected": {
+		"shape": false,
+		"normalized": null
+	}
+}

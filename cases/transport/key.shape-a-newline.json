@@ -1,0 +1,13 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.key",
+	"name": "shape-a-newline",
+	"input": {
+		"text": "key-or\n"
+	},
+	"expected": {
+		"shape": false,
+		"normalized": "key-or"
+	}
+}

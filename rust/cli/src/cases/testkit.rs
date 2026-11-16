@@ -4,15 +4,15 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
 use nyaaai_contract::cancel::CancelToken;
+use nyaaai_contract::fetch::{Fetch, FetchRequest, Method};
 use nyaaai_contract::id::Ids;
-use nyaaai_contract::json::{Record, Value};
-use nyaaai_contract::order::compare_text;
+use nyaaai_contract::json::{Record, Value, parse_json, stringify_json};
 use nyaaai_contract::random::{Random, SequenceRandom};
 use nyaaai_contract::time::{Clock, Scheduled, Scheduler, Slept};
 use nyaaai_testkit::cases::{CaseContext, Outcome, block_on, failed};
 use nyaaai_testkit::claude_session;
 use nyaaai_testkit::scheduler::{FakeScheduler, TimerWheel};
-use nyaaai_testkit::trace::{ReplayTransport, read_trace};
+use nyaaai_testkit::trace::{read_trace, replay_fetch};
 
 use super::shapes::*;
 
@@ -150,34 +150,56 @@ pub fn random(input: TestkitRandomInput) -> Outcome<TestkitRandomResult> {
 
 pub fn replay(input: TestkitReplayInput, context: &CaseContext) -> Outcome<TestkitReplayResult> {
     let trace = read_trace(&context.root().join(&input.file)).map_err(failed)?;
-    let asked: Vec<Value> = trace
-        .exchanges
-        .iter()
-        .map(|exchange| exchange.request.clone())
-        .collect();
-    let mut transport = ReplayTransport::new(trace);
-    let mut exchanges = Vec::new();
-    for request in asked {
-        let replayed = transport.fetch(request).map_err(failed)?;
-        let mut named = replayed.headers;
-        named.sort_by(|(left, _), (right, _)| compare_text(left, right));
-        let mut headers = Record::new();
-        for (name, value) in named {
-            headers.insert(name, value);
-        }
-        exchanges.push(TestkitReplayResultExchangesItem {
-            status: i64::from(replayed.status),
-            headers,
-            chunks: replayed
+    let played = replay_fetch(&trace).map_err(failed)?;
+    let cancel = CancelToken::new();
+    let exchanges = block_on(async {
+        let mut exchanges = Vec::new();
+        for exchange in &trace.exchanges {
+            let request = FetchRequest {
+                method: Method::Post,
+                url: "http://replay.invalid/".to_owned(),
+                headers: Vec::new(),
+                body: Some(stringify_json(&exchange.request)),
+            };
+            let mut response = played
+                .fetch(request, cancel.clone())
+                .await
+                .map_err(|error| format!("{error:?}"))?;
+            let mut chunks: Vec<Vec<u8>> = Vec::new();
+            while let Some(chunk) = response
                 .chunks
-                .iter()
-                .map(|chunk| chunk.len() as i64)
-                .collect(),
-            body: String::from_utf8_lossy(&replayed.chunks.concat()).into_owned(),
-        });
-    }
+                .next()
+                .await
+                .map_err(|error| format!("{error:?}"))?
+            {
+                chunks.push(chunk);
+            }
+            let mut headers = Record::new();
+            for (name, value) in response.headers {
+                headers.insert(name, value);
+            }
+            exchanges.push(TestkitReplayResultExchangesItem {
+                status: i64::from(response.status),
+                headers,
+                chunks: chunks.iter().map(|chunk| chunk.len() as i64).collect(),
+                body: String::from_utf8_lossy(&chunks.concat()).into_owned(),
+            });
+        }
+        Ok::<_, String>(exchanges)
+    })??;
+    let requests = played
+        .requests()
+        .iter()
+        .map(|request| {
+            request
+                .body
+                .as_deref()
+                .and_then(parse_json)
+                .unwrap_or(Value::Null)
+        })
+        .collect();
     Ok(TestkitReplayResult {
-        requests: transport.requests,
+        requests,
         exchanges,
     })
 }

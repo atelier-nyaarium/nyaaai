@@ -37,6 +37,7 @@ import { strictSchema } from "./scripts/caseGroups/strictSchema";
 import { testkit } from "./scripts/caseGroups/testkit";
 import { text } from "./scripts/caseGroups/text";
 import { time } from "./scripts/caseGroups/time";
+import { transport } from "./scripts/caseGroups/transport";
 import { adapterCases } from "./scripts/caseSources/adapter";
 import { rustModule, rustText, rustTexts, rustWhole } from "./scripts/rustConstants";
 import { converse, crash, crashBlocking, misfit, spin, spinBlocking } from "./scripts/testCommands";
@@ -166,6 +167,7 @@ export default project({
 		native,
 		schemaProjection,
 		codec,
+		transport,
 	],
 	runs: adapterCases,
 	cases: { crate: "nyaaai_cli", module: "cases", dir: "rust/cli/src/cases" },

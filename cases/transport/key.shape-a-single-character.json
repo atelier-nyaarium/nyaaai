@@ -1,0 +1,13 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.key",
+	"name": "shape-a-single-character",
+	"input": {
+		"text": "k"
+	},
+	"expected": {
+		"shape": true,
+		"normalized": "k"
+	}
+}

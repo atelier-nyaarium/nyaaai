@@ -1,0 +1,144 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.exchange",
+	"name": "idle-a-slow-head-then-a-fast-body",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"baseUrl": "https://openrouter.ai/api/v1",
+		"label": "OpenRouter",
+		"userAgent": "lab-app/1.0",
+		"keys": [
+			"key-0123456789abcdef"
+		],
+		"startMs": 1800000000000,
+		"script": {
+			"kind": "inline",
+			"exchanges": [
+				{
+					"status": 200,
+					"headers": [
+						[
+							"content-type",
+							"text/event-stream"
+						]
+					],
+					"chunks": [
+						{
+							"kind": "text",
+							"text": ": PROCESSING\n\n"
+						},
+						{
+							"kind": "text",
+							"text": "data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Hi\"}}]}\n\n"
+						},
+						{
+							"kind": "text",
+							"text": "data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}]}\n\n"
+						},
+						{
+							"kind": "text",
+							"text": "data: [DONE]\n\n"
+						}
+					],
+					"headMs": 25
+				}
+			]
+		},
+		"calls": [
+			{
+				"kind": "stream",
+				"request": {
+					"model": "openai/gpt-6-luna",
+					"system": [],
+					"history": [
+						{
+							"role": "user",
+							"text": "Hi"
+						}
+					],
+					"cache": {
+						"kind": "none"
+					},
+					"session": "root-1",
+					"zdrOnly": true
+				}
+			}
+		],
+		"idleMs": 30
+	},
+	"expected": {
+		"calls": [
+			{
+				"events": [
+					{
+						"kind": "serving",
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-1"
+						}
+					},
+					{
+						"kind": "text",
+						"text": "Hi"
+					},
+					{
+						"kind": "serving",
+						"serving": {
+							"generationId": "gen-1"
+						}
+					},
+					{
+						"kind": "finish",
+						"reason": "stop"
+					}
+				],
+				"result": null,
+				"answer": null,
+				"failure": null,
+				"thrown": null,
+				"aborted": false,
+				"nowMs": 1800000000025
+			}
+		],
+		"requests": [
+			{
+				"method": "POST",
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"headers": [
+					[
+						"Content-Type",
+						"application/json"
+					],
+					[
+						"Accept",
+						"text/event-stream"
+					],
+					[
+						"Authorization",
+						"Bearer key-0123456789abcdef"
+					],
+					[
+						"User-Agent",
+						"lab-app/1.0"
+					]
+				],
+				"body": "{\"model\":\"openai/gpt-6-luna\",\"messages\":[{\"role\":\"user\",\"content\":\"Hi\"}],\"stream\":true,\"session_id\":\"root-1\",\"provider\":{\"zdr\":true,\"data_collection\":\"deny\",\"require_parameters\":true}}"
+			}
+		],
+		"log": [
+			"OpenRouter 200 gen-1 Azure"
+		],
+		"settled": [
+			"openai/gpt-6-luna"
+		],
+		"keyReads": 1,
+		"read": [
+			4
+		],
+		"waiting": []
+	}
+}

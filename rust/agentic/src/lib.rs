@@ -3,6 +3,8 @@ pub mod codec;
 pub mod dialects;
 pub mod effort;
 pub mod failure;
+#[cfg(feature = "http")]
+pub mod fetch;
 pub mod gemini;
 pub mod hosts;
 pub mod loose;
@@ -13,3 +15,4 @@ pub mod responses;
 pub mod schema_projection;
 pub mod sse;
 pub mod step;
+pub mod transport;

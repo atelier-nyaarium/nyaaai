@@ -35,7 +35,7 @@ Same names in both languages; Rust files are snake case.
   - `headers`: `headerOf`, the first value of a name, ASCII case aside. `responseHeaders` (Rust `response_headers`): lowercase names, sorted by code unit, repeats joined with `, `, `set-cookie` one entry per value.
   - `fetch`: port `Fetch`, one call: `FetchRequest` and a cancel signal answer `FetchResponse`, its body read as chunks. Rust: `dyn Fetch`, `Chunks`, `FetchError`.
     - An adapter owes: the cancel covers the whole exchange, so a pending or later chunk read ends cancelled (Rust `FetchError::Cancelled`; TypeScript rejects with the signal's reason). Response headers are in the `responseHeaders` form. A `GET` carries no body. The connection is released at the end of the chunks, when the reader stops early (iterator `return`, Rust drop), or at the cancel.
-  - `future` (Rust): `BoxFuture`. `cancel` (Rust): `CancelToken`, cloneable; `cancel`, `is_cancelled`, `cancelled`, `run_until`.
+  - `future` (Rust): `BoxFuture`. `cancel` (Rust): `CancelToken`, cloneable; `cancel`, `is_cancelled`, `cancelled`, `run_until`, and `child`, a token that follows its parent's cancel and not the other way.
 - `process`: `paths` (`resolvedPath`, `isInside`).
 - `operator`: `claude/sessionCut` cuts a Claude Code session file. `claude/sessionFile` reads its rows and holds cut ports over files. `claude/cliVersion` reads the installed version. `prompts` is generated.
 - `adapter`: `runtime` serves commands over frames: `serve`, `command`, `RunContext` (Rust: `serve`, `serve_blocking`, `blocking`, `typed`, `typed_async`). `stdio` (TypeScript): `serveStdio` runs it on the process's own streams and flushes before exit.
@@ -43,7 +43,9 @@ Same names in both languages; Rust files are snake case.
 - `testkit`: what a repository's parity setup is made of.
   - `caseGroup`, `caseContext`, `caseFile` shape the cases. `project` shapes `parity.ts`. `tree` plants a folder tree.
   - `claudeSession` builds synthetic session files. `tortureShapes` holds every contract construct, for the generator.
-  - `trace` reads a recorded trace and replays it. `scheduler` holds a timer wheel on virtual time; `fakeScheduler` (Rust `FakeScheduler`) runs sleeps and scheduled calls from it as it advances. `cases` (Rust) holds `block_on`, so a handler can await.
+  - `trace` reads a recorded trace; `replayFetch` plays it as a `Fetch`. `scheduler` holds a timer wheel on virtual time; `fakeScheduler` (Rust `FakeScheduler`) runs sleeps and scheduled calls from it as it advances. `cases` (Rust) holds `block_on`, so a handler can await.
+  - `scriptedFetch(exchanges, wheel)`: a `Fetch` that plays exchanges in order and records each request. An exchange holds a status, raw headers, chunks (each with a delay), a delay before the head, and an end: `closed`, `dropped` after the last chunk, or `refused` before the head. Answering the head or a chunk first advances the wheel by its delay, then fails with the signal's reason if the signal aborted meanwhile. `read()` counts the chunks handed out. `keys`: `fakeKeys(values)`, a key source answering each read from a list, the last repeating; `reads()`.
+    Rust: `ScriptedFetch`, `replay_fetch` and `FakeKeys` (a sync `new`, an awaited `get`); a `Fetch` takes a `CancelToken` where TypeScript's takes a signal. `loopback` (Rust only): `Loopback`, an HTTP/1.1 server on `127.0.0.1` that answers each connection with one `LoopbackExchange`, its chunks flushed apart, and holds the connection before the head or after the chunks so a test sees the client close it.
   - `rejection` (TypeScript): `rejection`, `rethrown` read what a promise rejects with.
   - `samples` (TypeScript): `sampleTexts` derives round-trip inputs from an exported schema.
   - `rustNames`: `snake`, `pascal`, `quote`, for a `parity.ts`'s generated Rust.
@@ -62,6 +64,12 @@ Same names in both languages; Rust files are snake case.
   - `dialects/openrouter`: `OPENROUTER_CHAT`, `PROVIDER`, `thoughtsOf`, `detailsOf`. `dialects/opencode`: `opencodeChat(facts, clock)`, `opencodeErrors(clock)`. `dialects/local`: `localChat(facts, host, local)`, `LocalDialect`. A dialect reads a `CodecFacts`.
   - `responses/codec`: `responsesCodec(host, facts)`. `messages/codec`: `messagesCodec(host, facts)`. `gemini/codec`: `geminiCodec(host, facts)`, `SKIP_SIGNATURE`. Each has a `wire` file of its wire types. They read provider JSON loosely: a field of the wrong type is missing, a usage count of the wrong type or a negative one is zero; an `error` field is an error unless absent, `null`, `false`, zero or the empty text, a text being its own message.
   - `hosts/opencode`: `SESSION_HEADER`, `opencodeHost(prefix, clock)`, `opencodeFailure(clock, ...)`, `opencodeUsage`. Reset stamps count from the clock given.
+  - `transport`: `Transport` (`stream`, `complete`, `getJson`, `postJson`, `onSettled`), `KeySource`, `staticKey`, `isKeyShape`, `normalizeKey`. It takes a `Fetch`, a `Scheduler`, a `KeySource`, a log, the base URL, a label and the consumer's `name/version` as `User-Agent`; no retry.
+    Rust: `stream` answers an `EventStream` read with an awaited `next`, nothing running before the first; a call ends `TransportError::Cancelled` when the caller's token is cancelled, else a `ProviderError`. `StreamDecoder::over` tells the transport to read no further chunk. `fetch` (Rust only, Cargo feature `http`, off): `ReqwestFetch`, the `Fetch` over `reqwest`.
+    - A request's headers: the codec's own, less any named `Content-Type`, `Accept`, `Authorization` or `User-Agent` (ASCII case aside), then `Content-Type`, `Accept`, `Authorization` when there is a key, `User-Agent`. A JSON call sends `Accept`, `User-Agent`, `Authorization`, then `Content-Type` when it has a body.
+    - One idle timer: `scheduler.schedule`, armed before the request and after the head, after every chunk and after the end of the body. It aborts the exchange; a caller's `AbortSignal` is the other cancel. A JSON call has no idle timer. An unstreamed body has one window after its head. An error body is read to 64 KiB and has one window from the request.
+    - The key source is read once per call. A caller already aborted gets its reason at once, with no request. `Retry-After` goes through `parseRetryAfter` with the scheduler's time, when the codec's failure holds none.
+    - Failures, serving events and the log line are scrubbed of the key as is, path-encoded and in base64 without padding. Text, thought and call events are not.
     Rust: `Codec` and `ChatDialect` are traits; `stream()` answers a `StreamDecoder` pushed one item at a time, events appended to the caller's list so those before a failure stay. `ToolChoiceRule`, `Mode`, `HostStatus`, `Billing` and `Usage` are Rust's own spellings of what TypeScript leaves loose; `opencode_usage` takes the decoded `Usage`.
     Rust adds `loose` (readers of loose provider JSON fields, shared by the native codecs), `opencode_chat_usage` (the Chat dialects' `opencode_usage`, over a decoded `Usage`), and `OpenCodeHost`, which `opencode_host` returns; `Host` is a trait.
 - `ui`: empty.
@@ -165,6 +173,8 @@ Generated files are the ones `parity.generated.json` lists. A refresh removes a 
 A scripted run lists steps: `send`, `sendText`, `sendBase64`, `sendTail`, `sendOverCap`, `await`, `close`. `$TMP` is the run's temp folder. Frames compare per run, plus the connection's own in order, so runs may interleave. Never script a failure whose text the OS writes.
 
 Codec cases name a codec by data: `{ family, dialect, facts?, local?, nowMs?, prefix? }`; a native family takes the host's `prefix`. `scripts/caseGroups/codecOf.ts` builds it from a table keyed `<family>/<dialect>`; a new family adds a row there and the same arm in `rust/cli/src/cases/codec.rs`.
+
+Transport cases (`transport.exchange`) run calls in order on one `Transport` over a scripted network (`scriptedFetch`, or a trace in `cases/traces/` through `replayFetch`) and key source, on a wheel that starts at `startMs`. A call may be aborted by the caller at a wheel time after its start. The result holds each call's events, result, answer, failure or thrown message, the requests as sent, the log lines, the models `onSettled` was told, the key reads, the chunks read per exchange and the timers left waiting.
 
 ## Adapter
 
@@ -351,7 +361,8 @@ Same in both languages. `parseJson` and `parse_json` apply them.
 ## Dependencies
 
 - Seven days old, or named by an advisory. `ts/bunfig.toml` enforces the age for Bun.
-- `tokio` (Rust, `rt`, `sync`, `time`) is the one crate: it brings `pin-project-lite`. Engine code uses no `serde`.
+- `tokio` (Rust, `rt`, `sync`, `time`) is the one crate of the engine: it brings `pin-project-lite`. Engine code uses no `serde`. The test kit adds tokio `net` and `io-util` for the loopback.
+- `reqwest` 0.13 (Rust, only behind `agentic`'s `http` feature, which is off): `default-features = false`, `rustls` on. TLS is rustls with the platform verifier and `aws-lc-rs`; no `native-tls`, no OpenSSL, no HTTP/2, no compression, no cookies, no `json`, no charset, no system proxy settings.
 - `zod` is pinned at 4.6.7. An advisory names every version below 4.6.6.
 - `scripts/crates.ts` checks `Cargo.lock` against crates.io publish dates and OSV advisories.
   - `crate-ages.json` beside a lock holds the dates.

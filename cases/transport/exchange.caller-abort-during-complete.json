@@ -1,0 +1,108 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.exchange",
+	"name": "caller-abort-during-complete",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"baseUrl": "https://openrouter.ai/api/v1",
+		"label": "OpenRouter",
+		"userAgent": "lab-app/1.0",
+		"keys": [
+			"key-0123456789abcdef"
+		],
+		"startMs": 1800000000000,
+		"script": {
+			"kind": "inline",
+			"exchanges": [
+				{
+					"status": 200,
+					"headers": [
+						[
+							"content-type",
+							"application/json"
+						]
+					],
+					"chunks": [
+						{
+							"kind": "text",
+							"text": "{\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"message\":{\"content\":\"{\\\"title\\\":\\\"A\\\"}\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":4,\"completion_tokens\":2,\"cost\":0.1}}"
+						}
+					],
+					"headMs": 40
+				}
+			]
+		},
+		"calls": [
+			{
+				"kind": "complete",
+				"request": {
+					"model": "openai/gpt-6-luna",
+					"system": [],
+					"history": [
+						{
+							"role": "user",
+							"text": "Hi"
+						}
+					],
+					"cache": {
+						"kind": "none"
+					},
+					"session": "root-1",
+					"zdrOnly": true
+				},
+				"abortAfterMs": 10
+			}
+		]
+	},
+	"expected": {
+		"calls": [
+			{
+				"events": [],
+				"result": null,
+				"answer": null,
+				"failure": null,
+				"thrown": "caller aborted",
+				"aborted": true,
+				"nowMs": 1800000000040
+			}
+		],
+		"requests": [
+			{
+				"method": "POST",
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"headers": [
+					[
+						"Content-Type",
+						"application/json"
+					],
+					[
+						"Accept",
+						"application/json"
+					],
+					[
+						"Authorization",
+						"Bearer key-0123456789abcdef"
+					],
+					[
+						"User-Agent",
+						"lab-app/1.0"
+					]
+				],
+				"body": "{\"model\":\"openai/gpt-6-luna\",\"messages\":[{\"role\":\"user\",\"content\":\"Hi\"}],\"stream\":false,\"session_id\":\"root-1\",\"provider\":{\"zdr\":true,\"data_collection\":\"deny\",\"require_parameters\":true}}"
+			}
+		],
+		"log": [
+			"OpenRouter - - -"
+		],
+		"settled": [],
+		"keyReads": 1,
+		"read": [
+			0
+		],
+		"waiting": []
+	}
+}

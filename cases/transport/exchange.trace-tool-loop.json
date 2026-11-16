@@ -1,0 +1,495 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.exchange",
+	"name": "trace-tool-loop",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"baseUrl": "https://openrouter.ai/api/v1",
+		"label": "OpenRouter",
+		"userAgent": "lab-app/1.0",
+		"keys": [
+			"key-0123456789abcdef"
+		],
+		"startMs": 1800000000000,
+		"script": {
+			"kind": "trace",
+			"file": "cases/traces/openrouter.tool-loop.json"
+		},
+		"calls": [
+			{
+				"kind": "stream",
+				"request": {
+					"model": "openai/gpt-6-luna",
+					"system": [],
+					"history": [
+						{
+							"role": "user",
+							"text": "Use the lookup tool for the keys \"alpha\" and \"beta\", in parallel if you can. Then reply with both values."
+						}
+					],
+					"cache": {
+						"kind": "none"
+					},
+					"session": "00000000-0000-4000-8000-000000000000",
+					"zdrOnly": true,
+					"effort": "low",
+					"tools": [
+						{
+							"name": "lookup",
+							"description": "Look up the value stored under a key.",
+							"parameters": {
+								"type": "object",
+								"properties": {
+									"key": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"key"
+								],
+								"additionalProperties": false
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "stream",
+				"request": {
+					"model": "openai/gpt-6-luna",
+					"system": [],
+					"history": [
+						{
+							"role": "user",
+							"text": "Use the lookup tool for the keys \"alpha\" and \"beta\", in parallel if you can. Then reply with both values."
+						},
+						{
+							"role": "step",
+							"producer": {
+								"model": "openai/gpt-6-luna",
+								"host": "Azure"
+							},
+							"parts": [
+								{
+									"kind": "call",
+									"index": 0,
+									"wireId": "call_ZByuccg6RmQ9bAwU3IkyFvPl",
+									"name": "lookup",
+									"arguments": "{\"key\":\"alpha\"}"
+								},
+								{
+									"kind": "result",
+									"index": 0,
+									"output": "value-of-alpha",
+									"isError": false
+								},
+								{
+									"kind": "call",
+									"index": 1,
+									"wireId": "call_o58XubUYSReYrz8uvhRqppLA",
+									"name": "lookup",
+									"arguments": "{\"key\":\"beta\"}"
+								},
+								{
+									"kind": "result",
+									"index": 1,
+									"output": "value-of-beta",
+									"isError": false
+								}
+							]
+						}
+					],
+					"cache": {
+						"kind": "none"
+					},
+					"session": "00000000-0000-4000-8000-000000000000",
+					"zdrOnly": true,
+					"effort": "low",
+					"tools": [
+						{
+							"name": "lookup",
+							"description": "Look up the value stored under a key.",
+							"parameters": {
+								"type": "object",
+								"properties": {
+									"key": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"key"
+								],
+								"additionalProperties": false
+							}
+						}
+					]
+				}
+			}
+		]
+	},
+	"expected": {
+		"calls": [
+			{
+				"events": [
+					{
+						"kind": "serving",
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-0-recorded"
+						}
+					},
+					{
+						"kind": "call",
+						"index": 0,
+						"wireId": "call_ZByuccg6RmQ9bAwU3IkyFvPl",
+						"name": "lookup",
+						"argumentsText": ""
+					},
+					{
+						"kind": "serving",
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-0-recorded"
+						}
+					},
+					{
+						"kind": "call",
+						"index": 0,
+						"wireId": "",
+						"name": "",
+						"argumentsText": ""
+					},
+					{
+						"kind": "serving",
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-0-recorded"
+						}
+					},
+					{
+						"kind": "call",
+						"index": 0,
+						"wireId": "",
+						"name": "",
+						"argumentsText": "{\"key\":\"alpha\"}"
+					},
+					{
+						"kind": "serving",
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-0-recorded"
+						}
+					},
+					{
+						"kind": "call",
+						"index": 1,
+						"wireId": "call_o58XubUYSReYrz8uvhRqppLA",
+						"name": "lookup",
+						"argumentsText": ""
+					},
+					{
+						"kind": "serving",
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-0-recorded"
+						}
+					},
+					{
+						"kind": "call",
+						"index": 1,
+						"wireId": "",
+						"name": "",
+						"argumentsText": ""
+					},
+					{
+						"kind": "serving",
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-0-recorded"
+						}
+					},
+					{
+						"kind": "call",
+						"index": 1,
+						"wireId": "",
+						"name": "",
+						"argumentsText": "{\"key\":\"beta\"}"
+					},
+					{
+						"kind": "serving",
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-0-recorded"
+						}
+					},
+					{
+						"kind": "finish",
+						"reason": "tool_calls"
+					},
+					{
+						"kind": "serving",
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-0-recorded"
+						}
+					},
+					{
+						"kind": "finish",
+						"reason": "tool_calls"
+					},
+					{
+						"kind": "usage",
+						"usage": {
+							"input": 70,
+							"output": 46,
+							"cached": 0,
+							"cacheWrite": 0,
+							"reasoning": 0,
+							"cost": 0.00003,
+							"upstreamCost": 0.00003,
+							"byok": false
+						}
+					}
+				],
+				"result": null,
+				"answer": null,
+				"failure": null,
+				"thrown": null,
+				"aborted": false,
+				"nowMs": 1800000000000
+			},
+			{
+				"events": [
+					{
+						"kind": "serving",
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-0-recorded"
+						}
+					},
+					{
+						"kind": "text",
+						"text": "alpha"
+					},
+					{
+						"kind": "serving",
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-0-recorded"
+						}
+					},
+					{
+						"kind": "text",
+						"text": ":"
+					},
+					{
+						"kind": "serving",
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-0-recorded"
+						}
+					},
+					{
+						"kind": "text",
+						"text": " value"
+					},
+					{
+						"kind": "serving",
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-0-recorded"
+						}
+					},
+					{
+						"kind": "text",
+						"text": "-of"
+					},
+					{
+						"kind": "serving",
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-0-recorded"
+						}
+					},
+					{
+						"kind": "text",
+						"text": "-alpha"
+					},
+					{
+						"kind": "serving",
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-0-recorded"
+						}
+					},
+					{
+						"kind": "text",
+						"text": "  \n"
+					},
+					{
+						"kind": "serving",
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-0-recorded"
+						}
+					},
+					{
+						"kind": "text",
+						"text": "beta"
+					},
+					{
+						"kind": "serving",
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-0-recorded"
+						}
+					},
+					{
+						"kind": "text",
+						"text": ":"
+					},
+					{
+						"kind": "serving",
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-0-recorded"
+						}
+					},
+					{
+						"kind": "text",
+						"text": " value"
+					},
+					{
+						"kind": "serving",
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-0-recorded"
+						}
+					},
+					{
+						"kind": "text",
+						"text": "-of"
+					},
+					{
+						"kind": "serving",
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-0-recorded"
+						}
+					},
+					{
+						"kind": "text",
+						"text": "-beta"
+					},
+					{
+						"kind": "serving",
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-0-recorded"
+						}
+					},
+					{
+						"kind": "finish",
+						"reason": "stop"
+					},
+					{
+						"kind": "serving",
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-0-recorded"
+						}
+					},
+					{
+						"kind": "finish",
+						"reason": "stop"
+					},
+					{
+						"kind": "usage",
+						"usage": {
+							"input": 140,
+							"output": 15,
+							"cached": 0,
+							"cacheWrite": 0,
+							"reasoning": 0,
+							"cost": 0.0000215,
+							"upstreamCost": 0.0000215,
+							"byok": false
+						}
+					}
+				],
+				"result": null,
+				"answer": null,
+				"failure": null,
+				"thrown": null,
+				"aborted": false,
+				"nowMs": 1800000000000
+			}
+		],
+		"requests": [
+			{
+				"method": "POST",
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"headers": [
+					[
+						"Content-Type",
+						"application/json"
+					],
+					[
+						"Accept",
+						"text/event-stream"
+					],
+					[
+						"Authorization",
+						"Bearer key-0123456789abcdef"
+					],
+					[
+						"User-Agent",
+						"lab-app/1.0"
+					]
+				],
+				"body": "{\"model\":\"openai/gpt-6-luna\",\"messages\":[{\"role\":\"user\",\"content\":\"Use the lookup tool for the keys \\\"alpha\\\" and \\\"beta\\\", in parallel if you can. Then reply with both values.\"}],\"stream\":true,\"session_id\":\"00000000-0000-4000-8000-000000000000\",\"provider\":{\"zdr\":true,\"data_collection\":\"deny\",\"require_parameters\":true},\"reasoning\":{\"effort\":\"low\"},\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"lookup\",\"description\":\"Look up the value stored under a key.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"key\":{\"type\":\"string\"}},\"required\":[\"key\"],\"additionalProperties\":false}}}]}"
+			},
+			{
+				"method": "POST",
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"headers": [
+					[
+						"Content-Type",
+						"application/json"
+					],
+					[
+						"Accept",
+						"text/event-stream"
+					],
+					[
+						"Authorization",
+						"Bearer key-0123456789abcdef"
+					],
+					[
+						"User-Agent",
+						"lab-app/1.0"
+					]
+				],
+				"body": "{\"model\":\"openai/gpt-6-luna\",\"messages\":[{\"role\":\"user\",\"content\":\"Use the lookup tool for the keys \\\"alpha\\\" and \\\"beta\\\", in parallel if you can. Then reply with both values.\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"call_ZByuccg6RmQ9bAwU3IkyFvPl\",\"type\":\"function\",\"function\":{\"name\":\"lookup\",\"arguments\":\"{\\\"key\\\":\\\"alpha\\\"}\"}},{\"id\":\"call_o58XubUYSReYrz8uvhRqppLA\",\"type\":\"function\",\"function\":{\"name\":\"lookup\",\"arguments\":\"{\\\"key\\\":\\\"beta\\\"}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"call_ZByuccg6RmQ9bAwU3IkyFvPl\",\"content\":\"value-of-alpha\"},{\"role\":\"tool\",\"tool_call_id\":\"call_o58XubUYSReYrz8uvhRqppLA\",\"content\":\"value-of-beta\"}],\"stream\":true,\"session_id\":\"00000000-0000-4000-8000-000000000000\",\"provider\":{\"zdr\":true,\"data_collection\":\"deny\",\"require_parameters\":true},\"reasoning\":{\"effort\":\"low\"},\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"lookup\",\"description\":\"Look up the value stored under a key.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"key\":{\"type\":\"string\"}},\"required\":[\"key\"],\"additionalProperties\":false}}}]}"
+			}
+		],
+		"log": [
+			"OpenRouter 200 gen-0-recorded Azure",
+			"OpenRouter 200 gen-0-recorded Azure"
+		],
+		"settled": [
+			"openai/gpt-6-luna",
+			"openai/gpt-6-luna"
+		],
+		"keyReads": 2,
+		"read": [
+			1,
+			1
+		],
+		"waiting": []
+	}
+}

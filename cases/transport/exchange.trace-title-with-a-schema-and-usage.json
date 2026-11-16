@@ -1,0 +1,130 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.exchange",
+	"name": "trace-title-with-a-schema-and-usage",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"baseUrl": "https://openrouter.ai/api/v1",
+		"label": "OpenRouter",
+		"userAgent": "lab-app/1.0",
+		"keys": [
+			"key-0123456789abcdef"
+		],
+		"startMs": 1800000000000,
+		"script": {
+			"kind": "trace",
+			"file": "cases/traces/openrouter.title.json"
+		},
+		"calls": [
+			{
+				"kind": "complete",
+				"request": {
+					"model": "openai/gpt-6-luna",
+					"system": [],
+					"history": [
+						{
+							"role": "user",
+							"text": "Name this conversation in a few words: Rename the tally helper and update its callers."
+						}
+					],
+					"cache": {
+						"kind": "none"
+					},
+					"session": "00000000-0000-4000-8000-000000000000",
+					"zdrOnly": true,
+					"effort": "low",
+					"schema": {
+						"name": "title",
+						"json": {
+							"type": "object",
+							"properties": {
+								"title": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"title"
+							],
+							"additionalProperties": false
+						}
+					}
+				}
+			}
+		]
+	},
+	"expected": {
+		"calls": [
+			{
+				"events": [],
+				"result": {
+					"parts": [
+						{
+							"kind": "text",
+							"text": "{\"title\":\"Rename Tally Helper and Callers\"}"
+						}
+					],
+					"finish": "stop",
+					"usage": {
+						"input": 44,
+						"output": 18,
+						"cached": 0,
+						"cacheWrite": 0,
+						"reasoning": 0,
+						"cost": 0.0000134,
+						"upstreamCost": 0.0000134,
+						"byok": false
+					},
+					"serving": {
+						"host": "Azure",
+						"generationId": "gen-0-recorded"
+					}
+				},
+				"answer": null,
+				"failure": null,
+				"thrown": null,
+				"aborted": false,
+				"nowMs": 1800000000000
+			}
+		],
+		"requests": [
+			{
+				"method": "POST",
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"headers": [
+					[
+						"Content-Type",
+						"application/json"
+					],
+					[
+						"Accept",
+						"application/json"
+					],
+					[
+						"Authorization",
+						"Bearer key-0123456789abcdef"
+					],
+					[
+						"User-Agent",
+						"lab-app/1.0"
+					]
+				],
+				"body": "{\"model\":\"openai/gpt-6-luna\",\"messages\":[{\"role\":\"user\",\"content\":\"Name this conversation in a few words: Rename the tally helper and update its callers.\"}],\"stream\":false,\"session_id\":\"00000000-0000-4000-8000-000000000000\",\"provider\":{\"zdr\":true,\"data_collection\":\"deny\",\"require_parameters\":true},\"reasoning\":{\"effort\":\"low\"},\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"name\":\"title\",\"strict\":true,\"schema\":{\"type\":\"object\",\"properties\":{\"title\":{\"type\":\"string\"}},\"required\":[\"title\"],\"additionalProperties\":false}}}}"
+			}
+		],
+		"log": [
+			"OpenRouter 200 gen-0-recorded Azure"
+		],
+		"settled": [
+			"openai/gpt-6-luna"
+		],
+		"keyReads": 1,
+		"read": [
+			1
+		],
+		"waiting": []
+	}
+}

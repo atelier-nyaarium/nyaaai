@@ -1,0 +1,120 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.exchange",
+	"name": "scrub-key-in-the-serving-of-a-whole-reply-in-every-spelling",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"baseUrl": "https://openrouter.ai/api/v1",
+		"label": "OpenRouter",
+		"userAgent": "lab-app/1.0",
+		"keys": [
+			"sk+or/v1=="
+		],
+		"startMs": 1800000000000,
+		"script": {
+			"kind": "inline",
+			"exchanges": [
+				{
+					"status": 200,
+					"headers": [
+						[
+							"content-type",
+							"application/json"
+						]
+					],
+					"chunks": [
+						{
+							"kind": "text",
+							"text": "{\"id\":\"gen-sk%2Bor%2Fv1%3D%3D\",\"provider\":\"c2srb3IvdjE9PQ\",\"choices\":[{\"message\":{\"content\":\"Hi\"},\"finish_reason\":\"stop\"}]}"
+						}
+					]
+				}
+			]
+		},
+		"calls": [
+			{
+				"kind": "complete",
+				"request": {
+					"model": "openai/gpt-6-luna",
+					"system": [],
+					"history": [
+						{
+							"role": "user",
+							"text": "Hi"
+						}
+					],
+					"cache": {
+						"kind": "none"
+					},
+					"session": "root-1",
+					"zdrOnly": true
+				}
+			}
+		]
+	},
+	"expected": {
+		"calls": [
+			{
+				"events": [],
+				"result": {
+					"parts": [
+						{
+							"kind": "text",
+							"text": "Hi"
+						}
+					],
+					"finish": "stop",
+					"serving": {
+						"host": "[key]",
+						"generationId": "gen-[key]"
+					}
+				},
+				"answer": null,
+				"failure": null,
+				"thrown": null,
+				"aborted": false,
+				"nowMs": 1800000000000
+			}
+		],
+		"requests": [
+			{
+				"method": "POST",
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"headers": [
+					[
+						"Content-Type",
+						"application/json"
+					],
+					[
+						"Accept",
+						"application/json"
+					],
+					[
+						"Authorization",
+						"Bearer sk+or/v1=="
+					],
+					[
+						"User-Agent",
+						"lab-app/1.0"
+					]
+				],
+				"body": "{\"model\":\"openai/gpt-6-luna\",\"messages\":[{\"role\":\"user\",\"content\":\"Hi\"}],\"stream\":false,\"session_id\":\"root-1\",\"provider\":{\"zdr\":true,\"data_collection\":\"deny\",\"require_parameters\":true}}"
+			}
+		],
+		"log": [
+			"OpenRouter 200 gen-[key] [key]"
+		],
+		"settled": [
+			"openai/gpt-6-luna"
+		],
+		"keyReads": 1,
+		"read": [
+			1
+		],
+		"waiting": []
+	}
+}

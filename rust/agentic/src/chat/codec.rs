@@ -26,7 +26,7 @@ pub enum ToolChoiceRule {
 }
 
 /// Host-specific Chat Completions extensions.
-pub trait ChatDialect {
+pub trait ChatDialect: Send + Sync {
     /// Defaults to `/chat/completions`.
     fn path(&self) -> &str {
         PATH
@@ -485,6 +485,10 @@ struct ChatStream<'a> {
 }
 
 impl StreamDecoder for ChatStream<'_> {
+    fn over(&self) -> bool {
+        self.over
+    }
+
     fn push(&mut self, item: &SseItem, events: &mut Vec<StepEvent>) -> Result<(), ProviderError> {
         if let Some(error) = &self.failed {
             return Err(error.clone());

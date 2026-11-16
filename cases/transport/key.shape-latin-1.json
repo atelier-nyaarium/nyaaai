@@ -1,0 +1,13 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.key",
+	"name": "shape-latin-1",
+	"input": {
+		"text": "key-é"
+	},
+	"expected": {
+		"shape": false,
+		"normalized": null
+	}
+}

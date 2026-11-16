@@ -6853,3 +6853,987 @@ impl Shape for CodecFailureResult {
         Value::Object(object)
     }
 }
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum TransportChunk {
+    Text(TransportChunkText),
+    Bytes(TransportChunkBytes),
+    Repeat(TransportChunkRepeat),
+}
+
+impl Shape for TransportChunk {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "text" => TransportChunkText::decode_at(value, at).map(Self::Text),
+            "bytes" => TransportChunkBytes::decode_at(value, at).map(Self::Bytes),
+            "repeat" => TransportChunkRepeat::decode_at(value, at).map(Self::Repeat),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Text(held) => held.encode(),
+            Self::Bytes(held) => held.encode(),
+            Self::Repeat(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TransportChunkText {
+    pub text: String,
+    pub delay_ms: Option<i64>,
+}
+
+impl Shape for TransportChunkText {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "text")
+        })?;
+        let text = shape::required(object, "text", at, shape::text)?;
+        let delay_ms = shape::optional(object, "delayMs", at, shape::integer)?;
+        Ok(Self { text, delay_ms })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("text"));
+        object.insert("text", Value::from(self.text.as_str()));
+        if let Some(held) = &self.delay_ms {
+            object.insert("delayMs", Value::Number(*held as f64));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TransportChunkBytes {
+    pub base64: String,
+    pub delay_ms: Option<i64>,
+}
+
+impl Shape for TransportChunkBytes {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "bytes")
+        })?;
+        let base64 = shape::required(object, "base64", at, shape::text)?;
+        let delay_ms = shape::optional(object, "delayMs", at, shape::integer)?;
+        Ok(Self { base64, delay_ms })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("bytes"));
+        object.insert("base64", Value::from(self.base64.as_str()));
+        if let Some(held) = &self.delay_ms {
+            object.insert("delayMs", Value::Number(*held as f64));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TransportChunkRepeat {
+    pub text: String,
+    pub times: u64,
+    pub delay_ms: Option<i64>,
+}
+
+impl Shape for TransportChunkRepeat {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "repeat")
+        })?;
+        let text = shape::required(object, "text", at, shape::text)?;
+        let times = shape::required(object, "times", at, shape::natural)?;
+        let delay_ms = shape::optional(object, "delayMs", at, shape::integer)?;
+        Ok(Self {
+            text,
+            times,
+            delay_ms,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("repeat"));
+        object.insert("text", Value::from(self.text.as_str()));
+        object.insert("times", Value::Number(self.times as f64));
+        if let Some(held) = &self.delay_ms {
+            object.insert("delayMs", Value::Number(*held as f64));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TransportExchange {
+    pub status: i64,
+    pub headers: nyaaai_contract::shapes::step::HeaderList,
+    pub chunks: Vec<TransportChunk>,
+    pub head_ms: Option<i64>,
+    pub end: Option<TransportExchangeEnd>,
+    pub error: Option<String>,
+}
+
+impl Shape for TransportExchange {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let status = shape::required(object, "status", at, shape::integer)?;
+        let headers = shape::required(
+            object,
+            "headers",
+            at,
+            nyaaai_contract::shapes::step::decode_header_list,
+        )?;
+        let chunks = shape::required(object, "chunks", at, |value, at| {
+            shape::list(value, at, TransportChunk::decode_at)
+        })?;
+        let head_ms = shape::optional(object, "headMs", at, shape::integer)?;
+        let end = shape::optional(object, "end", at, TransportExchangeEnd::decode_at)?;
+        let error = shape::optional(object, "error", at, shape::text)?;
+        Ok(Self {
+            status,
+            headers,
+            chunks,
+            head_ms,
+            end,
+            error,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("status", Value::Number(self.status as f64));
+        object.insert(
+            "headers",
+            nyaaai_contract::shapes::step::encode_header_list(&self.headers),
+        );
+        object.insert(
+            "chunks",
+            Value::Array(self.chunks.iter().map(|held| held.encode()).collect()),
+        );
+        if let Some(held) = &self.head_ms {
+            object.insert("headMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.end {
+            object.insert("end", held.encode());
+        }
+        if let Some(held) = &self.error {
+            object.insert("error", Value::from(held.as_str()));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum TransportExchangeEnd {
+    Closed,
+    Dropped,
+    Refused,
+}
+
+impl TransportExchangeEnd {
+    pub const ALL: [Self; 3] = [Self::Closed, Self::Dropped, Self::Refused];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Closed => "closed",
+            Self::Dropped => "dropped",
+            Self::Refused => "refused",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for TransportExchangeEnd {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum TransportKeyAuth {
+    None(TransportKeyAuthNone),
+    Stored(TransportKeyAuthStored),
+    Key(TransportKeyAuthKey),
+}
+
+impl Shape for TransportKeyAuth {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "none" => TransportKeyAuthNone::decode_at(value, at).map(Self::None),
+            "stored" => TransportKeyAuthStored::decode_at(value, at).map(Self::Stored),
+            "key" => TransportKeyAuthKey::decode_at(value, at).map(Self::Key),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::None(held) => held.encode(),
+            Self::Stored(held) => held.encode(),
+            Self::Key(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TransportKeyAuthNone {}
+
+impl Shape for TransportKeyAuthNone {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "none")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("none"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TransportKeyAuthStored {}
+
+impl Shape for TransportKeyAuthStored {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "stored")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("stored"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TransportKeyAuthKey {
+    pub key: String,
+}
+
+impl Shape for TransportKeyAuthKey {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "key")
+        })?;
+        let key = shape::required(object, "key", at, shape::text)?;
+        Ok(Self { key })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("key"));
+        object.insert("key", Value::from(self.key.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum TransportCall {
+    Stream(TransportCallStream),
+    Complete(TransportCallComplete),
+    GetJson(TransportCallGetJson),
+    PostJson(TransportCallPostJson),
+}
+
+impl Shape for TransportCall {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "stream" => TransportCallStream::decode_at(value, at).map(Self::Stream),
+            "complete" => TransportCallComplete::decode_at(value, at).map(Self::Complete),
+            "getJson" => TransportCallGetJson::decode_at(value, at).map(Self::GetJson),
+            "postJson" => TransportCallPostJson::decode_at(value, at).map(Self::PostJson),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Stream(held) => held.encode(),
+            Self::Complete(held) => held.encode(),
+            Self::GetJson(held) => held.encode(),
+            Self::PostJson(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TransportCallStream {
+    pub request: nyaaai_contract::shapes::step::CanonicalRequest,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for TransportCallStream {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "stream")
+        })?;
+        let request = shape::required(
+            object,
+            "request",
+            at,
+            nyaaai_contract::shapes::step::CanonicalRequest::decode_at,
+        )?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            request,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("stream"));
+        object.insert("request", self.request.encode());
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TransportCallComplete {
+    pub request: nyaaai_contract::shapes::step::CanonicalRequest,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for TransportCallComplete {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "complete")
+        })?;
+        let request = shape::required(
+            object,
+            "request",
+            at,
+            nyaaai_contract::shapes::step::CanonicalRequest::decode_at,
+        )?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            request,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("complete"));
+        object.insert("request", self.request.encode());
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TransportCallGetJson {
+    pub path: String,
+    pub key_auth: Option<TransportKeyAuth>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for TransportCallGetJson {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "getJson")
+        })?;
+        let path = shape::required(object, "path", at, shape::text)?;
+        let key_auth = shape::optional(object, "keyAuth", at, TransportKeyAuth::decode_at)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            path,
+            key_auth,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("getJson"));
+        object.insert("path", Value::from(self.path.as_str()));
+        if let Some(held) = &self.key_auth {
+            object.insert("keyAuth", held.encode());
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TransportCallPostJson {
+    pub path: String,
+    pub body: Option<Value>,
+    pub key_auth: Option<TransportKeyAuth>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for TransportCallPostJson {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "postJson")
+        })?;
+        let path = shape::required(object, "path", at, shape::text)?;
+        let body = shape::optional(object, "body", at, shape::any)?;
+        let key_auth = shape::optional(object, "keyAuth", at, TransportKeyAuth::decode_at)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            path,
+            body,
+            key_auth,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("postJson"));
+        object.insert("path", Value::from(self.path.as_str()));
+        if let Some(held) = &self.body {
+            object.insert("body", held.clone());
+        }
+        if let Some(held) = &self.key_auth {
+            object.insert("keyAuth", held.encode());
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum TransportScript {
+    Inline(TransportScriptInline),
+    Trace(TransportScriptTrace),
+}
+
+impl Shape for TransportScript {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "inline" => TransportScriptInline::decode_at(value, at).map(Self::Inline),
+            "trace" => TransportScriptTrace::decode_at(value, at).map(Self::Trace),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Inline(held) => held.encode(),
+            Self::Trace(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TransportScriptInline {
+    pub exchanges: Vec<TransportExchange>,
+}
+
+impl Shape for TransportScriptInline {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "inline")
+        })?;
+        let exchanges = shape::required(object, "exchanges", at, |value, at| {
+            shape::list(value, at, TransportExchange::decode_at)
+        })?;
+        Ok(Self { exchanges })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("inline"));
+        object.insert(
+            "exchanges",
+            Value::Array(self.exchanges.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TransportScriptTrace {
+    pub file: String,
+}
+
+impl Shape for TransportScriptTrace {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "trace")
+        })?;
+        let file = shape::required(object, "file", at, shape::text)?;
+        Ok(Self { file })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("trace"));
+        object.insert("file", Value::from(self.file.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TransportSent {
+    pub method: String,
+    pub url: String,
+    pub headers: nyaaai_contract::shapes::step::HeaderList,
+    pub body: Option<String>,
+}
+
+impl Shape for TransportSent {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let method = shape::required(object, "method", at, shape::text)?;
+        let url = shape::required(object, "url", at, shape::text)?;
+        let headers = shape::required(
+            object,
+            "headers",
+            at,
+            nyaaai_contract::shapes::step::decode_header_list,
+        )?;
+        let body = shape::required(object, "body", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        Ok(Self {
+            method,
+            url,
+            headers,
+            body,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("method", Value::from(self.method.as_str()));
+        object.insert("url", Value::from(self.url.as_str()));
+        object.insert(
+            "headers",
+            nyaaai_contract::shapes::step::encode_header_list(&self.headers),
+        );
+        object.insert(
+            "body",
+            self.body
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TransportOutcome {
+    pub events: Vec<nyaaai_contract::shapes::step::StepEvent>,
+    pub result: Option<nyaaai_contract::shapes::step::StepResult>,
+    pub answer: Value,
+    pub failure: Option<nyaaai_contract::shapes::step::Failure>,
+    pub thrown: Option<String>,
+    pub aborted: bool,
+    pub now_ms: i64,
+}
+
+impl Shape for TransportOutcome {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let events = shape::required(object, "events", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::step::StepEvent::decode_at,
+            )
+        })?;
+        let result = shape::required(object, "result", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                nyaaai_contract::shapes::step::StepResult::decode_at,
+            )
+        })?;
+        let answer = shape::required(object, "answer", at, shape::any)?;
+        let failure = shape::required(object, "failure", at, |value, at| {
+            shape::nullable(value, at, nyaaai_contract::shapes::step::Failure::decode_at)
+        })?;
+        let thrown = shape::required(object, "thrown", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let aborted = shape::required(object, "aborted", at, shape::flag)?;
+        let now_ms = shape::required(object, "nowMs", at, shape::integer)?;
+        Ok(Self {
+            events,
+            result,
+            answer,
+            failure,
+            thrown,
+            aborted,
+            now_ms,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "events",
+            Value::Array(self.events.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "result",
+            self.result
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert("answer", self.answer.clone());
+        object.insert(
+            "failure",
+            self.failure
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert(
+            "thrown",
+            self.thrown
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert("aborted", Value::Bool(self.aborted));
+        object.insert("nowMs", Value::Number(self.now_ms as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TransportExchangeInput {
+    pub codec: CodecName,
+    pub codec_headers: Option<Record<String>>,
+    pub base_url: String,
+    pub label: String,
+    pub user_agent: String,
+    pub auth: Option<TransportExchangeInputAuth>,
+    pub idle_ms: Option<i64>,
+    pub keys: Vec<Option<String>>,
+    pub start_ms: i64,
+    pub script: TransportScript,
+    pub calls: Vec<TransportCall>,
+}
+
+impl Shape for TransportExchangeInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let codec = shape::required(object, "codec", at, CodecName::decode_at)?;
+        let codec_headers = shape::optional(object, "codecHeaders", at, |value, at| {
+            shape::record(value, at, shape::text)
+        })?;
+        let base_url = shape::required(object, "baseUrl", at, shape::text)?;
+        let label = shape::required(object, "label", at, shape::text)?;
+        let user_agent = shape::required(object, "userAgent", at, shape::text)?;
+        let auth = shape::optional(object, "auth", at, TransportExchangeInputAuth::decode_at)?;
+        let idle_ms = shape::optional(object, "idleMs", at, shape::integer)?;
+        let keys = shape::required(object, "keys", at, |value, at| {
+            shape::list_within(value, at, Some(1), None, |value, at| {
+                shape::nullable(value, at, shape::text)
+            })
+        })?;
+        let start_ms = shape::required(object, "startMs", at, shape::integer)?;
+        let script = shape::required(object, "script", at, TransportScript::decode_at)?;
+        let calls = shape::required(object, "calls", at, |value, at| {
+            shape::list_within(value, at, Some(1), None, TransportCall::decode_at)
+        })?;
+        Ok(Self {
+            codec,
+            codec_headers,
+            base_url,
+            label,
+            user_agent,
+            auth,
+            idle_ms,
+            keys,
+            start_ms,
+            script,
+            calls,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("codec", self.codec.encode());
+        if let Some(held) = &self.codec_headers {
+            object.insert(
+                "codecHeaders",
+                shape::record_value(held, |held| Value::from(held.as_str())),
+            );
+        }
+        object.insert("baseUrl", Value::from(self.base_url.as_str()));
+        object.insert("label", Value::from(self.label.as_str()));
+        object.insert("userAgent", Value::from(self.user_agent.as_str()));
+        if let Some(held) = &self.auth {
+            object.insert("auth", held.encode());
+        }
+        if let Some(held) = &self.idle_ms {
+            object.insert("idleMs", Value::Number(*held as f64));
+        }
+        object.insert(
+            "keys",
+            Value::Array(
+                self.keys
+                    .iter()
+                    .map(|held| {
+                        held.as_ref()
+                            .map_or(Value::Null, |held| Value::from(held.as_str()))
+                    })
+                    .collect(),
+            ),
+        );
+        object.insert("startMs", Value::Number(self.start_ms as f64));
+        object.insert("script", self.script.encode());
+        object.insert(
+            "calls",
+            Value::Array(self.calls.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum TransportExchangeInputAuth {
+    Bearer,
+    None,
+    Optional,
+}
+
+impl TransportExchangeInputAuth {
+    pub const ALL: [Self; 3] = [Self::Bearer, Self::None, Self::Optional];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Bearer => "bearer",
+            Self::None => "none",
+            Self::Optional => "optional",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for TransportExchangeInputAuth {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TransportExchangeResult {
+    pub calls: Vec<TransportOutcome>,
+    pub requests: Vec<TransportSent>,
+    pub log: Vec<String>,
+    pub settled: Vec<String>,
+    pub key_reads: i64,
+    pub read: Vec<i64>,
+    pub waiting: Vec<String>,
+}
+
+impl Shape for TransportExchangeResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let calls = shape::required(object, "calls", at, |value, at| {
+            shape::list(value, at, TransportOutcome::decode_at)
+        })?;
+        let requests = shape::required(object, "requests", at, |value, at| {
+            shape::list(value, at, TransportSent::decode_at)
+        })?;
+        let log = shape::required(object, "log", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let settled = shape::required(object, "settled", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let key_reads = shape::required(object, "keyReads", at, shape::integer)?;
+        let read = shape::required(object, "read", at, |value, at| {
+            shape::list(value, at, shape::integer)
+        })?;
+        let waiting = shape::required(object, "waiting", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self {
+            calls,
+            requests,
+            log,
+            settled,
+            key_reads,
+            read,
+            waiting,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "calls",
+            Value::Array(self.calls.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "requests",
+            Value::Array(self.requests.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "log",
+            Value::Array(
+                self.log
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "settled",
+            Value::Array(
+                self.settled
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert("keyReads", Value::Number(self.key_reads as f64));
+        object.insert(
+            "read",
+            Value::Array(
+                self.read
+                    .iter()
+                    .map(|held| Value::Number(*held as f64))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "waiting",
+            Value::Array(
+                self.waiting
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TransportKeyInput {
+    pub text: String,
+}
+
+impl Shape for TransportKeyInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let text = shape::required(object, "text", at, shape::text)?;
+        Ok(Self { text })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("text", Value::from(self.text.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TransportKeyResult {
+    pub shape: bool,
+    pub normalized: Option<String>,
+}
+
+impl Shape for TransportKeyResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let shape_field = shape::required(object, "shape", at, shape::flag)?;
+        let normalized = shape::required(object, "normalized", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        Ok(Self {
+            shape: shape_field,
+            normalized,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("shape", Value::Bool(self.shape));
+        object.insert(
+            "normalized",
+            self.normalized
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        Value::Object(object)
+    }
+}

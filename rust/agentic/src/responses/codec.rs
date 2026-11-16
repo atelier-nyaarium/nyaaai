@@ -766,6 +766,10 @@ struct ResponsesStream<'a> {
 }
 
 impl StreamDecoder for ResponsesStream<'_> {
+    fn over(&self) -> bool {
+        self.over
+    }
+
     fn push(&mut self, item: &SseItem, events: &mut Vec<StepEvent>) -> Result<(), ProviderError> {
         if let Some(error) = &self.failed {
             return Err(error.clone());

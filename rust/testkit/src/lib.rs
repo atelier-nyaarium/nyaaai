@@ -1,6 +1,9 @@
 pub mod cases;
 pub mod claude_session;
+pub mod keys;
+pub mod loopback;
 pub mod scheduler;
+pub mod scripted_fetch;
 pub mod torture_shapes;
 pub mod torture_shapes_hooks;
 pub mod trace;

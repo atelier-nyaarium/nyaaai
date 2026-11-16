@@ -1,0 +1,13 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.key",
+	"name": "normal-blank-is-no-key",
+	"input": {
+		"text": "   \n"
+	},
+	"expected": {
+		"shape": false,
+		"normalized": null
+	}
+}

@@ -1,0 +1,77 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.exchange",
+	"name": "json-explicit-key-empty-or-malformed-is-refused",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"baseUrl": "https://openrouter.ai/api/v1",
+		"label": "OpenRouter",
+		"userAgent": "lab-app/1.0",
+		"keys": [
+			"key-0123456789abcdef"
+		],
+		"startMs": 1800000000000,
+		"script": {
+			"kind": "inline",
+			"exchanges": []
+		},
+		"calls": [
+			{
+				"kind": "getJson",
+				"path": "/models",
+				"keyAuth": {
+					"kind": "key",
+					"key": ""
+				}
+			},
+			{
+				"kind": "getJson",
+				"path": "/models",
+				"keyAuth": {
+					"kind": "key",
+					"key": "has space"
+				}
+			}
+		]
+	},
+	"expected": {
+		"calls": [
+			{
+				"events": [],
+				"result": null,
+				"answer": null,
+				"failure": {
+					"category": "keyMissing",
+					"status": "keyMissing",
+					"message": "No OpenRouter key is set."
+				},
+				"thrown": null,
+				"aborted": false,
+				"nowMs": 1800000000000
+			},
+			{
+				"events": [],
+				"result": null,
+				"answer": null,
+				"failure": {
+					"category": "keyRejected",
+					"status": 401,
+					"message": "The OpenRouter key is malformed."
+				},
+				"thrown": null,
+				"aborted": false,
+				"nowMs": 1800000000000
+			}
+		],
+		"requests": [],
+		"log": [],
+		"settled": [],
+		"keyReads": 0,
+		"read": [],
+		"waiting": []
+	}
+}

@@ -1,16 +1,16 @@
 //! Byte-form trace replay.
 
-use std::collections::VecDeque;
 use std::fs;
 use std::io;
 use std::path::Path;
+use std::sync::Arc;
 
 use nyaaai_contract::base64::base64_decode;
-use nyaaai_contract::json::Value;
 use nyaaai_contract::shape::Shape;
-use nyaaai_contract::text::ascii_lower;
 
-use crate::trace_shapes::{Trace, TraceExchange};
+use crate::scheduler::TimerWheel;
+use crate::scripted_fetch::{ScriptedChunk, ScriptedEnd, ScriptedExchange, ScriptedFetch};
+use crate::trace_shapes::Trace;
 
 pub fn read_trace(file: &Path) -> io::Result<Trace> {
     let text = fs::read_to_string(file)?;
@@ -18,50 +18,34 @@ pub fn read_trace(file: &Path) -> io::Result<Trace> {
         .map_err(|refused| io::Error::other(format!("{} is no trace: {refused}", file.display())))
 }
 
-pub struct Replayed {
-    pub status: u16,
-    pub headers: Vec<(String, String)>,
-    /// Ordered body chunks.
-    pub chunks: Vec<Vec<u8>>,
-}
-
-/// One exchange per fetch.
-pub struct ReplayTransport {
-    left: VecDeque<TraceExchange>,
-    /// Parsed request bodies.
-    pub requests: Vec<Value>,
-}
-
-impl ReplayTransport {
-    pub fn new(trace: Trace) -> Self {
-        Self {
-            left: trace.exchanges.into(),
-            requests: Vec::new(),
-        }
-    }
-
-    /// Returns the next exchange.
-    pub fn fetch(&mut self, request: Value) -> io::Result<Replayed> {
-        let exchange = self
-            .left
-            .pop_front()
-            .ok_or_else(|| io::Error::other("the trace holds no further exchange"))?;
-        self.requests.push(request);
-        let chunks = exchange
-            .chunks
-            .iter()
-            .map(|chunk| {
-                base64_decode(chunk).ok_or_else(|| io::Error::other("a trace chunk is not base64"))
-            })
-            .collect::<io::Result<Vec<_>>>()?;
-        Ok(Replayed {
-            status: exchange.status as u16,
-            headers: exchange
-                .headers
+/// Plays the exchanges in order, keeping chunk edges. Nothing waits.
+pub fn replay_fetch(trace: &Trace) -> io::Result<ScriptedFetch> {
+    let exchanges = trace
+        .exchanges
+        .iter()
+        .map(|exchange| {
+            let chunks = exchange
+                .chunks
                 .iter()
-                .map(|(name, value)| (ascii_lower(name), value.clone()))
-                .collect(),
-            chunks,
+                .map(|chunk| {
+                    base64_decode(chunk)
+                        .map(|bytes| ScriptedChunk { bytes, delay_ms: 0 })
+                        .ok_or_else(|| io::Error::other("a trace chunk is not base64"))
+                })
+                .collect::<io::Result<Vec<_>>>()?;
+            Ok(ScriptedExchange {
+                status: exchange.status as u16,
+                headers: exchange
+                    .headers
+                    .iter()
+                    .map(|(name, value)| (name.to_owned(), value.clone()))
+                    .collect(),
+                chunks,
+                head_ms: 0,
+                end: ScriptedEnd::Closed,
+                error: None,
+            })
         })
-    }
+        .collect::<io::Result<Vec<_>>>()?;
+    Ok(ScriptedFetch::new(exchanges, Arc::new(TimerWheel::new(0))))
 }

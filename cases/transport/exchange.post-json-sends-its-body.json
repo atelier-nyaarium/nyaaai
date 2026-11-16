@@ -1,0 +1,98 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.exchange",
+	"name": "post-json-sends-its-body",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"baseUrl": "https://openrouter.ai/api/v1",
+		"label": "OpenRouter",
+		"userAgent": "lab-app/1.0",
+		"keys": [
+			"key-0123456789abcdef"
+		],
+		"startMs": 1800000000000,
+		"script": {
+			"kind": "inline",
+			"exchanges": [
+				{
+					"status": 200,
+					"headers": [
+						[
+							"content-type",
+							"application/json"
+						]
+					],
+					"chunks": [
+						{
+							"kind": "text",
+							"text": "{\"ok\":true}"
+						}
+					]
+				}
+			]
+		},
+		"calls": [
+			{
+				"kind": "postJson",
+				"path": "/probe",
+				"body": {
+					"a": 1,
+					"b": [
+						"x"
+					]
+				}
+			}
+		]
+	},
+	"expected": {
+		"calls": [
+			{
+				"events": [],
+				"result": null,
+				"answer": {
+					"ok": true
+				},
+				"failure": null,
+				"thrown": null,
+				"aborted": false,
+				"nowMs": 1800000000000
+			}
+		],
+		"requests": [
+			{
+				"method": "POST",
+				"url": "https://openrouter.ai/api/v1/probe",
+				"headers": [
+					[
+						"Accept",
+						"application/json"
+					],
+					[
+						"User-Agent",
+						"lab-app/1.0"
+					],
+					[
+						"Authorization",
+						"Bearer key-0123456789abcdef"
+					],
+					[
+						"Content-Type",
+						"application/json"
+					]
+				],
+				"body": "{\"a\":1,\"b\":[\"x\"]}"
+			}
+		],
+		"log": [],
+		"settled": [],
+		"keyReads": 1,
+		"read": [
+			1
+		],
+		"waiting": []
+	}
+}

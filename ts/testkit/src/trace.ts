@@ -2,9 +2,10 @@
 
 import { readFile } from "node:fs/promises";
 import { base64Decode } from "@nyaaai/contract/base64";
-import { parseJson } from "@nyaaai/contract/json";
 import { decodeText, shapeSet } from "@nyaaai/contract/shape";
 import { z } from "zod";
+import { TimerWheel } from "./scheduler";
+import { type ScriptedExchange, type ScriptedFetch, scriptedFetch } from "./scriptedFetch";
 
 ////////////////////////////////
 //  Shapes
@@ -27,16 +28,6 @@ export type Trace = z.infer<typeof Trace>;
 export const traceSet = shapeSet("trace", { TraceExchange, Trace });
 
 ////////////////////////////////
-//  Interfaces & Types
-
-export interface ReplayTransport {
-	/** Returns the next exchange. */
-	fetch: (input: string | URL, init?: { body?: string }) => Promise<Response>;
-	/** Parsed request bodies. */
-	requests: unknown[];
-}
-
-////////////////////////////////
 //  Functions & Helpers
 
 export async function readTrace(file: string): Promise<Trace> {
@@ -45,29 +36,18 @@ export async function readTrace(file: string): Promise<Trace> {
 	return held.value;
 }
 
-/** Replay preserves body chunks. */
-export function replayTransport(trace: Trace): ReplayTransport {
-	const left = [...trace.exchanges];
-	const requests: unknown[] = [];
-	return {
-		requests,
-		fetch: async (_input, init) => {
-			const exchange = left.shift();
-			if (!exchange) throw new Error("the trace holds no further exchange");
-			requests.push(init?.body === undefined ? null : (parseJson(init.body) ?? null));
-			const chunks = exchange.chunks.map((chunk) => {
+/** Plays the exchanges in order, keeping chunk edges. Nothing waits. */
+export function replayFetch(trace: Trace): ScriptedFetch {
+	const exchanges = trace.exchanges.map(
+		(exchange): ScriptedExchange => ({
+			status: exchange.status,
+			headers: Object.entries(exchange.headers),
+			chunks: exchange.chunks.map((chunk) => {
 				const bytes = base64Decode(chunk);
 				if (!bytes) throw new Error("a trace chunk is not base64");
-				return bytes;
-			});
-			const body = new ReadableStream<Uint8Array>({
-				pull(controller) {
-					const chunk = chunks.shift();
-					if (chunk) controller.enqueue(chunk);
-					else controller.close();
-				},
-			});
-			return new Response(body, { status: exchange.status, headers: exchange.headers });
-		},
-	};
+				return { bytes };
+			}),
+		}),
+	);
+	return scriptedFetch(exchanges, new TimerWheel());
 }

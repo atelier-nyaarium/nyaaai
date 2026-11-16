@@ -291,6 +291,14 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
             input,
             super::codec::failure,
         ),
+        "transport.exchange" => run_with::<
+            shapes::TransportExchangeInput,
+            shapes::TransportExchangeResult,
+        >(input, root, super::transport::exchange),
+        "transport.key" => run::<shapes::TransportKeyInput, shapes::TransportKeyResult>(
+            input,
+            super::transport::key,
+        ),
         _ => return None,
     })
 }

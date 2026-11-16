@@ -18,14 +18,17 @@ pub enum Mode {
 
 /// Pushed one SSE item at a time. Events an item completes are appended
 /// to `events`, kept when the item then fails.
-pub trait StreamDecoder {
+pub trait StreamDecoder: Send {
     fn push(&mut self, item: &SseItem, events: &mut Vec<StepEvent>) -> Result<(), ProviderError>;
+
+    /// Whether the decoder reads no further item: after an end marker or a failure.
+    fn over(&self) -> bool;
 
     /// The input ended: an early end throws `ProviderError`.
     fn end(&mut self, events: &mut Vec<StepEvent>) -> Result<(), ProviderError>;
 }
 
-pub trait Codec {
+pub trait Codec: Send + Sync {
     /// `Err`: the request was refused before sending.
     fn encode(&self, request: &CanonicalRequest, mode: Mode) -> Result<Encoded, String>;
 

@@ -1,0 +1,13 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.key",
+	"name": "shape-every-printable-symbol",
+	"input": {
+		"text": "!\"#$%&'()*+,-./0123456789:;<=>?@AZaz[\\]^_`{|}~"
+	},
+	"expected": {
+		"shape": true,
+		"normalized": "!\"#$%&'()*+,-./0123456789:;<=>?@AZaz[\\]^_`{|}~"
+	}
+}

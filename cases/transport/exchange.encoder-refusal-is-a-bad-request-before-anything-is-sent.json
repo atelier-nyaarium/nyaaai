@@ -1,0 +1,77 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.exchange",
+	"name": "encoder-refusal-is-a-bad-request-before-anything-is-sent",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"baseUrl": "https://openrouter.ai/api/v1",
+		"label": "OpenRouter",
+		"userAgent": "lab-app/1.0",
+		"keys": [
+			"key-0123456789abcdef"
+		],
+		"startMs": 1800000000000,
+		"script": {
+			"kind": "inline",
+			"exchanges": []
+		},
+		"calls": [
+			{
+				"kind": "stream",
+				"request": {
+					"model": "openai/gpt-6-luna",
+					"system": [],
+					"history": [
+						{
+							"role": "user",
+							"text": "Hi"
+						}
+					],
+					"cache": {
+						"kind": "none"
+					},
+					"session": "root-1",
+					"zdrOnly": true,
+					"schema": {
+						"name": "pick",
+						"json": {
+							"type": "object",
+							"properties": {
+								"a": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				}
+			}
+		]
+	},
+	"expected": {
+		"calls": [
+			{
+				"events": [],
+				"result": null,
+				"answer": null,
+				"failure": {
+					"category": "badRequest",
+					"status": "badRequest",
+					"message": "A strict json_schema cannot carry an optional field `a`; make it `.nullable()`, which is what strict mode sends."
+				},
+				"thrown": null,
+				"aborted": false,
+				"nowMs": 1800000000000
+			}
+		],
+		"requests": [],
+		"log": [],
+		"settled": [],
+		"keyReads": 0,
+		"read": [],
+		"waiting": []
+	}
+}
