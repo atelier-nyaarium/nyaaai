@@ -44,8 +44,8 @@
 			{
 				"kind": "usage",
 				"usage": {
-					"input": -5,
-					"output": -2
+					"input": 0,
+					"output": 0
 				}
 			},
 			{
@@ -63,8 +63,8 @@
 			"parts": [],
 			"finish": "stop",
 			"usage": {
-				"input": -5,
-				"output": -2
+				"input": 0,
+				"output": 0
 			},
 			"serving": {
 				"generationId": "gen-1"

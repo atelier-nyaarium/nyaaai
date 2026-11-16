@@ -655,11 +655,14 @@ impl Decoder<'_> {
 struct ResponsesStream<'a> {
     decoder: Decoder<'a>,
     over: bool,
-    dead: bool,
+    failed: Option<ProviderError>,
 }
 
 impl StreamDecoder for ResponsesStream<'_> {
     fn push(&mut self, item: &SseItem, events: &mut Vec<StepEvent>) -> Result<(), ProviderError> {
+        if let Some(error) = &self.failed {
+            return Err(error.clone());
+        }
         if self.over {
             return Ok(());
         }
@@ -678,25 +681,29 @@ impl StreamDecoder for ResponsesStream<'_> {
                 self.decoder.event(type_, &chunk, events)
             }),
         };
-        if result.is_err() {
-            self.dead = true;
+        if let Err(error) = &result {
+            self.failed = Some(error.clone());
         }
-        if self.dead || self.decoder.finished {
+        if self.failed.is_some() || self.decoder.finished {
             self.over = true;
         }
         result
     }
 
     fn end(&mut self, _events: &mut Vec<StepEvent>) -> Result<(), ProviderError> {
-        if self.decoder.finished || self.dead {
+        if let Some(error) = &self.failed {
+            return Err(error.clone());
+        }
+        if self.decoder.finished {
             return Ok(());
         }
-        self.dead = true;
-        Err(failed(
+        let error = failed(
             FailureCategory::Truncated,
             "The stream ended before the response completed.",
             FailureExtra::default(),
-        ))
+        );
+        self.failed = Some(error.clone());
+        Err(error)
     }
 }
 
@@ -742,7 +749,7 @@ impl<H: Host> Codec for ResponsesCodec<H> {
                 usage: None,
             },
             over: false,
-            dead: false,
+            failed: None,
         })
     }
 

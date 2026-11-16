@@ -152,6 +152,12 @@ function stringAt(raw: Json, key: string): string | undefined {
 	return typeof value === "string" ? value : undefined;
 }
 
+/** A count or an amount: negative reads as mistyped, negative zero as zero. */
+function amountAt(raw: Json, key: string): number | undefined {
+	const value = numberOf(raw[key]);
+	return value === undefined || value < 0 ? undefined : value + 0;
+}
+
 function numberAt(raw: Json, key: string): number | undefined {
 	return numberOf(raw[key]);
 }
@@ -189,28 +195,28 @@ export function readError(raw: unknown): WireError | undefined {
 /** Mistyped counts become zero. */
 export function readUsage(raw: unknown): Usage | undefined {
 	if (!isJson(raw)) return undefined;
-	const total = numberAt(raw, "total_tokens");
-	const cost = numberAt(raw, "cost");
+	const total = amountAt(raw, "total_tokens");
+	const cost = amountAt(raw, "cost");
 	const byok = raw["is_byok"];
 	const costs = objectAt(raw, "cost_details");
 	const prompt = objectAt(raw, "prompt_tokens_details");
 	const completion = objectAt(raw, "completion_tokens_details");
 	const block = objectAt(raw, "opencode");
 	const upstream = costs === undefined ? undefined : costs["upstream_inference_cost"];
-	const cached = prompt === undefined ? undefined : numberAt(prompt, "cached_tokens");
-	const written = prompt === undefined ? undefined : numberAt(prompt, "cache_write_tokens");
-	const reasoning = completion === undefined ? undefined : numberAt(completion, "reasoning_tokens");
+	const upstreamCost = upstream === null ? null : amountAt({ upstream }, "upstream");
+	const cached = prompt === undefined ? undefined : amountAt(prompt, "cached_tokens");
+	const written = prompt === undefined ? undefined : amountAt(prompt, "cache_write_tokens");
+	const reasoning = completion === undefined ? undefined : amountAt(completion, "reasoning_tokens");
 	return {
-		prompt_tokens: numberAt(raw, "prompt_tokens") ?? 0,
-		completion_tokens: numberAt(raw, "completion_tokens") ?? 0,
+		prompt_tokens: amountAt(raw, "prompt_tokens") ?? 0,
+		completion_tokens: amountAt(raw, "completion_tokens") ?? 0,
 		...(total === undefined ? {} : { total_tokens: total }),
 		...(cost === undefined ? {} : { cost }),
 		...(typeof byok === "boolean" ? { is_byok: byok } : {}),
 		...(costs === undefined
 			? {}
 			: {
-					cost_details:
-						upstream === null || typeof upstream === "number" ? { upstream_inference_cost: upstream } : {},
+					cost_details: upstreamCost === undefined ? {} : { upstream_inference_cost: upstreamCost },
 				}),
 		...(prompt === undefined
 			? {}
@@ -229,13 +235,13 @@ export function readUsage(raw: unknown): Usage | undefined {
 
 function readBilling(block: Json): NonNullable<Usage["opencode"]> {
 	const source = stringAt(block, "billing_source");
-	const list = numberAt(block, "list_cost");
-	const allowance = numberAt(block, "allowance");
+	const list = amountAt(block, "list_cost");
+	const allowance = amountAt(block, "allowance");
 	const tokens = objectAt(block, "tokens");
 	const counts = (
 		["input", "output", "reasoning", "cache_read", "cache_write_5m", "cache_write_1h"] as const
 	).flatMap((key) => {
-		const count = tokens === undefined ? undefined : numberAt(tokens, key);
+		const count = tokens === undefined ? undefined : amountAt(tokens, key);
 		return count === undefined ? [] : [[key, count] as const];
 	});
 	return {
@@ -321,10 +327,10 @@ function readWireCall(raw: unknown): WireCall[] {
 	];
 }
 
-/** A mistyped reason is a stop. */
+/** A mistyped reason is an error. */
 function readFinish(raw: unknown): string | undefined {
 	if (typeof raw === "string") return raw;
-	return raw === undefined || raw === null ? undefined : "stop";
+	return raw === undefined || raw === null ? undefined : "error";
 }
 
 function readServing(raw: Json): { id?: string; provider?: string } {

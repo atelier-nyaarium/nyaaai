@@ -1,0 +1,85 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "openrouter-extreme-usage-negative-counts-everywhere",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"a\"}}]}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}]}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-1\",\"choices\":[],\"usage\":{\"prompt_tokens\":-3.5,\"completion_tokens\":-1,\"total_tokens\":-4,\"prompt_tokens_details\":{\"cached_tokens\":-2,\"cache_write_tokens\":-1},\"completion_tokens_details\":{\"reasoning_tokens\":-1},\"opencode\":{\"tokens\":{\"cache_read\":-1,\"cache_write_5m\":-2,\"cache_write_1h\":5,\"reasoning\":-1}}}}"
+			},
+			{
+				"kind": "done"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"host": "Azure",
+					"generationId": "gen-1"
+				}
+			},
+			{
+				"kind": "text",
+				"text": "a"
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "gen-1"
+				}
+			},
+			{
+				"kind": "finish",
+				"reason": "stop"
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "gen-1"
+				}
+			},
+			{
+				"kind": "usage",
+				"usage": {
+					"input": 0,
+					"output": 0
+				}
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "a"
+				}
+			],
+			"finish": "stop",
+			"usage": {
+				"input": 0,
+				"output": 0
+			},
+			"serving": {
+				"host": "Azure",
+				"generationId": "gen-1"
+			}
+		},
+		"failure": null
+	}
+}

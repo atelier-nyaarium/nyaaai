@@ -1,0 +1,37 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "openrouter-extreme-reply-finish-object-is-an-error",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"body": {
+			"choices": [
+				{
+					"message": {
+						"content": "a"
+					},
+					"finish_reason": {
+						"error": "boom"
+					}
+				}
+			]
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "a"
+				}
+			],
+			"finish": "error",
+			"serving": {}
+		},
+		"failure": null
+	}
+}

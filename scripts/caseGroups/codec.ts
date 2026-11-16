@@ -36,10 +36,11 @@ export const codec = caseGroup("codec", {
 			z.object({ codec: CodecName, request: CanonicalRequest, mode: z.enum(["stream", "complete"]) }),
 			z.object({ encoded: Encoded.nullable(), refusal: z.string().nullable() }),
 			(input) => {
+				const built = codecOf(input.codec);
 				try {
-					return { encoded: codecOf(input.codec).encode(input.request, input.mode), refusal: null };
+					return { encoded: built.encode(input.request, input.mode), refusal: null };
 				} catch (error) {
-					if (!(error instanceof Error)) throw error;
+					if (!(error instanceof Error) || Object.getPrototypeOf(error) !== Error.prototype) throw error;
 					return { encoded: null, refusal: error.message };
 				}
 			},

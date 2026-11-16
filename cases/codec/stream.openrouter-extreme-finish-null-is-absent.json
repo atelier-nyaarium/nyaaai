@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "openrouter-extreme-finish-null-is-absent",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"a\"}}]}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"choices\":[{\"finish_reason\":null}]}"
+			},
+			{
+				"kind": "done"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"host": "Azure",
+					"generationId": "gen-1"
+				}
+			},
+			{
+				"kind": "text",
+				"text": "a"
+			}
+		],
+		"result": null,
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": "The provider ended the step."
+		}
+	}
+}

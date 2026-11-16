@@ -59,7 +59,7 @@ const USAGES: Array<[string, Json]> = [
 	["source-case-matters", block({ billing_source: "Go" })],
 	["source-mistyped-is-dropped", block({ billing_source: 1 })],
 	["list-cost", block({ list_cost: 0.01 })],
-	["list-cost-negative-is-kept", block({ list_cost: -0.01 })],
+	["list-cost-negative-is-dropped", block({ list_cost: -0.01 })],
 	["list-cost-mistyped-is-dropped", block({ list_cost: "0.01" })],
 	["allowance", block({ allowance: 0.25 })],
 	["allowance-zero", block({ allowance: 0 })],

@@ -28,7 +28,7 @@ function untilReset(at: string | number | undefined, nowMs: number): number | un
 
 function amountOf(value: unknown): number | undefined {
 	const amount = numberOf(value);
-	return amount !== undefined && amount >= 0 ? amount : undefined;
+	return amount !== undefined && amount >= 0 ? amount + 0 : undefined;
 }
 
 function overloaded(error: WireError): boolean {
@@ -79,14 +79,15 @@ export function opencodeUsage(own: NormalizedUsage, raw: Record<string, unknown>
 	const tokens = isJson(block["tokens"]) ? block["tokens"] : {};
 	const cost = amountOf(raw["cost"]);
 	const source = block["billing_source"];
-	const listCost = numberOf(block["list_cost"]);
+	const listCost = amountOf(block["list_cost"]);
 	const allowance = amountOf(block["allowance"]);
-	const cached = own.cached ?? numberOf(tokens["cache_read"]);
-	const writes = [numberOf(tokens["cache_write_5m"]), numberOf(tokens["cache_write_1h"])].filter(
+	const cached = own.cached ?? amountOf(tokens["cache_read"]);
+	const writes = [amountOf(tokens["cache_write_5m"]), amountOf(tokens["cache_write_1h"])].filter(
 		(each): each is number => each !== undefined,
 	);
-	const cacheWrite = own.cacheWrite ?? (writes.length === 0 ? undefined : writes.reduce((sum, each) => sum + each));
-	const reasoning = own.reasoning ?? numberOf(tokens["reasoning"]);
+	const cacheWrite =
+		own.cacheWrite ?? (writes.length === 0 ? undefined : writes.reduce((sum, each) => sum + each, 0));
+	const reasoning = own.reasoning ?? amountOf(tokens["reasoning"]);
 	return {
 		...own,
 		...(cached === undefined ? {} : { cached }),

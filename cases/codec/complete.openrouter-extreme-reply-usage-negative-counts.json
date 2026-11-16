@@ -1,0 +1,47 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "openrouter-extreme-reply-usage-negative-counts",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"body": {
+			"choices": [
+				{
+					"message": {
+						"content": "a"
+					},
+					"finish_reason": "stop"
+				}
+			],
+			"usage": {
+				"prompt_tokens": -5,
+				"completion_tokens": 2,
+				"cost": -1,
+				"cost_details": {
+					"upstream_inference_cost": -1
+				}
+			}
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "a"
+				}
+			],
+			"finish": "stop",
+			"usage": {
+				"input": 0,
+				"output": 2
+			},
+			"serving": {}
+		},
+		"failure": null
+	}
+}

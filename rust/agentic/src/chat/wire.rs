@@ -149,6 +149,13 @@ fn number_at(raw: &Object, key: &str) -> Option<f64> {
     raw.get(key).and_then(number_of)
 }
 
+/// A count or an amount: negative reads as mistyped, negative zero as zero.
+fn amount_at(raw: &Object, key: &str) -> Option<f64> {
+    number_at(raw, key)
+        .filter(|value| *value >= 0.0)
+        .map(|value| value + 0.0)
+}
+
 fn object_at<'a>(raw: &'a Object, key: &str) -> Option<&'a Object> {
     raw.get(key).and_then(Value::as_object)
 }
@@ -203,22 +210,18 @@ pub fn read_usage(raw: Option<&Value>) -> Option<Usage> {
     let prompt = object_at(raw, "prompt_tokens_details");
     let completion = object_at(raw, "completion_tokens_details");
     Some(Usage {
-        prompt_tokens: number_at(raw, "prompt_tokens").unwrap_or(0.0),
-        completion_tokens: number_at(raw, "completion_tokens").unwrap_or(0.0),
-        total_tokens: number_at(raw, "total_tokens"),
-        cost: number_at(raw, "cost"),
+        prompt_tokens: amount_at(raw, "prompt_tokens").unwrap_or(0.0),
+        completion_tokens: amount_at(raw, "completion_tokens").unwrap_or(0.0),
+        total_tokens: amount_at(raw, "total_tokens"),
+        cost: amount_at(raw, "cost"),
         is_byok: raw.get("is_byok").and_then(Value::as_bool),
-        upstream_inference_cost: object_at(raw, "cost_details").map(|costs| {
-            match costs.get("upstream_inference_cost") {
-                Some(Value::Number(number)) => Some(*number),
-                _ => None,
-            }
-        }),
+        upstream_inference_cost: object_at(raw, "cost_details")
+            .map(|costs| amount_at(costs, "upstream_inference_cost")),
         prompt_tokens_details: prompt.map(|held| PromptDetails {
-            cached_tokens: number_at(held, "cached_tokens"),
-            cache_write_tokens: number_at(held, "cache_write_tokens"),
+            cached_tokens: amount_at(held, "cached_tokens"),
+            cache_write_tokens: amount_at(held, "cache_write_tokens"),
         }),
-        reasoning_tokens: completion.map(|held| number_at(held, "reasoning_tokens")),
+        reasoning_tokens: completion.map(|held| amount_at(held, "reasoning_tokens")),
         opencode: object_at(raw, "opencode").map(read_billing),
     })
 }
@@ -226,15 +229,15 @@ pub fn read_usage(raw: Option<&Value>) -> Option<Usage> {
 pub fn read_billing(block: &Object) -> Billing {
     Billing {
         billing_source: string_at(block, "billing_source"),
-        list_cost: number_at(block, "list_cost"),
-        allowance: number_at(block, "allowance"),
+        list_cost: amount_at(block, "list_cost"),
+        allowance: amount_at(block, "allowance"),
         tokens: object_at(block, "tokens").map(|tokens| BillingTokens {
-            input: number_at(tokens, "input"),
-            output: number_at(tokens, "output"),
-            reasoning: number_at(tokens, "reasoning"),
-            cache_read: number_at(tokens, "cache_read"),
-            cache_write_5m: number_at(tokens, "cache_write_5m"),
-            cache_write_1h: number_at(tokens, "cache_write_1h"),
+            input: amount_at(tokens, "input"),
+            output: amount_at(tokens, "output"),
+            reasoning: amount_at(tokens, "reasoning"),
+            cache_read: amount_at(tokens, "cache_read"),
+            cache_write_5m: amount_at(tokens, "cache_write_5m"),
+            cache_write_1h: amount_at(tokens, "cache_write_1h"),
         }),
     }
 }
@@ -293,12 +296,12 @@ fn read_wire_call(raw: &Value) -> Option<WireCall> {
     })
 }
 
-/// A mistyped reason is a stop.
+/// A mistyped reason is an error.
 fn read_finish(raw: Option<&Value>) -> Option<String> {
     match raw {
         Some(Value::String(text)) => Some(text.clone()),
         None | Some(Value::Null) => None,
-        Some(_) => Some("stop".to_owned()),
+        Some(_) => Some("error".to_owned()),
     }
 }
 

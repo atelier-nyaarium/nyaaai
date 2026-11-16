@@ -1,0 +1,93 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "openrouter-extreme-usage-negative-zero-details",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"a\"}}]}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}]}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-1\",\"choices\":[],\"usage\":{\"prompt_tokens\":1,\"completion_tokens\":1,\"prompt_tokens_details\":{\"cached_tokens\":-0,\"cache_write_tokens\":-0},\"completion_tokens_details\":{\"reasoning_tokens\":-0},\"cost_details\":{\"upstream_inference_cost\":-0},\"opencode\":{\"list_cost\":-0,\"allowance\":-0,\"tokens\":{\"cache_read\":-0,\"cache_write_5m\":-0,\"cache_write_1h\":-0,\"reasoning\":-0}}}}"
+			},
+			{
+				"kind": "done"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"host": "Azure",
+					"generationId": "gen-1"
+				}
+			},
+			{
+				"kind": "text",
+				"text": "a"
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "gen-1"
+				}
+			},
+			{
+				"kind": "finish",
+				"reason": "stop"
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "gen-1"
+				}
+			},
+			{
+				"kind": "usage",
+				"usage": {
+					"input": 1,
+					"output": 1,
+					"cached": 0,
+					"cacheWrite": 0,
+					"reasoning": 0,
+					"upstreamCost": 0
+				}
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "a"
+				}
+			],
+			"finish": "stop",
+			"usage": {
+				"input": 1,
+				"output": 1,
+				"cached": 0,
+				"cacheWrite": 0,
+				"reasoning": 0,
+				"upstreamCost": 0
+			},
+			"serving": {
+				"host": "Azure",
+				"generationId": "gen-1"
+			}
+		},
+		"failure": null
+	}
+}

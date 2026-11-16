@@ -27,7 +27,7 @@
 					"text": "a"
 				}
 			],
-			"finish": "stop",
+			"finish": "error",
 			"serving": {}
 		},
 		"failure": null

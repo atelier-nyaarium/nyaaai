@@ -1,0 +1,68 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "local-extreme-reply-usage-negative-counts",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "local",
+			"facts": {
+				"api": {
+					"family": "chat-completions",
+					"structured": false,
+					"choice": [],
+					"strict": false
+				},
+				"efforts": [
+					"none",
+					"low",
+					"medium",
+					"high"
+				]
+			},
+			"local": {
+				"host": "Lab",
+				"label": "Ollama",
+				"replay": "reasoning"
+			}
+		},
+		"body": {
+			"choices": [
+				{
+					"message": {
+						"content": "a"
+					},
+					"finish_reason": "stop"
+				}
+			],
+			"usage": {
+				"prompt_tokens": -5,
+				"completion_tokens": 2,
+				"cost": -1,
+				"cost_details": {
+					"upstream_inference_cost": -1
+				}
+			}
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "a"
+				}
+			],
+			"finish": "stop",
+			"usage": {
+				"input": 0,
+				"output": 2
+			},
+			"serving": {
+				"host": "Lab"
+			}
+		},
+		"failure": null
+	}
+}

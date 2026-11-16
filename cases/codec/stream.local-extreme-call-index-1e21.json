@@ -1,0 +1,89 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "local-extreme-call-index-1e21",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "local",
+			"facts": {
+				"api": {
+					"family": "chat-completions",
+					"structured": false,
+					"choice": [],
+					"strict": false
+				},
+				"efforts": [
+					"none",
+					"low",
+					"medium",
+					"high"
+				]
+			},
+			"local": {
+				"host": "Lab",
+				"label": "Ollama",
+				"replay": "reasoning"
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"choices\":[{\"delta\":{\"tool_calls\":[{\"index\":1e21,\"id\":\"c\",\"function\":{\"name\":\"n\",\"arguments\":\"{}\"}}]}}]}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"tool_calls\"}]}"
+			},
+			{
+				"kind": "done"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"host": "Lab"
+				}
+			},
+			{
+				"kind": "call",
+				"index": 1e+21,
+				"wireId": "c",
+				"name": "n",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"host": "Lab",
+					"generationId": "gen-1"
+				}
+			},
+			{
+				"kind": "finish",
+				"reason": "tool_calls"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "call",
+					"index": 1e+21,
+					"wireId": "c",
+					"name": "n",
+					"argumentsText": "{}"
+				}
+			],
+			"finish": "tool_calls",
+			"serving": {
+				"host": "Lab",
+				"generationId": "gen-1"
+			}
+		},
+		"failure": null
+	}
+}

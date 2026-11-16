@@ -1,0 +1,100 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "opencode-extreme-usage-count-infinite",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "opencode",
+			"facts": {
+				"api": {
+					"family": "chat-completions",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false,
+					"reasoning": "reasoning_content"
+				},
+				"efforts": [
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"a\"}}]}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}]}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-1\",\"choices\":[],\"usage\":{\"prompt_tokens\":1e999,\"completion_tokens\":1e999,\"prompt_tokens_details\":{\"cached_tokens\":1e999}}}"
+			},
+			{
+				"kind": "done"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "gen-1"
+				}
+			},
+			{
+				"kind": "text",
+				"text": "a"
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "gen-1"
+				}
+			},
+			{
+				"kind": "finish",
+				"reason": "stop"
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "gen-1"
+				}
+			},
+			{
+				"kind": "usage",
+				"usage": {
+					"input": 0,
+					"output": 0
+				}
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "a"
+				}
+			],
+			"finish": "stop",
+			"usage": {
+				"input": 0,
+				"output": 0
+			},
+			"serving": {
+				"generationId": "gen-1"
+			}
+		},
+		"failure": null
+	}
+}

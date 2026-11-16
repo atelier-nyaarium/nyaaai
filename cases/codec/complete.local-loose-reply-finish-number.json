@@ -46,7 +46,7 @@
 					"text": "a"
 				}
 			],
-			"finish": "stop",
+			"finish": "error",
 			"serving": {
 				"host": "Lab"
 			}

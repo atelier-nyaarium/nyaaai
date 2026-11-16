@@ -50,8 +50,7 @@
 				"kind": "usage",
 				"usage": {
 					"input": 10,
-					"output": 4,
-					"listCost": -2
+					"output": 4
 				}
 			},
 			{
@@ -69,8 +68,7 @@
 			"finish": "stop",
 			"usage": {
 				"input": 10,
-				"output": 4,
-				"listCost": -2
+				"output": 4
 			},
 			"serving": {
 				"generationId": "resp_g"

@@ -1,0 +1,85 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "openrouter-extreme-usage-cost-infinite",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"a\"}}]}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}]}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-1\",\"choices\":[],\"usage\":{\"prompt_tokens\":1,\"completion_tokens\":1,\"cost\":1e999}}"
+			},
+			{
+				"kind": "done"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"host": "Azure",
+					"generationId": "gen-1"
+				}
+			},
+			{
+				"kind": "text",
+				"text": "a"
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "gen-1"
+				}
+			},
+			{
+				"kind": "finish",
+				"reason": "stop"
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "gen-1"
+				}
+			},
+			{
+				"kind": "usage",
+				"usage": {
+					"input": 1,
+					"output": 1
+				}
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "a"
+				}
+			],
+			"finish": "stop",
+			"usage": {
+				"input": 1,
+				"output": 1
+			},
+			"serving": {
+				"host": "Azure",
+				"generationId": "gen-1"
+			}
+		},
+		"failure": null
+	}
+}

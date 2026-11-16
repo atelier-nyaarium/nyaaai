@@ -2,7 +2,7 @@
 	"format": 2,
 	"type": "function",
 	"kind": "codec.complete",
-	"name": "host-gemini-usage-list-cost-negative-is-kept",
+	"name": "host-gemini-usage-list-cost-negative-is-dropped",
 	"input": {
 		"codec": {
 			"family": "generate-content",
@@ -49,8 +49,7 @@
 			"finish": "stop",
 			"usage": {
 				"input": 10,
-				"output": 5,
-				"listCost": -0.01
+				"output": 5
 			},
 			"serving": {
 				"generationId": "resp_g"

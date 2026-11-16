@@ -1,0 +1,79 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "opencode-extreme-call-index-1e21",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "opencode",
+			"facts": {
+				"api": {
+					"family": "chat-completions",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false,
+					"reasoning": "reasoning_content"
+				},
+				"efforts": [
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"choices\":[{\"delta\":{\"tool_calls\":[{\"index\":1e21,\"id\":\"c\",\"function\":{\"name\":\"n\",\"arguments\":\"{}\"}}]}}]}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"tool_calls\"}]}"
+			},
+			{
+				"kind": "done"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "call",
+				"index": 1e+21,
+				"wireId": "c",
+				"name": "n",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "gen-1"
+				}
+			},
+			{
+				"kind": "finish",
+				"reason": "tool_calls"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "call",
+					"index": 1e+21,
+					"wireId": "c",
+					"name": "n",
+					"argumentsText": "{}"
+				}
+			],
+			"finish": "tool_calls",
+			"serving": {
+				"generationId": "gen-1"
+			}
+		},
+		"failure": null
+	}
+}

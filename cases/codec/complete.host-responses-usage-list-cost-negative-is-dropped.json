@@ -2,15 +2,15 @@
 	"format": 2,
 	"type": "function",
 	"kind": "codec.complete",
-	"name": "host-messages-usage-list-cost-negative-is-kept",
+	"name": "host-responses-usage-list-cost-negative-is-dropped",
 	"input": {
 		"codec": {
-			"family": "messages",
+			"family": "responses",
 			"dialect": "opencode",
-			"prefix": "/anthropic/v1",
+			"prefix": "/openai/v1",
 			"facts": {
 				"api": {
-					"family": "messages",
+					"family": "responses",
 					"structured": true,
 					"choice": [
 						"auto",
@@ -18,20 +18,19 @@
 						"required",
 						"tool"
 					],
-					"strict": true,
-					"toggle": true
+					"strict": true
 				},
 				"efforts": [
+					"none",
 					"low",
 					"high"
-				],
-				"outputLimit": 128000
+				]
 			}
 		},
 		"body": {
-			"id": "msg_1",
-			"content": [],
-			"stop_reason": "end_turn",
+			"id": "resp_1",
+			"status": "completed",
+			"output": [],
 			"usage": {
 				"input_tokens": 10,
 				"output_tokens": 5,
@@ -47,11 +46,10 @@
 			"finish": "stop",
 			"usage": {
 				"input": 10,
-				"output": 5,
-				"listCost": -0.01
+				"output": 5
 			},
 			"serving": {
-				"generationId": "msg_1"
+				"generationId": "resp_1"
 			}
 		},
 		"failure": null

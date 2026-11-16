@@ -47,12 +47,12 @@
 			},
 			{
 				"kind": "finish",
-				"reason": "stop"
+				"reason": "error"
 			}
 		],
 		"result": {
 			"parts": [],
-			"finish": "stop",
+			"finish": "error",
 			"serving": {
 				"host": "Lab"
 			}

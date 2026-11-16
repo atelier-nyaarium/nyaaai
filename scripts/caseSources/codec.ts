@@ -2082,6 +2082,135 @@ const replies: CaseSource[] = LOOSE_CODECS.flatMap(([name, codec]) => [
 ////////////////////////////////
 //  Cases
 
+////////////////////////////////
+//  Number extremes, finish names, segment order
+
+const rawUsage = (usage: string): Json => data(`{"id":"gen-1","choices":[],"usage":${usage}}`);
+
+const extremes: CaseSource[] = LOOSE_CODECS.flatMap(([name, codec]) => {
+	const at = (suffix: string) => `${name}-extreme-${suffix}`;
+	const usage = (label: string, body: string) =>
+		streams(at(label), codec, data(text("a")), data(finish("stop")), rawUsage(body), DONE);
+	const call = (label: string, index: string) =>
+		streams(
+			at(label),
+			codec,
+			data(
+				`{"choices":[{"delta":{"tool_calls":[{"index":${index},"id":"c","function":{"name":"n","arguments":"{}"}}]}}]}`,
+			),
+			data(finish("tool_calls")),
+			DONE,
+		);
+	const finishes = (label: string, reason: string) =>
+		streams(at(label), codec, data(text("a")), data(`{"choices":[{"finish_reason":${reason}}]}`), DONE);
+	return [
+		usage("usage-negative-zero", '{"prompt_tokens":-0,"completion_tokens":-0,"cost":-0,"total_tokens":-0}'),
+		usage(
+			"usage-negative-zero-details",
+			'{"prompt_tokens":1,"completion_tokens":1,"prompt_tokens_details":{"cached_tokens":-0,"cache_write_tokens":-0},"completion_tokens_details":{"reasoning_tokens":-0},"cost_details":{"upstream_inference_cost":-0},"opencode":{"list_cost":-0,"allowance":-0,"tokens":{"cache_read":-0,"cache_write_5m":-0,"cache_write_1h":-0,"reasoning":-0}}}',
+		),
+		usage("usage-count-past-2-53", '{"prompt_tokens":9007199254740993,"completion_tokens":18014398509481984}'),
+		usage(
+			"usage-fractional-count",
+			'{"prompt_tokens":2.5,"completion_tokens":0.25,"prompt_tokens_details":{"cached_tokens":1.5}}',
+		),
+		usage(
+			"usage-count-infinite",
+			'{"prompt_tokens":1e999,"completion_tokens":1e999,"prompt_tokens_details":{"cached_tokens":1e999}}',
+		),
+		usage("usage-cost-infinite", '{"prompt_tokens":1,"completion_tokens":1,"cost":1e999}'),
+		usage(
+			"usage-upstream-cost-infinite",
+			'{"prompt_tokens":1,"completion_tokens":1,"cost_details":{"upstream_inference_cost":1e999}}',
+		),
+		usage(
+			"usage-list-cost-and-allowance-infinite",
+			'{"prompt_tokens":1,"completion_tokens":1,"opencode":{"list_cost":1e999,"allowance":1e999}}',
+		),
+		usage(
+			"usage-token-block-infinite",
+			'{"prompt_tokens":1,"completion_tokens":1,"opencode":{"tokens":{"cache_read":1e999,"cache_write_5m":1e999,"reasoning":1e999}}}',
+		),
+		usage(
+			"usage-upstream-cost-negative",
+			'{"prompt_tokens":1,"completion_tokens":1,"cost_details":{"upstream_inference_cost":-0.5}}',
+		),
+		usage(
+			"usage-upstream-cost-null",
+			'{"prompt_tokens":1,"completion_tokens":1,"cost_details":{"upstream_inference_cost":null}}',
+		),
+		usage(
+			"usage-negative-amounts",
+			'{"prompt_tokens":1,"completion_tokens":1,"cost":-1,"opencode":{"list_cost":-3,"allowance":-2}}',
+		),
+		usage(
+			"usage-negative-counts-everywhere",
+			'{"prompt_tokens":-3.5,"completion_tokens":-1,"total_tokens":-4,"prompt_tokens_details":{"cached_tokens":-2,"cache_write_tokens":-1},"completion_tokens_details":{"reasoning_tokens":-1},"opencode":{"tokens":{"cache_read":-1,"cache_write_5m":-2,"cache_write_1h":5,"reasoning":-1}}}',
+		),
+		call("call-index-negative-zero", "-0"),
+		call("call-index-1e21", "1e21"),
+		call("call-index-past-2-53", "9007199254740993"),
+		finishes("finish-function-call", '"function_call"'),
+		finishes("finish-max-tokens", '"max_tokens"'),
+		finishes("finish-insufficient-system-resource", '"insufficient_system_resource"'),
+		finishes("finish-network-error", '"network_error"'),
+		finishes("finish-unknown-text-stays-a-stop", '"weird_new_reason"'),
+		finishes("finish-false-is-an-error", "false"),
+		finishes("finish-true-is-an-error", "true"),
+		finishes("finish-number-is-an-error", "7"),
+		finishes("finish-object-is-an-error", '{"error":"boom"}'),
+		finishes("finish-array-is-an-error", "[]"),
+		finishes("finish-null-is-absent", "null"),
+		completes(at("reply-finish-function-call"), codec, {
+			choices: [{ message: { content: "a" }, finish_reason: "function_call" }],
+		}),
+		completes(at("reply-finish-object-is-an-error"), codec, {
+			choices: [{ message: { content: "a" }, finish_reason: { error: "boom" } }],
+		}),
+		completes(at("reply-finish-insufficient-system-resource"), codec, {
+			choices: [{ message: { content: "a" }, finish_reason: "insufficient_system_resource" }],
+		}),
+		completes(at("reply-usage-negative-counts"), codec, {
+			choices: [{ message: { content: "a" }, finish_reason: "stop" }],
+			usage: { prompt_tokens: -5, completion_tokens: 2, cost: -1, cost_details: { upstream_inference_cost: -1 } },
+		}),
+	];
+});
+
+const SEAMS = [
+	{ kind: "summary", text: "Plan " },
+	{ kind: "content", text: "Body." },
+	{ kind: "summary", text: "More." },
+];
+
+const segmentOrder: CaseSource[] = [
+	encodes("openrouter-replay-segments-summary-content-summary", OPENROUTER, {
+		history: [
+			{
+				role: "step",
+				producer: { model: LUNA },
+				parts: [{ kind: "thought", type: "reasoning.text", segments: SEAMS, index: 0, opaque: "s1" }],
+			},
+		],
+	}),
+	encodes("opencode-replay-segments-summary-content-summary", opencode(), {
+		model: DEEPSEEK,
+		history: [readStep(DEEPSEEK, { kind: "thought", type: "reasoning_content", segments: SEAMS })],
+	}),
+	encodes("local-replay-segments-summary-content-summary", local({ replay: "reasoning" }), {
+		history: [
+			{
+				role: "step",
+				producer: { model: LUNA },
+				parts: [
+					{ kind: "thought", type: "reasoning", segments: SEAMS },
+					{ kind: "text", text: "Hi" },
+				],
+			},
+		],
+	}),
+];
+
 export const codecCases: CaseSource[] = [
 	...conformance,
 	...everyDialect,
@@ -2095,6 +2224,8 @@ export const codecCases: CaseSource[] = [
 	...looseItems,
 	...looseReplies,
 	...looseFailures,
+	...extremes,
+	...segmentOrder,
 	...replies,
 	...responsesCases,
 	...messagesCases,

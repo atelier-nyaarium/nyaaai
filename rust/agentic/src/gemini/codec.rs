@@ -553,11 +553,14 @@ impl<'a> Decoder<'a> {
 struct GeminiStream<'a> {
     decoder: Decoder<'a>,
     over: bool,
-    dead: bool,
+    failed: Option<ProviderError>,
 }
 
 impl StreamDecoder for GeminiStream<'_> {
     fn push(&mut self, item: &SseItem, events: &mut Vec<StepEvent>) -> Result<(), ProviderError> {
+        if let Some(error) = &self.failed {
+            return Err(error.clone());
+        }
         if self.over {
             return Ok(());
         }
@@ -571,23 +574,27 @@ impl StreamDecoder for GeminiStream<'_> {
                 parsed_chunk(&data.data).and_then(|chunk| self.decoder.chunk(&chunk, events))
             }
         };
-        if result.is_err() {
-            self.dead = true;
+        if let Err(error) = &result {
+            self.failed = Some(error.clone());
             self.over = true;
         }
         result
     }
 
     fn end(&mut self, _events: &mut Vec<StepEvent>) -> Result<(), ProviderError> {
-        if self.decoder.finished || self.dead {
+        if let Some(error) = &self.failed {
+            return Err(error.clone());
+        }
+        if self.decoder.finished {
             return Ok(());
         }
-        self.dead = true;
-        Err(failed(
+        let error = failed(
             FailureCategory::Truncated,
             "The stream ended before a finish reason.",
             FailureExtra::default(),
-        ))
+        );
+        self.failed = Some(error.clone());
+        Err(error)
     }
 }
 
@@ -627,7 +634,7 @@ impl<H: Host> Codec for GeminiCodec<H> {
         Box::new(GeminiStream {
             decoder: Decoder::new(&self.host),
             over: false,
-            dead: false,
+            failed: None,
         })
     }
 

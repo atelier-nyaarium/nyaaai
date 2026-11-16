@@ -34,7 +34,9 @@ fn until_reset(error: &WireError, now_ms: i64) -> Option<i64> {
 }
 
 fn amount_of(value: Option<f64>) -> Option<f64> {
-    value.filter(|amount| *amount >= 0.0)
+    value
+        .filter(|amount| *amount >= 0.0)
+        .map(|amount| amount + 0.0)
 }
 
 fn overloaded(error: &WireError) -> bool {
@@ -139,20 +141,20 @@ fn billed(own: NormalizedUsage, cost: Option<f64>, block: &Billing) -> Normalize
         .filter(|source| SOURCES.contains(&source.as_str()));
     let writes: Vec<f64> = [tokens.cache_write_5m, tokens.cache_write_1h]
         .into_iter()
-        .flatten()
+        .filter_map(amount_of)
         .collect();
-    let cached = own.cached.or(tokens.cache_read);
+    let cached = own.cached.or(amount_of(tokens.cache_read));
     let cache_write = own
         .cache_write
-        .or_else(|| (!writes.is_empty()).then(|| writes.iter().sum()));
-    let reasoning = own.reasoning.or(tokens.reasoning);
+        .or_else(|| (!writes.is_empty()).then(|| writes.iter().fold(0.0, |sum, each| sum + each)));
+    let reasoning = own.reasoning.or(amount_of(tokens.reasoning));
     NormalizedUsage {
         cached,
         cache_write,
         reasoning,
         cost: cost.or(own.cost),
         billing_source: source.or(own.billing_source.clone()),
-        list_cost: block.list_cost.or(own.list_cost),
+        list_cost: amount_of(block.list_cost).or(own.list_cost),
         allowance: amount_of(block.allowance).or(own.allowance),
         ..own
     }

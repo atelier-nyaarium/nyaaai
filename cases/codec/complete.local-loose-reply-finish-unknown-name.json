@@ -46,7 +46,7 @@
 					"text": "a"
 				}
 			],
-			"finish": "stop",
+			"finish": "tool_calls",
 			"serving": {
 				"host": "Lab"
 			}

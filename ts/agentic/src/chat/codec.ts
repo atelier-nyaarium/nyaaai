@@ -78,8 +78,16 @@ const FINISHES: readonly FinishReason[] = ["stop", "tool_calls", "length", "cont
 ////////////////////////////////
 //  Functions & Helpers
 
+/** Other names some hosts give. */
+const SYNONYMS = new Map<string, FinishReason>([
+	["function_call", "tool_calls"],
+	["max_tokens", "length"],
+	["insufficient_system_resource", "error"],
+	["network_error", "error"],
+]);
+
 function finishOf(reason: string): FinishReason {
-	return FINISHES.find((each) => each === reason) ?? (reason.length === 0 ? "" : "stop");
+	return FINISHES.find((each) => each === reason) ?? SYNONYMS.get(reason) ?? (reason.length === 0 ? "" : "stop");
 }
 
 function toolOf(tool: ToolSpec): ChatTool {

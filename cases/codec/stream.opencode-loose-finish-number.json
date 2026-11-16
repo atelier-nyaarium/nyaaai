@@ -43,7 +43,7 @@
 			},
 			{
 				"kind": "finish",
-				"reason": "stop"
+				"reason": "error"
 			}
 		],
 		"result": {
@@ -53,7 +53,7 @@
 					"text": "a"
 				}
 			],
-			"finish": "stop",
+			"finish": "error",
 			"serving": {}
 		},
 		"failure": null

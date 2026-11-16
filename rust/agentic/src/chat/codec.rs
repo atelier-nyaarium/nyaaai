@@ -107,7 +107,13 @@ pub fn usable(text: Option<&str>) -> Option<&str> {
 }
 
 fn finish_of(reason: &str) -> FinishReason {
-    FinishReason::parse(reason).unwrap_or(FinishReason::Stop)
+    let named = match reason {
+        "function_call" => "tool_calls",
+        "max_tokens" => "length",
+        "insufficient_system_resource" | "network_error" => "error",
+        other => other,
+    };
+    FinishReason::parse(named).unwrap_or(FinishReason::Stop)
 }
 
 fn object_of(entries: Vec<(&str, Value)>) -> Value {
@@ -475,30 +481,40 @@ struct ChatStream<'a> {
     dialect: &'a dyn ChatDialect,
     finished: bool,
     over: bool,
+    failed: Option<ProviderError>,
 }
 
 impl StreamDecoder for ChatStream<'_> {
     fn push(&mut self, item: &SseItem, events: &mut Vec<StepEvent>) -> Result<(), ProviderError> {
+        if let Some(error) = &self.failed {
+            return Err(error.clone());
+        }
         if self.over {
             return Ok(());
         }
         let result = self.read(item, events);
-        if result.is_err() {
+        if let Err(error) = &result {
             self.over = true;
+            self.failed = Some(error.clone());
         }
         result
     }
 
     fn end(&mut self, _events: &mut Vec<StepEvent>) -> Result<(), ProviderError> {
+        if let Some(error) = &self.failed {
+            return Err(error.clone());
+        }
         if self.over {
             return Ok(());
         }
         self.over = true;
-        Err(failed(
+        let error = failed(
             FailureCategory::Truncated,
             "The stream ended before [DONE].",
             FailureExtra::default(),
-        ))
+        );
+        self.failed = Some(error.clone());
+        Err(error)
     }
 }
 
@@ -598,6 +614,7 @@ impl<D: ChatDialect> Codec for ChatCodec<D> {
             dialect: &self.dialect,
             finished: false,
             over: false,
+            failed: None,
         })
     }
 
