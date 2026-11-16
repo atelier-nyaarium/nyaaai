@@ -23,19 +23,16 @@ use nyaaai_contract::shapes::frames::{
 use nyaaai_contract::time::{Clock, SteppedClock, SystemClock};
 use nyaaai_contract::version::CONTRACT_VERSION;
 
-/// Oversized lines stay unread.
-pub const MAX_FRAME_BYTES: usize = 8 * 1024 * 1024;
-
-pub const EXIT_REJECTED: u8 = 2;
+use nyaaai_contract::adapter_texts::{
+    BAD_INPUT, CRASHED, GREETED_TWICE, INTERRUPTED, MISFIT, NO_COMMAND, NO_SUCH_REQUEST,
+    NO_SUCH_RUN, NOT_HOST_FRAME, NOT_JSON, OVERSIZED_FRAME, REJECT_REASON, RUN_OPEN, SAY_HELLO,
+};
+pub use nyaaai_contract::adapter_texts::{EXIT_REJECTED, MAX_FRAME_BYTES};
 
 /// The runtime would not start.
 pub const EXIT_FAILED: u8 = 1;
 
 const READ_CHUNK_BYTES: usize = 1 << 16;
-
-/// Shared crash message.
-const CRASHED: &str = "the command crashed";
-const MISFIT: &str = "the result does not fit the command";
 
 pub enum Inbound {
     Steer(String),
@@ -415,11 +412,11 @@ type Launch = dyn Fn(&str, Value, RunContext) -> Option<Command> + Send + Sync;
 
 fn failed(context: &RunContext, error: RunError) -> AdapterFrame {
     let (code, path, message) = match error {
-        RunError::Interrupted => (RunFailure::Interrupted, None, "interrupted".to_owned()),
+        RunError::Interrupted => (RunFailure::Interrupted, None, INTERRUPTED.to_owned()),
         RunError::BadInput(path) => (
             RunFailure::BadInput,
             Some(frame_path(path)),
-            "the input does not fit the command".to_owned(),
+            BAD_INPUT.to_owned(),
         ),
         RunError::HostRequest(message) => (RunFailure::HostRequest, None, message),
         RunError::UnknownCommand(message) => (RunFailure::UnknownCommand, None, message),
@@ -482,7 +479,7 @@ fn start(
         let worked = match launched {
             Ok(Some(command)) => Guarded(command).await,
             Ok(None) => Some(Err(RunError::UnknownCommand(format!(
-                "no command {}",
+                "{NO_COMMAND}{}",
                 frame.command
             )))),
             Err(_) => None,
@@ -519,7 +516,7 @@ pub fn serve_blocking(
             let name = name.to_owned();
             Some(blocking(&context, move |blocked| {
                 commands(&name, &input, blocked)
-                    .unwrap_or_else(|| Err(RunError::UnknownCommand(format!("no command {name}"))))
+                    .unwrap_or_else(|| Err(RunError::UnknownCommand(format!("{NO_COMMAND}{name}"))))
             }))
         }),
     )
@@ -542,22 +539,25 @@ fn serve_with(input: impl Read, out: Box<dyn Write + Send>, launch: Arc<Launch>)
     while let Some(line) = reader.next() {
         let bytes = match line {
             Line::Oversized => {
-                let message = "the frame is over the size cap";
-                out.fault(FaultCode::OversizedFrame, message, None, None);
+                out.fault(FaultCode::OversizedFrame, OVERSIZED_FRAME, None, None);
                 continue;
             }
             Line::Bytes(bytes) if bytes.is_empty() => continue,
             Line::Bytes(bytes) => bytes,
         };
         let Some(value) = parse_json(&String::from_utf8_lossy(&bytes)) else {
-            out.fault(FaultCode::BadFrame, "not JSON", None, None);
+            out.fault(FaultCode::BadFrame, NOT_JSON, None, None);
             continue;
         };
         let frame = match HostFrame::decode(&value) {
             Ok(frame) => frame,
             Err(refused) => {
-                let message = "not a host frame";
-                out.fault(FaultCode::BadFrame, message, None, Some(refused.path));
+                out.fault(
+                    FaultCode::BadFrame,
+                    NOT_HOST_FRAME,
+                    None,
+                    Some(refused.path),
+                );
                 continue;
             }
         };
@@ -574,23 +574,22 @@ fn serve_with(input: impl Read, out: Box<dyn Write + Send>, launch: Arc<Launch>)
                 HostFrame::Hello(_) => {
                     out.frame(&AdapterFrame::Reject(Reject {
                         version: CONTRACT_VERSION.to_owned(),
-                        reason: "another contract version".to_owned(),
+                        reason: REJECT_REASON.to_owned(),
                     }));
                     return EXIT_REJECTED;
                 }
-                _ => out.fault(FaultCode::NotGreeted, "say hello first", None, None),
+                _ => out.fault(FaultCode::NotGreeted, SAY_HELLO, None, None),
             }
             continue;
         }
         let (run, inbound) = match frame {
             HostFrame::Hello(_) => {
-                out.fault(FaultCode::BadFrame, "greeted twice", None, None);
+                out.fault(FaultCode::BadFrame, GREETED_TWICE, None, None);
                 continue;
             }
             HostFrame::Start(frame) => {
                 if locked(&runs).contains_key(&frame.run) {
-                    let message = "the run is open";
-                    out.fault(FaultCode::DuplicateRun, message, Some(&frame.run), None);
+                    out.fault(FaultCode::DuplicateRun, RUN_OPEN, Some(&frame.run), None);
                 } else {
                     tasks.retain(|task| !task.is_finished());
                     tasks.push(start(frame, &launch, &out, &runs, &pool));
@@ -616,7 +615,7 @@ fn serve_with(input: impl Read, out: Box<dyn Write + Send>, launch: Arc<Launch>)
         };
         let held = locked(&runs);
         let Some(handle) = held.get(&run) else {
-            out.fault(FaultCode::UnknownRun, "no such run", Some(&run), None);
+            out.fault(FaultCode::UnknownRun, NO_SUCH_RUN, Some(&run), None);
             continue;
         };
         let answered = match &inbound {
@@ -632,7 +631,7 @@ fn serve_with(input: impl Read, out: Box<dyn Write + Send>, launch: Arc<Launch>)
                 handle.cancel.cancel();
             }
         } else {
-            out.fault(FaultCode::UnknownReply, "no such request", Some(&run), None);
+            out.fault(FaultCode::UnknownReply, NO_SUCH_REQUEST, Some(&run), None);
         }
     }
 

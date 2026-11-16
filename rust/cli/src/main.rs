@@ -32,7 +32,8 @@ fn run(name: &str, input: Value, context: RunContext) -> Option<Command> {
                 .map(|held| held.map_err(nyaaai_adapter::runtime::RunError::Failed))
                 .unwrap_or_else(|| {
                     Err(nyaaai_adapter::runtime::RunError::UnknownCommand(format!(
-                        "no command {name}"
+                        "{}{name}",
+                        nyaaai_contract::adapter_texts::NO_COMMAND
                     )))
                 })
         }));

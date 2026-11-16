@@ -14,8 +14,8 @@ type Schema = { [key: string]: Json };
 ////////////////////////////////
 //  Constants
 
-const TYPES = new Set(["null", "boolean", "number", "integer", "string", "array", "object"]);
-const VALIDATED = new Set([
+export const TYPES = new Set(["null", "boolean", "number", "integer", "string", "array", "object"]);
+export const VALIDATED = new Set([
 	"type",
 	"enum",
 	"const",
@@ -37,12 +37,12 @@ const VALIDATED = new Set([
 	"$ref",
 	"$defs",
 ]);
-const ANNOTATIONS = new Set(["description", "title", "default", "examples"]);
-const DROPPED = new Set(["$schema", "pattern", "format"]);
+export const ANNOTATIONS = new Set(["description", "title", "default", "examples"]);
+export const DROPPED = new Set(["$schema", "pattern", "format"]);
 
-const MAPS = new Set(["properties", "$defs"]);
-const SINGLES = new Set(["items", "propertyNames", "additionalProperties"]);
-const LISTS = new Set(["anyOf", "oneOf"]);
+export const MAPS = new Set(["properties", "$defs"]);
+export const SINGLES = new Set(["items", "propertyNames", "additionalProperties"]);
+export const LISTS = new Set(["anyOf", "oneOf"]);
 
 export const MAX_SCHEMA_DEPTH = 64;
 

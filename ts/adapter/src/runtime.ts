@@ -58,17 +58,32 @@ export const MAX_FRAME_BYTES = 8 * 1024 * 1024;
 
 const LF = 0x0a;
 
-/** Rust shares this message. */
-const CRASHED = "the command crashed";
-
 export const EXIT_REJECTED = 2;
+
+/** Texts Rust shares: `parity.ts` generates its twin. */
+export const CRASHED = "the command crashed";
+export const MISFIT = "the result does not fit the command";
+export const BAD_INPUT = "the input does not fit the command";
+export const INTERRUPTED = "interrupted";
+export const NO_COMMAND = "no command ";
+export const FAULT_TEXTS = {
+	oversizedFrame: "the frame is over the size cap",
+	notJson: "not JSON",
+	notHostFrame: "not a host frame",
+	sayHello: "say hello first",
+	greetedTwice: "greeted twice",
+	runOpen: "the run is open",
+	noSuchRun: "no such run",
+	noSuchRequest: "no such request",
+} as const;
+export const REJECT_REASON = "another contract version";
 
 ////////////////////////////////
 //  Functions & Helpers
 
 export class Interrupted extends Error {
 	constructor() {
-		super("interrupted");
+		super(INTERRUPTED);
 	}
 }
 
@@ -76,7 +91,7 @@ export class HostRequestFailed extends Error {}
 
 export class BadInput extends Error {
 	constructor(readonly path: PathPart[]) {
-		super("the input does not fit the command");
+		super(BAD_INPUT);
 	}
 }
 
@@ -94,7 +109,7 @@ export function command<In extends AnyShape, Out extends AnyShape>(
 		const plain = parseJson(stringifyJson(await run(given.value, context)));
 		if (plain === undefined) throw new Error("the result is not JSON");
 		const made = decode(result, plain);
-		if (!made.ok) throw new Error("the result does not fit the command");
+		if (!made.ok) throw new Error(MISFIT);
 		return made.value;
 	};
 }
@@ -284,7 +299,7 @@ export async function serve(options: ServeOptions): Promise<number> {
 		const work = async (): Promise<AdapterFrame> => {
 			try {
 				const held = options.commands.get(frame.command);
-				if (!held) throw new UnknownCommand(`no command ${frame.command}`);
+				if (!held) throw new UnknownCommand(`${NO_COMMAND}${frame.command}`);
 				const result = await held(frame.input, run);
 				return { type: "done", run: run.id, seq: run.nextSeq(), result: result ?? null };
 			} catch (error) {
@@ -301,49 +316,49 @@ export async function serve(options: ServeOptions): Promise<number> {
 
 	for await (const line of frameLines(options.input)) {
 		if (line === null) {
-			fault("oversized_frame", "the frame is over the size cap");
+			fault("oversized_frame", FAULT_TEXTS.oversizedFrame);
 			continue;
 		}
 		if (line.length === 0) continue;
 		const value = parseJson(decoder.decode(line));
 		if (value === undefined) {
-			fault("bad_frame", "not JSON");
+			fault("bad_frame", FAULT_TEXTS.notJson);
 			continue;
 		}
 		const decoded = decode(HostFrame, value);
 		if (!decoded.ok) {
-			fault("bad_frame", "not a host frame", { path: decoded.path });
+			fault("bad_frame", FAULT_TEXTS.notHostFrame, { path: decoded.path });
 			continue;
 		}
 		const frame = decoded.value;
 		if (!greeted) {
 			if (frame.type !== "hello") {
-				fault("not_greeted", "say hello first");
+				fault("not_greeted", FAULT_TEXTS.sayHello);
 			} else if (compatibleVersions(frame.version, CONTRACT_VERSION)) {
 				greeted = true;
 				write({ type: "welcome", version: CONTRACT_VERSION });
 			} else {
-				write({ type: "reject", version: CONTRACT_VERSION, reason: "another contract version" });
+				write({ type: "reject", version: CONTRACT_VERSION, reason: REJECT_REASON });
 				return EXIT_REJECTED;
 			}
 			continue;
 		}
 		if (frame.type === "hello") {
-			fault("bad_frame", "greeted twice");
+			fault("bad_frame", FAULT_TEXTS.greetedTwice);
 			continue;
 		}
 		const run = runs.get(frame.run);
 		if (frame.type === "start") {
-			if (run) fault("duplicate_run", "the run is open", { run: frame.run });
+			if (run) fault("duplicate_run", FAULT_TEXTS.runOpen, { run: frame.run });
 			else start(frame);
 		} else if (!run) {
-			fault("unknown_run", "no such run", { run: frame.run });
+			fault("unknown_run", FAULT_TEXTS.noSuchRun, { run: frame.run });
 		} else if (frame.type === "steer") {
 			run.inbox.push({ type: "steer", text: frame.text });
 		} else if (frame.type === "interrupt") {
 			run.interrupt();
 		} else if (!run.pending.delete(frame.id)) {
-			fault("unknown_reply", "no such request", { run: frame.run });
+			fault("unknown_reply", FAULT_TEXTS.noSuchRequest, { run: frame.run });
 		} else if (frame.type === "reply") {
 			run.inbox.push({ type: "reply", id: frame.id, value: frame.value });
 		} else {

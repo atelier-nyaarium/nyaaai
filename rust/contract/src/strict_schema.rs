@@ -6,20 +6,10 @@ use crate::issues::IssueCode;
 use crate::json::{Object, Value};
 use crate::number::number_text;
 use crate::shape::PathPart;
-
-pub const MAX_SCHEMA_DEPTH: usize = 64;
-
-/// Refs count toward nesting.
-pub const MAX_VALIDATE_DEPTH: usize = 256;
-
-/// Per-run node limit.
-pub const MAX_STEPS: usize = 1_000_000;
-
-pub const MAX_ISSUES: usize = 64;
+use crate::strict_policy::{ANNOTATIONS, DROPPED, LISTS, MAPS, SINGLES, TYPES, VALIDATED};
+pub use crate::strict_policy::{MAX_ISSUES, MAX_SCHEMA_DEPTH, MAX_STEPS, MAX_VALIDATE_DEPTH};
 
 const ROOT_REF: &str = "#";
-
-const LISTS: [&str; 2] = ["anyOf", "oneOf"];
 
 type Bound = (&'static str, IssueCode, fn(f64, f64) -> bool);
 
@@ -67,40 +57,15 @@ fn root_defs(root: &Value) -> Option<&Object> {
 }
 
 fn annotation(key: &str) -> bool {
-    matches!(key, "description" | "title" | "default" | "examples")
+    ANNOTATIONS.contains(&key)
 }
 
 fn validated(key: &str) -> bool {
-    matches!(
-        key,
-        "type"
-            | "enum"
-            | "const"
-            | "minimum"
-            | "maximum"
-            | "exclusiveMinimum"
-            | "exclusiveMaximum"
-            | "minLength"
-            | "maxLength"
-            | "minItems"
-            | "maxItems"
-            | "items"
-            | "properties"
-            | "required"
-            | "additionalProperties"
-            | "propertyNames"
-            | "anyOf"
-            | "oneOf"
-            | "$ref"
-            | "$defs"
-    )
+    VALIDATED.contains(&key)
 }
 
 fn known_type(kind: &str) -> bool {
-    matches!(
-        kind,
-        "null" | "boolean" | "number" | "integer" | "string" | "array" | "object"
-    )
+    TYPES.contains(&kind)
 }
 
 fn types_of(schema: &Object) -> Option<Vec<&str>> {
@@ -123,17 +88,15 @@ fn each_schema(value: &Value, depth: usize, change: &mut dyn FnMut(&Object) -> O
     let mut held = Object::new();
     for (key, child) in change(node).iter() {
         let rebuilt = match (key, child) {
-            ("properties" | "$defs", Value::Object(named)) => {
+            (_, Value::Object(named)) if MAPS.contains(&key) => {
                 let mut map = Object::new();
                 for (name, item) in named.iter() {
                     map.insert(name, each_schema(item, depth + 1, change));
                 }
                 Value::Object(map)
             }
-            ("items" | "propertyNames" | "additionalProperties", _) => {
-                each_schema(child, depth + 1, change)
-            }
-            ("anyOf" | "oneOf", Value::Array(branches)) => Value::Array(
+            _ if SINGLES.contains(&key) => each_schema(child, depth + 1, change),
+            (_, Value::Array(branches)) if LISTS.contains(&key) => Value::Array(
                 branches
                     .iter()
                     .map(|branch| each_schema(branch, depth + 1, change))
@@ -623,7 +586,7 @@ pub fn normalize_schema(schema: &Value) -> Value {
     let dropped = each_schema(schema, 0, &mut |node| {
         let mut held = Object::new();
         for (key, value) in node.iter() {
-            if !matches!(key, "$schema" | "pattern" | "format") {
+            if !DROPPED.contains(&key) {
                 held.insert(key, value.clone());
             }
         }

@@ -7,6 +7,7 @@ use std::io;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 
+use nyaaai_contract::adapter_texts::MISFIT;
 use nyaaai_contract::id::CountedIds;
 use nyaaai_contract::json::{Object, Value};
 use nyaaai_contract::shape::Shape;
@@ -24,9 +25,6 @@ pub const TMP_MARK: &str = "$TMP";
 pub const ROOT_MARK: &str = "$ROOT";
 
 pub type Outcome<T> = Result<T, String>;
-
-/// The adapter answers this for a misfit.
-const MISFIT: &str = "the result does not fit the command";
 
 /// The result as its shape decodes it.
 fn held_to<Output: Shape>(made: Value) -> Outcome<Value> {

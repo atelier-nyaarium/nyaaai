@@ -1,3 +1,4 @@
+pub mod adapter_texts;
 pub mod base64;
 pub mod cancel;
 pub mod fetch;
@@ -14,7 +15,9 @@ pub mod pattern;
 pub mod random;
 pub mod shape;
 pub mod shapes;
+pub mod strict_policy;
 pub mod strict_schema;
 pub mod text;
 pub mod time;
+pub mod time_tokens;
 pub mod version;

@@ -8,6 +8,7 @@ use crate::future::BoxFuture;
 use crate::json::Value;
 use crate::number::{number_of_text, round_half_up};
 use crate::text::trim_text;
+use crate::time_tokens::{LONG_DAYS, MONTHS, SHORT_DAYS};
 
 const DAY_MS: i64 = 86_400_000;
 
@@ -314,19 +315,6 @@ pub fn iso_time(ms: i64) -> Option<String> {
     ))
 }
 
-const MONTHS: [&str; 12] = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-];
-const SHORT_DAYS: [&str; 7] = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const LONG_DAYS: [&str; 7] = [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
-];
 /// Below this: seconds.
 const SECONDS_BELOW: f64 = 1e11;
 /// Largest exact double integer.

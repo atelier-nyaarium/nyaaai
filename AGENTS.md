@@ -6,6 +6,7 @@ Shared AI framework for Nyaarium tools. TypeScript and Rust twins, judged by one
 
 - `ts/`: Bun workspace. Packages `contract`, `process`, `agentic`, `operator`, `ui`, `testkit`, `adapter`, `cli`, scope `@nyaaai`.
 - `rust/`: Cargo workspace. Crates `contract`, `process`, `agentic`, `operator`, `testkit`, `adapter`, `cli`.
+- Tables TypeScript owns and Rust reads as generated constants (`scripts/rustConstants.ts`, `parity.ts`): the strict schema keyword policy and limits (`strict_policy.rs`), the HTTP date tokens (`time_tokens.rs`), the adapter's limits and texts (`adapter_texts.rs`, in `contract` so `adapter` and `testkit` both reach it).
 - `prompts/`: prompt texts, one file each, by package. Both languages get a generated module.
 - `schema/`: JSON Schema exported from the Zod contract, input and output form per set. Generated, committed.
 - `cases/`: language-neutral cases. Generated from the case groups, committed.
