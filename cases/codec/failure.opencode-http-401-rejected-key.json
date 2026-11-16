@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "opencode-http-401-rejected-key",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "opencode",
+			"facts": {
+				"api": {
+					"family": "chat-completions",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false,
+					"reasoning": "reasoning_content"
+				},
+				"efforts": [
+					"high"
+				]
+			},
+			"nowMs": 1800000000000
+		},
+		"status": 401,
+		"body": {
+			"type": "error",
+			"error": {
+				"type": "AuthError",
+				"message": "Invalid API key."
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "keyRejected",
+			"status": 401,
+			"message": "Invalid API key."
+		}
+	}
+}

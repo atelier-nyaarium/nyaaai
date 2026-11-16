@@ -1,0 +1,72 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "local-loose-reply-tool-call-fields-mistyped",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "local",
+			"facts": {
+				"api": {
+					"family": "chat-completions",
+					"structured": false,
+					"choice": [],
+					"strict": false
+				},
+				"efforts": [
+					"none",
+					"low",
+					"medium",
+					"high"
+				]
+			},
+			"local": {
+				"host": "Lab",
+				"label": "Ollama",
+				"replay": "reasoning"
+			}
+		},
+		"body": {
+			"choices": [
+				{
+					"message": {
+						"content": "a",
+						"tool_calls": [
+							{
+								"id": 5,
+								"function": {
+									"name": 6,
+									"arguments": 7
+								}
+							}
+						]
+					},
+					"finish_reason": "stop"
+				}
+			]
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "a"
+				},
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "call_0",
+					"name": "",
+					"argumentsText": "{}"
+				}
+			],
+			"finish": "stop",
+			"serving": {
+				"host": "Lab"
+			}
+		},
+		"failure": null
+	}
+}

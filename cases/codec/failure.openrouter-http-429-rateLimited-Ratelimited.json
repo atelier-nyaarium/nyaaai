@@ -1,0 +1,29 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "openrouter-http-429-rateLimited-Ratelimited",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"status": 429,
+		"body": {
+			"error": {
+				"message": "Rate limited",
+				"metadata": {
+					"provider_name": 7
+				}
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "rateLimited",
+			"status": 429,
+			"message": "Rate limited"
+		}
+	}
+}

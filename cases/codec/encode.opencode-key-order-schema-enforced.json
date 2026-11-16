@@ -1,0 +1,133 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.encode",
+	"name": "opencode-key-order-schema-enforced",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "opencode",
+			"facts": {
+				"api": {
+					"family": "chat-completions",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false,
+					"reasoning": "reasoning_content"
+				},
+				"efforts": [
+					"high"
+				]
+			}
+		},
+		"request": {
+			"model": "openai/gpt-6-luna",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Hi"
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true,
+			"schema": {
+				"name": "scramble",
+				"json": {
+					"type": "object",
+					"required": [
+						"zeta",
+						"alpha",
+						"10",
+						"2"
+					],
+					"properties": {
+						"2": {
+							"type": "number"
+						},
+						"10": {
+							"type": "boolean"
+						},
+						"zeta": {
+							"type": "string",
+							"description": "Last letter."
+						},
+						"alpha": {
+							"type": "integer"
+						}
+					},
+					"additionalProperties": false
+				}
+			}
+		},
+		"mode": "stream"
+	},
+	"expected": {
+		"encoded": {
+			"path": "/openai/v1/chat/completions",
+			"body": {
+				"model": "openai/gpt-6-luna",
+				"messages": [
+					{
+						"role": "system",
+						"content": "Rules."
+					},
+					{
+						"role": "user",
+						"content": "Hi"
+					}
+				],
+				"stream": true,
+				"stream_options": {
+					"include_usage": true
+				},
+				"response_format": {
+					"type": "json_schema",
+					"json_schema": {
+						"name": "scramble",
+						"strict": true,
+						"schema": {
+							"type": "object",
+							"required": [
+								"zeta",
+								"alpha",
+								"10",
+								"2"
+							],
+							"properties": {
+								"2": {
+									"type": "number"
+								},
+								"10": {
+									"type": "boolean"
+								},
+								"zeta": {
+									"type": "string",
+									"description": "Last letter."
+								},
+								"alpha": {
+									"type": "integer"
+								}
+							},
+							"additionalProperties": false
+						}
+					}
+				}
+			},
+			"headers": {
+				"x-opencode-session": "root-1"
+			}
+		},
+		"refusal": null
+	}
+}

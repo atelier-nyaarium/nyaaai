@@ -1455,6 +1455,7 @@ pub struct CodecFacts {
     pub api: ApiFacts,
     pub efforts: Vec<Effort>,
     pub output_limit: Option<i64>,
+    pub free: Option<bool>,
 }
 
 impl Shape for CodecFacts {
@@ -1465,10 +1466,12 @@ impl Shape for CodecFacts {
             shape::list(value, at, Effort::decode_at)
         })?;
         let output_limit = shape::optional(object, "outputLimit", at, shape::integer)?;
+        let free = shape::optional(object, "free", at, shape::flag)?;
         Ok(Self {
             api,
             efforts,
             output_limit,
+            free,
         })
     }
 
@@ -1481,6 +1484,9 @@ impl Shape for CodecFacts {
         );
         if let Some(held) = &self.output_limit {
             object.insert("outputLimit", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.free {
+            object.insert("free", Value::Bool(*held));
         }
         Value::Object(object)
     }

@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "openrouter-http-400-replayRejected-Reasoningmu",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"status": 400,
+		"body": {
+			"error": {
+				"message": "Reasoning must go to the provider that created it."
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "replayRejected",
+			"status": 400,
+			"message": "Reasoning must go to the provider that created it."
+		}
+	}
+}

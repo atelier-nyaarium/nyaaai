@@ -1,0 +1,89 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.encode",
+	"name": "openrouter-schema-only",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"request": {
+			"model": "openai/gpt-6-luna",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Hi"
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true,
+			"schema": {
+				"name": "title",
+				"json": {
+					"type": "object",
+					"properties": {
+						"title": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"title"
+					]
+				}
+			}
+		},
+		"mode": "stream"
+	},
+	"expected": {
+		"encoded": {
+			"path": "/chat/completions",
+			"body": {
+				"model": "openai/gpt-6-luna",
+				"messages": [
+					{
+						"role": "system",
+						"content": "Rules."
+					},
+					{
+						"role": "user",
+						"content": "Hi"
+					}
+				],
+				"stream": true,
+				"session_id": "root-1",
+				"provider": {
+					"zdr": true,
+					"data_collection": "deny",
+					"require_parameters": true
+				},
+				"response_format": {
+					"type": "json_schema",
+					"json_schema": {
+						"name": "title",
+						"strict": true,
+						"schema": {
+							"type": "object",
+							"properties": {
+								"title": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"title"
+							],
+							"additionalProperties": false
+						}
+					}
+				}
+			}
+		},
+		"refusal": null
+	}
+}

@@ -1,0 +1,41 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "local-loose-http-body-number",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "local",
+			"facts": {
+				"api": {
+					"family": "chat-completions",
+					"structured": false,
+					"choice": [],
+					"strict": false
+				},
+				"efforts": [
+					"none",
+					"low",
+					"medium",
+					"high"
+				]
+			},
+			"local": {
+				"host": "Lab",
+				"label": "Ollama",
+				"replay": "reasoning"
+			}
+		},
+		"status": 500,
+		"body": 5,
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "unavailable",
+			"status": 500,
+			"message": "HTTP 500"
+		}
+	}
+}

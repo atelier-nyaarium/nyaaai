@@ -1,0 +1,57 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.encode",
+	"name": "opencode-request-no-facts",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "opencode"
+		},
+		"request": {
+			"model": "deepseek-v4.1-flash",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Hi"
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true,
+			"effort": "high"
+		},
+		"mode": "stream"
+	},
+	"expected": {
+		"encoded": {
+			"path": "/openai/v1/chat/completions",
+			"body": {
+				"model": "deepseek-v4.1-flash",
+				"messages": [
+					{
+						"role": "system",
+						"content": "Rules."
+					},
+					{
+						"role": "user",
+						"content": "Hi"
+					}
+				],
+				"stream": true,
+				"stream_options": {
+					"include_usage": true
+				}
+			},
+			"headers": {
+				"x-opencode-session": "root-1"
+			}
+		},
+		"refusal": null
+	}
+}

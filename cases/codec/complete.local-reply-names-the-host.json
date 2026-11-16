@@ -1,0 +1,76 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "local-reply-names-the-host",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "local",
+			"facts": {
+				"api": {
+					"family": "chat-completions",
+					"structured": false,
+					"choice": [],
+					"strict": false
+				},
+				"efforts": [
+					"none",
+					"low",
+					"medium",
+					"high"
+				]
+			},
+			"local": {
+				"host": "Lab",
+				"label": "Ollama"
+			}
+		},
+		"body": {
+			"id": "gen-1",
+			"choices": [
+				{
+					"message": {
+						"content": "Hi",
+						"reasoning": "Because."
+					},
+					"finish_reason": "stop"
+				}
+			],
+			"usage": {
+				"prompt_tokens": 1,
+				"completion_tokens": 1
+			}
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "reasoning",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "Because."
+						}
+					]
+				},
+				{
+					"kind": "text",
+					"text": "Hi"
+				}
+			],
+			"finish": "stop",
+			"usage": {
+				"input": 1,
+				"output": 1
+			},
+			"serving": {
+				"host": "Lab",
+				"generationId": "gen-1"
+			}
+		},
+		"failure": null
+	}
+}

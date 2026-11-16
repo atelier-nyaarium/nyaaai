@@ -1,0 +1,63 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "opencode-loose-reply-reasoning-details-junk",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "opencode",
+			"facts": {
+				"api": {
+					"family": "chat-completions",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false,
+					"reasoning": "reasoning_content"
+				},
+				"efforts": [
+					"high"
+				]
+			}
+		},
+		"body": {
+			"choices": [
+				{
+					"message": {
+						"content": "a",
+						"reasoning_details": [
+							null,
+							{
+								"type": "reasoning.text",
+								"text": "T",
+								"signature": "s"
+							},
+							{
+								"text": "no type"
+							}
+						]
+					},
+					"finish_reason": "stop"
+				}
+			]
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "a"
+				}
+			],
+			"finish": "stop",
+			"serving": {}
+		},
+		"failure": null
+	}
+}

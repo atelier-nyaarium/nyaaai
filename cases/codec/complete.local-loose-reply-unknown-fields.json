@@ -1,0 +1,61 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "local-loose-reply-unknown-fields",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "local",
+			"facts": {
+				"api": {
+					"family": "chat-completions",
+					"structured": false,
+					"choice": [],
+					"strict": false
+				},
+				"efforts": [
+					"none",
+					"low",
+					"medium",
+					"high"
+				]
+			},
+			"local": {
+				"host": "Lab",
+				"label": "Ollama",
+				"replay": "reasoning"
+			}
+		},
+		"body": {
+			"object": "chat.completion",
+			"created": 5,
+			"model": "m",
+			"system_fingerprint": "x",
+			"choices": [
+				{
+					"message": {
+						"content": "a",
+						"refusal": null
+					},
+					"finish_reason": "stop"
+				}
+			]
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "a"
+				}
+			],
+			"finish": "stop",
+			"serving": {
+				"host": "Lab"
+			}
+		},
+		"failure": null
+	}
+}

@@ -1,0 +1,30 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "openrouter-loose-http-error-object-mistyped",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"status": 400,
+		"body": {
+			"error": {
+				"code": "x",
+				"type": 1,
+				"message": [],
+				"metadata": 3,
+				"resetsAt": true
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "badRequest",
+			"status": 400,
+			"message": "HTTP 400"
+		}
+	}
+}

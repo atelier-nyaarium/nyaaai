@@ -1,0 +1,55 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "openrouter-in-stream-error-code-and-billing",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Hi\"}}]}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-1\",\"provider\":\"Azure\",\"error\":{\"code\":429,\"message\":\"Provider returned error\",\"metadata\":{\"provider_name\":\"Mistral\"}},\"usage\":{\"prompt_tokens\":4,\"completion_tokens\":2,\"cost\":0.1}}"
+			},
+			{
+				"kind": "done"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"host": "Azure",
+					"generationId": "gen-1"
+				}
+			},
+			{
+				"kind": "text",
+				"text": "Hi"
+			}
+		],
+		"result": null,
+		"failure": {
+			"category": "overloaded",
+			"status": "stream",
+			"message": "Provider returned error",
+			"billed": {
+				"usage": {
+					"input": 4,
+					"output": 2,
+					"cost": 0.1
+				},
+				"host": "Azure",
+				"generationId": "gen-1"
+			}
+		}
+	}
+}

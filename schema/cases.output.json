@@ -3550,6 +3550,248 @@
 				"refusal"
 			],
 			"additionalProperties": false
+		},
+		"LocalName": {
+			"type": "object",
+			"properties": {
+				"host": {
+					"type": "string"
+				},
+				"label": {
+					"type": "string"
+				},
+				"replay": {
+					"type": "string",
+					"enum": [
+						"reasoning",
+						"reasoning_content"
+					]
+				},
+				"chatPath": {
+					"type": "string"
+				},
+				"optionalKey": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"host",
+				"label"
+			],
+			"additionalProperties": false
+		},
+		"CodecName": {
+			"type": "object",
+			"properties": {
+				"family": {
+					"$ref": "step.output.json#/$defs/ApiFamily"
+				},
+				"dialect": {
+					"type": "string"
+				},
+				"facts": {
+					"$ref": "step.output.json#/$defs/CodecFacts"
+				},
+				"local": {
+					"$ref": "#/$defs/LocalName"
+				},
+				"nowMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				}
+			},
+			"required": [
+				"family",
+				"dialect"
+			],
+			"additionalProperties": false
+		},
+		"CodecEncodeInput": {
+			"type": "object",
+			"properties": {
+				"codec": {
+					"$ref": "#/$defs/CodecName"
+				},
+				"request": {
+					"$ref": "step.output.json#/$defs/CanonicalRequest"
+				},
+				"mode": {
+					"type": "string",
+					"enum": [
+						"stream",
+						"complete"
+					]
+				}
+			},
+			"required": [
+				"codec",
+				"request",
+				"mode"
+			],
+			"additionalProperties": false
+		},
+		"CodecEncodeResult": {
+			"type": "object",
+			"properties": {
+				"encoded": {
+					"anyOf": [
+						{
+							"$ref": "step.output.json#/$defs/Encoded"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"refusal": {
+					"type": [
+						"string",
+						"null"
+					]
+				}
+			},
+			"required": [
+				"encoded",
+				"refusal"
+			],
+			"additionalProperties": false
+		},
+		"CodecStreamInput": {
+			"type": "object",
+			"properties": {
+				"codec": {
+					"$ref": "#/$defs/CodecName"
+				},
+				"items": {
+					"type": "array",
+					"items": {
+						"$ref": "step.output.json#/$defs/SseItem"
+					}
+				}
+			},
+			"required": [
+				"codec",
+				"items"
+			],
+			"additionalProperties": false
+		},
+		"CodecStreamResult": {
+			"type": "object",
+			"properties": {
+				"events": {
+					"type": "array",
+					"items": {
+						"$ref": "step.output.json#/$defs/StepEvent"
+					}
+				},
+				"result": {
+					"anyOf": [
+						{
+							"$ref": "step.output.json#/$defs/StepResult"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"failure": {
+					"anyOf": [
+						{
+							"$ref": "step.output.json#/$defs/Failure"
+						},
+						{
+							"type": "null"
+						}
+					]
+				}
+			},
+			"required": [
+				"events",
+				"result",
+				"failure"
+			],
+			"additionalProperties": false
+		},
+		"CodecCompleteInput": {
+			"type": "object",
+			"properties": {
+				"codec": {
+					"$ref": "#/$defs/CodecName"
+				},
+				"body": {}
+			},
+			"required": [
+				"codec",
+				"body"
+			],
+			"additionalProperties": false
+		},
+		"CodecCompleteResult": {
+			"type": "object",
+			"properties": {
+				"result": {
+					"anyOf": [
+						{
+							"$ref": "step.output.json#/$defs/StepResult"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"failure": {
+					"anyOf": [
+						{
+							"$ref": "step.output.json#/$defs/Failure"
+						},
+						{
+							"type": "null"
+						}
+					]
+				}
+			},
+			"required": [
+				"result",
+				"failure"
+			],
+			"additionalProperties": false
+		},
+		"CodecFailureInput": {
+			"type": "object",
+			"properties": {
+				"codec": {
+					"$ref": "#/$defs/CodecName"
+				},
+				"status": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"body": {},
+				"headers": {
+					"$ref": "step.output.json#/$defs/HeaderList"
+				}
+			},
+			"required": [
+				"codec",
+				"status",
+				"body",
+				"headers"
+			],
+			"additionalProperties": false
+		},
+		"CodecFailureResult": {
+			"type": "object",
+			"properties": {
+				"failure": {
+					"$ref": "step.output.json#/$defs/Failure"
+				}
+			},
+			"required": [
+				"failure"
+			],
+			"additionalProperties": false
 		}
 	}
 }

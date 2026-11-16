@@ -1,0 +1,235 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "openrouter-thought-blocks-join",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"delta\":{\"reasoning_details\":[{\"type\":\"reasoning.text\",\"index\":0,\"text\":\"Think\"}]}}]}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"delta\":{\"reasoning_details\":[{\"type\":\"reasoning.encrypted\",\"index\":0,\"data\":\"sealed\"}]}}]}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"delta\":{\"reasoning_details\":[{\"type\":\"reasoning.encrypted\",\"index\":1,\"data\":\"abc\"}]}}]}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"delta\":{\"reasoning_details\":[{\"type\":\"reasoning.text\",\"index\":0,\"text\":\"ing.\",\"signature\":\"s1\"}]}}]}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Done.\"}}]}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"delta\":{\"reasoning_details\":[{\"type\":\"reasoning.encrypted\",\"index\":1,\"data\":\"abcdef\",\"id\":\"r1\"}]}}]}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"delta\":{\"reasoning_details\":[{\"type\":\"reasoning.encrypted\",\"index\":2,\"data\":\"next\",\"id\":\"r1\"}]}}]}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}]}"
+			},
+			{
+				"kind": "done"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"host": "Azure",
+					"generationId": "gen-1"
+				}
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "reasoning.text",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "Think"
+						}
+					],
+					"index": 0
+				},
+				"block": "reasoning.text#0"
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"host": "Azure",
+					"generationId": "gen-1"
+				}
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "reasoning.encrypted",
+					"opaque": "sealed",
+					"index": 0
+				},
+				"block": "reasoning.encrypted#0"
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"host": "Azure",
+					"generationId": "gen-1"
+				}
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "reasoning.encrypted",
+					"opaque": "abc",
+					"index": 1
+				},
+				"block": "reasoning.encrypted#1"
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"host": "Azure",
+					"generationId": "gen-1"
+				}
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "reasoning.text",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "ing."
+						}
+					],
+					"opaque": "s1",
+					"index": 0
+				},
+				"block": "reasoning.text#0"
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"host": "Azure",
+					"generationId": "gen-1"
+				}
+			},
+			{
+				"kind": "text",
+				"text": "Done."
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"host": "Azure",
+					"generationId": "gen-1"
+				}
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "reasoning.encrypted",
+					"opaque": "abcdef",
+					"id": "r1",
+					"index": 1
+				},
+				"block": "reasoning.encrypted#1"
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"host": "Azure",
+					"generationId": "gen-1"
+				}
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "reasoning.encrypted",
+					"opaque": "next",
+					"id": "r1",
+					"index": 2
+				},
+				"block": "reasoning.encrypted#2"
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "gen-1"
+				}
+			},
+			{
+				"kind": "finish",
+				"reason": "stop"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "reasoning.text",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "Thinking."
+						}
+					],
+					"opaque": "s1",
+					"index": 0
+				},
+				{
+					"kind": "thought",
+					"type": "reasoning.encrypted",
+					"opaque": "sealed",
+					"index": 0
+				},
+				{
+					"kind": "thought",
+					"type": "reasoning.encrypted",
+					"opaque": "abcdef",
+					"id": "r1",
+					"index": 1
+				},
+				{
+					"kind": "text",
+					"text": "Done."
+				},
+				{
+					"kind": "thought",
+					"type": "reasoning.encrypted",
+					"opaque": "next",
+					"id": "r1",
+					"index": 2
+				}
+			],
+			"finish": "stop",
+			"serving": {
+				"host": "Azure",
+				"generationId": "gen-1"
+			}
+		},
+		"failure": null
+	}
+}

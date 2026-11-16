@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "openrouter-http-body-array",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"status": 502,
+		"body": [
+			{
+				"error": {
+					"message": "x"
+				}
+			}
+		],
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "unavailable",
+			"status": 502,
+			"message": "HTTP 502"
+		}
+	}
+}

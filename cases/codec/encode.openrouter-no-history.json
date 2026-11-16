@@ -1,0 +1,40 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.encode",
+	"name": "openrouter-no-history",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"request": {
+			"model": "openai/gpt-6-luna",
+			"system": [],
+			"history": [],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true
+		},
+		"mode": "stream"
+	},
+	"expected": {
+		"encoded": {
+			"path": "/chat/completions",
+			"body": {
+				"model": "openai/gpt-6-luna",
+				"messages": [],
+				"stream": true,
+				"session_id": "root-1",
+				"provider": {
+					"zdr": true,
+					"data_collection": "deny",
+					"require_parameters": true
+				}
+			}
+		},
+		"refusal": null
+	}
+}

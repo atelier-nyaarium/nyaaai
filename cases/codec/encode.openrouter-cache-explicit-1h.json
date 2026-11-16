@@ -1,0 +1,157 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.encode",
+	"name": "openrouter-cache-explicit-1h",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"request": {
+			"model": "openai/gpt-6-luna",
+			"system": [
+				"Sections.",
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Read it."
+				},
+				{
+					"role": "step",
+					"producer": {
+						"model": "openai/gpt-6-luna"
+					},
+					"parts": [
+						{
+							"kind": "thought",
+							"type": "reasoning.text",
+							"segments": [
+								{
+									"kind": "content",
+									"text": "Divide."
+								}
+							],
+							"index": 0
+						},
+						{
+							"kind": "call",
+							"index": 0,
+							"wireId": "call_a",
+							"name": "read_file",
+							"arguments": "{}"
+						},
+						{
+							"kind": "result",
+							"index": 0,
+							"output": "source",
+							"isError": false
+						}
+					]
+				}
+			],
+			"cache": {
+				"kind": "explicit",
+				"ttl": "1h"
+			},
+			"session": "root-1",
+			"zdrOnly": true,
+			"summary": "Earlier.",
+			"state": "Live."
+		},
+		"mode": "stream"
+	},
+	"expected": {
+		"encoded": {
+			"path": "/chat/completions",
+			"body": {
+				"model": "openai/gpt-6-luna",
+				"messages": [
+					{
+						"role": "system",
+						"content": "Sections."
+					},
+					{
+						"role": "system",
+						"content": [
+							{
+								"type": "text",
+								"text": "Rules.",
+								"cache_control": {
+									"type": "ephemeral",
+									"ttl": "1h"
+								}
+							}
+						]
+					},
+					{
+						"role": "system",
+						"content": [
+							{
+								"type": "text",
+								"text": "Earlier.",
+								"cache_control": {
+									"type": "ephemeral",
+									"ttl": "1h"
+								}
+							}
+						]
+					},
+					{
+						"role": "user",
+						"content": "Read it."
+					},
+					{
+						"role": "assistant",
+						"content": null,
+						"tool_calls": [
+							{
+								"id": "call_a",
+								"type": "function",
+								"function": {
+									"name": "read_file",
+									"arguments": "{}"
+								}
+							}
+						],
+						"reasoning_details": [
+							{
+								"type": "reasoning.text",
+								"index": 0,
+								"text": "Divide."
+							}
+						]
+					},
+					{
+						"role": "tool",
+						"tool_call_id": "call_a",
+						"content": [
+							{
+								"type": "text",
+								"text": "source",
+								"cache_control": {
+									"type": "ephemeral",
+									"ttl": "1h"
+								}
+							}
+						]
+					},
+					{
+						"role": "user",
+						"content": "Live."
+					}
+				],
+				"stream": true,
+				"session_id": "root-1",
+				"provider": {
+					"zdr": true,
+					"data_collection": "deny",
+					"require_parameters": true
+				}
+			}
+		},
+		"refusal": null
+	}
+}

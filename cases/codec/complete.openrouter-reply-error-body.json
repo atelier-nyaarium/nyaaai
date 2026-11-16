@@ -1,0 +1,40 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "openrouter-reply-error-body",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"body": {
+			"id": "gen-1",
+			"provider": "Azure",
+			"error": {
+				"code": 402,
+				"message": "Insufficient credits"
+			},
+			"usage": {
+				"prompt_tokens": 1,
+				"completion_tokens": 0
+			}
+		}
+	},
+	"expected": {
+		"result": null,
+		"failure": {
+			"category": "outOfCredit",
+			"status": "stream",
+			"message": "Insufficient credits",
+			"billed": {
+				"usage": {
+					"input": 1,
+					"output": 0
+				},
+				"host": "Azure",
+				"generationId": "gen-1"
+			}
+		}
+	}
+}

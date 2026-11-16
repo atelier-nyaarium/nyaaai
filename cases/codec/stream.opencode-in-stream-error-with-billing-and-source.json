@@ -1,0 +1,54 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "opencode-in-stream-error-with-billing-and-source",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "opencode",
+			"facts": {
+				"api": {
+					"family": "chat-completions",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false,
+					"reasoning": "reasoning_content"
+				},
+				"efforts": [
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-2\",\"error\":{\"message\":\"Cut.\"},\"usage\":{\"prompt_tokens\":10,\"completion_tokens\":3,\"cost\":0.01,\"opencode\":{\"billing_source\":\"go\",\"allowance\":0.02}}}"
+			}
+		]
+	},
+	"expected": {
+		"events": [],
+		"result": null,
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": "Cut.",
+			"billed": {
+				"usage": {
+					"input": 10,
+					"output": 3,
+					"cost": 0.01,
+					"billingSource": "go",
+					"allowance": 0.02
+				},
+				"generationId": "gen-2"
+			}
+		}
+	}
+}

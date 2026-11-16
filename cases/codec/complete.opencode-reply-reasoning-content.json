@@ -1,0 +1,78 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "opencode-reply-reasoning-content",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "opencode",
+			"facts": {
+				"api": {
+					"family": "chat-completions",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false,
+					"reasoning": "reasoning_content"
+				},
+				"efforts": [
+					"high"
+				]
+			}
+		},
+		"body": {
+			"id": "gen-1",
+			"choices": [
+				{
+					"message": {
+						"content": "Done.",
+						"reasoning_content": "Why."
+					},
+					"finish_reason": "stop"
+				}
+			],
+			"usage": {
+				"prompt_tokens": 5,
+				"completion_tokens": 2,
+				"opencode": {
+					"billing_source": "go"
+				}
+			}
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "reasoning_content",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "Why."
+						}
+					]
+				},
+				{
+					"kind": "text",
+					"text": "Done."
+				}
+			],
+			"finish": "stop",
+			"usage": {
+				"input": 5,
+				"output": 2,
+				"billingSource": "go"
+			},
+			"serving": {
+				"generationId": "gen-1"
+			}
+		},
+		"failure": null
+	}
+}

@@ -1,0 +1,45 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "opencode-http-404-not-found",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "opencode",
+			"facts": {
+				"api": {
+					"family": "chat-completions",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false,
+					"reasoning": "reasoning_content"
+				},
+				"efforts": [
+					"high"
+				]
+			},
+			"nowMs": 1800000000000
+		},
+		"status": 404,
+		"body": {
+			"type": "error",
+			"error": {
+				"message": "No such model."
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "notFound",
+			"status": 404,
+			"message": "No such model."
+		}
+	}
+}

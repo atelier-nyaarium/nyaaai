@@ -1,0 +1,29 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "openrouter-http-429-overloaded-Providerret",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"status": 429,
+		"body": {
+			"error": {
+				"message": "Provider returned error",
+				"metadata": {
+					"provider_name": "Mistral"
+				}
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "overloaded",
+			"status": 429,
+			"message": "Provider returned error"
+		}
+	}
+}

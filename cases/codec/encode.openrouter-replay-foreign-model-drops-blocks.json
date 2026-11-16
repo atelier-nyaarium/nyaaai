@@ -1,0 +1,70 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.encode",
+	"name": "openrouter-replay-foreign-model-drops-blocks",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"request": {
+			"model": "anthropic/claude-opus-5.5",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "step",
+					"producer": {
+						"model": "openai/gpt-6-luna"
+					},
+					"parts": [
+						{
+							"kind": "thought",
+							"type": "reasoning.encrypted",
+							"opaque": "abcdef",
+							"index": 1
+						},
+						{
+							"kind": "text",
+							"text": "Done."
+						}
+					]
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true
+		},
+		"mode": "stream"
+	},
+	"expected": {
+		"encoded": {
+			"path": "/chat/completions",
+			"body": {
+				"model": "anthropic/claude-opus-5.5",
+				"messages": [
+					{
+						"role": "system",
+						"content": "Rules."
+					},
+					{
+						"role": "assistant",
+						"content": "Done."
+					}
+				],
+				"stream": true,
+				"session_id": "root-1",
+				"provider": {
+					"zdr": true,
+					"data_collection": "deny",
+					"require_parameters": true
+				}
+			}
+		},
+		"refusal": null
+	}
+}

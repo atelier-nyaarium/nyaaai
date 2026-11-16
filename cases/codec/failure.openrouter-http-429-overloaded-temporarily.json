@@ -1,0 +1,29 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "openrouter-http-429-overloaded-temporarily",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"status": 429,
+		"body": {
+			"error": {
+				"message": "temporarily rate-limited upstream.",
+				"metadata": {
+					"error_type": "rate_limit_exceeded"
+				}
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "overloaded",
+			"status": 429,
+			"message": "temporarily rate-limited upstream."
+		}
+	}
+}

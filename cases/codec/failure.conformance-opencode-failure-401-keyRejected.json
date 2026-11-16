@@ -1,0 +1,45 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "conformance-opencode-failure-401-keyRejected",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "opencode",
+			"facts": {
+				"api": {
+					"family": "chat-completions",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false,
+					"reasoning": "reasoning_content"
+				},
+				"efforts": [
+					"high"
+				]
+			}
+		},
+		"status": 401,
+		"body": {
+			"type": "error",
+			"error": {
+				"type": "AuthError",
+				"message": "Invalid API key."
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "keyRejected",
+			"status": 401,
+			"message": "Invalid API key."
+		}
+	}
+}

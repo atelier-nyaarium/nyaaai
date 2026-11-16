@@ -1,0 +1,44 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "local-http-401-open",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "local",
+			"facts": {
+				"api": {
+					"family": "chat-completions",
+					"structured": false,
+					"choice": [],
+					"strict": false
+				},
+				"efforts": [
+					"none",
+					"low",
+					"medium",
+					"high"
+				]
+			},
+			"local": {
+				"host": "Lab",
+				"label": "Ollama"
+			}
+		},
+		"status": 401,
+		"body": {
+			"error": {
+				"message": "Said."
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "refused",
+			"status": 401,
+			"message": "Said."
+		}
+	}
+}

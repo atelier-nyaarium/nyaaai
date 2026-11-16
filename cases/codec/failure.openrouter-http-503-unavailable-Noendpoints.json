@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "openrouter-http-503-unavailable-Noendpoints",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"status": 503,
+		"body": {
+			"error": {
+				"message": "No endpoints available upstream."
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "unavailable",
+			"status": 503,
+			"message": "No endpoints available upstream."
+		}
+	}
+}

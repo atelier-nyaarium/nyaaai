@@ -1,0 +1,48 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "local-in-stream-error-with-code-404",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "local",
+			"facts": {
+				"api": {
+					"family": "chat-completions",
+					"structured": false,
+					"choice": [],
+					"strict": false
+				},
+				"efforts": [
+					"none",
+					"low",
+					"medium",
+					"high"
+				]
+			},
+			"local": {
+				"host": "Lab",
+				"label": "Ollama"
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"error\":{\"code\":404,\"message\":\"Gone.\"}}"
+			}
+		]
+	},
+	"expected": {
+		"events": [],
+		"result": null,
+		"failure": {
+			"category": "notFound",
+			"status": "stream",
+			"message": "Gone.",
+			"billed": {
+				"host": "Lab"
+			}
+		}
+	}
+}

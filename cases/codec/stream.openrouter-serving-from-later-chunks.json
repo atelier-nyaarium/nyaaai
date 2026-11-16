@@ -1,0 +1,86 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "openrouter-serving-from-later-chunks",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"choices\":[{\"delta\":{\"content\":\"a\"}}]}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-9\",\"choices\":[{\"delta\":{\"content\":\"b\"}}]}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"provider\":\"Fireworks\",\"id\":\"gen-10\",\"choices\":[{\"delta\":{\"content\":\"c\"}}]}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}]}"
+			},
+			{
+				"kind": "done"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "text",
+				"text": "a"
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "gen-9"
+				}
+			},
+			{
+				"kind": "text",
+				"text": "b"
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"host": "Fireworks",
+					"generationId": "gen-10"
+				}
+			},
+			{
+				"kind": "text",
+				"text": "c"
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "gen-1"
+				}
+			},
+			{
+				"kind": "finish",
+				"reason": "stop"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "abc"
+				}
+			],
+			"finish": "stop",
+			"serving": {
+				"host": "Fireworks",
+				"generationId": "gen-9"
+			}
+		},
+		"failure": null
+	}
+}

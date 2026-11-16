@@ -1,0 +1,31 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "openrouter-http-headers-ignored",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"status": 429,
+		"body": {
+			"error": {
+				"message": "Slow."
+			}
+		},
+		"headers": [
+			[
+				"retry-after",
+				"30"
+			]
+		]
+	},
+	"expected": {
+		"failure": {
+			"category": "rateLimited",
+			"status": 429,
+			"message": "Slow."
+		}
+	}
+}

@@ -1,0 +1,133 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "local-reads-either-reasoning-field",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "local",
+			"facts": {
+				"api": {
+					"family": "chat-completions",
+					"structured": false,
+					"choice": [],
+					"strict": false
+				},
+				"efforts": [
+					"none",
+					"low",
+					"medium",
+					"high"
+				]
+			},
+			"local": {
+				"host": "Lab",
+				"label": "Ollama"
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"id\":\"c\",\"choices\":[{\"delta\":{\"reasoning_content\":\"Hmm.\"}}]}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"id\":\"c\",\"choices\":[{\"delta\":{\"reasoning\":\"More.\"}}]}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":3,\"completion_tokens\":1}}"
+			},
+			{
+				"kind": "done"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"host": "Lab",
+					"generationId": "c"
+				}
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "reasoning",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "Hmm."
+						}
+					]
+				}
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"host": "Lab",
+					"generationId": "c"
+				}
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "reasoning",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "More."
+						}
+					]
+				}
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"host": "Lab",
+					"generationId": "gen-1"
+				}
+			},
+			{
+				"kind": "finish",
+				"reason": "stop"
+			},
+			{
+				"kind": "usage",
+				"usage": {
+					"input": 3,
+					"output": 1
+				}
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "reasoning",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "Hmm.More."
+						}
+					]
+				}
+			],
+			"finish": "stop",
+			"usage": {
+				"input": 3,
+				"output": 1
+			},
+			"serving": {
+				"host": "Lab",
+				"generationId": "c"
+			}
+		},
+		"failure": null
+	}
+}

@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "opencode-http-error-before-a-model-400-unavailable",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "opencode"
+		},
+		"status": 400,
+		"body": {
+			"error": {
+				"message": "Model is unavailable."
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "notFound",
+			"status": 400,
+			"message": "Model is unavailable."
+		}
+	}
+}

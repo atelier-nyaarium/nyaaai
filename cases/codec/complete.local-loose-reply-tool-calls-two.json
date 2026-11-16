@@ -1,0 +1,83 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "local-loose-reply-tool-calls-two",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "local",
+			"facts": {
+				"api": {
+					"family": "chat-completions",
+					"structured": false,
+					"choice": [],
+					"strict": false
+				},
+				"efforts": [
+					"none",
+					"low",
+					"medium",
+					"high"
+				]
+			},
+			"local": {
+				"host": "Lab",
+				"label": "Ollama",
+				"replay": "reasoning"
+			}
+		},
+		"body": {
+			"choices": [
+				{
+					"message": {
+						"tool_calls": [
+							{
+								"id": "c1",
+								"type": "function",
+								"function": {
+									"name": "a",
+									"arguments": "{}"
+								}
+							},
+							{
+								"id": "c2",
+								"type": "function",
+								"function": {
+									"name": "b",
+									"arguments": "{\"x\":1}"
+								}
+							}
+						]
+					},
+					"finish_reason": "tool_calls"
+				}
+			]
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "c1",
+					"name": "a",
+					"argumentsText": "{}"
+				},
+				{
+					"kind": "call",
+					"index": 1,
+					"wireId": "c2",
+					"name": "b",
+					"argumentsText": "{\"x\":1}"
+				}
+			],
+			"finish": "tool_calls",
+			"serving": {
+				"host": "Lab"
+			}
+		},
+		"failure": null
+	}
+}

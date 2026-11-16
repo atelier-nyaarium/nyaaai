@@ -1,0 +1,32 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "openrouter-loose-reply-serving-only",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"body": {
+			"id": "gen-3",
+			"provider": "Azure",
+			"choices": [
+				{
+					"finish_reason": "stop"
+				}
+			]
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [],
+			"finish": "stop",
+			"serving": {
+				"host": "Azure",
+				"generationId": "gen-3"
+			}
+		},
+		"failure": null
+	}
+}

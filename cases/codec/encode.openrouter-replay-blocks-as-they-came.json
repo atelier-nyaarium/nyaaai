@@ -1,0 +1,105 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.encode",
+	"name": "openrouter-replay-blocks-as-they-came",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"request": {
+			"model": "openai/gpt-6-luna",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Hi"
+				},
+				{
+					"role": "step",
+					"producer": {
+						"model": "openai/gpt-6-luna"
+					},
+					"parts": [
+						{
+							"kind": "thought",
+							"type": "reasoning.text",
+							"segments": [
+								{
+									"kind": "content",
+									"text": "Thinking."
+								}
+							],
+							"opaque": "s1",
+							"index": 0
+						},
+						{
+							"kind": "thought",
+							"type": "reasoning.encrypted",
+							"opaque": "abcdef",
+							"id": "r1",
+							"index": 1
+						},
+						{
+							"kind": "text",
+							"text": "Done."
+						}
+					]
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true
+		},
+		"mode": "stream"
+	},
+	"expected": {
+		"encoded": {
+			"path": "/chat/completions",
+			"body": {
+				"model": "openai/gpt-6-luna",
+				"messages": [
+					{
+						"role": "system",
+						"content": "Rules."
+					},
+					{
+						"role": "user",
+						"content": "Hi"
+					},
+					{
+						"role": "assistant",
+						"content": "Done.",
+						"reasoning_details": [
+							{
+								"type": "reasoning.text",
+								"index": 0,
+								"text": "Thinking.",
+								"signature": "s1"
+							},
+							{
+								"type": "reasoning.encrypted",
+								"id": "r1",
+								"index": 1,
+								"data": "abcdef"
+							}
+						]
+					}
+				],
+				"stream": true,
+				"session_id": "root-1",
+				"provider": {
+					"zdr": true,
+					"data_collection": "deny",
+					"require_parameters": true
+				}
+			}
+		},
+		"refusal": null
+	}
+}

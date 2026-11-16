@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "openrouter-http-400-replayRejected-REASONINGMU",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"status": 400,
+		"body": {
+			"error": {
+				"message": "REASONING MUST GO TO THE PROVIDER THAT CREATED IT."
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "replayRejected",
+			"status": 400,
+			"message": "REASONING MUST GO TO THE PROVIDER THAT CREATED IT."
+		}
+	}
+}

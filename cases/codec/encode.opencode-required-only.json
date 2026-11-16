@@ -1,0 +1,126 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.encode",
+	"name": "opencode-required-only",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "opencode",
+			"facts": {
+				"api": {
+					"family": "chat-completions",
+					"structured": true,
+					"choice": [
+						"auto",
+						"required"
+					],
+					"strict": false,
+					"reasoning": "reasoning_content"
+				},
+				"efforts": [
+					"high"
+				]
+			}
+		},
+		"request": {
+			"model": "openai/gpt-6-luna",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Hi"
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true,
+			"tools": [
+				{
+					"name": "finish",
+					"description": "Finish.",
+					"parameters": {
+						"type": "object"
+					}
+				}
+			],
+			"toolChoice": {
+				"name": "finish"
+			},
+			"schema": {
+				"name": "title",
+				"json": {
+					"type": "object",
+					"properties": {
+						"title": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"title"
+					]
+				}
+			}
+		},
+		"mode": "complete"
+	},
+	"expected": {
+		"encoded": {
+			"path": "/openai/v1/chat/completions",
+			"body": {
+				"model": "openai/gpt-6-luna",
+				"messages": [
+					{
+						"role": "system",
+						"content": "Rules."
+					},
+					{
+						"role": "user",
+						"content": "Hi"
+					}
+				],
+				"stream": false,
+				"tools": [
+					{
+						"type": "function",
+						"function": {
+							"name": "finish",
+							"description": "Finish.",
+							"parameters": {
+								"type": "object"
+							}
+						}
+					}
+				],
+				"tool_choice": "required",
+				"response_format": {
+					"type": "json_schema",
+					"json_schema": {
+						"name": "title",
+						"strict": true,
+						"schema": {
+							"type": "object",
+							"properties": {
+								"title": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"title"
+							],
+							"additionalProperties": false
+						}
+					}
+				}
+			},
+			"headers": {
+				"x-opencode-session": "root-1"
+			}
+		},
+		"refusal": null
+	}
+}

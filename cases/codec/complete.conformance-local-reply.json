@@ -1,0 +1,96 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "conformance-local-reply",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "local",
+			"facts": {
+				"api": {
+					"family": "chat-completions",
+					"structured": false,
+					"choice": [],
+					"strict": false
+				},
+				"efforts": [
+					"none",
+					"low",
+					"medium",
+					"high"
+				],
+				"free": true
+			},
+			"local": {
+				"host": "Lab",
+				"label": "Ollama",
+				"replay": "reasoning"
+			}
+		},
+		"body": {
+			"id": "gen-1",
+			"choices": [
+				{
+					"message": {
+						"content": "Reading.",
+						"reasoning": "Thinking.",
+						"tool_calls": [
+							{
+								"id": "call_a",
+								"type": "function",
+								"function": {
+									"name": "read",
+									"arguments": "{\"path\":\"a\"}"
+								}
+							}
+						]
+					},
+					"finish_reason": "tool_calls"
+				}
+			],
+			"usage": {
+				"prompt_tokens": 100,
+				"completion_tokens": 10
+			}
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "reasoning",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "Thinking."
+						}
+					]
+				},
+				{
+					"kind": "text",
+					"text": "Reading."
+				},
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "call_a",
+					"name": "read",
+					"argumentsText": "{\"path\":\"a\"}"
+				}
+			],
+			"finish": "tool_calls",
+			"usage": {
+				"input": 100,
+				"output": 10,
+				"cost": 0
+			},
+			"serving": {
+				"host": "Lab",
+				"generationId": "gen-1"
+			}
+		},
+		"failure": null
+	}
+}

@@ -1,0 +1,71 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "openrouter-reply-reasoning-details",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"body": {
+			"id": "gen-1",
+			"choices": [
+				{
+					"message": {
+						"content": "Done.",
+						"reasoning_details": [
+							{
+								"type": "reasoning.text",
+								"index": 0,
+								"text": "Think",
+								"signature": "s1"
+							},
+							{
+								"type": "reasoning.encrypted",
+								"index": 1,
+								"data": "sealed",
+								"id": "r1"
+							}
+						]
+					},
+					"finish_reason": "stop"
+				}
+			]
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "reasoning.text",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "Think"
+						}
+					],
+					"opaque": "s1",
+					"index": 0
+				},
+				{
+					"kind": "thought",
+					"type": "reasoning.encrypted",
+					"opaque": "sealed",
+					"id": "r1",
+					"index": 1
+				},
+				{
+					"kind": "text",
+					"text": "Done."
+				}
+			],
+			"finish": "stop",
+			"serving": {
+				"generationId": "gen-1"
+			}
+		},
+		"failure": null
+	}
+}

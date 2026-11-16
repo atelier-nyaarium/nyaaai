@@ -1,0 +1,49 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "local-loose-error-metadata-reasons-mixed",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "local",
+			"facts": {
+				"api": {
+					"family": "chat-completions",
+					"structured": false,
+					"choice": [],
+					"strict": false
+				},
+				"efforts": [
+					"none",
+					"low",
+					"medium",
+					"high"
+				]
+			},
+			"local": {
+				"host": "Lab",
+				"label": "Ollama",
+				"replay": "reasoning"
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"error\":{\"code\":403,\"message\":\"No.\",\"metadata\":{\"reasons\":[\"a\",1,null,\"b\"],\"provider_name\":7}}}"
+			}
+		]
+	},
+	"expected": {
+		"events": [],
+		"result": null,
+		"failure": {
+			"category": "refused",
+			"status": "stream",
+			"message": "No.",
+			"billed": {
+				"host": "Lab"
+			}
+		}
+	}
+}

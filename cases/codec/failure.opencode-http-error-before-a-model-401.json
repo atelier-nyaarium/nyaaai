@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "opencode-http-error-before-a-model-401",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "opencode"
+		},
+		"status": 401,
+		"body": {
+			"error": {
+				"message": "No."
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "keyRejected",
+			"status": 401,
+			"message": "No."
+		}
+	}
+}

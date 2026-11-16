@@ -3370,6 +3370,238 @@
 				"output",
 				"refusal"
 			]
+		},
+		"LocalName": {
+			"type": "object",
+			"properties": {
+				"host": {
+					"type": "string"
+				},
+				"label": {
+					"type": "string"
+				},
+				"replay": {
+					"type": "string",
+					"enum": [
+						"reasoning",
+						"reasoning_content"
+					]
+				},
+				"chatPath": {
+					"type": "string"
+				},
+				"optionalKey": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"host",
+				"label"
+			]
+		},
+		"CodecName": {
+			"type": "object",
+			"properties": {
+				"family": {
+					"$ref": "step.input.json#/$defs/ApiFamily"
+				},
+				"dialect": {
+					"type": "string"
+				},
+				"facts": {
+					"$ref": "step.input.json#/$defs/CodecFacts"
+				},
+				"local": {
+					"$ref": "#/$defs/LocalName"
+				},
+				"nowMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				}
+			},
+			"required": [
+				"family",
+				"dialect"
+			]
+		},
+		"CodecEncodeInput": {
+			"type": "object",
+			"properties": {
+				"codec": {
+					"$ref": "#/$defs/CodecName"
+				},
+				"request": {
+					"$ref": "step.input.json#/$defs/CanonicalRequest"
+				},
+				"mode": {
+					"type": "string",
+					"enum": [
+						"stream",
+						"complete"
+					]
+				}
+			},
+			"required": [
+				"codec",
+				"request",
+				"mode"
+			]
+		},
+		"CodecEncodeResult": {
+			"type": "object",
+			"properties": {
+				"encoded": {
+					"anyOf": [
+						{
+							"$ref": "step.input.json#/$defs/Encoded"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"refusal": {
+					"type": [
+						"string",
+						"null"
+					]
+				}
+			},
+			"required": [
+				"encoded",
+				"refusal"
+			]
+		},
+		"CodecStreamInput": {
+			"type": "object",
+			"properties": {
+				"codec": {
+					"$ref": "#/$defs/CodecName"
+				},
+				"items": {
+					"type": "array",
+					"items": {
+						"$ref": "step.input.json#/$defs/SseItem"
+					}
+				}
+			},
+			"required": [
+				"codec",
+				"items"
+			]
+		},
+		"CodecStreamResult": {
+			"type": "object",
+			"properties": {
+				"events": {
+					"type": "array",
+					"items": {
+						"$ref": "step.input.json#/$defs/StepEvent"
+					}
+				},
+				"result": {
+					"anyOf": [
+						{
+							"$ref": "step.input.json#/$defs/StepResult"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"failure": {
+					"anyOf": [
+						{
+							"$ref": "step.input.json#/$defs/Failure"
+						},
+						{
+							"type": "null"
+						}
+					]
+				}
+			},
+			"required": [
+				"events",
+				"result",
+				"failure"
+			]
+		},
+		"CodecCompleteInput": {
+			"type": "object",
+			"properties": {
+				"codec": {
+					"$ref": "#/$defs/CodecName"
+				},
+				"body": {}
+			},
+			"required": [
+				"codec",
+				"body"
+			]
+		},
+		"CodecCompleteResult": {
+			"type": "object",
+			"properties": {
+				"result": {
+					"anyOf": [
+						{
+							"$ref": "step.input.json#/$defs/StepResult"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"failure": {
+					"anyOf": [
+						{
+							"$ref": "step.input.json#/$defs/Failure"
+						},
+						{
+							"type": "null"
+						}
+					]
+				}
+			},
+			"required": [
+				"result",
+				"failure"
+			]
+		},
+		"CodecFailureInput": {
+			"type": "object",
+			"properties": {
+				"codec": {
+					"$ref": "#/$defs/CodecName"
+				},
+				"status": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"body": {},
+				"headers": {
+					"$ref": "step.input.json#/$defs/HeaderList"
+				}
+			},
+			"required": [
+				"codec",
+				"status",
+				"body",
+				"headers"
+			]
+		},
+		"CodecFailureResult": {
+			"type": "object",
+			"properties": {
+				"failure": {
+					"$ref": "step.input.json#/$defs/Failure"
+				}
+			},
+			"required": [
+				"failure"
+			]
 		}
 	}
 }

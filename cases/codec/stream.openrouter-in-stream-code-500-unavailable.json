@@ -1,0 +1,30 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "openrouter-in-stream-code-500-unavailable",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"id\":\"gen-1\",\"error\":{\"code\":500,\"message\":\"Failed.\"}}"
+			}
+		]
+	},
+	"expected": {
+		"events": [],
+		"result": null,
+		"failure": {
+			"category": "unavailable",
+			"status": "stream",
+			"message": "Failed.",
+			"billed": {
+				"generationId": "gen-1"
+			}
+		}
+	}
+}

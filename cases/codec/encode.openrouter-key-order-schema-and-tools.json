@@ -1,0 +1,188 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.encode",
+	"name": "openrouter-key-order-schema-and-tools",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"request": {
+			"model": "openai/gpt-6-luna",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Hi"
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true,
+			"schema": {
+				"name": "scramble",
+				"json": {
+					"type": "object",
+					"required": [
+						"zeta",
+						"alpha",
+						"10",
+						"2"
+					],
+					"properties": {
+						"2": {
+							"type": "number"
+						},
+						"10": {
+							"type": "boolean"
+						},
+						"zeta": {
+							"type": "string",
+							"description": "Last letter."
+						},
+						"alpha": {
+							"type": "integer"
+						}
+					},
+					"additionalProperties": false
+				}
+			},
+			"tools": [
+				{
+					"name": "scramble",
+					"description": "Scramble.",
+					"parameters": {
+						"type": "object",
+						"required": [
+							"zeta",
+							"alpha",
+							"10",
+							"2"
+						],
+						"properties": {
+							"2": {
+								"type": "number"
+							},
+							"10": {
+								"type": "boolean"
+							},
+							"zeta": {
+								"type": "string"
+							},
+							"alpha": {
+								"type": "integer"
+							}
+						},
+						"additionalProperties": false
+					}
+				}
+			],
+			"toolChoice": {
+				"name": "scramble"
+			}
+		},
+		"mode": "stream"
+	},
+	"expected": {
+		"encoded": {
+			"path": "/chat/completions",
+			"body": {
+				"model": "openai/gpt-6-luna",
+				"messages": [
+					{
+						"role": "system",
+						"content": "Rules."
+					},
+					{
+						"role": "user",
+						"content": "Hi"
+					}
+				],
+				"stream": true,
+				"session_id": "root-1",
+				"provider": {
+					"zdr": true,
+					"data_collection": "deny",
+					"require_parameters": true
+				},
+				"tools": [
+					{
+						"type": "function",
+						"function": {
+							"name": "scramble",
+							"description": "Scramble.",
+							"parameters": {
+								"type": "object",
+								"required": [
+									"zeta",
+									"alpha",
+									"10",
+									"2"
+								],
+								"properties": {
+									"2": {
+										"type": "number"
+									},
+									"10": {
+										"type": "boolean"
+									},
+									"zeta": {
+										"type": "string"
+									},
+									"alpha": {
+										"type": "integer"
+									}
+								},
+								"additionalProperties": false
+							}
+						}
+					}
+				],
+				"tool_choice": {
+					"type": "function",
+					"function": {
+						"name": "scramble"
+					}
+				},
+				"response_format": {
+					"type": "json_schema",
+					"json_schema": {
+						"name": "scramble",
+						"strict": true,
+						"schema": {
+							"type": "object",
+							"required": [
+								"zeta",
+								"alpha",
+								"10",
+								"2"
+							],
+							"properties": {
+								"2": {
+									"type": "number"
+								},
+								"10": {
+									"type": "boolean"
+								},
+								"zeta": {
+									"type": "string",
+									"description": "Last letter."
+								},
+								"alpha": {
+									"type": "integer"
+								}
+							},
+							"additionalProperties": false
+						}
+					}
+				}
+			}
+		},
+		"refusal": null
+	}
+}

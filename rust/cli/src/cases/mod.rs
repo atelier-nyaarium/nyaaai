@@ -6,6 +6,7 @@ pub mod shapes;
 
 pub mod base64;
 pub mod claude;
+pub mod codec;
 pub mod contract;
 pub mod effort;
 pub mod failure;

@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "opencode-http-429-overloaded-marker",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "opencode",
+			"facts": {
+				"api": {
+					"family": "chat-completions",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false,
+					"reasoning": "reasoning_content"
+				},
+				"efforts": [
+					"high"
+				]
+			},
+			"nowMs": 1800000000000
+		},
+		"status": 429,
+		"body": {
+			"type": "error",
+			"error": {
+				"type": "server_error",
+				"message": "[overloaded] the server is overloaded; retry shortly"
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "overloaded",
+			"status": 429,
+			"message": "[overloaded] the server is overloaded; retry shortly"
+		}
+	}
+}

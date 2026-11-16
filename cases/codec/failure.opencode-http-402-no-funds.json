@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "opencode-http-402-no-funds",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "opencode",
+			"facts": {
+				"api": {
+					"family": "chat-completions",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false,
+					"reasoning": "reasoning_content"
+				},
+				"efforts": [
+					"high"
+				]
+			},
+			"nowMs": 1800000000000
+		},
+		"status": 402,
+		"body": {
+			"type": "error",
+			"error": {
+				"type": "CreditLimitExceeded",
+				"message": "Insufficient account funds"
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "outOfCredit",
+			"status": 402,
+			"message": "Insufficient account funds"
+		}
+	}
+}

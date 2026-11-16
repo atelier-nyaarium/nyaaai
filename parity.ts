@@ -11,6 +11,7 @@ import "@nyaaai/testkit/tortureShapes";
 import "@nyaaai/testkit/trace";
 import { base64 } from "./scripts/caseGroups/base64";
 import { claude } from "./scripts/caseGroups/claude";
+import { codec } from "./scripts/caseGroups/codec";
 import { contract } from "./scripts/caseGroups/contract";
 import { effort } from "./scripts/caseGroups/effort";
 import { failure } from "./scripts/caseGroups/failure";
@@ -113,6 +114,7 @@ export default project({
 		failure,
 		native,
 		schemaProjection,
+		codec,
 	],
 	runs: adapterCases,
 	cases: { crate: "nyaaai_cli", module: "cases", dir: "rust/cli/src/cases" },

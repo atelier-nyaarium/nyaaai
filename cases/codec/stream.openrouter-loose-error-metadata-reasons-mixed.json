@@ -1,0 +1,31 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "openrouter-loose-error-metadata-reasons-mixed",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"error\":{\"code\":403,\"message\":\"No.\",\"metadata\":{\"reasons\":[\"a\",1,null,\"b\"],\"provider_name\":7}}}"
+			}
+		]
+	},
+	"expected": {
+		"events": [],
+		"result": null,
+		"failure": {
+			"category": "refused",
+			"status": "stream",
+			"message": "No.",
+			"reasons": [
+				"a",
+				"b"
+			]
+		}
+	}
+}

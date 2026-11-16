@@ -1,0 +1,68 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "openrouter-reply-calls-by-position",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"body": {
+			"id": "gen-1",
+			"provider": "Azure",
+			"choices": [
+				{
+					"message": {
+						"content": null,
+						"tool_calls": [
+							{
+								"id": "call_a",
+								"type": "function",
+								"function": {
+									"name": "read",
+									"arguments": "{\"a\":1}"
+								}
+							},
+							{
+								"id": "call_b",
+								"type": "function",
+								"function": {
+									"name": "write",
+									"arguments": ""
+								}
+							}
+						]
+					},
+					"finish_reason": "tool_calls"
+				}
+			]
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "call_a",
+					"name": "read",
+					"argumentsText": "{\"a\":1}"
+				},
+				{
+					"kind": "call",
+					"index": 1,
+					"wireId": "call_b",
+					"name": "write",
+					"argumentsText": "{}"
+				}
+			],
+			"finish": "tool_calls",
+			"serving": {
+				"host": "Azure",
+				"generationId": "gen-1"
+			}
+		},
+		"failure": null
+	}
+}

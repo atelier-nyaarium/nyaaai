@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "conformance-openrouter-failure-402-outOfCredit",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"status": 402,
+		"body": {
+			"error": {
+				"message": "Insufficient credits"
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "outOfCredit",
+			"status": 402,
+			"message": "Insufficient credits"
+		}
+	}
+}

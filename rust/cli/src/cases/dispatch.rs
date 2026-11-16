@@ -277,6 +277,20 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
             shapes::SchemaProjectionProjectInput,
             shapes::SchemaProjectionProjectResult,
         >(input, super::schema_projection::project),
+        "codec.encode" => {
+            run::<shapes::CodecEncodeInput, shapes::CodecEncodeResult>(input, super::codec::encode)
+        }
+        "codec.stream" => {
+            run::<shapes::CodecStreamInput, shapes::CodecStreamResult>(input, super::codec::stream)
+        }
+        "codec.complete" => run::<shapes::CodecCompleteInput, shapes::CodecCompleteResult>(
+            input,
+            super::codec::complete,
+        ),
+        "codec.failure" => run::<shapes::CodecFailureInput, shapes::CodecFailureResult>(
+            input,
+            super::codec::failure,
+        ),
         _ => return None,
     })
 }

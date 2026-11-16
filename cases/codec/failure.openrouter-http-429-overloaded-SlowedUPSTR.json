@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "openrouter-http-429-overloaded-SlowedUPSTR",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"status": 429,
+		"body": {
+			"error": {
+				"message": "Slowed UPSTREAM again"
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "overloaded",
+			"status": 429,
+			"message": "Slowed UPSTREAM again"
+		}
+	}
+}

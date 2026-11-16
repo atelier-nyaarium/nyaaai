@@ -240,6 +240,8 @@ export const CodecFacts = z.object({
 	api: ApiFacts,
 	efforts: z.array(Effort),
 	outputLimit: z.int().exactOptional(),
+	/** Costs nothing. */
+	free: z.boolean().exactOptional(),
 });
 export type CodecFacts = z.infer<typeof CodecFacts>;
 

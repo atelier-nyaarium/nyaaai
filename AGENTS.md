@@ -56,6 +56,11 @@ Same names in both languages; Rust files are snake case.
   - `native`: `Host` and the helpers that read loose provider JSON: `isJson`, `stringOf`, `numberOf`, `argumentsOf`, `parsedChunk`, `wireError`, `streamFailure`, `assembled`, `servingEvents`, `schemaPrompt`, `systemTexts`, `currentTurnFrom`.
     Rust adds `HostStatus` (`Http` or `Stream`); `Host` is a trait.
   - `schemaProjection`: `cleanSchema`, `nullableOptionals`, `withoutNulls`, `strictSchema`.
+  - `codec`: `Codec` (`encode`, `stream`, `complete`, `failure`) and `StepTurn`.
+  - `chat/codec`: `chatCodec(dialect)`, `ChatDialect`. `chat/text`: `normalizeResponseValue`, `extractTextFromSegments`, `textOf`, `thoughtText`. `chat/wire`: the wire types and the readers of a reply (`readChunk`, `readCompletion`, `readUsage`, `readError`): a mistyped field is missing, a mistyped count is zero.
+  - `dialects/openrouter`: `OPENROUTER_CHAT`, `PROVIDER`, `thoughtsOf`, `detailsOf`. `dialects/opencode`: `opencodeChat(facts, clock)`, `opencodeErrors(clock)`. `dialects/local`: `localChat(facts, host, local)`, `LocalDialect`. A dialect reads a `CodecFacts`.
+  - `hosts/opencode`: `SESSION_HEADER`, `opencodeFailure(clock, ...)`, `opencodeUsage`. Reset stamps count from the clock given.
+    Rust: `Codec` and `ChatDialect` are traits; `stream()` answers a `StreamDecoder` pushed one item at a time, events appended to the caller's list so those before a failure stay. `ToolChoiceRule`, `Mode`, `HostStatus`, `Billing` and `Usage` are Rust's own spellings of what TypeScript leaves loose; `opencode_usage` takes the decoded `Usage`.
 - `ui`: empty.
 
 ## Patterns
@@ -155,6 +160,8 @@ A case file writes every banned character, and U+FEFF, as a `\uXXXX` escape.
 Generated files are the ones `parity.generated.json` lists. A refresh removes a listed file the fresh run no longer produces, writes the fresh files, then rewrites its list. A file nobody generated is never read, reported or removed. Drift is a fresh file that is missing or differs, a listed file nothing generates, or a stale list.
 
 A scripted run lists steps: `send`, `sendText`, `sendBase64`, `sendTail`, `sendOverCap`, `await`, `close`. `$TMP` is the run's temp folder. Frames compare per run, plus the connection's own in order, so runs may interleave. Never script a failure whose text the OS writes.
+
+Codec cases name a codec by data: `{ family, dialect, facts?, local?, nowMs? }`. `scripts/caseGroups/codecOf.ts` builds it from a table keyed `<family>/<dialect>`; a new family adds a row there and the same arm in `rust/cli/src/cases/codec.rs`.
 
 ## Adapter
 

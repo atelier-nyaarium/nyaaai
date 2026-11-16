@@ -1,0 +1,29 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "openrouter-http-reasons-not-a-list",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"status": 403,
+		"body": {
+			"error": {
+				"message": "Flagged",
+				"metadata": {
+					"reasons": "violence"
+				}
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "refused",
+			"status": 403,
+			"message": "Flagged"
+		}
+	}
+}

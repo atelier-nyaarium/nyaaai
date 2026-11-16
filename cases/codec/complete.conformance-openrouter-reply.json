@@ -1,0 +1,98 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "conformance-openrouter-reply",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"body": {
+			"id": "gen-1",
+			"provider": "Azure",
+			"choices": [
+				{
+					"message": {
+						"content": "Reading.",
+						"reasoning_details": [
+							{
+								"type": "reasoning.text",
+								"index": 0,
+								"text": "Thinking.",
+								"signature": "sig_1"
+							},
+							{
+								"type": "reasoning.encrypted",
+								"index": 1,
+								"data": "enc_2"
+							}
+						],
+						"tool_calls": [
+							{
+								"id": "call_a",
+								"type": "function",
+								"function": {
+									"name": "read",
+									"arguments": "{\"path\":\"a\"}"
+								}
+							}
+						]
+					},
+					"finish_reason": "tool_calls"
+				}
+			],
+			"usage": {
+				"prompt_tokens": 4,
+				"completion_tokens": 2,
+				"cost": 0.1
+			}
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "reasoning.text",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "Thinking."
+						}
+					],
+					"opaque": "sig_1",
+					"index": 0
+				},
+				{
+					"kind": "thought",
+					"type": "reasoning.encrypted",
+					"opaque": "enc_2",
+					"index": 1
+				},
+				{
+					"kind": "text",
+					"text": "Reading."
+				},
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "call_a",
+					"name": "read",
+					"argumentsText": "{\"path\":\"a\"}"
+				}
+			],
+			"finish": "tool_calls",
+			"usage": {
+				"input": 4,
+				"output": 2,
+				"cost": 0.1
+			},
+			"serving": {
+				"host": "Azure",
+				"generationId": "gen-1"
+			}
+		},
+		"failure": null
+	}
+}

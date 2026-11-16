@@ -1,0 +1,45 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "opencode-http-403-refused",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "opencode",
+			"facts": {
+				"api": {
+					"family": "chat-completions",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false,
+					"reasoning": "reasoning_content"
+				},
+				"efforts": [
+					"high"
+				]
+			},
+			"nowMs": 1800000000000
+		},
+		"status": 403,
+		"body": {
+			"type": "error",
+			"error": {
+				"message": "Forbidden."
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "refused",
+			"status": 403,
+			"message": "Forbidden."
+		}
+	}
+}
