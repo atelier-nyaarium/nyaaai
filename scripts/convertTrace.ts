@@ -4,8 +4,9 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { base64Encode } from "@nyaaai/contract/base64";
 import { parseJson, stringifyJson } from "@nyaaai/contract/json";
-import { Pattern } from "@nyaaai/contract/pattern";
+import { keptHeader } from "@nyaaai/testkit/recorder";
 import type { Trace, TraceExchange } from "@nyaaai/testkit/trace";
+import { collect, dataOf, longestFirst, scrubberOf } from "./traceIds";
 
 ////////////////////////////////
 //  Interfaces & Types
@@ -22,38 +23,7 @@ interface OldRow {
 }
 
 ////////////////////////////////
-//  Constants
-
-/** Keep only replay headers. */
-const KEPT_HEADER = Pattern.compile("^(?:content-type|retry-after|x-ratelimit-.*)$");
-const GENERATION = Pattern.compile("gen-[0-9]+-[A-Za-z0-9]+");
-const SESSION_KEY = "session_id";
-const SESSION = "00000000-0000-4000-8000-000000000000";
-const DATA_PREFIX = "data:";
-
-////////////////////////////////
 //  Functions & Helpers
-
-/** The JSON after `data:` and the prefix before it; undefined when the line holds none. */
-function dataOf(line: string): { prefix: string; payload: string; value: unknown } | undefined {
-	if (!line.startsWith(DATA_PREFIX)) return undefined;
-	const gap = line.startsWith(" ", DATA_PREFIX.length) ? 1 : 0;
-	const prefix = line.slice(0, DATA_PREFIX.length + gap);
-	const payload = line.slice(prefix.length);
-	const value = parseJson(payload);
-	return value === undefined ? undefined : { prefix, payload, value };
-}
-
-/** Every string found under a session key. */
-function collect(value: unknown, ids: Set<string>): void {
-	if (Array.isArray(value)) for (const item of value) collect(item, ids);
-	else if (value !== null && typeof value === "object") {
-		for (const [key, held] of Object.entries(value)) {
-			if (key === SESSION_KEY && typeof held === "string" && held !== "") ids.add(held);
-			else collect(held, ids);
-		}
-	}
-}
 
 function sessionIds(rows: OldRow[]): string[] {
 	const ids = new Set<string>();
@@ -63,42 +33,7 @@ function sessionIds(rows: OldRow[]): string[] {
 		collect(data.body, ids);
 		if (data.line !== undefined) collect(dataOf(data.line)?.value, ids);
 	}
-	// Longest first, so one id inside another is replaced whole.
-	return [...ids].sort((left, right) => right.length - left.length);
-}
-
-/** Scrubs by known id, by key, and every string. */
-function scrubberOf(ids: string[]) {
-	const text = (held: string): string => {
-		let made = held;
-		for (const id of ids) made = made.split(id).join(SESSION);
-		let from = 0;
-		let out = "";
-		for (const found of GENERATION.findAll(made)) {
-			out += `${made.slice(from, found.start)}gen-0-recorded`;
-			from = found.end;
-		}
-		return out + made.slice(from);
-	};
-	const value = (held: unknown): unknown => {
-		if (typeof held === "string") return text(held);
-		if (Array.isArray(held)) return held.map(value);
-		if (held !== null && typeof held === "object") {
-			return Object.fromEntries(
-				Object.entries(held).map(([key, item]) => [
-					text(key),
-					key === SESSION_KEY && typeof item === "string" ? SESSION : value(item),
-				]),
-			);
-		}
-		return held;
-	};
-	/** A stream line: JSON after `data:` is parsed, anything else is one string. */
-	const line = (held: string): string => {
-		const data = dataOf(held);
-		return data === undefined ? text(held) : data.prefix + stringifyJson(value(data.value));
-	};
-	return { value, line };
+	return longestFirst(ids);
 }
 
 const bytesOf = (text: string): string => base64Encode(new TextEncoder().encode(text));
@@ -128,9 +63,7 @@ export function convertTrace(rows: OldRow[]): Trace {
 			throw new Error("a response row comes before any request");
 		} else if (data.status !== undefined) {
 			last.status = data.status;
-			last.headers = Object.fromEntries(
-				Object.entries(data.headers ?? {}).filter(([name]) => KEPT_HEADER.test(name)),
-			);
+			last.headers = Object.fromEntries(Object.entries(data.headers ?? {}).filter(([name]) => keptHeader(name)));
 		} else if (data.line !== undefined) {
 			lines.push(scrub.line(data.line));
 		} else if (data.body !== undefined) {

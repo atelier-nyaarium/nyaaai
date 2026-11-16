@@ -164,6 +164,11 @@ function isDestructured(node: Node): boolean {
 	return isVariableDeclaration(node.parent) && isObjectBindingPattern(node.parent.name);
 }
 
+/** Bare `fetch` calls: the platform's own. */
+function platformFetchUses(file: SourceFile): number {
+	return descendants(file).filter((node) => isIdentifier(node) && node.text === "fetch" && isReference(node)).length;
+}
+
 function testFiles(): string[] {
 	const packages = readdirSync(path.join(ROOT, "ts"), { withFileTypes: true })
 		.filter((entry) => entry.isDirectory() && entry.name !== "node_modules")
@@ -493,6 +498,19 @@ describe("residue", () => {
 			platformCalls(source).map((call) => `${file} calls ${call}`),
 		);
 		expect(problems).toEqual([]);
+	});
+
+	it("only the platform adapter names the platform's fetch", async () => {
+		const probes = await parseProbes([
+			"const response = await fetch(url, init);",
+			"deps.fetch(url); const held = { fetch }; type Port = { fetch: Fetch }; const note = 'fetch(url)';",
+		]);
+		expect(probes.map(platformFetchUses)).toEqual([1, 0]);
+
+		const uses = [...(await parseFiles(engineTypeScriptFiles()))]
+			.filter(([, source]) => platformFetchUses(source) > 0)
+			.map(([file]) => path.relative(ROOT, file));
+		expect(uses).toEqual([path.join("ts", "agentic", "src", "fetch.ts")]);
 	});
 
 	it("the matcher runs on no platform regex", async () => {

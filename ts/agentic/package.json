@@ -15,6 +15,7 @@
 		"./dialects/openrouter": "./src/dialects/openrouter.ts",
 		"./effort": "./src/effort.ts",
 		"./failure": "./src/failure.ts",
+		"./fetch": "./src/fetch.ts",
 		"./gemini/codec": "./src/gemini/codec.ts",
 		"./gemini/wire": "./src/gemini/wire.ts",
 		"./hosts/opencode": "./src/hosts/opencode.ts",

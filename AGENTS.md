@@ -46,6 +46,8 @@ Same names in both languages; Rust files are snake case.
   - `trace` reads a recorded trace; `replayFetch` plays it as a `Fetch`. `scheduler` holds a timer wheel on virtual time; `fakeScheduler` (Rust `FakeScheduler`) runs sleeps and scheduled calls from it as it advances. `cases` (Rust) holds `block_on`, so a handler can await.
   - `scriptedFetch(exchanges, wheel)`: a `Fetch` that plays exchanges in order and records each request. An exchange holds a status, raw headers, chunks (each with a delay), a delay before the head, and an end: `closed`, `dropped` after the last chunk, or `refused` before the head. Answering the head or a chunk first advances the wheel by its delay, then fails with the signal's reason if the signal aborted meanwhile. `read()` counts the chunks handed out. `keys`: `fakeKeys(values)`, a key source answering each read from a list, the last repeating; `reads()`.
     Rust: `ScriptedFetch`, `replay_fetch` and `FakeKeys` (a sync `new`, an awaited `get`); a `Fetch` takes a `CancelToken` where TypeScript's takes a signal. `loopback` (Rust only): `Loopback`, an HTTP/1.1 server on `127.0.0.1` that answers each connection with one `LoopbackExchange`, its chunks flushed apart, and holds the connection before the head or after the chunks so a test sees the client close it.
+  - `recorder` (TypeScript): `recordingFetch(inner, secrets)` answers `{ fetch, trace }`. Every call passes to `inner`; `trace()` answers the `Trace` of the request bodies (JSON parsed, else text), statuses, the replay headers (`content-type`, `retry-after`, `x-ratelimit-*`) and each chunk's bytes with its edges. A request header is never kept. `trace()` throws when a secret, as is, path-encoded or in base64 without padding, occurs in a request body, a kept header or the joined bytes of a body, across edges too; the message names the exchange and the place, never the secret. Bytes are never rewritten.
+  - `loopback` (TypeScript): `loopbackProvider(trace, holds?)`, an HTTP server on `127.0.0.1` that answers each request with the next exchange, its chunks flushed apart. A hold keeps an exchange open before its head (`head`) or after its chunks (`chunks`); `arrived(at)`, `closed(at)` and `headers` let a test see the request and the close.
   - `rejection` (TypeScript): `rejection`, `rethrown` read what a promise rejects with.
   - `samples` (TypeScript): `sampleTexts` derives round-trip inputs from an exported schema.
   - `rustNames`: `snake`, `pascal`, `quote`, for a `parity.ts`'s generated Rust.
@@ -64,6 +66,7 @@ Same names in both languages; Rust files are snake case.
   - `dialects/openrouter`: `OPENROUTER_CHAT`, `PROVIDER`, `thoughtsOf`, `detailsOf`. `dialects/opencode`: `opencodeChat(facts, clock)`, `opencodeErrors(clock)`. `dialects/local`: `localChat(facts, host, local)`, `LocalDialect`. A dialect reads a `CodecFacts`.
   - `responses/codec`: `responsesCodec(host, facts)`. `messages/codec`: `messagesCodec(host, facts)`. `gemini/codec`: `geminiCodec(host, facts)`, `SKIP_SIGNATURE`. Each has a `wire` file of its wire types. They read provider JSON loosely: a field of the wrong type is missing, a usage count of the wrong type or a negative one is zero; an `error` field is an error unless absent, `null`, `false`, zero or the empty text, a text being its own message.
   - `hosts/opencode`: `SESSION_HEADER`, `opencodeHost(prefix, clock)`, `opencodeFailure(clock, ...)`, `opencodeUsage`. Reset stamps count from the clock given.
+  - `fetch`: `platformFetch()`, the `Fetch` over the platform's `fetch`, the one engine module that names it (the residue test holds it). Follows no redirect (a 3xx answers as its status), sets no timeout, answers no chunks for a response with no body, and keeps what the port's doc says an adapter owes.
   - `transport`: `Transport` (`stream`, `complete`, `getJson`, `postJson`, `onSettled`), `KeySource`, `staticKey`, `isKeyShape`, `normalizeKey`. It takes a `Fetch`, a `Scheduler`, a `KeySource`, a log, the base URL, a label and the consumer's `name/version` as `User-Agent`; no retry.
     Rust: `stream` answers an `EventStream` read with an awaited `next`, nothing running before the first; a call ends `TransportError::Cancelled` when the caller's token is cancelled, else a `ProviderError`. `StreamDecoder::over` tells the transport to read no further chunk. `fetch` (Rust only, Cargo feature `http`, off): `ReqwestFetch`, the `Fetch` over `reqwest`.
     - A request's headers: the codec's own, less any named `Content-Type`, `Accept`, `Authorization` or `User-Agent` (ASCII case aside), then `Content-Type`, `Accept`, `Authorization` when there is a key, `User-Agent`. A JSON call sends `Accept`, `User-Agent`, `Authorization`, then `Content-Type` when it has a body.
@@ -102,6 +105,7 @@ bun scripts/cases.ts --refresh    # rewrite case files from TypeScript
 bun scripts/samples.ts            # values sampled from every schema, decoded in both languages
 bun scripts/serve.ts              # the TypeScript adapter, with the case kinds
 bun scripts/convertTrace.ts <trace.jsonl> <out.json>   # an old recorded trace into the byte form, scrubbed
+bun scripts/record.ts openrouter [scenario]            # paid, run by hand; key on standard input; writes cases/traces/openrouter.<scenario>.json
 bun scripts/unicodeTables.ts <ucd folder>              # the NFC tables, from Unicode 17.0 files; run by hand
 bun scripts/crates.ts             # crate ages and advisories of rust/Cargo.lock
 bun scripts/bannedSymbols.ts      # banned characters in tracked and untracked files
@@ -375,6 +379,7 @@ Same in both languages. `parseJson` and `parse_json` apply them.
 - No license file.
 - Scan fixtures, cases and prompts before a push.
 - `scripts/convertTrace.ts` replaces generation ids and every id found under a `session_id` key, wherever that id recurs. It sees no other secret. Read a converted trace before committing it.
+- `scripts/record.ts` refuses a recording that holds its key, and replaces the same ids by the same rules (`scripts/traceIds.ts`) inside each chunk; an id across a chunk edge fails the recording. It sees no other secret. Read a recorded trace before committing it.
 
 ## Text
 
