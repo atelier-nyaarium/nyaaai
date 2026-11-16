@@ -12,7 +12,7 @@ workspace = true
 
 [features]
 # The gate's build: `serve` also runs the case kinds.
-cases = ["dep:nyaaai-testkit", "dep:tokio"]
+cases = ["dep:nyaaai-testkit"]
 
 [[bin]]
 name = "nyaaai"
@@ -25,7 +25,7 @@ nyaaai-contract.workspace = true
 nyaaai-operator.workspace = true
 nyaaai-process.workspace = true
 nyaaai-testkit = { workspace = true, optional = true }
-tokio = { workspace = true, optional = true, features = ["rt"] }
+tokio = { workspace = true, features = ["rt"] }
 
 [dev-dependencies]
 nyaaai-testkit.workspace = true

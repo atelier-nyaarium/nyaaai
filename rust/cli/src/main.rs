@@ -10,7 +10,7 @@ mod test_commands;
 use std::io;
 use std::process::ExitCode;
 
-use nyaaai_adapter::runtime::{RunContext, RunError, serve};
+use nyaaai_adapter::runtime::{Command, RunContext, serve};
 use nyaaai_contract::json::Value;
 
 const SERVE_USAGE: &str = "nyaaai serve";
@@ -24,16 +24,25 @@ fn project_root() -> &'static std::path::Path {
 
 /// Gate uses `case:a.b`.
 #[cfg(feature = "cases")]
-fn run(name: &str, input: &Value, context: &RunContext) -> Option<Result<Value, RunError>> {
+fn run(name: &str, input: Value, context: RunContext) -> Option<Command> {
     if let Some(kind) = name.strip_prefix("case:") {
-        return cases::dispatch::dispatch(kind, input, project_root())
-            .map(|held| held.map_err(RunError::Failed));
+        let (kind, name) = (kind.to_owned(), name.to_owned());
+        return Some(nyaaai_adapter::runtime::blocking(&context, move |_| {
+            cases::dispatch::dispatch(&kind, &input, project_root())
+                .map(|held| held.map_err(nyaaai_adapter::runtime::RunError::Failed))
+                .unwrap_or_else(|| {
+                    Err(nyaaai_adapter::runtime::RunError::UnknownCommand(format!(
+                        "no command {name}"
+                    )))
+                })
+        }));
     }
-    commands::run(name, input, context).or_else(|| test_commands::run(name, input, context))
+    commands::run(name, input.clone(), context.clone())
+        .or_else(|| test_commands::run(name, input, context))
 }
 
 #[cfg(not(feature = "cases"))]
-fn run(name: &str, input: &Value, context: &RunContext) -> Option<Result<Value, RunError>> {
+fn run(name: &str, input: Value, context: RunContext) -> Option<Command> {
     commands::run(name, input, context)
 }
 

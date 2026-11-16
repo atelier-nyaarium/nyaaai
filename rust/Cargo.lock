@@ -7,6 +7,7 @@ name = "nyaaai-adapter"
 version = "0.0.0"
 dependencies = [
  "nyaaai-contract",
+ "tokio",
 ]
 
 [[package]]
@@ -43,6 +44,7 @@ dependencies = [
  "nyaaai-contract",
  "nyaaai-process",
  "nyaaai-testkit",
+ "tokio",
 ]
 
 [[package]]

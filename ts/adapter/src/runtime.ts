@@ -35,6 +35,8 @@ export interface RunContext {
 	reply: (id: string) => Promise<unknown>;
 	request: (kind: string, input: unknown) => Promise<unknown>;
 	steers: () => string[];
+	/** Aborted at an interrupt and when the input ends. */
+	signal: AbortSignal;
 }
 
 export type Command = (input: unknown, context: RunContext) => Promise<unknown>;
@@ -160,6 +162,8 @@ class Inbox {
 class Run implements RunContext {
 	readonly inbox = new Inbox();
 	readonly pending = new Set<string>();
+	private readonly abort = new AbortController();
+	readonly signal = this.abort.signal;
 	private seq = 0;
 	private asked = 0;
 
@@ -199,6 +203,11 @@ class Run implements RunContext {
 	request = (kind: string, input: unknown): Promise<unknown> => this.reply(this.ask(kind, input));
 
 	steers = (): string[] => this.inbox.takeSteers();
+
+	interrupt(): void {
+		this.inbox.push(INTERRUPT);
+		this.abort.abort();
+	}
 }
 
 function concat(parts: Uint8Array[], size: number): Uint8Array {
@@ -332,7 +341,7 @@ export async function serve(options: ServeOptions): Promise<number> {
 		} else if (frame.type === "steer") {
 			run.inbox.push({ type: "steer", text: frame.text });
 		} else if (frame.type === "interrupt") {
-			run.inbox.push({ type: "interrupt" });
+			run.interrupt();
 		} else if (!run.pending.delete(frame.id)) {
 			fault("unknown_reply", "no such request", { run: frame.run });
 		} else if (frame.type === "reply") {
@@ -342,7 +351,7 @@ export async function serve(options: ServeOptions): Promise<number> {
 		}
 	}
 
-	for (const run of runs.values()) run.inbox.push({ type: "interrupt" });
+	for (const run of runs.values()) run.interrupt();
 	await Promise.all(open);
 	return 0;
 }

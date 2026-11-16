@@ -37,7 +37,7 @@ Same names in both languages; Rust files are snake case.
   - `future` (Rust): `BoxFuture`. `cancel` (Rust): `CancelToken`, cloneable; `cancel`, `is_cancelled`, `cancelled`, `run_until`.
 - `process`: `paths` (`resolvedPath`, `isInside`).
 - `operator`: `claude/sessionCut` cuts a Claude Code session file. `claude/sessionFile` reads its rows and holds cut ports over files. `claude/cliVersion` reads the installed version. `prompts` is generated.
-- `adapter`: `runtime` serves commands over frames: `serve`, `command`, `RunContext`. `stdio` (TypeScript): `serveStdio` runs it on the process's own streams and flushes before exit.
+- `adapter`: `runtime` serves commands over frames: `serve`, `command`, `RunContext` (Rust: `serve`, `serve_blocking`, `blocking`, `typed`, `typed_async`). `stdio` (TypeScript): `serveStdio` runs it on the process's own streams and flushes before exit.
 - `cli`: `commands` lists NyaaAI's own. Rust adds the `cut` command and `cases/`, the case handlers.
 - `testkit`: what a repository's parity setup is made of.
   - `caseGroup`, `caseContext`, `caseFile` shape the cases. `project` shapes `parity.ts`. `tree` plants a folder tree.
@@ -179,6 +179,8 @@ One process, many runs. `ts/adapter/src/runtime.ts` and `rust/adapter/src/runtim
 - End of input interrupts open runs, then exit 0.
 - Every message text is fixed and the same in both languages. A command that ends with none, by a thrown non-Error or a panic, fails with `the command crashed`. A result that does not fit the command's result shape fails with `the result does not fit the command`, in both languages.
 
+Rust's adapter is awaited, as TypeScript's is. A command is `fn(&str, Value, RunContext) -> Option<Command>`, `Command` a boxed future; `None` is an unknown command. `receive`, `reply` and `request` are awaited; `emit`, `ask` and `steers` are plain calls. `RunContext` is `Clone`, `Send` and `Sync`, and holds the run's `CancelToken`: an interrupt frame and the input closing cancel it, besides ending the awaits on the inbox. `typed` holds a blocking command to its shapes, `typed_async` an awaited one. `serve` owns a multi-thread `tokio` runtime and reads frames on the calling thread; each run is a task, and at end of input every run is cancelled and awaited. A table of blocking work uses `serve_blocking` with `fn(&str, &Value, &BlockingContext)`, which offers the clock, the ids and `is_cancelled()`; one blocking arm in an awaited table wraps in `blocking(&context, ..)`. A panic in either kind fails the run with `the command crashed`. A run carries a cancel signal in both languages: Rust's `CancelToken`, TypeScript's `signal`.
+
 Commands: `sessionCut.plan`, `sessionCut.apply`. A compact with no summary handed over asks the host: request `sessionCut.summarize`, reply the summary text.
 
 ## Prompts
@@ -287,7 +289,7 @@ Parity of its own:
 - The first refresh has no list to compare with, so it removes nothing. Delete generated files left from before by hand, once.
 - Group and kind names are letters and digits, a letter first. Case and run names are letters and digits in parts joined by one `.`, `_` or `-`.
 - Rust: path dependencies on the submodule's `rust/contract`, `rust/adapter` and `rust/testkit`. `cases` names the crate, module and folder the generator writes `shapes.rs`, `dispatch.rs` and `mod.rs` into. Handlers are by hand: `cases/<group>.rs`, `pub fn <kind>(input: <Group><Kind>Input) -> Outcome<<Group><Kind>Result>`. A context kind takes `context: &CaseContext` second.
-- Its `main` serves with `nyaaai_adapter::runtime::serve`. A `case:` command goes to `cases::dispatch::dispatch(kind, input, root)`, the root being the current directory read once at start. `rust/cli/src/main.rs` is the example.
+- Its `main` serves with `nyaaai_adapter::runtime::serve`. A `case:` command goes to `cases::dispatch::dispatch(kind, input, root)` inside `blocking`, the root being the current directory read once at start. `rust/cli/src/main.rs` is the example.
 - `rustAdapter.build` and `.run` are relative to its root. `rust/target` is ignored in git: the runner fails on a case run that changes the tree.
 - Toolchain: crates of edition 2024; its `rust-toolchain.toml` pins the submodule's channel exactly, with `rustfmt` and `clippy`. `cargo fmt` runs from `rust/`. Biome of its own, under `node_modules` at its root or in `ts/`.
 - Copy `rust/clippy.toml`; `assert` checks it. Clippy lints the path crates too.

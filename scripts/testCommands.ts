@@ -13,6 +13,21 @@ export const crash: Command = async () => {
 	throw "crash";
 };
 
+/** Ends with no message, the way `crash` does: Rust runs it on its blocking pool. */
+export const crashBlocking: Command = crash;
+
+/** Works until its run is cancelled, then answers what it saw. Never reads the inbox. */
+export const spin: Command = async (_input, context) => {
+	context.emit({ working: true });
+	if (!context.signal.aborted) {
+		await new Promise<void>((resolve) => context.signal.addEventListener("abort", () => resolve(), { once: true }));
+	}
+	return { saw: "cancelled" };
+};
+
+/** `spin`, with Rust's work on its blocking pool. */
+export const spinBlocking: Command = spin;
+
 /** Answers a text its shape refuses. */
 export const misfit = command(TestkitMisfitInput, TestkitMisfitResult, (input) => ({ text: input.fits ? "fits" : "" }));
 

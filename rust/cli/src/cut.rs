@@ -50,7 +50,11 @@ pub fn run(args: &[String]) -> Result<ExitCode, String> {
         },
         keep_out_of: None,
     };
-    match cut_session(&ports, &request).map_err(|error| error.to_string())? {
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .build()
+        .map_err(|error| error.to_string())?;
+    let outcome = runtime.block_on(cut_session(&ports, &request));
+    match outcome.map_err(|error| error.to_string())? {
         Ok(done) => {
             let file = ports.built(&done.session_id);
             let mut said = done.encode();

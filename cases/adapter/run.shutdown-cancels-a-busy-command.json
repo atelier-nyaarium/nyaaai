@@ -1,0 +1,100 @@
+{
+	"format": 2,
+	"type": "run",
+	"kind": "adapter.run",
+	"name": "shutdown-cancels-a-busy-command",
+	"script": [
+		{
+			"send": {
+				"type": "hello",
+				"version": "0.1.0"
+			}
+		},
+		{
+			"await": {
+				"type": "welcome"
+			}
+		},
+		{
+			"send": {
+				"type": "start",
+				"run": "awaited",
+				"command": "testkit.spin",
+				"input": null
+			}
+		},
+		{
+			"await": {
+				"type": "event",
+				"run": "awaited",
+				"seq": 1
+			}
+		},
+		{
+			"send": {
+				"type": "start",
+				"run": "blocking",
+				"command": "testkit.spinBlocking",
+				"input": null
+			}
+		},
+		{
+			"await": {
+				"type": "event",
+				"run": "blocking",
+				"seq": 1
+			}
+		},
+		{
+			"close": true
+		}
+	],
+	"expected": {
+		"exit": 0,
+		"connection": [
+			{
+				"type": "welcome",
+				"version": "0.1.0"
+			}
+		],
+		"runs": {
+			"awaited": [
+				{
+					"type": "event",
+					"run": "awaited",
+					"seq": 1,
+					"event": {
+						"working": true
+					}
+				},
+				{
+					"type": "done",
+					"run": "awaited",
+					"seq": 2,
+					"result": {
+						"saw": "cancelled"
+					}
+				}
+			],
+			"blocking": [
+				{
+					"type": "event",
+					"run": "blocking",
+					"seq": 1,
+					"event": {
+						"working": true
+					}
+				},
+				{
+					"type": "done",
+					"run": "blocking",
+					"seq": 2,
+					"result": {
+						"saw": "cancelled"
+					}
+				}
+			]
+		},
+		"files": {}
+	}
+}

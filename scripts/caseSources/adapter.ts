@@ -36,6 +36,10 @@ const converse = (id: string, requests: number, together = false): Step => ({
 	},
 });
 
+const busy = (id: string, command: string): Step => ({
+	send: { type: "start", run: id, command, input: null },
+});
+
 const asked = (id: string, request: string): Step => ({ await: { type: "request", run: id, id: request } });
 const ended = (id: string): Step => ({
 	await: [
@@ -275,6 +279,32 @@ export const adapterCases: RunSource[] = [
 		{ send: { type: "reply", run: "also", id: "q1", value: 1 } },
 		asked("also", "q2"),
 		{ close: true },
+	]),
+	run("interrupt-reaches-a-busy-command", [
+		...welcomed,
+		busy("awaited", "testkit.spin"),
+		{ await: { type: "event", run: "awaited", seq: 1, event: { working: true } } },
+		busy("blocking", "testkit.spinBlocking"),
+		{ await: { type: "event", run: "blocking", seq: 1, event: { working: true } } },
+		{ send: { type: "interrupt", run: "blocking" } },
+		{ await: { type: "done", run: "blocking", result: { saw: "cancelled" } } },
+		{ send: { type: "interrupt", run: "awaited" } },
+		{ await: { type: "done", run: "awaited", result: { saw: "cancelled" } } },
+	]),
+	run("shutdown-cancels-a-busy-command", [
+		...welcomed,
+		busy("awaited", "testkit.spin"),
+		{ await: { type: "event", run: "awaited", seq: 1 } },
+		busy("blocking", "testkit.spinBlocking"),
+		{ await: { type: "event", run: "blocking", seq: 1 } },
+		{ close: true },
+	]),
+	run("blocking-arm-panic", [
+		...welcomed,
+		{ send: { type: "start", run: "crash", command: "testkit.crashBlocking", input: null } },
+		{ await: { type: "failed", run: "crash", code: "error", message: "the command crashed" } },
+		converse("after", 0),
+		ended("after"),
 	]),
 	run("unterminated-tail", [
 		...welcomed,

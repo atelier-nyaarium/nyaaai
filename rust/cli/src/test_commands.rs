@@ -1,20 +1,62 @@
 //! Scripted test commands.
 
-use nyaaai_adapter::runtime::{Inbound, RunContext, RunError, typed};
+use std::thread;
+use std::time::Duration;
+
+use nyaaai_adapter::runtime::{
+    Command, Inbound, RunContext, RunError, blocking, typed, typed_async,
+};
 use nyaaai_contract::json::{Object, Value};
 
 use super::cases::shapes::{
     TestkitConverseInput, TestkitConverseResult, TestkitMisfitInput, TestkitMisfitResult,
 };
 
-pub fn run(name: &str, input: &Value, context: &RunContext) -> Option<Result<Value, RunError>> {
+/// How long blocking work waits between looks.
+const LOOK: Duration = Duration::from_millis(1);
+
+pub fn run(name: &str, input: Value, context: RunContext) -> Option<Command> {
     Some(match name {
-        "testkit.converse" => typed(input, |input| testkit_converse(input, context)),
-        "testkit.misfit" => typed(input, testkit_misfit),
+        "testkit.converse" => {
+            Box::pin(
+                async move { typed_async(&input, |input| testkit_converse(input, context)).await },
+            )
+        }
+        "testkit.misfit" => Box::pin(async move { typed(&input, testkit_misfit) }),
         // Avoids panic hook report.
         "testkit.crash" => std::panic::resume_unwind(Box::new("crash")),
+        "testkit.crashBlocking" => {
+            blocking(&context, |_| std::panic::resume_unwind(Box::new("crash")))
+        }
+        "testkit.spin" => Box::pin(async move {
+            working(&context);
+            context.token().cancelled().await;
+            Ok(saw_cancel())
+        }),
+        "testkit.spinBlocking" => {
+            working(&context);
+            blocking(&context, |blocked| {
+                while !blocked.is_cancelled() {
+                    thread::sleep(LOOK);
+                }
+                Ok(saw_cancel())
+            })
+        }
         _ => return None,
     })
+}
+
+/// Tells the host the work began.
+fn working(context: &RunContext) {
+    let mut event = Object::new();
+    event.insert("working", Value::Bool(true));
+    context.emit(Value::Object(event));
+}
+
+fn saw_cancel() -> Value {
+    let mut result = Object::new();
+    result.insert("saw", Value::from("cancelled"));
+    Value::Object(result)
 }
 
 fn testkit_misfit(input: TestkitMisfitInput) -> Result<TestkitMisfitResult, RunError> {
@@ -24,9 +66,9 @@ fn testkit_misfit(input: TestkitMisfitInput) -> Result<TestkitMisfitResult, RunE
     })
 }
 
-fn testkit_converse(
+async fn testkit_converse(
     input: TestkitConverseInput,
-    context: &RunContext,
+    context: RunContext,
 ) -> Result<TestkitConverseResult, RunError> {
     let said = |key: &str, value: Value| {
         let mut event = Object::new();
@@ -44,7 +86,7 @@ fn testkit_converse(
         Vec::new()
     };
     for id in &together {
-        match context.reply(id) {
+        match context.reply(id).await {
             Ok(value) => said("reply", value),
             Err(RunError::HostRequest(message)) => said("failed", Value::from(message)),
             Err(error) => return Err(error),
@@ -53,7 +95,7 @@ fn testkit_converse(
     for count in (1..=input.requests).filter(|_| !input.together) {
         let id = echo(count);
         loop {
-            match context.receive() {
+            match context.receive().await {
                 Inbound::Interrupt => return Err(RunError::Interrupted),
                 Inbound::Steer(text) => said("steer", Value::from(text)),
                 Inbound::Reply { id: held, value } if held == id => {

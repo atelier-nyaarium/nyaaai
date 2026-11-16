@@ -7,10 +7,19 @@ use std::path::{Path, PathBuf};
 use nyaaai_contract::id::Ids;
 use nyaaai_contract::time::Clock;
 use nyaaai_operator::claude::session_cut::{
-    CutMode, CutPorts, Lines, cut_session, request_for, verify_cut,
+    CutError, CutMode, CutOutcome, CutPorts, CutRefusal, CutRequest, Lines, Summarizer, Summary,
+    cut_session, request_for, verify_cut,
 };
 use nyaaai_operator::claude::session_file::{FileCutPorts, session_lines};
+use nyaaai_testkit::cases::block_on;
 use nyaaai_testkit::claude_session::{CLI_VERSION, compacted_session};
+
+fn cut<Ports: CutPorts + ?Sized>(
+    ports: &Ports,
+    request: &CutRequest,
+) -> Result<CutOutcome, CutError> {
+    block_on(cut_session(ports, request)).unwrap()
+}
 
 fn scratch(name: &str) -> (PathBuf, PathBuf, Vec<u8>) {
     let folder = Path::new(env!("CARGO_TARGET_TMPDIR")).join(name);
@@ -35,15 +44,133 @@ fn builds_a_sound_file_in_a_folder_it_makes_and_leaves_the_source_alone() {
         cli_version: CLI_VERSION.to_owned(),
         keep_out_of: Some(folder.join("sessions")),
     };
-    let done = cut_session(&ports, &request_for(CutMode::Trim))
-        .unwrap()
-        .unwrap();
+    let done = cut(&ports, &request_for(CutMode::Trim)).unwrap().unwrap();
     let built = ports.built(&done.session_id);
     assert_eq!(built.parent(), Some(ports.out.as_path()));
     let problems = verify_cut(session_lines(&built).unwrap(), &done.session_id, false).unwrap();
     assert_eq!(problems, Vec::<String>::new());
     assert_eq!(fs::read(&source).unwrap(), bytes);
     assert_eq!(files_under(&folder.join("sessions")), 1);
+}
+
+/// Summarizes after a yield.
+struct Summarizing(FileCutPorts);
+
+impl CutPorts for Summarizing {
+    fn read(&self) -> io::Result<Lines<'_>> {
+        self.0.read()
+    }
+    fn source_path(&self) -> String {
+        self.0.source_path()
+    }
+    fn create(&self, session_id: &str, lines: &[String]) -> io::Result<()> {
+        self.0.create(session_id, lines)
+    }
+    fn read_built(&self, session_id: &str) -> io::Result<Lines<'_>> {
+        self.0.read_built(session_id)
+    }
+    fn discard(&self, session_id: &str) -> io::Result<()> {
+        self.0.discard(session_id)
+    }
+    fn ids(&self) -> &dyn Ids {
+        self.0.ids()
+    }
+    fn clock(&self) -> &dyn Clock {
+        self.0.clock()
+    }
+    fn cli_version(&self) -> io::Result<String> {
+        self.0.cli_version()
+    }
+    fn summarizer(&self) -> Option<&dyn Summarizer> {
+        Some(self)
+    }
+}
+
+impl Summarizer for Summarizing {
+    fn summarize<'a>(&'a self, _: Option<&'a str>, rows: &'a [String]) -> Summary<'a> {
+        Box::pin(async move {
+            tokio::task::yield_now().await;
+            Ok(format!("{} rows folded", rows.len()))
+        })
+    }
+}
+
+fn is_send<T: Send>(held: T) -> T {
+    held
+}
+
+#[test]
+fn awaits_the_summary_a_port_answers_and_stays_send_over_sync_ports() {
+    let (folder, source, _) = scratch("file-ports-summary");
+    let ports = Summarizing(FileCutPorts {
+        source,
+        out: folder.join("out"),
+        cli_version: CLI_VERSION.to_owned(),
+        keep_out_of: None,
+    });
+    let mut request = request_for(CutMode::Compact);
+    request.target_uuid = Some(compacted_session().second);
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .build()
+        .unwrap();
+    let done = runtime
+        .block_on(is_send(cut_session(&ports, &request)))
+        .unwrap()
+        .unwrap();
+    let built = ports.0.built(&done.session_id);
+    let text = fs::read_to_string(built).unwrap();
+    assert!(text.contains(" rows folded"));
+}
+
+/// Reads once, then fails.
+struct ReadsOnce(FileCutPorts, std::sync::atomic::AtomicUsize);
+
+impl CutPorts for ReadsOnce {
+    fn read(&self) -> io::Result<Lines<'_>> {
+        if self.1.fetch_add(1, std::sync::atomic::Ordering::Relaxed) > 0 {
+            return Err(io::Error::other("denied"));
+        }
+        self.0.read()
+    }
+    fn source_path(&self) -> String {
+        self.0.source_path()
+    }
+    fn create(&self, session_id: &str, lines: &[String]) -> io::Result<()> {
+        self.0.create(session_id, lines)
+    }
+    fn read_built(&self, session_id: &str) -> io::Result<Lines<'_>> {
+        self.0.read_built(session_id)
+    }
+    fn discard(&self, session_id: &str) -> io::Result<()> {
+        self.0.discard(session_id)
+    }
+    fn ids(&self) -> &dyn Ids {
+        self.0.ids()
+    }
+    fn clock(&self) -> &dyn Clock {
+        self.0.clock()
+    }
+    fn cli_version(&self) -> io::Result<String> {
+        self.0.cli_version()
+    }
+}
+
+#[test]
+fn asks_for_a_summarizer_before_it_reads_a_row_for_one() {
+    let (folder, source, _) = scratch("file-ports-no-summarizer");
+    let ports = ReadsOnce(
+        FileCutPorts {
+            source,
+            out: folder.join("out"),
+            cli_version: CLI_VERSION.to_owned(),
+            keep_out_of: None,
+        },
+        std::sync::atomic::AtomicUsize::new(0),
+    );
+    let mut request = request_for(CutMode::Compact);
+    request.target_uuid = Some(compacted_session().second);
+    let refused = cut(&ports, &request).unwrap().unwrap_err();
+    assert_eq!(refused.reason, CutRefusal::SummaryNeeded);
 }
 
 /// Read-back always fails.
@@ -85,7 +212,7 @@ fn discards_the_built_file_when_its_read_back_fails() {
         cli_version: CLI_VERSION.to_owned(),
         keep_out_of: None,
     });
-    assert!(cut_session(&ports, &request_for(CutMode::Trim)).is_err());
+    assert!(cut(&ports, &request_for(CutMode::Trim)).is_err());
     assert_eq!(files_under(&folder.join("out")), 0);
 }
 
@@ -102,7 +229,7 @@ fn refuses_to_build_inside_the_folder_it_is_kept_out_of() {
             cli_version: CLI_VERSION.to_owned(),
             keep_out_of: Some(folder.join("sessions")),
         };
-        assert!(cut_session(&ports, &request_for(CutMode::Trim)).is_err());
+        assert!(cut(&ports, &request_for(CutMode::Trim)).is_err());
     }
     assert_eq!(files_under(&folder.join("sessions")), 1);
     assert_eq!(fs::read(&source).unwrap(), bytes);

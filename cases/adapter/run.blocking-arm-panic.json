@@ -1,0 +1,99 @@
+{
+	"format": 2,
+	"type": "run",
+	"kind": "adapter.run",
+	"name": "blocking-arm-panic",
+	"script": [
+		{
+			"send": {
+				"type": "hello",
+				"version": "0.1.0"
+			}
+		},
+		{
+			"await": {
+				"type": "welcome"
+			}
+		},
+		{
+			"send": {
+				"type": "start",
+				"run": "crash",
+				"command": "testkit.crashBlocking",
+				"input": null
+			}
+		},
+		{
+			"await": {
+				"type": "failed",
+				"run": "crash",
+				"code": "error",
+				"message": "the command crashed"
+			}
+		},
+		{
+			"send": {
+				"type": "start",
+				"run": "after",
+				"command": "testkit.converse",
+				"input": {
+					"requests": 0,
+					"together": false
+				},
+				"fixed": {
+					"nowMs": 1794535200000,
+					"stepMs": 1000,
+					"idPrefix": "after-"
+				}
+			}
+		},
+		{
+			"await": [
+				{
+					"type": "done",
+					"run": "after"
+				},
+				{
+					"type": "failed",
+					"run": "after"
+				}
+			]
+		}
+	],
+	"expected": {
+		"exit": 0,
+		"connection": [
+			{
+				"type": "welcome",
+				"version": "0.1.0"
+			}
+		],
+		"runs": {
+			"after": [
+				{
+					"type": "done",
+					"run": "after",
+					"seq": 1,
+					"result": {
+						"ids": [
+							"after-1",
+							"after-2"
+						],
+						"nowMs": 1794535200000,
+						"steers": []
+					}
+				}
+			],
+			"crash": [
+				{
+					"type": "failed",
+					"run": "crash",
+					"seq": 1,
+					"code": "error",
+					"message": "the command crashed"
+				}
+			]
+		},
+		"files": {}
+	}
+}

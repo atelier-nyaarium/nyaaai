@@ -9,13 +9,13 @@ use std::rc::Rc;
 use nyaaai_contract::id::{CountedIds, Ids};
 use nyaaai_contract::time::{Clock, SteppedClock};
 use nyaaai_operator::claude::session_cut::{
-    self as operator, CutPorts, Lines, Summarizer, TurnPick, cut_session, index_session, plan_cut,
-    verify_cut,
+    self as operator, CutPorts, Lines, Summarizer, Summary, TurnPick, cut_session, index_session,
+    plan_cut, verify_cut,
 };
 use nyaaai_operator::claude::session_file::{lines_of, session_lines};
 
 use super::session_file::bytes_of;
-use nyaaai_testkit::cases::{Outcome, failed};
+use nyaaai_testkit::cases::{Outcome, block_on, failed};
 
 use super::shapes::*;
 
@@ -73,13 +73,16 @@ pub fn plan(input: SessionCutPlanInput) -> Outcome<SessionCutPlanResult> {
     Ok(SessionCutPlanResult { plans })
 }
 
+/// Answers at once.
+type Answer = dyn Fn(Option<&str>, &[String]) -> io::Result<String>;
+
 struct MemoryPorts {
     rows: Vec<String>,
     source_path: String,
     ids: CountedIds,
     clock: SteppedClock,
     cli_version: String,
-    summarize: Option<Box<Summarizer<'static>>>,
+    summarize: Option<Immediate>,
     built: RefCell<HashMap<String, Vec<String>>>,
 }
 
@@ -126,8 +129,17 @@ impl CutPorts for MemoryPorts {
         Ok(self.cli_version.clone())
     }
 
-    fn summarizer(&self) -> Option<&Summarizer<'_>> {
-        self.summarize.as_deref()
+    fn summarizer(&self) -> Option<&dyn Summarizer> {
+        self.summarize.as_ref().map(|held| held as &dyn Summarizer)
+    }
+}
+
+/// Answers at once.
+struct Immediate(Box<Answer>);
+
+impl Summarizer for Immediate {
+    fn summarize<'a>(&'a self, standing: Option<&'a str>, rows: &'a [String]) -> Summary<'a> {
+        Box::pin(std::future::ready((self.0)(standing, rows)))
     }
 }
 
@@ -142,7 +154,7 @@ pub fn cut(input: SessionCutCutInput) -> Outcome<SessionCutCutResult> {
             });
             Ok(summary.clone())
         };
-        Box::new(answer) as Box<Summarizer<'static>>
+        Immediate(Box::new(answer))
     });
     let ports = MemoryPorts {
         rows: rows_of(&input.source)?,
@@ -153,7 +165,7 @@ pub fn cut(input: SessionCutCutInput) -> Outcome<SessionCutCutResult> {
         summarize,
         built: RefCell::default(),
     };
-    let outcome = match cut_session(&ports, &input.request) {
+    let outcome = match block_on(cut_session(&ports, &input.request))? {
         Ok(outcome) => outcome,
         Err(error) => {
             return Ok(SessionCutCutResult {

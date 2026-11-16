@@ -1,8 +1,8 @@
 //! Adapter commands.
 
-use std::cell::RefCell;
 use std::io;
 use std::path::{Path, PathBuf};
+use std::sync::Mutex;
 
 use nyaaai_contract::id::Ids;
 use nyaaai_contract::json::Value;
@@ -12,19 +12,19 @@ use nyaaai_contract::shapes::session_cut::{
 };
 use nyaaai_contract::time::Clock;
 use nyaaai_operator::claude::session_cut::{
-    CutError, CutPorts, Lines, Summarizer, cut_session, index_session, plan_cut,
+    CutError, CutPorts, Lines, Summarizer, Summary, cut_session, index_session, plan_cut,
 };
 use nyaaai_operator::claude::session_file::{FileCutPorts, session_lines};
 
-use nyaaai_adapter::runtime::{RunContext, RunError, typed};
+use nyaaai_adapter::runtime::{Command, RunContext, RunError, blocking, typed, typed_async};
 
 /// Host summary request.
 pub const SUMMARIZE: &str = "sessionCut.summarize";
 
-pub fn run(name: &str, input: &Value, context: &RunContext) -> Option<Result<Value, RunError>> {
+pub fn run(name: &str, input: Value, context: RunContext) -> Option<Command> {
     Some(match name {
-        "sessionCut.plan" => plan(input),
-        "sessionCut.apply" => apply(input, context),
+        "sessionCut.plan" => blocking(&context, move |_| plan(&input)),
+        "sessionCut.apply" => Box::pin(apply(input, context)),
         _ => return None,
     })
 }
@@ -39,13 +39,14 @@ fn plan(input: &Value) -> Result<Value, RunError> {
     })
 }
 
-struct ApplyPorts<'a> {
+struct ApplyPorts {
     file: FileCutPorts,
-    context: &'a RunContext,
-    summarize: Box<Summarizer<'a>>,
+    context: RunContext,
+    /// Preserves host request failures.
+    refused: Mutex<Option<RunError>>,
 }
 
-impl CutPorts for ApplyPorts<'_> {
+impl CutPorts for ApplyPorts {
     fn read(&self) -> io::Result<Lines<'_>> {
         self.file.read()
     }
@@ -78,28 +79,31 @@ impl CutPorts for ApplyPorts<'_> {
         self.file.cli_version()
     }
 
-    fn summarizer(&self) -> Option<&Summarizer<'_>> {
-        Some(&*self.summarize)
+    fn summarizer(&self) -> Option<&dyn Summarizer> {
+        Some(self)
     }
 }
 
-fn apply(input: &Value, context: &RunContext) -> Result<Value, RunError> {
-    typed(input, |input: ApplyCommand| {
-        // Preserve host request failures.
-        let refused: RefCell<Option<RunError>> = RefCell::new(None);
-        let summarize = |standing: Option<&str>, rows: &[String]| -> io::Result<String> {
-            let asked = SummarizeRequest {
-                standing: standing.map(str::to_owned),
-                rows: rows.to_vec(),
-            };
-            let failure = match context.request(SUMMARIZE, asked.encode()) {
+impl Summarizer for ApplyPorts {
+    fn summarize<'a>(&'a self, standing: Option<&'a str>, rows: &'a [String]) -> Summary<'a> {
+        let asked = SummarizeRequest {
+            standing: standing.map(str::to_owned),
+            rows: rows.to_vec(),
+        };
+        Box::pin(async move {
+            let failure = match self.context.request(SUMMARIZE, asked.encode()).await {
                 Ok(Value::String(summary)) => return Ok(summary),
                 Ok(_) => RunError::HostRequest("the summary is not text".to_owned()),
                 Err(error) => error,
             };
-            *refused.borrow_mut() = Some(failure);
+            *self.refused.lock().unwrap_or_else(|held| held.into_inner()) = Some(failure);
             Err(io::Error::other("the host gave no summary"))
-        };
+        })
+    }
+}
+
+async fn apply(input: Value, context: RunContext) -> Result<Value, RunError> {
+    typed_async(&input, |input: ApplyCommand| async move {
         let ports = ApplyPorts {
             file: FileCutPorts {
                 source: PathBuf::from(&input.source),
@@ -108,10 +112,15 @@ fn apply(input: &Value, context: &RunContext) -> Result<Value, RunError> {
                 keep_out_of: input.keep_out_of.map(PathBuf::from),
             },
             context,
-            summarize: Box::new(summarize),
+            refused: Mutex::new(None),
         };
-        let outcome = cut_session(&ports, &input.request);
-        if let Some(failure) = refused.take() {
+        let outcome = cut_session(&ports, &input.request).await;
+        let refused = ports
+            .refused
+            .lock()
+            .unwrap_or_else(|held| held.into_inner())
+            .take();
+        if let Some(failure) = refused {
             return Err(failure);
         }
         match outcome {
@@ -121,4 +130,5 @@ fn apply(input: &Value, context: &RunContext) -> Result<Value, RunError> {
             Err(error) => Err(RunError::Failed(error.to_string())),
         }
     })
+    .await
 }

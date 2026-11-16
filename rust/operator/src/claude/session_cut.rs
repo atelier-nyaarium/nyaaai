@@ -4,6 +4,7 @@ use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::io;
 
+use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::id::Ids;
 use nyaaai_contract::js::{strict_equal, to_js_string};
 use nyaaai_contract::json::{Object, Record, Value, parse_json, quote_json, stringify_json};
@@ -37,8 +38,13 @@ pub struct BuildInputs<'a> {
     pub clock: &'a dyn Clock,
 }
 
+/// A summary, awaited.
+pub type Summary<'a> = BoxFuture<'a, io::Result<String>>;
+
 /// Summarizes cut context.
-pub type Summarizer<'a> = dyn Fn(Option<&str>, &[String]) -> io::Result<String> + 'a;
+pub trait Summarizer {
+    fn summarize<'a>(&'a self, standing: Option<&'a str>, rows: &'a [String]) -> Summary<'a>;
+}
 
 /// Fallible text rows.
 pub type Lines<'a> = Box<dyn Iterator<Item = io::Result<String>> + 'a>;
@@ -56,7 +62,7 @@ pub trait CutPorts {
     fn clock(&self) -> &dyn Clock;
     fn cli_version(&self) -> io::Result<String>;
     /// Absent disables summarization.
-    fn summarizer(&self) -> Option<&Summarizer<'_>> {
+    fn summarizer(&self) -> Option<&dyn Summarizer> {
         None
     }
 }
@@ -1007,7 +1013,10 @@ pub fn cleared_summary(standing: Option<&str>, plan: &CutPlan, source_path: &str
 }
 
 /// Caller relaunches the CLI.
-pub fn cut_session(ports: &dyn CutPorts, request: &CutRequest) -> Result<CutOutcome, CutError> {
+pub async fn cut_session<Ports: CutPorts + ?Sized>(
+    ports: &Ports,
+    request: &CutRequest,
+) -> Result<CutOutcome, CutError> {
     let index = index_session(ports.read()?)?;
     let plan = match plan_cut(&index, request, &ports.cli_version()?) {
         Ok(plan) => plan,
@@ -1026,7 +1035,7 @@ pub fn cut_session(ports: &dyn CutPorts, request: &CutRequest) -> Result<CutOutc
         let summary = match &request.summary_text {
             Some(summary) => summary.clone(),
             None => {
-                let Some(summarize) = ports.summarizer() else {
+                let Some(summarizer) = ports.summarizer() else {
                     return Ok(Err(refused(
                         CutRefusal::SummaryNeeded,
                         "No summary was handed over.",
@@ -1040,7 +1049,9 @@ pub fn cut_session(ports: &dyn CutPorts, request: &CutRequest) -> Result<CutOutc
                         rows.push(text);
                     }
                 }
-                summarize(index.standing.as_deref(), &rows)?
+                summarizer
+                    .summarize(index.standing.as_deref(), &rows)
+                    .await?
             }
         };
         if trim_text(&summary).is_empty() {

@@ -35,7 +35,7 @@ import { testkit } from "./scripts/caseGroups/testkit";
 import { text } from "./scripts/caseGroups/text";
 import { time } from "./scripts/caseGroups/time";
 import { adapterCases } from "./scripts/caseSources/adapter";
-import { converse, crash, misfit } from "./scripts/testCommands";
+import { converse, crash, crashBlocking, misfit, spin, spinBlocking } from "./scripts/testCommands";
 
 ////////////////////////////////
 //  Functions & Helpers
@@ -122,6 +122,9 @@ export default project({
 		...COMMANDS,
 		["testkit.converse", converse],
 		["testkit.crash", crash],
+		["testkit.crashBlocking", crashBlocking],
+		["testkit.spin", spin],
+		["testkit.spinBlocking", spinBlocking],
 		["testkit.misfit", misfit],
 	]),
 	rustAdapter: {
