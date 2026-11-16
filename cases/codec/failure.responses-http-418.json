@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "responses-http-418",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"status": 418,
+		"body": {
+			"error": {
+				"type": "x",
+				"message": "Teapot."
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "badRequest",
+			"status": 418,
+			"message": "Teapot."
+		}
+	}
+}

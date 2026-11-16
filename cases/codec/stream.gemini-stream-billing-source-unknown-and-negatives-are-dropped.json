@@ -1,0 +1,81 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "gemini-stream-billing-source-unknown-and-negatives-are-dropped",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"candidates\":[{\"content\":{\"role\":\"model\",\"parts\":[{\"text\":\"Hi\"}]},\"finishReason\":\"STOP\"}],\"responseId\":\"resp_g\",\"usageMetadata\":{\"promptTokenCount\":10,\"candidatesTokenCount\":4,\"cost\":-1,\"opencode\":{\"billing_source\":\"gift\",\"list_cost\":-2,\"allowance\":-3}}}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "resp_g"
+				}
+			},
+			{
+				"kind": "text",
+				"text": "Hi"
+			},
+			{
+				"kind": "usage",
+				"usage": {
+					"input": 10,
+					"output": 4,
+					"listCost": -2
+				}
+			},
+			{
+				"kind": "finish",
+				"reason": "stop"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "Hi"
+				}
+			],
+			"finish": "stop",
+			"usage": {
+				"input": 10,
+				"output": 4,
+				"listCost": -2
+			},
+			"serving": {
+				"generationId": "resp_g"
+			}
+		},
+		"failure": null
+	}
+}

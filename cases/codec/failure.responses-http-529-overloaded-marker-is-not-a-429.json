@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "responses-http-529-overloaded-marker-is-not-a-429",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"status": 529,
+		"body": {
+			"error": {
+				"type": "x",
+				"message": "[overloaded] busy"
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "unavailable",
+			"status": 529,
+			"message": "[overloaded] busy"
+		}
+	}
+}

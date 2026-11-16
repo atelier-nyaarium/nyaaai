@@ -59,8 +59,10 @@ Same names in both languages; Rust files are snake case.
   - `codec`: `Codec` (`encode`, `stream`, `complete`, `failure`) and `StepTurn`.
   - `chat/codec`: `chatCodec(dialect)`, `ChatDialect`. `chat/text`: `normalizeResponseValue`, `extractTextFromSegments`, `textOf`, `thoughtText`. `chat/wire`: the wire types and the readers of a reply (`readChunk`, `readCompletion`, `readUsage`, `readError`): a mistyped field is missing, a mistyped count is zero.
   - `dialects/openrouter`: `OPENROUTER_CHAT`, `PROVIDER`, `thoughtsOf`, `detailsOf`. `dialects/opencode`: `opencodeChat(facts, clock)`, `opencodeErrors(clock)`. `dialects/local`: `localChat(facts, host, local)`, `LocalDialect`. A dialect reads a `CodecFacts`.
-  - `hosts/opencode`: `SESSION_HEADER`, `opencodeFailure(clock, ...)`, `opencodeUsage`. Reset stamps count from the clock given.
+  - `responses/codec`: `responsesCodec(host, facts)`. `messages/codec`: `messagesCodec(host, facts)`. `gemini/codec`: `geminiCodec(host, facts)`, `SKIP_SIGNATURE`. Each has a `wire` file of its wire types. They read provider JSON loosely: a field of the wrong type is missing; an `error` field is an error unless absent, `null`, `false`, zero or the empty text, a text being its own message.
+  - `hosts/opencode`: `SESSION_HEADER`, `opencodeHost(prefix, clock)`, `opencodeFailure(clock, ...)`, `opencodeUsage`. Reset stamps count from the clock given.
     Rust: `Codec` and `ChatDialect` are traits; `stream()` answers a `StreamDecoder` pushed one item at a time, events appended to the caller's list so those before a failure stay. `ToolChoiceRule`, `Mode`, `HostStatus`, `Billing` and `Usage` are Rust's own spellings of what TypeScript leaves loose; `opencode_usage` takes the decoded `Usage`.
+    Rust adds `loose` (readers of loose provider JSON fields, shared by the native codecs), `opencode_chat_usage` (the Chat dialects' `opencode_usage`, over a decoded `Usage`), and `OpenCodeHost`, which `opencode_host` returns; `Host` is a trait.
 - `ui`: empty.
 
 ## Patterns
@@ -161,7 +163,7 @@ Generated files are the ones `parity.generated.json` lists. A refresh removes a 
 
 A scripted run lists steps: `send`, `sendText`, `sendBase64`, `sendTail`, `sendOverCap`, `await`, `close`. `$TMP` is the run's temp folder. Frames compare per run, plus the connection's own in order, so runs may interleave. Never script a failure whose text the OS writes.
 
-Codec cases name a codec by data: `{ family, dialect, facts?, local?, nowMs? }`. `scripts/caseGroups/codecOf.ts` builds it from a table keyed `<family>/<dialect>`; a new family adds a row there and the same arm in `rust/cli/src/cases/codec.rs`.
+Codec cases name a codec by data: `{ family, dialect, facts?, local?, nowMs?, prefix? }`; a native family takes the host's `prefix`. `scripts/caseGroups/codecOf.ts` builds it from a table keyed `<family>/<dialect>`; a new family adds a row there and the same arm in `rust/cli/src/cases/codec.rs`.
 
 ## Adapter
 

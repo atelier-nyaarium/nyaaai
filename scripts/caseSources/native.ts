@@ -209,6 +209,13 @@ export const nativeCases: CaseSource[] = [
 		[500, json({ error: [{ message: "in a list" }] })],
 		[200, json({ error: { message: "ok status" } })],
 	),
+	wires(
+		"wire-error-text-is-the-message",
+		[500, json({ error: "Down." })],
+		[500, json({ error: "" })],
+		[500, json({ error: "   " })],
+		[429, json({ error: " kept " })],
+	),
 	wires("wire-error-ignores-other-keys", [
 		500,
 		json({ error: { code: 7, metadata: { a: 1 }, message: "m", extra: true } }),

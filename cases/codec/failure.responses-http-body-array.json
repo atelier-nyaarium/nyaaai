@@ -1,0 +1,43 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "responses-http-body-array",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"status": 500,
+		"body": [
+			1
+		],
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "unavailable",
+			"status": 500,
+			"message": "HTTP 500"
+		}
+	}
+}

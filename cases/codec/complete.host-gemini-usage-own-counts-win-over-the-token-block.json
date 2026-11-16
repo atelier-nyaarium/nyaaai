@@ -1,0 +1,70 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "host-gemini-usage-own-counts-win-over-the-token-block",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"body": {
+			"candidates": [
+				{
+					"finishReason": "STOP"
+				}
+			],
+			"responseId": "resp_g",
+			"usageMetadata": {
+				"promptTokenCount": 10,
+				"candidatesTokenCount": 5,
+				"cachedContentTokenCount": 11,
+				"thoughtsTokenCount": 13,
+				"opencode": {
+					"tokens": {
+						"cache_read": 50,
+						"reasoning": 3,
+						"cache_write_5m": 4,
+						"cache_write_1h": 6
+					}
+				}
+			}
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [],
+			"finish": "stop",
+			"usage": {
+				"input": 10,
+				"output": 18,
+				"cached": 11,
+				"cacheWrite": 10,
+				"reasoning": 13
+			},
+			"serving": {
+				"generationId": "resp_g"
+			}
+		},
+		"failure": null
+	}
+}

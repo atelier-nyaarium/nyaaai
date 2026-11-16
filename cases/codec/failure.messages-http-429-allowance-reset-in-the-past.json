@@ -1,0 +1,51 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "messages-http-429-allowance-reset-in-the-past",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			},
+			"nowMs": 1800000000000
+		},
+		"status": 429,
+		"body": {
+			"type": "error",
+			"error": {
+				"type": "GoUsageLimitError",
+				"message": "Usage limit reached.",
+				"resetsAt": 1799996400
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "allowance",
+			"status": 429,
+			"resetsAt": 1799996400000,
+			"message": "Usage limit reached."
+		}
+	}
+}

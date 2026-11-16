@@ -1,0 +1,62 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "responses-reply-usage",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"body": {
+			"id": "resp_1",
+			"status": "completed",
+			"output": [],
+			"usage": {
+				"input_tokens": 100,
+				"input_tokens_details": {
+					"cached_tokens": 60
+				},
+				"output_tokens": 10,
+				"output_tokens_details": {
+					"reasoning_tokens": 4
+				}
+			}
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [],
+			"finish": "stop",
+			"usage": {
+				"input": 100,
+				"output": 10,
+				"cached": 60,
+				"reasoning": 4
+			},
+			"serving": {
+				"generationId": "resp_1"
+			}
+		},
+		"failure": null
+	}
+}

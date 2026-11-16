@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "responses-http-404",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"status": 404,
+		"body": {
+			"error": {
+				"type": "x",
+				"message": "No such model."
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "notFound",
+			"status": 404,
+			"message": "No such model."
+		}
+	}
+}

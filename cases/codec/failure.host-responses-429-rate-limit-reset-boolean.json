@@ -1,0 +1,47 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "host-responses-429-rate-limit-reset-boolean",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			},
+			"nowMs": 1800000000000
+		},
+		"status": 429,
+		"body": {
+			"error": {
+				"message": "Slow.",
+				"resetsAt": true
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "rateLimited",
+			"status": 429,
+			"message": "Slow."
+		}
+	}
+}

@@ -1,0 +1,83 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "gemini-stream-chunks-after-the-finish-add-only-usage",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"candidates\":[{\"content\":{\"role\":\"model\",\"parts\":[{\"text\":\"Hi\"}]},\"finishReason\":\"STOP\"}],\"responseId\":\"resp_g\"}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"candidates\":[{\"content\":{\"role\":\"model\",\"parts\":[{\"text\":\" more\"}]},\"finishReason\":\"MAX_TOKENS\"}],\"responseId\":\"late\",\"usageMetadata\":{\"promptTokenCount\":10,\"candidatesTokenCount\":4}}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "resp_g"
+				}
+			},
+			{
+				"kind": "text",
+				"text": "Hi"
+			},
+			{
+				"kind": "finish",
+				"reason": "stop"
+			},
+			{
+				"kind": "usage",
+				"usage": {
+					"input": 10,
+					"output": 4
+				}
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "Hi"
+				}
+			],
+			"finish": "stop",
+			"usage": {
+				"input": 10,
+				"output": 4
+			},
+			"serving": {
+				"generationId": "resp_g"
+			}
+		},
+		"failure": null
+	}
+}

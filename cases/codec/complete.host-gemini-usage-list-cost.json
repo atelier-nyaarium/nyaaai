@@ -1,0 +1,61 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "host-gemini-usage-list-cost",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"body": {
+			"candidates": [
+				{
+					"finishReason": "STOP"
+				}
+			],
+			"responseId": "resp_g",
+			"usageMetadata": {
+				"promptTokenCount": 10,
+				"candidatesTokenCount": 5,
+				"opencode": {
+					"list_cost": 0.01
+				}
+			}
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [],
+			"finish": "stop",
+			"usage": {
+				"input": 10,
+				"output": 5,
+				"listCost": 0.01
+			},
+			"serving": {
+				"generationId": "resp_g"
+			}
+		},
+		"failure": null
+	}
+}

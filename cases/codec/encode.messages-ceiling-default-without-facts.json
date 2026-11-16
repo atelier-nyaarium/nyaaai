@@ -1,0 +1,62 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.encode",
+	"name": "messages-ceiling-default-without-facts",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1"
+		},
+		"request": {
+			"model": "claude-haiku-5-5",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Hi"
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true
+		},
+		"mode": "complete"
+	},
+	"expected": {
+		"encoded": {
+			"path": "/anthropic/v1/messages",
+			"body": {
+				"model": "claude-haiku-5-5",
+				"max_tokens": 32000,
+				"system": [
+					{
+						"type": "text",
+						"text": "Rules."
+					}
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": [
+							{
+								"type": "text",
+								"text": "Hi"
+							}
+						]
+					}
+				],
+				"stream": false
+			},
+			"headers": {
+				"x-opencode-session": "root-1"
+			}
+		},
+		"refusal": null
+	}
+}

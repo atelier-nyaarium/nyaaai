@@ -1,0 +1,41 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "responses-http-body-text",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"status": 502,
+		"body": "Bad gateway",
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "unavailable",
+			"status": 502,
+			"message": "HTTP 502"
+		}
+	}
+}

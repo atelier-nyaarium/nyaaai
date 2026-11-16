@@ -7,7 +7,6 @@ import {
 	DEEPSEEK,
 	DONE,
 	data,
-	FIXTURES,
 	finish,
 	type Json,
 	LUNA,
@@ -20,37 +19,18 @@ import {
 	reasoned,
 	reasoning,
 	reasoningContent,
-	request,
 	stepOf,
 	text,
 } from "./codecFixtures";
+import { geminiCases } from "./codecGemini";
+import { hostCases } from "./codecHost";
+import { completes, encodes, fails, streams } from "./codecKit";
+import { messagesCases } from "./codecMessages";
+import { ALL_FIXTURES } from "./codecNativeFixtures";
+import { responsesCases } from "./codecResponses";
 
 ////////////////////////////////
 //  Functions & Helpers
-
-const encodes = (name: string, codec: Json, over: Json = {}, mode: "stream" | "complete" = "stream"): CaseSource => ({
-	kind: "codec.encode",
-	name,
-	input: { codec, request: request(over), mode },
-});
-
-const streams = (name: string, codec: Json, ...items: Json[]): CaseSource => ({
-	kind: "codec.stream",
-	name,
-	input: { codec, items },
-});
-
-const completes = (name: string, codec: Json, body: unknown): CaseSource => ({
-	kind: "codec.complete",
-	name,
-	input: { codec, body },
-});
-
-const fails = (name: string, codec: Json, status: number, body: unknown, headers: string[][] = []): CaseSource => ({
-	kind: "codec.failure",
-	name,
-	input: { codec, status, body, headers },
-});
 
 const wireCall = (id: string, name: string, args: unknown): Json => ({
 	id,
@@ -88,7 +68,7 @@ function readStep(model: string, thought: Json = DIVIDE, host?: string): Json {
 ////////////////////////////////
 //  Conformance: each fixture, five runs
 
-const conformance: CaseSource[] = FIXTURES.flatMap((fixture) => {
+const conformance: CaseSource[] = ALL_FIXTURES.flatMap((fixture) => {
 	const history = [{ role: "user", text: "Hi" }, stepOf(fixture.result, fixture.model)];
 	const at = (suffix: string) => `conformance-${fixture.name}-${suffix}`;
 	return [
@@ -2116,4 +2096,8 @@ export const codecCases: CaseSource[] = [
 	...looseReplies,
 	...looseFailures,
 	...replies,
+	...responsesCases,
+	...messagesCases,
+	...geminiCases,
+	...hostCases,
 ];

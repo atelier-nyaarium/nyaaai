@@ -1,0 +1,142 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.encode",
+	"name": "responses-key-order-tools",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"request": {
+			"model": "gpt-6-luna",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Hi"
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true,
+			"tools": [
+				{
+					"name": "scramble",
+					"description": "Scramble.",
+					"parameters": {
+						"type": "object",
+						"required": [
+							"zeta",
+							"alpha",
+							"10",
+							"2"
+						],
+						"properties": {
+							"2": {
+								"type": "number"
+							},
+							"10": {
+								"type": "boolean"
+							},
+							"zeta": {
+								"type": "string"
+							},
+							"alpha": {
+								"type": "integer"
+							}
+						},
+						"additionalProperties": false
+					}
+				}
+			],
+			"toolChoice": {
+				"name": "scramble"
+			}
+		},
+		"mode": "complete"
+	},
+	"expected": {
+		"encoded": {
+			"path": "/openai/v1/responses",
+			"body": {
+				"model": "gpt-6-luna",
+				"instructions": "Rules.",
+				"input": [
+					{
+						"type": "message",
+						"role": "user",
+						"content": "Hi"
+					}
+				],
+				"tools": [
+					{
+						"type": "function",
+						"name": "scramble",
+						"description": "Scramble.",
+						"parameters": {
+							"type": "object",
+							"required": [
+								"zeta",
+								"alpha",
+								"10",
+								"2"
+							],
+							"properties": {
+								"2": {
+									"type": "number"
+								},
+								"10": {
+									"type": "boolean"
+								},
+								"zeta": {
+									"type": "string"
+								},
+								"alpha": {
+									"type": "integer"
+								}
+							},
+							"additionalProperties": false
+						}
+					}
+				],
+				"tool_choice": {
+					"type": "function",
+					"name": "scramble"
+				},
+				"store": false,
+				"include": [
+					"reasoning.encrypted_content"
+				],
+				"stream": false
+			},
+			"headers": {
+				"x-opencode-session": "root-1"
+			}
+		},
+		"refusal": null
+	}
+}

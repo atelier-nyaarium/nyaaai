@@ -1,0 +1,122 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.encode",
+	"name": "responses-replay-summary-and-content-segments",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"request": {
+			"model": "gpt-6-luna",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "step",
+					"producer": {
+						"model": "gpt-6-luna"
+					},
+					"parts": [
+						{
+							"kind": "thought",
+							"type": "reasoning",
+							"opaque": "enc",
+							"id": "rs_1",
+							"segments": [
+								{
+									"kind": "content",
+									"text": "Raw one."
+								},
+								{
+									"kind": "summary",
+									"text": "Short."
+								},
+								{
+									"kind": "content",
+									"text": "Raw two."
+								},
+								{
+									"kind": "summary",
+									"text": "Tail."
+								}
+							]
+						}
+					]
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true
+		},
+		"mode": "complete"
+	},
+	"expected": {
+		"encoded": {
+			"path": "/openai/v1/responses",
+			"body": {
+				"model": "gpt-6-luna",
+				"instructions": "Rules.",
+				"input": [
+					{
+						"type": "reasoning",
+						"id": "rs_1",
+						"summary": [
+							{
+								"type": "summary_text",
+								"text": "Short."
+							},
+							{
+								"type": "summary_text",
+								"text": "Tail."
+							}
+						],
+						"content": [
+							{
+								"type": "reasoning_text",
+								"text": "Raw one."
+							},
+							{
+								"type": "reasoning_text",
+								"text": "Raw two."
+							}
+						],
+						"encrypted_content": "enc"
+					}
+				],
+				"store": false,
+				"include": [
+					"reasoning.encrypted_content"
+				],
+				"stream": false
+			},
+			"headers": {
+				"x-opencode-session": "root-1"
+			}
+		},
+		"refusal": null
+	}
+}

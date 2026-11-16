@@ -1,0 +1,47 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "gemini-http-503",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"status": 503,
+		"body": {
+			"error": {
+				"code": 503,
+				"status": "UNAVAILABLE",
+				"message": "Unavailable."
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "unavailable",
+			"status": 503,
+			"message": "Unavailable."
+		}
+	}
+}

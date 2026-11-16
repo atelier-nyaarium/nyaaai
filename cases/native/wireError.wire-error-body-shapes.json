@@ -72,7 +72,7 @@
 				"message": "HTTP 500"
 			},
 			{
-				"message": "HTTP 500"
+				"message": "boom"
 			},
 			{
 				"message": "HTTP 500"

@@ -1,0 +1,49 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "responses-reply-incomplete-filter",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"body": {
+			"id": "resp_1",
+			"status": "incomplete",
+			"output": [],
+			"incomplete_details": {
+				"reason": "content_filter"
+			}
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [],
+			"finish": "content_filter",
+			"serving": {
+				"generationId": "resp_1"
+			}
+		},
+		"failure": null
+	}
+}

@@ -1,0 +1,72 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "host-responses-usage-own-counts-win-over-the-token-block",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"body": {
+			"id": "resp_1",
+			"status": "completed",
+			"output": [],
+			"usage": {
+				"input_tokens": 10,
+				"output_tokens": 5,
+				"input_tokens_details": {
+					"cached_tokens": 11,
+					"cache_write_tokens": 12
+				},
+				"output_tokens_details": {
+					"reasoning_tokens": 13
+				},
+				"opencode": {
+					"tokens": {
+						"cache_read": 50,
+						"reasoning": 3,
+						"cache_write_5m": 4,
+						"cache_write_1h": 6
+					}
+				}
+			}
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [],
+			"finish": "stop",
+			"usage": {
+				"input": 10,
+				"output": 5,
+				"cached": 11,
+				"cacheWrite": 12,
+				"reasoning": 13
+			},
+			"serving": {
+				"generationId": "resp_1"
+			}
+		},
+		"failure": null
+	}
+}

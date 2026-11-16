@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "responses-stream-chunk-is-null",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "null"
+			}
+		]
+	},
+	"expected": {
+		"events": [],
+		"result": null,
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": "A stream chunk was not JSON."
+		}
+	}
+}

@@ -1,11 +1,11 @@
-// OpenCode's failure and usage rules.
+// OpenCode's host, failure and usage rules.
 
 import { headerOf } from "@nyaaai/contract/headers";
 import type { Failure, FailureCategory, HeaderList, NormalizedUsage } from "@nyaaai/contract/shapes/step";
 import { asciiLower } from "@nyaaai/contract/text";
 import { type Clock, resetStampMs } from "@nyaaai/contract/time";
 import { messageOf, type WireError } from "../failure";
-import { isJson, numberOf } from "../native";
+import { type Host, isJson, numberOf } from "../native";
 
 ////////////////////////////////
 //  Constants
@@ -96,5 +96,15 @@ export function opencodeUsage(own: NormalizedUsage, raw: Record<string, unknown>
 		...(typeof source === "string" && SOURCES.has(source) ? { billingSource: source } : {}),
 		...(listCost === undefined ? {} : { listCost }),
 		...(allowance === undefined ? {} : { allowance }),
+	};
+}
+
+/** The plan's routes, for the native families. */
+export function opencodeHost(prefix: string, clock: Clock): Host {
+	return {
+		prefix,
+		headers: (request) => ({ [SESSION_HEADER]: request.session }),
+		usage: opencodeUsage,
+		failure: (status, error, headers) => opencodeFailure(clock, status, error, headers),
 	};
 }

@@ -1,0 +1,50 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "host-gemini-429-allowance-reset-moves-with-the-clock",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			},
+			"nowMs": 1800000060000
+		},
+		"status": 429,
+		"body": {
+			"type": "error",
+			"error": {
+				"type": "GoUsageLimitError",
+				"message": "Limit reached.",
+				"resetsAt": 1800000090
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "allowance",
+			"status": 429,
+			"resetsAt": 1800000090000,
+			"message": "Limit reached."
+		}
+	}
+}

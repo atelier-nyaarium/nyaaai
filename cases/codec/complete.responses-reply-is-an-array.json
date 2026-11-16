@@ -1,0 +1,42 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "responses-reply-is-an-array",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"body": [
+			1
+		]
+	},
+	"expected": {
+		"result": null,
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": "The reply was not JSON."
+		}
+	}
+}

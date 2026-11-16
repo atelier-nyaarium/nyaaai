@@ -1,0 +1,86 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.encode",
+	"name": "messages-effort-not-listed",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			}
+		},
+		"request": {
+			"model": "claude-haiku-5-5",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Hi"
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true,
+			"effort": "medium"
+		},
+		"mode": "complete"
+	},
+	"expected": {
+		"encoded": {
+			"path": "/anthropic/v1/messages",
+			"body": {
+				"model": "claude-haiku-5-5",
+				"max_tokens": 128000,
+				"system": [
+					{
+						"type": "text",
+						"text": "Rules."
+					}
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": [
+							{
+								"type": "text",
+								"text": "Hi"
+							}
+						]
+					}
+				],
+				"thinking": {
+					"type": "adaptive",
+					"display": "summarized"
+				},
+				"stream": false
+			},
+			"headers": {
+				"x-opencode-session": "root-1"
+			}
+		},
+		"refusal": null
+	}
+}

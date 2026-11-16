@@ -1,0 +1,83 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "responses-stream-item-id-mistyped",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"event": "response.output_text.delta",
+				"data": "{\"type\":\"response.output_text.delta\",\"item_id\":5,\"delta\":\"Hi\"}"
+			},
+			{
+				"kind": "data",
+				"event": "response.output_text.delta",
+				"data": "{\"type\":\"response.output_text.delta\",\"item_id\":null,\"delta\":\"again\"}"
+			},
+			{
+				"kind": "data",
+				"event": "response.completed",
+				"data": "{\"type\":\"response.completed\",\"response\":{\"id\":\"resp_1\",\"status\":\"completed\"}}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "text",
+				"text": "Hi"
+			},
+			{
+				"kind": "text",
+				"text": "again"
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "resp_1"
+				}
+			},
+			{
+				"kind": "finish",
+				"reason": "stop"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "Hiagain"
+				}
+			],
+			"finish": "stop",
+			"serving": {
+				"generationId": "resp_1"
+			}
+		},
+		"failure": null
+	}
+}

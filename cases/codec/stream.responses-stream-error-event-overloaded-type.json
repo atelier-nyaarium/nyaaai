@@ -1,0 +1,47 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "responses-stream-error-event-overloaded-type",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"event": "error",
+				"data": "{\"type\":\"error\",\"code\":\"overloaded_error\",\"message\":\"Slow down.\"}"
+			}
+		]
+	},
+	"expected": {
+		"events": [],
+		"result": null,
+		"failure": {
+			"category": "overloaded",
+			"status": "stream",
+			"message": "Slow down."
+		}
+	}
+}

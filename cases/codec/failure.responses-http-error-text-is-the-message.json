@@ -1,0 +1,43 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "responses-http-error-text-is-the-message",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"status": 429,
+		"body": {
+			"error": "Slow down."
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "rateLimited",
+			"status": 429,
+			"message": "Slow down."
+		}
+	}
+}

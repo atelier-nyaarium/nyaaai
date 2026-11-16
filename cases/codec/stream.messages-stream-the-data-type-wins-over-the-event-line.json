@@ -1,0 +1,71 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "messages-stream-the-data-type-wins-over-the-event-line",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"event": "ping",
+				"data": "{\"type\":\"message_start\",\"message\":{\"id\":\"msg_1\"}}"
+			},
+			{
+				"kind": "data",
+				"event": "message_delta",
+				"data": "{\"type\":\"message_delta\",\"delta\":{\"stop_reason\":\"end_turn\"}}"
+			},
+			{
+				"kind": "data",
+				"event": "message_stop",
+				"data": "{\"type\":\"message_stop\"}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "msg_1"
+				}
+			},
+			{
+				"kind": "finish",
+				"reason": "stop"
+			}
+		],
+		"result": {
+			"parts": [],
+			"finish": "stop",
+			"serving": {
+				"generationId": "msg_1"
+			}
+		},
+		"failure": null
+	}
+}

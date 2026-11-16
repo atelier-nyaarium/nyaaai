@@ -1,0 +1,151 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.encode",
+	"name": "conformance-responses-replay-own",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				]
+			}
+		},
+		"request": {
+			"model": "gpt-6-luna",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Hi"
+				},
+				{
+					"role": "step",
+					"producer": {
+						"model": "gpt-6-luna"
+					},
+					"parts": [
+						{
+							"kind": "thought",
+							"type": "reasoning",
+							"segments": [
+								{
+									"kind": "summary",
+									"text": "Thinking."
+								}
+							],
+							"opaque": "enc_1",
+							"id": "rs_1"
+						},
+						{
+							"kind": "text",
+							"text": "Reading.",
+							"phase": "commentary"
+						},
+						{
+							"kind": "thought",
+							"type": "reasoning",
+							"opaque": "enc_2",
+							"id": "rs_2"
+						},
+						{
+							"kind": "call",
+							"index": 0,
+							"wireId": "call_a",
+							"name": "read",
+							"arguments": "{\"path\":\"a\"}"
+						},
+						{
+							"kind": "result",
+							"index": 0,
+							"output": "ran read",
+							"isError": false
+						}
+					]
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true
+		},
+		"mode": "stream"
+	},
+	"expected": {
+		"encoded": {
+			"path": "/openai/v1/responses",
+			"body": {
+				"model": "gpt-6-luna",
+				"instructions": "Rules.",
+				"input": [
+					{
+						"type": "message",
+						"role": "user",
+						"content": "Hi"
+					},
+					{
+						"type": "reasoning",
+						"id": "rs_1",
+						"summary": [
+							{
+								"type": "summary_text",
+								"text": "Thinking."
+							}
+						],
+						"encrypted_content": "enc_1"
+					},
+					{
+						"type": "message",
+						"role": "assistant",
+						"content": "Reading.",
+						"phase": "commentary"
+					},
+					{
+						"type": "reasoning",
+						"id": "rs_2",
+						"summary": [],
+						"encrypted_content": "enc_2"
+					},
+					{
+						"type": "function_call",
+						"call_id": "call_a",
+						"name": "read",
+						"arguments": "{\"path\":\"a\"}"
+					},
+					{
+						"type": "function_call_output",
+						"call_id": "call_a",
+						"output": "ran read"
+					}
+				],
+				"store": false,
+				"include": [
+					"reasoning.encrypted_content"
+				],
+				"stream": true
+			},
+			"headers": {
+				"x-opencode-session": "root-1"
+			}
+		},
+		"refusal": null
+	}
+}

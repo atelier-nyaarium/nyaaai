@@ -1,0 +1,47 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "gemini-http-400-model-unavailable",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"status": 400,
+		"body": {
+			"error": {
+				"code": 400,
+				"status": "INVALID_ARGUMENT",
+				"message": "Model is unavailable."
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "notFound",
+			"status": 400,
+			"message": "Model is unavailable."
+		}
+	}
+}

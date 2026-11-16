@@ -4,6 +4,10 @@ use nyaaai_agentic::codec::{Codec, Mode};
 use nyaaai_agentic::dialects::local::{LocalDialect, LocalReplay, local_chat};
 use nyaaai_agentic::dialects::opencode::opencode_chat;
 use nyaaai_agentic::dialects::openrouter::OPENROUTER_CHAT;
+use nyaaai_agentic::gemini::codec::gemini_codec;
+use nyaaai_agentic::hosts::opencode::{OpenCodeHost, opencode_host};
+use nyaaai_agentic::messages::codec::messages_codec;
+use nyaaai_agentic::responses::codec::responses_codec;
 use nyaaai_agentic::step::StepAssembler;
 use nyaaai_contract::shapes::step::Failure;
 use nyaaai_contract::time::SteppedClock;
@@ -38,6 +42,16 @@ fn local_of(name: &CodecName) -> Outcome<Built> {
     )))
 }
 
+fn host_of(name: &CodecName) -> Outcome<OpenCodeHost<SteppedClock>> {
+    let Some(prefix) = &name.prefix else {
+        return Err("a native codec needs its `prefix`".to_owned());
+    };
+    Ok(opencode_host(
+        prefix,
+        SteppedClock::new(name.now_ms.unwrap_or(0), 0),
+    ))
+}
+
 /// A later family adds one arm here, and one row in `codecOf.ts`.
 fn codec_of(name: &CodecName) -> Outcome<Built> {
     let key = format!("{}/{}", name.family.as_str(), name.dialect);
@@ -48,6 +62,17 @@ fn codec_of(name: &CodecName) -> Outcome<Built> {
             SteppedClock::new(name.now_ms.unwrap_or(0), 0),
         ))),
         "chat-completions/local" => local_of(name),
+        "responses/opencode" => Ok(Box::new(responses_codec(
+            host_of(name)?,
+            name.facts.as_ref(),
+        ))),
+        "messages/opencode" => Ok(Box::new(messages_codec(
+            host_of(name)?,
+            name.facts.as_ref(),
+        ))),
+        "generate-content/opencode" => {
+            Ok(Box::new(gemini_codec(host_of(name)?, name.facts.as_ref())))
+        }
         _ => Err(format!("no codec named {key}")),
     }
 }

@@ -1,0 +1,63 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "messages-stream-start-without-a-message",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"event": "message_start",
+				"data": "{\"type\":\"message_start\"}"
+			},
+			{
+				"kind": "data",
+				"event": "message_delta",
+				"data": "{\"type\":\"message_delta\",\"delta\":{\"stop_reason\":\"end_turn\"}}"
+			},
+			{
+				"kind": "data",
+				"event": "message_stop",
+				"data": "{\"type\":\"message_stop\"}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "finish",
+				"reason": "stop"
+			}
+		],
+		"result": {
+			"parts": [],
+			"finish": "stop",
+			"serving": {}
+		},
+		"failure": null
+	}
+}

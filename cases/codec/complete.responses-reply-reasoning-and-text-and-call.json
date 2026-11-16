@@ -1,0 +1,102 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "responses-reply-reasoning-and-text-and-call",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"body": {
+			"id": "resp_1",
+			"status": "completed",
+			"output": [
+				{
+					"type": "reasoning",
+					"id": "rs_1",
+					"summary": [
+						{
+							"type": "summary_text",
+							"text": "Plan."
+						}
+					],
+					"encrypted_content": "enc"
+				},
+				{
+					"type": "message",
+					"id": "msg_1",
+					"role": "assistant",
+					"content": [
+						{
+							"type": "output_text",
+							"text": "Reading."
+						}
+					],
+					"phase": "commentary"
+				},
+				{
+					"type": "function_call",
+					"id": "fc_1",
+					"call_id": "call_a",
+					"name": "read",
+					"arguments": "{\"path\":\"a\"}"
+				}
+			]
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "reasoning",
+					"segments": [
+						{
+							"kind": "summary",
+							"text": "Plan."
+						}
+					],
+					"opaque": "enc",
+					"id": "rs_1"
+				},
+				{
+					"kind": "text",
+					"text": "Reading.",
+					"phase": "commentary"
+				},
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "call_a",
+					"name": "read",
+					"argumentsText": "{\"path\":\"a\"}"
+				}
+			],
+			"finish": "tool_calls",
+			"serving": {
+				"generationId": "resp_1"
+			}
+		},
+		"failure": null
+	}
+}

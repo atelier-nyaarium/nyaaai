@@ -1,0 +1,100 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.encode",
+	"name": "gemini-replay-signature-on-text-is-an-empty-part",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"request": {
+			"model": "gemini-3.8-flash",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "step",
+					"producer": {
+						"model": "gemini-3.8-flash"
+					},
+					"parts": [
+						{
+							"kind": "text",
+							"text": "Done."
+						},
+						{
+							"kind": "thought",
+							"type": "thought",
+							"opaque": "sig_t",
+							"anchor": "text"
+						}
+					]
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true
+		},
+		"mode": "stream"
+	},
+	"expected": {
+		"encoded": {
+			"path": "/google/v1beta/models/gemini-3.8-flash:streamGenerateContent?alt=sse",
+			"body": {
+				"contents": [
+					{
+						"role": "model",
+						"parts": [
+							{
+								"text": "Done."
+							},
+							{
+								"text": "",
+								"thoughtSignature": "sig_t"
+							}
+						]
+					}
+				],
+				"systemInstruction": {
+					"parts": [
+						{
+							"text": "Rules."
+						}
+					]
+				},
+				"generationConfig": {
+					"thinkingConfig": {
+						"includeThoughts": true
+					}
+				}
+			},
+			"headers": {
+				"x-opencode-session": "root-1"
+			}
+		},
+		"refusal": null
+	}
+}

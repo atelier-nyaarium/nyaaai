@@ -1,0 +1,45 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "conformance-responses-failure-400-notFound",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				]
+			}
+		},
+		"status": 400,
+		"body": {
+			"error": {
+				"message": "Model is unavailable.",
+				"type": "invalid_request_error"
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "notFound",
+			"status": 400,
+			"message": "Model is unavailable."
+		}
+	}
+}

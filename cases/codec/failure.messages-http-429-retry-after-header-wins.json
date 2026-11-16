@@ -1,0 +1,53 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "messages-http-429-retry-after-header-wins",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			},
+			"nowMs": 1800000000000
+		},
+		"status": 429,
+		"body": {
+			"error": {
+				"message": "Slow.",
+				"resetsAt": 1800000090
+			}
+		},
+		"headers": [
+			[
+				"retry-after",
+				"5"
+			]
+		]
+	},
+	"expected": {
+		"failure": {
+			"category": "rateLimited",
+			"status": 429,
+			"message": "Slow."
+		}
+	}
+}

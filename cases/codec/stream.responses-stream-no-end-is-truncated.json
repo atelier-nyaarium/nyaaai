@@ -1,0 +1,52 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "responses-stream-no-end-is-truncated",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"event": "response.output_text.delta",
+				"data": "{\"type\":\"response.output_text.delta\",\"item_id\":\"msg_1\",\"delta\":\"Hi\"}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "text",
+				"text": "Hi"
+			}
+		],
+		"result": null,
+		"failure": {
+			"category": "truncated",
+			"status": "truncated",
+			"message": "The stream ended before the response completed."
+		}
+	}
+}

@@ -1,0 +1,48 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "messages-http-429-rate-limited",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			}
+		},
+		"status": 429,
+		"body": {
+			"type": "error",
+			"error": {
+				"type": "rate_limit_error",
+				"message": "Slow down."
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "rateLimited",
+			"status": 429,
+			"message": "Slow down."
+		}
+	}
+}

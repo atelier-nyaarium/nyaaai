@@ -1,0 +1,99 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "messages-reply-call-input-not-an-object",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			}
+		},
+		"body": {
+			"id": "msg_1",
+			"type": "message",
+			"role": "assistant",
+			"content": [
+				{
+					"type": "tool_use",
+					"id": "c",
+					"name": "read",
+					"input": "x"
+				},
+				{
+					"type": "tool_use",
+					"id": "d",
+					"name": "read"
+				},
+				{
+					"type": "tool_use",
+					"id": "e",
+					"name": "read",
+					"input": [
+						1
+					]
+				}
+			],
+			"stop_reason": "tool_use",
+			"usage": {
+				"input_tokens": 4,
+				"output_tokens": 2
+			}
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "c",
+					"name": "read",
+					"argumentsText": "{}"
+				},
+				{
+					"kind": "call",
+					"index": 1,
+					"wireId": "d",
+					"name": "read",
+					"argumentsText": "{}"
+				},
+				{
+					"kind": "call",
+					"index": 2,
+					"wireId": "e",
+					"name": "read",
+					"argumentsText": "{}"
+				}
+			],
+			"finish": "tool_calls",
+			"usage": {
+				"input": 4,
+				"output": 2
+			},
+			"serving": {
+				"generationId": "msg_1"
+			}
+		},
+		"failure": null
+	}
+}

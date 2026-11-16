@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "conformance-responses-failure-429-allowance",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				]
+			}
+		},
+		"status": 429,
+		"body": {
+			"type": "error",
+			"error": {
+				"type": "GoUsageLimitError",
+				"message": "Usage limit reached."
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "allowance",
+			"status": 429,
+			"message": "Usage limit reached."
+		}
+	}
+}

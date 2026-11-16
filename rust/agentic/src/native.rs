@@ -92,17 +92,20 @@ pub fn parsed_chunk(data: &str) -> Result<Json, ProviderError> {
     }
 }
 
-/// Native errors wrap `error`.
+/// Native errors wrap `error`; a text is the message.
 pub fn wire_error(status: i64, body: &Value) -> WireError {
-    let error = body.get("error").and_then(Value::as_object);
+    let held = body.get("error");
+    let error = held.and_then(Value::as_object);
     let field = |key: &str| error.and_then(|error| error.get(key));
     let type_ = field("type")
         .and_then(Value::as_str)
         .or_else(|| field("status").and_then(Value::as_str))
         .map(str::to_owned);
-    let message = field("message")
-        .and_then(message_of)
-        .map_or_else(|| format!("HTTP {status}"), str::to_owned);
+    let message = match held {
+        Some(text @ Value::String(_)) => message_of(text),
+        _ => field("message").and_then(message_of),
+    }
+    .map_or_else(|| format!("HTTP {status}"), str::to_owned);
     let resets_at = match field("resetsAt") {
         Some(Value::String(text)) => Some(NumberOrText::Text(text.clone())),
         Some(Value::Number(number)) => Some(NumberOrText::Number(*number)),

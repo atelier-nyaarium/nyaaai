@@ -1,0 +1,44 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "responses-reply-status-unknown-ends-the-step",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"body": {
+			"id": "resp_1",
+			"status": "queued",
+			"output": []
+		}
+	},
+	"expected": {
+		"result": null,
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": "The provider ended the step."
+		}
+	}
+}

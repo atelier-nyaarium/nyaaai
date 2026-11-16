@@ -1,0 +1,57 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "gemini-reply-safety",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"body": {
+			"candidates": [
+				{
+					"finishReason": "SAFETY"
+				}
+			],
+			"responseId": "resp_g",
+			"usageMetadata": {
+				"promptTokenCount": 4,
+				"candidatesTokenCount": 2
+			}
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [],
+			"finish": "content_filter",
+			"usage": {
+				"input": 4,
+				"output": 2
+			},
+			"serving": {
+				"generationId": "resp_g"
+			}
+		},
+		"failure": null
+	}
+}

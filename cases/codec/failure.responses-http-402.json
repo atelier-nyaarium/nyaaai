@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "responses-http-402",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"status": 402,
+		"body": {
+			"error": {
+				"type": "x",
+				"message": "Insufficient balance."
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "outOfCredit",
+			"status": 402,
+			"message": "Insufficient balance."
+		}
+	}
+}

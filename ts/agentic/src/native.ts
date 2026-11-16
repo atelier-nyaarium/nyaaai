@@ -77,7 +77,8 @@ export function parsedChunk(data: string): Json {
 
 /** Native errors wrap `error`. */
 export function wireError(status: number, body: unknown): WireError {
-	const error = isJson(body) && isJson(body["error"]) ? body["error"] : {};
+	const held = isJson(body) ? body["error"] : undefined;
+	const error = typeof held === "string" ? { message: held } : isJson(held) ? held : {};
 	const type =
 		typeof error["type"] === "string"
 			? error["type"]

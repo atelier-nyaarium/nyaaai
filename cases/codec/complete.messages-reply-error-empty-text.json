@@ -1,0 +1,44 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "messages-reply-error-empty-text",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			}
+		},
+		"body": {
+			"type": "error",
+			"error": ""
+		}
+	},
+	"expected": {
+		"result": null,
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": "HTTP 200"
+		}
+	}
+}

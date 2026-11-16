@@ -4,6 +4,10 @@ import type { Codec } from "@nyaaai/agentic/codec";
 import { localChat } from "@nyaaai/agentic/dialects/local";
 import { opencodeChat } from "@nyaaai/agentic/dialects/opencode";
 import { OPENROUTER_CHAT } from "@nyaaai/agentic/dialects/openrouter";
+import { geminiCodec } from "@nyaaai/agentic/gemini/codec";
+import { opencodeHost } from "@nyaaai/agentic/hosts/opencode";
+import { messagesCodec } from "@nyaaai/agentic/messages/codec";
+import { responsesCodec } from "@nyaaai/agentic/responses/codec";
 import { z } from "@nyaaai/contract/shape";
 import { ApiFamily, CodecFacts } from "@nyaaai/contract/shapes/step";
 import { steppedClock } from "@nyaaai/contract/time";
@@ -29,6 +33,8 @@ export const CodecName = z.object({
 	local: LocalName.exactOptional(),
 	/** The scripted instant a dialect measures reset stamps from. Defaults to zero. */
 	nowMs: z.int().exactOptional(),
+	/** A native family's host path prefix, such as `/openai/v1`. */
+	prefix: z.string().exactOptional(),
 });
 export type CodecName = z.infer<typeof CodecName>;
 
@@ -40,6 +46,11 @@ type Builder = (name: CodecName) => Codec;
 function slashed(path: string): `/${string}` {
 	if (!path.startsWith("/")) throw new Error(`a chat path starts with a slash: ${path}`);
 	return `/${path.slice(1)}` as const;
+}
+
+function hostOf(name: CodecName) {
+	if (name.prefix === undefined) throw new Error("a native codec needs its `prefix`");
+	return opencodeHost(name.prefix, steppedClock(name.nowMs ?? 0));
 }
 
 function localOf(name: CodecName): Codec {
@@ -61,6 +72,9 @@ const BUILDERS = new Map<string, Builder>([
 	["chat-completions/openrouter", () => OPENROUTER_CHAT],
 	["chat-completions/opencode", (name) => opencodeChat(name.facts, steppedClock(name.nowMs ?? 0))],
 	["chat-completions/local", localOf],
+	["responses/opencode", (name) => responsesCodec(hostOf(name), name.facts)],
+	["messages/opencode", (name) => messagesCodec(hostOf(name), name.facts)],
+	["generate-content/opencode", (name) => geminiCodec(hostOf(name), name.facts)],
 ]);
 
 export function codecOf(name: CodecName): Codec {

@@ -1,0 +1,80 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "gemini-stream-serving-id-empty-or-mistyped",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"candidates\":[{\"content\":{\"role\":\"model\",\"parts\":[{\"text\":\"A\"}]}}],\"responseId\":\"\"}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"candidates\":[{\"content\":{\"role\":\"model\",\"parts\":[{\"text\":\"B\"}]}}],\"responseId\":5}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"candidates\":[{\"content\":{\"role\":\"model\",\"parts\":[]},\"finishReason\":\"STOP\"}],\"responseId\":\"r_3\"}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "text",
+				"text": "A"
+			},
+			{
+				"kind": "text",
+				"text": "B"
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "r_3"
+				}
+			},
+			{
+				"kind": "finish",
+				"reason": "stop"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "AB"
+				}
+			],
+			"finish": "stop",
+			"serving": {
+				"generationId": "r_3"
+			}
+		},
+		"failure": null
+	}
+}

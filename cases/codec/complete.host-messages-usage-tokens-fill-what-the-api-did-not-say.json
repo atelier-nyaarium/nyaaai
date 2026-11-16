@@ -1,0 +1,66 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "host-messages-usage-tokens-fill-what-the-api-did-not-say",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			}
+		},
+		"body": {
+			"id": "msg_1",
+			"content": [],
+			"stop_reason": "end_turn",
+			"usage": {
+				"input_tokens": 10,
+				"output_tokens": 5,
+				"opencode": {
+					"tokens": {
+						"cache_read": 50,
+						"reasoning": 3,
+						"cache_write_5m": 4,
+						"cache_write_1h": 6
+					}
+				}
+			}
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [],
+			"finish": "stop",
+			"usage": {
+				"input": 10,
+				"output": 5,
+				"cached": 50,
+				"cacheWrite": 10,
+				"reasoning": 3
+			},
+			"serving": {
+				"generationId": "msg_1"
+			}
+		},
+		"failure": null
+	}
+}

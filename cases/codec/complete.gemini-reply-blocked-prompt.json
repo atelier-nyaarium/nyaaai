@@ -1,0 +1,44 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "gemini-reply-blocked-prompt",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"body": {
+			"promptFeedback": {
+				"blockReason": "SAFETY"
+			}
+		}
+	},
+	"expected": {
+		"result": null,
+		"failure": {
+			"category": "refused",
+			"status": "stream",
+			"message": "The prompt was blocked: SAFETY."
+		}
+	}
+}

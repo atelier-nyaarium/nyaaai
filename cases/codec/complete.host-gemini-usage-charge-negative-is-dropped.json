@@ -1,0 +1,58 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "host-gemini-usage-charge-negative-is-dropped",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"body": {
+			"candidates": [
+				{
+					"finishReason": "STOP"
+				}
+			],
+			"responseId": "resp_g",
+			"usageMetadata": {
+				"promptTokenCount": 10,
+				"candidatesTokenCount": 5,
+				"cost": -0.5
+			}
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [],
+			"finish": "stop",
+			"usage": {
+				"input": 10,
+				"output": 5
+			},
+			"serving": {
+				"generationId": "resp_g"
+			}
+		},
+		"failure": null
+	}
+}

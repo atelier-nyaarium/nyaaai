@@ -1,0 +1,60 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "gemini-stream-error-empty-text-is-no-error",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"error\":\"\",\"candidates\":[{\"content\":{\"parts\":[{\"text\":\"Hi\"}]},\"finishReason\":\"STOP\"}]}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "text",
+				"text": "Hi"
+			},
+			{
+				"kind": "finish",
+				"reason": "stop"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "Hi"
+				}
+			],
+			"finish": "stop",
+			"serving": {}
+		},
+		"failure": null
+	}
+}

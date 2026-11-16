@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "responses-http-403",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"status": 403,
+		"body": {
+			"error": {
+				"type": "x",
+				"message": "Forbidden."
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "refused",
+			"status": 403,
+			"message": "Forbidden."
+		}
+	}
+}

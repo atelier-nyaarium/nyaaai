@@ -1,0 +1,140 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "conformance-responses-reply",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				]
+			}
+		},
+		"body": {
+			"id": "resp_1",
+			"status": "completed",
+			"output": [
+				{
+					"type": "reasoning",
+					"id": "rs_1",
+					"summary": [
+						{
+							"type": "summary_text",
+							"text": "Thinking."
+						}
+					],
+					"encrypted_content": "enc_1"
+				},
+				{
+					"type": "message",
+					"id": "msg_1",
+					"role": "assistant",
+					"phase": "commentary",
+					"content": [
+						{
+							"type": "output_text",
+							"text": "Reading."
+						}
+					]
+				},
+				{
+					"type": "reasoning",
+					"id": "rs_2",
+					"summary": [],
+					"encrypted_content": "enc_2"
+				},
+				{
+					"type": "function_call",
+					"id": "fc_1",
+					"call_id": "call_a",
+					"name": "read",
+					"arguments": "{\"path\":\"a\"}"
+				}
+			],
+			"usage": {
+				"input_tokens": 100,
+				"input_tokens_details": {
+					"cached_tokens": 60
+				},
+				"output_tokens": 10,
+				"output_tokens_details": {
+					"reasoning_tokens": 4
+				},
+				"cost": 0.002,
+				"opencode": {
+					"billing_source": "go",
+					"tokens": {
+						"cache_write_5m": 5,
+						"cache_write_1h": 2
+					}
+				}
+			}
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "reasoning",
+					"segments": [
+						{
+							"kind": "summary",
+							"text": "Thinking."
+						}
+					],
+					"opaque": "enc_1",
+					"id": "rs_1"
+				},
+				{
+					"kind": "text",
+					"text": "Reading.",
+					"phase": "commentary"
+				},
+				{
+					"kind": "thought",
+					"type": "reasoning",
+					"opaque": "enc_2",
+					"id": "rs_2"
+				},
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "call_a",
+					"name": "read",
+					"argumentsText": "{\"path\":\"a\"}"
+				}
+			],
+			"finish": "tool_calls",
+			"usage": {
+				"input": 100,
+				"output": 10,
+				"cached": 60,
+				"cacheWrite": 7,
+				"reasoning": 4,
+				"cost": 0.002,
+				"billingSource": "go"
+			},
+			"serving": {
+				"generationId": "resp_1"
+			}
+		},
+		"failure": null
+	}
+}

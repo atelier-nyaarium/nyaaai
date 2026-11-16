@@ -1,0 +1,49 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "messages-http-429-reset-in-the-past",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			},
+			"nowMs": 1800000000000
+		},
+		"status": 429,
+		"body": {
+			"error": {
+				"message": "Slow.",
+				"resetsAt": 1799999910
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "rateLimited",
+			"status": 429,
+			"retryAfterMs": 0,
+			"message": "Slow."
+		}
+	}
+}

@@ -1,0 +1,82 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.encode",
+	"name": "gemini-path-model-keeps-its-marks",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"request": {
+			"model": "a-b_c.d!e~f*g'h(i)",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Hi"
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true
+		},
+		"mode": "stream"
+	},
+	"expected": {
+		"encoded": {
+			"path": "/google/v1beta/models/a-b_c.d!e~f*g'h(i):streamGenerateContent?alt=sse",
+			"body": {
+				"contents": [
+					{
+						"role": "user",
+						"parts": [
+							{
+								"text": "Hi"
+							}
+						]
+					}
+				],
+				"systemInstruction": {
+					"parts": [
+						{
+							"text": "Rules."
+						}
+					]
+				},
+				"generationConfig": {
+					"thinkingConfig": {
+						"includeThoughts": true
+					}
+				}
+			},
+			"headers": {
+				"x-opencode-session": "root-1"
+			}
+		},
+		"refusal": null
+	}
+}

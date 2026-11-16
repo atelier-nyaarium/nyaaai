@@ -1,0 +1,47 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "messages-reply-error-allowance",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			}
+		},
+		"body": {
+			"type": "error",
+			"error": {
+				"type": "GoUsageLimitError",
+				"message": "Usage limit reached."
+			}
+		}
+	},
+	"expected": {
+		"result": null,
+		"failure": {
+			"category": "allowance",
+			"status": "stream",
+			"message": "Usage limit reached."
+		}
+	}
+}

@@ -1,0 +1,42 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "messages-stream-no-items-is-truncated",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			}
+		},
+		"items": []
+	},
+	"expected": {
+		"events": [],
+		"result": null,
+		"failure": {
+			"category": "truncated",
+			"status": "truncated",
+			"message": "The stream ended before message_stop."
+		}
+	}
+}

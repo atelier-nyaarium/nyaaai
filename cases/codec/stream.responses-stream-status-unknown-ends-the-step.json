@@ -1,0 +1,57 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "responses-stream-status-unknown-ends-the-step",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"event": "response.output_text.delta",
+				"data": "{\"type\":\"response.output_text.delta\",\"item_id\":\"msg_1\",\"delta\":\"Hi\"}"
+			},
+			{
+				"kind": "data",
+				"event": "response.completed",
+				"data": "{\"type\":\"response.completed\",\"response\":{\"status\":\"cancelled\"}}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "text",
+				"text": "Hi"
+			}
+		],
+		"result": null,
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": "The provider ended the step."
+		}
+	}
+}

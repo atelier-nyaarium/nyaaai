@@ -1,0 +1,116 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "gemini-stream-thought-text-and-text",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"candidates\":[{\"content\":{\"role\":\"model\",\"parts\":[{\"text\":\"Think\",\"thought\":true}]}}],\"responseId\":\"resp_g\"}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"candidates\":[{\"content\":{\"role\":\"model\",\"parts\":[{\"text\":\"ing.\",\"thought\":true}]}}],\"responseId\":\"resp_g\"}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"candidates\":[{\"content\":{\"role\":\"model\",\"parts\":[{\"text\":\"Reading.\"}]}}],\"responseId\":\"resp_g\"}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"candidates\":[{\"content\":{\"role\":\"model\",\"parts\":[]},\"finishReason\":\"STOP\"}],\"responseId\":\"resp_g\"}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "resp_g"
+				}
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "thought",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "Think"
+						}
+					]
+				}
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "thought",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "ing."
+						}
+					]
+				}
+			},
+			{
+				"kind": "text",
+				"text": "Reading."
+			},
+			{
+				"kind": "finish",
+				"reason": "stop"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "thought",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "Thinking."
+						}
+					]
+				},
+				{
+					"kind": "text",
+					"text": "Reading."
+				}
+			],
+			"finish": "stop",
+			"serving": {
+				"generationId": "resp_g"
+			}
+		},
+		"failure": null
+	}
+}

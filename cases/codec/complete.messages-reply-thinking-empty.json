@@ -1,0 +1,68 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "messages-reply-thinking-empty",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			}
+		},
+		"body": {
+			"id": "msg_1",
+			"type": "message",
+			"role": "assistant",
+			"content": [
+				{
+					"type": "thinking",
+					"thinking": "",
+					"signature": ""
+				}
+			],
+			"stop_reason": "end_turn",
+			"usage": {
+				"input_tokens": 4,
+				"output_tokens": 2
+			}
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "thinking"
+				}
+			],
+			"finish": "stop",
+			"usage": {
+				"input": 4,
+				"output": 2
+			},
+			"serving": {
+				"generationId": "msg_1"
+			}
+		},
+		"failure": null
+	}
+}

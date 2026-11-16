@@ -1,0 +1,130 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.encode",
+	"name": "responses-replay-family-is-the-first-two-words",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"request": {
+			"model": "gpt-6-luna-mini",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "step",
+					"producer": {
+						"model": "gpt-6-sol-max"
+					},
+					"parts": [
+						{
+							"kind": "thought",
+							"type": "reasoning",
+							"segments": [
+								{
+									"kind": "summary",
+									"text": "Plan."
+								}
+							],
+							"opaque": "enc",
+							"id": "rs_1"
+						},
+						{
+							"kind": "text",
+							"text": "Reading."
+						},
+						{
+							"kind": "call",
+							"index": 0,
+							"wireId": "call_a",
+							"name": "read",
+							"arguments": "{}"
+						},
+						{
+							"kind": "result",
+							"index": 0,
+							"output": "source",
+							"isError": false
+						}
+					]
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true
+		},
+		"mode": "complete"
+	},
+	"expected": {
+		"encoded": {
+			"path": "/openai/v1/responses",
+			"body": {
+				"model": "gpt-6-luna-mini",
+				"instructions": "Rules.",
+				"input": [
+					{
+						"type": "reasoning",
+						"id": "rs_1",
+						"summary": [
+							{
+								"type": "summary_text",
+								"text": "Plan."
+							}
+						],
+						"encrypted_content": "enc"
+					},
+					{
+						"type": "message",
+						"role": "assistant",
+						"content": "Reading.",
+						"phase": "commentary"
+					},
+					{
+						"type": "function_call",
+						"call_id": "call_a",
+						"name": "read",
+						"arguments": "{}"
+					},
+					{
+						"type": "function_call_output",
+						"call_id": "call_a",
+						"output": "source"
+					}
+				],
+				"store": false,
+				"include": [
+					"reasoning.encrypted_content"
+				],
+				"stream": false
+			},
+			"headers": {
+				"x-opencode-session": "root-1"
+			}
+		},
+		"refusal": null
+	}
+}

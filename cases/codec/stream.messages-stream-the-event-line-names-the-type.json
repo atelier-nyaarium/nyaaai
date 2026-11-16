@@ -1,0 +1,85 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "messages-stream-the-event-line-names-the-type",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"event": "message_start",
+				"data": "{\"message\":{\"id\":\"msg_1\"}}"
+			},
+			{
+				"kind": "data",
+				"event": "content_block_start",
+				"data": "{\"index\":0,\"content_block\":{\"type\":\"text\",\"text\":\"Hi\"}}"
+			},
+			{
+				"kind": "data",
+				"event": "message_delta",
+				"data": "{\"delta\":{\"stop_reason\":\"end_turn\"}}"
+			},
+			{
+				"kind": "data",
+				"event": "message_stop",
+				"data": "{}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "msg_1"
+				}
+			},
+			{
+				"kind": "text",
+				"text": "Hi"
+			},
+			{
+				"kind": "finish",
+				"reason": "stop"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "Hi"
+				}
+			],
+			"finish": "stop",
+			"serving": {
+				"generationId": "msg_1"
+			}
+		},
+		"failure": null
+	}
+}

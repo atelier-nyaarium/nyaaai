@@ -1,0 +1,76 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "gemini-reply-signature-on-text",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"body": {
+			"candidates": [
+				{
+					"content": {
+						"parts": [
+							{
+								"text": "Done.",
+								"thoughtSignature": "sig_t"
+							}
+						]
+					},
+					"finishReason": "STOP"
+				}
+			],
+			"responseId": "resp_g",
+			"usageMetadata": {
+				"promptTokenCount": 4,
+				"candidatesTokenCount": 2
+			}
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "Done."
+				},
+				{
+					"kind": "thought",
+					"type": "thought",
+					"opaque": "sig_t",
+					"anchor": "text"
+				}
+			],
+			"finish": "stop",
+			"usage": {
+				"input": 4,
+				"output": 2
+			},
+			"serving": {
+				"generationId": "resp_g"
+			}
+		},
+		"failure": null
+	}
+}

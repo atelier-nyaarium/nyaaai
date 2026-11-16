@@ -1,0 +1,111 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "gemini-stream-call-with-signature-anchors-its-index",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"candidates\":[{\"content\":{\"role\":\"model\",\"parts\":[{\"functionCall\":{\"name\":\"read\",\"args\":{\"path\":\"a\"}}}]}}],\"responseId\":\"resp_g\"}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"candidates\":[{\"content\":{\"role\":\"model\",\"parts\":[{\"functionCall\":{\"id\":\"call_b\",\"name\":\"write\",\"args\":{}},\"thoughtSignature\":\"sig_b\"}]}}],\"responseId\":\"resp_g\"}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"candidates\":[{\"content\":{\"role\":\"model\",\"parts\":[]},\"finishReason\":\"STOP\"}],\"responseId\":\"resp_g\"}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "resp_g"
+				}
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "",
+				"name": "read",
+				"argumentsText": "{\"path\":\"a\"}"
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "thought",
+					"opaque": "sig_b",
+					"anchor": "call:1"
+				}
+			},
+			{
+				"kind": "call",
+				"index": 1,
+				"wireId": "call_b",
+				"name": "write",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "finish",
+				"reason": "tool_calls"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "resp_g_0",
+					"name": "read",
+					"argumentsText": "{\"path\":\"a\"}"
+				},
+				{
+					"kind": "thought",
+					"type": "thought",
+					"opaque": "sig_b",
+					"anchor": "call:1"
+				},
+				{
+					"kind": "call",
+					"index": 1,
+					"wireId": "call_b",
+					"name": "write",
+					"argumentsText": "{}"
+				}
+			],
+			"finish": "tool_calls",
+			"serving": {
+				"generationId": "resp_g"
+			}
+		},
+		"failure": null
+	}
+}

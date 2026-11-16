@@ -1,0 +1,126 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "messages-stream-call-by-deltas",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"event": "message_start",
+				"data": "{\"type\":\"message_start\",\"message\":{\"id\":\"msg_1\",\"usage\":{\"input_tokens\":4,\"output_tokens\":1}}}"
+			},
+			{
+				"kind": "data",
+				"event": "content_block_start",
+				"data": "{\"type\":\"content_block_start\",\"index\":3,\"content_block\":{\"type\":\"tool_use\",\"id\":\"call_a\",\"name\":\"read\",\"input\":{}}}"
+			},
+			{
+				"kind": "data",
+				"event": "content_block_delta",
+				"data": "{\"type\":\"content_block_delta\",\"index\":3,\"delta\":{\"type\":\"input_json_delta\",\"partial_json\":\"{\\\"path\\\":\"}}"
+			},
+			{
+				"kind": "data",
+				"event": "content_block_delta",
+				"data": "{\"type\":\"content_block_delta\",\"index\":3,\"delta\":{\"type\":\"input_json_delta\",\"partial_json\":\"\\\"a\\\"}\"}}"
+			},
+			{
+				"kind": "data",
+				"event": "message_delta",
+				"data": "{\"type\":\"message_delta\",\"delta\":{\"stop_reason\":\"tool_use\"}}"
+			},
+			{
+				"kind": "data",
+				"event": "message_stop",
+				"data": "{\"type\":\"message_stop\"}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "msg_1"
+				}
+			},
+			{
+				"kind": "usage",
+				"usage": {
+					"input": 4,
+					"output": 1
+				}
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "call_a",
+				"name": "read",
+				"argumentsText": ""
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "",
+				"name": "",
+				"argumentsText": "{\"path\":"
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "",
+				"name": "",
+				"argumentsText": "\"a\"}"
+			},
+			{
+				"kind": "finish",
+				"reason": "tool_calls"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "call_a",
+					"name": "read",
+					"argumentsText": "{\"path\":\"a\"}"
+				}
+			],
+			"finish": "tool_calls",
+			"usage": {
+				"input": 4,
+				"output": 1
+			},
+			"serving": {
+				"generationId": "msg_1"
+			}
+		},
+		"failure": null
+	}
+}

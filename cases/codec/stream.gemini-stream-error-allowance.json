@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "gemini-stream-error-allowance",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"error\":{\"code\":429,\"status\":\"GoUsageLimitError\",\"message\":\"Usage limit reached.\"}}"
+			}
+		]
+	},
+	"expected": {
+		"events": [],
+		"result": null,
+		"failure": {
+			"category": "allowance",
+			"status": "stream",
+			"message": "Usage limit reached."
+		}
+	}
+}

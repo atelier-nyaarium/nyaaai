@@ -1,0 +1,41 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "gemini-http-400-no-body",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"status": 400,
+		"body": null,
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "badRequest",
+			"status": 400,
+			"message": "HTTP 400"
+		}
+	}
+}

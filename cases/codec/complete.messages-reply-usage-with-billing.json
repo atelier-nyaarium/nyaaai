@@ -1,0 +1,84 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "messages-reply-usage-with-billing",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			}
+		},
+		"body": {
+			"id": "msg_1",
+			"type": "message",
+			"role": "assistant",
+			"content": [
+				{
+					"type": "text",
+					"text": "Hello."
+				}
+			],
+			"stop_reason": "end_turn",
+			"usage": {
+				"input_tokens": 4,
+				"output_tokens": 2,
+				"cost": 0.002,
+				"opencode": {
+					"billing_source": "go",
+					"list_cost": 0.01,
+					"allowance": 0.5,
+					"tokens": {
+						"reasoning": 4,
+						"cache_write_5m": 5,
+						"cache_write_1h": 2
+					}
+				}
+			}
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "Hello."
+				}
+			],
+			"finish": "stop",
+			"usage": {
+				"input": 4,
+				"output": 2,
+				"cacheWrite": 7,
+				"reasoning": 4,
+				"cost": 0.002,
+				"billingSource": "go",
+				"listCost": 0.01,
+				"allowance": 0.5
+			},
+			"serving": {
+				"generationId": "msg_1"
+			}
+		},
+		"failure": null
+	}
+}

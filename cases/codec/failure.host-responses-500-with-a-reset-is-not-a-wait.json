@@ -1,0 +1,47 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "host-responses-500-with-a-reset-is-not-a-wait",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			},
+			"nowMs": 1800000000000
+		},
+		"status": 500,
+		"body": {
+			"error": {
+				"message": "Down.",
+				"resetsAt": 1800000090
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "unavailable",
+			"status": 500,
+			"message": "Down."
+		}
+	}
+}

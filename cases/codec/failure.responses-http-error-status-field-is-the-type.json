@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "responses-http-error-status-field-is-the-type",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"status": 429,
+		"body": {
+			"error": {
+				"status": "GoUsageLimitError",
+				"message": "Limit."
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "allowance",
+			"status": 429,
+			"message": "Limit."
+		}
+	}
+}

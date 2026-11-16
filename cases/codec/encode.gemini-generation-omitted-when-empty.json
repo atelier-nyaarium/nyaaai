@@ -1,0 +1,73 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.encode",
+	"name": "gemini-generation-omitted-when-empty",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": []
+			}
+		},
+		"request": {
+			"model": "gemini-3.8-flash",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Hi"
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true
+		},
+		"mode": "stream"
+	},
+	"expected": {
+		"encoded": {
+			"path": "/google/v1beta/models/gemini-3.8-flash:streamGenerateContent?alt=sse",
+			"body": {
+				"contents": [
+					{
+						"role": "user",
+						"parts": [
+							{
+								"text": "Hi"
+							}
+						]
+					}
+				],
+				"systemInstruction": {
+					"parts": [
+						{
+							"text": "Rules."
+						}
+					]
+				}
+			},
+			"headers": {
+				"x-opencode-session": "root-1"
+			}
+		},
+		"refusal": null
+	}
+}

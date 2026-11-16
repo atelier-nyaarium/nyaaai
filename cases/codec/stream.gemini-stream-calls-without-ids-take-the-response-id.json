@@ -1,0 +1,105 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "gemini-stream-calls-without-ids-take-the-response-id",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"candidates\":[{\"content\":{\"parts\":[{\"functionCall\":{\"name\":\"read\",\"args\":{}}}]}}],\"responseId\":\"r\"}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"candidates\":[{\"content\":{\"parts\":[{\"text\":\"Done.\"}]}}]}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"candidates\":[{\"content\":{\"parts\":[{\"text\":\"\",\"thoughtSignature\":\"sig\"}]},\"finishReason\":\"STOP\"}]}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "r"
+				}
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "",
+				"name": "read",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "text",
+				"text": "Done."
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "thought",
+					"opaque": "sig",
+					"anchor": "text"
+				}
+			},
+			{
+				"kind": "finish",
+				"reason": "tool_calls"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "r_0",
+					"name": "read",
+					"argumentsText": "{}"
+				},
+				{
+					"kind": "text",
+					"text": "Done."
+				},
+				{
+					"kind": "thought",
+					"type": "thought",
+					"opaque": "sig",
+					"anchor": "text"
+				}
+			],
+			"finish": "tool_calls",
+			"serving": {
+				"generationId": "r"
+			}
+		},
+		"failure": null
+	}
+}

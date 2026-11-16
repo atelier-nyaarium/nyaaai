@@ -1,0 +1,48 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "messages-http-402",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			}
+		},
+		"status": 402,
+		"body": {
+			"type": "error",
+			"error": {
+				"type": "x",
+				"message": "Insufficient balance."
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "outOfCredit",
+			"status": 402,
+			"message": "Insufficient balance."
+		}
+	}
+}

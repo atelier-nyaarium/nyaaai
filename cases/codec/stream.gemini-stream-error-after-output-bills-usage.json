@@ -1,0 +1,68 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "gemini-stream-error-after-output-bills-usage",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"candidates\":[{\"content\":{\"role\":\"model\",\"parts\":[{\"text\":\"Hi\"}]}}],\"responseId\":\"resp_g\"}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"error\":{\"code\":503,\"status\":\"UNAVAILABLE\",\"message\":\"Down.\"},\"usageMetadata\":{\"promptTokenCount\":10,\"candidatesTokenCount\":4}}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "resp_g"
+				}
+			},
+			{
+				"kind": "text",
+				"text": "Hi"
+			}
+		],
+		"result": null,
+		"failure": {
+			"category": "unavailable",
+			"status": "stream",
+			"message": "Down.",
+			"billed": {
+				"usage": {
+					"input": 10,
+					"output": 4
+				},
+				"generationId": "resp_g"
+			}
+		}
+	}
+}

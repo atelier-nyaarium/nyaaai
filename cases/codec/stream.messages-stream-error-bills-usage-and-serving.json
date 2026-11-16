@@ -1,0 +1,74 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "messages-stream-error-bills-usage-and-serving",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"event": "message_start",
+				"data": "{\"type\":\"message_start\",\"message\":{\"id\":\"msg_1\",\"usage\":{\"input_tokens\":40,\"output_tokens\":1}}}"
+			},
+			{
+				"kind": "data",
+				"event": "error",
+				"data": "{\"type\":\"error\",\"error\":{\"type\":\"api_error\",\"message\":\"Down.\"}}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "msg_1"
+				}
+			},
+			{
+				"kind": "usage",
+				"usage": {
+					"input": 40,
+					"output": 1
+				}
+			}
+		],
+		"result": null,
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": "Down.",
+			"billed": {
+				"usage": {
+					"input": 40,
+					"output": 1
+				},
+				"generationId": "msg_1"
+			}
+		}
+	}
+}

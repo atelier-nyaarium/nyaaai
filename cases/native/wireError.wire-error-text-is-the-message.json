@@ -1,0 +1,42 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "native.wireError",
+	"name": "wire-error-text-is-the-message",
+	"input": {
+		"rows": [
+			{
+				"status": 500,
+				"body": "{\"error\":\"Down.\"}"
+			},
+			{
+				"status": 500,
+				"body": "{\"error\":\"\"}"
+			},
+			{
+				"status": 500,
+				"body": "{\"error\":\"   \"}"
+			},
+			{
+				"status": 429,
+				"body": "{\"error\":\" kept \"}"
+			}
+		]
+	},
+	"expected": {
+		"errors": [
+			{
+				"message": "Down."
+			},
+			{
+				"message": "HTTP 500"
+			},
+			{
+				"message": "HTTP 500"
+			},
+			{
+				"message": " kept "
+			}
+		]
+	}
+}

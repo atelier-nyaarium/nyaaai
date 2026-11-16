@@ -223,7 +223,7 @@ pub fn read_usage(raw: Option<&Value>) -> Option<Usage> {
     })
 }
 
-fn read_billing(block: &Object) -> Billing {
+pub fn read_billing(block: &Object) -> Billing {
     Billing {
         billing_source: string_at(block, "billing_source"),
         list_cost: number_at(block, "list_cost"),

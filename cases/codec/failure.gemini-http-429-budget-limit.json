@@ -1,0 +1,49 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "gemini-http-429-budget-limit",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			},
+			"nowMs": 1800000000000
+		},
+		"status": 429,
+		"body": {
+			"error": {
+				"type": "BudgetLimitError",
+				"message": "Budget spent.",
+				"resetsAt": "2027-01-15T09:00:00Z"
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "allowance",
+			"status": 429,
+			"resetsAt": 1800003600000,
+			"message": "Budget spent."
+		}
+	}
+}

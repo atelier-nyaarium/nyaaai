@@ -1,9 +1,10 @@
-// The conformance fixtures hold the Chat codecs to what a case file cannot say across files.
+// The conformance fixtures hold every codec to what a case file cannot say across files.
 
 import { describe, expect, it } from "bun:test";
 import { runKind } from "../caseAdapter";
 import { codec } from "../caseGroups/codec";
-import { FIXTURES, type Fixture, type Json, request, stepOf } from "../caseSources/codecFixtures";
+import { type Fixture, type Json, request, stepOf } from "../caseSources/codecFixtures";
+import { ALL_FIXTURES } from "../caseSources/codecNativeFixtures";
 
 ////////////////////////////////
 //  Functions & Helpers
@@ -57,6 +58,21 @@ const REPLAYS: Record<
 		state: ["Thinking."],
 		session: () => undefined,
 	},
+	responses: {
+		read: (body) => found(body, "encrypted_content"),
+		state: ["enc_1", "enc_2"],
+		session: (e) => e.encoded?.headers?.["x-opencode-session"],
+	},
+	messages: {
+		read: (body) => [...found(body, "signature"), ...found(body, "data")],
+		state: ["sig_1", "red_2"],
+		session: (e) => e.encoded?.headers?.["x-opencode-session"],
+	},
+	gemini: {
+		read: (body) => found(body, "thoughtSignature").filter((each) => each !== "skip_thought_signature_validator"),
+		state: ["sig_g"],
+		session: (e) => e.encoded?.headers?.["x-opencode-session"],
+	},
 };
 
 /** The in-stream failure each fixture ends on. */
@@ -67,12 +83,24 @@ const FAILING: Record<string, { category: string; billed: Json }> = {
 	},
 	opencode: { category: "overloaded", billed: { usage: { input: 4, output: 2, cost: 0.1 }, generationId: "gen-1" } },
 	local: { category: "stream", billed: { host: "Lab", generationId: "gen-1" } },
+	responses: {
+		category: "overloaded",
+		billed: { usage: { input: 4, output: 2, cost: 0.1 }, generationId: "resp_1" },
+	},
+	messages: {
+		category: "overloaded",
+		billed: { usage: { input: 100, output: 1, cached: 60 }, generationId: "msg_1" },
+	},
+	gemini: {
+		category: "overloaded",
+		billed: { usage: { input: 100, output: 0, cached: 60 }, generationId: "resp_g" },
+	},
 };
 
 ////////////////////////////////
 //  Tests
 
-describe.each(FIXTURES)("the $name fixture", (fixture: Fixture) => {
+describe.each(ALL_FIXTURES)("the $name fixture", (fixture: Fixture) => {
 	it("streams to its step, usage and cost last, and a whole reply assembles to the same step", async () => {
 		const streamed = await run("stream", { codec: fixture.codec, items: fixture.stream });
 		const usages = streamed.events.flatMap((event) => (event.kind === "usage" ? [event.usage] : []));

@@ -1,0 +1,106 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "gemini-stream-call-args-not-an-object",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"candidates\":[{\"content\":{\"role\":\"model\",\"parts\":[{\"functionCall\":{\"name\":\"a\",\"args\":\"x\"}},{\"functionCall\":{\"name\":\"b\",\"args\":[1]}},{\"functionCall\":{\"name\":\"c\"}}]}}],\"responseId\":\"resp_g\"}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"candidates\":[{\"content\":{\"role\":\"model\",\"parts\":[]},\"finishReason\":\"STOP\"}],\"responseId\":\"resp_g\"}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "resp_g"
+				}
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "",
+				"name": "a",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "call",
+				"index": 1,
+				"wireId": "",
+				"name": "b",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "call",
+				"index": 2,
+				"wireId": "",
+				"name": "c",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "finish",
+				"reason": "tool_calls"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "resp_g_0",
+					"name": "a",
+					"argumentsText": "{}"
+				},
+				{
+					"kind": "call",
+					"index": 1,
+					"wireId": "resp_g_1",
+					"name": "b",
+					"argumentsText": "{}"
+				},
+				{
+					"kind": "call",
+					"index": 2,
+					"wireId": "resp_g_2",
+					"name": "c",
+					"argumentsText": "{}"
+				}
+			],
+			"finish": "tool_calls",
+			"serving": {
+				"generationId": "resp_g"
+			}
+		},
+		"failure": null
+	}
+}

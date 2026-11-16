@@ -1,0 +1,47 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "conformance-gemini-failure-401-keyRejected",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"status": 401,
+		"body": {
+			"error": {
+				"code": 401,
+				"message": "API key not valid.",
+				"status": "UNAUTHENTICATED"
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "keyRejected",
+			"status": 401,
+			"message": "API key not valid."
+		}
+	}
+}

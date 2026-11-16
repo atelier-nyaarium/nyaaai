@@ -1,0 +1,48 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "gemini-http-429-reset-in-the-past",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			},
+			"nowMs": 1800000000000
+		},
+		"status": 429,
+		"body": {
+			"error": {
+				"message": "Slow.",
+				"resetsAt": 1799999910
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "rateLimited",
+			"status": 429,
+			"retryAfterMs": 0,
+			"message": "Slow."
+		}
+	}
+}

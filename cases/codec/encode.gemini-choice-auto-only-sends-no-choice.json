@@ -1,0 +1,104 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.encode",
+	"name": "gemini-choice-auto-only-sends-no-choice",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"request": {
+			"model": "gemini-3.8-flash",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Hi"
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true,
+			"tools": [
+				{
+					"name": "finish",
+					"description": "Finish.",
+					"parameters": {
+						"type": "object"
+					}
+				}
+			],
+			"toolChoice": {
+				"name": "finish"
+			}
+		},
+		"mode": "stream"
+	},
+	"expected": {
+		"encoded": {
+			"path": "/google/v1beta/models/gemini-3.8-flash:streamGenerateContent?alt=sse",
+			"body": {
+				"contents": [
+					{
+						"role": "user",
+						"parts": [
+							{
+								"text": "Hi"
+							}
+						]
+					}
+				],
+				"systemInstruction": {
+					"parts": [
+						{
+							"text": "Rules."
+						}
+					]
+				},
+				"tools": [
+					{
+						"functionDeclarations": [
+							{
+								"name": "finish",
+								"description": "Finish.",
+								"parametersJsonSchema": {
+									"type": "object"
+								}
+							}
+						]
+					}
+				],
+				"generationConfig": {
+					"thinkingConfig": {
+						"includeThoughts": true
+					}
+				}
+			},
+			"headers": {
+				"x-opencode-session": "root-1"
+			}
+		},
+		"refusal": null
+	}
+}

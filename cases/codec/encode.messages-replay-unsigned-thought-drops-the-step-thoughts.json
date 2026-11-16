@@ -1,0 +1,138 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.encode",
+	"name": "messages-replay-unsigned-thought-drops-the-step-thoughts",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			}
+		},
+		"request": {
+			"model": "claude-haiku-5-5",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "step",
+					"producer": {
+						"model": "claude-haiku-5-5"
+					},
+					"parts": [
+						{
+							"kind": "thought",
+							"type": "thinking",
+							"segments": [
+								{
+									"kind": "content",
+									"text": "Plan."
+								}
+							],
+							"opaque": "sig"
+						},
+						{
+							"kind": "thought",
+							"type": "thinking",
+							"segments": [
+								{
+									"kind": "content",
+									"text": "?"
+								}
+							]
+						},
+						{
+							"kind": "call",
+							"index": 0,
+							"wireId": "run-1/restored/0",
+							"name": "read",
+							"arguments": "{\"file\":\"a\"}"
+						},
+						{
+							"kind": "result",
+							"index": 0,
+							"output": "missing",
+							"isError": true
+						}
+					]
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true
+		},
+		"mode": "complete"
+	},
+	"expected": {
+		"encoded": {
+			"path": "/anthropic/v1/messages",
+			"body": {
+				"model": "claude-haiku-5-5",
+				"max_tokens": 128000,
+				"system": [
+					{
+						"type": "text",
+						"text": "Rules."
+					}
+				],
+				"messages": [
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "tool_use",
+								"id": "run-1_restored_0",
+								"name": "read",
+								"input": {
+									"file": "a"
+								}
+							}
+						]
+					},
+					{
+						"role": "user",
+						"content": [
+							{
+								"type": "tool_result",
+								"tool_use_id": "run-1_restored_0",
+								"content": "missing",
+								"is_error": true
+							}
+						]
+					}
+				],
+				"thinking": {
+					"type": "adaptive",
+					"display": "summarized"
+				},
+				"stream": false
+			},
+			"headers": {
+				"x-opencode-session": "root-1"
+			}
+		},
+		"refusal": null
+	}
+}

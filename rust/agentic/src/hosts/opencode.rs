@@ -1,15 +1,17 @@
 //! OpenCode's failure and usage rules.
 
 use nyaaai_contract::headers::header_of;
-use nyaaai_contract::json::Value;
-use nyaaai_contract::shapes::step::{Failure, FailureCategory, HeaderList, NormalizedUsage};
+use nyaaai_contract::json::{Object, Value};
+use nyaaai_contract::shapes::step::{
+    CanonicalRequest, Failure, FailureCategory, HeaderList, NormalizedUsage,
+};
 use nyaaai_contract::text::ascii_lower;
 use nyaaai_contract::time::{Clock, reset_stamp_ms};
 
 use crate::chat::codec::{code_of, failure_status, usable};
-use crate::chat::wire::Usage;
+use crate::chat::wire::{Billing, Usage, read_billing};
 use crate::failure::{NumberOrText, WireError};
-use crate::native::HostStatus;
+use crate::native::{Host, HostStatus, number_of};
 
 pub const SESSION_HEADER: &str = "x-opencode-session";
 
@@ -113,11 +115,24 @@ pub fn opencode_failure(
     }
 }
 
-/// OpenCode usage fields.
-pub fn opencode_usage(own: NormalizedUsage, raw: &Usage) -> NormalizedUsage {
-    let block = raw.opencode.clone().unwrap_or_default();
+/// OpenCode usage fields of loose provider JSON.
+pub fn opencode_usage(own: NormalizedUsage, raw: &Object) -> NormalizedUsage {
+    let block = raw
+        .get("opencode")
+        .and_then(Value::as_object)
+        .map(read_billing)
+        .unwrap_or_default();
+    billed(own, raw.get("cost").and_then(number_of), &block)
+}
+
+/// OpenCode usage fields of a decoded `Usage`.
+pub fn opencode_chat_usage(own: NormalizedUsage, raw: &Usage) -> NormalizedUsage {
+    billed(own, raw.cost, &raw.opencode.clone().unwrap_or_default())
+}
+
+fn billed(own: NormalizedUsage, cost: Option<f64>, block: &Billing) -> NormalizedUsage {
     let tokens = block.tokens.clone().unwrap_or_default();
-    let cost = amount_of(raw.cost);
+    let cost = amount_of(cost);
     let source = block
         .billing_source
         .clone()
@@ -140,5 +155,41 @@ pub fn opencode_usage(own: NormalizedUsage, raw: &Usage) -> NormalizedUsage {
         list_cost: block.list_cost.or(own.list_cost),
         allowance: amount_of(block.allowance).or(own.allowance),
         ..own
+    }
+}
+
+/// The plan's routes, for the native families.
+pub fn opencode_host<C: Clock>(prefix: &str, clock: C) -> OpenCodeHost<C> {
+    OpenCodeHost {
+        prefix: prefix.to_owned(),
+        clock,
+    }
+}
+
+pub struct OpenCodeHost<C> {
+    prefix: String,
+    clock: C,
+}
+
+impl<C: Clock> Host for OpenCodeHost<C> {
+    fn prefix(&self) -> &str {
+        &self.prefix
+    }
+
+    fn headers(&self, request: &CanonicalRequest) -> Vec<(String, String)> {
+        vec![(SESSION_HEADER.to_owned(), request.session.clone())]
+    }
+
+    fn usage(&self, own: NormalizedUsage, raw: &Object) -> NormalizedUsage {
+        opencode_usage(own, raw)
+    }
+
+    fn failure(
+        &self,
+        status: HostStatus,
+        error: &WireError,
+        headers: Option<&HeaderList>,
+    ) -> Failure {
+        opencode_failure(&self.clock, status, error, headers)
     }
 }

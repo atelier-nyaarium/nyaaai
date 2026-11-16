@@ -1,0 +1,77 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.encode",
+	"name": "responses-request-empty-system-blocks-keep-their-gaps",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"request": {
+			"model": "gpt-6-luna",
+			"system": [
+				"",
+				"One.",
+				""
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Hi"
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true,
+			"summary": ""
+		},
+		"mode": "complete"
+	},
+	"expected": {
+		"encoded": {
+			"path": "/openai/v1/responses",
+			"body": {
+				"model": "gpt-6-luna",
+				"instructions": "\n\nOne.\n\n\n\n",
+				"input": [
+					{
+						"type": "message",
+						"role": "user",
+						"content": "Hi"
+					}
+				],
+				"store": false,
+				"include": [
+					"reasoning.encrypted_content"
+				],
+				"stream": false
+			},
+			"headers": {
+				"x-opencode-session": "root-1"
+			}
+		},
+		"refusal": null
+	}
+}

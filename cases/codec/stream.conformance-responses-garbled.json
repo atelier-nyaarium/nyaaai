@@ -1,0 +1,45 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "conformance-responses-garbled",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{not json"
+			}
+		]
+	},
+	"expected": {
+		"events": [],
+		"result": null,
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": "A stream chunk was not JSON."
+		}
+	}
+}

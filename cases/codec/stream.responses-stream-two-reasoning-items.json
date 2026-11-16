@@ -1,0 +1,143 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "responses-stream-two-reasoning-items",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"event": "response.reasoning_summary_text.delta",
+				"data": "{\"type\":\"response.reasoning_summary_text.delta\",\"item_id\":\"rs_1\",\"summary_index\":0,\"delta\":\"A\"}"
+			},
+			{
+				"kind": "data",
+				"event": "response.reasoning_summary_text.delta",
+				"data": "{\"type\":\"response.reasoning_summary_text.delta\",\"item_id\":\"rs_2\",\"summary_index\":0,\"delta\":\"B\"}"
+			},
+			{
+				"kind": "data",
+				"event": "response.reasoning_summary_text.delta",
+				"data": "{\"type\":\"response.reasoning_summary_text.delta\",\"item_id\":\"rs_1\",\"summary_index\":0,\"delta\":\"C\"}"
+			},
+			{
+				"kind": "data",
+				"event": "response.completed",
+				"data": "{\"type\":\"response.completed\",\"response\":{\"id\":\"resp_1\",\"status\":\"completed\"}}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "reasoning",
+					"segments": [
+						{
+							"kind": "summary",
+							"text": "A"
+						}
+					],
+					"id": "rs_1"
+				},
+				"block": "rs_1"
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "reasoning",
+					"segments": [
+						{
+							"kind": "summary",
+							"text": "B"
+						}
+					],
+					"id": "rs_2"
+				},
+				"block": "rs_2"
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "reasoning",
+					"segments": [
+						{
+							"kind": "summary",
+							"text": "C"
+						}
+					],
+					"id": "rs_1"
+				},
+				"block": "rs_1"
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "resp_1"
+				}
+			},
+			{
+				"kind": "finish",
+				"reason": "stop"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "reasoning",
+					"segments": [
+						{
+							"kind": "summary",
+							"text": "AC"
+						}
+					],
+					"id": "rs_1"
+				},
+				{
+					"kind": "thought",
+					"type": "reasoning",
+					"segments": [
+						{
+							"kind": "summary",
+							"text": "B"
+						}
+					],
+					"id": "rs_2"
+				}
+			],
+			"finish": "stop",
+			"serving": {
+				"generationId": "resp_1"
+			}
+		},
+		"failure": null
+	}
+}

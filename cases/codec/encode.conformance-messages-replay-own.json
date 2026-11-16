@@ -1,0 +1,162 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.encode",
+	"name": "conformance-messages-replay-own",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			}
+		},
+		"request": {
+			"model": "claude-haiku-5-5",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Hi"
+				},
+				{
+					"role": "step",
+					"producer": {
+						"model": "claude-haiku-5-5"
+					},
+					"parts": [
+						{
+							"kind": "thought",
+							"type": "thinking",
+							"segments": [
+								{
+									"kind": "content",
+									"text": "Thinking."
+								}
+							],
+							"opaque": "sig_1"
+						},
+						{
+							"kind": "text",
+							"text": "Reading."
+						},
+						{
+							"kind": "thought",
+							"type": "redacted_thinking",
+							"opaque": "red_2"
+						},
+						{
+							"kind": "call",
+							"index": 0,
+							"wireId": "call_a",
+							"name": "read",
+							"arguments": "{\"path\":\"a\"}"
+						},
+						{
+							"kind": "result",
+							"index": 0,
+							"output": "ran read",
+							"isError": false
+						}
+					]
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true
+		},
+		"mode": "stream"
+	},
+	"expected": {
+		"encoded": {
+			"path": "/anthropic/v1/messages",
+			"body": {
+				"model": "claude-haiku-5-5",
+				"max_tokens": 128000,
+				"system": [
+					{
+						"type": "text",
+						"text": "Rules."
+					}
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": [
+							{
+								"type": "text",
+								"text": "Hi"
+							}
+						]
+					},
+					{
+						"role": "assistant",
+						"content": [
+							{
+								"type": "thinking",
+								"thinking": "Thinking.",
+								"signature": "sig_1"
+							},
+							{
+								"type": "text",
+								"text": "Reading."
+							},
+							{
+								"type": "redacted_thinking",
+								"data": "red_2"
+							},
+							{
+								"type": "tool_use",
+								"id": "call_a",
+								"name": "read",
+								"input": {
+									"path": "a"
+								}
+							}
+						]
+					},
+					{
+						"role": "user",
+						"content": [
+							{
+								"type": "tool_result",
+								"tool_use_id": "call_a",
+								"content": "ran read"
+							}
+						]
+					}
+				],
+				"thinking": {
+					"type": "adaptive",
+					"display": "summarized"
+				},
+				"stream": true
+			},
+			"headers": {
+				"x-opencode-session": "root-1"
+			}
+		},
+		"refusal": null
+	}
+}

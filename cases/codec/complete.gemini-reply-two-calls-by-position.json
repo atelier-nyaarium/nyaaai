@@ -1,0 +1,95 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "gemini-reply-two-calls-by-position",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"body": {
+			"candidates": [
+				{
+					"content": {
+						"parts": [
+							{
+								"functionCall": {
+									"name": "read",
+									"args": {}
+								}
+							},
+							{
+								"functionCall": {
+									"name": "write",
+									"args": {}
+								},
+								"thoughtSignature": "sig_b"
+							}
+						]
+					},
+					"finishReason": "STOP"
+				}
+			],
+			"responseId": "resp_g",
+			"usageMetadata": {
+				"promptTokenCount": 4,
+				"candidatesTokenCount": 2
+			}
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "resp_g_0",
+					"name": "read",
+					"argumentsText": "{}"
+				},
+				{
+					"kind": "thought",
+					"type": "thought",
+					"opaque": "sig_b",
+					"anchor": "call:1"
+				},
+				{
+					"kind": "call",
+					"index": 1,
+					"wireId": "resp_g_1",
+					"name": "write",
+					"argumentsText": "{}"
+				}
+			],
+			"finish": "tool_calls",
+			"usage": {
+				"input": 4,
+				"output": 2
+			},
+			"serving": {
+				"generationId": "resp_g"
+			}
+		},
+		"failure": null
+	}
+}

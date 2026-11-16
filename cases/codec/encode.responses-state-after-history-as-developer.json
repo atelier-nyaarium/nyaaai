@@ -1,0 +1,98 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.encode",
+	"name": "responses-state-after-history-as-developer",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"request": {
+			"model": "gpt-6-luna",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Hi"
+				},
+				{
+					"role": "step",
+					"producer": {
+						"model": "gpt-6-luna"
+					},
+					"parts": [
+						{
+							"kind": "text",
+							"text": "Hello."
+						}
+					]
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true,
+			"state": "Live."
+		},
+		"mode": "complete"
+	},
+	"expected": {
+		"encoded": {
+			"path": "/openai/v1/responses",
+			"body": {
+				"model": "gpt-6-luna",
+				"instructions": "Rules.",
+				"input": [
+					{
+						"type": "message",
+						"role": "user",
+						"content": "Hi"
+					},
+					{
+						"type": "message",
+						"role": "assistant",
+						"content": "Hello.",
+						"phase": "final_answer"
+					},
+					{
+						"type": "message",
+						"role": "developer",
+						"content": "Live."
+					}
+				],
+				"store": false,
+				"include": [
+					"reasoning.encrypted_content"
+				],
+				"stream": false
+			},
+			"headers": {
+				"x-opencode-session": "root-1"
+			}
+		},
+		"refusal": null
+	}
+}

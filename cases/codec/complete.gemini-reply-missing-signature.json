@@ -1,0 +1,51 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "gemini-reply-missing-signature",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"body": {
+			"candidates": [
+				{
+					"finishReason": "MISSING_THOUGHT_SIGNATURE"
+				}
+			],
+			"responseId": "resp_g",
+			"usageMetadata": {
+				"promptTokenCount": 4,
+				"candidatesTokenCount": 2
+			}
+		}
+	},
+	"expected": {
+		"result": null,
+		"failure": {
+			"category": "replayRejected",
+			"status": "stream",
+			"message": "A thought signature was missing."
+		}
+	}
+}

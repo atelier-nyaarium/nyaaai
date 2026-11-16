@@ -1,0 +1,94 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.encode",
+	"name": "responses-replay-one-bad-part-drops-all",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"request": {
+			"model": "gpt-6-luna",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "step",
+					"producer": {
+						"model": "gpt-6-luna"
+					},
+					"parts": [
+						{
+							"kind": "thought",
+							"type": "reasoning",
+							"opaque": "enc_1",
+							"id": "rs_1"
+						},
+						{
+							"kind": "thought",
+							"type": "reasoning",
+							"opaque": "enc_2"
+						},
+						{
+							"kind": "text",
+							"text": "Hi"
+						}
+					]
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true
+		},
+		"mode": "complete"
+	},
+	"expected": {
+		"encoded": {
+			"path": "/openai/v1/responses",
+			"body": {
+				"model": "gpt-6-luna",
+				"instructions": "Rules.",
+				"input": [
+					{
+						"type": "message",
+						"role": "assistant",
+						"content": "Hi",
+						"phase": "final_answer"
+					}
+				],
+				"store": false,
+				"include": [
+					"reasoning.encrypted_content"
+				],
+				"stream": false
+			},
+			"headers": {
+				"x-opencode-session": "root-1"
+			}
+		},
+		"refusal": null
+	}
+}

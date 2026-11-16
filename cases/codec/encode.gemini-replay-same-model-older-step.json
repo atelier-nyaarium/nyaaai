@@ -1,0 +1,191 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.encode",
+	"name": "gemini-replay-same-model-older-step",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"request": {
+			"model": "gemini-3.8-flash",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Read."
+				},
+				{
+					"role": "step",
+					"producer": {
+						"model": "gemini-3.8-flash"
+					},
+					"parts": [
+						{
+							"kind": "thought",
+							"type": "thought",
+							"segments": [
+								{
+									"kind": "content",
+									"text": "Plan."
+								}
+							]
+						},
+						{
+							"kind": "thought",
+							"type": "thought",
+							"opaque": "sig",
+							"anchor": "call:0"
+						},
+						{
+							"kind": "call",
+							"index": 0,
+							"wireId": "call_a",
+							"name": "read",
+							"arguments": "{\"file\":\"a\"}"
+						},
+						{
+							"kind": "call",
+							"index": 1,
+							"wireId": "call_b",
+							"name": "read",
+							"arguments": "{\"file\":\"b\"}"
+						},
+						{
+							"kind": "result",
+							"index": 0,
+							"output": "a",
+							"isError": false
+						},
+						{
+							"kind": "result",
+							"index": 1,
+							"output": "gone",
+							"isError": true
+						}
+					]
+				},
+				{
+					"role": "user",
+					"text": "Again."
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true
+		},
+		"mode": "stream"
+	},
+	"expected": {
+		"encoded": {
+			"path": "/google/v1beta/models/gemini-3.8-flash:streamGenerateContent?alt=sse",
+			"body": {
+				"contents": [
+					{
+						"role": "user",
+						"parts": [
+							{
+								"text": "Read."
+							}
+						]
+					},
+					{
+						"role": "model",
+						"parts": [
+							{
+								"text": "Plan.",
+								"thought": true
+							},
+							{
+								"functionCall": {
+									"name": "read",
+									"args": {
+										"file": "a"
+									}
+								},
+								"thoughtSignature": "sig"
+							},
+							{
+								"functionCall": {
+									"name": "read",
+									"args": {
+										"file": "b"
+									}
+								}
+							}
+						]
+					},
+					{
+						"role": "user",
+						"parts": [
+							{
+								"functionResponse": {
+									"name": "read",
+									"response": {
+										"output": "a"
+									}
+								}
+							},
+							{
+								"functionResponse": {
+									"name": "read",
+									"response": {
+										"error": "gone"
+									}
+								}
+							}
+						]
+					},
+					{
+						"role": "user",
+						"parts": [
+							{
+								"text": "Again."
+							}
+						]
+					}
+				],
+				"systemInstruction": {
+					"parts": [
+						{
+							"text": "Rules."
+						}
+					]
+				},
+				"generationConfig": {
+					"thinkingConfig": {
+						"includeThoughts": true
+					}
+				}
+			},
+			"headers": {
+				"x-opencode-session": "root-1"
+			}
+		},
+		"refusal": null
+	}
+}

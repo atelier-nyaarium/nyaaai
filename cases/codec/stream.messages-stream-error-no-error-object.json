@@ -1,0 +1,48 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "messages-stream-error-no-error-object",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"event": "error",
+				"data": "{\"type\":\"error\"}"
+			}
+		]
+	},
+	"expected": {
+		"events": [],
+		"result": null,
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": "The message failed."
+		}
+	}
+}

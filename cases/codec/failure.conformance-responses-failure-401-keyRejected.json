@@ -1,0 +1,45 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "conformance-responses-failure-401-keyRejected",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				]
+			}
+		},
+		"status": 401,
+		"body": {
+			"error": {
+				"message": "Invalid API key.",
+				"type": "invalid_request_error"
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "keyRejected",
+			"status": 401,
+			"message": "Invalid API key."
+		}
+	}
+}

@@ -1,0 +1,65 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.encode",
+	"name": "messages-schema-refused-by-ref",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			}
+		},
+		"request": {
+			"model": "claude-haiku-5-5",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Hi"
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true,
+			"schema": {
+				"name": "tree",
+				"json": {
+					"$ref": "#/$defs/node",
+					"$defs": {
+						"node": {
+							"type": "object"
+						}
+					}
+				}
+			}
+		},
+		"mode": "complete"
+	},
+	"expected": {
+		"encoded": null,
+		"refusal": "A strict json_schema cannot carry `$ref`; reshape the answer without it."
+	}
+}

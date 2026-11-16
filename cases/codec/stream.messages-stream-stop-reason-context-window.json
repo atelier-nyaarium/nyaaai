@@ -1,0 +1,103 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "messages-stream-stop-reason-context-window",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"event": "message_start",
+				"data": "{\"type\":\"message_start\",\"message\":{\"id\":\"msg_1\",\"usage\":{\"input_tokens\":4,\"output_tokens\":1}}}"
+			},
+			{
+				"kind": "data",
+				"event": "content_block_start",
+				"data": "{\"type\":\"content_block_start\",\"index\":0,\"content_block\":{\"type\":\"text\",\"text\":\"Hi\"}}"
+			},
+			{
+				"kind": "data",
+				"event": "message_delta",
+				"data": "{\"type\":\"message_delta\",\"delta\":{\"stop_reason\":\"model_context_window_exceeded\"},\"usage\":{\"output_tokens\":2}}"
+			},
+			{
+				"kind": "data",
+				"event": "message_stop",
+				"data": "{\"type\":\"message_stop\"}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "msg_1"
+				}
+			},
+			{
+				"kind": "usage",
+				"usage": {
+					"input": 4,
+					"output": 1
+				}
+			},
+			{
+				"kind": "text",
+				"text": "Hi"
+			},
+			{
+				"kind": "usage",
+				"usage": {
+					"input": 4,
+					"output": 2
+				}
+			},
+			{
+				"kind": "finish",
+				"reason": "length"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "Hi"
+				}
+			],
+			"finish": "length",
+			"usage": {
+				"input": 4,
+				"output": 2
+			},
+			"serving": {
+				"generationId": "msg_1"
+			}
+		},
+		"failure": null
+	}
+}

@@ -1,0 +1,99 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "conformance-gemini-cut",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"candidates\":[{\"content\":{\"role\":\"model\",\"parts\":[{\"text\":\"Think\",\"thought\":true}]}}],\"usageMetadata\":{\"promptTokenCount\":100,\"cachedContentTokenCount\":60},\"responseId\":\"resp_g\"}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"candidates\":[{\"content\":{\"role\":\"model\",\"parts\":[{\"text\":\"ing.\",\"thought\":true}]}}],\"responseId\":\"resp_g\"}"
+			},
+			{
+				"kind": "data",
+				"data": "{\"candidates\":[{\"content\":{\"role\":\"model\",\"parts\":[{\"text\":\"Reading.\"}]}}],\"responseId\":\"resp_g\"}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "resp_g"
+				}
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "thought",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "Think"
+						}
+					]
+				}
+			},
+			{
+				"kind": "usage",
+				"usage": {
+					"input": 100,
+					"output": 0,
+					"cached": 60
+				}
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "thought",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "ing."
+						}
+					]
+				}
+			},
+			{
+				"kind": "text",
+				"text": "Reading."
+			}
+		],
+		"result": null,
+		"failure": {
+			"category": "truncated",
+			"status": "truncated",
+			"message": "The stream ended before a finish reason."
+		}
+	}
+}

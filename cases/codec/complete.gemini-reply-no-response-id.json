@@ -1,0 +1,67 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "gemini-reply-no-response-id",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"body": {
+			"candidates": [
+				{
+					"content": {
+						"role": "model",
+						"parts": [
+							{
+								"text": "Hello."
+							}
+						]
+					},
+					"finishReason": "STOP"
+				}
+			],
+			"usageMetadata": {
+				"promptTokenCount": 4,
+				"candidatesTokenCount": 2
+			}
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "Hello."
+				}
+			],
+			"finish": "stop",
+			"usage": {
+				"input": 4,
+				"output": 2
+			},
+			"serving": {}
+		},
+		"failure": null
+	}
+}

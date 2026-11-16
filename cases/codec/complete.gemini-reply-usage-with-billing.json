@@ -1,0 +1,85 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.complete",
+	"name": "gemini-reply-usage-with-billing",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"body": {
+			"candidates": [
+				{
+					"content": {
+						"role": "model",
+						"parts": [
+							{
+								"text": "Hello."
+							}
+						]
+					},
+					"finishReason": "STOP"
+				}
+			],
+			"responseId": "resp_g",
+			"usageMetadata": {
+				"promptTokenCount": 100,
+				"cachedContentTokenCount": 60,
+				"candidatesTokenCount": 6,
+				"thoughtsTokenCount": 4,
+				"cost": 0.002,
+				"opencode": {
+					"billing_source": "go",
+					"tokens": {
+						"cache_write_5m": 5,
+						"cache_write_1h": 2
+					}
+				}
+			}
+		}
+	},
+	"expected": {
+		"result": {
+			"parts": [
+				{
+					"kind": "text",
+					"text": "Hello."
+				}
+			],
+			"finish": "stop",
+			"usage": {
+				"input": 100,
+				"output": 10,
+				"cached": 60,
+				"cacheWrite": 7,
+				"reasoning": 4,
+				"cost": 0.002,
+				"billingSource": "go"
+			},
+			"serving": {
+				"generationId": "resp_g"
+			}
+		},
+		"failure": null
+	}
+}

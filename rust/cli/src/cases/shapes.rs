@@ -6488,6 +6488,7 @@ pub struct CodecName {
     pub facts: Option<nyaaai_contract::shapes::step::CodecFacts>,
     pub local: Option<LocalName>,
     pub now_ms: Option<i64>,
+    pub prefix: Option<String>,
 }
 
 impl Shape for CodecName {
@@ -6508,12 +6509,14 @@ impl Shape for CodecName {
         )?;
         let local = shape::optional(object, "local", at, LocalName::decode_at)?;
         let now_ms = shape::optional(object, "nowMs", at, shape::integer)?;
+        let prefix = shape::optional(object, "prefix", at, shape::text)?;
         Ok(Self {
             family,
             dialect,
             facts,
             local,
             now_ms,
+            prefix,
         })
     }
 
@@ -6529,6 +6532,9 @@ impl Shape for CodecName {
         }
         if let Some(held) = &self.now_ms {
             object.insert("nowMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.prefix {
+            object.insert("prefix", Value::from(held.as_str()));
         }
         Value::Object(object)
     }

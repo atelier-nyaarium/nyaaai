@@ -1,0 +1,89 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "gemini-stream-finish-max-tokens-with-a-call-is-length",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"data": "{\"candidates\":[{\"content\":{\"role\":\"model\",\"parts\":[{\"functionCall\":{\"id\":\"call_a\",\"name\":\"read\",\"args\":{\"path\":\"a\"}},\"thoughtSignature\":\"sig_g\"}]},\"finishReason\":\"MAX_TOKENS\"}],\"responseId\":\"resp_g\"}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "resp_g"
+				}
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "thought",
+					"opaque": "sig_g",
+					"anchor": "call:0"
+				}
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "call_a",
+				"name": "read",
+				"argumentsText": "{\"path\":\"a\"}"
+			},
+			{
+				"kind": "finish",
+				"reason": "length"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "thought",
+					"opaque": "sig_g",
+					"anchor": "call:0"
+				},
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "call_a",
+					"name": "read",
+					"argumentsText": "{\"path\":\"a\"}"
+				}
+			],
+			"finish": "length",
+			"serving": {
+				"generationId": "resp_g"
+			}
+		},
+		"failure": null
+	}
+}

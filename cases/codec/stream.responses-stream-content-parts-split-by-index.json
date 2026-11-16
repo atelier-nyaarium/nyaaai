@@ -1,0 +1,141 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "responses-stream-content-parts-split-by-index",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"event": "response.reasoning_text.delta",
+				"data": "{\"type\":\"response.reasoning_text.delta\",\"item_id\":\"rs_1\",\"content_index\":0,\"delta\":\"Raw\"}"
+			},
+			{
+				"kind": "data",
+				"event": "response.reasoning_text.delta",
+				"data": "{\"type\":\"response.reasoning_text.delta\",\"item_id\":\"rs_1\",\"content_index\":1,\"delta\":\"More\"}"
+			},
+			{
+				"kind": "data",
+				"event": "response.reasoning_summary_text.delta",
+				"data": "{\"type\":\"response.reasoning_summary_text.delta\",\"item_id\":\"rs_1\",\"summary_index\":0,\"delta\":\"Short\"}"
+			},
+			{
+				"kind": "data",
+				"event": "response.completed",
+				"data": "{\"type\":\"response.completed\",\"response\":{\"id\":\"resp_1\",\"status\":\"completed\"}}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "reasoning",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "Raw"
+						}
+					],
+					"id": "rs_1"
+				},
+				"block": "rs_1"
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "reasoning",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "More"
+						}
+					],
+					"id": "rs_1"
+				},
+				"block": "rs_1",
+				"split": true
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "reasoning",
+					"segments": [
+						{
+							"kind": "summary",
+							"text": "Short"
+						}
+					],
+					"id": "rs_1"
+				},
+				"block": "rs_1"
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "resp_1"
+				}
+			},
+			{
+				"kind": "finish",
+				"reason": "stop"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "reasoning",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "Raw"
+						},
+						{
+							"kind": "content",
+							"text": "More"
+						},
+						{
+							"kind": "summary",
+							"text": "Short"
+						}
+					],
+					"id": "rs_1"
+				}
+			],
+			"finish": "stop",
+			"serving": {
+				"generationId": "resp_1"
+			}
+		},
+		"failure": null
+	}
+}

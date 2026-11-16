@@ -1,0 +1,108 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "responses-stream-done-reasoning-after-deltas-adds-only-the-seal",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"event": "response.reasoning_summary_text.delta",
+				"data": "{\"type\":\"response.reasoning_summary_text.delta\",\"item_id\":\"rs_1\",\"summary_index\":0,\"delta\":\"Think\"}"
+			},
+			{
+				"kind": "data",
+				"event": "response.output_item.done",
+				"data": "{\"type\":\"response.output_item.done\",\"item\":{\"type\":\"reasoning\",\"id\":\"rs_1\",\"summary\":[{\"type\":\"summary_text\",\"text\":\"Think\"}],\"encrypted_content\":\"enc\"}}"
+			},
+			{
+				"kind": "data",
+				"event": "response.completed",
+				"data": "{\"type\":\"response.completed\",\"response\":{\"id\":\"resp_1\",\"status\":\"completed\"}}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "reasoning",
+					"segments": [
+						{
+							"kind": "summary",
+							"text": "Think"
+						}
+					],
+					"id": "rs_1"
+				},
+				"block": "rs_1"
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "reasoning",
+					"opaque": "enc",
+					"id": "rs_1"
+				},
+				"block": "rs_1"
+			},
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "resp_1"
+				}
+			},
+			{
+				"kind": "finish",
+				"reason": "stop"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "thought",
+					"type": "reasoning",
+					"segments": [
+						{
+							"kind": "summary",
+							"text": "Think"
+						}
+					],
+					"opaque": "enc",
+					"id": "rs_1"
+				}
+			],
+			"finish": "stop",
+			"serving": {
+				"generationId": "resp_1"
+			}
+		},
+		"failure": null
+	}
+}

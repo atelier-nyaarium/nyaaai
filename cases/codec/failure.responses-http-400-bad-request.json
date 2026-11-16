@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "responses-http-400-bad-request",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"status": 400,
+		"body": {
+			"error": {
+				"type": "invalid_request_error",
+				"message": "Bad field."
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "badRequest",
+			"status": 400,
+			"message": "Bad field."
+		}
+	}
+}

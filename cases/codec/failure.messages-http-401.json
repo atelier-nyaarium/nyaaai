@@ -1,0 +1,48 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "messages-http-401",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			}
+		},
+		"status": 401,
+		"body": {
+			"type": "error",
+			"error": {
+				"type": "authentication_error",
+				"message": "invalid x-api-key"
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "keyRejected",
+			"status": 401,
+			"message": "invalid x-api-key"
+		}
+	}
+}

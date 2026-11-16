@@ -1,0 +1,76 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "responses-stream-failed-status-bills-usage-and-serving",
+	"input": {
+		"codec": {
+			"family": "responses",
+			"dialect": "opencode",
+			"prefix": "/openai/v1",
+			"facts": {
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true
+				},
+				"efforts": [
+					"none",
+					"low",
+					"high"
+				]
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"event": "response.created",
+				"data": "{\"type\":\"response.created\",\"response\":{\"id\":\"resp_1\"}}"
+			},
+			{
+				"kind": "data",
+				"event": "response.output_text.delta",
+				"data": "{\"type\":\"response.output_text.delta\",\"item_id\":\"msg_1\",\"delta\":\"Hi\"}"
+			},
+			{
+				"kind": "data",
+				"event": "response.failed",
+				"data": "{\"type\":\"response.failed\",\"response\":{\"id\":\"resp_1\",\"status\":\"failed\",\"error\":{\"code\":\"server_error\",\"message\":\"Down.\"},\"usage\":{\"input_tokens\":4,\"output_tokens\":2,\"cost\":0.1}}}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "resp_1"
+				}
+			},
+			{
+				"kind": "text",
+				"text": "Hi"
+			}
+		],
+		"result": null,
+		"failure": {
+			"category": "stream",
+			"status": "stream",
+			"message": "Down.",
+			"billed": {
+				"usage": {
+					"input": 4,
+					"output": 2,
+					"cost": 0.1
+				},
+				"generationId": "resp_1"
+			}
+		}
+	}
+}

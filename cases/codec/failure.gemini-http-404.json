@@ -1,0 +1,47 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.failure",
+	"name": "gemini-http-404",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"status": 404,
+		"body": {
+			"error": {
+				"code": 404,
+				"status": "NOT_FOUND",
+				"message": "No such model."
+			}
+		},
+		"headers": []
+	},
+	"expected": {
+		"failure": {
+			"category": "notFound",
+			"status": 404,
+			"message": "No such model."
+		}
+	}
+}

@@ -1,0 +1,213 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.stream",
+	"name": "conformance-messages-cut",
+	"input": {
+		"codec": {
+			"family": "messages",
+			"dialect": "opencode",
+			"prefix": "/anthropic/v1",
+			"facts": {
+				"api": {
+					"family": "messages",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": true,
+					"toggle": true
+				},
+				"efforts": [
+					"low",
+					"high"
+				],
+				"outputLimit": 128000
+			}
+		},
+		"items": [
+			{
+				"kind": "data",
+				"event": "message_start",
+				"data": "{\"type\":\"message_start\",\"message\":{\"id\":\"msg_1\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[],\"model\":\"claude-haiku-5-5\",\"usage\":{\"input_tokens\":40,\"cache_read_input_tokens\":60,\"output_tokens\":1}}}"
+			},
+			{
+				"kind": "data",
+				"event": "content_block_start",
+				"data": "{\"type\":\"content_block_start\",\"index\":0,\"content_block\":{\"type\":\"thinking\",\"thinking\":\"\",\"signature\":\"\"}}"
+			},
+			{
+				"kind": "data",
+				"event": "content_block_delta",
+				"data": "{\"type\":\"content_block_delta\",\"index\":0,\"delta\":{\"type\":\"thinking_delta\",\"thinking\":\"Think\"}}"
+			},
+			{
+				"kind": "data",
+				"event": "ping",
+				"data": "{\"type\":\"ping\"}"
+			},
+			{
+				"kind": "data",
+				"event": "content_block_delta",
+				"data": "{\"type\":\"content_block_delta\",\"index\":0,\"delta\":{\"type\":\"thinking_delta\",\"thinking\":\"ing.\"}}"
+			},
+			{
+				"kind": "data",
+				"event": "content_block_delta",
+				"data": "{\"type\":\"content_block_delta\",\"index\":0,\"delta\":{\"type\":\"signature_delta\",\"signature\":\"sig_1\"}}"
+			},
+			{
+				"kind": "data",
+				"event": "content_block_stop",
+				"data": "{\"type\":\"content_block_stop\",\"index\":0}"
+			},
+			{
+				"kind": "data",
+				"event": "content_block_start",
+				"data": "{\"type\":\"content_block_start\",\"index\":1,\"content_block\":{\"type\":\"text\",\"text\":\"\"}}"
+			},
+			{
+				"kind": "data",
+				"event": "content_block_delta",
+				"data": "{\"type\":\"content_block_delta\",\"index\":1,\"delta\":{\"type\":\"text_delta\",\"text\":\"Reading.\"}}"
+			},
+			{
+				"kind": "data",
+				"event": "content_block_stop",
+				"data": "{\"type\":\"content_block_stop\",\"index\":1}"
+			},
+			{
+				"kind": "data",
+				"event": "content_block_start",
+				"data": "{\"type\":\"content_block_start\",\"index\":2,\"content_block\":{\"type\":\"redacted_thinking\",\"data\":\"red_2\"}}"
+			},
+			{
+				"kind": "data",
+				"event": "content_block_stop",
+				"data": "{\"type\":\"content_block_stop\",\"index\":2}"
+			},
+			{
+				"kind": "data",
+				"event": "content_block_start",
+				"data": "{\"type\":\"content_block_start\",\"index\":3,\"content_block\":{\"type\":\"tool_use\",\"id\":\"call_a\",\"name\":\"read\",\"input\":{}}}"
+			},
+			{
+				"kind": "data",
+				"event": "content_block_delta",
+				"data": "{\"type\":\"content_block_delta\",\"index\":3,\"delta\":{\"type\":\"input_json_delta\",\"partial_json\":\"{\\\"path\\\":\"}}"
+			},
+			{
+				"kind": "data",
+				"event": "content_block_delta",
+				"data": "{\"type\":\"content_block_delta\",\"index\":3,\"delta\":{\"type\":\"input_json_delta\",\"partial_json\":\"\\\"a\\\"}\"}}"
+			},
+			{
+				"kind": "data",
+				"event": "content_block_stop",
+				"data": "{\"type\":\"content_block_stop\",\"index\":3}"
+			}
+		]
+	},
+	"expected": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "msg_1"
+				}
+			},
+			{
+				"kind": "usage",
+				"usage": {
+					"input": 100,
+					"output": 1,
+					"cached": 60
+				}
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "thinking",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "Think"
+						}
+					]
+				},
+				"block": "0"
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "thinking",
+					"segments": [
+						{
+							"kind": "content",
+							"text": "ing."
+						}
+					]
+				},
+				"block": "0"
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "thinking",
+					"opaque": "sig_1"
+				},
+				"block": "0"
+			},
+			{
+				"kind": "text",
+				"text": ""
+			},
+			{
+				"kind": "text",
+				"text": "Reading."
+			},
+			{
+				"kind": "thought",
+				"part": {
+					"kind": "thought",
+					"type": "redacted_thinking",
+					"opaque": "red_2"
+				},
+				"block": "2"
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "call_a",
+				"name": "read",
+				"argumentsText": ""
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "",
+				"name": "",
+				"argumentsText": "{\"path\":"
+			},
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "",
+				"name": "",
+				"argumentsText": "\"a\"}"
+			}
+		],
+		"result": null,
+		"failure": {
+			"category": "truncated",
+			"status": "truncated",
+			"message": "The stream ended before message_stop."
+		}
+	}
+}

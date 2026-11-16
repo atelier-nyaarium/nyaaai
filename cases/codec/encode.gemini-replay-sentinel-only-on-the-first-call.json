@@ -1,0 +1,157 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "codec.encode",
+	"name": "gemini-replay-sentinel-only-on-the-first-call",
+	"input": {
+		"codec": {
+			"family": "generate-content",
+			"dialect": "opencode",
+			"prefix": "/google/v1beta",
+			"facts": {
+				"api": {
+					"family": "generate-content",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"medium",
+					"high"
+				]
+			}
+		},
+		"request": {
+			"model": "gemini-3.8-flash",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "step",
+					"producer": {
+						"model": "gemini-4-argon"
+					},
+					"parts": [
+						{
+							"kind": "thought",
+							"type": "thought",
+							"segments": [
+								{
+									"kind": "content",
+									"text": "Plan."
+								}
+							]
+						},
+						{
+							"kind": "call",
+							"index": 0,
+							"wireId": "call_a",
+							"name": "read",
+							"arguments": "{\"file\":\"a\"}"
+						},
+						{
+							"kind": "call",
+							"index": 1,
+							"wireId": "call_b",
+							"name": "read",
+							"arguments": "{\"file\":\"b\"}"
+						},
+						{
+							"kind": "result",
+							"index": 0,
+							"output": "a",
+							"isError": false
+						},
+						{
+							"kind": "result",
+							"index": 1,
+							"output": "gone",
+							"isError": true
+						}
+					]
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true
+		},
+		"mode": "stream"
+	},
+	"expected": {
+		"encoded": {
+			"path": "/google/v1beta/models/gemini-3.8-flash:streamGenerateContent?alt=sse",
+			"body": {
+				"contents": [
+					{
+						"role": "model",
+						"parts": [
+							{
+								"functionCall": {
+									"name": "read",
+									"args": {
+										"file": "a"
+									}
+								},
+								"thoughtSignature": "skip_thought_signature_validator"
+							},
+							{
+								"functionCall": {
+									"name": "read",
+									"args": {
+										"file": "b"
+									}
+								}
+							}
+						]
+					},
+					{
+						"role": "user",
+						"parts": [
+							{
+								"functionResponse": {
+									"name": "read",
+									"response": {
+										"output": "a"
+									}
+								}
+							},
+							{
+								"functionResponse": {
+									"name": "read",
+									"response": {
+										"error": "gone"
+									}
+								}
+							}
+						]
+					}
+				],
+				"systemInstruction": {
+					"parts": [
+						{
+							"text": "Rules."
+						}
+					]
+				},
+				"generationConfig": {
+					"thinkingConfig": {
+						"includeThoughts": true
+					}
+				}
+			},
+			"headers": {
+				"x-opencode-session": "root-1"
+			}
+		},
+		"refusal": null
+	}
+}

@@ -13,7 +13,7 @@ use crate::chat::text::thought_text;
 use crate::chat::wire::{Delta, Usage};
 use crate::codec::Mode;
 use crate::failure::WireError;
-use crate::hosts::opencode::{SESSION_HEADER, opencode_failure, opencode_usage};
+use crate::hosts::opencode::{SESSION_HEADER, opencode_chat_usage, opencode_failure};
 use crate::native::HostStatus;
 use crate::schema_projection::strict_schema;
 
@@ -114,7 +114,7 @@ pub fn effort_fields(efforts: &[Effort], request: &CanonicalRequest, mode: Mode)
 
 fn normalized(usage: &Usage) -> NormalizedUsage {
     let prompt = usage.prompt_tokens_details.as_ref();
-    opencode_usage(
+    opencode_chat_usage(
         NormalizedUsage {
             input: usage.prompt_tokens,
             output: usage.completion_tokens,
