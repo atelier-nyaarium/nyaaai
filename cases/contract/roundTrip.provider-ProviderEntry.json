@@ -1,0 +1,76 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "provider-ProviderEntry",
+	"input": {
+		"set": "provider",
+		"shape": "ProviderEntry",
+		"texts": [
+			"{\"id\":\"e1\",\"kind\":\"openrouter\",\"label\":\"Main\"}",
+			"{\"id\":\"e2\",\"kind\":\"opencode\",\"label\":\"Plan\",\"plan\":\"go\",\"url\":\"http://lab.local:11434\",\"extraUsage\":true}",
+			"{\"id\":\"e1\",\"kind\":\"openrouter\",\"label\":\"Main\",\"extra\":{\"deep\":1}}",
+			"{\"id\":\"e1\",\"kind\":\"openrouter\",\"label\":\"Main\",\"extraUsage\":false}",
+			"{\"kind\":\"openrouter\",\"label\":\"x\"}",
+			"{\"id\":\"e1\",\"kind\":\"other\",\"label\":\"Main\"}",
+			"{\"id\":\"e1\",\"kind\":\"openrouter\",\"label\":\"Main\",\"plan\":\"free\"}",
+			"{\"id\":\"e1\",\"kind\":\"openrouter\",\"label\":\"Main\",\"extraUsage\":\"yes\"}",
+			"{\"id\":\"e1\",\"kind\":\"openrouter\",\"label\":\"Main\",\"url\":1}",
+			"[]"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"id\":\"e1\",\"kind\":\"openrouter\",\"label\":\"Main\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"id\":\"e2\",\"kind\":\"opencode\",\"label\":\"Plan\",\"plan\":\"go\",\"url\":\"http://lab.local:11434\",\"extraUsage\":true}"
+			},
+			{
+				"ok": true,
+				"text": "{\"id\":\"e1\",\"kind\":\"openrouter\",\"label\":\"Main\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"id\":\"e1\",\"kind\":\"openrouter\",\"label\":\"Main\",\"extraUsage\":false}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"id"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"plan"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"extraUsage"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"url"
+				]
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

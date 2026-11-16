@@ -1,0 +1,129 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.providerList",
+	"name": "order",
+	"input": {
+		"steps": [
+			{
+				"op": "read"
+			},
+			{
+				"op": "listen",
+				"name": "a"
+			},
+			{
+				"op": "listen",
+				"name": "b"
+			},
+			{
+				"op": "set",
+				"ids": [
+					"x",
+					"y",
+					"z"
+				]
+			},
+			{
+				"op": "read"
+			},
+			{
+				"op": "unlisten",
+				"name": "a"
+			},
+			{
+				"op": "set",
+				"ids": [
+					"z",
+					"x"
+				]
+			},
+			{
+				"op": "read"
+			},
+			{
+				"op": "unlisten",
+				"name": "a"
+			},
+			{
+				"op": "unlisten",
+				"name": "b"
+			},
+			{
+				"op": "set",
+				"ids": []
+			},
+			{
+				"op": "read"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"heard": [],
+				"ids": [],
+				"reads": 1
+			},
+			{
+				"heard": [],
+				"reads": 1
+			},
+			{
+				"heard": [],
+				"reads": 1
+			},
+			{
+				"heard": [
+					"a",
+					"b"
+				],
+				"reads": 1
+			},
+			{
+				"heard": [],
+				"ids": [
+					"x",
+					"y",
+					"z"
+				],
+				"reads": 2
+			},
+			{
+				"heard": [],
+				"reads": 2
+			},
+			{
+				"heard": [
+					"b"
+				],
+				"reads": 2
+			},
+			{
+				"heard": [],
+				"ids": [
+					"z",
+					"x"
+				],
+				"reads": 3
+			},
+			{
+				"heard": [],
+				"reads": 3
+			},
+			{
+				"heard": [],
+				"reads": 3
+			},
+			{
+				"heard": [],
+				"reads": 3
+			},
+			{
+				"heard": [],
+				"ids": [],
+				"reads": 4
+			}
+		]
+	}
+}

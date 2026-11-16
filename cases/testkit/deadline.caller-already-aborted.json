@@ -1,0 +1,80 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.deadline",
+	"name": "caller-already-aborted",
+	"input": {
+		"startMs": 0,
+		"steps": [
+			{
+				"op": "caller",
+				"id": "c"
+			},
+			{
+				"op": "abortCaller",
+				"id": "c"
+			},
+			{
+				"op": "deadline",
+				"id": "d",
+				"ms": 50,
+				"caller": "c"
+			},
+			{
+				"op": "advance",
+				"ms": 100
+			},
+			{
+				"op": "clear",
+				"id": "d"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 0,
+				"waiting": [],
+				"deadlines": []
+			},
+			{
+				"nowMs": 0,
+				"waiting": [],
+				"deadlines": []
+			},
+			{
+				"nowMs": 0,
+				"waiting": [],
+				"deadlines": [
+					{
+						"id": "d",
+						"aborted": true,
+						"ended": "caller"
+					}
+				]
+			},
+			{
+				"nowMs": 100,
+				"waiting": [],
+				"deadlines": [
+					{
+						"id": "d",
+						"aborted": true,
+						"ended": "caller"
+					}
+				]
+			},
+			{
+				"nowMs": 100,
+				"waiting": [],
+				"deadlines": [
+					{
+						"id": "d",
+						"aborted": true,
+						"ended": "caller"
+					}
+				]
+			}
+		]
+	}
+}

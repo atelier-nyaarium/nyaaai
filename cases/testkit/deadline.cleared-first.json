@@ -1,0 +1,137 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.deadline",
+	"name": "cleared-first",
+	"input": {
+		"startMs": 0,
+		"steps": [
+			{
+				"op": "deadline",
+				"id": "d",
+				"ms": 50
+			},
+			{
+				"op": "caller",
+				"id": "c"
+			},
+			{
+				"op": "deadline",
+				"id": "e",
+				"ms": 70,
+				"caller": "c"
+			},
+			{
+				"op": "clear",
+				"id": "d"
+			},
+			{
+				"op": "clear",
+				"id": "e"
+			},
+			{
+				"op": "advance",
+				"ms": 200
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 0,
+				"waiting": [
+					"schedule-1"
+				],
+				"deadlines": [
+					{
+						"id": "d",
+						"aborted": false,
+						"ended": null
+					}
+				]
+			},
+			{
+				"nowMs": 0,
+				"waiting": [
+					"schedule-1"
+				],
+				"deadlines": [
+					{
+						"id": "d",
+						"aborted": false,
+						"ended": null
+					}
+				]
+			},
+			{
+				"nowMs": 0,
+				"waiting": [
+					"schedule-1",
+					"schedule-2"
+				],
+				"deadlines": [
+					{
+						"id": "d",
+						"aborted": false,
+						"ended": null
+					},
+					{
+						"id": "e",
+						"aborted": false,
+						"ended": null
+					}
+				]
+			},
+			{
+				"nowMs": 0,
+				"waiting": [
+					"schedule-2"
+				],
+				"deadlines": [
+					{
+						"id": "d",
+						"aborted": false,
+						"ended": null
+					},
+					{
+						"id": "e",
+						"aborted": false,
+						"ended": null
+					}
+				]
+			},
+			{
+				"nowMs": 0,
+				"waiting": [],
+				"deadlines": [
+					{
+						"id": "d",
+						"aborted": false,
+						"ended": null
+					},
+					{
+						"id": "e",
+						"aborted": false,
+						"ended": null
+					}
+				]
+			},
+			{
+				"nowMs": 200,
+				"waiting": [],
+				"deadlines": [
+					{
+						"id": "d",
+						"aborted": false,
+						"ended": null
+					},
+					{
+						"id": "e",
+						"aborted": false,
+						"ended": null
+					}
+				]
+			}
+		]
+	}
+}

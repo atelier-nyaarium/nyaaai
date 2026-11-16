@@ -1,0 +1,85 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "model-BrowseModel",
+	"input": {
+		"set": "model",
+		"shape": "BrowseModel",
+		"texts": [
+			"{\"id\":\"vendor/model-a\",\"display\":\"vendor/model-a\",\"label\":\"Model A\",\"curated\":false,\"description\":\"A model.\",\"inputs\":[\"text\"],\"outputs\":[\"text\"],\"parameters\":[\"tools\"],\"price\":\"free\",\"tools\":\"ok\"}",
+			"{\"id\":\"vendor/model-a\",\"display\":\"vendor/model-a\",\"label\":\"Model A\",\"curated\":true,\"description\":\"A model.\",\"inputs\":[\"text\"],\"outputs\":[\"text\"],\"parameters\":[\"tools\"],\"price\":{\"prompt\":[1,2],\"completion\":[3,4]},\"tools\":\"noZdrHost\",\"context\":64000,\"retestable\":true,\"family\":\"messages\",\"extra\":1}",
+			"{\"id\":\"vendor/model-a\",\"display\":\"vendor/model-a\",\"label\":\"Model A\",\"curated\":false,\"description\":\"A model.\",\"inputs\":[\"text\"],\"outputs\":[\"text\"],\"parameters\":[\"tools\"],\"price\":\"unknown\",\"tools\":\"ok\"}",
+			"{\"id\":\"vendor/model-a\",\"display\":\"vendor/model-a\",\"label\":\"Model A\",\"curated\":false,\"description\":\"A model.\",\"inputs\":[\"text\"],\"outputs\":[\"text\"],\"parameters\":[\"tools\"],\"price\":\"paid\",\"tools\":\"ok\"}",
+			"{\"id\":\"vendor/model-a\",\"display\":\"vendor/model-a\",\"label\":\"Model A\",\"curated\":false,\"description\":\"A model.\",\"inputs\":[\"text\"],\"outputs\":[\"text\"],\"parameters\":[\"tools\"],\"price\":{\"prompt\":[1,2]},\"tools\":\"ok\"}",
+			"{\"id\":\"vendor/model-a\",\"display\":\"vendor/model-a\",\"label\":\"Model A\",\"curated\":false,\"description\":\"A model.\",\"inputs\":[\"text\"],\"outputs\":[\"text\"],\"parameters\":[\"tools\"],\"price\":\"free\",\"tools\":\"maybe\"}",
+			"{\"id\":\"vendor/model-a\",\"display\":\"vendor/model-a\",\"label\":\"Model A\",\"curated\":false,\"description\":\"A model.\",\"inputs\":[\"text\"],\"outputs\":[\"text\"],\"parameters\":[\"tools\"],\"price\":\"free\",\"tools\":\"none\"}",
+			"{\"id\":\"vendor/model-a\",\"display\":\"vendor/model-a\",\"label\":\"Model A\",\"curated\":false,\"description\":\"A model.\",\"inputs\":[\"text\"],\"outputs\":[\"text\"],\"parameters\":[\"tools\"],\"price\":\"free\",\"tools\":\"ok\",\"retestable\":false}",
+			"{\"id\":\"vendor/model-a\",\"display\":\"vendor/model-a\",\"label\":\"Model A\",\"curated\":false,\"description\":\"A model.\",\"inputs\":[\"text\"],\"outputs\":[\"text\"],\"parameters\":[\"tools\"],\"price\":\"free\",\"tools\":\"ok\",\"family\":\"other\"}",
+			"{\"id\":\"vendor/model-a\",\"display\":\"vendor/model-a\",\"label\":\"Model A\",\"curated\":false,\"description\":\"A model.\",\"inputs\":\"text\",\"outputs\":[\"text\"],\"parameters\":[\"tools\"],\"price\":\"free\",\"tools\":\"ok\"}",
+			"{\"id\":\"x\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"id\":\"vendor/model-a\",\"display\":\"vendor/model-a\",\"label\":\"Model A\",\"curated\":false,\"description\":\"A model.\",\"inputs\":[\"text\"],\"outputs\":[\"text\"],\"parameters\":[\"tools\"],\"price\":\"free\",\"tools\":\"ok\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"id\":\"vendor/model-a\",\"display\":\"vendor/model-a\",\"label\":\"Model A\",\"curated\":true,\"description\":\"A model.\",\"context\":64000,\"inputs\":[\"text\"],\"outputs\":[\"text\"],\"parameters\":[\"tools\"],\"price\":{\"prompt\":[1,2],\"completion\":[3,4]},\"tools\":\"noZdrHost\",\"retestable\":true,\"family\":\"messages\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"id\":\"vendor/model-a\",\"display\":\"vendor/model-a\",\"label\":\"Model A\",\"curated\":false,\"description\":\"A model.\",\"inputs\":[\"text\"],\"outputs\":[\"text\"],\"parameters\":[\"tools\"],\"price\":\"unknown\",\"tools\":\"ok\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"price"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"price"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"tools"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"id\":\"vendor/model-a\",\"display\":\"vendor/model-a\",\"label\":\"Model A\",\"curated\":false,\"description\":\"A model.\",\"inputs\":[\"text\"],\"outputs\":[\"text\"],\"parameters\":[\"tools\"],\"price\":\"free\",\"tools\":\"none\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"retestable"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"family"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"inputs"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"display"
+				]
+			}
+		]
+	}
+}

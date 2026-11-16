@@ -16,6 +16,10 @@ use nyaaai_testkit::trace::{read_trace, replay_fetch};
 
 use super::shapes::*;
 
+mod ports;
+
+pub use ports::{deadline, entry_keys, model_registry, provider_list};
+
 pub fn wheel(input: TestkitWheelInput) -> Outcome<TestkitWheelResult> {
     let wheel = TimerWheel::new(input.start_ms);
     let steps = input

@@ -1,0 +1,109 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.deadline",
+	"name": "caller-first",
+	"input": {
+		"startMs": 0,
+		"steps": [
+			{
+				"op": "caller",
+				"id": "c"
+			},
+			{
+				"op": "deadline",
+				"id": "d",
+				"ms": 50,
+				"caller": "c"
+			},
+			{
+				"op": "abortAt",
+				"id": "c",
+				"ms": 20
+			},
+			{
+				"op": "advance",
+				"ms": 20
+			},
+			{
+				"op": "advance",
+				"ms": 100
+			},
+			{
+				"op": "clear",
+				"id": "d"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 0,
+				"waiting": [],
+				"deadlines": []
+			},
+			{
+				"nowMs": 0,
+				"waiting": [
+					"schedule-1"
+				],
+				"deadlines": [
+					{
+						"id": "d",
+						"aborted": false,
+						"ended": null
+					}
+				]
+			},
+			{
+				"nowMs": 0,
+				"waiting": [
+					"schedule-1",
+					"schedule-2"
+				],
+				"deadlines": [
+					{
+						"id": "d",
+						"aborted": false,
+						"ended": null
+					}
+				]
+			},
+			{
+				"nowMs": 20,
+				"waiting": [
+					"schedule-1"
+				],
+				"deadlines": [
+					{
+						"id": "d",
+						"aborted": true,
+						"ended": "caller"
+					}
+				]
+			},
+			{
+				"nowMs": 120,
+				"waiting": [],
+				"deadlines": [
+					{
+						"id": "d",
+						"aborted": true,
+						"ended": "caller"
+					}
+				]
+			},
+			{
+				"nowMs": 120,
+				"waiting": [],
+				"deadlines": [
+					{
+						"id": "d",
+						"aborted": true,
+						"ended": "caller"
+					}
+				]
+			}
+		]
+	}
+}

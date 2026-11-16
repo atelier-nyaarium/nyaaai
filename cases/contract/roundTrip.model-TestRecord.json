@@ -1,0 +1,153 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "model-TestRecord",
+	"input": {
+		"set": "model",
+		"shape": "TestRecord",
+		"texts": [
+			"{\"label\":\"Model A\",\"date\":\"2026-01-02\",\"cost\":0.012,\"checks\":{\"toolPlus\":\"pass\",\"recovery\":\"fail\",\"reasoning\":\"n/a\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"explicit\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2}}",
+			"{\"label\":\"Model A\",\"date\":\"2026-01-02\",\"cost\":0.012,\"checks\":{\"toolPlus\":\"pass\",\"recovery\":\"fail\",\"reasoning\":\"n/a\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"explicit\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"estimated\":true,\"extra\":1}",
+			"{\"label\":\"  Padded  \",\"date\":\"2026-01-02\",\"cost\":0.012,\"checks\":{\"toolPlus\":\"pass\",\"recovery\":\"fail\",\"reasoning\":\"n/a\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"explicit\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2}}",
+			"{\"label\":\"   \",\"date\":\"2026-01-02\",\"cost\":0.012,\"checks\":{\"toolPlus\":\"pass\",\"recovery\":\"fail\",\"reasoning\":\"n/a\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"explicit\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2}}",
+			"{\"label\":\"\",\"date\":\"2026-01-02\",\"cost\":0.012,\"checks\":{\"toolPlus\":\"pass\",\"recovery\":\"fail\",\"reasoning\":\"n/a\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"explicit\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2}}",
+			"{\"label\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\"date\":\"2026-01-02\",\"cost\":0.012,\"checks\":{\"toolPlus\":\"pass\",\"recovery\":\"fail\",\"reasoning\":\"n/a\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"explicit\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2}}",
+			"{\"label\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\"date\":\"2026-01-02\",\"cost\":0.012,\"checks\":{\"toolPlus\":\"pass\",\"recovery\":\"fail\",\"reasoning\":\"n/a\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"explicit\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2}}",
+			"{\"label\":\" 　 Wide \ufeff\",\"date\":\"2026-01-02\",\"cost\":0.012,\"checks\":{\"toolPlus\":\"pass\",\"recovery\":\"fail\",\"reasoning\":\"n/a\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"explicit\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2}}",
+			"{\"label\":1,\"date\":\"2026-01-02\",\"cost\":0.012,\"checks\":{\"toolPlus\":\"pass\",\"recovery\":\"fail\",\"reasoning\":\"n/a\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"explicit\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2}}",
+			"{\"label\":\"Model A\",\"date\":\"2026-1-2\",\"cost\":0.012,\"checks\":{\"toolPlus\":\"pass\",\"recovery\":\"fail\",\"reasoning\":\"n/a\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"explicit\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2}}",
+			"{\"label\":\"Model A\",\"date\":\"2026-01-02T00:00:00Z\",\"cost\":0.012,\"checks\":{\"toolPlus\":\"pass\",\"recovery\":\"fail\",\"reasoning\":\"n/a\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"explicit\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2}}",
+			"{\"label\":\"Model A\",\"date\":\"\",\"cost\":0.012,\"checks\":{\"toolPlus\":\"pass\",\"recovery\":\"fail\",\"reasoning\":\"n/a\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"explicit\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2}}",
+			"{\"label\":\"Model A\",\"date\":\"2026-01-02\",\"cost\":0,\"checks\":{\"toolPlus\":\"pass\",\"recovery\":\"fail\",\"reasoning\":\"n/a\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"explicit\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2}}",
+			"{\"label\":\"Model A\",\"date\":\"2026-01-02\",\"cost\":-0.5,\"checks\":{\"toolPlus\":\"pass\",\"recovery\":\"fail\",\"reasoning\":\"n/a\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"explicit\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2}}",
+			"{\"label\":\"Model A\",\"date\":\"2026-01-02\",\"cost\":0.012,\"checks\":{\"toolPlus\":\"skip\",\"recovery\":\"pass\",\"reasoning\":\"pass\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"explicit\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2}}",
+			"{\"label\":\"Model A\",\"date\":\"2026-01-02\",\"cost\":0.012,\"checks\":{\"toolPlus\":\"pass\"},\"reasoning\":true,\"cache\":\"explicit\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2}}",
+			"{\"label\":\"Model A\",\"date\":\"2026-01-02\",\"cost\":0.012,\"checks\":{\"toolPlus\":\"pass\",\"recovery\":\"fail\",\"reasoning\":\"n/a\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"none\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2}}",
+			"{\"label\":\"Model A\",\"date\":\"2026-01-02\",\"cost\":0.012,\"checks\":{\"toolPlus\":\"pass\",\"recovery\":\"fail\",\"reasoning\":\"n/a\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"other\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2}}",
+			"{\"label\":\"Model A\",\"date\":\"2026-01-02\",\"cost\":0.012,\"checks\":{\"toolPlus\":\"pass\",\"recovery\":\"fail\",\"reasoning\":\"n/a\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"explicit\",\"verifiedPrice\":{\"prompt\":-1,\"completion\":2}}",
+			"{\"label\":\"Model A\",\"date\":\"2026-01-02\",\"cost\":0.012,\"checks\":{\"toolPlus\":\"pass\",\"recovery\":\"fail\",\"reasoning\":\"n/a\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"explicit\",\"verifiedPrice\":{\"prompt\":1}}",
+			"{\"label\":\"Model A\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"label\":\"Model A\",\"date\":\"2026-01-02\",\"cost\":0.012,\"checks\":{\"toolPlus\":\"pass\",\"recovery\":\"fail\",\"reasoning\":\"n/a\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"explicit\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"label\":\"Model A\",\"date\":\"2026-01-02\",\"cost\":0.012,\"estimated\":true,\"checks\":{\"toolPlus\":\"pass\",\"recovery\":\"fail\",\"reasoning\":\"n/a\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"explicit\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"label\":\"Padded\",\"date\":\"2026-01-02\",\"cost\":0.012,\"checks\":{\"toolPlus\":\"pass\",\"recovery\":\"fail\",\"reasoning\":\"n/a\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"explicit\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2}}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"label"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"label"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"label\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\"date\":\"2026-01-02\",\"cost\":0.012,\"checks\":{\"toolPlus\":\"pass\",\"recovery\":\"fail\",\"reasoning\":\"n/a\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"explicit\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2}}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"label"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"label\":\"Wide\",\"date\":\"2026-01-02\",\"cost\":0.012,\"checks\":{\"toolPlus\":\"pass\",\"recovery\":\"fail\",\"reasoning\":\"n/a\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"explicit\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2}}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"label"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"date"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"date"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"date"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"label\":\"Model A\",\"date\":\"2026-01-02\",\"cost\":0,\"checks\":{\"toolPlus\":\"pass\",\"recovery\":\"fail\",\"reasoning\":\"n/a\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"explicit\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2}}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"cost"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"checks",
+					"toolPlus"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"checks",
+					"recovery"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"label\":\"Model A\",\"date\":\"2026-01-02\",\"cost\":0.012,\"checks\":{\"toolPlus\":\"pass\",\"recovery\":\"fail\",\"reasoning\":\"n/a\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"none\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2}}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"cache"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"verifiedPrice",
+					"prompt"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"verifiedPrice",
+					"completion"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"date"
+				]
+			}
+		]
+	}
+}

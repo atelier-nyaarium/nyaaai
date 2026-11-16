@@ -1,0 +1,40 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "model-Binding",
+	"input": {
+		"set": "model",
+		"shape": "Binding",
+		"texts": [
+			"{\"id\":\"vendor/x\"}",
+			"{\"id\":\"x\",\"extra\":1}",
+			"{}",
+			"{\"id\":1}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"id\":\"vendor/x\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"id\":\"x\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"id"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"id"
+				]
+			}
+		]
+	}
+}

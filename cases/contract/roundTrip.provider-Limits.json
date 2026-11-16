@@ -1,0 +1,50 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "provider-Limits",
+	"input": {
+		"set": "provider",
+		"shape": "Limits",
+		"texts": [
+			"{}",
+			"{\"limit\":5,\"reset\":\"2026-11-01T00:00:00Z\"}",
+			"{\"limit\":5,\"extra\":1}",
+			"{\"limit\":\"5\"}",
+			"{\"reset\":1}",
+			"[]"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{}"
+			},
+			{
+				"ok": true,
+				"text": "{\"limit\":5,\"reset\":\"2026-11-01T00:00:00Z\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"limit\":5}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"limit"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"reset"
+				]
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

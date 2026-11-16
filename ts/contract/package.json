@@ -8,13 +8,16 @@
 		".": "./src/index.ts",
 		"./base64": "./src/base64.ts",
 		"./fetch": "./src/fetch.ts",
+		"./entryKeys": "./src/entryKeys.ts",
 		"./headers": "./src/headers.ts",
 		"./id": "./src/id.ts",
 		"./issues": "./src/issues.ts",
 		"./json": "./src/json.ts",
+		"./modelRegistry": "./src/modelRegistry.ts",
 		"./number": "./src/number.ts",
 		"./order": "./src/order.ts",
 		"./pattern": "./src/pattern.ts",
+		"./providerList": "./src/providerList.ts",
 		"./random": "./src/random.ts",
 		"./rustNames": "./src/rustNames.ts",
 		"./secret": "./src/secret.ts",
@@ -22,10 +25,13 @@
 		"./strictSchema": "./src/strictSchema.ts",
 		"./shape": "./src/shape.ts",
 		"./shapes/frames": "./src/shapes/frames.ts",
+		"./shapes/model": "./src/shapes/model.ts",
+		"./shapes/provider": "./src/shapes/provider.ts",
 		"./shapes/sessionCut": "./src/shapes/sessionCut.ts",
 		"./shapes/step": "./src/shapes/step.ts",
 		"./text": "./src/text.ts",
-		"./time": "./src/time.ts"
+		"./time": "./src/time.ts",
+		"./url": "./src/url.ts"
 	},
 	"dependencies": {
 		"zod": "4.6.7"

@@ -1,0 +1,57 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "provider-KindLine",
+	"input": {
+		"set": "provider",
+		"shape": "KindLine",
+		"texts": [
+			"{\"kind\":\"ollama\",\"label\":\"Ollama\",\"field\":\"url\"}",
+			"{\"kind\":\"openrouter\",\"label\":\"Ollama\",\"field\":\"key\"}",
+			"{\"kind\":\"ollama\",\"label\":\"Ollama\",\"field\":\"url\",\"plan\":\"go\",\"url\":\"http://lab.local:11434\",\"optionalKey\":true}",
+			"{\"kind\":\"ollama\",\"label\":\"Ollama\",\"field\":\"url\",\"extra\":1}",
+			"{\"kind\":\"ollama\",\"label\":\"Ollama\",\"field\":\"url\",\"optionalKey\":false}",
+			"{\"kind\":\"ollama\",\"label\":\"Ollama\",\"field\":\"path\"}",
+			"{\"kind\":\"ollama\",\"field\":\"url\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"kind\":\"ollama\",\"label\":\"Ollama\",\"field\":\"url\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"openrouter\",\"label\":\"Ollama\",\"field\":\"key\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"ollama\",\"plan\":\"go\",\"label\":\"Ollama\",\"field\":\"url\",\"url\":\"http://lab.local:11434\",\"optionalKey\":true}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"ollama\",\"label\":\"Ollama\",\"field\":\"url\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"optionalKey"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"field"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"label"
+				]
+			}
+		]
+	}
+}

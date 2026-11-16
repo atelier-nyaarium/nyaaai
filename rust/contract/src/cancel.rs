@@ -29,6 +29,9 @@ impl State {
     }
 }
 
+/// Ends a subscription; call it once.
+pub type Unsubscribe = Box<dyn FnOnce() + Send + Sync>;
+
 /// Clones share one flag.
 #[derive(Clone)]
 pub struct CancelToken {

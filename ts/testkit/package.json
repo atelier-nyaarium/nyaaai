@@ -17,6 +17,7 @@
 		"./rejection": "./src/rejection.ts",
 		"./rustNames": "./src/rustNames.ts",
 		"./samples": "./src/samples.ts",
+		"./scriptedPorts": "./src/scriptedPorts.ts",
 		"./scheduler": "./src/scheduler.ts",
 		"./scriptedFetch": "./src/scriptedFetch.ts",
 		"./tortureShapes": "./src/tortureShapes.ts",

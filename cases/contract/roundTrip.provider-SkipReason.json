@@ -1,0 +1,71 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "provider-SkipReason",
+	"input": {
+		"set": "provider",
+		"shape": "SkipReason",
+		"texts": [
+			"\"keyMissing\"",
+			"\"keyRejected\"",
+			"\"credit\"",
+			"\"allowance\"",
+			"\"model\"",
+			"\"overloaded\"",
+			"\"unavailable\"",
+			"\"network\"",
+			"\"paused\"",
+			"\"other\"",
+			"1"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "\"keyMissing\""
+			},
+			{
+				"ok": true,
+				"text": "\"keyRejected\""
+			},
+			{
+				"ok": true,
+				"text": "\"credit\""
+			},
+			{
+				"ok": true,
+				"text": "\"allowance\""
+			},
+			{
+				"ok": true,
+				"text": "\"model\""
+			},
+			{
+				"ok": true,
+				"text": "\"overloaded\""
+			},
+			{
+				"ok": true,
+				"text": "\"unavailable\""
+			},
+			{
+				"ok": true,
+				"text": "\"network\""
+			},
+			{
+				"ok": true,
+				"text": "\"paused\""
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

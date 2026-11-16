@@ -1,0 +1,125 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "model-ModelView",
+	"input": {
+		"set": "model",
+		"shape": "ModelView",
+		"texts": [
+			"{\"row\":{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"vendor/model-a\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}},\"status\":\"ok\",\"efforts\":[],\"hosts\":[]}",
+			"{\"row\":{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"vendor/model-a\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}},\"status\":\"retired\",\"efforts\":[\"low\",\"high\"],\"hosts\":[\"Host\"],\"retiredOn\":\"2026-12-01\",\"promptLimit\":128000,\"outputLimit\":8192,\"price\":{\"prompt\":[1,3],\"completion\":[2,6],\"tiers\":[]},\"cacheWrite1h\":true,\"dataKept\":true,\"api\":{\"family\":\"responses\",\"structured\":true,\"choice\":[\"auto\"],\"strict\":false},\"cache\":\"explicit\",\"extra\":1}",
+			"{\"row\":{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"vendor/model-a\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}},\"status\":\"ok\",\"efforts\":[],\"hosts\":[],\"price\":\"free\"}",
+			"{\"row\":{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"vendor/model-a\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}},\"status\":\"ok\",\"efforts\":[],\"hosts\":[],\"price\":\"unknown\"}",
+			"{\"row\":{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"vendor/model-a\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}},\"status\":\"ok\",\"efforts\":[],\"hosts\":[],\"price\":\"other\"}",
+			"{\"row\":{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"vendor/model-a\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}},\"status\":\"noZdrHost\",\"efforts\":[],\"hosts\":[]}",
+			"{\"row\":{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"vendor/model-a\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}},\"status\":\"noTools\",\"efforts\":[],\"hosts\":[]}",
+			"{\"row\":{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"vendor/model-a\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}},\"status\":\"unknown\",\"efforts\":[],\"hosts\":[]}",
+			"{\"row\":{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"vendor/model-a\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}},\"status\":\"gone\",\"efforts\":[],\"hosts\":[]}",
+			"{\"row\":{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"vendor/model-a\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}},\"status\":\"ok\",\"efforts\":[],\"hosts\":[],\"cacheWrite1h\":false}",
+			"{\"row\":{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"vendor/model-a\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}},\"status\":\"ok\",\"efforts\":[],\"hosts\":[],\"dataKept\":false}",
+			"{\"row\":{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"vendor/model-a\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}},\"status\":\"ok\",\"efforts\":[\"ultra\"],\"hosts\":[]}",
+			"{\"row\":{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"vendor/model-a\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}},\"status\":\"ok\",\"efforts\":[],\"hosts\":[],\"cache\":\"none\"}",
+			"{\"row\":{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"vendor/model-a\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}},\"status\":\"ok\",\"efforts\":[],\"hosts\":[],\"api\":{\"family\":\"responses\"}}",
+			"{\"row\":{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"vendor/model-a\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}},\"status\":\"ok\",\"efforts\":[],\"hosts\":[1]}",
+			"{\"row\":{},\"status\":\"ok\",\"efforts\":[],\"hosts\":[]}",
+			"{\"status\":\"ok\",\"efforts\":[],\"hosts\":[]}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"row\":{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"vendor/model-a\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}},\"status\":\"ok\",\"efforts\":[],\"hosts\":[]}"
+			},
+			{
+				"ok": true,
+				"text": "{\"row\":{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"vendor/model-a\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}},\"status\":\"retired\",\"retiredOn\":\"2026-12-01\",\"efforts\":[\"low\",\"high\"],\"promptLimit\":128000,\"outputLimit\":8192,\"price\":{\"prompt\":[1,3],\"completion\":[2,6],\"tiers\":[]},\"cacheWrite1h\":true,\"hosts\":[\"Host\"],\"dataKept\":true,\"api\":{\"family\":\"responses\",\"structured\":true,\"choice\":[\"auto\"],\"strict\":false},\"cache\":\"explicit\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"row\":{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"vendor/model-a\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}},\"status\":\"ok\",\"efforts\":[],\"price\":\"free\",\"hosts\":[]}"
+			},
+			{
+				"ok": true,
+				"text": "{\"row\":{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"vendor/model-a\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}},\"status\":\"ok\",\"efforts\":[],\"price\":\"unknown\",\"hosts\":[]}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"price"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"row\":{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"vendor/model-a\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}},\"status\":\"noZdrHost\",\"efforts\":[],\"hosts\":[]}"
+			},
+			{
+				"ok": true,
+				"text": "{\"row\":{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"vendor/model-a\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}},\"status\":\"noTools\",\"efforts\":[],\"hosts\":[]}"
+			},
+			{
+				"ok": true,
+				"text": "{\"row\":{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"vendor/model-a\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}},\"status\":\"unknown\",\"efforts\":[],\"hosts\":[]}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"status"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"cacheWrite1h"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"dataKept"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"efforts",
+					0
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"cache"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"api",
+					"structured"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"hosts",
+					0
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"row",
+					"key"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"row"
+				]
+			}
+		]
+	}
+}

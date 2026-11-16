@@ -1,0 +1,41 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "provider-ProviderPlan",
+	"input": {
+		"set": "provider",
+		"shape": "ProviderPlan",
+		"texts": [
+			"\"go\"",
+			"\"payg\"",
+			"\"free\"",
+			"null",
+			"1"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "\"go\""
+			},
+			{
+				"ok": true,
+				"text": "\"payg\""
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

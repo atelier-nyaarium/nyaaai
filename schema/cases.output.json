@@ -1141,6 +1141,36 @@
 			],
 			"additionalProperties": false
 		},
+		"TextHasControlInput": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			],
+			"additionalProperties": false
+		},
+		"TextHasControlResult": {
+			"type": "object",
+			"properties": {
+				"results": {
+					"type": "array",
+					"items": {
+						"type": "boolean"
+					}
+				}
+			},
+			"required": [
+				"results"
+			],
+			"additionalProperties": false
+		},
 		"TextPathSegmentInput": {
 			"type": "object",
 			"properties": {
@@ -1198,6 +1228,39 @@
 			},
 			"required": [
 				"texts"
+			],
+			"additionalProperties": false
+		},
+		"UrlOriginInput": {
+			"type": "object",
+			"properties": {
+				"urls": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"urls"
+			],
+			"additionalProperties": false
+		},
+		"UrlOriginResult": {
+			"type": "object",
+			"properties": {
+				"origins": {
+					"type": "array",
+					"items": {
+						"type": [
+							"string",
+							"null"
+						]
+					}
+				}
+			},
+			"required": [
+				"origins"
 			],
 			"additionalProperties": false
 		},
@@ -2130,6 +2193,420 @@
 			},
 			"required": [
 				"text"
+			],
+			"additionalProperties": false
+		},
+		"TestkitEntryKeysInput": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"op": {
+								"type": "string",
+								"enum": [
+									"listen",
+									"unlisten",
+									"set",
+									"get"
+								]
+							},
+							"name": {
+								"type": "string"
+							},
+							"id": {
+								"type": "string"
+							},
+							"answer": {
+								"type": "string",
+								"enum": [
+									"key",
+									"none",
+									"refused",
+									"unready"
+								]
+							},
+							"key": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"op"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"steps"
+			],
+			"additionalProperties": false
+		},
+		"TestkitEntryKeysResult": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"heard": {
+								"type": "array",
+								"items": {
+									"type": "object",
+									"properties": {
+										"name": {
+											"type": "string"
+										},
+										"id": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"name",
+										"id"
+									],
+									"additionalProperties": false
+								}
+							},
+							"got": {
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string"
+									},
+									"key": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"kind"
+								],
+								"additionalProperties": false
+							},
+							"reads": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							}
+						},
+						"required": [
+							"heard",
+							"reads"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"steps"
+			],
+			"additionalProperties": false
+		},
+		"TestkitProviderListInput": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"op": {
+								"type": "string",
+								"enum": [
+									"listen",
+									"unlisten",
+									"set",
+									"read"
+								]
+							},
+							"name": {
+								"type": "string"
+							},
+							"ids": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							}
+						},
+						"required": [
+							"op"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"steps"
+			],
+			"additionalProperties": false
+		},
+		"TestkitProviderListResult": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"heard": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"ids": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"reads": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							}
+						},
+						"required": [
+							"heard",
+							"reads"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"steps"
+			],
+			"additionalProperties": false
+		},
+		"TestkitModelRegistryInput": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"op": {
+								"type": "string",
+								"enum": [
+									"listen",
+									"unlisten",
+									"setRows",
+									"setHidden",
+									"read",
+									"record",
+									"refuse",
+									"allow"
+								]
+							},
+							"name": {
+								"type": "string"
+							},
+							"keys": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"entry": {
+								"type": "string"
+							},
+							"id": {
+								"type": "string"
+							},
+							"label": {
+								"type": "string"
+							},
+							"why": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"op"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"steps"
+			],
+			"additionalProperties": false
+		},
+		"TestkitModelRegistryResult": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"heard": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"rows": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"hidden": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"tested": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"outcome": {
+								"type": [
+									"string",
+									"null"
+								]
+							},
+							"reads": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"written": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							}
+						},
+						"required": [
+							"heard",
+							"reads",
+							"written"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"steps"
+			],
+			"additionalProperties": false
+		},
+		"TestkitDeadlineInput": {
+			"type": "object",
+			"properties": {
+				"startMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"op": {
+								"type": "string",
+								"enum": [
+									"caller",
+									"abortCaller",
+									"abortAt",
+									"deadline",
+									"clear",
+									"advance"
+								]
+							},
+							"id": {
+								"type": "string"
+							},
+							"ms": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"caller": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"op"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"startMs",
+				"steps"
+			],
+			"additionalProperties": false
+		},
+		"TestkitDeadlineResult": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"nowMs": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"waiting": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"deadlines": {
+								"type": "array",
+								"items": {
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "string"
+										},
+										"aborted": {
+											"type": "boolean"
+										},
+										"ended": {
+											"type": [
+												"string",
+												"null"
+											]
+										}
+									},
+									"required": [
+										"id",
+										"aborted",
+										"ended"
+									],
+									"additionalProperties": false
+								}
+							}
+						},
+						"required": [
+							"nowMs",
+							"waiting",
+							"deadlines"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"steps"
 			],
 			"additionalProperties": false
 		},

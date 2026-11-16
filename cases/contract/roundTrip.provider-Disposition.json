@@ -1,0 +1,71 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "provider-Disposition",
+	"input": {
+		"set": "provider",
+		"shape": "Disposition",
+		"texts": [
+			"{\"act\":\"retry\"}",
+			"{\"act\":\"retry\",\"extra\":1}",
+			"{\"act\":\"fallThrough\",\"notice\":\"keyMissing\"}",
+			"{\"act\":\"stop\",\"notice\":\"badRequest\"}",
+			"{\"act\":\"stop\",\"notice\":\"other\"}",
+			"{\"act\":\"stop\"}",
+			"{\"act\":\"wait\",\"notice\":\"keyMissing\"}",
+			"{\"notice\":\"keyMissing\"}",
+			"{}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"act\":\"retry\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"act\":\"retry\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"act\":\"fallThrough\",\"notice\":\"keyMissing\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"act\":\"stop\",\"notice\":\"badRequest\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"notice"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"notice"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"act"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"act"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"act"
+				]
+			}
+		]
+	}
+}

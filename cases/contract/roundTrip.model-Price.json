@@ -1,0 +1,61 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "model-Price",
+	"input": {
+		"set": "model",
+		"shape": "Price",
+		"texts": [
+			"{\"prompt\":[1,3],\"completion\":[2,6],\"tiers\":[]}",
+			"{\"prompt\":[1,3],\"completion\":[2,6],\"tiers\":[{\"minPromptTokens\":200000,\"prompt\":2,\"completion\":8},{\"minPromptTokens\":200000,\"prompt\":2,\"completion\":8,\"cacheRead\":1}]}",
+			"{\"prompt\":[1,3],\"completion\":[2,6],\"tiers\":[],\"extra\":1}",
+			"{\"prompt\":[1],\"completion\":[2,6],\"tiers\":[]}",
+			"{\"prompt\":[1,3],\"completion\":[1,2,3],\"tiers\":[]}",
+			"{\"prompt\":[1,2],\"completion\":[1,2]}",
+			"{\"prompt\":[1,3],\"completion\":[2,6],\"tiers\":[{}]}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"prompt\":[1,3],\"completion\":[2,6],\"tiers\":[]}"
+			},
+			{
+				"ok": true,
+				"text": "{\"prompt\":[1,3],\"completion\":[2,6],\"tiers\":[{\"minPromptTokens\":200000,\"prompt\":2,\"completion\":8},{\"minPromptTokens\":200000,\"prompt\":2,\"completion\":8,\"cacheRead\":1}]}"
+			},
+			{
+				"ok": true,
+				"text": "{\"prompt\":[1,3],\"completion\":[2,6],\"tiers\":[]}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"prompt"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"completion"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"tiers"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"tiers",
+					0,
+					"minPromptTokens"
+				]
+			}
+		]
+	}
+}

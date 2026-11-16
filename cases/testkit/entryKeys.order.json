@@ -1,0 +1,205 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.entryKeys",
+	"name": "order",
+	"input": {
+		"steps": [
+			{
+				"op": "get",
+				"id": "e1"
+			},
+			{
+				"op": "listen",
+				"name": "a"
+			},
+			{
+				"op": "listen",
+				"name": "b"
+			},
+			{
+				"op": "listen",
+				"name": "c"
+			},
+			{
+				"op": "set",
+				"id": "e1",
+				"answer": "key",
+				"key": "key-one"
+			},
+			{
+				"op": "get",
+				"id": "e1"
+			},
+			{
+				"op": "unlisten",
+				"name": "b"
+			},
+			{
+				"op": "set",
+				"id": "e2",
+				"answer": "refused"
+			},
+			{
+				"op": "get",
+				"id": "e2"
+			},
+			{
+				"op": "unlisten",
+				"name": "b"
+			},
+			{
+				"op": "set",
+				"id": "e1",
+				"answer": "unready"
+			},
+			{
+				"op": "get",
+				"id": "e1"
+			},
+			{
+				"op": "unlisten",
+				"name": "a"
+			},
+			{
+				"op": "unlisten",
+				"name": "c"
+			},
+			{
+				"op": "set",
+				"id": "e1",
+				"answer": "none"
+			},
+			{
+				"op": "get",
+				"id": "e1"
+			},
+			{
+				"op": "get",
+				"id": "never"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"heard": [],
+				"got": {
+					"kind": "none"
+				},
+				"reads": 1
+			},
+			{
+				"heard": [],
+				"reads": 1
+			},
+			{
+				"heard": [],
+				"reads": 1
+			},
+			{
+				"heard": [],
+				"reads": 1
+			},
+			{
+				"heard": [
+					{
+						"name": "a",
+						"id": "e1"
+					},
+					{
+						"name": "b",
+						"id": "e1"
+					},
+					{
+						"name": "c",
+						"id": "e1"
+					}
+				],
+				"reads": 1
+			},
+			{
+				"heard": [],
+				"got": {
+					"kind": "key",
+					"key": "key-one"
+				},
+				"reads": 2
+			},
+			{
+				"heard": [],
+				"reads": 2
+			},
+			{
+				"heard": [
+					{
+						"name": "a",
+						"id": "e2"
+					},
+					{
+						"name": "c",
+						"id": "e2"
+					}
+				],
+				"reads": 2
+			},
+			{
+				"heard": [],
+				"got": {
+					"kind": "refused"
+				},
+				"reads": 3
+			},
+			{
+				"heard": [],
+				"reads": 3
+			},
+			{
+				"heard": [
+					{
+						"name": "a",
+						"id": "e1"
+					},
+					{
+						"name": "c",
+						"id": "e1"
+					}
+				],
+				"reads": 3
+			},
+			{
+				"heard": [],
+				"got": {
+					"kind": "unready"
+				},
+				"reads": 4
+			},
+			{
+				"heard": [],
+				"reads": 4
+			},
+			{
+				"heard": [],
+				"reads": 4
+			},
+			{
+				"heard": [],
+				"reads": 4
+			},
+			{
+				"heard": [],
+				"got": {
+					"kind": "none"
+				},
+				"reads": 5
+			},
+			{
+				"heard": [],
+				"got": {
+					"kind": "none"
+				},
+				"reads": 6
+			}
+		]
+	}
+}

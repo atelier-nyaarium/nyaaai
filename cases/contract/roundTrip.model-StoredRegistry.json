@@ -1,0 +1,71 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "model-StoredRegistry",
+	"input": {
+		"set": "model",
+		"shape": "StoredRegistry",
+		"texts": [
+			"{\"tested\":{},\"added\":{},\"hidden\":[]}",
+			"{\"tested\":{\"e1\":{\"openrouter:vendor/x\":{\"label\":\"Model A\",\"date\":\"2026-01-02\",\"cost\":0.012,\"checks\":{\"toolPlus\":\"pass\",\"recovery\":\"fail\",\"reasoning\":\"n/a\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"explicit\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2}},\"local:e2/local-a:27b\":{\"label\":\" Local \",\"date\":\"2026-01-02\",\"cost\":0.012,\"checks\":{\"toolPlus\":\"pass\",\"recovery\":\"fail\",\"reasoning\":\"n/a\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"explicit\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2}}}},\"added\":{\"e1\":[\"openrouter:vendor/x\",\"openrouter:vendor/y\"],\"e2\":[]},\"hidden\":[\"model-a*\",\"openrouter:vendor/z\"],\"extra\":1}",
+			"{\"tested\":{\"__proto__\":{\"a\":{}},\"e1\":{}},\"added\":{},\"hidden\":[]}",
+			"{\"tested\":{\"e1\":{\"k\":{\"label\":\"x\"}}},\"added\":{},\"hidden\":[]}",
+			"{\"tested\":{},\"added\":{\"e1\":[1]},\"hidden\":[]}",
+			"{\"tested\":[],\"added\":{},\"hidden\":[]}",
+			"{\"tested\":{},\"added\":{},\"hidden\":\"a\"}",
+			"{\"tested\":{},\"added\":{}}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"tested\":{},\"added\":{},\"hidden\":[]}"
+			},
+			{
+				"ok": true,
+				"text": "{\"tested\":{\"e1\":{\"openrouter:vendor/x\":{\"label\":\"Model A\",\"date\":\"2026-01-02\",\"cost\":0.012,\"checks\":{\"toolPlus\":\"pass\",\"recovery\":\"fail\",\"reasoning\":\"n/a\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"explicit\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2}},\"local:e2/local-a:27b\":{\"label\":\"Local\",\"date\":\"2026-01-02\",\"cost\":0.012,\"checks\":{\"toolPlus\":\"pass\",\"recovery\":\"fail\",\"reasoning\":\"n/a\",\"schema\":\"pass\"},\"reasoning\":true,\"cache\":\"explicit\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2}}}},\"added\":{\"e1\":[\"openrouter:vendor/x\",\"openrouter:vendor/y\"],\"e2\":[]},\"hidden\":[\"model-a*\",\"openrouter:vendor/z\"]}"
+			},
+			{
+				"ok": true,
+				"text": "{\"tested\":{\"e1\":{}},\"added\":{},\"hidden\":[]}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"tested",
+					"e1",
+					"k",
+					"date"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"added",
+					"e1",
+					0
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"tested"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"hidden"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"hidden"
+				]
+			}
+		]
+	}
+}

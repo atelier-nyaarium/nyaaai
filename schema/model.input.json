@@ -1,0 +1,715 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "model.input.json",
+	"x-contract-version": "0.1.0",
+	"$defs": {
+		"ModelUse": {
+			"type": "string",
+			"enum": [
+				"chat",
+				"compaction",
+				"analysis"
+			]
+		},
+		"Binding": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"id"
+			]
+		},
+		"RowIdentity": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "curated"
+						},
+						"key": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"kind",
+						"key"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "hosted"
+						},
+						"provider": {
+							"$ref": "provider.input.json#/$defs/ProviderKindName"
+						},
+						"id": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"kind",
+						"provider",
+						"id"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "local"
+						},
+						"entry": {
+							"type": "string"
+						},
+						"tag": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"kind",
+						"entry",
+						"tag"
+					]
+				}
+			],
+			"x-tag": "kind"
+		},
+		"ModelRow": {
+			"type": "object",
+			"properties": {
+				"key": {
+					"type": "string"
+				},
+				"bindings": {
+					"type": "object",
+					"propertyNames": {
+						"type": "string"
+					},
+					"additionalProperties": {
+						"$ref": "#/$defs/Binding"
+					}
+				},
+				"family": {
+					"type": "string"
+				},
+				"label": {
+					"type": "string"
+				},
+				"reasoning": {
+					"type": "boolean"
+				},
+				"schema": {
+					"type": "boolean"
+				},
+				"cache": {
+					"type": "string",
+					"enum": [
+						"implicit",
+						"explicit"
+					]
+				},
+				"verified": {
+					"type": "string"
+				},
+				"verifiedPrice": {
+					"type": "object",
+					"properties": {
+						"prompt": {
+							"type": "number"
+						},
+						"completion": {
+							"type": "number"
+						}
+					},
+					"required": [
+						"prompt",
+						"completion"
+					]
+				},
+				"identity": {
+					"$ref": "#/$defs/RowIdentity"
+				}
+			},
+			"required": [
+				"key",
+				"bindings",
+				"family",
+				"label",
+				"reasoning",
+				"schema",
+				"cache",
+				"verified",
+				"verifiedPrice",
+				"identity"
+			]
+		},
+		"PriceTier": {
+			"type": "object",
+			"properties": {
+				"minPromptTokens": {
+					"type": "number"
+				},
+				"prompt": {
+					"type": "number"
+				},
+				"completion": {
+					"type": "number"
+				},
+				"cacheRead": {
+					"type": "number"
+				},
+				"cacheWrite": {
+					"type": "number"
+				},
+				"cacheWrite1h": {
+					"type": "number"
+				}
+			},
+			"required": [
+				"minPromptTokens",
+				"prompt",
+				"completion"
+			]
+		},
+		"Price": {
+			"type": "object",
+			"properties": {
+				"prompt": {
+					"type": "array",
+					"prefixItems": [
+						{
+							"type": "number"
+						},
+						{
+							"type": "number"
+						}
+					],
+					"items": false,
+					"minItems": 2,
+					"maxItems": 2
+				},
+				"completion": {
+					"type": "array",
+					"prefixItems": [
+						{
+							"type": "number"
+						},
+						{
+							"type": "number"
+						}
+					],
+					"items": false,
+					"minItems": 2,
+					"maxItems": 2
+				},
+				"tiers": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/PriceTier"
+					}
+				}
+			},
+			"required": [
+				"prompt",
+				"completion",
+				"tiers"
+			]
+		},
+		"ModelView": {
+			"type": "object",
+			"properties": {
+				"row": {
+					"$ref": "#/$defs/ModelRow"
+				},
+				"status": {
+					"type": "string",
+					"enum": [
+						"ok",
+						"retired",
+						"noZdrHost",
+						"noTools",
+						"unknown"
+					]
+				},
+				"retiredOn": {
+					"type": "string"
+				},
+				"efforts": {
+					"type": "array",
+					"items": {
+						"$ref": "step.input.json#/$defs/Effort"
+					}
+				},
+				"promptLimit": {
+					"type": "number"
+				},
+				"outputLimit": {
+					"type": "number"
+				},
+				"price": {
+					"anyOf": [
+						{
+							"$ref": "#/$defs/Price"
+						},
+						{
+							"type": "string",
+							"const": "free"
+						},
+						{
+							"type": "string",
+							"const": "unknown"
+						}
+					]
+				},
+				"cacheWrite1h": {
+					"type": "boolean",
+					"const": true
+				},
+				"hosts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"dataKept": {
+					"type": "boolean",
+					"const": true
+				},
+				"api": {
+					"$ref": "step.input.json#/$defs/ApiFacts"
+				},
+				"cache": {
+					"type": "string",
+					"enum": [
+						"implicit",
+						"explicit"
+					]
+				}
+			},
+			"required": [
+				"row",
+				"status",
+				"efforts",
+				"hosts"
+			]
+		},
+		"TestRecord": {
+			"type": "object",
+			"properties": {
+				"label": {
+					"type": "string",
+					"minLength": 1,
+					"maxLength": 200,
+					"x-hooks": [
+						{
+							"kind": "preprocess",
+							"name": "trimmed"
+						}
+					]
+				},
+				"date": {
+					"type": "string",
+					"x-hooks": [
+						{
+							"kind": "match",
+							"source": "^\\d{4}-\\d{2}-\\d{2}$",
+							"flags": ""
+						}
+					]
+				},
+				"cost": {
+					"type": "number",
+					"minimum": 0
+				},
+				"estimated": {
+					"type": "boolean"
+				},
+				"checks": {
+					"type": "object",
+					"properties": {
+						"toolPlus": {
+							"type": "string",
+							"enum": [
+								"pass",
+								"fail",
+								"n/a"
+							]
+						},
+						"recovery": {
+							"type": "string",
+							"enum": [
+								"pass",
+								"fail",
+								"n/a"
+							]
+						},
+						"reasoning": {
+							"type": "string",
+							"enum": [
+								"pass",
+								"fail",
+								"n/a"
+							]
+						},
+						"schema": {
+							"type": "string",
+							"enum": [
+								"pass",
+								"fail",
+								"n/a"
+							]
+						}
+					},
+					"required": [
+						"toolPlus",
+						"recovery",
+						"reasoning",
+						"schema"
+					]
+				},
+				"reasoning": {
+					"type": "boolean"
+				},
+				"cache": {
+					"type": "string",
+					"enum": [
+						"implicit",
+						"explicit",
+						"none"
+					]
+				},
+				"verifiedPrice": {
+					"type": "object",
+					"properties": {
+						"prompt": {
+							"type": "number",
+							"minimum": 0
+						},
+						"completion": {
+							"type": "number",
+							"minimum": 0
+						}
+					},
+					"required": [
+						"prompt",
+						"completion"
+					]
+				}
+			},
+			"required": [
+				"label",
+				"date",
+				"cost",
+				"checks",
+				"reasoning",
+				"cache",
+				"verifiedPrice"
+			]
+		},
+		"StoredRegistry": {
+			"type": "object",
+			"properties": {
+				"tested": {
+					"type": "object",
+					"propertyNames": {
+						"type": "string"
+					},
+					"additionalProperties": {
+						"type": "object",
+						"propertyNames": {
+							"type": "string"
+						},
+						"additionalProperties": {
+							"$ref": "#/$defs/TestRecord"
+						}
+					}
+				},
+				"added": {
+					"type": "object",
+					"propertyNames": {
+						"type": "string"
+					},
+					"additionalProperties": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					}
+				},
+				"hidden": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"tested",
+				"added",
+				"hidden"
+			]
+		},
+		"ProviderRow": {
+			"type": "object",
+			"properties": {
+				"name": {
+					"type": "string"
+				},
+				"tag": {
+					"type": "string"
+				},
+				"context": {
+					"type": "number"
+				},
+				"maxOutput": {
+					"type": "number"
+				},
+				"quantization": {
+					"type": "string"
+				},
+				"prompt": {
+					"type": "number"
+				},
+				"completion": {
+					"type": "number"
+				},
+				"cacheRead": {
+					"type": "number"
+				},
+				"uptime": {
+					"type": "number"
+				},
+				"zdr": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"name",
+				"tag",
+				"zdr"
+			]
+		},
+		"BrowseModel": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "string"
+				},
+				"display": {
+					"type": "string"
+				},
+				"label": {
+					"type": "string"
+				},
+				"curated": {
+					"type": "boolean"
+				},
+				"description": {
+					"type": "string"
+				},
+				"context": {
+					"type": "number"
+				},
+				"inputs": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"outputs": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"parameters": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"price": {
+					"anyOf": [
+						{
+							"type": "object",
+							"properties": {
+								"prompt": {
+									"type": "array",
+									"prefixItems": [
+										{
+											"type": "number"
+										},
+										{
+											"type": "number"
+										}
+									],
+									"items": false,
+									"minItems": 2,
+									"maxItems": 2
+								},
+								"completion": {
+									"type": "array",
+									"prefixItems": [
+										{
+											"type": "number"
+										},
+										{
+											"type": "number"
+										}
+									],
+									"items": false,
+									"minItems": 2,
+									"maxItems": 2
+								}
+							},
+							"required": [
+								"prompt",
+								"completion"
+							]
+						},
+						{
+							"type": "string",
+							"const": "free"
+						},
+						{
+							"type": "string",
+							"const": "unknown"
+						}
+					]
+				},
+				"tools": {
+					"type": "string",
+					"enum": [
+						"ok",
+						"none",
+						"noZdrHost"
+					]
+				},
+				"retestable": {
+					"type": "boolean",
+					"const": true
+				},
+				"family": {
+					"$ref": "step.input.json#/$defs/ApiFamily"
+				}
+			},
+			"required": [
+				"id",
+				"display",
+				"label",
+				"curated",
+				"description",
+				"inputs",
+				"outputs",
+				"parameters",
+				"price",
+				"tools"
+			]
+		},
+		"BrowseDetail": {
+			"type": "object",
+			"properties": {
+				"hosts": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/ProviderRow"
+					}
+				},
+				"maxOutput": {
+					"type": "number"
+				},
+				"efforts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"choice": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"cache": {
+					"type": "string",
+					"enum": [
+						"implicit",
+						"explicit"
+					]
+				},
+				"retention": {
+					"type": "object",
+					"properties": {
+						"zdr": {
+							"type": "boolean"
+						},
+						"until": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"zdr"
+					]
+				}
+			}
+		},
+		"Via": {
+			"type": "object",
+			"properties": {
+				"entry": {
+					"type": "string"
+				},
+				"label": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"entry",
+				"label"
+			]
+		},
+		"Refusal": {
+			"type": "string",
+			"enum": [
+				"keyMissing",
+				"keyRejected",
+				"unreachable",
+				"noZdrHost",
+				"modelRetired",
+				"noModel"
+			]
+		},
+		"Unresolved": {
+			"type": "object",
+			"properties": {
+				"ok": {
+					"type": "boolean",
+					"const": false
+				},
+				"key": {
+					"type": "string"
+				},
+				"refusal": {
+					"$ref": "#/$defs/Refusal"
+				},
+				"entry": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"ok",
+				"key",
+				"refusal"
+			]
+		}
+	}
+}

@@ -1,0 +1,45 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "provider-EntryFields",
+	"input": {
+		"set": "provider",
+		"shape": "EntryFields",
+		"texts": [
+			"{\"kind\":\"llamacpp\",\"label\":\"Lab\"}",
+			"{\"kind\":\"opencode\",\"label\":\"Plan\",\"plan\":\"payg\",\"url\":\"http://lab.local:8080\",\"extraUsage\":false}",
+			"{\"id\":\"e1\",\"kind\":\"openrouter\",\"label\":\"Main\"}",
+			"{\"kind\":\"llamacpp\"}",
+			"{\"kind\":\"x\",\"label\":\"Lab\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"kind\":\"llamacpp\",\"label\":\"Lab\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"opencode\",\"label\":\"Plan\",\"plan\":\"payg\",\"url\":\"http://lab.local:8080\",\"extraUsage\":false}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"openrouter\",\"label\":\"Main\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"label"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			}
+		]
+	}
+}

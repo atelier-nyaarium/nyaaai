@@ -1,0 +1,95 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.deadline",
+	"name": "deadline-first",
+	"input": {
+		"startMs": 100,
+		"steps": [
+			{
+				"op": "deadline",
+				"id": "d",
+				"ms": 50
+			},
+			{
+				"op": "advance",
+				"ms": 49
+			},
+			{
+				"op": "advance",
+				"ms": 1
+			},
+			{
+				"op": "advance",
+				"ms": 100
+			},
+			{
+				"op": "clear",
+				"id": "d"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 100,
+				"waiting": [
+					"schedule-1"
+				],
+				"deadlines": [
+					{
+						"id": "d",
+						"aborted": false,
+						"ended": null
+					}
+				]
+			},
+			{
+				"nowMs": 149,
+				"waiting": [
+					"schedule-1"
+				],
+				"deadlines": [
+					{
+						"id": "d",
+						"aborted": false,
+						"ended": null
+					}
+				]
+			},
+			{
+				"nowMs": 150,
+				"waiting": [],
+				"deadlines": [
+					{
+						"id": "d",
+						"aborted": true,
+						"ended": "deadline"
+					}
+				]
+			},
+			{
+				"nowMs": 250,
+				"waiting": [],
+				"deadlines": [
+					{
+						"id": "d",
+						"aborted": true,
+						"ended": "deadline"
+					}
+				]
+			},
+			{
+				"nowMs": 250,
+				"waiting": [],
+				"deadlines": [
+					{
+						"id": "d",
+						"aborted": true,
+						"ended": "deadline"
+					}
+				]
+			}
+		]
+	}
+}

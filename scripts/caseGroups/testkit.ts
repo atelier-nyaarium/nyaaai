@@ -7,6 +7,8 @@ import { caseGroup, kind } from "@nyaaai/testkit/caseGroup";
 import { compactedSession } from "@nyaaai/testkit/claudeSession";
 import { fakeScheduler, TimerWheel } from "@nyaaai/testkit/scheduler";
 import { readTrace, replayFetch } from "@nyaaai/testkit/trace";
+import { testkitPortCases } from "../caseSources/testkitPorts";
+import { portKinds } from "./testkitPorts";
 
 ////////////////////////////////
 //  Shapes
@@ -43,6 +45,7 @@ const settled = (steps: SchedulerStep[]): SchedulerStep[] => steps.flatMap((step
 export const testkit = caseGroup("testkit", {
 	shapes: { TestkitConverseInput, TestkitConverseResult, TestkitMisfitInput, TestkitMisfitResult },
 	kinds: {
+		...portKinds,
 		compactedSession: kind(z.object({}), z.object({ lines: z.array(z.string()) }), () => ({
 			lines: compactedSession().session.lines,
 		})),
@@ -225,6 +228,7 @@ export const testkit = caseGroup("testkit", {
 		),
 	},
 	sources: [
+		...testkitPortCases,
 		{ kind: "testkit.replay", name: "tool-loop", input: { file: "cases/traces/openrouter.tool-loop.json" } },
 		{ kind: "testkit.replay", name: "chunk-edges", input: { file: "cases/traces/synthetic.chunks.json" } },
 		{ kind: "testkit.random", name: "cycles", input: { values: [0, 0.5, 0.999999], draws: 7 } },

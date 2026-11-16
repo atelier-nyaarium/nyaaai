@@ -158,6 +158,41 @@ export const SEGMENT_TEXTS = [
 	"\r\n\t\u{0}",
 ];
 
+/** Each boundary of C0, DEL and C1, and text near them. */
+const CONTROL_TEXTS = [
+	"",
+	"plain",
+	"\u{0}",
+	"a\u{0}b",
+	"\u{1}",
+	"\u{9}",
+	"\u{a}",
+	"\u{1f}",
+	"\u{20}",
+	"\u{21}",
+	"\u{7e}",
+	"\u{7f}",
+	"x\u{7f}",
+	"\u{80}",
+	"\u{85}",
+	"\u{9f}",
+	"\u{a0}",
+	"\u{a1}",
+	"\u{ad}",
+	"\u{2028}",
+	"\u{200b}",
+	"\u{feff}",
+	"\u{ffff}",
+	"\u{3042}\u{6f22}",
+	GRIN,
+	`a${GRIN}b`,
+	`${GRIN}\u{1f}`,
+	"\u{10000}\u{10ffff}",
+	"\u{D800}",
+	"\u{DC00}",
+	"a\u{D800}b\u{80}",
+];
+
 export const textCases: CaseSource[] = [
 	{ kind: "text.cuts", name: "pairs", input: { texts: TEXTS, points: [0, 1, 2, 3, 4, 5, 7, 8, 9, 100] } },
 	{
@@ -219,5 +254,6 @@ export const textCases: CaseSource[] = [
 	{ kind: "text.utf8Chunks", name: "byte-order-mark", input: { runs: UTF8_BOM_RUNS } },
 	{ kind: "text.utf8Chunks", name: "reused", input: { runs: UTF8_REUSED_RUNS } },
 	{ kind: "text.utf8Chunks", name: "empty-chunks", input: { runs: UTF8_EMPTY_RUNS } },
+	{ kind: "text.hasControl", name: "ranges", input: { texts: CONTROL_TEXTS } },
 	{ kind: "text.pathSegment", name: "encoded", input: { texts: SEGMENT_TEXTS } },
 ];

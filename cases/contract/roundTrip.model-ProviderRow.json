@@ -1,0 +1,40 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "model-ProviderRow",
+	"input": {
+		"set": "model",
+		"shape": "ProviderRow",
+		"texts": [
+			"{\"name\":\"Host\",\"tag\":\"host/fp8\",\"zdr\":true}",
+			"{\"name\":\"Host\",\"tag\":\"host/fp8\",\"zdr\":true,\"context\":200000,\"maxOutput\":8192,\"quantization\":\"fp8\",\"prompt\":1,\"completion\":2,\"cacheRead\":0.1,\"uptime\":99.5,\"extra\":1}",
+			"{\"name\":\"Host\",\"tag\":\"t\"}",
+			"{\"name\":\"Host\",\"tag\":\"host/fp8\",\"zdr\":true,\"uptime\":\"99\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"name\":\"Host\",\"tag\":\"host/fp8\",\"zdr\":true}"
+			},
+			{
+				"ok": true,
+				"text": "{\"name\":\"Host\",\"tag\":\"host/fp8\",\"context\":200000,\"maxOutput\":8192,\"quantization\":\"fp8\",\"prompt\":1,\"completion\":2,\"cacheRead\":0.1,\"uptime\":99.5,\"zdr\":true}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"zdr"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"uptime"
+				]
+			}
+		]
+	}
+}

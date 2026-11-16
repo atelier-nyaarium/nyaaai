@@ -6,6 +6,8 @@ import { ISSUE_MESSAGES } from "@nyaaai/contract/issues";
 import { CONTRACT_VERSION } from "@nyaaai/contract/shape";
 import * as strict from "@nyaaai/contract/strictSchema";
 import * as httpDates from "@nyaaai/contract/time";
+import "@nyaaai/contract/shapes/model";
+import "@nyaaai/contract/shapes/provider";
 import "@nyaaai/contract/shapes/sessionCut";
 import "@nyaaai/contract/shapes/step";
 import { NYAAAI_SETS, project } from "@nyaaai/testkit/project";
@@ -39,6 +41,7 @@ import { testkit } from "./scripts/caseGroups/testkit";
 import { text } from "./scripts/caseGroups/text";
 import { time } from "./scripts/caseGroups/time";
 import { transport } from "./scripts/caseGroups/transport";
+import { url } from "./scripts/caseGroups/url";
 import { adapterCases } from "./scripts/caseSources/adapter";
 import { rustModule, rustText, rustTexts, rustWhole } from "./scripts/rustConstants";
 import { converse, crash, crashBlocking, misfit, spin, spinBlocking } from "./scripts/testCommands";
@@ -136,6 +139,12 @@ export default project({
 			module: "shapes::session_cut",
 			file: "rust/contract/src/shapes/session_cut.rs",
 		},
+		provider: {
+			crate: "nyaaai_contract",
+			module: "shapes::provider",
+			file: "rust/contract/src/shapes/provider.rs",
+		},
+		model: { crate: "nyaaai_contract", module: "shapes::model", file: "rust/contract/src/shapes/model.rs" },
 		step: { crate: "nyaaai_contract", module: "shapes::step", file: "rust/contract/src/shapes/step.rs" },
 		torture: { crate: "nyaaai_testkit", module: "torture_shapes", file: "rust/testkit/src/torture_shapes.rs" },
 		trace: { crate: "nyaaai_testkit", module: "trace_shapes", file: "rust/testkit/src/trace_shapes.rs" },
@@ -153,6 +162,7 @@ export default project({
 		time,
 		number,
 		text,
+		url,
 		pattern,
 		strictSchema,
 		sessionCut,

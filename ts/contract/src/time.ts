@@ -265,6 +265,42 @@ export const systemScheduler: Scheduler = {
 	schedule: afterMs,
 };
 
+/** Ends at a deadline or with the caller's signal. */
+export interface Deadline {
+	signal: AbortSignal;
+	/** Which came first; undefined while neither has. */
+	ended: () => "deadline" | "caller" | undefined;
+	/** Drops the timer and the caller's listener. */
+	clear: () => void;
+}
+
+/** The first of `ms` and the caller's abort wins; ties go by schedule order. Clear it when done. */
+export function deadline(scheduler: Scheduler, ms: number, caller?: AbortSignal): Deadline {
+	const controller = new AbortController();
+	let first: "deadline" | "caller" | undefined;
+	let cancel = () => {};
+	const clear = () => {
+		cancel();
+		caller?.removeEventListener("abort", onCaller);
+	};
+	const end = (by: "deadline" | "caller", reason: unknown) => {
+		if (first !== undefined) return;
+		first = by;
+		controller.abort(reason);
+	};
+	const onCaller = () => end("caller", caller?.reason);
+	const result: Deadline = { signal: controller.signal, ended: () => first, clear };
+	if (caller?.aborted) {
+		end("caller", caller.reason);
+		return result;
+	}
+	caller?.addEventListener("abort", onCaller, { once: true });
+	cancel = scheduler.schedule(ms, () =>
+		end("deadline", Object.assign(new Error("The operation timed out."), { name: "TimeoutError" })),
+	);
+	return result;
+}
+
 /** Advances on each read. */
 export function steppedClock(startMs: number, stepMs = 0): Clock {
 	let reads = 0;

@@ -1,0 +1,41 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "model-ModelUse",
+	"input": {
+		"set": "model",
+		"shape": "ModelUse",
+		"texts": [
+			"\"chat\"",
+			"\"compaction\"",
+			"\"analysis\"",
+			"\"other\"",
+			"1"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "\"chat\""
+			},
+			{
+				"ok": true,
+				"text": "\"compaction\""
+			},
+			{
+				"ok": true,
+				"text": "\"analysis\""
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

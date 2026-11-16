@@ -1,0 +1,414 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "provider.output.json",
+	"x-contract-version": "0.1.0",
+	"$defs": {
+		"ProviderKindName": {
+			"type": "string",
+			"enum": [
+				"openrouter",
+				"opencode",
+				"ollama",
+				"lmstudio",
+				"llamacpp",
+				"compatible"
+			]
+		},
+		"ProviderPlan": {
+			"type": "string",
+			"enum": [
+				"go",
+				"payg"
+			]
+		},
+		"ProviderEntry": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "string"
+				},
+				"kind": {
+					"$ref": "#/$defs/ProviderKindName"
+				},
+				"label": {
+					"type": "string"
+				},
+				"plan": {
+					"$ref": "#/$defs/ProviderPlan"
+				},
+				"url": {
+					"type": "string"
+				},
+				"extraUsage": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"id",
+				"kind",
+				"label"
+			],
+			"additionalProperties": false
+		},
+		"EntryFields": {
+			"type": "object",
+			"properties": {
+				"kind": {
+					"$ref": "#/$defs/ProviderKindName"
+				},
+				"label": {
+					"type": "string"
+				},
+				"plan": {
+					"$ref": "#/$defs/ProviderPlan"
+				},
+				"url": {
+					"type": "string"
+				},
+				"extraUsage": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"kind",
+				"label"
+			],
+			"additionalProperties": false
+		},
+		"KeyState": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "none"
+						}
+					},
+					"required": [
+						"kind"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "checking"
+						}
+					},
+					"required": [
+						"kind"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "ok"
+						},
+						"usage": {
+							"type": "number"
+						},
+						"limit": {
+							"type": "number"
+						},
+						"models": {
+							"type": "number"
+						}
+					},
+					"required": [
+						"kind"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "rejected"
+						}
+					},
+					"required": [
+						"kind"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "unreachable"
+						}
+					},
+					"required": [
+						"kind"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "invalid"
+						}
+					},
+					"required": [
+						"kind"
+					],
+					"additionalProperties": false
+				}
+			],
+			"x-tag": "kind"
+		},
+		"KindLine": {
+			"type": "object",
+			"properties": {
+				"kind": {
+					"$ref": "#/$defs/ProviderKindName"
+				},
+				"plan": {
+					"$ref": "#/$defs/ProviderPlan"
+				},
+				"label": {
+					"type": "string"
+				},
+				"field": {
+					"type": "string",
+					"enum": [
+						"key",
+						"url"
+					]
+				},
+				"url": {
+					"type": "string"
+				},
+				"optionalKey": {
+					"type": "boolean",
+					"const": true
+				}
+			},
+			"required": [
+				"kind",
+				"label",
+				"field"
+			],
+			"additionalProperties": false
+		},
+		"ProviderView": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "string"
+				},
+				"kind": {
+					"$ref": "#/$defs/ProviderKindName"
+				},
+				"plan": {
+					"$ref": "#/$defs/ProviderPlan"
+				},
+				"label": {
+					"type": "string"
+				},
+				"url": {
+					"type": "string"
+				},
+				"status": {
+					"$ref": "#/$defs/KeyState"
+				},
+				"facts": {
+					"type": "string"
+				},
+				"balance": {
+					"type": "boolean",
+					"const": true
+				},
+				"extraUsage": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"id",
+				"kind",
+				"label",
+				"status"
+			],
+			"additionalProperties": false
+		},
+		"KeyReach": {
+			"type": "string",
+			"enum": [
+				"ok",
+				"keyMissing",
+				"keyRejected",
+				"unreachable"
+			]
+		},
+		"Limits": {
+			"type": "object",
+			"properties": {
+				"limit": {
+					"type": "number"
+				},
+				"reset": {
+					"type": "string"
+				}
+			},
+			"additionalProperties": false
+		},
+		"Billed": {
+			"type": "object",
+			"properties": {
+				"billing": {
+					"type": "string"
+				},
+				"allowance": {
+					"type": "number"
+				},
+				"cost": {
+					"type": "number"
+				}
+			},
+			"required": [
+				"billing"
+			],
+			"additionalProperties": false
+		},
+		"SkipReason": {
+			"type": "string",
+			"enum": [
+				"keyMissing",
+				"keyRejected",
+				"credit",
+				"allowance",
+				"model",
+				"overloaded",
+				"unavailable",
+				"network",
+				"paused"
+			]
+		},
+		"Skip": {
+			"type": "object",
+			"properties": {
+				"entry": {
+					"type": "string"
+				},
+				"label": {
+					"type": "string"
+				},
+				"reason": {
+					"$ref": "#/$defs/SkipReason"
+				}
+			},
+			"required": [
+				"entry",
+				"label",
+				"reason"
+			],
+			"additionalProperties": false
+		},
+		"Passed": {
+			"type": "object",
+			"properties": {
+				"entry": {
+					"type": "string"
+				},
+				"label": {
+					"type": "string"
+				},
+				"reason": {
+					"$ref": "#/$defs/SkipReason"
+				},
+				"before": {
+					"type": "number"
+				}
+			},
+			"required": [
+				"entry",
+				"label",
+				"reason",
+				"before"
+			],
+			"additionalProperties": false
+		},
+		"NoticeKind": {
+			"type": "string",
+			"enum": [
+				"keyMissing",
+				"keyRejected",
+				"spendLimit",
+				"refused",
+				"noZdrHost",
+				"modelRetired",
+				"modelUnavailable",
+				"unreachable",
+				"badRequest",
+				"retriesExhausted",
+				"providerOverloaded",
+				"streamFailed",
+				"outputCut",
+				"noModel",
+				"historyDropped"
+			]
+		},
+		"Disposition": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"act": {
+							"type": "string",
+							"const": "retry"
+						}
+					},
+					"required": [
+						"act"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"act": {
+							"type": "string",
+							"const": "fallThrough"
+						},
+						"notice": {
+							"$ref": "#/$defs/NoticeKind"
+						}
+					},
+					"required": [
+						"act",
+						"notice"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"act": {
+							"type": "string",
+							"const": "stop"
+						},
+						"notice": {
+							"$ref": "#/$defs/NoticeKind"
+						}
+					},
+					"required": [
+						"act",
+						"notice"
+					],
+					"additionalProperties": false
+				}
+			],
+			"x-tag": "act"
+		}
+	}
+}

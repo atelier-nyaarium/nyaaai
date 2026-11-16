@@ -114,3 +114,13 @@ pub fn path_segment(input: TextPathSegmentInput) -> Outcome<TextPathSegmentResul
         .collect();
     Ok(TextPathSegmentResult { texts })
 }
+
+pub fn has_control(input: TextHasControlInput) -> Outcome<TextHasControlResult> {
+    Ok(TextHasControlResult {
+        results: input
+            .texts
+            .iter()
+            .map(|held| text::has_control(held))
+            .collect(),
+    })
+}

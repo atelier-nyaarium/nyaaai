@@ -1,0 +1,63 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "model-BrowseDetail",
+	"input": {
+		"set": "model",
+		"shape": "BrowseDetail",
+		"texts": [
+			"{}",
+			"{\"hosts\":[{\"name\":\"Host\",\"tag\":\"host/fp8\",\"zdr\":true}],\"maxOutput\":4096,\"efforts\":[\"low\"],\"choice\":[\"auto\",\"none\"],\"cache\":\"implicit\",\"retention\":{\"zdr\":true,\"until\":\"2026-12-31\"},\"extra\":1}",
+			"{\"retention\":{\"zdr\":false}}",
+			"{\"retention\":{}}",
+			"{\"cache\":\"none\"}",
+			"{\"hosts\":[{}]}",
+			"{\"efforts\":[1]}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{}"
+			},
+			{
+				"ok": true,
+				"text": "{\"hosts\":[{\"name\":\"Host\",\"tag\":\"host/fp8\",\"zdr\":true}],\"maxOutput\":4096,\"efforts\":[\"low\"],\"choice\":[\"auto\",\"none\"],\"cache\":\"implicit\",\"retention\":{\"zdr\":true,\"until\":\"2026-12-31\"}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"retention\":{\"zdr\":false}}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"retention",
+					"zdr"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"cache"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"hosts",
+					0,
+					"name"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"efforts",
+					0
+				]
+			}
+		]
+	}
+}

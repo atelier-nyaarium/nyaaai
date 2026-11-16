@@ -1,0 +1,54 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "model-Unresolved",
+	"input": {
+		"set": "model",
+		"shape": "Unresolved",
+		"texts": [
+			"{\"ok\":false,\"key\":\"model-a\",\"refusal\":\"noModel\"}",
+			"{\"ok\":false,\"key\":\"model-a\",\"refusal\":\"keyRejected\",\"entry\":\"Main\",\"extra\":1}",
+			"{\"ok\":true,\"key\":\"model-a\",\"refusal\":\"noModel\"}",
+			"{\"key\":\"model-a\",\"refusal\":\"noModel\"}",
+			"{\"ok\":false,\"key\":\"model-a\"}",
+			"{\"ok\":false,\"key\":\"model-a\",\"refusal\":\"ok\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"ok\":false,\"key\":\"model-a\",\"refusal\":\"noModel\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"ok\":false,\"key\":\"model-a\",\"refusal\":\"keyRejected\",\"entry\":\"Main\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"ok"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"ok"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"refusal"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"refusal"
+				]
+			}
+		]
+	}
+}

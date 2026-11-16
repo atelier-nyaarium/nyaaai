@@ -1,0 +1,67 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "provider-ProviderView",
+	"input": {
+		"set": "provider",
+		"shape": "ProviderView",
+		"texts": [
+			"{\"id\":\"e1\",\"kind\":\"openrouter\",\"label\":\"Main\",\"status\":{\"kind\":\"none\"}}",
+			"{\"id\":\"e1\",\"kind\":\"openrouter\",\"label\":\"Main\",\"status\":{\"kind\":\"ok\",\"usage\":2,\"limit\":5,\"models\":4},\"plan\":\"go\",\"url\":\"http://lab.local:11434\",\"facts\":\"Billed 1.00\",\"balance\":true,\"extraUsage\":false}",
+			"{\"id\":\"e1\",\"kind\":\"openrouter\",\"label\":\"Main\",\"status\":{\"kind\":\"none\"},\"extra\":[1]}",
+			"{\"id\":\"e1\",\"kind\":\"openrouter\",\"label\":\"Main\"}",
+			"{\"id\":\"e1\",\"kind\":\"openrouter\",\"label\":\"Main\",\"status\":{\"kind\":\"other\"}}",
+			"{\"id\":\"e1\",\"kind\":\"openrouter\",\"label\":\"Main\",\"status\":{\"kind\":\"none\"},\"balance\":false}",
+			"{\"id\":\"e1\",\"kind\":\"openrouter\",\"label\":\"Main\",\"status\":{\"kind\":\"none\"},\"facts\":1}",
+			"{\"id\":\"e1\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"id\":\"e1\",\"kind\":\"openrouter\",\"label\":\"Main\",\"status\":{\"kind\":\"none\"}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"id\":\"e1\",\"kind\":\"openrouter\",\"plan\":\"go\",\"label\":\"Main\",\"url\":\"http://lab.local:11434\",\"status\":{\"kind\":\"ok\",\"usage\":2,\"limit\":5,\"models\":4},\"facts\":\"Billed 1.00\",\"balance\":true,\"extraUsage\":false}"
+			},
+			{
+				"ok": true,
+				"text": "{\"id\":\"e1\",\"kind\":\"openrouter\",\"label\":\"Main\",\"status\":{\"kind\":\"none\"}}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"status"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"status",
+					"kind"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"balance"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"facts"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			}
+		]
+	}
+}

@@ -1,0 +1,45 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "provider-Skip",
+	"input": {
+		"set": "provider",
+		"shape": "Skip",
+		"texts": [
+			"{\"entry\":\"e1\",\"label\":\"Main\",\"reason\":\"credit\"}",
+			"{\"entry\":\"e1\",\"label\":\"Main\",\"reason\":\"credit\",\"extra\":1}",
+			"{\"entry\":\"e1\",\"label\":\"Main\",\"reason\":\"other\"}",
+			"{\"entry\":\"e1\",\"label\":\"Main\"}",
+			"[]"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"entry\":\"e1\",\"label\":\"Main\",\"reason\":\"credit\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"entry\":\"e1\",\"label\":\"Main\",\"reason\":\"credit\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"reason"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"reason"
+				]
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

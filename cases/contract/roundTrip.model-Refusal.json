@@ -1,0 +1,61 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "model-Refusal",
+	"input": {
+		"set": "model",
+		"shape": "Refusal",
+		"texts": [
+			"\"keyMissing\"",
+			"\"keyRejected\"",
+			"\"unreachable\"",
+			"\"noZdrHost\"",
+			"\"modelRetired\"",
+			"\"noModel\"",
+			"\"ok\"",
+			"\"other\"",
+			"null"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "\"keyMissing\""
+			},
+			{
+				"ok": true,
+				"text": "\"keyRejected\""
+			},
+			{
+				"ok": true,
+				"text": "\"unreachable\""
+			},
+			{
+				"ok": true,
+				"text": "\"noZdrHost\""
+			},
+			{
+				"ok": true,
+				"text": "\"modelRetired\""
+			},
+			{
+				"ok": true,
+				"text": "\"noModel\""
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

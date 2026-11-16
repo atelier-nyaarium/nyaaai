@@ -436,3 +436,9 @@ pub fn encode_path_segment(text: &str) -> String {
     }
     out
 }
+
+/// A character of category Cc: C0, DEL or C1.
+pub fn has_control(text: &str) -> bool {
+    text.chars()
+        .any(|char| matches!(u32::from(char), 0..=0x1f | 0x7f..=0x9f))
+}

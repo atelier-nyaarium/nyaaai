@@ -1083,6 +1083,34 @@
 				"runs"
 			]
 		},
+		"TextHasControlInput": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			]
+		},
+		"TextHasControlResult": {
+			"type": "object",
+			"properties": {
+				"results": {
+					"type": "array",
+					"items": {
+						"type": "boolean"
+					}
+				}
+			},
+			"required": [
+				"results"
+			]
+		},
 		"TextPathSegmentInput": {
 			"type": "object",
 			"properties": {
@@ -1137,6 +1165,37 @@
 			},
 			"required": [
 				"texts"
+			]
+		},
+		"UrlOriginInput": {
+			"type": "object",
+			"properties": {
+				"urls": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"urls"
+			]
+		},
+		"UrlOriginResult": {
+			"type": "object",
+			"properties": {
+				"origins": {
+					"type": "array",
+					"items": {
+						"type": [
+							"string",
+							"null"
+						]
+					}
+				}
+			},
+			"required": [
+				"origins"
 			]
 		},
 		"PatternCaseMatch": {
@@ -2022,6 +2081,401 @@
 			},
 			"required": [
 				"text"
+			]
+		},
+		"TestkitEntryKeysInput": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"op": {
+								"type": "string",
+								"enum": [
+									"listen",
+									"unlisten",
+									"set",
+									"get"
+								]
+							},
+							"name": {
+								"type": "string"
+							},
+							"id": {
+								"type": "string"
+							},
+							"answer": {
+								"type": "string",
+								"enum": [
+									"key",
+									"none",
+									"refused",
+									"unready"
+								]
+							},
+							"key": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"op"
+						]
+					}
+				}
+			},
+			"required": [
+				"steps"
+			]
+		},
+		"TestkitEntryKeysResult": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"heard": {
+								"type": "array",
+								"items": {
+									"type": "object",
+									"properties": {
+										"name": {
+											"type": "string"
+										},
+										"id": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"name",
+										"id"
+									]
+								}
+							},
+							"got": {
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string"
+									},
+									"key": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"kind"
+								]
+							},
+							"reads": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							}
+						},
+						"required": [
+							"heard",
+							"reads"
+						]
+					}
+				}
+			},
+			"required": [
+				"steps"
+			]
+		},
+		"TestkitProviderListInput": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"op": {
+								"type": "string",
+								"enum": [
+									"listen",
+									"unlisten",
+									"set",
+									"read"
+								]
+							},
+							"name": {
+								"type": "string"
+							},
+							"ids": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							}
+						},
+						"required": [
+							"op"
+						]
+					}
+				}
+			},
+			"required": [
+				"steps"
+			]
+		},
+		"TestkitProviderListResult": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"heard": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"ids": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"reads": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							}
+						},
+						"required": [
+							"heard",
+							"reads"
+						]
+					}
+				}
+			},
+			"required": [
+				"steps"
+			]
+		},
+		"TestkitModelRegistryInput": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"op": {
+								"type": "string",
+								"enum": [
+									"listen",
+									"unlisten",
+									"setRows",
+									"setHidden",
+									"read",
+									"record",
+									"refuse",
+									"allow"
+								]
+							},
+							"name": {
+								"type": "string"
+							},
+							"keys": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"entry": {
+								"type": "string"
+							},
+							"id": {
+								"type": "string"
+							},
+							"label": {
+								"type": "string"
+							},
+							"why": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"op"
+						]
+					}
+				}
+			},
+			"required": [
+				"steps"
+			]
+		},
+		"TestkitModelRegistryResult": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"heard": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"rows": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"hidden": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"tested": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"outcome": {
+								"type": [
+									"string",
+									"null"
+								]
+							},
+							"reads": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"written": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							}
+						},
+						"required": [
+							"heard",
+							"reads",
+							"written"
+						]
+					}
+				}
+			},
+			"required": [
+				"steps"
+			]
+		},
+		"TestkitDeadlineInput": {
+			"type": "object",
+			"properties": {
+				"startMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"op": {
+								"type": "string",
+								"enum": [
+									"caller",
+									"abortCaller",
+									"abortAt",
+									"deadline",
+									"clear",
+									"advance"
+								]
+							},
+							"id": {
+								"type": "string"
+							},
+							"ms": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"caller": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"op"
+						]
+					}
+				}
+			},
+			"required": [
+				"startMs",
+				"steps"
+			]
+		},
+		"TestkitDeadlineResult": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"nowMs": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"waiting": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"deadlines": {
+								"type": "array",
+								"items": {
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "string"
+										},
+										"aborted": {
+											"type": "boolean"
+										},
+										"ended": {
+											"type": [
+												"string",
+												"null"
+											]
+										}
+									},
+									"required": [
+										"id",
+										"aborted",
+										"ended"
+									]
+								}
+							}
+						},
+						"required": [
+							"nowMs",
+							"waiting",
+							"deadlines"
+						]
+					}
+				}
+			},
+			"required": [
+				"steps"
 			]
 		},
 		"TestkitCompactedSessionInput": {

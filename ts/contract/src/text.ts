@@ -350,6 +350,15 @@ export class Utf8Decoder {
 	}
 }
 
+/** A character of category Cc: C0, DEL or C1. */
+export function hasControl(text: string): boolean {
+	for (let at = 0; at < text.length; at++) {
+		const unit = text.charCodeAt(at);
+		if (unit < 0x20 || (unit >= 0x7f && unit <= 0x9f)) return true;
+	}
+	return false;
+}
+
 const SEGMENT_KEPT = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.!~*'()";
 const HEX = "0123456789ABCDEF";
 

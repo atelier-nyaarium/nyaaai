@@ -1,0 +1,71 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "model-RowIdentity",
+	"input": {
+		"set": "model",
+		"shape": "RowIdentity",
+		"texts": [
+			"{\"kind\":\"curated\",\"key\":\"model-a\"}",
+			"{\"kind\":\"hosted\",\"provider\":\"openrouter\",\"id\":\"vendor/x\"}",
+			"{\"kind\":\"local\",\"entry\":\"e1\",\"tag\":\"local-a:27b\"}",
+			"{\"kind\":\"local\",\"entry\":\"e1\",\"tag\":\"local-a:27b\",\"extra\":1}",
+			"{\"kind\":\"hosted\",\"provider\":\"other\",\"id\":\"x\"}",
+			"{\"kind\":\"hosted\",\"provider\":\"openrouter\"}",
+			"{\"kind\":\"curated\"}",
+			"{\"kind\":\"other\"}",
+			"{}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"kind\":\"curated\",\"key\":\"model-a\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"hosted\",\"provider\":\"openrouter\",\"id\":\"vendor/x\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"local\",\"entry\":\"e1\",\"tag\":\"local-a:27b\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"local\",\"entry\":\"e1\",\"tag\":\"local-a:27b\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"provider"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"id"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"key"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			}
+		]
+	}
+}

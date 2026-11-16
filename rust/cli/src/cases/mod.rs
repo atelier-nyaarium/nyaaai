@@ -31,3 +31,4 @@ pub mod testkit;
 pub mod text;
 pub mod time;
 pub mod transport;
+pub mod url;

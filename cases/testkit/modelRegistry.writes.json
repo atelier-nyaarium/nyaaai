@@ -1,0 +1,265 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.modelRegistry",
+	"name": "writes",
+	"input": {
+		"steps": [
+			{
+				"op": "read"
+			},
+			{
+				"op": "listen",
+				"name": "a"
+			},
+			{
+				"op": "listen",
+				"name": "b"
+			},
+			{
+				"op": "setRows",
+				"keys": [
+					"m1",
+					"m2"
+				]
+			},
+			{
+				"op": "setHidden",
+				"keys": [
+					"m2",
+					"fam-*"
+				]
+			},
+			{
+				"op": "read"
+			},
+			{
+				"op": "record",
+				"entry": "e1",
+				"id": "openrouter:v/m",
+				"label": "first"
+			},
+			{
+				"op": "record",
+				"entry": "e1",
+				"id": "openrouter:v/n",
+				"label": "second"
+			},
+			{
+				"op": "record",
+				"entry": "e2",
+				"id": "openrouter:v/m",
+				"label": "third"
+			},
+			{
+				"op": "read"
+			},
+			{
+				"op": "unlisten",
+				"name": "a"
+			},
+			{
+				"op": "record",
+				"entry": "e1",
+				"id": "openrouter:v/m",
+				"label": "again"
+			},
+			{
+				"op": "refuse",
+				"why": "settings are read only"
+			},
+			{
+				"op": "record",
+				"entry": "e1",
+				"id": "openrouter:v/q",
+				"label": "never"
+			},
+			{
+				"op": "read"
+			},
+			{
+				"op": "allow"
+			},
+			{
+				"op": "record",
+				"entry": "e1",
+				"id": "openrouter:v/q",
+				"label": "later"
+			},
+			{
+				"op": "read"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"heard": [],
+				"rows": [],
+				"hidden": [],
+				"tested": [],
+				"reads": 2,
+				"written": 0
+			},
+			{
+				"heard": [],
+				"reads": 2,
+				"written": 0
+			},
+			{
+				"heard": [],
+				"reads": 2,
+				"written": 0
+			},
+			{
+				"heard": [
+					"a",
+					"b"
+				],
+				"reads": 2,
+				"written": 0
+			},
+			{
+				"heard": [
+					"a",
+					"b"
+				],
+				"reads": 3,
+				"written": 0
+			},
+			{
+				"heard": [],
+				"rows": [
+					"m1",
+					"m2"
+				],
+				"hidden": [
+					"m2",
+					"fam-*"
+				],
+				"tested": [],
+				"reads": 5,
+				"written": 0
+			},
+			{
+				"heard": [
+					"a",
+					"b"
+				],
+				"outcome": null,
+				"reads": 5,
+				"written": 1
+			},
+			{
+				"heard": [
+					"a",
+					"b"
+				],
+				"outcome": null,
+				"reads": 5,
+				"written": 2
+			},
+			{
+				"heard": [
+					"a",
+					"b"
+				],
+				"outcome": null,
+				"reads": 5,
+				"written": 3
+			},
+			{
+				"heard": [],
+				"rows": [
+					"m1",
+					"m2"
+				],
+				"hidden": [
+					"m2",
+					"fam-*"
+				],
+				"tested": [
+					"e1/openrouter:v/m=first",
+					"e1/openrouter:v/n=second",
+					"e2/openrouter:v/m=third"
+				],
+				"reads": 7,
+				"written": 3
+			},
+			{
+				"heard": [],
+				"reads": 7,
+				"written": 3
+			},
+			{
+				"heard": [
+					"b"
+				],
+				"outcome": null,
+				"reads": 7,
+				"written": 4
+			},
+			{
+				"heard": [],
+				"reads": 7,
+				"written": 4
+			},
+			{
+				"heard": [],
+				"outcome": "settings are read only",
+				"reads": 7,
+				"written": 4
+			},
+			{
+				"heard": [],
+				"rows": [
+					"m1",
+					"m2"
+				],
+				"hidden": [
+					"m2",
+					"fam-*"
+				],
+				"tested": [
+					"e1/openrouter:v/m=again",
+					"e1/openrouter:v/n=second",
+					"e2/openrouter:v/m=third"
+				],
+				"reads": 9,
+				"written": 4
+			},
+			{
+				"heard": [],
+				"reads": 9,
+				"written": 4
+			},
+			{
+				"heard": [
+					"b"
+				],
+				"outcome": null,
+				"reads": 9,
+				"written": 5
+			},
+			{
+				"heard": [],
+				"rows": [
+					"m1",
+					"m2"
+				],
+				"hidden": [
+					"m2",
+					"fam-*"
+				],
+				"tested": [
+					"e1/openrouter:v/m=again",
+					"e1/openrouter:v/n=second",
+					"e1/openrouter:v/q=later",
+					"e2/openrouter:v/m=third"
+				],
+				"reads": 11,
+				"written": 5
+			}
+		]
+	}
+}

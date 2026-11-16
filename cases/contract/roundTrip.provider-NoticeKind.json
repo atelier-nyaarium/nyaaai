@@ -1,0 +1,101 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "provider-NoticeKind",
+	"input": {
+		"set": "provider",
+		"shape": "NoticeKind",
+		"texts": [
+			"\"keyMissing\"",
+			"\"keyRejected\"",
+			"\"spendLimit\"",
+			"\"refused\"",
+			"\"noZdrHost\"",
+			"\"modelRetired\"",
+			"\"modelUnavailable\"",
+			"\"unreachable\"",
+			"\"badRequest\"",
+			"\"retriesExhausted\"",
+			"\"providerOverloaded\"",
+			"\"streamFailed\"",
+			"\"outputCut\"",
+			"\"noModel\"",
+			"\"historyDropped\"",
+			"\"other\"",
+			"null"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "\"keyMissing\""
+			},
+			{
+				"ok": true,
+				"text": "\"keyRejected\""
+			},
+			{
+				"ok": true,
+				"text": "\"spendLimit\""
+			},
+			{
+				"ok": true,
+				"text": "\"refused\""
+			},
+			{
+				"ok": true,
+				"text": "\"noZdrHost\""
+			},
+			{
+				"ok": true,
+				"text": "\"modelRetired\""
+			},
+			{
+				"ok": true,
+				"text": "\"modelUnavailable\""
+			},
+			{
+				"ok": true,
+				"text": "\"unreachable\""
+			},
+			{
+				"ok": true,
+				"text": "\"badRequest\""
+			},
+			{
+				"ok": true,
+				"text": "\"retriesExhausted\""
+			},
+			{
+				"ok": true,
+				"text": "\"providerOverloaded\""
+			},
+			{
+				"ok": true,
+				"text": "\"streamFailed\""
+			},
+			{
+				"ok": true,
+				"text": "\"outputCut\""
+			},
+			{
+				"ok": true,
+				"text": "\"noModel\""
+			},
+			{
+				"ok": true,
+				"text": "\"historyDropped\""
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

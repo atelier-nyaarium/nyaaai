@@ -1,0 +1,47 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "provider-Passed",
+	"input": {
+		"set": "provider",
+		"shape": "Passed",
+		"texts": [
+			"{\"entry\":\"e1\",\"label\":\"Main\",\"reason\":\"credit\",\"before\":0}",
+			"{\"entry\":\"e1\",\"label\":\"Main\",\"reason\":\"credit\",\"before\":2,\"extra\":1}",
+			"{\"entry\":\"e1\",\"label\":\"Main\",\"reason\":\"credit\"}",
+			"{\"entry\":\"e1\",\"label\":\"Main\",\"reason\":\"credit\",\"before\":\"1\"}",
+			"{\"entry\":\"e1\",\"label\":\"Main\",\"reason\":\"other\",\"before\":1}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"entry\":\"e1\",\"label\":\"Main\",\"reason\":\"credit\",\"before\":0}"
+			},
+			{
+				"ok": true,
+				"text": "{\"entry\":\"e1\",\"label\":\"Main\",\"reason\":\"credit\",\"before\":2}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"before"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"before"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"reason"
+				]
+			}
+		]
+	}
+}

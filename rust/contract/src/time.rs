@@ -1,6 +1,7 @@
 //! Millisecond and ISO times.
 
-use std::sync::atomic::{AtomicI64, Ordering};
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, AtomicI64, Ordering};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use crate::cancel::CancelToken;
@@ -95,6 +96,79 @@ impl Scheduler for SystemScheduler {
             }
         });
         Scheduled::new(move || cancel.cancel())
+    }
+}
+
+/// Which ended a deadline first.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Ended {
+    Deadline,
+    Caller,
+}
+
+/// Ends at a deadline or with the caller's token. Clear it, or drop it, when done.
+pub struct Deadline {
+    token: CancelToken,
+    timed_out: Arc<AtomicBool>,
+    timer: Option<Scheduled>,
+}
+
+impl Deadline {
+    /// A child of the caller's token.
+    pub fn token(&self) -> &CancelToken {
+        &self.token
+    }
+
+    /// Which came first; `None` while neither has.
+    pub fn ended(&self) -> Option<Ended> {
+        if self.timed_out.load(Ordering::SeqCst) {
+            Some(Ended::Deadline)
+        } else if self.token.is_cancelled() {
+            Some(Ended::Caller)
+        } else {
+            None
+        }
+    }
+
+    /// Drops the timer.
+    pub fn clear(&self) {
+        if let Some(timer) = &self.timer {
+            timer.cancel();
+        }
+    }
+}
+
+impl Drop for Deadline {
+    fn drop(&mut self) {
+        self.clear();
+    }
+}
+
+/// The first of `ms` and the caller's cancel wins; ties go by schedule order.
+pub fn deadline(scheduler: &dyn Scheduler, ms: i64, caller: &CancelToken) -> Deadline {
+    let token = caller.child();
+    let timed_out = Arc::new(AtomicBool::new(false));
+    if token.is_cancelled() {
+        return Deadline {
+            token,
+            timed_out,
+            timer: None,
+        };
+    }
+    let (held, flag) = (token.clone(), Arc::clone(&timed_out));
+    let timer = scheduler.schedule(
+        ms,
+        Box::new(move || {
+            if !held.is_cancelled() {
+                flag.store(true, Ordering::SeqCst);
+                held.cancel();
+            }
+        }),
+    );
+    Deadline {
+        token,
+        timed_out,
+        timer: Some(timer),
     }
 }
 

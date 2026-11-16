@@ -8,6 +8,7 @@ import {
 	cutBefore,
 	cutUtf8,
 	encodePathSegment,
+	hasControl,
 	headOf,
 	indexOfText,
 	lastIndexOfText,
@@ -104,6 +105,14 @@ export const text = caseGroup("text", {
 					const first = pass(held.chunks);
 					return held.again === undefined ? first : { ...first, second: pass(held.again) };
 				}),
+			}),
+		),
+		/** True when a text holds a character of category Cc. */
+		hasControl: kind(
+			z.object({ texts: z.array(z.string()) }),
+			z.object({ results: z.array(z.boolean()) }),
+			(input) => ({
+				results: input.texts.map(hasControl),
 			}),
 		),
 		pathSegment: kind(

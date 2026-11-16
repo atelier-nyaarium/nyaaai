@@ -1,0 +1,74 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "model-ModelRow",
+	"input": {
+		"set": "model",
+		"shape": "ModelRow",
+		"texts": [
+			"{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"vendor/model-a\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}}",
+			"{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"a\"},\"opencode\":{\"id\":\"b\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"explicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"hosted\",\"provider\":\"openrouter\",\"id\":\"vendor/x\"},\"extra\":{\"deep\":[1]}}",
+			"{\"key\":\"model-a\",\"bindings\":{},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}}",
+			"{\"key\":\"model-a\",\"bindings\":{\"__proto__\":{\"id\":\"x\"},\"openrouter\":{\"id\":\"a\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}}",
+			"{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":1}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}}",
+			"{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"vendor/model-a\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"none\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}}",
+			"{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"vendor/model-a\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}}",
+			"{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"vendor/model-a\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2}}",
+			"{\"key\":\"model-a\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"vendor/model-a\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"a\"},\"opencode\":{\"id\":\"b\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"explicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"hosted\",\"provider\":\"openrouter\",\"id\":\"vendor/x\"}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"key\":\"model-a\",\"bindings\":{},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"key\":\"model-a\",\"bindings\":{\"openrouter\":{\"id\":\"a\"}},\"family\":\"model-a*\",\"label\":\"Model A\",\"reasoning\":false,\"schema\":true,\"cache\":\"implicit\",\"verified\":\"2026-01-01\",\"verifiedPrice\":{\"prompt\":1,\"completion\":2},\"identity\":{\"kind\":\"curated\",\"key\":\"model-a\"}}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"bindings",
+					"openrouter",
+					"id"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"cache"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"verifiedPrice",
+					"completion"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"identity"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"bindings"
+				]
+			}
+		]
+	}
+}

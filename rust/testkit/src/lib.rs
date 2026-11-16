@@ -4,6 +4,7 @@ pub mod keys;
 pub mod loopback;
 pub mod scheduler;
 pub mod scripted_fetch;
+pub mod scripted_ports;
 pub mod torture_shapes;
 pub mod torture_shapes_hooks;
 pub mod trace;

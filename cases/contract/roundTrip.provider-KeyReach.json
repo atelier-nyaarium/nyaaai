@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "provider-KeyReach",
+	"input": {
+		"set": "provider",
+		"shape": "KeyReach",
+		"texts": [
+			"\"ok\"",
+			"\"keyMissing\"",
+			"\"keyRejected\"",
+			"\"unreachable\"",
+			"\"checking\"",
+			"null"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "\"ok\""
+			},
+			{
+				"ok": true,
+				"text": "\"keyMissing\""
+			},
+			{
+				"ok": true,
+				"text": "\"keyRejected\""
+			},
+			{
+				"ok": true,
+				"text": "\"unreachable\""
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

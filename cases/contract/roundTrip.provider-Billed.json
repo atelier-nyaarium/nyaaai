@@ -1,0 +1,45 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "provider-Billed",
+	"input": {
+		"set": "provider",
+		"shape": "Billed",
+		"texts": [
+			"{\"billing\":\"credit\"}",
+			"{\"billing\":\"credit\",\"allowance\":0.5,\"cost\":0.25}",
+			"{\"billing\":\"credit\",\"extra\":1}",
+			"{\"allowance\":1}",
+			"{\"billing\":\"credit\",\"cost\":\"1\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"billing\":\"credit\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"billing\":\"credit\",\"allowance\":0.5,\"cost\":0.25}"
+			},
+			{
+				"ok": true,
+				"text": "{\"billing\":\"credit\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"billing"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"cost"
+				]
+			}
+		]
+	}
+}

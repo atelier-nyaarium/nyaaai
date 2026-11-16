@@ -1,0 +1,40 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "model-PriceTier",
+	"input": {
+		"set": "model",
+		"shape": "PriceTier",
+		"texts": [
+			"{\"minPromptTokens\":200000,\"prompt\":2,\"completion\":8}",
+			"{\"minPromptTokens\":200000,\"prompt\":2,\"completion\":8,\"cacheRead\":0.5,\"cacheWrite\":1,\"cacheWrite1h\":2,\"extra\":1}",
+			"{\"prompt\":1,\"completion\":2}",
+			"{\"minPromptTokens\":200000,\"prompt\":2,\"completion\":8,\"cacheRead\":\"0.5\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"minPromptTokens\":200000,\"prompt\":2,\"completion\":8}"
+			},
+			{
+				"ok": true,
+				"text": "{\"minPromptTokens\":200000,\"prompt\":2,\"completion\":8,\"cacheRead\":0.5,\"cacheWrite\":1,\"cacheWrite1h\":2}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"minPromptTokens"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"cacheRead"
+				]
+			}
+		]
+	}
+}

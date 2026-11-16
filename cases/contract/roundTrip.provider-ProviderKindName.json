@@ -1,0 +1,66 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "provider-ProviderKindName",
+	"input": {
+		"set": "provider",
+		"shape": "ProviderKindName",
+		"texts": [
+			"\"openrouter\"",
+			"\"opencode\"",
+			"\"ollama\"",
+			"\"lmstudio\"",
+			"\"llamacpp\"",
+			"\"compatible\"",
+			"\"other\"",
+			"\"\"",
+			"1",
+			"null"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "\"openrouter\""
+			},
+			{
+				"ok": true,
+				"text": "\"opencode\""
+			},
+			{
+				"ok": true,
+				"text": "\"ollama\""
+			},
+			{
+				"ok": true,
+				"text": "\"lmstudio\""
+			},
+			{
+				"ok": true,
+				"text": "\"llamacpp\""
+			},
+			{
+				"ok": true,
+				"text": "\"compatible\""
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

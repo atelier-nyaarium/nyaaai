@@ -1,0 +1,84 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "provider-KeyState",
+	"input": {
+		"set": "provider",
+		"shape": "KeyState",
+		"texts": [
+			"{\"kind\":\"none\"}",
+			"{\"kind\":\"checking\"}",
+			"{\"kind\":\"ok\"}",
+			"{\"kind\":\"ok\",\"usage\":1.5,\"limit\":10,\"models\":3}",
+			"{\"kind\":\"rejected\"}",
+			"{\"kind\":\"unreachable\"}",
+			"{\"kind\":\"invalid\"}",
+			"{\"kind\":\"none\",\"extra\":1}",
+			"{\"kind\":\"ok\",\"usage\":\"1\"}",
+			"{\"kind\":\"ok\",\"models\":null}",
+			"{\"kind\":\"other\"}",
+			"{}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"kind\":\"none\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"checking\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"ok\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"ok\",\"usage\":1.5,\"limit\":10,\"models\":3}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"rejected\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"unreachable\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"invalid\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"none\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"usage"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"models"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			}
+		]
+	}
+}

@@ -99,11 +99,18 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
             input,
             super::text::utf8_chunks,
         ),
+        "text.hasControl" => run::<shapes::TextHasControlInput, shapes::TextHasControlResult>(
+            input,
+            super::text::has_control,
+        ),
         "text.pathSegment" => run::<shapes::TextPathSegmentInput, shapes::TextPathSegmentResult>(
             input,
             super::text::path_segment,
         ),
         "text.nfc" => run::<shapes::TextNfcInput, shapes::TextNfcResult>(input, super::text::nfc),
+        "url.origin" => {
+            run::<shapes::UrlOriginInput, shapes::UrlOriginResult>(input, super::url::origin)
+        }
         "pattern.problems" => run::<shapes::PatternProblemsInput, shapes::PatternProblemsResult>(
             input,
             super::pattern::problems,
@@ -173,6 +180,24 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
         "claude.versionIn" => run::<shapes::ClaudeVersionInInput, shapes::ClaudeVersionInResult>(
             input,
             super::claude::version_in,
+        ),
+        "testkit.entryKeys" => {
+            run::<shapes::TestkitEntryKeysInput, shapes::TestkitEntryKeysResult>(
+                input,
+                super::testkit::entry_keys,
+            )
+        }
+        "testkit.providerList" => run::<
+            shapes::TestkitProviderListInput,
+            shapes::TestkitProviderListResult,
+        >(input, super::testkit::provider_list),
+        "testkit.modelRegistry" => run::<
+            shapes::TestkitModelRegistryInput,
+            shapes::TestkitModelRegistryResult,
+        >(input, super::testkit::model_registry),
+        "testkit.deadline" => run::<shapes::TestkitDeadlineInput, shapes::TestkitDeadlineResult>(
+            input,
+            super::testkit::deadline,
         ),
         "testkit.compactedSession" => run::<
             shapes::TestkitCompactedSessionInput,
