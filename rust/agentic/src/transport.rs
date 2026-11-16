@@ -6,17 +6,17 @@ use std::fmt;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 
-use nyaaai_contract::base64::base64_encode;
 use nyaaai_contract::cancel::CancelToken;
 use nyaaai_contract::fetch::{Chunks, Fetch, FetchError, FetchRequest, FetchResponse, Method};
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::headers::header_of;
-use nyaaai_contract::json::{Value, parse_json, stringify_json};
+use nyaaai_contract::json::{Value, parse_json, quote_json, stringify_json};
+use nyaaai_contract::secret::scrub_secret;
 use nyaaai_contract::shapes::step::{
     CanonicalRequest, Encoded, Failure, FailureBilled, FailureCategory, HeaderList, Serving,
     StepEvent, StepEventServing, StepResult,
 };
-use nyaaai_contract::text::{Utf8Decoder, ascii_lower, encode_path_segment, trim_text};
+use nyaaai_contract::text::{Utf8Decoder, ascii_lower, trim_text};
 use nyaaai_contract::time::{Scheduled, Scheduler, parse_retry_after};
 
 use crate::codec::{Codec, Mode, StreamDecoder};
@@ -50,11 +50,22 @@ pub enum Auth {
     Optional,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub enum KeyAuth {
     None,
     Stored,
     Key(String),
+}
+
+impl fmt::Debug for KeyAuth {
+    fn fmt(&self, out: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // The key never prints.
+        match self {
+            Self::None => out.write_str("None"),
+            Self::Stored => out.write_str("Stored"),
+            Self::Key(_) => out.write_str("Key([key])"),
+        }
+    }
 }
 
 pub struct TransportDeps {
@@ -74,6 +85,8 @@ pub struct TransportDeps {
     pub auth: Auth,
     /// Default two minutes.
     pub idle_ms: Option<i64>,
+    /// Cap on one reply, or on a stream's bytes between items. Default 16 MiB.
+    pub max_bytes: Option<usize>,
 }
 
 /// How a call ended, short of an answer.
@@ -134,7 +147,8 @@ const IDLE_MS: i64 = 120_000;
 const ERROR_BODY_BYTES: usize = 64 * 1024;
 /// The names a codec cannot set.
 const OWNED_HEADERS: [&str; 4] = ["content-type", "accept", "authorization", "user-agent"];
-const REDACTED: &str = "[key]";
+const REPLY_BYTES: usize = 16 * 1024 * 1024;
+const TOKEN_SYMBOLS: &str = "!#$%&'*+-.^_`|~";
 
 type Listener = Arc<dyn Fn(&str) + Send + Sync>;
 
@@ -142,6 +156,7 @@ type Listener = Arc<dyn Fn(&str) + Send + Sync>;
 pub struct Transport {
     d: TransportDeps,
     idle_ms: i64,
+    max_bytes: usize,
     settled: Mutex<Vec<(u64, Listener)>>,
     listeners: AtomicU64,
 }
@@ -215,6 +230,8 @@ struct Open<'a> {
     seen: Seen,
     body: Option<Box<dyn Chunks>>,
     body_done: bool,
+    /// Bytes read since an item last finished.
+    since: usize,
     sse: SseDecoder,
     decoder: Box<dyn StreamDecoder + 'a>,
     events: VecDeque<StepEvent>,
@@ -262,6 +279,8 @@ impl Open<'_> {
 
 enum StreamState<'a> {
     Fresh,
+    /// The request may have gone; a dropped `next` left it here.
+    Opening,
     Open(Box<Open<'a>>),
     Closed,
 }
@@ -273,15 +292,23 @@ pub struct EventStream<'a> {
     request: &'a CanonicalRequest,
     cancel: CancelToken,
     state: StreamState<'a>,
+    /// What an opening learned before it was dropped.
+    seen: Seen,
 }
 
 impl EventStream<'_> {
     /// `None` ends the stream.
     pub async fn next(&mut self) -> Result<Option<StepEvent>, TransportError> {
+        if matches!(self.state, StreamState::Opening) {
+            // An opening left behind sends nothing twice.
+            self.close();
+            return Ok(None);
+        }
         if matches!(self.state, StreamState::Fresh) {
+            self.state = StreamState::Opening;
             match self
                 .transport
-                .open(self.codec, self.request, &self.cancel)
+                .open(self.codec, self.request, &self.cancel, &mut self.seen)
                 .await
             {
                 Ok(open) => self.state = StreamState::Open(Box::new(open)),
@@ -321,9 +348,13 @@ impl EventStream<'_> {
     }
 
     fn close(&mut self) {
-        if let StreamState::Open(open) = std::mem::replace(&mut self.state, StreamState::Closed) {
-            open.cut.clear();
-            self.transport.log(&open.seen);
+        match std::mem::replace(&mut self.state, StreamState::Closed) {
+            StreamState::Open(open) => {
+                open.cut.clear();
+                self.transport.log(&open.seen);
+            }
+            StreamState::Opening => self.transport.log(&self.seen),
+            StreamState::Fresh | StreamState::Closed => {}
         }
     }
 }
@@ -338,6 +369,7 @@ impl Transport {
     pub fn new(d: TransportDeps) -> Self {
         Self {
             idle_ms: d.idle_ms.unwrap_or(IDLE_MS),
+            max_bytes: d.max_bytes.unwrap_or(REPLY_BYTES),
             d,
             settled: Mutex::new(Vec::new()),
             listeners: AtomicU64::new(0),
@@ -378,6 +410,7 @@ impl Transport {
             request,
             cancel: cancel.clone(),
             state: StreamState::Fresh,
+            seen: Seen::default(),
         }
     }
 
@@ -391,6 +424,7 @@ impl Transport {
             return Err(TransportError::Cancelled);
         }
         let encoded = encoded_of(codec, request, Mode::Complete)?;
+        self.check_headers(&encoded)?;
         let key = self.request_key().await?;
         let cut = Cut::new(cancel, Arc::clone(&self.d.scheduler), self.idle_ms);
         let mut seen = Seen::default();
@@ -406,7 +440,7 @@ impl Transport {
                 )
                 .await?;
             cut.arm();
-            let text = read_text(&mut *response.chunks, None).await?;
+            let text = read_all(&mut *response.chunks, self.max_bytes).await?;
             let Some(body) = parse_json(&text) else {
                 return Err(Fault::Provider(failed(
                     FailureCategory::Stream,
@@ -470,6 +504,7 @@ impl Transport {
         if cancel.is_cancelled() {
             return Err(TransportError::Cancelled);
         }
+        checked_headers(&[("User-Agent", self.d.user_agent.as_str())])?;
         let key = self.key_for(auth).await?;
         let mut headers: HeaderList = vec![
             ("Accept".to_owned(), "application/json".to_owned()),
@@ -494,7 +529,7 @@ impl Transport {
                     self.failure(&*self.d.errors, response).await?,
                 ));
             }
-            let answer = parse_json(&read_text(&mut *response.chunks, None).await?);
+            let answer = parse_json(&read_all(&mut *response.chunks, self.max_bytes).await?);
             answer.ok_or_else(|| {
                 Fault::Provider(failed(
                     FailureCategory::Network,
@@ -569,12 +604,9 @@ impl Transport {
         accept: &str,
         seen: &mut Seen,
     ) -> Result<FetchResponse, Fault> {
-        let mut headers: HeaderList = encoded
-            .headers
-            .iter()
-            .flat_map(|held| held.iter())
-            .filter(|(name, _)| !OWNED_HEADERS.contains(&ascii_lower(name).as_str()))
-            .map(|(name, value)| (name.to_owned(), value.clone()))
+        let mut headers: HeaderList = codec_headers(encoded)
+            .into_iter()
+            .map(|(name, value)| (name.to_owned(), value.to_owned()))
             .collect();
         headers.push(("Content-Type".to_owned(), "application/json".to_owned()));
         headers.push(("Accept".to_owned(), accept.to_owned()));
@@ -616,6 +648,12 @@ impl Transport {
         }))
     }
 
+    fn check_headers(&self, encoded: &Encoded) -> Result<(), ProviderError> {
+        let mut headers: Vec<(&str, &str)> = codec_headers(encoded);
+        headers.push(("User-Agent", self.d.user_agent.as_str()));
+        checked_headers(&headers)
+    }
+
     fn log(&self, seen: &Seen) {
         let status = seen
             .status
@@ -635,14 +673,15 @@ impl Transport {
         codec: &'a dyn Codec,
         request: &CanonicalRequest,
         cancel: &CancelToken,
+        seen: &mut Seen,
     ) -> Result<Open<'a>, TransportError> {
         if cancel.is_cancelled() {
             return Err(TransportError::Cancelled);
         }
         let encoded = encoded_of(codec, request, Mode::Stream)?;
+        self.check_headers(&encoded)?;
         let key = self.request_key().await?;
         let cut = Cut::new(cancel, Arc::clone(&self.d.scheduler), self.idle_ms);
-        let mut seen = Seen::default();
         let posted = self
             .post(
                 codec,
@@ -650,7 +689,7 @@ impl Transport {
                 key.as_deref(),
                 &cut.token,
                 "text/event-stream",
-                &mut seen,
+                seen,
             )
             .await;
         match posted {
@@ -660,7 +699,7 @@ impl Transport {
                 }
                 let error = self.mapped(fault, cancel, Some(&cut), key.as_deref());
                 cut.clear();
-                self.log(&seen);
+                self.log(seen);
                 Err(error)
             }
             Ok(response) => {
@@ -668,9 +707,10 @@ impl Transport {
                 Ok(Open {
                     key,
                     cut,
-                    seen,
+                    seen: std::mem::take(seen),
                     body: Some(response.chunks),
                     body_done: false,
+                    since: 0,
                     sse: SseDecoder::new(),
                     decoder: codec.stream(),
                     events: VecDeque::new(),
@@ -701,6 +741,19 @@ impl Transport {
             Ok(Some(bytes)) => {
                 open.cut.arm();
                 let items = open.sse.push(&bytes);
+                open.since = if items.is_empty() {
+                    open.since + bytes.len()
+                } else {
+                    0
+                };
+                if open.since > self.max_bytes {
+                    open.failed = Some(Fault::Provider(failed(
+                        FailureCategory::Stream,
+                        &format!("A stream event is larger than {} bytes.", self.max_bytes),
+                        FailureExtra::default(),
+                    )));
+                    return;
+                }
                 open.push_items(items);
             }
             Ok(None) => {
@@ -799,23 +852,76 @@ async fn read_text(chunks: &mut dyn Chunks, limit: Option<usize>) -> Result<Stri
     Ok(text)
 }
 
-/// The base64 spelling, without padding.
-fn base64_form(key: &str) -> String {
-    base64_encode(key.as_bytes())
-        .trim_end_matches('=')
-        .to_owned()
+/// Every spelling of the key, in one pass.
+fn scrubbed(text: &str, key: Option<&str>) -> String {
+    key.map_or_else(|| text.to_owned(), |key| scrub_secret(text, key))
 }
 
-/// Scrub URL/base64 echoes.
-fn scrubbed(text: &str, key: Option<&str>) -> String {
-    let Some(key) = key.filter(|key| !key.is_empty()) else {
-        return text.to_owned();
-    };
-    [key.to_owned(), encode_path_segment(key), base64_form(key)]
+/// The codec's headers, less the names we own.
+fn codec_headers(encoded: &Encoded) -> Vec<(&str, &str)> {
+    encoded
+        .headers
         .iter()
-        .fold(text.to_owned(), |each, form| {
-            each.replace(form.as_str(), REDACTED)
-        })
+        .flat_map(|held| held.iter())
+        .filter(|(name, _)| !OWNED_HEADERS.contains(&ascii_lower(name).as_str()))
+        .map(|(name, value)| (name, value.as_str()))
+        .collect()
+}
+
+fn is_token(name: &str) -> bool {
+    !name.is_empty()
+        && name
+            .chars()
+            .all(|char| char.is_ascii_alphanumeric() || TOKEN_SYMBOLS.contains(char))
+}
+
+/// Visible ASCII, space and tab.
+fn is_field_value(value: &str) -> bool {
+    value
+        .chars()
+        .all(|char| char == '\t' || ('\u{20}'..='\u{7e}').contains(&char))
+}
+
+/// Refuses a header the adapter must not see; names the header, never its value.
+fn checked_headers(headers: &[(&str, &str)]) -> Result<(), ProviderError> {
+    for (name, value) in headers {
+        let message = if !is_token(name) {
+            format!(
+                "The request header {} has a name that is not valid.",
+                quote_json(name)
+            )
+        } else if !is_field_value(value) {
+            format!("The request header {name} has a value that is not valid.")
+        } else {
+            continue;
+        };
+        return Err(failed(
+            FailureCategory::BadRequest,
+            &message,
+            FailureExtra::default(),
+        ));
+    }
+    Ok(())
+}
+
+/// Fails past the cap.
+async fn read_all(chunks: &mut dyn Chunks, cap: usize) -> Result<String, Fault> {
+    let mut decoder = Utf8Decoder::new();
+    let mut text = String::new();
+    let mut size = 0usize;
+    while let Some(chunk) = chunks.next().await? {
+        size += chunk.len();
+        if size > cap {
+            return Err(Fault::Provider(failed(
+                FailureCategory::Network,
+                &format!("The reply is larger than {cap} bytes."),
+                FailureExtra::default(),
+            )));
+        }
+        text.push_str(&decoder.push(&chunk));
+    }
+    text.push_str(&decoder.end());
+    Ok(text)
 }
 
 /// Sanitize response-derived names.

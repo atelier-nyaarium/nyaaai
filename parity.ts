@@ -28,6 +28,7 @@ import { order } from "./scripts/caseGroups/order";
 import { paths } from "./scripts/caseGroups/paths";
 import { pattern } from "./scripts/caseGroups/pattern";
 import { schemaProjection } from "./scripts/caseGroups/schemaProjection";
+import { secret } from "./scripts/caseGroups/secret";
 import { sessionCut } from "./scripts/caseGroups/sessionCut";
 import { sessionFile } from "./scripts/caseGroups/sessionFile";
 import { shape } from "./scripts/caseGroups/shape";
@@ -168,6 +169,7 @@ export default project({
 		schemaProjection,
 		codec,
 		transport,
+		secret,
 	],
 	runs: adapterCases,
 	cases: { crate: "nyaaai_cli", module: "cases", dir: "rust/cli/src/cases" },

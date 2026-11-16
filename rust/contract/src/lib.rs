@@ -13,6 +13,7 @@ pub mod number;
 pub mod order;
 pub mod pattern;
 pub mod random;
+pub mod secret;
 pub mod shape;
 pub mod shapes;
 pub mod strict_policy;

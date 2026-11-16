@@ -86,6 +86,61 @@ describe("the transport", () => {
 		expect(error).toBe("stopped");
 	});
 
+	it("drops what a throwing listener or log function says, so the outcome stands", async () => {
+		const ok = (): Fetch => async () => ({
+			status: 200,
+			headers: [],
+			chunks: (async function* () {
+				yield new TextEncoder().encode(
+					JSON.stringify({ id: "g", choices: [{ message: { content: "Hi" }, finish_reason: "stop" }] }),
+				);
+			})(),
+		});
+		const throwing = new Transport({
+			fetch: ok(),
+			scheduler: fakeScheduler(),
+			key: staticKey("sk-test-123"),
+			log: () => {
+				throw new Error("log boom");
+			},
+			baseUrl: "https://lab.example.test/v1",
+			label: "Lab",
+			userAgent: "lab-app/1.0",
+			errors: OPENROUTER_CHAT,
+		});
+		const heard: string[] = [];
+		throwing.onSettled(() => {
+			throw new Error("listener boom");
+		});
+		throwing.onSettled((model) => heard.push(model));
+		const result = await throwing.complete(OPENROUTER_CHAT, REQUEST, new AbortController().signal);
+		expect(result.parts).toEqual([{ kind: "text", text: "Hi" }]);
+		expect(heard).toEqual(["openai/gpt-6-luna"]);
+
+		const failing = new Transport({
+			fetch: async () => ({ status: 500, headers: [], chunks: (async function* () {})() }),
+			scheduler: fakeScheduler(),
+			key: staticKey("sk-test-123"),
+			log: () => {
+				throw new Error("log boom");
+			},
+			baseUrl: "https://lab.example.test/v1",
+			label: "Lab",
+			userAgent: "lab-app/1.0",
+			errors: OPENROUTER_CHAT,
+		});
+		failing.onSettled(() => {
+			throw new Error("listener boom");
+		});
+		try {
+			await failing.complete(OPENROUTER_CHAT, REQUEST, new AbortController().signal);
+		} catch (error) {
+			expect(failureOf(error)?.category).toBe("unavailable");
+			return;
+		}
+		throw new Error("the call did not fail");
+	});
+
 	it("holds a static key", async () => {
 		expect(await staticKey("k").get()).toBe("k");
 	});

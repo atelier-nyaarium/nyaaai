@@ -32,10 +32,10 @@ async function* chunksOf(body: ReadableStream<Uint8Array> | null, signal: AbortS
 }
 
 /** The platform's fetch as a port. */
-export function platformFetch(): Fetch {
+export function platformFetch(platform: typeof fetch = fetch): Fetch {
 	return async (request, signal) => {
 		if (signal.aborted) throw signal.reason;
-		const response = await fetch(request.url, {
+		const response = await platform(request.url, {
 			method: request.method,
 			headers: request.headers.map(([name, value]) => [name, value]),
 			...(request.method === "GET" || request.body === undefined ? {} : { body: request.body }),

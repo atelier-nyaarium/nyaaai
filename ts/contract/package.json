@@ -17,6 +17,7 @@
 		"./pattern": "./src/pattern.ts",
 		"./random": "./src/random.ts",
 		"./rustNames": "./src/rustNames.ts",
+		"./secret": "./src/secret.ts",
 		"./schemaExport": "./src/schemaExport.ts",
 		"./strictSchema": "./src/strictSchema.ts",
 		"./shape": "./src/shape.ts",

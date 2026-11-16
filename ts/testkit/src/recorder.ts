@@ -3,7 +3,8 @@
 import { base64Encode } from "@nyaaai/contract/base64";
 import type { Fetch } from "@nyaaai/contract/fetch";
 import { parseJson } from "@nyaaai/contract/json";
-import { asciiLower, encodePathSegment } from "@nyaaai/contract/text";
+import { leaksSpelling, type Spelling, secretSpellings } from "@nyaaai/contract/secret";
+import { asciiLower } from "@nyaaai/contract/text";
 import type { Trace } from "./trace";
 
 ////////////////////////////////
@@ -38,12 +39,9 @@ function binaryOf(bytes: Uint8Array): string {
 
 const binaryText = (text: string): string => binaryOf(new TextEncoder().encode(text));
 
-/** As is, path-segment encoded, base64 without padding. */
-function formsOf(secret: string): string[] {
-	const unpadded = base64Encode(new TextEncoder().encode(secret));
-	let end = unpadded.length;
-	while (end > 0 && unpadded[end - 1] === "=") end -= 1;
-	return [secret, encodePathSegment(secret), unpadded.slice(0, end)].map(binaryText);
+/** The spellings of a secret, in byte-per-character text. */
+function formsOf(secret: string): Spelling[] {
+	return secretSpellings(secret).map((spelling) => ({ ...spelling, text: binaryText(spelling.text) }));
 }
 
 function joined(chunks: readonly Uint8Array[]): Uint8Array {
@@ -67,8 +65,8 @@ async function* passing(from: AsyncIterable<Uint8Array>, into: Uint8Array[]): As
 /** Keeps no request header. */
 export function recordingFetch(inner: Fetch, secrets: readonly string[]): RecordingFetch {
 	const held: Held[] = [];
-	const forms = secrets.filter((secret) => secret.length > 0).flatMap(formsOf);
-	const leaks = (text: string): boolean => forms.some((form) => text.includes(form));
+	const forms = secrets.flatMap(formsOf);
+	const leaks = (text: string): boolean => leaksSpelling(text, forms);
 
 	return {
 		fetch: async (request, signal) => {

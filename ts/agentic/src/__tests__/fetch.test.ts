@@ -103,6 +103,30 @@ describe("the platform fetch", () => {
 		});
 	});
 
+	it("runs on a fetch function it is given", async () => {
+		const asked: string[] = [];
+		const given: typeof fetch = Object.assign(
+			async (input: Parameters<typeof fetch>[0]) => {
+				asked.push(String(input));
+				return new Response("held", { status: 201, headers: { "X-B": "2", "x-a": "1" } });
+			},
+			{ preconnect: fetch.preconnect },
+		);
+		const answer = await platformFetch(given)(
+			{ method: "GET", url: "http://lab.local/x", headers: [] },
+			new AbortController().signal,
+		);
+		const parts: Uint8Array[] = [];
+		for await (const chunk of answer.chunks) parts.push(chunk);
+		expect(asked).toEqual(["http://lab.local/x"]);
+		expect(answer.status).toBe(201);
+		expect(answer.headers.filter(([name]) => name.startsWith("x-"))).toEqual([
+			["x-a", "1"],
+			["x-b", "2"],
+		]);
+		expect(new TextDecoder().decode(parts[0])).toBe("held");
+	});
+
 	it("answers a redirect as its status and makes no second request", async () => {
 		const trace: Trace = {
 			format: 1,

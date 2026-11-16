@@ -36,8 +36,8 @@ export async function readTrace(file: string): Promise<Trace> {
 	return held.value;
 }
 
-/** Plays the exchanges in order, keeping chunk edges. Nothing waits. */
-export function replayFetch(trace: Trace): ScriptedFetch {
+/** Plays the exchanges in order on `wheel`, keeping chunk edges. Nothing waits. */
+export function replayFetch(trace: Trace, wheel: TimerWheel = new TimerWheel()): ScriptedFetch {
 	const exchanges = trace.exchanges.map(
 		(exchange): ScriptedExchange => ({
 			status: exchange.status,
@@ -49,5 +49,5 @@ export function replayFetch(trace: Trace): ScriptedFetch {
 			}),
 		}),
 	);
-	return scriptedFetch(exchanges, new TimerWheel());
+	return scriptedFetch(exchanges, wheel);
 }

@@ -4011,6 +4011,11 @@
 						"request": {
 							"$ref": "step.output.json#/$defs/CanonicalRequest"
 						},
+						"stopAfter": {
+							"type": "integer",
+							"minimum": 1,
+							"maximum": 9007199254740991
+						},
 						"abortAfterMs": {
 							"type": "integer",
 							"minimum": -9007199254740991,
@@ -4273,6 +4278,11 @@
 					"minimum": -9007199254740991,
 					"maximum": 9007199254740991
 				},
+				"maxBytes": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
 				"keys": {
 					"minItems": 1,
 					"type": "array",
@@ -4397,6 +4407,83 @@
 			"required": [
 				"shape",
 				"normalized"
+			],
+			"additionalProperties": false
+		},
+		"SecretSpellingsInput": {
+			"type": "object",
+			"properties": {
+				"secret": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"secret"
+			],
+			"additionalProperties": false
+		},
+		"SecretSpellingsResult": {
+			"type": "object",
+			"properties": {
+				"spellings": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"text": {
+								"type": "string"
+							},
+							"folded": {
+								"type": "array",
+								"items": {
+									"type": "integer",
+									"minimum": -9007199254740991,
+									"maximum": 9007199254740991
+								}
+							}
+						},
+						"required": [
+							"text",
+							"folded"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"spellings"
+			],
+			"additionalProperties": false
+		},
+		"SecretScrubInput": {
+			"type": "object",
+			"properties": {
+				"secret": {
+					"type": "string"
+				},
+				"text": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"secret",
+				"text"
+			],
+			"additionalProperties": false
+		},
+		"SecretScrubResult": {
+			"type": "object",
+			"properties": {
+				"scrubbed": {
+					"type": "string"
+				},
+				"leaks": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"scrubbed",
+				"leaks"
 			],
 			"additionalProperties": false
 		}

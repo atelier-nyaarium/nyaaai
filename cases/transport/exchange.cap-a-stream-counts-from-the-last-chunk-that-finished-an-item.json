@@ -2,7 +2,7 @@
 	"format": 2,
 	"type": "function",
 	"kind": "transport.exchange",
-	"name": "scrub-base64-at-another-alignment-is-not-caught",
+	"name": "cap-a-stream-counts-from-the-last-chunk-that-finished-an-item",
 	"input": {
 		"codec": {
 			"family": "chat-completions",
@@ -19,17 +19,35 @@
 			"kind": "inline",
 			"exchanges": [
 				{
-					"status": 401,
+					"status": 200,
 					"headers": [
 						[
 							"content-type",
-							"application/json"
+							"text/event-stream"
 						]
 					],
 					"chunks": [
 						{
 							"kind": "text",
-							"text": "{\"error\":{\"code\":401,\"message\":\"Bad eGtleS0wMTIzNDU2Nzg5YWJjZGVm\"}}"
+							"text": "data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Hi\"}}]}\n\n"
+						},
+						{
+							"kind": "repeat",
+							"text": "y",
+							"times": 20
+						},
+						{
+							"kind": "repeat",
+							"text": "y",
+							"times": 20
+						},
+						{
+							"kind": "text",
+							"text": "\n\n"
+						},
+						{
+							"kind": "text",
+							"text": "data: [DONE]\n\n"
 						}
 					]
 				}
@@ -54,18 +72,31 @@
 					"zdrOnly": true
 				}
 			}
-		]
+		],
+		"maxBytes": 30
 	},
 	"expected": {
 		"calls": [
 			{
-				"events": [],
+				"events": [
+					{
+						"kind": "serving",
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-1"
+						}
+					},
+					{
+						"kind": "text",
+						"text": "Hi"
+					}
+				],
 				"result": null,
 				"answer": null,
 				"failure": {
-					"category": "keyRejected",
-					"status": 401,
-					"message": "Bad eGtleS0wMTIzNDU2Nzg5YWJjZGVm"
+					"category": "stream",
+					"status": "stream",
+					"message": "A stream event is larger than 30 bytes."
 				},
 				"thrown": null,
 				"aborted": false,
@@ -98,14 +129,14 @@
 			}
 		],
 		"log": [
-			"OpenRouter 401 - -"
+			"OpenRouter 200 gen-1 Azure"
 		],
 		"settled": [
 			"openai/gpt-6-luna"
 		],
 		"keyReads": 1,
 		"read": [
-			1
+			3
 		],
 		"waiting": []
 	}

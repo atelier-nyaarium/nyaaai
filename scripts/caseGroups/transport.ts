@@ -54,7 +54,13 @@ const abort = {
 };
 
 export const TransportCall = z.discriminatedUnion("kind", [
-	z.object({ kind: z.literal("stream"), request: CanonicalRequest, ...abort }),
+	z.object({
+		kind: z.literal("stream"),
+		request: CanonicalRequest,
+		/** Takes this many events, then lets go of the stream. */
+		stopAfter: z.int().min(1).exactOptional(),
+		...abort,
+	}),
 	z.object({ kind: z.literal("complete"), request: CanonicalRequest, ...abort }),
 	/** The path starts with a slash. */
 	z.object({ kind: z.literal("getJson"), path: z.string(), keyAuth: TransportKeyAuth.exactOptional(), ...abort }),
@@ -162,6 +168,8 @@ export const transport = caseGroup("transport", {
 				userAgent: z.string(),
 				auth: z.enum(["bearer", "none", "optional"]).exactOptional(),
 				idleMs: z.int().exactOptional(),
+				/** The transport's cap on a reply. */
+				maxBytes: z.int().exactOptional(),
 				/** What each read of the key source answers, the last repeating; null is no key. */
 				keys: z.array(z.string().nullable()).min(1),
 				/** The wheel's first instant. */
@@ -188,7 +196,7 @@ export const transport = caseGroup("transport", {
 				const played =
 					input.script.kind === "inline"
 						? scriptedFetch(input.script.exchanges.map(exchangeOf), wheel)
-						: replayFetch(await readTrace(path.join(context.root, input.script.file)));
+						: replayFetch(await readTrace(path.join(context.root, input.script.file)), wheel);
 				const keys = fakeKeys(input.keys.map((held) => held ?? undefined));
 				const log: string[] = [];
 				const settled: string[] = [];
@@ -215,8 +223,11 @@ export const transport = caseGroup("transport", {
 					errors: base,
 					...(input.auth === undefined ? {} : { auth: input.auth }),
 					...(input.idleMs === undefined ? {} : { idleMs: input.idleMs }),
+					...(input.maxBytes === undefined ? {} : { maxBytes: input.maxBytes }),
 				});
 				made.onSettled((model) => settled.push(model));
+				for (const call of input.calls)
+					if (call.kind === "getJson" || call.kind === "postJson") slashed(call.path);
 				const calls: z.infer<typeof TransportOutcome>[] = [];
 				for (const call of input.calls) {
 					const caller = new AbortController();
@@ -234,8 +245,15 @@ export const transport = caseGroup("transport", {
 					};
 					try {
 						if (call.kind === "stream") {
-							for await (const event of made.stream(codec, call.request, caller.signal))
-								outcome.events.push(event);
+							const events = made.stream(codec, call.request, caller.signal);
+							try {
+								for await (const event of events) {
+									outcome.events.push(event);
+									if (outcome.events.length === call.stopAfter) break;
+								}
+							} finally {
+								await events.return(undefined);
+							}
 						} else if (call.kind === "complete") {
 							outcome.result = await made.complete(codec, call.request, caller.signal);
 						} else if (call.kind === "getJson") {

@@ -299,6 +299,13 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
             input,
             super::transport::key,
         ),
+        "secret.spellings" => run::<shapes::SecretSpellingsInput, shapes::SecretSpellingsResult>(
+            input,
+            super::secret::spellings,
+        ),
+        "secret.scrub" => {
+            run::<shapes::SecretScrubInput, shapes::SecretScrubResult>(input, super::secret::scrub)
+        }
         _ => return None,
     })
 }

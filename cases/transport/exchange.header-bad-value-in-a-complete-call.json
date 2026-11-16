@@ -1,0 +1,87 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.exchange",
+	"name": "header-bad-value-in-a-complete-call",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"baseUrl": "https://openrouter.ai/api/v1",
+		"label": "OpenRouter",
+		"userAgent": "lab-app/1.0",
+		"keys": [
+			"key-0123456789abcdef"
+		],
+		"startMs": 1800000000000,
+		"script": {
+			"kind": "inline",
+			"exchanges": [
+				{
+					"status": 200,
+					"headers": [
+						[
+							"content-type",
+							"text/event-stream"
+						]
+					],
+					"chunks": [
+						{
+							"kind": "text",
+							"text": "data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Hi\"}}]}\n\ndata: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n"
+						}
+					]
+				}
+			]
+		},
+		"calls": [
+			{
+				"kind": "complete",
+				"request": {
+					"model": "openai/gpt-6-luna",
+					"system": [],
+					"history": [
+						{
+							"role": "user",
+							"text": "Hi"
+						}
+					],
+					"cache": {
+						"kind": "none"
+					},
+					"session": "root-1",
+					"zdrOnly": true
+				}
+			}
+		],
+		"codecHeaders": {
+			"X-Session": "s\r\nt"
+		}
+	},
+	"expected": {
+		"calls": [
+			{
+				"events": [],
+				"result": null,
+				"answer": null,
+				"failure": {
+					"category": "badRequest",
+					"status": "badRequest",
+					"message": "The request header X-Session has a value that is not valid."
+				},
+				"thrown": null,
+				"aborted": false,
+				"nowMs": 1800000000000
+			}
+		],
+		"requests": [],
+		"log": [],
+		"settled": [],
+		"keyReads": 0,
+		"read": [
+			0
+		],
+		"waiting": []
+	}
+}

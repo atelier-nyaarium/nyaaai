@@ -106,6 +106,9 @@ describe("the recording fetch", () => {
 		["as is", (secret: string) => secret],
 		["path encoded", encodePathSegment],
 		["in base64 without padding", unpadded],
+		["path encoded in lower-case hex", (secret: string) => encodePathSegment(secret).toLowerCase()],
+		["in base64 after a bearer prefix", (secret: string) => unpadded(`Bearer ${secret}`)],
+		["in base64 after one byte, with a tail", (secret: string) => unpadded(`a${secret}-tail`)],
 	] as const) {
 		it(`refuses a secret ${form} in a response body, naming the place and not the secret`, async () => {
 			const held = recording(

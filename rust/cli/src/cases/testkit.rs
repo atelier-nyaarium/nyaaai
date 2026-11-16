@@ -150,7 +150,7 @@ pub fn random(input: TestkitRandomInput) -> Outcome<TestkitRandomResult> {
 
 pub fn replay(input: TestkitReplayInput, context: &CaseContext) -> Outcome<TestkitReplayResult> {
     let trace = read_trace(&context.root().join(&input.file)).map_err(failed)?;
-    let played = replay_fetch(&trace).map_err(failed)?;
+    let played = replay_fetch(&trace, Arc::new(TimerWheel::new(0))).map_err(failed)?;
     let cancel = CancelToken::new();
     let exchanges = block_on(async {
         let mut exchanges = Vec::new();

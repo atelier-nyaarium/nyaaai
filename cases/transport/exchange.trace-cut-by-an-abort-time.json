@@ -1,0 +1,91 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.exchange",
+	"name": "trace-cut-by-an-abort-time",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"baseUrl": "https://openrouter.ai/api/v1",
+		"label": "OpenRouter",
+		"userAgent": "lab-app/1.0",
+		"keys": [
+			"key-0123456789abcdef"
+		],
+		"startMs": 1800000000000,
+		"script": {
+			"kind": "trace",
+			"file": "cases/traces/openrouter.no-zdr.json"
+		},
+		"calls": [
+			{
+				"kind": "stream",
+				"request": {
+					"model": "anthropic/claude-fable-5.1",
+					"system": [],
+					"cache": {
+						"kind": "none"
+					},
+					"zdrOnly": true,
+					"session": "00000000-0000-4000-8000-000000000000",
+					"history": [
+						{
+							"role": "user",
+							"text": "Say hi."
+						}
+					]
+				},
+				"abortAfterMs": 0
+			}
+		]
+	},
+	"expected": {
+		"calls": [
+			{
+				"events": [],
+				"result": null,
+				"answer": null,
+				"failure": null,
+				"thrown": "caller aborted",
+				"aborted": true,
+				"nowMs": 1800000000000
+			}
+		],
+		"requests": [
+			{
+				"method": "POST",
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"headers": [
+					[
+						"Content-Type",
+						"application/json"
+					],
+					[
+						"Accept",
+						"text/event-stream"
+					],
+					[
+						"Authorization",
+						"Bearer key-0123456789abcdef"
+					],
+					[
+						"User-Agent",
+						"lab-app/1.0"
+					]
+				],
+				"body": "{\"model\":\"anthropic/claude-fable-5.1\",\"messages\":[{\"role\":\"user\",\"content\":\"Say hi.\"}],\"stream\":true,\"session_id\":\"00000000-0000-4000-8000-000000000000\",\"provider\":{\"zdr\":true,\"data_collection\":\"deny\",\"require_parameters\":true}}"
+			}
+		],
+		"log": [
+			"OpenRouter - - -"
+		],
+		"settled": [],
+		"keyReads": 1,
+		"read": [
+			0
+		],
+		"waiting": []
+	}
+}

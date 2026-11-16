@@ -20,6 +20,7 @@ pub mod order;
 pub mod paths;
 pub mod pattern;
 pub mod schema_projection;
+pub mod secret;
 pub mod session_cut;
 pub mod session_file;
 pub mod shape;

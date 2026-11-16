@@ -1,9 +1,9 @@
 // A codec's calls over the Fetch port.
 
-import { base64Encode } from "@nyaaai/contract/base64";
 import type { Fetch, FetchResponse } from "@nyaaai/contract/fetch";
 import { headerOf } from "@nyaaai/contract/headers";
 import { jsString, parseJson, stringifyJson } from "@nyaaai/contract/json";
+import { scrubSecret } from "@nyaaai/contract/secret";
 import type {
 	CanonicalRequest,
 	Encoded,
@@ -14,7 +14,7 @@ import type {
 	StepEvent,
 	StepResult,
 } from "@nyaaai/contract/shapes/step";
-import { asciiLower, encodePathSegment, trimText, Utf8Decoder } from "@nyaaai/contract/text";
+import { asciiLower, trimText, Utf8Decoder } from "@nyaaai/contract/text";
 import { parseRetryAfter, type Scheduler } from "@nyaaai/contract/time";
 import type { Codec } from "./codec";
 import { failed, ProviderError } from "./failure";
@@ -44,6 +44,8 @@ export interface TransportDeps {
 	/** `optional`: bearer when a key exists. */
 	auth?: "bearer" | "none" | "optional";
 	idleMs?: number;
+	/** Cap on one reply, or on a stream's bytes between items. Default 16 MiB. */
+	maxBytes?: number;
 }
 
 export type KeyAuth = "none" | "stored" | { key: string };
@@ -61,7 +63,8 @@ const IDLE_MS = 120_000;
 const ERROR_BODY_BYTES = 64 * 1024;
 /** The names a codec cannot set. */
 const OWNED_HEADERS = ["content-type", "accept", "authorization", "user-agent"];
-const REDACTED = "[key]";
+const REPLY_BYTES = 16 * 1024 * 1024;
+const TOKEN_SYMBOLS = "!#$%&'*+-.^_`|~";
 
 ////////////////////////////////
 //  Classes
@@ -69,10 +72,12 @@ const REDACTED = "[key]";
 /** Scrubbed codec transport. */
 export class Transport {
 	private readonly idleMs: number;
+	private readonly maxBytes: number;
 	private readonly settled = new Set<(model: string) => void>();
 
 	constructor(private readonly d: TransportDeps) {
 		this.idleMs = d.idleMs ?? IDLE_MS;
+		this.maxBytes = d.maxBytes ?? REPLY_BYTES;
 	}
 
 	/** After each unaborted reply. */
@@ -81,9 +86,11 @@ export class Transport {
 		return () => this.settled.delete(listener);
 	}
 
+	/** A generator left unfinished keeps its idle timer until closed. */
 	async *stream(codec: Codec, request: CanonicalRequest, signal: AbortSignal): AsyncGenerator<StepEvent> {
 		if (signal.aborted) throw signal.reason;
 		const encoded = encodedOf(codec, request, "stream");
+		this.checkHeaders(encoded);
 		const key = await this.requestKey();
 		const cut = new Cut(signal, this.d.scheduler, this.idleMs);
 		const seen: Seen = {};
@@ -113,6 +120,7 @@ export class Transport {
 	async complete(codec: Codec, request: CanonicalRequest, signal: AbortSignal): Promise<StepResult> {
 		if (signal.aborted) throw signal.reason;
 		const encoded = encodedOf(codec, request, "complete");
+		this.checkHeaders(encoded);
 		const key = await this.requestKey();
 		const cut = new Cut(signal, this.d.scheduler, this.idleMs);
 		const seen: Seen = {};
@@ -120,7 +128,7 @@ export class Transport {
 		try {
 			const response = await this.post(codec, encoded, key, cut.signal, "application/json", seen);
 			cut.arm();
-			const body = parseJson(await readText(response.chunks, Number.POSITIVE_INFINITY));
+			const body = parseJson(await readAll(response.chunks, this.maxBytes));
 			if (body === undefined) throw failed("stream", "The reply was not JSON.");
 			const decoded = codec.complete(body);
 			const serving = scrubbedServing(decoded.serving, key);
@@ -154,6 +162,7 @@ export class Transport {
 		auth: KeyAuth,
 	): Promise<unknown> {
 		if (signal.aborted) throw signal.reason;
+		checkedHeaders([["User-Agent", this.d.userAgent]]);
 		const key = await this.keyFor(auth);
 		const headers: HeaderList = [
 			["Accept", "application/json"],
@@ -172,7 +181,7 @@ export class Transport {
 				signal,
 			);
 			if (!ok(response)) throw await this.failure(this.d.errors, response);
-			const answer = parseJson(await readText(response.chunks, Number.POSITIVE_INFINITY));
+			const answer = parseJson(await readAll(response.chunks, this.maxBytes));
 			if (answer === undefined) throw failed("network", `${path} did not answer JSON.`);
 			return answer;
 		} catch (error) {
@@ -181,15 +190,25 @@ export class Transport {
 	}
 
 	private notify(model: string): void {
-		for (const listener of this.settled) listener(model);
+		for (const listener of this.settled) {
+			try {
+				listener(model);
+			} catch {
+				// A listener cannot change a call's outcome.
+			}
+		}
 	}
 
 	/** Re-arms the idle abort. */
 	private async *items(chunks: AsyncIterable<Uint8Array>, cut: Cut): AsyncGenerator<SseItem> {
 		const decoder = new SseDecoder();
+		let since = 0;
 		for await (const chunk of chunks) {
 			cut.arm();
-			yield* decoder.push(chunk);
+			const items = decoder.push(chunk);
+			since = items.length > 0 ? 0 : since + chunk.byteLength;
+			if (since > this.maxBytes) throw failed("stream", `A stream event is larger than ${this.maxBytes} bytes.`);
+			yield* items;
 		}
 		cut.arm();
 		yield* decoder.end();
@@ -230,9 +249,7 @@ export class Transport {
 				method: "POST",
 				url: `${this.d.baseUrl}${encoded.path}`,
 				headers: [
-					...Object.entries(encoded.headers ?? {}).filter(
-						([name]) => !OWNED_HEADERS.includes(asciiLower(name)),
-					),
+					...codecHeaders(encoded),
 					["Content-Type", "application/json"],
 					["Accept", accept],
 					...(key === undefined ? [] : [["Authorization", `Bearer ${key}`] as [string, string]]),
@@ -256,8 +273,16 @@ export class Transport {
 		return new ProviderError({ ...decoded, ...(retryAfterMs === undefined ? {} : { retryAfterMs }) });
 	}
 
+	private checkHeaders(encoded: Encoded): void {
+		checkedHeaders([...codecHeaders(encoded), ["User-Agent", this.d.userAgent]]);
+	}
+
 	private log(seen: Seen): void {
-		this.d.log(`${this.d.label} ${seen.status ?? "-"} ${seen.generation ?? "-"} ${seen.host ?? "-"}`);
+		try {
+			this.d.log(`${this.d.label} ${seen.status ?? "-"} ${seen.generation ?? "-"} ${seen.host ?? "-"}`);
+		} catch {
+			// A log function cannot change a call's outcome.
+		}
 	}
 }
 
@@ -338,6 +363,54 @@ function encodedOf(codec: Codec, request: CanonicalRequest, mode: "stream" | "co
 	}
 }
 
+/** The codec's headers, less the names we own. */
+function codecHeaders(encoded: Encoded): Array<[string, string]> {
+	return Object.entries(encoded.headers ?? {}).filter(([name]) => !OWNED_HEADERS.includes(asciiLower(name)));
+}
+
+function isToken(name: string): boolean {
+	if (name.length === 0) return false;
+	for (let at = 0; at < name.length; at++) {
+		const code = name.charCodeAt(at);
+		const alnum =
+			(code >= 0x30 && code <= 0x39) || (code >= 0x41 && code <= 0x5a) || (code >= 0x61 && code <= 0x7a);
+		if (!alnum && !TOKEN_SYMBOLS.includes(name.charAt(at))) return false;
+	}
+	return true;
+}
+
+/** Visible ASCII, space and tab. */
+function isFieldValue(value: string): boolean {
+	for (let at = 0; at < value.length; at++) {
+		const code = value.charCodeAt(at);
+		if (code !== 0x09 && (code < 0x20 || code > 0x7e)) return false;
+	}
+	return true;
+}
+
+/** Refuses a header the adapter must not see; names the header, never its value. */
+function checkedHeaders(headers: ReadonlyArray<readonly [string, string]>): void {
+	for (const [name, value] of headers) {
+		if (!isToken(name))
+			throw failed("badRequest", `The request header ${stringifyJson(name)} has a name that is not valid.`);
+		if (!isFieldValue(value))
+			throw failed("badRequest", `The request header ${name} has a value that is not valid.`);
+	}
+}
+
+/** Fails past the cap. */
+async function readAll(chunks: AsyncIterable<Uint8Array>, cap: number): Promise<string> {
+	const decoder = new Utf8Decoder();
+	let text = "";
+	let size = 0;
+	for await (const chunk of chunks) {
+		size += chunk.byteLength;
+		if (size > cap) throw failed("network", `The reply is larger than ${cap} bytes.`);
+		text += decoder.push(chunk);
+	}
+	return text + decoder.end();
+}
+
 /** Decodes to the limit, then stops reading. */
 async function readText(chunks: AsyncIterable<Uint8Array>, limit: number): Promise<string> {
 	const decoder = new Utf8Decoder();
@@ -351,19 +424,9 @@ async function readText(chunks: AsyncIterable<Uint8Array>, limit: number): Promi
 	return text + decoder.end();
 }
 
-/** The base64 spelling, without padding. */
-function base64Form(key: string): string {
-	const text = base64Encode(new TextEncoder().encode(key));
-	let end = text.length;
-	while (end > 0 && text.charCodeAt(end - 1) === 0x3d) end -= 1;
-	return text.slice(0, end);
-}
-
 /** Scrub URL/base64 echoes. */
 function scrubbed(text: string, key: string | undefined): string {
-	if (key === undefined || key.length === 0) return text;
-	const forms = [key, encodePathSegment(key), base64Form(key)];
-	return forms.reduce((each, form) => each.split(form).join(REDACTED), text);
+	return key === undefined ? text : scrubSecret(text, key);
 }
 
 /** Sanitize response-derived names. */

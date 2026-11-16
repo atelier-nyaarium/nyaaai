@@ -6,8 +6,10 @@ use nyaaai_contract::cancel::CancelToken;
 use nyaaai_contract::fetch::{Chunks, Fetch, FetchError, FetchRequest, FetchResponse, Method};
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::headers::response_headers;
+use reqwest::header::{HeaderName, HeaderValue};
 
-/// A request client; redirects and timeouts as `reqwest` has them: no timeout of its own.
+/// A request client with no proxy from the environment, no redirect followed
+/// and no timeout of its own.
 pub struct ReqwestFetch {
     client: reqwest::Client,
 }
@@ -15,18 +17,22 @@ pub struct ReqwestFetch {
 impl ReqwestFetch {
     pub fn new() -> Result<Self, FetchError> {
         reqwest::Client::builder()
+            .no_proxy()
+            .redirect(reqwest::redirect::Policy::none())
             .build()
             .map(Self::with_client)
-            .map_err(|error| FetchError::Failed(described(&error)))
+            .map_err(|error| FetchError::Failed(described(error)))
     }
 
+    /// A host's own settings: its proxies and redirects are its own.
     pub fn with_client(client: reqwest::Client) -> Self {
         Self { client }
     }
 }
 
-/// The error and what caused it, without the URL.
-fn described(error: &reqwest::Error) -> String {
+/// The error and what caused it. `reqwest` writes the URL into its own text, so it is cut first.
+fn described(error: reqwest::Error) -> String {
+    let error = error.without_url();
     let mut text = error.to_string();
     let mut cause = error.source();
     while let Some(held) = cause {
@@ -35,6 +41,17 @@ fn described(error: &reqwest::Error) -> String {
         cause = held.source();
     }
     text
+}
+
+/// A header the adapter can carry; the key is marked sensitive, and no text of a refused one is kept.
+fn header_of(name: &str, value: &str) -> Result<(HeaderName, HeaderValue), FetchError> {
+    let refused = || FetchError::Failed("a request header is not valid".to_owned());
+    let name = HeaderName::from_bytes(name.as_bytes()).map_err(|_| refused())?;
+    let mut value = HeaderValue::from_str(value).map_err(|_| refused())?;
+    if name == reqwest::header::AUTHORIZATION {
+        value.set_sensitive(true);
+    }
+    Ok((name, value))
 }
 
 struct Body {
@@ -57,7 +74,7 @@ impl Chunks for Body {
             let read = self.cancel.run_until(response.chunk()).await;
             let outcome = match read {
                 None => Err(FetchError::Cancelled),
-                Some(Err(error)) => Err(FetchError::Failed(described(&error))),
+                Some(Err(error)) => Err(FetchError::Failed(described(error))),
                 Some(Ok(Some(bytes))) => return Ok(Some(bytes.to_vec())),
                 Some(Ok(None)) => Ok(None),
             };
@@ -85,7 +102,8 @@ impl Fetch for ReqwestFetch {
             };
             let mut builder = self.client.request(method, &request.url);
             for (name, value) in &request.headers {
-                builder = builder.header(name.as_str(), value.as_str());
+                let (name, value) = header_of(name, value)?;
+                builder = builder.header(name, value);
             }
             if request.method == Method::Post
                 && let Some(body) = request.body
@@ -95,7 +113,7 @@ impl Fetch for ReqwestFetch {
             let sent = cancel.run_until(builder.send()).await;
             let response = match sent {
                 None => return Err(FetchError::Cancelled),
-                Some(Err(error)) => return Err(FetchError::Failed(described(&error))),
+                Some(Err(error)) => return Err(FetchError::Failed(described(error))),
                 Some(Ok(response)) => response,
             };
             let raw: Vec<(String, String)> = response

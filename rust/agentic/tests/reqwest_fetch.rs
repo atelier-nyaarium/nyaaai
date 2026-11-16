@@ -227,3 +227,226 @@ fn a_refused_connection_fails() {
         assert!(matches!(outcome, Err(FetchError::Failed(_))));
     });
 }
+
+#[test]
+fn a_dropped_body_closes_its_connection() {
+    run(async {
+        let mut held = played(200, &["first"]);
+        held.hold = Hold::AfterChunks;
+        let server = Loopback::start(vec![held]).await.unwrap();
+        let fetch = ReqwestFetch::new().unwrap();
+        let mut response = fetch
+            .fetch(post(server.url("/"), "{}"), CancelToken::new())
+            .await
+            .unwrap();
+        assert_eq!(
+            response.chunks.next().await.unwrap(),
+            Some(b"first".to_vec())
+        );
+        drop(response);
+        assert!(server.wait_closed(1).await);
+    });
+}
+
+#[test]
+fn a_truncated_chunked_body_fails() {
+    run(async {
+        let mut held = played(200, &["ab"]);
+        held.hold = Hold::Truncate;
+        let server = Loopback::start(vec![held]).await.unwrap();
+        let fetch = ReqwestFetch::new().unwrap();
+        let mut response = fetch
+            .fetch(post(server.url("/"), "{}"), CancelToken::new())
+            .await
+            .unwrap();
+        let mut ended = None;
+        for _ in 0..4 {
+            match response.chunks.next().await {
+                Ok(Some(_)) => {}
+                other => {
+                    ended = Some(other);
+                    break;
+                }
+            }
+        }
+        assert!(matches!(ended, Some(Err(FetchError::Failed(_)))));
+    });
+}
+
+#[test]
+fn a_redirect_answers_its_status_and_is_not_followed() {
+    run(async {
+        let mut moved = played(302, &[]);
+        moved
+            .headers
+            .push(("Location".to_owned(), "/next".to_owned()));
+        let server = Loopback::start(vec![moved, played(200, &["x"])])
+            .await
+            .unwrap();
+        let fetch = ReqwestFetch::new().unwrap();
+        let mut response = fetch
+            .fetch(post(server.url("/"), "{}"), CancelToken::new())
+            .await
+            .unwrap();
+        assert_eq!(response.status, 302);
+        assert!(drained(&mut response).await.unwrap().is_empty());
+        tokio::time::sleep(Duration::from_millis(50)).await;
+        assert_eq!(server.requests().len(), 1);
+    });
+}
+
+#[test]
+fn a_failed_send_holds_no_url() {
+    run(async {
+        let url = {
+            let server = Loopback::start(Vec::new()).await.unwrap();
+            server.url("/secret-path?token=abc")
+        };
+        tokio::time::sleep(Duration::from_millis(20)).await;
+        let fetch = ReqwestFetch::new().unwrap();
+        let Err(FetchError::Failed(text)) = fetch
+            .fetch(post(url.clone(), "{}"), CancelToken::new())
+            .await
+        else {
+            panic!("the send should fail");
+        };
+        assert!(!text.contains("secret-path"));
+        assert!(!text.contains("token=abc"));
+        assert!(!text.contains("http://"));
+    });
+}
+
+#[test]
+fn authorization_is_sent() {
+    run(async {
+        let server = Loopback::start(vec![played(200, &["{}"])]).await.unwrap();
+        let fetch = ReqwestFetch::new().unwrap();
+        let mut request = post(server.url("/"), "{}");
+        request
+            .headers
+            .push(("Authorization".to_owned(), "Bearer key-1234".to_owned()));
+        let mut response = fetch.fetch(request, CancelToken::new()).await.unwrap();
+        drained(&mut response).await.unwrap();
+        let seen = server.requests();
+        let sent = seen[0]
+            .headers
+            .iter()
+            .find(|(name, _)| name == "authorization");
+        assert_eq!(
+            sent.map(|(_, value)| value.as_str()),
+            Some("Bearer key-1234")
+        );
+    });
+}
+
+#[test]
+fn a_header_that_is_not_valid_is_refused_without_its_text() {
+    run(async {
+        let server = Loopback::start(vec![played(200, &["{}"])]).await.unwrap();
+        let fetch = ReqwestFetch::new().unwrap();
+        let mut request = post(server.url("/"), "{}");
+        request
+            .headers
+            .push(("X-Bad".to_owned(), "line\r\nbreak-value".to_owned()));
+        let Err(FetchError::Failed(text)) = fetch.fetch(request, CancelToken::new()).await else {
+            panic!("the header should be refused");
+        };
+        assert!(!text.contains("break-value"));
+        assert!(server.requests().is_empty());
+    });
+}
+
+fn request_of() -> nyaaai_contract::shapes::step::CanonicalRequest {
+    use nyaaai_contract::shapes::step::{
+        CanonicalRequest, CanonicalRequestCache, CanonicalRequestCacheKind,
+    };
+    CanonicalRequest {
+        model: "vendor/model-1".to_owned(),
+        system: vec!["Be brief.".to_owned()],
+        summary: None,
+        history: Vec::new(),
+        state: None,
+        tools: None,
+        tool_choice: None,
+        schema: None,
+        effort: None,
+        cache: CanonicalRequestCache {
+            kind: CanonicalRequestCacheKind::None,
+            ttl: None,
+        },
+        max_tokens: None,
+        session: "session-1".to_owned(),
+        zdr_only: false,
+    }
+}
+
+#[test]
+fn the_transport_runs_over_the_adapter() {
+    use std::sync::Arc;
+
+    use nyaaai_agentic::dialects::openrouter::OPENROUTER_CHAT;
+    use nyaaai_agentic::transport::{Auth, Transport, TransportDeps, TransportError, static_key};
+    use nyaaai_contract::shapes::step::StepEvent;
+    use nyaaai_contract::time::SystemScheduler;
+
+    const KEY: &str = "key-0123456789abcdef";
+    run(async {
+        let stream = "data: {\"id\":\"gen-7\",\"choices\":[{\"delta\":{\"content\":\"hi\"},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n";
+        let mut failing = played(400, &[]);
+        failing.chunks =
+            vec![format!("{{\"error\":{{\"message\":\"bad {KEY} here\"}}}}").into_bytes()];
+        failing.headers = vec![("Content-Type".to_owned(), "application/json".to_owned())];
+        let server = Loopback::start(vec![played(200, &[stream]), failing])
+            .await
+            .unwrap();
+        let logged = Arc::new(std::sync::Mutex::new(Vec::<String>::new()));
+        let sink = Arc::clone(&logged);
+        let transport = Transport::new(TransportDeps {
+            fetch: Arc::new(ReqwestFetch::new().unwrap()),
+            scheduler: Arc::new(SystemScheduler),
+            key: Arc::new(static_key(KEY)),
+            log: Box::new(move |line| sink.lock().unwrap().push(line.to_owned())),
+            base_url: server.url(""),
+            label: "Loop".to_owned(),
+            user_agent: "test/1".to_owned(),
+            errors: Arc::new(OPENROUTER_CHAT),
+            auth: Auth::Bearer,
+            idle_ms: None,
+            max_bytes: None,
+        });
+        let request = request_of();
+        let cancel = CancelToken::new();
+        let mut events = transport.stream(&OPENROUTER_CHAT, &request, &cancel);
+        let mut seen = Vec::new();
+        while let Some(event) = events.next().await.unwrap() {
+            seen.push(event);
+        }
+        drop(events);
+        assert!(
+            seen.iter()
+                .any(|event| matches!(event, StepEvent::Text(text) if text.text == "hi"))
+        );
+        assert!(
+            seen.iter()
+                .any(|event| matches!(event, StepEvent::Finish(_)))
+        );
+        let failed = transport
+            .complete(&OPENROUTER_CHAT, &request, &cancel)
+            .await;
+        let Err(TransportError::Provider(error)) = failed else {
+            panic!("the second call should fail");
+        };
+        assert!(error.failure.message.contains("[key]"));
+        assert!(!error.failure.message.contains(KEY));
+        let sent = server.requests();
+        let auth = sent[0]
+            .headers
+            .iter()
+            .find(|(name, _)| name == "authorization");
+        assert_eq!(
+            auth.map(|(_, value)| value.as_str()),
+            Some(format!("Bearer {KEY}").as_str())
+        );
+        assert_eq!(logged.lock().unwrap().len(), 2);
+    });
+}

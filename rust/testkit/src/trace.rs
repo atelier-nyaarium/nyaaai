@@ -18,8 +18,8 @@ pub fn read_trace(file: &Path) -> io::Result<Trace> {
         .map_err(|refused| io::Error::other(format!("{} is no trace: {refused}", file.display())))
 }
 
-/// Plays the exchanges in order, keeping chunk edges. Nothing waits.
-pub fn replay_fetch(trace: &Trace) -> io::Result<ScriptedFetch> {
+/// Plays the exchanges in order on `wheel`, keeping chunk edges. Nothing waits.
+pub fn replay_fetch(trace: &Trace, wheel: Arc<TimerWheel>) -> io::Result<ScriptedFetch> {
     let exchanges = trace
         .exchanges
         .iter()
@@ -47,5 +47,5 @@ pub fn replay_fetch(trace: &Trace) -> io::Result<ScriptedFetch> {
             })
         })
         .collect::<io::Result<Vec<_>>>()?;
-    Ok(ScriptedFetch::new(exchanges, Arc::new(TimerWheel::new(0))))
+    Ok(ScriptedFetch::new(exchanges, wheel))
 }

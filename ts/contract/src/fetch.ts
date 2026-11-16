@@ -21,5 +21,5 @@ export interface FetchResponse {
 	chunks: AsyncIterable<Uint8Array>;
 }
 
-/** The signal covers the whole exchange: a pending or later chunk read rejects with its reason. */
+/** No redirect is followed: a 3xx is answered as the status it is. The signal covers the whole exchange: a pending or later chunk read rejects with its reason. */
 export type Fetch = (request: FetchRequest, signal: AbortSignal) => Promise<FetchResponse>;

@@ -1,5 +1,6 @@
 //! A loopback HTTP/1.1 server that plays recorded exchanges.
 
+use std::fmt;
 use std::io;
 use std::net::SocketAddr;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -25,6 +26,8 @@ pub enum Hold {
     BeforeHead,
     /// The chunks go out and the body stays open.
     AfterChunks,
+    /// The chunks go out, then half a chunk, and the connection closes.
+    Truncate,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -67,13 +70,33 @@ impl LoopbackExchange {
 }
 
 /// A request as the server read it.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct SeenRequest {
     pub method: String,
     pub path: String,
     /// Lowercase names, in arrival order.
     pub headers: Vec<(String, String)>,
     pub body: Vec<u8>,
+}
+
+impl fmt::Debug for SeenRequest {
+    fn fmt(&self, out: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // The key never prints.
+        let headers: Vec<(&str, &str)> = self
+            .headers
+            .iter()
+            .map(|(name, value)| {
+                let secret = name == "authorization";
+                (name.as_str(), if secret { "[key]" } else { value.as_str() })
+            })
+            .collect();
+        out.debug_struct("SeenRequest")
+            .field("method", &self.method)
+            .field("path", &self.path)
+            .field("headers", &headers)
+            .field("body", &self.body)
+            .finish()
+    }
 }
 
 struct State {
@@ -288,6 +311,12 @@ async fn answer(
         closed.fetch_add(1, Ordering::SeqCst);
         wake.notify_waiters();
         return Ok(());
+    }
+    if exchange.hold == Hold::Truncate {
+        // A chunk that promises sixteen bytes and sends two.
+        stream.write_all(b"10\r\nab").await?;
+        stream.flush().await?;
+        return stream.shutdown().await;
     }
     stream.write_all(b"0\r\n\r\n").await?;
     stream.flush().await?;

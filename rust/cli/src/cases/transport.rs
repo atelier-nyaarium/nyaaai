@@ -165,7 +165,12 @@ async fn run_call(
             let mut stream = transport.stream(codec, &held.request, caller);
             loop {
                 match stream.next().await {
-                    Ok(Some(event)) => outcome.events.push(event),
+                    Ok(Some(event)) => {
+                        outcome.events.push(event);
+                        if Some(outcome.events.len() as u64) == held.stop_after {
+                            break;
+                        }
+                    }
                     Ok(None) => break,
                     Err(error) => {
                         recorded(&mut outcome, error);
@@ -173,6 +178,8 @@ async fn run_call(
                     }
                 }
             }
+            // Letting go of the stream writes its log line.
+            drop(stream);
         }
         TransportCall::Complete(held) => {
             match transport.complete(codec, &held.request, caller).await {
@@ -220,7 +227,7 @@ fn played_of(
         }
         TransportScript::Trace(held) => {
             let trace = read_trace(&root.join(&held.file)).map_err(failed)?;
-            replay_fetch(&trace).map_err(failed)
+            replay_fetch(&trace, Arc::clone(wheel)).map_err(failed)
         }
     }
 }
@@ -229,6 +236,17 @@ pub fn exchange(
     input: TransportExchangeInput,
     context: &CaseContext,
 ) -> Outcome<TransportExchangeResult> {
+    for call in &input.calls {
+        match call {
+            TransportCall::GetJson(held) => {
+                slashed(&held.path)?;
+            }
+            TransportCall::PostJson(held) => {
+                slashed(&held.path)?;
+            }
+            _ => {}
+        }
+    }
     let wheel = Arc::new(TimerWheel::new(input.start_ms));
     let played = Arc::new(played_of(&input.script, &wheel, context.root())?);
     let keys = Arc::new(
@@ -267,6 +285,7 @@ pub fn exchange(
             Some(TransportExchangeInputAuth::Optional) => Auth::Optional,
         },
         idle_ms: input.idle_ms,
+        max_bytes: input.max_bytes.map(|held| held.max(0) as usize),
     });
     let told = Arc::clone(&settled);
     transport.on_settled(move |model| {

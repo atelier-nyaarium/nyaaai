@@ -7189,6 +7189,7 @@ impl Shape for TransportCall {
 #[derive(Debug, Clone, PartialEq)]
 pub struct TransportCallStream {
     pub request: nyaaai_contract::shapes::step::CanonicalRequest,
+    pub stop_after: Option<u64>,
     pub abort_after_ms: Option<i64>,
     pub aborted_before: Option<bool>,
 }
@@ -7205,10 +7206,14 @@ impl Shape for TransportCallStream {
             at,
             nyaaai_contract::shapes::step::CanonicalRequest::decode_at,
         )?;
+        let stop_after = shape::optional(object, "stopAfter", at, |value, at| {
+            shape::natural(value, at).and_then(|held| shape::at_least(held, 1, at))
+        })?;
         let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
         let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
         Ok(Self {
             request,
+            stop_after,
             abort_after_ms,
             aborted_before,
         })
@@ -7218,6 +7223,9 @@ impl Shape for TransportCallStream {
         let mut object = Object::new();
         object.insert("kind", Value::from("stream"));
         object.insert("request", self.request.encode());
+        if let Some(held) = &self.stop_after {
+            object.insert("stopAfter", Value::Number(*held as f64));
+        }
         if let Some(held) = &self.abort_after_ms {
             object.insert("abortAfterMs", Value::Number(*held as f64));
         }
@@ -7573,6 +7581,7 @@ pub struct TransportExchangeInput {
     pub user_agent: String,
     pub auth: Option<TransportExchangeInputAuth>,
     pub idle_ms: Option<i64>,
+    pub max_bytes: Option<i64>,
     pub keys: Vec<Option<String>>,
     pub start_ms: i64,
     pub script: TransportScript,
@@ -7591,6 +7600,7 @@ impl Shape for TransportExchangeInput {
         let user_agent = shape::required(object, "userAgent", at, shape::text)?;
         let auth = shape::optional(object, "auth", at, TransportExchangeInputAuth::decode_at)?;
         let idle_ms = shape::optional(object, "idleMs", at, shape::integer)?;
+        let max_bytes = shape::optional(object, "maxBytes", at, shape::integer)?;
         let keys = shape::required(object, "keys", at, |value, at| {
             shape::list_within(value, at, Some(1), None, |value, at| {
                 shape::nullable(value, at, shape::text)
@@ -7609,6 +7619,7 @@ impl Shape for TransportExchangeInput {
             user_agent,
             auth,
             idle_ms,
+            max_bytes,
             keys,
             start_ms,
             script,
@@ -7633,6 +7644,9 @@ impl Shape for TransportExchangeInput {
         }
         if let Some(held) = &self.idle_ms {
             object.insert("idleMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.max_bytes {
+            object.insert("maxBytes", Value::Number(*held as f64));
         }
         object.insert(
             "keys",
@@ -7834,6 +7848,125 @@ impl Shape for TransportKeyResult {
                 .as_ref()
                 .map_or(Value::Null, |held| Value::from(held.as_str())),
         );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct SecretSpellingsInput {
+    pub secret: String,
+}
+
+impl Shape for SecretSpellingsInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let secret = shape::required(object, "secret", at, shape::text)?;
+        Ok(Self { secret })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("secret", Value::from(self.secret.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct SecretSpellingsResult {
+    pub spellings: Vec<SecretSpellingsResultSpellingsItem>,
+}
+
+impl Shape for SecretSpellingsResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let spellings = shape::required(object, "spellings", at, |value, at| {
+            shape::list(value, at, SecretSpellingsResultSpellingsItem::decode_at)
+        })?;
+        Ok(Self { spellings })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "spellings",
+            Value::Array(self.spellings.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct SecretSpellingsResultSpellingsItem {
+    pub text: String,
+    pub folded: Vec<i64>,
+}
+
+impl Shape for SecretSpellingsResultSpellingsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let text = shape::required(object, "text", at, shape::text)?;
+        let folded = shape::required(object, "folded", at, |value, at| {
+            shape::list(value, at, shape::integer)
+        })?;
+        Ok(Self { text, folded })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("text", Value::from(self.text.as_str()));
+        object.insert(
+            "folded",
+            Value::Array(
+                self.folded
+                    .iter()
+                    .map(|held| Value::Number(*held as f64))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct SecretScrubInput {
+    pub secret: String,
+    pub text: String,
+}
+
+impl Shape for SecretScrubInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let secret = shape::required(object, "secret", at, shape::text)?;
+        let text = shape::required(object, "text", at, shape::text)?;
+        Ok(Self { secret, text })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("secret", Value::from(self.secret.as_str()));
+        object.insert("text", Value::from(self.text.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct SecretScrubResult {
+    pub scrubbed: String,
+    pub leaks: bool,
+}
+
+impl Shape for SecretScrubResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let scrubbed = shape::required(object, "scrubbed", at, shape::text)?;
+        let leaks = shape::required(object, "leaks", at, shape::flag)?;
+        Ok(Self { scrubbed, leaks })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("scrubbed", Value::from(self.scrubbed.as_str()));
+        object.insert("leaks", Value::Bool(self.leaks));
         Value::Object(object)
     }
 }

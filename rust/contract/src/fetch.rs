@@ -1,8 +1,11 @@
 //! The HTTP port.
 
+use std::fmt;
+
 use crate::cancel::CancelToken;
 use crate::future::BoxFuture;
 use crate::shapes::step::HeaderList;
+use crate::text::ascii_lower;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Method {
@@ -11,12 +14,32 @@ pub enum Method {
 }
 
 /// A `Get` carries no body.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct FetchRequest {
     pub method: Method,
     pub url: String,
     pub headers: HeaderList,
     pub body: Option<String>,
+}
+
+impl fmt::Debug for FetchRequest {
+    fn fmt(&self, out: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // The key never prints.
+        let headers: Vec<(&str, &str)> = self
+            .headers
+            .iter()
+            .map(|(name, value)| {
+                let secret = ascii_lower(name) == "authorization";
+                (name.as_str(), if secret { "[key]" } else { value.as_str() })
+            })
+            .collect();
+        out.debug_struct("FetchRequest")
+            .field("method", &self.method)
+            .field("url", &self.url)
+            .field("headers", &headers)
+            .field("body", &self.body)
+            .finish()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -39,6 +62,7 @@ pub struct FetchResponse {
     pub chunks: Box<dyn Chunks>,
 }
 
+/// No redirect is followed: a 3xx is answered as the status it is.
 /// The cancel covers the whole exchange, body reads included.
 pub trait Fetch: Send + Sync {
     fn fetch(
@@ -46,4 +70,26 @@ pub trait Fetch: Send + Sync {
         request: FetchRequest,
         cancel: CancelToken,
     ) -> BoxFuture<'_, Result<FetchResponse, FetchError>>;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_debug_print_hides_the_key() {
+        let request = FetchRequest {
+            method: Method::Post,
+            url: "http://host/".to_owned(),
+            headers: vec![
+                ("Accept".to_owned(), "x".to_owned()),
+                ("authorization".to_owned(), "Bearer secret-value".to_owned()),
+            ],
+            body: None,
+        };
+        let shown = format!("{request:?}");
+        assert!(!shown.contains("secret-value"));
+        assert!(shown.contains("[key]"));
+        assert!(shown.contains("Accept"));
+    }
 }

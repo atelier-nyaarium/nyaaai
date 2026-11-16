@@ -355,11 +355,6 @@ const scrubs: CaseSource[] = [
 		[sseReply([piece(frame(text(`The key is ${KEY}`))), piece(frame(finish("stop"))), piece(DONE_TEXT)])],
 	),
 	exchange(
-		"scrub-base64-at-another-alignment-is-not-caught",
-		[streamCall()],
-		[jsonReply({ error: { code: 401, message: `Bad ${Buffer.from(`x${KEY}`).toString("base64")}` } }, 401)],
-	),
-	exchange(
 		"scrub-twice-the-same-key-and-different-calls",
 		[streamCall(), streamCall()],
 		[
