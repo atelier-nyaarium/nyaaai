@@ -2163,6 +2163,62 @@
 				"planted"
 			],
 			"additionalProperties": false
+		},
+		"NoticeTextTextsInput": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"model": {
+								"type": [
+									"string",
+									"null"
+								]
+							},
+							"entry": {
+								"type": [
+									"string",
+									"null"
+								]
+							}
+						},
+						"required": [
+							"model",
+							"entry"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"rows"
+			],
+			"additionalProperties": false
+		},
+		"NoticeTextTextsResult": {
+			"type": "object",
+			"properties": {
+				"overloaded": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"unavailable": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"overloaded",
+				"unavailable"
+			],
+			"additionalProperties": false
 		}
 	}
 }

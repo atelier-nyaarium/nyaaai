@@ -5,12 +5,6 @@ import { type Json, refOf, type SetSchema } from "@nyaaai/contract/schemaExport"
 ////////////////////////////////
 //  Interfaces & Types
 
-export interface Sampled {
-	texts: string[];
-	/** Texts dropped past the cap. */
-	cut: number;
-}
-
 type Obj = { [key: string]: Json };
 
 interface Found {
@@ -23,8 +17,6 @@ type Put = (value: Json) => Json;
 
 ////////////////////////////////
 //  Constants
-
-export const SAMPLE_CAP = 2000;
 
 const DEPTH_FULL = 3;
 const DEPTH_HARD = 12;
@@ -447,24 +439,18 @@ export function fullValue(docs: Map<string, SetSchema>, set: string, name: strin
 	return full === NONE ? undefined : full;
 }
 
-/** Texts for one named shape, and how many the cap dropped. */
-export function sampleShape(docs: Map<string, SetSchema>, set: string, name: string, base?: Json): Sampled {
+/** Every JSON text for one named shape, mutated from a base value when given. */
+export function sampleTexts(docs: Map<string, SetSchema>, set: string, name: string, base?: Json): string[] {
 	const sampler = new Sampler(docs);
 	const root = docs.get(set)?.$defs[name];
 	if (root === undefined) throw new Error(`no shape ${set}.${name}`);
 	const full = base ?? sampler.build(set, root, 0, true);
 	const minimal = sampler.build(set, root, 0, false);
-	if (full === NONE || minimal === NONE) return { texts: [], cut: 0 };
+	if (full === NONE || minimal === NONE) return [];
 	const found: Found = { valid: [], unknown: [], broken: [] };
 	sampler.walk(set, root, full, 0, (held) => held, found);
 	const seen = new Set<string>();
 	const unique = (values: Json[]): string[] =>
 		values.map((value) => JSON.stringify(value)).filter((text) => !seen.has(text) && seen.add(text));
-	const all = [...unique([full, minimal, ...found.valid, ...found.unknown]), ...unique(found.broken)];
-	return { texts: all.slice(0, SAMPLE_CAP), cut: Math.max(all.length - SAMPLE_CAP, 0) };
-}
-
-/** JSON texts for one named shape, mutated from a base value when given. */
-export function sampleTexts(docs: Map<string, SetSchema>, set: string, name: string, base?: Json): string[] {
-	return sampleShape(docs, set, name, base).texts;
+	return [...unique([full, minimal, ...found.valid, ...found.unknown]), ...unique(found.broken)];
 }

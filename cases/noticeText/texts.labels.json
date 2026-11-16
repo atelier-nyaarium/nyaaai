@@ -1,0 +1,52 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "noticeText.texts",
+	"name": "labels",
+	"input": {
+		"rows": [
+			{
+				"model": null,
+				"entry": null
+			},
+			{
+				"model": "Model A",
+				"entry": null
+			},
+			{
+				"model": null,
+				"entry": "Host B"
+			},
+			{
+				"model": "Model A",
+				"entry": "Host B"
+			},
+			{
+				"model": "",
+				"entry": ""
+			},
+			{
+				"model": "Modèle 文",
+				"entry": "Hôte"
+			}
+		]
+	},
+	"expected": {
+		"overloaded": [
+			"The model is overloaded at its provider.",
+			"Model A is overloaded at its provider.",
+			"The model is overloaded at its provider.",
+			"Model A is overloaded at its provider.",
+			" is overloaded at its provider.",
+			"Modèle 文 is overloaded at its provider."
+		],
+		"unavailable": [
+			"The model is unavailable on its provider.",
+			"Model A is unavailable on its provider.",
+			"The model is unavailable on Host B.",
+			"Model A is unavailable on Host B.",
+			" is unavailable on .",
+			"Modèle 文 is unavailable on Hôte."
+		]
+	}
+}

@@ -13,6 +13,7 @@ import { claude } from "./scripts/caseGroups/claude";
 import { contract } from "./scripts/caseGroups/contract";
 import { js } from "./scripts/caseGroups/js";
 import { json } from "./scripts/caseGroups/json";
+import { noticeText } from "./scripts/caseGroups/noticeText";
 import { number } from "./scripts/caseGroups/number";
 import { order } from "./scripts/caseGroups/order";
 import { paths } from "./scripts/caseGroups/paths";
@@ -95,6 +96,7 @@ export default project({
 		paths,
 		claude,
 		testkit,
+		noticeText,
 	],
 	runs: adapterCases,
 	cases: { crate: "nyaaai_cli", module: "cases", dir: "rust/cli/src/cases" },

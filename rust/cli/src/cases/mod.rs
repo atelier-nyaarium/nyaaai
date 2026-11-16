@@ -9,6 +9,7 @@ pub mod claude;
 pub mod contract;
 pub mod js;
 pub mod json;
+pub mod notice_text;
 pub mod number;
 pub mod order;
 pub mod paths;

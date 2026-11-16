@@ -5,6 +5,7 @@
 	"type": "module",
 	"description": "Key-backed model turns",
 	"exports": {
-		".": "./src/index.ts"
+		".": "./src/index.ts",
+		"./noticeText": "./src/noticeText.ts"
 	}
 }

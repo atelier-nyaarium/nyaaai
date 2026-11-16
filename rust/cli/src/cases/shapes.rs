@@ -3797,3 +3797,108 @@ impl Shape for TestkitContextResult {
         Value::Object(object)
     }
 }
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NoticeTextTextsInput {
+    pub rows: Vec<NoticeTextTextsInputRowsItem>,
+}
+
+impl Shape for NoticeTextTextsInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, NoticeTextTextsInputRowsItem::decode_at)
+        })?;
+        Ok(Self { rows })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "rows",
+            Value::Array(self.rows.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NoticeTextTextsInputRowsItem {
+    pub model: Option<String>,
+    pub entry: Option<String>,
+}
+
+impl Shape for NoticeTextTextsInputRowsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let model = shape::required(object, "model", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let entry = shape::required(object, "entry", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        Ok(Self { model, entry })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "model",
+            self.model
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "entry",
+            self.entry
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NoticeTextTextsResult {
+    pub overloaded: Vec<String>,
+    pub unavailable: Vec<String>,
+}
+
+impl Shape for NoticeTextTextsResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let overloaded = shape::required(object, "overloaded", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let unavailable = shape::required(object, "unavailable", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self {
+            overloaded,
+            unavailable,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "overloaded",
+            Value::Array(
+                self.overloaded
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "unavailable",
+            Value::Array(
+                self.unavailable
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}

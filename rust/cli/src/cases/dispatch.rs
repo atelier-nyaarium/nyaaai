@@ -181,6 +181,10 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
             root,
             super::testkit::context,
         ),
+        "noticeText.texts" => run::<shapes::NoticeTextTextsInput, shapes::NoticeTextTextsResult>(
+            input,
+            super::notice_text::texts,
+        ),
         _ => return None,
     })
 }

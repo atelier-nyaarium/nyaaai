@@ -122,6 +122,7 @@
 		"cases/json/roundTrip.refused.json",
 		"cases/json/roundTrip.space.json",
 		"cases/json/roundTrip.strings.json",
+		"cases/noticeText/texts.labels.json",
 		"cases/number/fixed.digits.json",
 		"cases/number/integerOfText.spellings.json",
 		"cases/number/ofText.spellings.json",

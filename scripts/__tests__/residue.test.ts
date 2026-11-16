@@ -5,15 +5,18 @@ import { Pattern } from "@nyaaai/contract/pattern";
 import { ROOT } from "../child";
 import {
 	descendants,
+	isAwaitExpression,
 	isBindingElement,
 	isCallExpression,
 	isElementAccessExpression,
 	isExportDeclaration,
+	isForOfStatement,
 	isIdentifier,
 	isImportDeclaration,
 	isImportEqualsDeclaration,
 	isImportTypeNode,
 	isLiteralTypeNode,
+	isMetaProperty,
 	isNoSubstitutionTemplateLiteral,
 	isObjectBindingPattern,
 	isPropertyAccessExpression,
@@ -301,6 +304,90 @@ function namesOperator(files: Array<[string, string]>): string[] {
 	return files.filter(([, text]) => names.some((name) => text.includes(name))).map(([file]) => file);
 }
 
+/** Packages a consumer bundles into one CommonJS file. */
+const BUNDLED_PACKAGES = ["contract", "process", "agentic", "operator", "ui"];
+
+/** What a browser bundle may take: a package, or one file under `ts`. */
+const BROWSER_ENTRIES = ["contract", "ui", "agentic/src/noticeText.ts"];
+
+const ASSETS = [".txt", ".md", ".json", ".css", ".svg"];
+const FUNCTIONS = [
+	SyntaxKind.FunctionDeclaration,
+	SyntaxKind.FunctionExpression,
+	SyntaxKind.ArrowFunction,
+	SyntaxKind.MethodDeclaration,
+	SyntaxKind.Constructor,
+	SyntaxKind.GetAccessor,
+	SyntaxKind.SetAccessor,
+];
+const PLATFORM_GLOBALS = ["Bun", "process", "Buffer", "require", "__dirname", "__filename"];
+
+function insideFunction(node: Node): boolean {
+	for (let held = node.parent; held !== undefined; held = held.parent) {
+		if (FUNCTIONS.includes(held.kind)) return true;
+	}
+	return false;
+}
+
+/** What one CommonJS bundle cannot hold. */
+function bundleBlocks(file: SourceFile): string[] {
+	const found: Array<[at: number, text: string]> = [];
+	for (const node of descendants(file)) {
+		if (isMetaProperty(node) && node.keywordToken === SyntaxKind.ImportKeyword)
+			found.push([node.end, "import.meta"]);
+		const awaits = isAwaitExpression(node) || (isForOfStatement(node) && node.awaitModifier !== undefined);
+		if (awaits && !insideFunction(node)) found.push([node.end, "a top-level await"]);
+		if ((isImportDeclaration(node) || isExportDeclaration(node)) && node.attributes !== undefined) {
+			found.push([node.end, "an import attribute"]);
+		}
+	}
+	const assets = specifiersOf(file).filter((specifier) => ASSETS.some((ending) => specifier.endsWith(ending)));
+	return [...found.sort((left, right) => left[0] - right[0]).map(([, text]) => text), ...assets];
+}
+
+/** Modules and globals a browser lacks. */
+function platformUses(file: SourceFile): string[] {
+	const modules = specifiersOf(file).filter(
+		(specifier) => specifier.startsWith("node:") || specifier === "bun" || specifier.startsWith("bun:"),
+	);
+	const globals = descendants(file)
+		.filter((node) => isIdentifier(node) && isReference(node) && PLATFORM_GLOBALS.includes(node.text))
+		.map((node) => (node as Node & { text: string }).text);
+	return [...modules, ...globals];
+}
+
+/** The file a specifier names from `file`; undefined outside the packages. */
+function packageFile(file: string, specifier: string): string | undefined {
+	if (specifier.startsWith(".")) return path.join(path.dirname(file), `${specifier}.ts`);
+	if (!specifier.startsWith("@nyaaai/")) return undefined;
+	const [, name, ...rest] = specifier.split("/");
+	const folder = path.join(ROOT, "ts", name ?? "");
+	const manifest = JSON.parse(readFileSync(path.join(folder, "package.json"), "utf8")) as {
+		exports: Record<string, string>;
+	};
+	const target = manifest.exports[rest.length === 0 ? "." : `./${rest.join("/")}`];
+	if (target === undefined) throw new Error(`${specifier} is not exported`);
+	return path.join(folder, target);
+}
+
+/** Every package file an entry reaches, itself included. */
+async function reachedFrom(entry: string): Promise<Map<string, SourceFile>> {
+	const whole = !entry.endsWith(".ts");
+	const queue = whole ? sourcesOf(entry) : [path.join(ROOT, "ts", entry)];
+	const reached = new Map<string, SourceFile>();
+	while (queue.length > 0) {
+		const fresh = [...new Set(queue.splice(0))].filter((file) => !reached.has(file));
+		for (const [file, source] of await parseFiles(fresh)) {
+			reached.set(file, source);
+			for (const specifier of specifiersOf(source)) {
+				const next = packageFile(file, specifier);
+				if (next !== undefined) queue.push(next);
+			}
+		}
+	}
+	return reached;
+}
+
 describe("residue", () => {
 	it("engine TypeScript uses frozen patterns", async () => {
 		const probes = await parseProbes([
@@ -502,5 +589,43 @@ describe("residue", () => {
 		).workspaces;
 		const crates = cargoOf(readFileSync(path.join(ROOT, "rust", "Cargo.toml"), "utf8")).workspace?.members ?? [];
 		expect(packages.filter((name) => name !== "ui").sort()).toEqual([...crates].sort());
+	});
+
+	it("bundled packages fit one CommonJS file", async () => {
+		const probes = await parseProbes([
+			"const loaded = await load(); for await (const part of parts) use(part);",
+			"async function run() { await load(); for await (const part of parts) use(part); } const later = async () => await load();",
+			"const here = import.meta.dirname; function made() { return new.target; }",
+			'import text from "./prompt.txt"; import data from "./table.json" with { type: "json" }; export * from "./other";',
+		]);
+		expect(probes.map(bundleBlocks)).toEqual([
+			["a top-level await", "a top-level await"],
+			[],
+			["import.meta"],
+			["an import attribute", "./prompt.txt", "./table.json"],
+		]);
+
+		const files = BUNDLED_PACKAGES.flatMap(sourcesOf);
+		const problems = [...(await parseFiles(files))].flatMap(([file, source]) =>
+			bundleBlocks(source).map((block) => `${path.relative(ROOT, file)} holds ${block}`),
+		);
+		expect(problems).toEqual([]);
+	});
+
+	it("browser entries reach no platform module or global", async () => {
+		const probes = await parseProbes([
+			'import { readFile } from "node:fs/promises"; import { $ } from "bun"; const a = Bun.file("x"); const b = process.cwd();',
+			"const text = 'process'; const held = { process: 1, Buffer: 2 }; held.process; type Bytes = Buffer;",
+		]);
+		expect(probes.map(platformUses)).toEqual([["node:fs/promises", "bun", "Bun", "process"], []]);
+
+		const problems: string[] = [];
+		for (const entry of BROWSER_ENTRIES) {
+			for (const [file, source] of await reachedFrom(entry)) {
+				for (const use of platformUses(source))
+					problems.push(`${entry} reaches ${use} in ${path.relative(ROOT, file)}`);
+			}
+		}
+		expect(problems).toEqual([]);
 	});
 });

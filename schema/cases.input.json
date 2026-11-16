@@ -2053,6 +2053,59 @@
 				"root",
 				"planted"
 			]
+		},
+		"NoticeTextTextsInput": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"model": {
+								"type": [
+									"string",
+									"null"
+								]
+							},
+							"entry": {
+								"type": [
+									"string",
+									"null"
+								]
+							}
+						},
+						"required": [
+							"model",
+							"entry"
+						]
+					}
+				}
+			},
+			"required": [
+				"rows"
+			]
+		},
+		"NoticeTextTextsResult": {
+			"type": "object",
+			"properties": {
+				"overloaded": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"unavailable": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"overloaded",
+				"unavailable"
+			]
 		}
 	}
 }

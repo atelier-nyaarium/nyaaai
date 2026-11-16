@@ -42,7 +42,8 @@ Same names in both languages; Rust files are snake case.
   - `rejection` (TypeScript): `rejection`, `rethrown` read what a promise rejects with.
   - `samples` (TypeScript): `sampleTexts` derives round-trip inputs from an exported schema.
   - `rustNames`: `snake`, `pascal`, `quote`, for a `parity.ts`'s generated Rust.
-- `agentic`, `ui`: empty.
+- `agentic`: `noticeText` (`overloadedText`, `unavailableText`), the sentences a notice shows.
+- `ui`: empty.
 
 ## Patterns
 
@@ -191,7 +192,7 @@ To add a set:
 3. `bun scripts/contract.ts --refresh`.
 4. Round-trip cases for every named shape in `scripts/caseSources/contract.ts`. A test fails on a shape without one.
 
-`samples` holds every shape to more than its hand-written cases. For each named shape it derives values from the exported schema: a full one, a minimal one, each branch, an unknown key, then one broken rule at a time. Both languages decode each through the project's `roundTrip` kind, and a difference fails the gate. It stores nothing.
+`samples` holds every shape to more than its hand-written cases. For each named shape it derives values from the exported schema: a full one, a minimal one, each branch, an unknown key, then one broken rule at a time. Both languages decode each through the project's `roundTrip` kind, and a difference fails the gate. A shape's values go out 2,000 a request, and none is dropped. It stores nothing.
 
 Dialect. `contract` fails on anything else:
 
@@ -240,6 +241,8 @@ bun <submodule>/scripts/consumer.ts assert --package    # also refuses a snapsho
 - `assert` fails on `node_modules` inside the submodule, a missing link, and a package dependency (Zod) that the consumer's root, or a workspace `package.json` naming it, does not pin at the same version.
   - With a `rust/Cargo.toml`: a `rust-toolchain.toml` whose `channel` differs, and a `rust/clippy.toml` lacking a `disallowed-methods` path of the submodule's. A missing file fails.
 - A snapshot's subject starts with `Dev snapshot of `. Never pin one.
+- A consumer bundles the source itself. `contract`, `process`, `agentic`, `operator` and `ui` fit one CommonJS file: no top-level `await`, no `import.meta`, no asset import.
+- A browser bundle may take `contract`, `ui` and `@nyaaai/agentic/noticeText`. They reach no platform module (`node:*`, `bun`) or global (`Bun`, `process`, `Buffer`). A new browser entry joins `BROWSER_ENTRIES` in the residue test, which holds both rules.
 
 Parity of its own:
 

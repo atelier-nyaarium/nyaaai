@@ -3,7 +3,7 @@
 
 import { exportSchemas, type Json, type SetSchema } from "@nyaaai/contract/schemaExport";
 import { decodeText, shapeSets } from "@nyaaai/contract/shape";
-import { fullValue, SAMPLE_CAP, sampleShape } from "@nyaaai/testkit/samples";
+import { fullValue, sampleTexts } from "@nyaaai/testkit/samples";
 import { runCommands, rustAdapter } from "./adapterHost";
 import { CASE_PREFIX, runCase } from "./caseAdapter";
 import { loadProject } from "./project";
@@ -24,6 +24,8 @@ interface Difference {
 
 const SHOWN = 20;
 const TEXT_CUT = 200;
+/** Texts in one request. */
+const PART = 2000;
 
 ////////////////////////////////
 //  Functions & Helpers
@@ -56,7 +58,8 @@ if (import.meta.main) {
 			seeds.set(`${set}.${shape}`, [...(seeds.get(`${set}.${shape}`) ?? []), ...texts]);
 		}
 	}
-	const jobs: Array<{ set: string; shape: string; texts: string[] }> = [];
+	const jobs: Array<{ run: string; set: string; shape: string; texts: string[] }> = [];
+	let shapes = 0;
 	for (const set of Object.keys(project.sets)) {
 		const input = inputs.get(set);
 		if (!input) {
@@ -78,20 +81,21 @@ if (import.meta.main) {
 				}
 				base = JSON.parse(seed) as Json;
 			}
-			const sampled = sampleShape(inputs, set, shape, base);
-			if (sampled.cut > 0) failures.push(`${name}: cut at ${SAMPLE_CAP}, ${sampled.cut} dropped`);
-			jobs.push({ set, shape, texts: sampled.texts });
+			const texts = sampleTexts(inputs, set, shape, base);
+			shapes += 1;
+			for (let at = 0; at === 0 || at < texts.length; at += PART) {
+				jobs.push({ run: `${name}/${at / PART}`, set, shape, texts: texts.slice(at, at + PART) });
+			}
 		}
 	}
 	const rust = await runCommands(
 		rustAdapter(project),
-		jobs.map((job) => ({ run: `${job.set}.${job.shape}`, command: `${CASE_PREFIX}${kind}`, input: job })),
+		jobs.map(({ run, ...input }) => ({ run, command: `${CASE_PREFIX}${kind}`, input })),
 	);
 	const differences: Difference[] = [];
 	let values = 0;
-	for (const job of jobs) {
-		const name = `${job.set}.${job.shape}`;
-		const theirs = rust.get(name);
+	for (const { run, ...job } of jobs) {
+		const theirs = rust.get(run);
 		const mine = await runCase(project, kind, job).then(
 			(held) => ({ held }),
 			(error: unknown) => ({ error: error instanceof Error ? error.message : String(error) }),
@@ -103,7 +107,7 @@ if (import.meta.main) {
 			differences.push({
 				set: job.set,
 				shape: job.shape,
-				text: `(the whole shape, ${job.texts.length} texts sent)`,
+				text: `(part ${run}, ${job.texts.length} texts sent)`,
 				typescript: show("held" in mine ? mine.held : mine),
 				rust: show(theirs),
 			});
@@ -127,8 +131,6 @@ if (import.meta.main) {
 	if (differences.length > SHOWN) console.error(`... ${differences.length - SHOWN} more differences`);
 	console.log(`samples: ran in ${Date.now() - started} ms`);
 	const ok = differences.length === 0 && failures.length === 0;
-	console.log(
-		ok ? `samples: ${values} values over ${jobs.length} shapes agree in both languages` : "samples: FAILED",
-	);
+	console.log(ok ? `samples: ${values} values over ${shapes} shapes agree in both languages` : "samples: FAILED");
 	process.exit(ok ? 0 : 1);
 }

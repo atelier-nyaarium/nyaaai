@@ -18,6 +18,7 @@ name = "nyaaai-cli"
 version = "0.0.0"
 dependencies = [
  "nyaaai-adapter",
+ "nyaaai-agentic",
  "nyaaai-contract",
  "nyaaai-operator",
  "nyaaai-process",
