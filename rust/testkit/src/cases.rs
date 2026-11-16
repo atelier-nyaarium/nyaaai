@@ -25,6 +25,16 @@ pub const ROOT_MARK: &str = "$ROOT";
 
 pub type Outcome<T> = Result<T, String>;
 
+/// The adapter answers this for a misfit.
+const MISFIT: &str = "the result does not fit the command";
+
+/// The result as its shape decodes it.
+fn held_to<Output: Shape>(made: Value) -> Outcome<Value> {
+    Output::decode(&made)
+        .map(|held| held.encode())
+        .map_err(|_| MISFIT.to_owned())
+}
+
 static MADE: AtomicU64 = AtomicU64::new(0);
 
 /// Shared case resources.
@@ -122,13 +132,13 @@ pub fn failed(error: io::Error) -> String {
     error.to_string()
 }
 
-/// Runs shaped case handlers.
+/// Runs shaped case handlers, and holds results to their shape.
 pub fn run<Input: Shape, Output: Shape>(
     input: &Value,
     handler: fn(Input) -> Outcome<Output>,
 ) -> Outcome<Value> {
     let input = Input::decode(input).map_err(|refused| format!("the input: {refused}"))?;
-    handler(input).map(|result| result.encode())
+    held_to::<Output>(handler(input)?.encode())
 }
 
 /// Runs a future to its end on a current-thread runtime.
@@ -149,5 +159,40 @@ pub fn run_with<Input: Shape, Output: Shape>(
     let input = Input::decode(input).map_err(|refused| format!("the input: {refused}"))?;
     let context = CaseContext::new(root);
     let result = handler(input, &context)?;
-    Ok(context.marked(result.encode()))
+    held_to::<Output>(context.marked(result.encode()))
+}
+
+#[cfg(test)]
+mod tests {
+    use nyaaai_contract::json::parse_json;
+
+    use super::*;
+    use crate::torture_shapes::Bounded;
+
+    const BOUNDED: &str = r#"{"name":"ab","ratio":0.5,"few":[true],"level":0,"count":0}"#;
+
+    fn blank(mut held: Bounded) -> Outcome<Bounded> {
+        held.few.clear();
+        Ok(held)
+    }
+
+    fn same(held: Bounded) -> Outcome<Bounded> {
+        Ok(held)
+    }
+
+    #[test]
+    fn holds_a_result_to_its_shape() {
+        let input = parse_json(BOUNDED).expect("json");
+        assert_eq!(
+            run::<Bounded, Bounded>(&input, blank),
+            Err(MISFIT.to_owned())
+        );
+        let fits = run::<Bounded, Bounded>(&input, same).expect("fits");
+        assert_eq!(fits, input);
+        let root = std::env::temp_dir();
+        assert_eq!(
+            run_with::<Bounded, Bounded>(&input, &root, |held, _| blank(held)),
+            Err(MISFIT.to_owned())
+        );
+    }
 }

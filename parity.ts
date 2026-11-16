@@ -35,7 +35,7 @@ import { testkit } from "./scripts/caseGroups/testkit";
 import { text } from "./scripts/caseGroups/text";
 import { time } from "./scripts/caseGroups/time";
 import { adapterCases } from "./scripts/caseSources/adapter";
-import { converse, crash } from "./scripts/testCommands";
+import { converse, crash, misfit } from "./scripts/testCommands";
 
 ////////////////////////////////
 //  Functions & Helpers
@@ -118,7 +118,12 @@ export default project({
 	],
 	runs: adapterCases,
 	cases: { crate: "nyaaai_cli", module: "cases", dir: "rust/cli/src/cases" },
-	commands: new Map([...COMMANDS, ["testkit.converse", converse], ["testkit.crash", crash]]),
+	commands: new Map([
+		...COMMANDS,
+		["testkit.converse", converse],
+		["testkit.crash", crash],
+		["testkit.misfit", misfit],
+	]),
 	rustAdapter: {
 		build: [
 			"cargo",

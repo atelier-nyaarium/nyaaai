@@ -2001,6 +2001,29 @@
 				"steers"
 			]
 		},
+		"TestkitMisfitInput": {
+			"type": "object",
+			"properties": {
+				"fits": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"fits"
+			]
+		},
+		"TestkitMisfitResult": {
+			"type": "object",
+			"properties": {
+				"text": {
+					"type": "string",
+					"minLength": 1
+				}
+			},
+			"required": [
+				"text"
+			]
+		},
 		"TestkitCompactedSessionInput": {
 			"type": "object",
 			"properties": {}

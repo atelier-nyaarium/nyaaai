@@ -193,6 +193,13 @@ export const adapterCases: RunSource[] = [
 		{ send: { type: "steer", run: "pure", text: "too late" } },
 		{ await: { type: "fault", code: "unknown_run" } },
 	]),
+	run("result-shape", [
+		...welcomed,
+		{ send: { type: "start", run: "misfit", command: "testkit.misfit", input: { fits: false } } },
+		{ await: { type: "failed", run: "misfit", code: "error", message: "the result does not fit the command" } },
+		{ send: { type: "start", run: "fits", command: "testkit.misfit", input: { fits: true } } },
+		{ await: { type: "done", run: "fits", result: { text: "fits" } } },
+	]),
 	run("steer-and-interrupt-while-asking", [
 		...welcomed,
 		converse("talk", 2),

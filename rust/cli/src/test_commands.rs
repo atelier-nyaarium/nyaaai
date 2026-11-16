@@ -3,14 +3,24 @@
 use nyaaai_adapter::runtime::{Inbound, RunContext, RunError, typed};
 use nyaaai_contract::json::{Object, Value};
 
-use super::cases::shapes::{TestkitConverseInput, TestkitConverseResult};
+use super::cases::shapes::{
+    TestkitConverseInput, TestkitConverseResult, TestkitMisfitInput, TestkitMisfitResult,
+};
 
 pub fn run(name: &str, input: &Value, context: &RunContext) -> Option<Result<Value, RunError>> {
     Some(match name {
         "testkit.converse" => typed(input, |input| testkit_converse(input, context)),
+        "testkit.misfit" => typed(input, testkit_misfit),
         // Avoids panic hook report.
         "testkit.crash" => std::panic::resume_unwind(Box::new("crash")),
         _ => return None,
+    })
+}
+
+fn testkit_misfit(input: TestkitMisfitInput) -> Result<TestkitMisfitResult, RunError> {
+    let text = if input.fits { "fits" } else { "" };
+    Ok(TestkitMisfitResult {
+        text: text.to_owned(),
     })
 }
 

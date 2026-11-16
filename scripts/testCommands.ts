@@ -1,12 +1,20 @@
 // Scripted-run commands.
 
 import { type Command, command, HostRequestFailed, Interrupted } from "@nyaaai/adapter/runtime";
-import { TestkitConverseInput, TestkitConverseResult } from "./caseGroups/testkit";
+import {
+	TestkitConverseInput,
+	TestkitConverseResult,
+	TestkitMisfitInput,
+	TestkitMisfitResult,
+} from "./caseGroups/testkit";
 
 /** Ends with no message: a thrown value here, a panic in Rust. */
 export const crash: Command = async () => {
 	throw "crash";
 };
+
+/** Answers a text its shape refuses. */
+export const misfit = command(TestkitMisfitInput, TestkitMisfitResult, (input) => ({ text: input.fits ? "fits" : "" }));
 
 /** Reports host replies. */
 export const converse = command(TestkitConverseInput, TestkitConverseResult, async (input, context) => {

@@ -27,6 +27,7 @@ const READ_CHUNK_BYTES: usize = 1 << 16;
 
 /// Shared crash message.
 const CRASHED: &str = "the command crashed";
+const MISFIT: &str = "the result does not fit the command";
 
 pub enum Inbound {
     Steer(String),
@@ -57,13 +58,16 @@ impl From<std::io::Error> for RunError {
 
 pub type Commands = fn(&str, &Value, &RunContext) -> Option<Result<Value, RunError>>;
 
-/// Decodes input and encodes output.
+/// Decodes input, and holds the output to its shape.
 pub fn typed<Input: Shape, Output: Shape>(
     input: &Value,
     run: impl FnOnce(Input) -> Result<Output, RunError>,
 ) -> Result<Value, RunError> {
     let input = Input::decode(input).map_err(|refused| RunError::BadInput(refused.path))?;
-    run(input).map(|result| result.encode())
+    let made = run(input)?.encode();
+    Output::decode(&made)
+        .map(|held| held.encode())
+        .map_err(|_| RunError::Failed(MISFIT.to_owned()))
 }
 
 fn locked<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {

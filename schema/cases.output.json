@@ -2108,6 +2108,31 @@
 			],
 			"additionalProperties": false
 		},
+		"TestkitMisfitInput": {
+			"type": "object",
+			"properties": {
+				"fits": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"fits"
+			],
+			"additionalProperties": false
+		},
+		"TestkitMisfitResult": {
+			"type": "object",
+			"properties": {
+				"text": {
+					"type": "string",
+					"minLength": 1
+				}
+			},
+			"required": [
+				"text"
+			],
+			"additionalProperties": false
+		},
 		"TestkitCompactedSessionInput": {
 			"type": "object",
 			"properties": {},

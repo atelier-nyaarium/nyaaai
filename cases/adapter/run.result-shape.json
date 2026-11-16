@@ -1,0 +1,87 @@
+{
+	"format": 2,
+	"type": "run",
+	"kind": "adapter.run",
+	"name": "result-shape",
+	"script": [
+		{
+			"send": {
+				"type": "hello",
+				"version": "0.1.0"
+			}
+		},
+		{
+			"await": {
+				"type": "welcome"
+			}
+		},
+		{
+			"send": {
+				"type": "start",
+				"run": "misfit",
+				"command": "testkit.misfit",
+				"input": {
+					"fits": false
+				}
+			}
+		},
+		{
+			"await": {
+				"type": "failed",
+				"run": "misfit",
+				"code": "error",
+				"message": "the result does not fit the command"
+			}
+		},
+		{
+			"send": {
+				"type": "start",
+				"run": "fits",
+				"command": "testkit.misfit",
+				"input": {
+					"fits": true
+				}
+			}
+		},
+		{
+			"await": {
+				"type": "done",
+				"run": "fits",
+				"result": {
+					"text": "fits"
+				}
+			}
+		}
+	],
+	"expected": {
+		"exit": 0,
+		"connection": [
+			{
+				"type": "welcome",
+				"version": "0.1.0"
+			}
+		],
+		"runs": {
+			"fits": [
+				{
+					"type": "done",
+					"run": "fits",
+					"seq": 1,
+					"result": {
+						"text": "fits"
+					}
+				}
+			],
+			"misfit": [
+				{
+					"type": "failed",
+					"run": "misfit",
+					"seq": 1,
+					"code": "error",
+					"message": "the result does not fit the command"
+				}
+			]
+		},
+		"files": {}
+	}
+}

@@ -3730,6 +3730,46 @@ impl Shape for TestkitConverseResult {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+pub struct TestkitMisfitInput {
+    pub fits: bool,
+}
+
+impl Shape for TestkitMisfitInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let fits = shape::required(object, "fits", at, shape::flag)?;
+        Ok(Self { fits })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("fits", Value::Bool(self.fits));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TestkitMisfitResult {
+    pub text: String,
+}
+
+impl Shape for TestkitMisfitResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let text = shape::required(object, "text", at, |value, at| {
+            shape::text_within(value, at, Some(1), None)
+        })?;
+        Ok(Self { text })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("text", Value::from(self.text.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct TestkitCompactedSessionInput {}
 
 impl Shape for TestkitCompactedSessionInput {

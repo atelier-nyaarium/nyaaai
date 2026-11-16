@@ -153,7 +153,7 @@ To add a kind:
 4. Inputs in `scripts/caseSources/`.
 5. `bun scripts/cases.ts --refresh`, then read the diff under `cases/`.
 
-An adapter serves kind `a.b` as command `case:a.b`. Rust does so only with the `cases` feature. The runner fails when a run changes the project tree.
+An adapter serves kind `a.b` as command `case:a.b`. Rust does so only with the `cases` feature. Both languages hold a kind's result to its shape. The runner fails when a run changes the project tree.
 
 A case file writes every banned character, and U+FEFF, as a `\uXXXX` escape.
 
@@ -175,7 +175,7 @@ One process, many runs. `ts/adapter/src/runtime.ts` and `rust/adapter/src/runtim
 - `steer` and `interrupt` reach a run while it waits. An interrupt ends a run that reads its inbox, and nothing reaches the run after it.
 - A refused frame draws a `fault` and ends no run: `bad_frame`, `oversized_frame`, `not_greeted`, `unknown_run`, `duplicate_run`, `unknown_reply`.
 - End of input interrupts open runs, then exit 0.
-- Every message text is fixed and the same in both languages. A command that ends with none, by a thrown non-Error or a panic, fails with `the command crashed`.
+- Every message text is fixed and the same in both languages. A command that ends with none, by a thrown non-Error or a panic, fails with `the command crashed`. A result that does not fit the command's result shape fails with `the result does not fit the command`, in both languages.
 
 Commands: `sessionCut.plan`, `sessionCut.apply`. A compact with no summary handed over asks the host: request `sessionCut.summarize`, reply the summary text.
 

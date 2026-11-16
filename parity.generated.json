@@ -43,6 +43,7 @@
 		"cases/adapter/run.reject-no-version.json",
 		"cases/adapter/run.replies-out-of-order.json",
 		"cases/adapter/run.replies.json",
+		"cases/adapter/run.result-shape.json",
 		"cases/adapter/run.shutdown-interrupts-open-runs.json",
 		"cases/adapter/run.steer-and-interrupt-while-asking.json",
 		"cases/adapter/run.unterminated-tail.json",

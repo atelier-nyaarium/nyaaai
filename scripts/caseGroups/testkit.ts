@@ -21,6 +21,10 @@ export const TestkitConverseResult = z.object({
 	steers: z.array(z.string()),
 });
 
+/** The handler answers an empty text unless told it fits. */
+export const TestkitMisfitInput = z.object({ fits: z.boolean() });
+export const TestkitMisfitResult = z.object({ text: z.string().min(1) });
+
 ////////////////////////////////
 //  Functions & Helpers
 
@@ -38,7 +42,7 @@ const settled = (steps: SchedulerStep[]): SchedulerStep[] => steps.flatMap((step
 //  Group
 
 export const testkit = caseGroup("testkit", {
-	shapes: { TestkitConverseInput, TestkitConverseResult },
+	shapes: { TestkitConverseInput, TestkitConverseResult, TestkitMisfitInput, TestkitMisfitResult },
 	kinds: {
 		compactedSession: kind(z.object({}), z.object({ lines: z.array(z.string()) }), () => ({
 			lines: compactedSession().session.lines,
