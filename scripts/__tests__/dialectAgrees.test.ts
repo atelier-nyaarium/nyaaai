@@ -98,6 +98,18 @@ describe("the dialect check and the generator", () => {
 		}
 	});
 
+	it("pass a literal branch that is a named shape, nullable or not", () => {
+		counter += 1;
+		const name = `agree${counter}`;
+		const Root = z.literal(".");
+		const set = shapeSet(name, {
+			Root,
+			Shape: z.object({ plain: z.union([Root, z.string()]), absent: z.union([Root.nullable(), z.number()]) }),
+		});
+		expect(dialectProblems([set])).toEqual([]);
+		expect(generated(name)).toContain("Root(Root)");
+	});
+
 	it("refuses an alias that names itself before the generator runs", () => {
 		counter += 1;
 		const name = `agree${counter}`;

@@ -229,8 +229,14 @@ function branchFaults(def: Def): string[] {
 	if (isNullable(def)) return [];
 	const found: string[] = [];
 	(def.options ?? []).forEach((option, at) => {
-		let held = defOf(option);
-		while (held.type === "nullable" && held.innerType) held = defOf(held.innerType);
+		let branch = option;
+		let held = defOf(branch);
+		while (!shapeIds.has(branch) && held.type === "nullable" && held.innerType) {
+			branch = held.innerType;
+			held = defOf(branch);
+		}
+		// A named shape names it.
+		if (shapeIds.has(branch)) return;
 		const [value] = held.values ?? [];
 		if (held.type === "literal" && value !== null && tryVariant(String(value)) === undefined) {
 			found.push(
