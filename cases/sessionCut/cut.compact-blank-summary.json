@@ -39,7 +39,7 @@
 		"request": {
 			"mode": "compact",
 			"targetUuid": "u15",
-			"summaryText": " \n﻿"
+			"summaryText": " \n\ufeff"
 		},
 		"cliVersion": "2.1.323",
 		"sourcePath": "/sessions/old.jsonl",

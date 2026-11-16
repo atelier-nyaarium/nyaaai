@@ -5,6 +5,7 @@ import { ISSUE_MESSAGES } from "@nyaaai/contract/issues";
 import { CONTRACT_VERSION } from "@nyaaai/contract/shape";
 import "@nyaaai/contract/shapes/sessionCut";
 import { NYAAAI_SETS, project } from "@nyaaai/testkit/project";
+import { pascal, quote } from "@nyaaai/testkit/rustNames";
 import "@nyaaai/testkit/tortureShapes";
 import "@nyaaai/testkit/trace";
 import { base64 } from "./scripts/caseGroups/base64";
@@ -24,7 +25,6 @@ import { testkit } from "./scripts/caseGroups/testkit";
 import { text } from "./scripts/caseGroups/text";
 import { time } from "./scripts/caseGroups/time";
 import { adapterCases } from "./scripts/caseSources/adapter";
-import { pascal, quote } from "./scripts/contract/rust";
 import { converse, crash } from "./scripts/testCommands";
 
 ////////////////////////////////

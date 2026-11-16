@@ -256,6 +256,36 @@ describe("consumer", () => {
 	);
 
 	it(
+		"assert compares workspace pins, the toolchain pin and the Clippy bans",
+		() => {
+			const world = makeWorld({ workspaces: ["ts/*"] });
+			link(world.consumer, world.submodule);
+			mkdirSync(path.join(world.consumer, "ts", "app"), { recursive: true });
+			writeJson(path.join(world.consumer, "ts/app/package.json"), { dependencies: { "left-pad": "1.2.0" } });
+			expect(failure(() => assertConsumer(world.consumer, world.submodule, false))).toContain(
+				"ts/app/package.json",
+			);
+			writeJson(path.join(world.consumer, "ts/app/package.json"), { dependencies: { "left-pad": "1.3.0" } });
+			expect(assertConsumer(world.consumer, world.submodule, false)).toEqual([]);
+
+			mkdirSync(path.join(world.consumer, "rust"));
+			writeFileSync(path.join(world.consumer, "rust/Cargo.toml"), "[workspace]\n");
+			const refused = () => failure(() => assertConsumer(world.consumer, world.submodule, false));
+			expect(refused()).toContain("rust-toolchain.toml is missing");
+			expect(refused()).toContain("rust/clippy.toml is missing");
+
+			writeFileSync(path.join(world.consumer, "rust-toolchain.toml"), '[toolchain]\nchannel = "1.0.0"\n');
+			expect(refused()).toContain("names channel 1.0.0");
+			cpSync(path.join(world.submodule, "rust-toolchain.toml"), path.join(world.consumer, "rust-toolchain.toml"));
+			writeFileSync(path.join(world.consumer, "rust/clippy.toml"), "disallowed-methods = []\n");
+			expect(refused()).toContain("lacks disallowed-methods path str::trim");
+			cpSync(path.join(world.submodule, "rust/clippy.toml"), path.join(world.consumer, "rust/clippy.toml"));
+			expect(assertConsumer(world.consumer, world.submodule, false)).toEqual([]);
+		},
+		TIMEOUT,
+	);
+
+	it(
 		"runs from a clean clone's root",
 		() => {
 			const world = makeWorld();

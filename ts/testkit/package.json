@@ -13,6 +13,7 @@
 		"./loopback": "./src/loopback.ts",
 		"./project": "./src/project.ts",
 		"./rejection": "./src/rejection.ts",
+		"./rustNames": "./src/rustNames.ts",
 		"./samples": "./src/samples.ts",
 		"./scheduler": "./src/scheduler.ts",
 		"./tortureShapes": "./src/tortureShapes.ts",

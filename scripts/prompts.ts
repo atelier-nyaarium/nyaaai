@@ -3,7 +3,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { Pattern } from "@nyaaai/contract/pattern";
-import { quote, snake } from "./contract/rust";
+import { quote, snake } from "@nyaaai/testkit/rustNames";
 
 ////////////////////////////////
 //  Interfaces & Types

@@ -21,7 +21,7 @@ interface Part {
 const BIN = path.join(ROOT, "ts", "node_modules", ".bin");
 const MANIFEST = path.join("rust", "Cargo.toml");
 const TAIL_LINES = 60;
-const DEMO = path.resolve(ROOT, process.env.NYAAAI_DEMO_DIR ?? "../nyaaai-demo");
+const DEMO = path.resolve(ROOT, process.env["NYAAAI_DEMO_DIR"] ?? "../nyaaai-demo");
 
 ////////////////////////////////
 //  Functions & Helpers

@@ -12,8 +12,8 @@ const isRecord = (raw: unknown): raw is Record<string, unknown> =>
 function renameLegacy(raw: unknown): unknown {
 	if (!isRecord(raw)) return raw;
 	const held = { ...raw };
-	if (!("id" in held) && "name" in held) held.id = held.name;
-	if (typeof held.tags === "string") held.tags = [held.tags];
+	if (!("id" in held) && "name" in held) held["id"] = held["name"];
+	if (typeof held["tags"] === "string") held["tags"] = [held["tags"]];
 	return held;
 }
 

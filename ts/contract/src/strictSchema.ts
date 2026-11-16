@@ -85,14 +85,14 @@ function refName(value: Json | undefined): string | undefined {
 }
 
 function rootDefs(root: Json): Schema {
-	return record(root) && record(root.$defs) ? root.$defs : bare();
+	return record(root) && record(root["$defs"]) ? root["$defs"] : bare();
 }
 
 const typesOf = (schema: Schema): string[] | undefined =>
-	typeof schema.type === "string"
-		? [schema.type]
-		: Array.isArray(schema.type)
-			? schema.type.filter((type) => typeof type === "string")
+	typeof schema["type"] === "string"
+		? [schema["type"]]
+		: Array.isArray(schema["type"])
+			? schema["type"].filter((type) => typeof type === "string")
 			: undefined;
 
 /** Transforms before subschema traversal. */
@@ -209,7 +209,7 @@ function schemaNode(value: Json, path: PathPart[], defs: Schema, out: Issue[], d
 /** Finds inputless refs. */
 function inputlessRefs(value: Json, defs: Schema, found: Set<string>, depth = 0): void {
 	if (!record(value) || depth > MAX_SCHEMA_DEPTH) return;
-	const name = refName(value.$ref);
+	const name = refName(value["$ref"]);
 	if (name !== undefined && Object.hasOwn(defs, name)) found.add(name);
 	for (const keyword of LISTS) {
 		const branches = value[keyword];
@@ -316,7 +316,7 @@ class Run {
 		if (!record(schema)) return true;
 		if (depth > MAX_VALIDATE_DEPTH) return this.halt([...this.path]);
 		if (Object.hasOwn(schema, "$ref")) {
-			const name = refName(schema.$ref);
+			const name = refName(schema["$ref"]);
 			if (name === undefined || !Object.hasOwn(this.defs, name)) return true;
 			return this.check(this.defs[name] as Json, value, depth + 1, report);
 		}
@@ -326,11 +326,11 @@ class Run {
 			return false;
 		}
 		let clean = true;
-		if (Array.isArray(schema.enum) && !schema.enum.some((member) => sameJson(member, value))) {
+		if (Array.isArray(schema["enum"]) && !schema["enum"].some((member) => sameJson(member, value))) {
 			clean = false;
 			if (this.fails(report, "enum")) return false;
 		}
-		if (Object.hasOwn(schema, "const") && !sameJson(schema.const as Json, value)) {
+		if (Object.hasOwn(schema, "const") && !sameJson(schema["const"] as Json, value)) {
 			clean = false;
 			if (this.fails(report, "const")) return false;
 		}
@@ -344,13 +344,13 @@ class Run {
 		}
 		if (typeof value === "string") {
 			const length = codePoints(value);
-			if (typeof schema.minLength === "number" && length < schema.minLength) {
+			if (typeof schema["minLength"] === "number" && length < schema["minLength"]) {
 				clean = false;
-				if (this.fails(report, "min_length", { bound: numberText(schema.minLength) })) return false;
+				if (this.fails(report, "min_length", { bound: numberText(schema["minLength"]) })) return false;
 			}
-			if (typeof schema.maxLength === "number" && length > schema.maxLength) {
+			if (typeof schema["maxLength"] === "number" && length > schema["maxLength"]) {
 				clean = false;
-				if (this.fails(report, "max_length", { bound: numberText(schema.maxLength) })) return false;
+				if (this.fails(report, "max_length", { bound: numberText(schema["maxLength"]) })) return false;
 			}
 		}
 		if (Array.isArray(value) && !this.list(schema, value, depth, report)) {
@@ -366,18 +366,18 @@ class Run {
 
 	private list(schema: Schema, value: Json[], depth: number, report: boolean): boolean {
 		let clean = true;
-		if (typeof schema.minItems === "number" && value.length < schema.minItems) {
+		if (typeof schema["minItems"] === "number" && value.length < schema["minItems"]) {
 			clean = false;
-			if (this.fails(report, "min_items", { bound: numberText(schema.minItems) })) return false;
+			if (this.fails(report, "min_items", { bound: numberText(schema["minItems"]) })) return false;
 		}
-		if (typeof schema.maxItems === "number" && value.length > schema.maxItems) {
+		if (typeof schema["maxItems"] === "number" && value.length > schema["maxItems"]) {
 			clean = false;
-			if (this.fails(report, "max_items", { bound: numberText(schema.maxItems) })) return false;
+			if (this.fails(report, "max_items", { bound: numberText(schema["maxItems"]) })) return false;
 		}
 		if (!Object.hasOwn(schema, "items")) return clean;
 		for (let index = 0; index < value.length; index += 1) {
 			this.path.push(index);
-			const held = this.check(schema.items as Json, value[index] as Json, depth + 1, report);
+			const held = this.check(schema["items"] as Json, value[index] as Json, depth + 1, report);
 			this.path.pop();
 			if (held) continue;
 			clean = false;
@@ -388,7 +388,7 @@ class Run {
 
 	private object(schema: Schema, value: Schema, depth: number, report: boolean): boolean {
 		let clean = true;
-		for (const name of Array.isArray(schema.required) ? schema.required : []) {
+		for (const name of Array.isArray(schema["required"]) ? schema["required"] : []) {
 			if (typeof name !== "string" || Object.hasOwn(value, name)) continue;
 			clean = false;
 			this.path.push(name);
@@ -410,15 +410,15 @@ class Run {
 	private member(schema: Schema, name: string, item: Json, depth: number, report: boolean): boolean {
 		let clean = true;
 		if (Object.hasOwn(schema, "propertyNames")) {
-			const named = this.check(schema.propertyNames as Json, name, depth + 1, false);
+			const named = this.check(schema["propertyNames"] as Json, name, depth + 1, false);
 			if (this.halted) return false;
 			if (!named) {
 				clean = false;
 				if (this.fails(report, "property_name")) return false;
 			}
 		}
-		const properties = schema.properties;
-		const additional = schema.additionalProperties;
+		const properties = schema["properties"];
+		const additional = schema["additionalProperties"];
 		if (record(properties) && Object.hasOwn(properties, name))
 			return this.check(properties[name] as Json, item, depth + 1, report) && clean;
 		if (additional === false) {
@@ -430,9 +430,9 @@ class Run {
 
 	private unions(schema: Schema, value: Json, depth: number, report: boolean): boolean {
 		let clean = true;
-		if (Array.isArray(schema.anyOf)) {
+		if (Array.isArray(schema["anyOf"])) {
 			let matched = false;
-			for (const branch of schema.anyOf) {
+			for (const branch of schema["anyOf"]) {
 				matched = this.check(branch, value, depth + 1, false);
 				if (this.halted) return false;
 				if (matched) break;
@@ -442,9 +442,9 @@ class Run {
 				if (this.fails(report, "no_branch")) return false;
 			}
 		}
-		if (Array.isArray(schema.oneOf)) {
+		if (Array.isArray(schema["oneOf"])) {
 			let matches = 0;
-			for (const branch of schema.oneOf) {
+			for (const branch of schema["oneOf"]) {
 				if (this.check(branch, value, depth + 1, false)) matches += 1;
 				if (this.halted) return false;
 				if (matches > 1) break;
@@ -464,17 +464,17 @@ export function normalizeSchema(schema: Json): Json {
 	const dropped = eachSchema(schema, 0, (node) => {
 		const held = bare();
 		for (const [key, value] of Object.entries(node)) if (!DROPPED.has(key)) held[key] = value;
-		if (held.$ref === ROOT_REF) rooted = true;
+		if (held["$ref"] === ROOT_REF) rooted = true;
 		return held;
 	});
 	if (!rooted || !record(dropped)) return dropped;
-	const defs = Object.hasOwn(dropped, "$defs") ? dropped.$defs : bare();
+	const defs = Object.hasOwn(dropped, "$defs") ? dropped["$defs"] : bare();
 	if (!record(defs)) return dropped;
 	let name = "Root";
 	while (Object.hasOwn(defs, name)) name += "_";
 	const target = `#/$defs/${name}`;
 	const named = eachSchema(dropped, 0, (node) => {
-		if (node.$ref !== ROOT_REF) return node;
+		if (node["$ref"] !== ROOT_REF) return node;
 		const held = bare();
 		for (const [key, value] of Object.entries(node)) held[key] = key === "$ref" ? target : value;
 		return held;
@@ -487,8 +487,8 @@ export function normalizeSchema(schema: Json): Json {
 	}
 	allDefs[name] = root;
 	const moved = bare();
-	moved.$ref = target;
-	moved.$defs = allDefs;
+	moved["$ref"] = target;
+	moved["$defs"] = allDefs;
 	return moved;
 }
 

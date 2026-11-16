@@ -10,7 +10,7 @@
 			"{\"legacy\":{\"id\":\"i\",\"tags\":[]},\"span\":null,\"label\":\"x\",\"spans\":[]}",
 			"{\"legacy\":{\"name\":\"n\",\"tags\":\"t\"},\"span\":{\"from\":1,\"to\":2},\"label\":\"x\",\"spans\":[{\"from\":0,\"to\":0}]}",
 			"{\"legacy\":{\"id\":\"i\",\"tags\":[]},\"span\":null,\"label\":\"  x y  \",\"spans\":[]}",
-			"{\"legacy\":{\"id\":\"i\",\"tags\":[]},\"span\":null,\"label\":\"﻿  x　 \",\"spans\":[]}",
+			"{\"legacy\":{\"id\":\"i\",\"tags\":[]},\"span\":null,\"label\":\"\ufeff  x　 \",\"spans\":[]}",
 			"{\"legacy\":{\"id\":\"i\",\"tags\":[]},\"span\":null,\"label\":\"   \",\"spans\":[]}",
 			"{\"legacy\":{\"id\":\"i\",\"tags\":[]},\"span\":null,\"label\":\"\",\"spans\":[]}",
 			"{\"legacy\":{\"id\":\"i\",\"tags\":[]},\"span\":null,\"label\":5,\"spans\":[]}",

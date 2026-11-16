@@ -8,8 +8,8 @@
 	},
 	"expected": {
 		"rows": [
-			"﻿A",
-			"﻿A"
+			"\ufeffA",
+			"\ufeffA"
 		]
 	}
 }

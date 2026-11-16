@@ -9,7 +9,7 @@
 			"   ",
 			"a  b",
 			" a\tb\nc\r\nd ",
-			"﻿  one 　two \t\n",
+			"\ufeff  one 　two \t\n",
 			"\u000b\fx\u000b\fy",
 			" a   b  ",
 			"  ",

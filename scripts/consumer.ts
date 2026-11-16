@@ -14,7 +14,7 @@ interface Manifest {
 	dependencies?: Record<string, string>;
 	devDependencies?: Record<string, string>;
 	nyaaai?: { packages?: unknown };
-	workspaces?: string[];
+	workspaces?: string[] | { packages?: string[] };
 }
 
 ////////////////////////////////
@@ -24,6 +24,9 @@ const SCOPE = "@nyaaai/";
 
 /** Packages a parity.ts imports. */
 const REQUIRED = ["contract", "testkit", "adapter"];
+
+const CLIPPY = "rust/clippy.toml";
+const TOOLCHAIN = "rust-toolchain.toml";
 
 ////////////////////////////////
 //  Functions & Helpers
@@ -37,10 +40,13 @@ function rootManifest(root: string): Manifest {
 	return existsSync(file) ? readManifest(file) : {};
 }
 
+const workspacePatterns = (manifest: Manifest): string[] =>
+	Array.isArray(manifest.workspaces) ? manifest.workspaces : (manifest.workspaces?.packages ?? []);
+
 /** Checked-out package names. */
 function allPackages(submodule: string): string[] {
 	const file = path.join(submodule, "ts", "package.json");
-	const names = existsSync(file) ? (readManifest(file).workspaces ?? []) : [];
+	const names = existsSync(file) ? workspacePatterns(readManifest(file)) : [];
 	if (names.some((name) => /[*?[\]{}]/.test(name))) throw new Error(`${file} lists a workspace pattern, not a name`);
 	return names;
 }
@@ -122,6 +128,57 @@ export function bump(submodule: string): string[] {
 	return [`nyaaai: ${before.slice(0, 7)} -> ${after.slice(0, 7)}`];
 }
 
+/** Manifests of the consumer's workspace packages, the root's aside. */
+function workspaceManifests(root: string, submodule: string): string[] {
+	const skipped = submoduleRelative(root, submodule);
+	const found = new Set<string>();
+	for (const pattern of workspacePatterns(rootManifest(root))) {
+		if (pattern.startsWith("!")) continue;
+		for (const file of new Bun.Glob(`${pattern}/package.json`).scanSync({ cwd: root })) {
+			if (file.split("/").includes("node_modules") || file.startsWith(`${skipped}/`)) continue;
+			found.add(file);
+		}
+	}
+	return [...found].sort();
+}
+
+function tomlOf(file: string): Record<string, unknown> {
+	return Bun.TOML.parse(readFileSync(file, "utf8")) as Record<string, unknown>;
+}
+
+const clippyPaths = (file: string): string[] => {
+	const listed = tomlOf(file)["disallowed-methods"];
+	if (!Array.isArray(listed)) return [];
+	return listed.flatMap((entry: unknown) => {
+		const held = typeof entry === "string" ? entry : (entry as { path?: unknown } | null)?.path;
+		return typeof held === "string" ? [held] : [];
+	});
+};
+
+/** The toolchain pin and Clippy bans a consumer's Rust shares. */
+function rustFailures(root: string, submodule: string): string[] {
+	if (!existsSync(path.join(root, "rust", "Cargo.toml"))) return [];
+	const failures: string[] = [];
+	const ours = path.join(submodule, TOOLCHAIN);
+	const channel = (file: string) => (tomlOf(file)["toolchain"] as { channel?: unknown } | undefined)?.channel;
+	const wanted = existsSync(ours) ? channel(ours) : undefined;
+	const held = path.join(root, TOOLCHAIN);
+	if (!existsSync(held)) failures.push(`${TOOLCHAIN} is missing; NyaaAI pins channel ${wanted}`);
+	else if (channel(held) !== wanted) {
+		failures.push(`${TOOLCHAIN} names channel ${channel(held)}; NyaaAI pins channel ${wanted}`);
+	}
+	const bans = clippyPaths(path.join(submodule, CLIPPY));
+	const copy = path.join(root, CLIPPY);
+	if (!existsSync(copy)) failures.push(`${CLIPPY} is missing; NyaaAI lists ${bans.length} disallowed-methods paths`);
+	else {
+		const have = clippyPaths(copy);
+		for (const ban of bans) {
+			if (!have.includes(ban)) failures.push(`${CLIPPY} lacks disallowed-methods path ${ban}; NyaaAI lists it`);
+		}
+	}
+	return failures;
+}
+
 export function assertConsumer(root: string, submodule: string, packageMode: boolean): string[] {
 	const failures: string[] = [];
 	const notes: string[] = [];
@@ -177,6 +234,25 @@ export function assertConsumer(root: string, submodule: string, packageMode: boo
 		}
 	}
 
+	const pins = new Map<string, string>();
+	for (const name of used) {
+		const file = path.join(packageDir(submodule, name), "package.json");
+		if (!existsSync(file)) continue;
+		for (const [dep, version] of Object.entries(readManifest(file).dependencies ?? {})) {
+			if (!dep.startsWith(SCOPE)) pins.set(dep, version);
+		}
+	}
+	for (const file of workspaceManifests(root, submodule)) {
+		const own = readManifest(path.join(root, file));
+		for (const [dep, version] of Object.entries({ ...own.devDependencies, ...own.dependencies })) {
+			const pinned = pins.get(dep);
+			if (pinned !== undefined && pinned !== version) {
+				failures.push(`${file} pins ${dep} ${version}; NyaaAI pins ${dep} ${pinned}`);
+			}
+		}
+	}
+	failures.push(...rustFailures(root, submodule));
+
 	const subject = git(submodule, ["log", "-1", "--format=%s"]);
 	const isSnapshot = subject.startsWith(SNAPSHOT_PREFIX);
 	if (!packageMode) {
@@ -207,7 +283,7 @@ if (import.meta.main) {
 		else if (command === "dev") {
 			lines = flags.includes("--reset")
 				? devReset(root, submodule)
-				: dev(root, submodule, process.env.NYAAAI_DIR);
+				: dev(root, submodule, process.env["NYAAAI_DIR"]);
 		} else if (command === "bump") lines = bump(submodule);
 		else if (command === "assert") lines = assertConsumer(root, submodule, flags.includes("--package"));
 		else throw new Error("usage: consumer.ts link | dev [--reset] | bump | assert [--package]");

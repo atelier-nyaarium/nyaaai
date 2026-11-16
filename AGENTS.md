@@ -41,6 +41,7 @@ Same names in both languages; Rust files are snake case.
   - `trace` reads a recorded trace and replays it. `scheduler` holds a timer wheel on virtual time.
   - `rejection` (TypeScript): `rejection`, `rethrown` read what a promise rejects with.
   - `samples` (TypeScript): `sampleTexts` derives round-trip inputs from an exported schema.
+  - `rustNames`: `snake`, `pascal`, `quote`, for a `parity.ts`'s generated Rust.
 - `agentic`, `ui`: empty.
 
 ## Patterns
@@ -72,7 +73,8 @@ bun scripts/samples.ts            # values sampled from every schema, decoded in
 bun scripts/serve.ts              # the TypeScript adapter, with the case kinds
 bun scripts/convertTrace.ts <trace.jsonl> <out.json>   # an old recorded trace into the byte form, scrubbed
 bun scripts/unicodeTables.ts <ucd folder>              # the NFC tables, from Unicode 17.0 files; run by hand
-bun scripts/crates.ts             # crate ages and advisories
+bun scripts/crates.ts             # crate ages and advisories of rust/Cargo.lock
+bun scripts/bannedSymbols.ts      # banned characters in tracked and untracked files
 bun scripts/snapshot.ts           # commit the working tree for a consumer, print {ref, sha, subject}
 bun scripts/realSessions.ts       # both languages on this machine's real session files; prints counts, and names a file only when a result differs or the file changed mid-run (`live`)
 bun scripts/surveyedSchemas.ts <folder> # checks surveyed schemas in both languages; prints counts only
@@ -80,7 +82,7 @@ bun scripts/surveyedSchemas.ts <folder> # checks surveyed schemas in both langua
 
 Gate parts: `link`, `contract`, `biome`, `tsc`, `test`, `fmt`, `clippy`, `clippy-plain`, `cargo-test`, `crates`, `cases`, `samples`, `symbols`, `demo`.
 
-`contract.ts`, `cases.ts` and `serve.ts` work on the folder they are run from, through its `parity.ts`.
+`contract.ts`, `cases.ts` and `serve.ts` work on the folder they are run from, through its `parity.ts`. `crates.ts` and `bannedSymbols.ts` work on that folder too: its `rust/Cargo.lock`, and its files minus nested checkouts, `node_modules` and `target`.
 
 `link` makes `node_modules/@nyaaai` here, as a consumer's does. Scripts import packages by name, so the gate reads the same exports a consumer reads.
 
@@ -120,7 +122,7 @@ export const text = caseGroup("text", {
 
 - `kind(input, result, run)`: two Zod objects and the TypeScript handler. The `cases` set names them `<Group><Kind>Input` and `Result`. Each kind holds its own two objects; a shared one is a factory.
 - `shapes`: named shapes the group's kinds share.
-- Rust handler: `fn <kind>(input)` in `<group>.rs` under `rust/cli/src/cases/`, snake case. `shapes.rs`, `dispatch.rs` and `mod.rs` there are generated.
+- Rust handler: `fn <kind>(input)` in `<group>.rs` under `rust/cli/src/cases/`, snake case. `shapes.rs`, `dispatch.rs`, `normalizers.rs` and `mod.rs` there are generated.
 - `kind(..., { context: true })` hands both handlers a `CaseContext`: `tmp()` a fresh folder, `root` the project root (read only), a scripted `clock` and `ids`. In a result, `$TMP` and `$ROOT` stand for the two folders.
 - A folder tree is `TreeEntry` rows, planted with `plant`.
 
@@ -133,6 +135,8 @@ To add a kind:
 5. `bun scripts/cases.ts --refresh`, then read the diff under `cases/`.
 
 An adapter serves kind `a.b` as command `case:a.b`. Rust does so only with the `cases` feature. The runner fails when a run changes the project tree.
+
+A case file writes every banned character, and U+FEFF, as a `\uXXXX` escape.
 
 Generated files are the ones `parity.generated.json` lists. A refresh removes a listed file the fresh run no longer produces, writes the fresh files, then rewrites its list. A file nobody generated is never read, reported or removed. Drift is a fresh file that is missing or differs, a listed file nothing generates, or a stale list.
 
@@ -232,13 +236,14 @@ bun <submodule>/scripts/consumer.ts assert --package    # also refuses a snapsho
 ```
 
 - Packages used: `"nyaaai": { "packages": ["contract", "agentic"] }` in the consumer's `package.json`. Absent means all.
-- `assert` fails on `node_modules` inside the submodule, a missing link, and a package dependency the consumer does not pin at the same version.
+- `assert` fails on `node_modules` inside the submodule, a missing link, and a package dependency (Zod) that the consumer's root, or a workspace `package.json` naming it, does not pin at the same version.
+  - With a `rust/Cargo.toml`: a `rust-toolchain.toml` whose `channel` differs, and a `rust/clippy.toml` lacking a `disallowed-methods` path of the submodule's. A missing file fails.
 - A snapshot's subject starts with `Dev snapshot of `. Never pin one.
 
 Parity of its own:
 
 - Packages `contract`, `testkit`, `adapter`, and a `parity.ts` at its root: `export default project({ sets, schemaOnly, groups, runs, cases, commands, rustAdapter, generated })`. NyaaAI's own `parity.ts` is the example.
-- It runs `consumer.ts`, `contract.ts`, `cases.ts` and `samples.ts` from its root. The other scripts are NyaaAI's own. A residue test keeps what a consumer runs on the three packages, and `assert` fails when one is not linked.
+- It runs `consumer.ts`, `contract.ts`, `cases.ts`, `samples.ts`, `crates.ts` and `bannedSymbols.ts` from its root, and Clippy with the shared `clippy.toml`. `consumer.ts assert` runs with `--package` on its release path. The other scripts are NyaaAI's own. A residue test keeps what a consumer runs on the three packages, and `assert` fails when one is not linked.
 - A `sets` value is `{ crate, module, file }`, `file` relative to its root. A set `parity.ts` imports sits in `sets`, `schemaOnly` or `external`; `contract.ts` fails on any other.
 - `external`: sets generated elsewhere, each with its Rust target, or `null` for none. NyaaAI's own (`frames`, `tree`, `caseFile`) are external without being listed.
 - Opt in: `tests`, a command that must pass before a case refresh; `prompts`, the prompt folder; `roundTrip`, the kind `samples.ts` runs.
@@ -252,7 +257,15 @@ Parity of its own:
 - Rust: path dependencies on the submodule's `rust/contract`, `rust/adapter` and `rust/testkit`. `cases` names the crate, module and folder the generator writes `shapes.rs`, `dispatch.rs` and `mod.rs` into. Handlers are by hand: `cases/<group>.rs`, `pub fn <kind>(input: <Group><Kind>Input) -> Outcome<<Group><Kind>Result>`. A context kind takes `context: &CaseContext` second.
 - Its `main` serves with `nyaaai_adapter::runtime::serve`. A `case:` command goes to `cases::dispatch::dispatch(kind, input, root)`, the root being the current directory read once at start. `rust/cli/src/main.rs` is the example.
 - `rustAdapter.build` and `.run` are relative to its root. `rust/target` is ignored in git: the runner fails on a case run that changes the tree.
-- Toolchain: crates of edition 2024, on a toolchain at or above the submodule's `rust-version`; `rustfmt` from it; Biome of its own, under `node_modules` at its root or in `ts/`.
+- Toolchain: crates of edition 2024; its `rust-toolchain.toml` pins the submodule's channel exactly, with `rustfmt` and `clippy`. `cargo fmt` runs from `rust/`. Biome of its own, under `node_modules` at its root or in `ts/`.
+- Copy `rust/clippy.toml`; `assert` checks it. Clippy lints the path crates too.
+- `Outcome` and `CaseContext` live in `nyaaai_testkit::cases`.
+- Round trip: the generator writes `normalizers.rs` beside `shapes.rs`. `normalizers::normalize(set, shape, value)` calls the `normalize(shape, value)` of each set's generated module, and answers `None` for an unknown set or shape. `rust/cli/src/cases/contract.rs` is the example.
+- `generated` helpers import `snake`, `pascal` and `quote` from `@nyaaai/testkit/rustNames`, never from `scripts/`.
+- TypeScript: a consumer type-checks NyaaAI's source. A `tsconfig` at its root extends `<submodule>/ts/tsconfig.base.json`, includes the `src` of the packages it uses, emits to a folder at its own root, and is referenced by its projects. NyaaAI builds with TypeScript 7.0.2; one consumer compiles it with 6.0.3.
+- A workspace package of the consumer imports `@nyaaai/*` through the root link and declares nothing. `nyaaai.packages` at the root is the declaration. The root pin of a package dependency (Zod) is what makes it resolvable from the linked source.
+- Case files hold banned characters and U+FEFF as escapes; a consumer's residue and symbols checks need no exemption.
+- An in-tree submodule is swept by the consumer's own tools: ignore it in its formatter, its test runner and its own residue tests.
 
 ## Rules
 
@@ -314,9 +327,9 @@ Same in both languages. `parseJson` and `parse_json` apply them.
 - No key, account id, real transcript or personal content. Test data is synthetic.
 - No license file.
 - Scan fixtures, cases and prompts before a push.
-- `scripts/convertTrace.ts` replaces generation ids and every value found under a `session_id` key. It sees no other secret. Read a converted trace before committing it.
+- `scripts/convertTrace.ts` replaces generation ids and every id found under a `session_id` key, wherever that id recurs. It sees no other secret. Read a converted trace before committing it.
 
 ## Text
 
-- No em dash, smart quote or zero-width character. `symbols` fails on one.
+- No em dash, smart quote or zero-width character. `symbols` fails on one, and on U+FEFF.
 - In source, write `\u{2028}`, not the four-digit form: some editors decode it on save.

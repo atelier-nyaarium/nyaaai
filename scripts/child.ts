@@ -55,7 +55,7 @@ export function gitOrNull(cwd: string, args: string[]): string | null {
 function rustBin(name: string): string {
 	const onPath = spawnSync(name, ["--version"], { stdio: "ignore" }).status === 0;
 	if (onPath) return name;
-	const home = process.env.CARGO_HOME ?? path.join(homedir(), ".cargo");
+	const home = process.env["CARGO_HOME"] ?? path.join(homedir(), ".cargo");
 	const held = path.join(home, "bin", name);
 	if (!existsSync(held)) throw new Error(`${name} is neither on PATH nor under CARGO_HOME`);
 	return held;

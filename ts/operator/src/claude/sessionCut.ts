@@ -118,10 +118,10 @@ const parse = (text: string): Row | null => {
 	return row && typeof row === "object" && !Array.isArray(row) ? (row as Row) : null;
 };
 
-const isBoundary = (row: Row) => row.type === "system" && row.subtype === "compact_boundary";
+const isBoundary = (row: Row) => row["type"] === "system" && row["subtype"] === "compact_boundary";
 
 const partsOf = (row: Row): Row[] => {
-	const content = (row.message as { content?: unknown } | undefined)?.content;
+	const content = (row["message"] as { content?: unknown } | undefined)?.content;
 	return Array.isArray(content) ? (content.filter((part) => part && typeof part === "object") as Row[]) : [];
 };
 
@@ -129,28 +129,28 @@ const partsOf = (row: Row): Row[] => {
 const callsOf = (row: Row): { opened: string[]; answered: string[] } => {
 	const ids = (kind: string, key: string) =>
 		partsOf(row)
-			.filter((part) => part.type === kind)
+			.filter((part) => part["type"] === kind)
 			.map((part) => part[key])
 			.filter((id): id is string => typeof id === "string");
 	return {
-		opened: row.type === "assistant" ? ids("tool_use", "id") : [],
-		answered: row.type === "user" ? ids("tool_result", "tool_use_id") : [],
+		opened: row["type"] === "assistant" ? ids("tool_use", "id") : [],
+		answered: row["type"] === "user" ? ids("tool_result", "tool_use_id") : [],
 	};
 };
 
 const textOf = (row: Row): string | undefined => {
-	const content = (row.message as { content?: unknown } | undefined)?.content;
+	const content = (row["message"] as { content?: unknown } | undefined)?.content;
 	if (typeof content === "string") return content;
 	const parts = partsOf(row);
-	if (parts.length === 0 || parts.some((part) => part.type === "tool_result")) return undefined;
-	return parts.map((part) => (typeof part.text === "string" ? part.text : "")).join("\n");
+	if (parts.length === 0 || parts.some((part) => part["type"] === "tool_result")) return undefined;
+	return parts.map((part) => (typeof part["text"] === "string" ? part["text"] : "")).join("\n");
 };
 
 /** Queued prompt text. */
 function absorbedText(row: Row): string | undefined {
-	if (row.type !== "attachment") return undefined;
-	const held = row.attachment as Row | undefined;
-	return held?.type === "queued_command" && typeof held.prompt === "string" ? held.prompt : undefined;
+	if (row["type"] !== "attachment") return undefined;
+	const held = row["attachment"] as Row | undefined;
+	return held?.["type"] === "queued_command" && typeof held["prompt"] === "string" ? held["prompt"] : undefined;
 }
 
 const pointsOf = (row: Row): string[] =>
@@ -222,27 +222,27 @@ export async function indexSession(lines: AsyncIterable<string>): Promise<Sessio
 			unreadable.push(line);
 			continue;
 		}
-		const type = jsString(row.type);
+		const type = jsString(row["type"]);
 		if (HEADER_TYPES.has(type)) header[type] = line;
-		if (typeof row.version === "string") version = row.version;
-		const uuid = typeof row.uuid === "string" ? row.uuid : undefined;
+		if (typeof row["version"] === "string") version = row["version"];
+		const uuid = typeof row["uuid"] === "string" ? row["uuid"] : undefined;
 
 		if (isBoundary(row)) {
-			const meta = (row.compactMetadata ?? {}) as Row;
-			const kept = (meta.preservedSegment ?? {}) as Row;
-			const uuids = (meta.preservedMessages as Row | undefined)?.uuids ?? [];
+			const meta = (row["compactMetadata"] ?? {}) as Row;
+			const kept = (meta["preservedSegment"] ?? {}) as Row;
+			const uuids = (meta["preservedMessages"] as Row | undefined)?.["uuids"] ?? [];
 			const listed = Array.isArray(uuids) && uuids.every((id) => typeof id === "string");
 			const preserved = listed ? (uuids as string[]) : [];
-			const dropped = meta.cumulativeDroppedTokens;
-			const standingTokens = meta.postTokens;
+			const dropped = meta["cumulativeDroppedTokens"];
+			const standingTokens = meta["postTokens"];
 			const walk = new Set<string>();
 			for (
-				let id: unknown = kept.tailUuid;
+				let id: unknown = kept["tailUuid"];
 				typeof id === "string" && !walk.has(id);
 				id = segment.get(id)?.parent
 			) {
 				walk.add(id);
-				if (id === kept.headUuid) break;
+				if (id === kept["headUuid"]) break;
 			}
 			boundary = {
 				line,
@@ -272,8 +272,8 @@ export async function indexSession(lines: AsyncIterable<string>): Promise<Sessio
 			standing = null;
 			unreadable = [];
 		}
-		if (uuid) segment.set(uuid, { line, parent: row.parentUuid });
-		if (boundary && boundary.summaryLine === null && row.isCompactSummary === true) {
+		if (uuid) segment.set(uuid, { line, parent: row["parentUuid"] });
+		if (boundary && boundary.summaryLine === null && row["isCompactSummary"] === true) {
 			boundary.summaryLine = line;
 			standing = textOf(row) ?? null;
 		}
@@ -283,14 +283,16 @@ export async function indexSession(lines: AsyncIterable<string>): Promise<Sessio
 		for (const id of calls.opened) open.add(id);
 		for (const id of calls.answered) open.delete(id);
 		const opens =
-			type === "user" && row.isCompactSummary !== true && row.isSidechain !== true ? textOf(row) : undefined;
+			type === "user" && row["isCompactSummary"] !== true && row["isSidechain"] !== true
+				? textOf(row)
+				: undefined;
 		const message = opens ?? absorbedText(row);
 		tail.push({
 			line,
 			bytes: utf8Length(text) + 1,
 			type,
 			...(uuid ? { uuid } : {}),
-			...(typeof row.timestamp === "string" ? { at: row.timestamp } : {}),
+			...(typeof row["timestamp"] === "string" ? { at: row["timestamp"] } : {}),
 			openTools,
 			delivered: message !== undefined,
 			...(message !== undefined ? { text: message } : {}),
@@ -435,8 +437,8 @@ export async function* buildCut(
 		if (!kept.has(line)) continue;
 		body.push(rehomed(text, inputs.sessionId));
 		const row = parse(text);
-		if (typeof row?.uuid === "string") envelope = row;
-		if (row?.turnPosition !== undefined) position = row.turnPosition;
+		if (typeof row?.["uuid"] === "string") envelope = row;
+		if (row?.["turnPosition"] !== undefined) position = row["turnPosition"];
 	}
 	yield* headers;
 	yield* body;
@@ -468,13 +470,13 @@ export async function* buildCut(
 		},
 		uuid: boundaryUuid,
 		timestamp: at,
-		userType: carried.userType,
-		entrypoint: carried.entrypoint,
-		cwd: carried.cwd,
+		userType: carried["userType"],
+		entrypoint: carried["entrypoint"],
+		cwd: carried["cwd"],
 		sessionId: inputs.sessionId,
-		version: carried.version,
-		gitBranch: carried.gitBranch,
-		slug: carried.slug,
+		version: carried["version"],
+		gitBranch: carried["gitBranch"],
+		slug: carried["slug"],
 	};
 	yield stringifyJson(boundary);
 	yield stringifyJson({
@@ -489,13 +491,13 @@ export async function* buildCut(
 		timestamp: at,
 		...(position !== undefined ? { turnPosition: position } : {}),
 		session_id: inputs.sessionId,
-		userType: carried.userType,
-		entrypoint: carried.entrypoint,
-		cwd: carried.cwd,
+		userType: carried["userType"],
+		entrypoint: carried["entrypoint"],
+		cwd: carried["cwd"],
 		sessionId: inputs.sessionId,
-		version: carried.version,
-		gitBranch: carried.gitBranch,
-		slug: carried.slug,
+		version: carried["version"],
+		gitBranch: carried["gitBranch"],
+		slug: carried["slug"],
 	});
 }
 
@@ -515,7 +517,7 @@ export async function verifyCut(lines: AsyncIterable<string>, sessionId: string,
 			problems.push(`line ${line} does not parse`);
 			continue;
 		}
-		if (SKIPPED_TYPES.has(jsString(row.type))) problems.push(`line ${line} is a request log row`);
+		if (SKIPPED_TYPES.has(jsString(row["type"]))) problems.push(`line ${line} is a request log row`);
 		for (const key of SESSION_KEYS) {
 			if (typeof row[key] === "string" && row[key] !== sessionId)
 				problems.push(`line ${line} names another session`);
@@ -527,7 +529,7 @@ export async function verifyCut(lines: AsyncIterable<string>, sessionId: string,
 			boundary = { line, row };
 			afterBoundary = null;
 		}
-		if (typeof row.uuid === "string") seen.set(row.uuid, line);
+		if (typeof row["uuid"] === "string") seen.set(row["uuid"], line);
 		const made = callsOf(row);
 		for (const id of made.opened) calls.add(id);
 		if (paired && made.answered.some((id) => !calls.has(id))) {
@@ -538,10 +540,10 @@ export async function verifyCut(lines: AsyncIterable<string>, sessionId: string,
 		if (!seen.has(id)) problems.push(`line ${at} names a row that is not in the file`);
 	if (!boundary) return [...problems, "no compaction row"];
 
-	const meta = (boundary.row.compactMetadata ?? {}) as Row;
-	const segment = (meta.preservedSegment ?? {}) as Row;
-	const messages = (meta.preservedMessages ?? {}) as Row;
-	const held = messages.uuids ?? [];
+	const meta = (boundary.row["compactMetadata"] ?? {}) as Row;
+	const segment = (meta["preservedSegment"] ?? {}) as Row;
+	const messages = (meta["preservedMessages"] ?? {}) as Row;
+	const held = messages["uuids"] ?? [];
 	if (!Array.isArray(held)) problems.push("the preserved rows are not a list");
 	const uuids: unknown[] = Array.isArray(held) ? held : [];
 	const places = uuids.map((id) => (typeof id === "string" ? seen.get(id) : undefined));
@@ -549,16 +551,16 @@ export async function verifyCut(lines: AsyncIterable<string>, sessionId: string,
 		problems.push("a preserved row is missing or after the compaction row");
 	if (places.some((at, i) => i > 0 && (at ?? 0) < (places[i - 1] ?? 0)))
 		problems.push("preserved rows are not in conversation order");
-	if (uuids.length > 0 && (segment.headUuid !== uuids[0] || segment.tailUuid !== uuids.at(-1))) {
+	if (uuids.length > 0 && (segment["headUuid"] !== uuids[0] || segment["tailUuid"] !== uuids.at(-1))) {
 		problems.push("the preserved segment's ends are not its rows' ends");
 	}
-	if (boundary.row.parentUuid !== null) problems.push("the compaction row has a parent");
+	if (boundary.row["parentUuid"] !== null) problems.push("the compaction row has a parent");
 	const summary =
-		afterBoundary?.isCompactSummary === true && afterBoundary.parentUuid === boundary.row.uuid
+		afterBoundary?.["isCompactSummary"] === true && afterBoundary["parentUuid"] === boundary.row["uuid"]
 			? afterBoundary
 			: null;
 	if (!summary) problems.push("no summary follows the compaction row");
-	else if (summary.uuid !== segment.anchorUuid || summary.uuid !== messages.anchorUuid) {
+	else if (summary["uuid"] !== segment["anchorUuid"] || summary["uuid"] !== messages["anchorUuid"]) {
 		problems.push("the summary is not the compaction row's anchor");
 	}
 	return problems;

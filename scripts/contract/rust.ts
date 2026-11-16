@@ -2,6 +2,7 @@
 
 import type { Hook } from "@nyaaai/contract/shape";
 import type { RustTarget } from "@nyaaai/testkit/project";
+import { pascal, quote, snake } from "@nyaaai/testkit/rustNames";
 import type { Field, Node, SetIr, Shape } from "./ir";
 
 ////////////////////////////////
@@ -46,12 +47,6 @@ interface PatternStatic {
 ////////////////////////////////
 //  Constants
 
-const KEYWORDS = new Set(
-	`as async await break const continue crate dyn else enum extern false fn for gen if impl in let loop match mod move
-	mut pub ref return self Self static struct super trait true try type unsafe use where while abstract become box do
-	final macro override priv typeof unsized virtual yield`.split(/\s+/),
-);
-
 const LOCALS = new Set(["object", "value", "at", "held", "hooks", "shape"]);
 
 /** Standalone type kinds. */
@@ -61,65 +56,6 @@ const DERIVES = "#[derive(Debug, Clone, PartialEq)]";
 
 ////////////////////////////////
 //  Functions & Helpers
-
-const isLower = (char: string): boolean => char >= "a" && char <= "z";
-const isUpper = (char: string): boolean => char >= "A" && char <= "Z";
-const isDigit = (char: string): boolean => char >= "0" && char <= "9";
-
-/** Splits at non-alphanumerics, and before an uppercase letter after a lowercase letter or digit. */
-function words(text: string): string[] {
-	const found: string[] = [];
-	let word = "";
-	let before = "";
-	for (const char of text) {
-		if (!isLower(char) && !isUpper(char) && !isDigit(char)) {
-			if (word !== "") found.push(word);
-			word = "";
-		} else {
-			if (isUpper(char) && (isLower(before) || isDigit(before)) && word !== "") {
-				found.push(word);
-				word = "";
-			}
-			word += char;
-		}
-		before = char;
-	}
-	if (word !== "") found.push(word);
-	return found;
-}
-
-function identifier(text: string, made: string): string {
-	if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(made)) throw new Error(`${JSON.stringify(text)} names no Rust identifier`);
-	return KEYWORDS.has(made) ? `${made}_` : made;
-}
-
-export const snake = (text: string): string =>
-	identifier(
-		text,
-		words(text)
-			.map((word) => word.toLowerCase())
-			.join("_"),
-	);
-
-export const pascal = (text: string): string =>
-	identifier(
-		text,
-		words(text)
-			.map((word) => `${word.charAt(0).toUpperCase()}${word.slice(1)}`)
-			.join(""),
-	);
-
-/** ASCII-only Rust literal. */
-export function quote(text: string): string {
-	let made = '"';
-	for (const char of text) {
-		const point = char.codePointAt(0) as number;
-		if (char === '"' || char === "\\") made += `\\${char}`;
-		else if (point >= 0x20 && point < 0x7f) made += char;
-		else made += `\\u{${point.toString(16)}}`;
-	}
-	return `${made}"`;
-}
 
 function raw(text: string): string {
 	let longest = 0;

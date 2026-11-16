@@ -174,10 +174,12 @@ function testFiles(): string[] {
 const CONSUMER_PACKAGES = ["contract", "testkit", "adapter"];
 const CONSUMER_SCRIPTS = [
 	"adapterHost.ts",
+	"bannedSymbols.ts",
 	"caseAdapter.ts",
 	"cases.ts",
 	"child.ts",
 	"consumer.ts",
+	"crates.ts",
 	"contract.ts",
 	"contract/ir.ts",
 	"contract/rust.ts",
@@ -482,10 +484,11 @@ describe("residue", () => {
 				Record<string, string> | undefined
 			>;
 			const needs = [
-				...[manifest.dependencies, manifest.devDependencies, manifest.peerDependencies].flatMap((table) =>
-					Object.entries(table ?? {})
-						.filter(([, version]) => version.startsWith("workspace"))
-						.map(([dependency]) => dependency.replace("@nyaaai/", "")),
+				...[manifest["dependencies"], manifest["devDependencies"], manifest["peerDependencies"]].flatMap(
+					(table) =>
+						Object.entries(table ?? {})
+							.filter(([, version]) => version.startsWith("workspace"))
+							.map(([dependency]) => dependency.replace("@nyaaai/", "")),
 				),
 				...dependencyNames(crateManifest(name)).map((dependency) => dependency.replace("nyaaai-", "")),
 			];

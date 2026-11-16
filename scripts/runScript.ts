@@ -49,10 +49,10 @@ export async function play(adapter: AdapterCommand, source: RunSource): Promise<
 		exit ??= await host.close();
 		const played: Played = { exit, connection: [], runs: {}, files: {} };
 		for (const frame of host.frames) {
-			if (CONNECTION.has(frame.type as string)) {
+			if (CONNECTION.has(frame["type"] as string)) {
 				played.connection.push(frame);
 			} else {
-				const run = frame.run as string;
+				const run = frame["run"] as string;
 				played.runs[run] = [...(played.runs[run] ?? []), frame];
 			}
 		}

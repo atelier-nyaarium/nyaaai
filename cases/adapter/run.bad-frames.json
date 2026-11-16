@@ -40,7 +40,7 @@
 			"sendText": "{\"type\":\"start\",\"run\":\"x\",\"command\":\"c\",\"input\":1,\"fixed\":{\"nowMs\":1.5,\"idPrefix\":\"\"}}"
 		},
 		{
-			"sendText": "﻿{\"type\":\"interrupt\",\"run\":\"bom\"}"
+			"sendText": "\ufeff{\"type\":\"interrupt\",\"run\":\"bom\"}"
 		},
 		{
 			"sendText": "{\"type\":\"interrupt\",\"run\":\"cr\"}\r"

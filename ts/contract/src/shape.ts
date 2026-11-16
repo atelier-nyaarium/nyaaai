@@ -183,7 +183,7 @@ export function decode<T extends z.ZodType>(schema: T, value: unknown): Decoded<
 	const union = failedUnion(schema, value, path);
 	if (union !== undefined) return { ok: false, path: path.slice(0, union), message: NO_BRANCH };
 	const refusal = { ok: false as const, path, message: first?.message ?? "refused" };
-	return first?.code === "custom" && first.params?.fixed === true ? { ...refusal, fixed: true } : refusal;
+	return first?.code === "custom" && first.params?.["fixed"] === true ? { ...refusal, fixed: true } : refusal;
 }
 
 export function decodeText<T extends z.ZodType>(schema: T, text: string): Decoded<z.output<T>> {

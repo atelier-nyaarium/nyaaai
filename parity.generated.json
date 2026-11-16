@@ -2,6 +2,7 @@
 	"contract": [
 		"rust/cli/src/cases/dispatch.rs",
 		"rust/cli/src/cases/mod.rs",
+		"rust/cli/src/cases/normalizers.rs",
 		"rust/cli/src/cases/shapes.rs",
 		"rust/contract/src/issues.rs",
 		"rust/contract/src/shapes/frames.rs",

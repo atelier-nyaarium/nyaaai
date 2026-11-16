@@ -41,7 +41,8 @@
 		"rules": {
 			"preset": "recommended",
 			"complexity": {
-				"noBannedTypes": "off"
+				"noBannedTypes": "off",
+				"useLiteralKeys": "off"
 			},
 			"correctness": {
 				"noUnusedFunctionParameters": "off",

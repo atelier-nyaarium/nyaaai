@@ -1,9 +1,9 @@
 // Cargo crate checks.
-// Run: bun scripts/crates.ts
+// Run from the project root: bun scripts/crates.ts
 
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { ROOT } from "./child";
+import { PROJECT_ROOT } from "./project";
 
 ////////////////////////////////
 //  Interfaces & Types
@@ -177,7 +177,7 @@ export const liveSources: CrateSources = {
 
 if (import.meta.main) {
 	const locks = process.argv.slice(2);
-	if (locks.length === 0) locks.push(path.join(ROOT, "rust", "Cargo.lock"));
+	if (locks.length === 0) locks.push(path.join(PROJECT_ROOT, "rust", "Cargo.lock"));
 	let failed = false;
 	for (const lock of locks) {
 		const problems = await checkLock(lock, liveSources).catch((error: unknown) => [

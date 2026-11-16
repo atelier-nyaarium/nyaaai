@@ -1,6 +1,7 @@
 //! Generated from the case groups by scripts/contract.ts. Do not edit.
 
 pub mod dispatch;
+pub mod normalizers;
 pub mod shapes;
 
 pub mod base64;

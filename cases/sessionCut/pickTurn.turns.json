@@ -22,7 +22,7 @@
 				"{\"parentUuid\":\"u9\",\"isSidechain\":false,\"type\":\"assistant\",\"message\":{\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"went again\"}]},\"uuid\":\"u10\",\"timestamp\":\"2026-11-13T00:00:10.000Z\",\"userType\":\"external\",\"entrypoint\":\"cli\",\"cwd\":\"/work\",\"sessionId\":\"11111111-1111-4111-8111-111111111111\",\"version\":\"2.1.323\",\"gitBranch\":\"main\",\"slug\":\"a-slug\"}",
 				"{\"type\":\"user\",\"uuid\":\"odd-time\",\"timestamp\":\"Nov 13 2026\",\"message\":{\"content\":\"timeless\"}}",
 				"{\"type\":\"user\",\"uuid\":\"no-time\",\"message\":{\"content\":\"timeless\"}}",
-				"{\"type\":\"user\",\"uuid\":\"offset-time\",\"timestamp\":\"2026-11-13T01:00:20+01:00\",\"message\":{\"content\":\" spaced 　out﻿\t\"}}",
+				"{\"type\":\"user\",\"uuid\":\"offset-time\",\"timestamp\":\"2026-11-13T01:00:20+01:00\",\"message\":{\"content\":\" spaced 　out\ufeff\t\"}}",
 				"{\"type\":\"user\",\"uuid\":\"tie-a\",\"timestamp\":\"2026-11-13T00:00:30.000Z\",\"message\":{\"content\":\"tie\"}}",
 				"{\"type\":\"user\",\"uuid\":\"tie-b\",\"timestamp\":\"2026-11-13T00:00:32.000Z\",\"message\":{\"content\":\"tie\"}}"
 			]

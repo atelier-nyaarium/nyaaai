@@ -46,7 +46,7 @@ const isObject = (json: Json | undefined): json is Obj =>
 const count = (json: Obj, key: string): number | undefined =>
 	typeof json[key] === "number" ? (json[key] as number) : undefined;
 
-const isNull = (json: Obj): boolean => json.type === "null" && Object.keys(json).length === 1;
+const isNull = (json: Obj): boolean => json["type"] === "null" && Object.keys(json).length === 1;
 
 /** Evenly spaced picks, in order. */
 function pick<T>(list: T[], wanted: number): T[] {
@@ -102,7 +102,7 @@ class Sampler {
 		let held = { at, schema };
 		for (let hops = 0; ; hops++) {
 			if (!isObject(held.schema)) throw new Error(`${held.at}: not a schema`);
-			const target = held.schema.$ref;
+			const target = held.schema["$ref"];
 			if (typeof target !== "string") return { at: held.at, json: held.schema, hops };
 			const ref = refOf(target);
 			const set = ref?.set ?? held.at;
@@ -113,21 +113,21 @@ class Sampler {
 	}
 
 	private branches(json: Obj): Json[] | undefined {
-		if (Array.isArray(json.anyOf)) return json.anyOf;
-		if (Array.isArray(json.oneOf)) return json.oneOf;
+		if (Array.isArray(json["anyOf"])) return json["anyOf"];
+		if (Array.isArray(json["oneOf"])) return json["oneOf"];
 		return undefined;
 	}
 
 	/** An anyOf of one schema and null. */
 	private nullable(at: string, json: Obj, options: Json[]): boolean {
-		return Array.isArray(json.anyOf) && options.length === 2 && isNull(this.deref(at, options[1] as Json).json);
+		return Array.isArray(json["anyOf"]) && options.length === 2 && isNull(this.deref(at, options[1] as Json).json);
 	}
 
 	/** Whether a value has the shape of a schema. */
 	private fits(at: string, schema: Json, value: Json): boolean {
 		const { at: here, json } = this.deref(at, schema);
-		if ("const" in json) return JSON.stringify(json.const) === JSON.stringify(value);
-		if (Array.isArray(json.enum)) return json.enum.includes(value);
+		if ("const" in json) return JSON.stringify(json["const"]) === JSON.stringify(value);
+		if (Array.isArray(json["enum"])) return json["enum"].includes(value);
 		const options = this.branches(json);
 		if (options) return options.some((option) => this.fits(here, option, value));
 		const { type } = json;
@@ -147,8 +147,8 @@ class Sampler {
 			case "object": {
 				if (!isObject(value)) return false;
 				if ("propertyNames" in json) return true;
-				const required = Array.isArray(json.required) ? (json.required as string[]) : [];
-				const properties = isObject(json.properties) ? json.properties : {};
+				const required = Array.isArray(json["required"]) ? (json["required"] as string[]) : [];
+				const properties = isObject(json["properties"]) ? json["properties"] : {};
 				return required.every((name) => {
 					const property = properties[name];
 					if (property === undefined) return true;
@@ -168,8 +168,8 @@ class Sampler {
 		const depth = held + hops;
 		if (depth > DEPTH_HARD) return NONE;
 		const wide = full && depth < DEPTH_FULL;
-		if ("const" in json) return json.const as Json;
-		if (Array.isArray(json.enum)) return json.enum[0] as Json;
+		if ("const" in json) return json["const"] as Json;
+		if (Array.isArray(json["enum"])) return json["enum"][0] as Json;
 		const options = this.branches(json);
 		if (options) return this.buildUnion(here, json, options, depth, wide);
 		const { type } = json;
@@ -190,7 +190,7 @@ class Sampler {
 				return null;
 			case "array":
 				return "prefixItems" in json
-					? this.buildTuple(here, json.prefixItems as Json[], depth, wide)
+					? this.buildTuple(here, json["prefixItems"] as Json[], depth, wide)
 					: this.buildArray(here, json, depth, wide);
 			case "object":
 				return "propertyNames" in json
@@ -229,21 +229,21 @@ class Sampler {
 		const max = count(json, "maxItems") ?? Number.POSITIVE_INFINITY;
 		const length = Math.min(Math.max(min, wide ? 1 : 0), max);
 		if (length === 0) return [];
-		const item = this.build(at, json.items as Json, depth, wide);
+		const item = this.build(at, json["items"] as Json, depth, wide);
 		if (item === NONE) return min === 0 ? [] : NONE;
 		return Array.from({ length }, () => item);
 	}
 
 	private buildRecord(at: string, json: Obj, depth: number, wide: boolean): Json | typeof NONE {
 		if (!wide) return {};
-		const item = this.build(at, json.additionalProperties as Json, depth, wide);
+		const item = this.build(at, json["additionalProperties"] as Json, depth, wide);
 		return item === NONE ? {} : { k: item };
 	}
 
 	private buildObject(at: string, json: Obj, depth: number, wide: boolean): Json | typeof NONE {
-		const required = new Set(Array.isArray(json.required) ? (json.required as string[]) : []);
+		const required = new Set(Array.isArray(json["required"]) ? (json["required"] as string[]) : []);
 		const held: Obj = {};
-		for (const [name, schema] of Object.entries(isObject(json.properties) ? json.properties : {})) {
+		for (const [name, schema] of Object.entries(isObject(json["properties"]) ? json["properties"] : {})) {
 			const must = required.has(name) && !(isObject(schema) && "default" in schema);
 			if (!must && !wide) continue;
 			const value = this.build(at, schema, depth, wide);
@@ -281,11 +281,11 @@ class Sampler {
 		if (depth > DEPTH_FULL) return;
 		for (const wrong of WRONG) found.broken.push(put(wrong));
 		if ("const" in json) {
-			found.broken.push(put(other(json.const as Json)));
+			found.broken.push(put(other(json["const"] as Json)));
 			return;
 		}
-		if (Array.isArray(json.enum)) {
-			for (const option of json.enum) found.valid.push(put(option));
+		if (Array.isArray(json["enum"])) {
+			for (const option of json["enum"]) found.valid.push(put(option));
 			found.broken.push(put(UNKNOWN_TEXT));
 			return;
 		}
@@ -357,7 +357,7 @@ class Sampler {
 	private walkArray(at: string, json: Obj, value: Json[], depth: number, put: Put, found: Found): void {
 		const min = count(json, "minItems");
 		const max = count(json, "maxItems");
-		const item = this.build(at, json.items as Json, depth, true);
+		const item = this.build(at, json["items"] as Json, depth, true);
 		const [first, ...rest] = value;
 		const lengths = [
 			...(min !== undefined && min > 0 ? [min - 1] : []),
@@ -366,14 +366,15 @@ class Sampler {
 		if (item !== NONE) {
 			for (const length of lengths) found.broken.push(put(Array.from({ length }, () => item)));
 			if (this.pairing === 0 && first !== undefined) {
-				for (const fault of this.faults(at, json.items as Json, first, depth, false)) {
+				for (const fault of this.faults(at, json["items"] as Json, first, depth, false)) {
 					for (const length of lengths.filter((held) => held > 0)) {
 						found.broken.push(put([fault as Json, ...Array.from({ length: length - 1 }, () => item)]));
 					}
 				}
 			}
 		}
-		if (first !== undefined) this.walk(at, json.items as Json, first, depth, (held) => put([held, ...rest]), found);
+		if (first !== undefined)
+			this.walk(at, json["items"] as Json, first, depth, (held) => put([held, ...rest]), found);
 	}
 
 	private walkTuple(at: string, json: Obj, value: Json[], depth: number, put: Put, found: Found): void {
@@ -381,7 +382,7 @@ class Sampler {
 		const more = [...value, null];
 		found.broken.push(put(fewer));
 		found.broken.push(put(more));
-		const places = json.prefixItems as Json[];
+		const places = json["prefixItems"] as Json[];
 		value.forEach((held, place) => {
 			const swap: Put = (next) => put(value.map((old, index) => (index === place ? next : old)));
 			this.walk(at, places[place] as Json, held, depth, swap, found);
@@ -396,7 +397,7 @@ class Sampler {
 
 	private walkRecord(at: string, json: Obj, value: Obj, depth: number, put: Put, found: Found): void {
 		found.valid.push(put({}));
-		const schema = json.additionalProperties as Json;
+		const schema = json["additionalProperties"] as Json;
 		for (const [key, held] of Object.entries(value)) {
 			this.walk(at, schema, held, depth, (next) => put({ ...value, [key]: next }), found);
 		}
@@ -408,7 +409,7 @@ class Sampler {
 
 	private walkObject(at: string, json: Obj, value: Obj, depth: number, put: Put, found: Found): void {
 		found.unknown.push(put({ ...value, [UNKNOWN_KEY]: 0 }));
-		const properties = isObject(json.properties) ? json.properties : {};
+		const properties = isObject(json["properties"]) ? json["properties"] : {};
 		const named = Object.keys(value).filter((name) => properties[name] !== undefined);
 		for (const name of Object.keys(value)) {
 			found.broken.push(put(swapped(value, [[name, GONE]])));

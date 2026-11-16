@@ -7,9 +7,10 @@ import path from "node:path";
 import { exportSchemas, SCHEMA_FORMS, type SetSchema } from "@nyaaai/contract/schemaExport";
 import { type CaseGroup, kindsOf } from "@nyaaai/testkit/caseGroup";
 import { CASES_SET, nameProblems, type Project, type RustTarget } from "@nyaaai/testkit/project";
+import { pascal, quote, snake } from "@nyaaai/testkit/rustNames";
 import { rustfmtBin } from "./child";
 import { formProblems, irOf } from "./contract/ir";
-import { emitRust, pascal, quote, snake } from "./contract/rust";
+import { emitRust } from "./contract/rust";
 import { manifestProblems, removeStale, writeList } from "./manifest";
 import { loadProject, PROJECT_ROOT } from "./project";
 import { promptFiles } from "./prompts";
@@ -98,10 +99,33 @@ _ => return None,
 `;
 }
 
+/** One match over every set with a generated `normalize`. */
+function normalizerRegistry(project: Project): string {
+	const held = new Map<string, RustTarget>();
+	for (const [set, target] of [...Object.entries(project.sets), ...Object.entries(project.external)]) {
+		if (target && !target.bare) held.set(set, target);
+	}
+	const arms = [...held].map(([set, target]) => {
+		const root = target.crate === project.cases.crate ? "crate" : target.crate;
+		return `${quote(set)} => ${root}::${target.module}::normalize(shape, value),`;
+	});
+	return `${GENERATED}
+
+use nyaaai_contract::json::Value;
+use nyaaai_contract::shape::Refused;
+
+/// Normalizes a value as a shape of a set. None for an unknown set or shape.
+pub fn normalize(set: &str, shape: &str, value: &Value) -> Option<Result<Value, Refused>> {
+${arms.length === 0 ? "let _ = (set, shape, value);\nNone" : `match set {\n${arms.join("\n")}\n_ => None,\n}`}
+}
+`;
+}
+
 const caseModules = (groups: CaseGroup[]): string =>
 	`${GENERATED}
 
 pub mod dispatch;
+pub mod normalizers;
 pub mod shapes;
 
 ${groups.map((group) => `pub mod ${snake(group.name)};`).join("\n")}
@@ -171,6 +195,7 @@ export function freshFiles(project: Project): Fresh {
 		...prompts.typescript,
 		...prompts.rust,
 		[`${project.cases.dir}/dispatch.rs`, caseDispatch(project.groups)],
+		[`${project.cases.dir}/normalizers.rs`, normalizerRegistry(project)],
 		[`${project.cases.dir}/mod.rs`, caseModules(project.groups)],
 		...project.generated.flatMap((make) => [...make()]),
 	]);

@@ -23,7 +23,7 @@ const json = (row: unknown) => JSON.stringify(row);
 function uuidWhere(lines: string[], accepts: (row: Record<string, unknown>) => boolean): string {
 	for (const line of lines) {
 		const row = JSON.parse(line) as Record<string, unknown>;
-		if (accepts(row)) return String(row.uuid);
+		if (accepts(row)) return String(row["uuid"]);
 	}
 	throw new Error("no such row");
 }
@@ -160,7 +160,7 @@ function withBoundary(lines: string[], change: (row: Record<string, unknown>) =>
 }
 
 const metadataOf = (row: Record<string, unknown>) =>
-	row.compactMetadata as { preservedMessages: Record<string, unknown>; preservedSegment: Record<string, unknown> };
+	row["compactMetadata"] as { preservedMessages: Record<string, unknown>; preservedSegment: Record<string, unknown> };
 
 ////////////////////////////////
 //  Cases
@@ -674,7 +674,7 @@ function rehomedCases(): CaseSource[] {
 
 function verifyCases(): CaseSource[] {
 	const sound = builtClear();
-	const reordered = withBoundary(sound, (row) => (metadataOf(row).preservedMessages.uuids as string[]).reverse());
+	const reordered = withBoundary(sound, (row) => (metadataOf(row).preservedMessages["uuids"] as string[]).reverse());
 	const tolerant = [
 		...sound.slice(0, -2),
 		'{"type":"user","uuid":"ghost-answer","message":{"content":[{"type":"tool_result","tool_use_id":"never-called"}]},"sessionId":"built-1"}',
@@ -697,7 +697,7 @@ function verifyCases(): CaseSource[] {
 			"list-is-text",
 			rows(
 				withBoundary(sound, (row) => {
-					metadataOf(row).preservedMessages.uuids = "u12";
+					metadataOf(row).preservedMessages["uuids"] = "u12";
 				}),
 			),
 			"built-1",
@@ -707,7 +707,7 @@ function verifyCases(): CaseSource[] {
 			"list-holds-other-values",
 			rows(
 				withBoundary(sound, (row) => {
-					metadataOf(row).preservedMessages.uuids = [7, null, { a: 1 }, "u12"];
+					metadataOf(row).preservedMessages["uuids"] = [7, null, { a: 1 }, "u12"];
 				}),
 			),
 			"built-1",
@@ -717,7 +717,7 @@ function verifyCases(): CaseSource[] {
 			"list-absent",
 			rows(
 				withBoundary(sound, (row) => {
-					delete metadataOf(row).preservedMessages.uuids;
+					delete metadataOf(row).preservedMessages["uuids"];
 				}),
 			),
 			"built-1",
@@ -727,7 +727,7 @@ function verifyCases(): CaseSource[] {
 			"ends-differ",
 			rows(
 				withBoundary(sound, (row) => {
-					metadataOf(row).preservedSegment.headUuid = "u13";
+					metadataOf(row).preservedSegment["headUuid"] = "u13";
 				}),
 			),
 			"built-1",
@@ -737,7 +737,7 @@ function verifyCases(): CaseSource[] {
 			"anchors-differ",
 			rows(
 				withBoundary(sound, (row) => {
-					metadataOf(row).preservedMessages.anchorUuid = "elsewhere";
+					metadataOf(row).preservedMessages["anchorUuid"] = "elsewhere";
 				}),
 			),
 			"built-1",
@@ -747,7 +747,7 @@ function verifyCases(): CaseSource[] {
 			"boundary-has-a-parent",
 			rows(
 				withBoundary(sound, (row) => {
-					row.parentUuid = "u20";
+					row["parentUuid"] = "u20";
 				}),
 			),
 			"built-1",
@@ -757,7 +757,7 @@ function verifyCases(): CaseSource[] {
 			"boundary-parent-absent",
 			rows(
 				withBoundary(sound, (row) => {
-					delete row.parentUuid;
+					delete row["parentUuid"];
 				}),
 			),
 			"built-1",
@@ -767,7 +767,7 @@ function verifyCases(): CaseSource[] {
 			"metadata-absent",
 			rows(
 				withBoundary(sound, (row) => {
-					delete row.compactMetadata;
+					delete row["compactMetadata"];
 				}),
 			),
 			"built-1",

@@ -18,7 +18,7 @@ describe("the adapter host", () => {
 			argv: ["bun", "-e", 'console.log(JSON.stringify({type:"welcome"})); process.exit(3)'],
 		};
 		const host = new AdapterHost(crashed);
-		expect((await host.awaitFrame({ type: "welcome" })).type).toBe("welcome");
+		expect((await host.awaitFrame({ type: "welcome" }))["type"]).toBe("welcome");
 		const waited = await host.awaitFrame({ type: "done" }).then(
 			() => "came",
 			() => "failed",
@@ -33,7 +33,7 @@ describe("the adapter host", () => {
 		host.hello();
 		host.send({ type: "start", run: "a", command: "case:json.canonical", input: { texts: [text] } });
 		expect(await host.close()).toBe(0);
-		expect(host.frames.find((frame) => frame.type === "done")?.result).toEqual({ texts: [text] });
+		expect(host.frames.find((frame) => frame["type"] === "done")?.["result"]).toEqual({ texts: [text] });
 	});
 
 	it("exits quietly when the reader closes after the first frame", async () => {

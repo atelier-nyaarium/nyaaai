@@ -153,7 +153,7 @@ export async function runCommands(
 		for (const start of starts) {
 			host.send({ type: "start", ...start });
 			const frame = await host.awaitFrame({ type: "done", run: start.run }, { type: "failed", run: start.run });
-			held.set(start.run, frame.type === "done" ? { result: frame.result } : { failed: frame });
+			held.set(start.run, frame["type"] === "done" ? { result: frame["result"] } : { failed: frame });
 		}
 		const exit = await host.close();
 		if (exit !== 0) throw new Error(`the ${adapter.name} adapter exited with ${exit}`);

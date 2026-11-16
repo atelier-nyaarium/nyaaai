@@ -102,24 +102,24 @@ class Reader {
 		const count = (key: string) => (json[key] === undefined ? {} : { [key]: json[key] as number });
 		if ("$ref" in json) {
 			only("$ref");
-			return this.ref(json.$ref as string, where);
+			return this.ref(json["$ref"] as string, where);
 		}
 		if ("const" in json) {
 			only("const", "type");
-			const value = json.const as string | number | boolean | null;
+			const value = json["const"] as string | number | boolean | null;
 			return value === null ? { kind: "null" } : { kind: "literal", value };
 		}
 		if ("enum" in json) {
 			only("enum", "type");
-			const values = json.enum as Json[];
-			if (json.type !== "string" || !values.every((value) => typeof value === "string")) {
+			const values = json["enum"] as Json[];
+			if (json["type"] !== "string" || !values.every((value) => typeof value === "string")) {
 				throw new Error(`${where}: an enum holds texts`);
 			}
 			return { kind: "enum", values: values as string[] };
 		}
 		if ("anyOf" in json) {
 			only("anyOf");
-			const branches = (json.anyOf as Json[]).map((branch, at) => this.node(branch, `${where}|${at}`));
+			const branches = (json["anyOf"] as Json[]).map((branch, at) => this.node(branch, `${where}|${at}`));
 			const [first, second, ...rest] = branches;
 			if (first && second && rest.length === 0 && second.kind === "null" && !second.hooks) {
 				return { kind: "nullable", inner: first };
@@ -132,7 +132,7 @@ class Reader {
 			const node: Extract<Node, { kind: "tagged" }> = {
 				kind: "tagged",
 				tag: json["x-tag"],
-				branches: (json.oneOf as Json[]).map((branch, at) => ({
+				branches: (json["oneOf"] as Json[]).map((branch, at) => ({
 					value: "",
 					node: this.node(branch, `${where}|${at}`),
 				})),
@@ -177,10 +177,10 @@ class Reader {
 			case "array":
 				if ("prefixItems" in json) return this.tuple(json, where, only);
 				only("type", "items", "minItems", "maxItems");
-				if (json.items === undefined) throw new Error(`${where}: an array names its items`);
+				if (json["items"] === undefined) throw new Error(`${where}: an array names its items`);
 				return {
 					kind: "array",
-					items: this.node(json.items, `${where}[]`),
+					items: this.node(json["items"], `${where}[]`),
 					...count("minItems"),
 					...count("maxItems"),
 				};
@@ -193,29 +193,33 @@ class Reader {
 
 	private tuple(json: JsonObject, where: string, only: (...allowed: string[]) => void): Node {
 		only("type", "prefixItems", "items", "minItems", "maxItems");
-		const places = json.prefixItems;
+		const places = json["prefixItems"];
 		const fixed = (count: Json | undefined) => Array.isArray(places) && count === places.length;
-		if (!Array.isArray(places) || places.length === 0 || json.items !== false) {
+		if (!Array.isArray(places) || places.length === 0 || json["items"] !== false) {
 			throw new Error(`${where}: a tuple holds fixed places`);
 		}
-		if (!fixed(json.minItems) || !fixed(json.maxItems)) throw new Error(`${where}: a tuple fills every place`);
+		if (!fixed(json["minItems"]) || !fixed(json["maxItems"]))
+			throw new Error(`${where}: a tuple fills every place`);
 		if (places.length > 12) throw new Error(`${where}: a tuple holds at most 12 places`);
 		return { kind: "tuple", items: places.map((place, at) => this.node(place, `${where}[${at}]`)) };
 	}
 
 	private record(json: JsonObject, where: string, only: (...allowed: string[]) => void): Node {
 		only("type", "propertyNames", "additionalProperties");
-		if (JSON.stringify(json.propertyNames) !== '{"type":"string"}' || json.additionalProperties === undefined) {
+		if (
+			JSON.stringify(json["propertyNames"]) !== '{"type":"string"}' ||
+			json["additionalProperties"] === undefined
+		) {
 			throw new Error(`${where}: a record's keys are any text`);
 		}
-		return { kind: "record", values: this.node(json.additionalProperties, `${where}{}`) };
+		return { kind: "record", values: this.node(json["additionalProperties"], `${where}{}`) };
 	}
 
 	private object(json: JsonObject, where: string, only: (...allowed: string[]) => void): Node {
 		only("type", "properties", "required", "additionalProperties");
-		if (json.additionalProperties !== false) throw new Error(`${where}: an object keeps no unknown keys`);
-		const required = new Set((json.required as string[] | undefined) ?? []);
-		const fields = Object.entries((json.properties as JsonObject | undefined) ?? {}).map(
+		if (json["additionalProperties"] !== false) throw new Error(`${where}: an object keeps no unknown keys`);
+		const required = new Set((json["required"] as string[] | undefined) ?? []);
+		const fields = Object.entries((json["properties"] as JsonObject | undefined) ?? {}).map(
 			([name, schema]): Field => {
 				const at = `${where}.${name}`;
 				if (schema === null || typeof schema !== "object" || Array.isArray(schema)) {
@@ -298,15 +302,15 @@ function asInput(node: Json): Json {
 		if (key === "$ref" && typeof value === "string") held[key] = value.replace(".output.json#", ".input.json#");
 		else held[key] = asInput(value);
 	}
-	const properties = held.properties;
-	if (Array.isArray(held.required) && properties !== null && typeof properties === "object") {
+	const properties = held["properties"];
+	if (Array.isArray(held["required"]) && properties !== null && typeof properties === "object") {
 		const filled = (name: Json) => {
 			const property = (properties as JsonObject)[name as string];
 			return property !== null && typeof property === "object" && "default" in property;
 		};
-		held.required = held.required.filter((name) => !filled(name));
+		held["required"] = held["required"].filter((name) => !filled(name));
 	}
-	if (Array.isArray(held.required) && held.required.length === 0) delete held.required;
+	if (Array.isArray(held["required"]) && held["required"].length === 0) delete held["required"];
 	return held;
 }
 

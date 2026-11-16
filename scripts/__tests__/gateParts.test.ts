@@ -18,7 +18,7 @@ import { caseGroup } from "@nyaaai/testkit/caseGroup";
 import { nameProblems } from "@nyaaai/testkit/project";
 import { rethrown } from "@nyaaai/testkit/rejection";
 import { bannedSymbols } from "../bannedSymbols";
-import { drift, treeHash } from "../cases";
+import { drift, escapedBanned, treeHash } from "../cases";
 import { git } from "../child";
 import { drift as schemaDrift } from "../contract";
 import { type CrateSources, checkLock, type LockedCrate } from "../crates";
@@ -183,6 +183,13 @@ describe("banned symbols", () => {
 		writeFileSync(path.join(folder, "quote.txt"), "\u{201c}quoted\u{201d}\n\n\u{200b}\n");
 		writeFileSync(path.join(folder, "ignored.txt"), "\u{2014}\n");
 		git(folder, ["add", "dash.txt"]);
+		// Nested checkouts, node_modules and target are not this project's.
+		for (const skipped of ["nested/.git", "node_modules/x", "target/y"]) {
+			mkdirSync(path.join(folder, skipped), { recursive: true });
+		}
+		for (const file of ["nested/a.txt", "node_modules/x/a.txt", "target/y/a.txt"]) {
+			writeFileSync(path.join(folder, file), "\u{2014}\n");
+		}
 		expect(bannedSymbols(folder).sort()).toEqual(["dash.txt:2", "quote.txt:1", "quote.txt:3"]);
 
 		const each = ["\u{2014}", "\u{2018}", "\u{2019}", "\u{201c}", "\u{201d}", "\u{200b}", "\u{200c}", "\u{200d}"];
@@ -269,6 +276,15 @@ describe("manifest safety", () => {
 
 		writeList(folder, "cases", ["a"]);
 		expect(readdirSync(folder).filter((name) => name.endsWith(".tmp"))).toEqual([]);
+	});
+});
+
+describe("case writer", () => {
+	it("writes banned characters as escapes and keeps the value", () => {
+		const value = { text: "a\u{feff}b\u{200b}c\u{2014}d plain \u{e9}" };
+		const written = escapedBanned(JSON.stringify(value, null, "\t"));
+		expect(written).toContain("a\\ufeffb\\u200bc\\u2014d plain \u{e9}");
+		expect(JSON.parse(written)).toEqual(value);
 	});
 });
 

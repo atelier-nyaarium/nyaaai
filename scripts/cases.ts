@@ -10,6 +10,7 @@ import { CASE_FORMAT, CaseFile, type FunctionCase, unhandled } from "@nyaaai/tes
 import type { CaseSource } from "@nyaaai/testkit/caseGroup";
 import { nameProblems, type Project, type RunSource } from "@nyaaai/testkit/project";
 import { type AdapterCommand, runCommands, rustAdapter, TS_ADAPTER } from "./adapterHost";
+import { BANNED } from "./bannedSymbols";
 import { CASE_PREFIX, runCase } from "./caseAdapter";
 import { gitOrNull } from "./child";
 import { manifestProblems, removeStale, writeList } from "./manifest";
@@ -32,6 +33,16 @@ const FOLDER = "cases";
 function fileOf(source: Source): string {
 	const [group, ...operation] = source.kind.split(".");
 	return path.join(FOLDER, group as string, `${operation.join(".")}.${source.name}.json`);
+}
+
+/** Banned characters written as `\\uXXXX`, by code unit. */
+export function escapedBanned(text: string): string {
+	let made = "";
+	for (let at = 0; at < text.length; at += 1) {
+		const unit = text.charCodeAt(at);
+		made += BANNED.has(unit) ? `\\u${unit.toString(16).padStart(4, "0")}` : text[at];
+	}
+	return made;
 }
 
 const isRun = (source: Source): source is RunSource => "script" in source;
@@ -63,7 +74,7 @@ export async function freshFiles(project: Project, sources = sourcesOf(project))
 					input: source.input,
 					expected: await runCase(project, source.kind, source.input),
 				};
-		files.set(file, `${JSON.stringify(caseOf(file, made), null, "\t")}\n`);
+		files.set(file, `${escapedBanned(JSON.stringify(caseOf(file, made), null, "\t"))}\n`);
 	}
 	return files;
 }
