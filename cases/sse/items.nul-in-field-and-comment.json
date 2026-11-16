@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "nul-in-field-and-comment",
+	"input": {
+		"chunks": [
+			"ZGEAdGE6IHgKCjpjAApkYXRhOiB5Cgo="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[
+				{
+					"kind": "comment",
+					"text": "c\u0000"
+				},
+				{
+					"kind": "data",
+					"data": "y"
+				}
+			]
+		],
+		"ended": []
+	}
+}

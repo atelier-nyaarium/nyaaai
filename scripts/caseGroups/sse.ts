@@ -31,9 +31,25 @@ export const sse = caseGroup("sse", {
 	kinds: {
 		/** The items each chunk yields, then what `end` adds. */
 		items: kind(
-			z.object({ chunks: z.array(z.string()) }),
-			z.object({ pushed: z.array(z.array(SseItem)), ended: z.array(SseItem) }),
-			(input) => decodeChunks(input.chunks.map(bytesOf)),
+			z.object({
+				chunks: z.array(z.string()),
+				/** Chunks pushed after the first `end`, then `end` again. */
+				again: z.array(z.string()).exactOptional(),
+			}),
+			z.object({
+				pushed: z.array(z.array(SseItem)),
+				ended: z.array(SseItem),
+				pushedAgain: z.array(z.array(SseItem)).exactOptional(),
+				endedAgain: z.array(SseItem).exactOptional(),
+			}),
+			(input) => {
+				const decoder = new SseDecoder();
+				const pushed = input.chunks.map(bytesOf).map((chunk) => decoder.push(chunk));
+				const ended = decoder.end();
+				if (input.again === undefined) return { pushed, ended };
+				const pushedAgain = input.again.map(bytesOf).map((chunk) => decoder.push(chunk));
+				return { pushed, ended, pushedAgain, endedAgain: decoder.end() };
+			},
 		),
 		/** Whether every two-way split, and each byte alone, gives the whole stream's items. */
 		splits: kind(

@@ -6,21 +6,26 @@ import { Utf8Decoder } from "@nyaaai/contract/text";
 ////////////////////////////////
 //  Classes
 
-/** Decodes split UTF-8; accepts LF and CRLF. */
+/** Decodes split UTF-8. A line ends at LF; a lone CR is data. */
 export class SseDecoder {
 	private readonly decoder = new Utf8Decoder();
 	private pending = "";
+	/** Pending text before this offset holds no LF. */
+	private scanned = 0;
 	private data: string[] = [];
 	private event: string | undefined;
 
 	push(bytes: Uint8Array): SseItem[] {
 		this.pending += this.decoder.push(bytes);
 		const items: SseItem[] = [];
-		for (let at = this.pending.indexOf("\n"); at !== -1; at = this.pending.indexOf("\n")) {
-			const line = this.pending.slice(0, at);
-			this.pending = this.pending.slice(at + 1);
+		let from = 0;
+		for (let at = this.pending.indexOf("\n", this.scanned); at !== -1; at = this.pending.indexOf("\n", from)) {
+			const line = this.pending.slice(from, at);
+			from = at + 1;
 			this.line(line.endsWith("\r") ? line.slice(0, -1) : line, items);
 		}
+		this.pending = this.pending.slice(from);
+		this.scanned = this.pending.length;
 		return items;
 	}
 
@@ -31,6 +36,7 @@ export class SseDecoder {
 		if (this.pending.length > 0)
 			this.line(this.pending.endsWith("\r") ? this.pending.slice(0, -1) : this.pending, items);
 		this.pending = "";
+		this.scanned = 0;
 		this.dispatch(items);
 		return items;
 	}

@@ -36,7 +36,7 @@
 		"failure": {
 			"category": "stream",
 			"status": "stream",
-			"message": "Ollama reported an error.",
+			"message": "Plain words.",
 			"billed": {
 				"host": "Lab"
 			}

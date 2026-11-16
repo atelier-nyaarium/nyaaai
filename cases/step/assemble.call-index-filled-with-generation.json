@@ -1,0 +1,81 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "call-index-filled-with-generation",
+	"input": {
+		"events": [
+			{
+				"kind": "serving",
+				"serving": {
+					"generationId": "g"
+				}
+			},
+			{
+				"kind": "call",
+				"index": 9007199254740992,
+				"wireId": "",
+				"name": "r",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "call",
+				"index": 1e+21,
+				"wireId": "",
+				"name": "r",
+				"argumentsText": "{}"
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			false,
+			true,
+			true
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {
+			"generationId": "g"
+		},
+		"snapshot": [
+			{
+				"kind": "call",
+				"index": 9007199254740992,
+				"wireId": "",
+				"name": "r",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "call",
+				"index": 1e+21,
+				"wireId": "",
+				"name": "r",
+				"argumentsText": "{}"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "call",
+					"index": 9007199254740992,
+					"wireId": "g_9007199254740992",
+					"name": "r",
+					"argumentsText": "{}"
+				},
+				{
+					"kind": "call",
+					"index": 1e+21,
+					"wireId": "g_1e+21",
+					"name": "r",
+					"argumentsText": "{}"
+				}
+			],
+			"finish": "",
+			"serving": {
+				"generationId": "g"
+			}
+		}
+	}
+}

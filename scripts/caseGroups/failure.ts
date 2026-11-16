@@ -28,7 +28,7 @@ const FailureExtra = z.object({
 		.exactOptional(),
 });
 
-/** A thrown value, by how it is made. */
+/** A thrown error, by how it is made. */
 const Thrown = z.discriminatedUnion("make", [
 	z.object({
 		make: z.literal("failed"),
@@ -38,7 +38,6 @@ const Thrown = z.discriminatedUnion("make", [
 	}),
 	z.object({ make: z.literal("provider"), failure: Failure }),
 	z.object({ make: z.literal("error"), message: z.string() }),
-	z.object({ make: z.literal("value"), value: z.unknown() }),
 ]);
 
 function thrownOf(held: z.output<typeof Thrown>): unknown {
@@ -49,8 +48,6 @@ function thrownOf(held: z.output<typeof Thrown>): unknown {
 			return new ProviderError(held.failure);
 		case "error":
 			return new Error(held.message);
-		case "value":
-			return held.value;
 	}
 }
 

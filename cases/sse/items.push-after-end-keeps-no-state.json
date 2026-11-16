@@ -1,0 +1,35 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "push-after-end-keeps-no-state",
+	"input": {
+		"chunks": [
+			"ZXZlbnQ6IGUKZGF0YTogYQ=="
+		],
+		"again": [
+			"ZGF0YTogYgoK"
+		]
+	},
+	"expected": {
+		"pushed": [
+			[]
+		],
+		"ended": [
+			{
+				"kind": "data",
+				"data": "a",
+				"event": "e"
+			}
+		],
+		"pushedAgain": [
+			[
+				{
+					"kind": "data",
+					"data": "b"
+				}
+			]
+		],
+		"endedAgain": []
+	}
+}

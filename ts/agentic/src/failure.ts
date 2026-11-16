@@ -31,8 +31,13 @@ export class ProviderError extends Error {
 //  Functions & Helpers
 
 /** Status is the category, for failures with no HTTP status. */
-export function failed(category: Failure["category"], message: string, extra: Partial<Failure> = {}): ProviderError {
-	return new ProviderError({ category, status: category, message, ...extra });
+export function failed(
+	category: Failure["category"],
+	message: string,
+	extra: Omit<Partial<Failure>, "category" | "message" | "status"> & { status?: Failure["status"] | undefined } = {},
+): ProviderError {
+	const { status, ...rest } = extra;
+	return new ProviderError({ ...rest, category, status: status ?? category, message });
 }
 
 /** Undefined for errors no codec decoded. */

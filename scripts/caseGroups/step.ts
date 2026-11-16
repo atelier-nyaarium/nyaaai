@@ -1,6 +1,7 @@
 import { failureOf } from "@nyaaai/agentic/failure";
 import { replyCalls, replyText, replyThoughts, StepAssembler } from "@nyaaai/agentic/step";
-import { z } from "@nyaaai/contract/shape";
+import { parseJson } from "@nyaaai/contract/json";
+import { decode, z } from "@nyaaai/contract/shape";
 import { Failure, NormalizedUsage, ReplyPart, StepEvent, StepResult, ThoughtPart } from "@nyaaai/contract/shapes/step";
 import { caseGroup, casesFor, kind } from "@nyaaai/testkit/caseGroup";
 import { stepCases } from "../caseSources/step";
@@ -12,12 +13,22 @@ export const StepBilled = z.object({
 	generationId: z.string().exactOptional(),
 });
 
+function eventOf(text: string): StepEvent {
+	const held = decode(StepEvent, parseJson(text));
+	if (!held.ok) throw new Error(`an event text is not an event: ${held.message}`);
+	return held.value;
+}
+
 export const step = caseGroup("step", {
 	shapes: { StepBilled },
 	kinds: {
 		/** Events join in order; the first throw stops the run. */
 		assemble: kind(
-			z.object({ events: z.array(StepEvent) }),
+			z.object({
+				events: z.array(StepEvent),
+				/** JSON texts of events that follow, for numbers a JSON writer cannot carry. */
+				more: z.array(z.string()).exactOptional(),
+			}),
 			z.object({
 				/** What `add` answered, per event it took. */
 				added: z.array(z.boolean()),
@@ -36,7 +47,8 @@ export const step = caseGroup("step", {
 				const added: boolean[] = [];
 				let failedAt: number | null = null;
 				let failure: Failure | null = null;
-				for (const [at, event] of input.events.entries()) {
+				const events = [...input.events, ...(input.more ?? []).map(eventOf)];
+				for (const [at, event] of events.entries()) {
 					try {
 						added.push(assembler.add(event));
 					} catch (error) {

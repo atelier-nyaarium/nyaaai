@@ -19,6 +19,12 @@ const items = (name: string, ...chunks: Array<string | number[]>): CaseSource =>
 	input: { chunks: chunked(...chunks) },
 });
 
+const again = (name: string, chunks: Array<string | number[]>, later: Array<string | number[]>): CaseSource => ({
+	kind: "sse.items",
+	name,
+	input: { chunks: chunked(...chunks), again: chunked(...later) },
+});
+
 const splits = (name: string, bytes: ArrayLike<number> | string): CaseSource => ({
 	kind: "sse.splits",
 	name,
@@ -101,6 +107,15 @@ export const sseCases: CaseSource[] = [
 	items("surrogate-bytes", "data: ", [0xed, 0xa0, 0x80], "\n\n"),
 	items("wide-data-whole", `data: ${WIDE}\n\n`),
 	items("long-line-in-pieces", "data: ", ..."abcdefghij".repeat(20).split(""), "\n\n"),
+	again("end-twice", ["data: a"], []),
+	again("push-after-end", ["data: a\n\n"], ["data: b\n\n", "data: tail"]),
+	again("push-after-end-keeps-no-state", ["event: e\ndata: a"], ["data: b\n\n"]),
+	again("bytes-order-mark-after-end", [[0xef, 0xbb, 0xbf], "data: x\n\n"], [[0xef, 0xbb, 0xbf], "data: y\n\n"]),
+	again("character-held-at-end", ["data: caf", [0xc3]], [[0xa9], "\n\n"]),
+	items("nul-in-data", "data: a\u{0}b\n\n"),
+	items("nul-in-field-and-comment", "da\u{0}ta: x\n\n:c\u{0}\ndata: y\n\n"),
+	items("thousands-of-lines", `${Array.from({ length: 3000 }, (_, at) => `id: ${at}\n`).join("")}data: end\n\n`),
+	items("many-events-in-one-chunk", "data: x\n\n".repeat(400)),
 	items("recorded-shape", STREAM),
 	items("recorded-shape-crlf", crlf(STREAM)),
 	items("mixed", MIXED),

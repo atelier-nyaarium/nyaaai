@@ -1,0 +1,43 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "call-index-negative-zero-first",
+	"input": {
+		"events": [],
+		"more": [
+			"{\"kind\":\"call\",\"index\":-0,\"wireId\":\"\",\"name\":\"read\",\"argumentsText\":\"a\"}"
+		]
+	},
+	"expected": {
+		"added": [
+			true
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "",
+				"name": "read",
+				"argumentsText": "a"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "call_0",
+					"name": "read",
+					"argumentsText": "a"
+				}
+			],
+			"finish": "",
+			"serving": {}
+		}
+	}
+}

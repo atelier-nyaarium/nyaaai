@@ -1,0 +1,56 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "call-index-one-e21",
+	"input": {
+		"events": [
+			{
+				"kind": "call",
+				"index": 1e+21,
+				"wireId": "",
+				"name": "r",
+				"argumentsText": "{}"
+			},
+			{
+				"kind": "call",
+				"index": 1e+21,
+				"wireId": "",
+				"name": "",
+				"argumentsText": "x"
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true,
+			true
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "call",
+				"index": 1e+21,
+				"wireId": "",
+				"name": "r",
+				"argumentsText": "{}x"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "call",
+					"index": 1e+21,
+					"wireId": "call_1e+21",
+					"name": "r",
+					"argumentsText": "{}x"
+				}
+			],
+			"finish": "",
+			"serving": {}
+		}
+	}
+}

@@ -39,6 +39,12 @@ export function replyThoughts(result: StepResult): ThoughtPart[] {
 	return result.parts.filter((part): part is ThoughtPart => part.kind === "thought");
 }
 
+/** A part sharing nothing with the original. */
+function copiedPart<T extends ReplyPart>(part: T): T {
+	if (part.kind !== "thought" || part.segments === undefined) return { ...part };
+	return { ...part, segments: part.segments.map((segment) => ({ ...segment })) };
+}
+
 /** Joins matching seam segments unless split. */
 function joinedSegments<T extends { kind: string; text: string }>(
 	left: readonly T[],
@@ -47,8 +53,13 @@ function joinedSegments<T extends { kind: string; text: string }>(
 ): T[] {
 	const last = left.at(-1);
 	const first = right[0];
-	if (split || last === undefined || first === undefined || last.kind !== first.kind) return [...left, ...right];
-	return [...left.slice(0, -1), { ...last, text: last.text + first.text }, ...right.slice(1)];
+	if (split || last === undefined || first === undefined || last.kind !== first.kind)
+		return [...left, ...right.map((segment) => ({ ...segment }))];
+	return [
+		...left.slice(0, -1),
+		{ ...last, text: last.text + first.text },
+		...right.slice(1).map((segment) => ({ ...segment })),
+	];
 }
 
 /** Text appends; fields replace. */
@@ -97,7 +108,7 @@ export class StepAssembler {
 
 	/** Current assembled parts. */
 	get snapshot(): ReplyPart[] {
-		return [...this.parts];
+		return this.parts.map(copiedPart);
 	}
 
 	/** Whether parts changed. */
@@ -133,7 +144,7 @@ export class StepAssembler {
 	/** Missing call ids and empty arguments are filled. */
 	result(): StepResult {
 		const parts = this.parts.map((part): ReplyPart => {
-			if (part.kind !== "call") return part;
+			if (part.kind !== "call") return copiedPart(part);
 			return {
 				...part,
 				wireId: part.wireId.length > 0 ? part.wireId : `${this.serving.generationId ?? "call"}_${part.index}`,
@@ -168,7 +179,7 @@ export class StepAssembler {
 		}
 		if (block === undefined) this.loose = this.parts.length;
 		else this.blocks.set(block, this.parts.length);
-		this.parts.push({ ...part });
+		this.parts.push(copiedPart(part));
 	}
 
 	/** Unsealed loose tail of this type. */
@@ -203,8 +214,13 @@ export class StepAssembler {
 		const known = at === undefined ? undefined : this.parts[at];
 		if (at === undefined || known?.kind !== "call") {
 			this.calls.set(event.index, this.parts.length);
-			const { kind: _kind, ...call } = event;
-			this.parts.push({ kind: "call", ...call });
+			this.parts.push({
+				kind: "call",
+				index: event.index,
+				wireId: event.wireId,
+				name: event.name,
+				argumentsText: event.argumentsText,
+			});
 			return;
 		}
 		if (known.wireId.length > 0 && event.wireId.length > 0 && known.wireId !== event.wireId)

@@ -34,7 +34,7 @@
 		"failure": {
 			"category": "stream",
 			"status": "stream",
-			"message": "OpenCode reported an error."
+			"message": "Plain words."
 		}
 	}
 }

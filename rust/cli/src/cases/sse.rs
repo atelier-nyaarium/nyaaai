@@ -30,14 +30,36 @@ fn text_of(items: &[SseItem]) -> String {
 }
 
 pub fn items(input: SseItemsInput) -> Outcome<SseItemsResult> {
-    let chunks = input
-        .chunks
+    let decode = |chunks: &[String]| {
+        chunks
+            .iter()
+            .map(|chunk| bytes_of(chunk))
+            .collect::<Outcome<Vec<_>>>()
+    };
+    let mut decoder = SseDecoder::new();
+    let pushed = decode(&input.chunks)?
         .iter()
-        .map(|chunk| bytes_of(chunk))
-        .collect::<Outcome<Vec<_>>>()?;
-    let slices: Vec<&[u8]> = chunks.iter().map(Vec::as_slice).collect();
-    let (pushed, ended) = decode_chunks(&slices);
-    Ok(SseItemsResult { pushed, ended })
+        .map(|chunk| decoder.push(chunk))
+        .collect();
+    let ended = decoder.end();
+    let Some(again) = &input.again else {
+        return Ok(SseItemsResult {
+            pushed,
+            ended,
+            pushed_again: None,
+            ended_again: None,
+        });
+    };
+    let pushed_again = decode(again)?
+        .iter()
+        .map(|chunk| decoder.push(chunk))
+        .collect();
+    Ok(SseItemsResult {
+        pushed,
+        ended,
+        pushed_again: Some(pushed_again),
+        ended_again: Some(decoder.end()),
+    })
 }
 
 pub fn splits(input: SseSplitsInput) -> Outcome<SseSplitsResult> {

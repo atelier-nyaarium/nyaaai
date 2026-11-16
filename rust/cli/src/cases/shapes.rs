@@ -4672,6 +4672,7 @@ impl Shape for EffortResolveResult {
 #[derive(Debug, Clone, PartialEq)]
 pub struct SseItemsInput {
     pub chunks: Vec<String>,
+    pub again: Option<Vec<String>>,
 }
 
 impl Shape for SseItemsInput {
@@ -4680,7 +4681,10 @@ impl Shape for SseItemsInput {
         let chunks = shape::required(object, "chunks", at, |value, at| {
             shape::list(value, at, shape::text)
         })?;
-        Ok(Self { chunks })
+        let again = shape::optional(object, "again", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { chunks, again })
     }
 
     fn encode(&self) -> Value {
@@ -4694,6 +4698,12 @@ impl Shape for SseItemsInput {
                     .collect(),
             ),
         );
+        if let Some(held) = &self.again {
+            object.insert(
+                "again",
+                Value::Array(held.iter().map(|held| Value::from(held.as_str())).collect()),
+            );
+        }
         Value::Object(object)
     }
 }
@@ -4702,6 +4712,8 @@ impl Shape for SseItemsInput {
 pub struct SseItemsResult {
     pub pushed: Vec<Vec<nyaaai_contract::shapes::step::SseItem>>,
     pub ended: Vec<nyaaai_contract::shapes::step::SseItem>,
+    pub pushed_again: Option<Vec<Vec<nyaaai_contract::shapes::step::SseItem>>>,
+    pub ended_again: Option<Vec<nyaaai_contract::shapes::step::SseItem>>,
 }
 
 impl Shape for SseItemsResult {
@@ -4715,7 +4727,20 @@ impl Shape for SseItemsResult {
         let ended = shape::required(object, "ended", at, |value, at| {
             shape::list(value, at, nyaaai_contract::shapes::step::SseItem::decode_at)
         })?;
-        Ok(Self { pushed, ended })
+        let pushed_again = shape::optional(object, "pushedAgain", at, |value, at| {
+            shape::list(value, at, |value, at| {
+                shape::list(value, at, nyaaai_contract::shapes::step::SseItem::decode_at)
+            })
+        })?;
+        let ended_again = shape::optional(object, "endedAgain", at, |value, at| {
+            shape::list(value, at, nyaaai_contract::shapes::step::SseItem::decode_at)
+        })?;
+        Ok(Self {
+            pushed,
+            ended,
+            pushed_again,
+            ended_again,
+        })
     }
 
     fn encode(&self) -> Value {
@@ -4733,6 +4758,22 @@ impl Shape for SseItemsResult {
             "ended",
             Value::Array(self.ended.iter().map(|held| held.encode()).collect()),
         );
+        if let Some(held) = &self.pushed_again {
+            object.insert(
+                "pushedAgain",
+                Value::Array(
+                    held.iter()
+                        .map(|held| Value::Array(held.iter().map(|held| held.encode()).collect()))
+                        .collect(),
+                ),
+            );
+        }
+        if let Some(held) = &self.ended_again {
+            object.insert(
+                "endedAgain",
+                Value::Array(held.iter().map(|held| held.encode()).collect()),
+            );
+        }
         Value::Object(object)
     }
 }
@@ -4844,6 +4885,7 @@ impl Shape for StepBilled {
 #[derive(Debug, Clone, PartialEq)]
 pub struct StepAssembleInput {
     pub events: Vec<nyaaai_contract::shapes::step::StepEvent>,
+    pub more: Option<Vec<String>>,
 }
 
 impl Shape for StepAssembleInput {
@@ -4856,7 +4898,10 @@ impl Shape for StepAssembleInput {
                 nyaaai_contract::shapes::step::StepEvent::decode_at,
             )
         })?;
-        Ok(Self { events })
+        let more = shape::optional(object, "more", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { events, more })
     }
 
     fn encode(&self) -> Value {
@@ -4865,6 +4910,12 @@ impl Shape for StepAssembleInput {
             "events",
             Value::Array(self.events.iter().map(|held| held.encode()).collect()),
         );
+        if let Some(held) = &self.more {
+            object.insert(
+                "more",
+                Value::Array(held.iter().map(|held| Value::from(held.as_str())).collect()),
+            );
+        }
         Value::Object(object)
     }
 }
@@ -5331,7 +5382,6 @@ pub enum FailureOfInputThrownItem {
     Failed(FailureOfInputThrownItemFailed),
     Provider(FailureOfInputThrownItemProvider),
     Error(FailureOfInputThrownItemError),
-    Value(FailureOfInputThrownItemValue),
 }
 
 impl Shape for FailureOfInputThrownItem {
@@ -5343,7 +5393,6 @@ impl Shape for FailureOfInputThrownItem {
                 FailureOfInputThrownItemProvider::decode_at(value, at).map(Self::Provider)
             }
             "error" => FailureOfInputThrownItemError::decode_at(value, at).map(Self::Error),
-            "value" => FailureOfInputThrownItemValue::decode_at(value, at).map(Self::Value),
             _ => Err(shape::no_branch(at, "make")),
         }
     }
@@ -5353,7 +5402,6 @@ impl Shape for FailureOfInputThrownItem {
             Self::Failed(held) => held.encode(),
             Self::Provider(held) => held.encode(),
             Self::Error(held) => held.encode(),
-            Self::Value(held) => held.encode(),
         }
     }
 }
@@ -5445,29 +5493,6 @@ impl Shape for FailureOfInputThrownItemError {
         let mut object = Object::new();
         object.insert("make", Value::from("error"));
         object.insert("message", Value::from(self.message.as_str()));
-        Value::Object(object)
-    }
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct FailureOfInputThrownItemValue {
-    pub value: Value,
-}
-
-impl Shape for FailureOfInputThrownItemValue {
-    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
-        let object = shape::object(value, at)?;
-        shape::required(object, "make", at, |value, at| {
-            shape::is_text(value, at, "value")
-        })?;
-        let value_field = shape::required(object, "value", at, shape::any)?;
-        Ok(Self { value: value_field })
-    }
-
-    fn encode(&self) -> Value {
-        let mut object = Object::new();
-        object.insert("make", Value::from("value"));
-        object.insert("value", self.value.clone());
         Value::Object(object)
     }
 }

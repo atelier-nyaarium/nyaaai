@@ -3,11 +3,13 @@
 use nyaaai_contract::shapes::step::{SseItem, SseItemComment, SseItemData, SseItemDone};
 use nyaaai_contract::text::Utf8Decoder;
 
-/// Decodes split UTF-8; accepts LF and CRLF.
+/// Decodes split UTF-8. A line ends at LF; a lone CR is data.
 #[derive(Default)]
 pub struct SseDecoder {
     decoder: Utf8Decoder,
     pending: String,
+    /// Pending text before this offset holds no LF.
+    scanned: usize,
     data: Vec<String>,
     event: Option<String>,
 }
@@ -24,11 +26,18 @@ impl SseDecoder {
     pub fn push(&mut self, bytes: &[u8]) -> Vec<SseItem> {
         let text = self.decoder.push(bytes);
         self.pending.push_str(&text);
+        let pending = std::mem::take(&mut self.pending);
         let mut items = Vec::new();
-        while let Some(at) = self.pending.find('\n') {
-            let line: String = self.pending.drain(..=at).collect();
-            self.line(without_cr(&line[..at]), &mut items);
+        let mut from = 0;
+        let mut scan = self.scanned;
+        while let Some(found) = pending[scan..].find('\n') {
+            let at = scan + found;
+            self.line(without_cr(&pending[from..at]), &mut items);
+            from = at + 1;
+            scan = from;
         }
+        self.pending = pending[from..].to_owned();
+        self.scanned = self.pending.len();
         items
     }
 
@@ -38,6 +47,7 @@ impl SseDecoder {
         let tail = self.decoder.end();
         self.pending.push_str(&tail);
         let pending = std::mem::take(&mut self.pending);
+        self.scanned = 0;
         if !pending.is_empty() {
             self.line(without_cr(&pending), &mut items);
         }

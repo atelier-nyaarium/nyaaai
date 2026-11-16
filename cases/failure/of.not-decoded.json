@@ -10,50 +10,13 @@
 				"message": "plain"
 			},
 			{
-				"make": "value",
-				"value": "text"
-			},
-			{
-				"make": "value",
-				"value": null
-			},
-			{
-				"make": "value",
-				"value": 5
-			},
-			{
-				"make": "value",
-				"value": {
-					"failure": {
-						"category": "idle",
-						"status": "idle",
-						"message": "x"
-					}
-				}
-			},
-			{
-				"make": "value",
-				"value": {
-					"category": "idle",
-					"status": "idle",
-					"message": "x"
-				}
-			},
-			{
-				"make": "value",
-				"value": [
-					"failure"
-				]
+				"make": "error",
+				"message": ""
 			}
 		]
 	},
 	"expected": {
 		"failures": [
-			null,
-			null,
-			null,
-			null,
-			null,
 			null,
 			null
 		]

@@ -1,0 +1,25 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "end-twice",
+	"input": {
+		"chunks": [
+			"ZGF0YTogYQ=="
+		],
+		"again": []
+	},
+	"expected": {
+		"pushed": [
+			[]
+		],
+		"ended": [
+			{
+				"kind": "data",
+				"data": "a"
+			}
+		],
+		"pushedAgain": [],
+		"endedAgain": []
+	}
+}

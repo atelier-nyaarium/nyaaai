@@ -153,13 +153,13 @@ fn object_at<'a>(raw: &'a Object, key: &str) -> Option<&'a Object> {
     raw.get(key).and_then(Value::as_object)
 }
 
-/// Absent, null, false, zero and empty text are no error; other non-objects have no message.
+/// Absent, null, false, zero and empty text are no error; a text is the message; other non-objects have none.
 fn read_reply_error(raw: Option<&Value>) -> Option<WireError> {
     match raw {
         None | Some(Value::Null | Value::Bool(false)) => None,
         Some(Value::Number(number)) if *number == 0.0 => None,
         Some(Value::String(text)) if text.is_empty() => None,
-        Some(Value::Object(_)) => raw.and_then(read_error),
+        Some(Value::Object(_) | Value::String(_)) => raw.and_then(read_error),
         Some(_) => Some(WireError::default()),
     }
 }

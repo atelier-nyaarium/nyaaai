@@ -1,17 +1,22 @@
 //! Step assembly cases.
 
 use nyaaai_agentic::step::{StepAssembler, reply_calls, reply_text, reply_thoughts};
-use nyaaai_contract::shapes::step::ReplyPart;
+use nyaaai_contract::shape::Shape;
+use nyaaai_contract::shapes::step::{ReplyPart, StepEvent};
 use nyaaai_testkit::cases::Outcome;
 
 use super::shapes::*;
 
 pub fn assemble(input: StepAssembleInput) -> Outcome<StepAssembleResult> {
+    let mut events = input.events;
+    for text in input.more.iter().flatten() {
+        events.push(StepEvent::decode_text(text).map_err(|_| "an event text is not an event")?);
+    }
     let mut assembler = StepAssembler::new();
     let mut added = Vec::new();
     let mut failed_at = None;
     let mut failure = None;
-    for (at, event) in input.events.iter().enumerate() {
+    for (at, event) in events.iter().enumerate() {
         match assembler.add(event) {
             Ok(changed) => added.push(changed),
             Err(error) => {

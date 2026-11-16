@@ -21,7 +21,7 @@
 		"failure": {
 			"category": "stream",
 			"status": "stream",
-			"message": "OpenRouter reported an error."
+			"message": "Plain words."
 		}
 	}
 }

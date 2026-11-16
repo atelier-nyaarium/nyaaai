@@ -49,6 +49,12 @@ const assembles = (name: string, ...events: object[]): CaseSource => ({
 	input: { events },
 });
 
+const assemblesMore = (name: string, events: object[], ...more: object[]): CaseSource => ({
+	kind: "step.assemble",
+	name,
+	input: { events, more: more.map((event) => JSON.stringify(event).replace('"index":0', '"index":-0')) },
+});
+
 const replies = (name: string, parts: object[], finishReason = "stop"): CaseSource => ({
 	kind: "step.replies",
 	name,
@@ -293,6 +299,17 @@ export const stepCases: CaseSource[] = [
 		call(0, "", "read", "{"),
 		call(0, "call_b", "", "}"),
 		call(0, "call_c", "", ""),
+	),
+
+	assemblesMore("call-index-negative-zero-joins-zero", [call(0, "", "read", "a")], call(0, "", "", "b")),
+	assemblesMore("call-index-negative-zero-first", [], call(0, "", "read", "a")),
+	assembles("call-index-two-to-the-53", call(9007199254740992, "", "r", "{}")),
+	assembles("call-index-one-e21", call(1e21, "", "r", "{}"), call(1e21, "", "", "x")),
+	assembles(
+		"call-index-filled-with-generation",
+		serving({ generationId: "g" }),
+		call(9007199254740992, "", "r", "{}"),
+		call(1e21, "", "r", "{}"),
 	),
 
 	// Order and flags.

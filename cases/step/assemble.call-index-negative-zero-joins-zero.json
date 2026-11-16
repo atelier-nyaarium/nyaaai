@@ -1,0 +1,52 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "call-index-negative-zero-joins-zero",
+	"input": {
+		"events": [
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "",
+				"name": "read",
+				"argumentsText": "a"
+			}
+		],
+		"more": [
+			"{\"kind\":\"call\",\"index\":-0,\"wireId\":\"\",\"name\":\"\",\"argumentsText\":\"b\"}"
+		]
+	},
+	"expected": {
+		"added": [
+			true,
+			true
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "call",
+				"index": 0,
+				"wireId": "",
+				"name": "read",
+				"argumentsText": "ab"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "call",
+					"index": 0,
+					"wireId": "call_0",
+					"name": "read",
+					"argumentsText": "ab"
+				}
+			],
+			"finish": "",
+			"serving": {}
+		}
+	}
+}

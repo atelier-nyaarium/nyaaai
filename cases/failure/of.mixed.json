@@ -15,8 +15,8 @@
 				"message": "Cut."
 			},
 			{
-				"make": "value",
-				"value": 1
+				"make": "error",
+				"message": "other"
 			},
 			{
 				"make": "provider",

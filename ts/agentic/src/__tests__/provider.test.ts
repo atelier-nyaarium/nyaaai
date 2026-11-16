@@ -2,6 +2,8 @@ import { expect, it } from "bun:test";
 import { failed, failureOf, ProviderError } from "../failure";
 import { StepAssembler } from "../step";
 
+const CALL = { kind: "call", index: 0, wireId: "", name: "read", argumentsText: "" } as const;
+
 it("a provider error is an Error that carries its failure", () => {
 	const error = failed("rateLimited", "Slow down.", { status: 429 });
 	expect(error).toBeInstanceOf(Error);
@@ -17,11 +19,58 @@ it("a provider error is an Error that carries its failure", () => {
 	expect(failureOf(thrown)).toEqual({ category: "rateLimited", status: 429, message: "Slow down." });
 });
 
-it("a snapshot is a copy, and reading the result changes nothing", () => {
+it("a failure is read from provider errors alone", () => {
+	const look = { failure: { category: "idle", status: "idle", message: "x" } };
+	expect([undefined, null, "text", 5, ["failure"], look, new Error("plain")].map(failureOf)).toEqual([
+		undefined,
+		undefined,
+		undefined,
+		undefined,
+		undefined,
+		undefined,
+		undefined,
+	]);
+});
+
+it("the status falls back to the category, and extra cannot set category or message", () => {
+	expect(failed("stream", "m", { status: undefined }).failure.status).toBe("stream");
+	expect(failed("stream", "m", { status: 502 }).failure.status).toBe(502);
+	const sneaky = { category: "auth", message: "other", retryAfterMs: 5 } as object;
+	expect(failed("stream", "m", sneaky).failure).toEqual({
+		category: "stream",
+		status: "stream",
+		message: "m",
+		retryAfterMs: 5,
+	});
+});
+
+it("an assembler keeps nothing it was handed and hands out nothing it holds", () => {
 	const assembler = new StepAssembler();
-	assembler.add({ kind: "call", index: 0, wireId: "", name: "read", argumentsText: "" });
+	const segment = { kind: "content" as const, text: "a" };
+	assembler.add({ kind: "thought", part: { kind: "thought", type: "t", segments: [segment] } });
+	segment.text = "MUTATED";
+	expect(assembler.snapshot[0]).toMatchObject({ segments: [{ text: "a" }] });
+
+	const joined = { kind: "content" as const, text: "b" };
+	assembler.add({ kind: "thought", part: { kind: "thought", type: "t", segments: [joined] }, split: true });
+	joined.text = "MUTATED";
+	expect(assembler.snapshot[0]).toMatchObject({ segments: [{ text: "a" }, { text: "b" }] });
+
+	const first = assembler.snapshot;
+	(first[0] as { type: string }).type = "changed";
+	const result = assembler.result();
+	(result.parts[0] as { type: string }).type = "changed";
+	(result.parts[0] as { segments: Array<{ text: string }> }).segments[0]!.text = "changed";
+	expect(assembler.snapshot[0]).toMatchObject({ type: "t", segments: [{ text: "a" }, { text: "b" }] });
+	expect(assembler.result().parts[0]).toMatchObject({ type: "t", segments: [{ text: "a" }, { text: "b" }] });
+});
+
+it("a call part holds its own fields only, and a result changes nothing", () => {
+	const assembler = new StepAssembler();
+	assembler.add({ ...CALL, extra: 1 } as typeof CALL);
 	assembler.snapshot.pop();
 	const first = assembler.result();
 	expect(assembler.result()).toEqual(first);
-	expect(assembler.snapshot).toEqual([{ kind: "call", index: 0, wireId: "", name: "read", argumentsText: "" }]);
+	expect(assembler.snapshot).toEqual([CALL]);
+	expect(Object.keys(first.parts[0] as object)).toEqual(["kind", "index", "wireId", "name", "argumentsText"]);
 });

@@ -5,7 +5,7 @@ import { schemaProjectionCases } from "../caseSources/schemaProjection";
 
 export const schemaProjection = caseGroup("schemaProjection", {
 	kinds: {
-		/** `value` matters to `withoutNulls` alone. A refusal leaves `output` null. */
+		/** `value` matters to `withoutNulls` alone. An absent output and a refusal leave `output` null. */
 		project: kind(
 			z.object({
 				projection: z.enum(["clean", "nullable", "withoutNulls", "strict"]),
@@ -21,7 +21,7 @@ export const schemaProjection = caseGroup("schemaProjection", {
 						case "nullable":
 							return { output: nullableOptionals(input.schema), refusal: null };
 						case "withoutNulls":
-							return { output: withoutNulls(input.schema, input.value), refusal: null };
+							return { output: withoutNulls(input.schema, input.value) ?? null, refusal: null };
 						case "strict":
 							return { output: strictSchema(input.schema), refusal: null };
 					}

@@ -161,10 +161,10 @@ function objectAt(raw: Json, key: string): Json | undefined {
 	return isJson(value) ? value : undefined;
 }
 
-/** Absent, null, false, zero and empty text are no error; other non-objects have no message. */
+/** Absent, null, false, zero and empty text are no error; a text is the message; other non-objects have none. */
 function readReplyError(raw: unknown): WireError | undefined {
 	if (raw === undefined || raw === null || raw === false || raw === 0 || raw === "") return undefined;
-	return isJson(raw) ? readError(raw) : {};
+	return isJson(raw) || typeof raw === "string" ? readError(raw) : {};
 }
 
 /** A text is the message. */

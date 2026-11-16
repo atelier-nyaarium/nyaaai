@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "nul-in-data",
+	"input": {
+		"chunks": [
+			"ZGF0YTogYQBiCgo="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[
+				{
+					"kind": "data",
+					"data": "a\u0000b"
+				}
+			]
+		],
+		"ended": []
+	}
+}

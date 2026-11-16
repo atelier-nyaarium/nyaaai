@@ -42,19 +42,18 @@ pub fn of(input: FailureOfInput) -> Outcome<FailureOfResult> {
         .thrown
         .into_iter()
         .map(|held| {
-            let thrown: Option<Box<dyn Error>> = match held {
-                FailureOfInputThrownItem::Failed(made) => Some(Box::new(failed(
+            let thrown: Box<dyn Error> = match held {
+                FailureOfInputThrownItem::Failed(made) => Box::new(failed(
                     made.category,
                     &made.message,
                     made.extra.map(extra_of).unwrap_or_default(),
-                ))),
+                )),
                 FailureOfInputThrownItem::Provider(made) => {
-                    Some(Box::new(ProviderError::new(made.failure)))
+                    Box::new(ProviderError::new(made.failure))
                 }
-                FailureOfInputThrownItem::Error(made) => Some(Box::from(made.message)),
-                FailureOfInputThrownItem::Value(_) => None,
+                FailureOfInputThrownItem::Error(made) => Box::from(made.message),
             };
-            thrown.and_then(|error| failure_of(error.as_ref()).cloned())
+            failure_of(thrown.as_ref()).cloned()
         })
         .collect();
     Ok(FailureOfResult { failures })

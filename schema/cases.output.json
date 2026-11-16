@@ -2636,6 +2636,12 @@
 					"items": {
 						"type": "string"
 					}
+				},
+				"again": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
 				}
 			},
 			"required": [
@@ -2656,6 +2662,21 @@
 					}
 				},
 				"ended": {
+					"type": "array",
+					"items": {
+						"$ref": "step.output.json#/$defs/SseItem"
+					}
+				},
+				"pushedAgain": {
+					"type": "array",
+					"items": {
+						"type": "array",
+						"items": {
+							"$ref": "step.output.json#/$defs/SseItem"
+						}
+					}
+				},
+				"endedAgain": {
 					"type": "array",
 					"items": {
 						"$ref": "step.output.json#/$defs/SseItem"
@@ -2738,6 +2759,12 @@
 					"type": "array",
 					"items": {
 						"$ref": "step.output.json#/$defs/StepEvent"
+					}
+				},
+				"more": {
+					"type": "array",
+					"items": {
+						"type": "string"
 					}
 				}
 			},
@@ -3023,21 +3050,6 @@
 								"required": [
 									"make",
 									"message"
-								],
-								"additionalProperties": false
-							},
-							{
-								"type": "object",
-								"properties": {
-									"make": {
-										"type": "string",
-										"const": "value"
-									},
-									"value": {}
-								},
-								"required": [
-									"make",
-									"value"
 								],
 								"additionalProperties": false
 							}

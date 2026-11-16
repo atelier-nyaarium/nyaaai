@@ -1,0 +1,33 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "character-held-at-end",
+	"input": {
+		"chunks": [
+			"ZGF0YTogY2Fm",
+			"ww=="
+		],
+		"again": [
+			"qQ==",
+			"Cgo="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[],
+			[]
+		],
+		"ended": [
+			{
+				"kind": "data",
+				"data": "caf�"
+			}
+		],
+		"pushedAgain": [
+			[],
+			[]
+		],
+		"endedAgain": []
+	}
+}

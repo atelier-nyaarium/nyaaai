@@ -1,0 +1,48 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "step.assemble",
+	"name": "call-index-two-to-the-53",
+	"input": {
+		"events": [
+			{
+				"kind": "call",
+				"index": 9007199254740992,
+				"wireId": "",
+				"name": "r",
+				"argumentsText": "{}"
+			}
+		]
+	},
+	"expected": {
+		"added": [
+			true
+		],
+		"failedAt": null,
+		"failure": null,
+		"outputSeen": true,
+		"billed": {},
+		"snapshot": [
+			{
+				"kind": "call",
+				"index": 9007199254740992,
+				"wireId": "",
+				"name": "r",
+				"argumentsText": "{}"
+			}
+		],
+		"result": {
+			"parts": [
+				{
+					"kind": "call",
+					"index": 9007199254740992,
+					"wireId": "call_9007199254740992",
+					"name": "r",
+					"argumentsText": "{}"
+				}
+			],
+			"finish": "",
+			"serving": {}
+		}
+	}
+}

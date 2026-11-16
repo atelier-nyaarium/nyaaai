@@ -1,0 +1,41 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "sse.items",
+	"name": "push-after-end",
+	"input": {
+		"chunks": [
+			"ZGF0YTogYQoK"
+		],
+		"again": [
+			"ZGF0YTogYgoK",
+			"ZGF0YTogdGFpbA=="
+		]
+	},
+	"expected": {
+		"pushed": [
+			[
+				{
+					"kind": "data",
+					"data": "a"
+				}
+			]
+		],
+		"ended": [],
+		"pushedAgain": [
+			[
+				{
+					"kind": "data",
+					"data": "b"
+				}
+			],
+			[]
+		],
+		"endedAgain": [
+			{
+				"kind": "data",
+				"data": "tail"
+			}
+		]
+	}
+}
