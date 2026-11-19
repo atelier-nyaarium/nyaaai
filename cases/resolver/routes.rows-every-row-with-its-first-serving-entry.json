@@ -130,7 +130,6 @@
 			"Second"
 		],
 		"refreshed": [],
-		"keyReads": 4,
-		"listReads": 6
+		"keyReads": 4
 	}
 }

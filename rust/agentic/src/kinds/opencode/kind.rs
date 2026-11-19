@@ -1,6 +1,6 @@
 //! The OpenCode kind.
 
-use std::sync::{Arc, LazyLock};
+use std::sync::Arc;
 
 use nyaaai_contract::cancel::CancelToken;
 use nyaaai_contract::future::BoxFuture;
@@ -12,7 +12,7 @@ use nyaaai_contract::shapes::provider::{
     ProviderPlan,
 };
 use nyaaai_contract::shapes::step::{ApiFamily, Failure, FailureCategory};
-use nyaaai_contract::time::{Clock, Scheduler, SystemScheduler};
+use nyaaai_contract::time::{Clock, Scheduler};
 
 use super::catalog::{OpenCodeCatalog, OpenCodeCatalogDeps, opencode_browser, opencode_tester};
 use crate::codec::Codec;
@@ -94,14 +94,8 @@ fn billing_facts(entry: &EntryFields, bill: Option<&Billed>) -> Option<String> {
     (!facts.is_empty()).then(|| facts.join(DOT))
 }
 
-pub struct OpenCodeKind {
-    clock: Arc<dyn Scheduler>,
-}
-
-/// The kind; the clock dates what its codecs and browser read.
-pub fn opencode_kind(clock: Arc<dyn Scheduler>) -> Arc<OpenCodeKind> {
-    Arc::new(OpenCodeKind { clock })
-}
+/// The OpenCode kind; every date comes from the route's deps.
+pub struct OpenCodeKind;
 
 impl ProviderKind for OpenCodeKind {
     fn kind(&self) -> ProviderKindName {
@@ -222,23 +216,38 @@ impl ProviderKind for OpenCodeKind {
         }))
     }
 
-    fn browse(&self, entry: &ProviderEntry, route: &Route) -> Option<Box<dyn Browser>> {
+    fn browse(
+        &self,
+        entry: &ProviderEntry,
+        route: &Route,
+        deps: &KindDeps,
+    ) -> Option<Box<dyn Browser>> {
         let catalog = catalog_of(route)?;
         Some(Box::new(opencode_browser(
             catalog,
             entry.plan.unwrap_or(ProviderPlan::Go),
-            Arc::clone(&self.clock),
+            Arc::clone(&deps.scheduler),
         )))
     }
 
-    fn tester(&self, _entry: &ProviderEntry, route: &Route) -> Option<Box<dyn Tester>> {
+    fn tester(
+        &self,
+        _entry: &ProviderEntry,
+        route: &Route,
+        _deps: &KindDeps,
+    ) -> Option<Box<dyn Tester>> {
         Some(Box::new(opencode_tester(catalog_of(route)?)))
     }
 
     /// Unknown views use Chat.
-    fn codec(&self, view: Option<&ModelView>, _entry: &EntryFields) -> Box<dyn Codec> {
+    fn codec(
+        &self,
+        view: Option<&ModelView>,
+        _entry: &EntryFields,
+        deps: &KindDeps,
+    ) -> Box<dyn Codec> {
         let facts = codec_facts_of(view);
-        let clock = || ArcClock(Arc::clone(&self.clock));
+        let clock = || ArcClock(Arc::clone(&deps.scheduler));
         match view
             .and_then(|held| held.api.as_ref())
             .map(|api| api.family)
@@ -272,5 +281,4 @@ impl ProviderKind for OpenCodeKind {
     }
 }
 
-pub static OPENCODE: LazyLock<Arc<dyn ProviderKind>> =
-    LazyLock::new(|| opencode_kind(Arc::new(SystemScheduler)) as Arc<dyn ProviderKind>);
+pub static OPENCODE: OpenCodeKind = OpenCodeKind;

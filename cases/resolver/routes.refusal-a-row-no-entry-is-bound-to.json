@@ -68,7 +68,6 @@
 		"transports": [],
 		"stopped": [],
 		"refreshed": [],
-		"keyReads": 0,
-		"listReads": 1
+		"keyReads": 0
 	}
 }

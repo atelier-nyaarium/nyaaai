@@ -2,7 +2,6 @@
 
 import { fixedText } from "@nyaaai/contract/number";
 import type { EntryFields, KeyState } from "@nyaaai/contract/shapes/provider";
-import { type Scheduler, systemScheduler } from "@nyaaai/contract/time";
 import { OPENROUTER_CHAT } from "../../dialects/openrouter";
 import { dispositionOf } from "../../provider/disposition";
 import type { ProviderKind, Route } from "../../provider/kind";
@@ -50,8 +49,7 @@ function keyStateOf(check: KeyCheck): KeyState {
 	};
 }
 
-/** The kind; the scheduler times its browser and tester. */
-export function openrouterKind(scheduler: Scheduler): ProviderKind {
+export const OPENROUTER: ProviderKind = (() => {
 	const self: ProviderKind = {
 		kind: "openrouter",
 		label: "OpenRouter",
@@ -75,8 +73,8 @@ export function openrouterKind(scheduler: Scheduler): ProviderKind {
 				userAgent: deps.userAgent,
 			}),
 		catalog: (_entry, transport, deps) => new ModelCatalog({ transport, ...deps }),
-		browse: (_entry, route) => openRouterBrowser(catalogOf(route), route.transport, scheduler),
-		tester: (_entry, route) => openRouterTester(catalogOf(route), route.transport, scheduler),
+		browse: (_entry, route, deps) => openRouterBrowser(catalogOf(route), route.transport, deps.scheduler),
+		tester: (_entry, route, deps) => openRouterTester(catalogOf(route), route.transport, deps.scheduler),
 		codec: () => OPENROUTER_CHAT,
 		failure: dispositionOf,
 		limits: async (transport, signal) => {
@@ -89,6 +87,4 @@ export function openrouterKind(scheduler: Scheduler): ProviderKind {
 		},
 	};
 	return self;
-}
-
-export const OPENROUTER: ProviderKind = openrouterKind(systemScheduler);
+})();

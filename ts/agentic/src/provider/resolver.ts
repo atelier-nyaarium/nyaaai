@@ -6,6 +6,7 @@ import type { ProviderList } from "@nyaaai/contract/providerList";
 import type { Binding, ModelRow, ModelUse, ModelView, Refusal, Unresolved, Via } from "@nyaaai/contract/shapes/model";
 import type { KeyReach, Passed, ProviderEntry, ProviderKindName, SkipReason } from "@nyaaai/contract/shapes/provider";
 import type { Codec } from "../codec";
+import { joinAll } from "../kinds/join";
 import { parseRowKey, servedIdOf } from "../models/rowKey";
 import { unknownView } from "../models/view";
 import type { KeySource, Transport } from "../transport";
@@ -110,9 +111,9 @@ export function viaOf(entry: ProviderEntry): Via {
 	return { entry: entry.id, label: entry.label };
 }
 
-/** What identifies a route: id, plan and URL. */
+/** What identifies a route: id, kind, plan and URL. */
 export function routeKey(entry: ProviderEntry): string {
-	return [entry.id, entry.plan ?? "", entry.url ?? ""].join("\n");
+	return [entry.id, entry.kind, entry.plan ?? "", entry.url ?? ""].join("\n");
 }
 
 /** A URL kind needs no key; a key kind needs one. */
@@ -129,12 +130,13 @@ export function reachOf(kind: Pick<ProviderKind, "field">, answer: KeyAnswer): K
 	}
 }
 
-/** One route's key: a key stays with its URL. */
+/** One route's key: read first, then given only while the list holds the same id, kind, plan and URL. */
 export function keySourceOf(keys: EntryKeys, list: ProviderList, entry: ProviderEntry): KeySource {
 	return {
 		get: async () => {
-			if (list.entries().find((each) => each.id === entry.id)?.url !== entry.url) return undefined;
-			const answer = await keys.get(entry.id);
+			const answer = await keys.get(entry.id).catch((): KeyAnswer => ({ kind: "unready" }));
+			const listed = list.entries().find((each) => each.id === entry.id);
+			if (listed === undefined || routeKey(listed) !== routeKey(entry)) return undefined;
 			return answer.kind === "key" ? answer.key : undefined;
 		},
 	};
@@ -183,9 +185,13 @@ function stamped(transport: Resolved["transport"], zdrOnly: () => boolean): Reso
 	};
 }
 
-/** Stops a catalog that listens, when it does. */
+/** Stops a catalog that listens; a failure stops nothing else. */
 function disposed(catalog: Route["catalog"]): void {
-	catalog.dispose?.();
+	try {
+		catalog.dispose?.();
+	} catch {
+		// The others still go.
+	}
 }
 
 /** Resolves through one entry. */
@@ -194,12 +200,13 @@ export function servedBy(d: {
 	kind: ProviderKind;
 	transport: Resolved["transport"];
 	catalog: Catalog;
+	deps: KindDeps;
 	zdrOnly: () => boolean;
 }): Plan {
 	const { zdrOnly } = d;
 	return async (key, use) => {
 		const view = (await d.catalog.view(key, use)) ?? unknownView(adhocRow(key, d.kind.kind));
-		const codec = d.kind.codec(view, d.entry);
+		const codec = d.kind.codec(view, d.entry, d.deps);
 		const route: Resolved = {
 			ok: true,
 			key,
@@ -222,22 +229,30 @@ export function servedBy(d: {
 
 /** Routes keys across entries; holds one route per entry as it stands. */
 export class ModelResolver {
-	private readonly made = new Map<string, Route>();
+	private readonly made = new Map<string, { route: Route; deps: KindDeps }>();
 	private readonly unsubscribe: () => void;
+	private closed = false;
 
 	constructor(private readonly d: ResolverDeps) {
 		this.unsubscribe = d.list.onChange(() => this.drop());
 	}
 
-	/** Stops listening; the routes go. */
+	/** Stops listening; the routes go; nothing is built after. */
 	dispose(): void {
+		if (this.closed) return;
+		this.closed = true;
 		this.unsubscribe();
-		for (const route of this.made.values()) disposed(route.catalog);
+		for (const held of this.made.values()) disposed(held.route.catalog);
 		this.made.clear();
 	}
 
-	/** The entry's route, made once per id, plan and URL. */
+	/** The entry's route, made once per id, kind, plan and URL. */
 	route(entry: ProviderEntry): Route {
+		return this.held(entry).route;
+	}
+
+	private held(entry: ProviderEntry): { route: Route; deps: KindDeps } {
+		if (this.closed) throw new Error("The resolver is disposed.");
 		const at = routeKey(entry);
 		const known = this.made.get(at);
 		if (known !== undefined) return known;
@@ -248,18 +263,23 @@ export class ModelResolver {
 		const catalog = kind.catalog(entry, transport, {
 			scheduler: deps.scheduler,
 			rows: this.d.registry,
-			refreshed: () => this.d.refreshed?.(entry),
+			refreshed: () => this.d.refreshed?.(this.listedAs(entry) ?? entry),
 		});
-		const made = { transport, catalog };
+		const made = { route: { transport, catalog }, deps };
 		this.made.set(at, made);
 		return made;
+	}
+
+	/** The entry as the list holds it, when it is the route's. */
+	private listedAs(entry: ProviderEntry): ProviderEntry | undefined {
+		return this.d.list.entries().find((each) => routeKey(each) === routeKey(entry));
 	}
 
 	/** What a key says of one entry. */
 	reach(entry: ProviderEntry): Promise<KeyReach> {
 		return this.d.keys.get(entry.id).then(
 			(answer) => reachOf({ field: this.d.kinds[entry.kind]?.field ?? "key" }, answer),
-			(): KeyReach => "keyMissing",
+			(): KeyReach => "unreachable",
 		);
 	}
 
@@ -287,8 +307,8 @@ export class ModelResolver {
 	async rows(use: ModelUse): Promise<ResolvedOption[]> {
 		const zdrOnly = this.d.zdrOnly();
 		const reach = this.reaches();
-		return Promise.all(
-			this.d.registry.rows().map(async (row): Promise<ResolvedOption> => {
+		return joinAll(
+			this.d.registry.rows().map((row) => async (): Promise<ResolvedOption> => {
 				const routed = await this.routed(row, use, zdrOnly, reach, true, false);
 				if (!routed.ok) return { key: row.key, view: routed.view ?? unknownView(row) };
 				const [first] = routed.candidates;
@@ -305,10 +325,10 @@ export class ModelResolver {
 	/** Routes of entries the list no longer holds go. */
 	private drop(): void {
 		const listed = new Set(this.d.list.entries().map(routeKey));
-		for (const [at, route] of this.made) {
+		for (const [at, held] of this.made) {
 			if (listed.has(at)) continue;
 			this.made.delete(at);
-			disposed(route.catalog);
+			disposed(held.route.catalog);
 		}
 	}
 
@@ -337,14 +357,18 @@ export class ModelResolver {
 		let matched = false;
 		const found: Resolved[] = [];
 		const passed: Passed[] = [];
-		for (const entry of this.d.list.entries()) {
+		const listed = this.closed ? [] : this.d.list.entries();
+		const owner = row.identity.kind === "local" ? row.identity.entry : undefined;
+		if (owner !== undefined && !listed.some((each) => each.id === owner)) return { ok: false, refusal: "noModel" };
+		for (const entry of listed) {
 			if (found.length > 0 && !all) break;
 			const kind = this.d.kinds[entry.kind];
 			const binding = row.bindings[entry.kind];
-			const elsewhere = row.identity.kind === "local" && row.identity.entry !== entry.id;
+			const elsewhere = owner !== undefined && owner !== entry.id;
 			if (kind === undefined || binding === undefined || elsewhere) continue;
-			matched = true;
 			const reached = await reach(entry);
+			if (!this.stands(entry)) continue;
+			matched = true;
 			if (reached !== "ok") {
 				passed.push({
 					entry: entry.id,
@@ -352,12 +376,18 @@ export class ModelResolver {
 					reason: REACH_SKIPS[reached],
 					before: found.length,
 				});
-				const behind =
-					standing && worst.view === undefined ? await this.viewOf(entry, row, use, zdrOnly) : undefined;
+				const held = standing && worst.view === undefined ? this.tried(entry) : undefined;
+				const behind = held === undefined ? undefined : await this.viewOf(held.route, row, use, zdrOnly);
 				worst = raised(worst, reached, behind, entry.label);
 				continue;
 			}
-			const view = await this.viewOf(entry, row, use, zdrOnly);
+			const held = this.tried(entry);
+			if (held === undefined) {
+				passed.push({ entry: entry.id, label: entry.label, reason: "network", before: found.length });
+				worst = raised(worst, "unreachable", undefined, entry.label);
+				continue;
+			}
+			const view = await this.viewOf(held.route, row, use, zdrOnly);
 			if (view === undefined || !usable(view)) {
 				worst = raised(worst, refusalOf(view), view, entry.label);
 				continue;
@@ -370,8 +400,8 @@ export class ModelResolver {
 				kind,
 				binding,
 				view,
-				transport: stamped(this.route(entry).transport, live),
-				codec: kind.codec(view, entry),
+				transport: stamped(held.route.transport, live),
+				codec: kind.codec(view, entry, held.deps),
 				get zdrOnly() {
 					return live();
 				},
@@ -382,13 +412,22 @@ export class ModelResolver {
 		return matched ? { ok: false, ...worst } : { ok: false, refusal: "keyMissing" };
 	}
 
-	private async viewOf(
-		entry: ProviderEntry,
-		row: ModelRow,
-		use: ModelUse,
-		zdrOnly: boolean,
-	): Promise<ModelView | undefined> {
-		const views = await this.route(entry).catalog.views(use, zdrOnly);
+	/** The entry is still listed as it was. */
+	private stands(entry: ProviderEntry): boolean {
+		return !this.closed && this.d.list.entries().some((each) => routeKey(each) === routeKey(entry));
+	}
+
+	/** The route, or none when it cannot be made. */
+	private tried(entry: ProviderEntry): { route: Route; deps: KindDeps } | undefined {
+		try {
+			return this.held(entry);
+		} catch {
+			return undefined;
+		}
+	}
+
+	private async viewOf(route: Route, row: ModelRow, use: ModelUse, zdrOnly: boolean): Promise<ModelView | undefined> {
+		const views = await route.catalog.views(use, zdrOnly);
 		return views.find((each) => each.row.key === row.key);
 	}
 }

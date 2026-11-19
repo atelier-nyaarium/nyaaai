@@ -1,0 +1,104 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routes",
+	"name": "order-the-routes-a-step-made-are-in-the-lists-order",
+	"input": {
+		"entries": [
+			{
+				"id": "lab",
+				"kind": "ollama",
+				"label": "Lab",
+				"url": "http://lab.local:11434"
+			},
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "First"
+			},
+			{
+				"id": "studio",
+				"kind": "lmstudio",
+				"label": "Studio",
+				"url": "http://lab.local:1234"
+			}
+		],
+		"answers": {
+			"a": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"failing": [],
+		"rows": [
+			"ollama:qwen",
+			"openai/gpt-6-luna",
+			"lmstudio:qwen"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama",
+			"lmstudio",
+			"llamacpp",
+			"compatible"
+		],
+		"listings": {},
+		"zdrOnly": true,
+		"steps": [
+			{
+				"kind": "rows",
+				"use": "chat"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answer": {
+					"kind": "rows",
+					"options": [
+						{
+							"key": "ollama:qwen",
+							"status": "ok",
+							"via": {
+								"entry": "lab",
+								"label": "Lab"
+							}
+						},
+						{
+							"key": "openai/gpt-6-luna",
+							"status": "ok",
+							"via": {
+								"entry": "a",
+								"label": "First"
+							}
+						},
+						{
+							"key": "lmstudio:qwen",
+							"status": "ok",
+							"via": {
+								"entry": "studio",
+								"label": "Studio"
+							}
+						}
+					]
+				},
+				"built": 3,
+				"disposed": 0
+			}
+		],
+		"transports": [
+			"Lab http://lab.local:11434",
+			"First",
+			"Studio http://lab.local:1234"
+		],
+		"stopped": [
+			"Lab http://lab.local:11434",
+			"First",
+			"Studio http://lab.local:1234"
+		],
+		"refreshed": [],
+		"keyReads": 3
+	}
+}

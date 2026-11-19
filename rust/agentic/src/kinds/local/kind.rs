@@ -285,15 +285,30 @@ impl ProviderKind for LocalKind {
         Arc::new(catalog)
     }
 
-    fn browse(&self, _entry: &ProviderEntry, route: &Route) -> Option<Box<dyn Browser>> {
+    fn browse(
+        &self,
+        _entry: &ProviderEntry,
+        route: &Route,
+        _deps: &KindDeps,
+    ) -> Option<Box<dyn Browser>> {
         catalog_of(route).map(|catalog| Box::new(local_browser(&catalog)) as Box<dyn Browser>)
     }
 
-    fn tester(&self, _entry: &ProviderEntry, route: &Route) -> Option<Box<dyn Tester>> {
+    fn tester(
+        &self,
+        _entry: &ProviderEntry,
+        route: &Route,
+        _deps: &KindDeps,
+    ) -> Option<Box<dyn Tester>> {
         catalog_of(route).map(|catalog| Box::new(local_tester(&catalog)) as Box<dyn Tester>)
     }
 
-    fn codec(&self, view: Option<&ModelView>, entry: &EntryFields) -> Box<dyn Codec> {
+    fn codec(
+        &self,
+        view: Option<&ModelView>,
+        entry: &EntryFields,
+        _deps: &KindDeps,
+    ) -> Box<dyn Codec> {
         let facts = codec_facts_of(view);
         Box::new(local_chat(facts.as_ref(), &entry.label, self.dialect()))
     }

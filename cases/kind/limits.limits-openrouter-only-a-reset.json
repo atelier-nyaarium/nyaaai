@@ -26,7 +26,6 @@
 		"limits": {
 			"reset": "daily"
 		},
-		"thrown": null,
 		"requests": [
 			{
 				"method": "GET",

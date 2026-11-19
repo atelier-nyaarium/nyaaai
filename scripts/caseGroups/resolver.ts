@@ -1,4 +1,5 @@
 import type { Codec } from "@nyaaai/agentic/codec";
+import { failureOf } from "@nyaaai/agentic/failure";
 import { parseRowKey } from "@nyaaai/agentic/models/rowKey";
 import { type EntryCatalog, KINDS, type ProviderKind } from "@nyaaai/agentic/provider/kind";
 import {
@@ -9,14 +10,14 @@ import {
 	reachOf,
 	routeKey,
 	servedBy,
+	viaOf,
 } from "@nyaaai/agentic/provider/resolver";
-import type { Transport } from "@nyaaai/agentic/transport";
 import type { KeyAnswer } from "@nyaaai/contract/entryKeys";
-import type { Fetch } from "@nyaaai/contract/fetch";
+import type { Fetch, FetchRequest } from "@nyaaai/contract/fetch";
 import { z } from "@nyaaai/contract/shape";
 import { type ModelRow, ModelUse, ModelView, Unresolved, Via } from "@nyaaai/contract/shapes/model";
 import { KeyReach, Passed, ProviderEntry, ProviderKindName } from "@nyaaai/contract/shapes/provider";
-import type { CanonicalRequest } from "@nyaaai/contract/shapes/step";
+import { type CanonicalRequest, Failure, type StepResult } from "@nyaaai/contract/shapes/step";
 import { caseGroup, casesFor, kind } from "@nyaaai/testkit/caseGroup";
 import { fakeScheduler, TimerWheel } from "@nyaaai/testkit/scheduler";
 import { scriptedEntryKeys, scriptedModelRegistry, scriptedProviderList } from "@nyaaai/testkit/scriptedPorts";
@@ -58,23 +59,48 @@ const Candidate = z.object({
 	path: z.string(),
 });
 
+/** A change of a scripted port; it tells its listeners. */
+const CHANGES = [
+	/** The list changes. */
+	z.object({ kind: z.literal("list"), entries: z.array(ProviderEntry) }),
+	/** An entry's key answer changes. */
+	z.object({ kind: z.literal("answer"), id: z.string(), answer: KeyAnswerIn }),
+	/** The registry's rows change. */
+	z.object({ kind: z.literal("registry"), rows: z.array(z.string()) }),
+	z.object({ kind: z.literal("zdr"), on: z.boolean() }),
+] as const;
+
+/** A call on the resolver, or a request through a route it gave. */
+const CALLS = [
+	z.object({ kind: z.literal("routes"), model: z.string(), use: ModelUse }),
+	z.object({ kind: z.literal("resolve"), model: z.string(), use: ModelUse }),
+	z.object({ kind: z.literal("rows"), use: ModelUse }),
+	z.object({ kind: z.literal("candidates"), use: ModelUse }),
+	/** A request through a candidate an earlier `routes` or `resolve` step answered; `fail` is what the host answers it. */
+	z.object({
+		kind: z.literal("send"),
+		from: z.int().min(0),
+		candidate: z.int().min(0),
+		mode: z.enum(["complete", "stream"]).exactOptional(),
+		fail: z.object({ status: z.int(), body: z.unknown() }).exactOptional(),
+	}),
+] as const;
+
 const RouteStep = () =>
 	z.discriminatedUnion("kind", [
-		z.object({ kind: z.literal("routes"), model: z.string(), use: ModelUse }),
-		z.object({ kind: z.literal("resolve"), model: z.string(), use: ModelUse }),
-		z.object({ kind: z.literal("rows"), use: ModelUse }),
-		z.object({ kind: z.literal("candidates"), use: ModelUse }),
-		/** The list changes and tells. */
-		z.object({ kind: z.literal("list"), entries: z.array(ProviderEntry) }),
-		/** An entry's key answer changes and tells. */
-		z.object({ kind: z.literal("answer"), id: z.string(), answer: KeyAnswerIn }),
-		/** The registry's rows change and tell. */
-		z.object({ kind: z.literal("registry"), rows: z.array(z.string()) }),
-		z.object({ kind: z.literal("zdr"), on: z.boolean() }),
+		...CHANGES,
+		...CALLS,
 		/** The catalog of an entry's route says it refreshed. */
 		z.object({ kind: z.literal("refreshed"), entry: z.string() }),
-		/** A request goes through a candidate an earlier `routes` or `resolve` step answered. */
-		z.object({ kind: z.literal("send"), from: z.int().min(0), candidate: z.int().min(0) }),
+		/** The route of an entry is asked for directly. */
+		z.object({ kind: z.literal("route"), entry: ProviderEntry }),
+		z.object({ kind: z.literal("dispose") }),
+		/** A call whose first key read is held while the changes are made, then let go. */
+		z.object({
+			kind: z.literal("during"),
+			changes: z.array(z.discriminatedUnion("kind", CHANGES)),
+			call: z.discriminatedUnion("kind", CALLS),
+		}),
 	]);
 
 const StepAnswer = () =>
@@ -95,14 +121,17 @@ const StepAnswer = () =>
 			served: z.array(z.object({ key: z.string(), status: ViewStatus, via: Via })),
 		}),
 		z.object({ kind: z.literal("changed") }),
-		/** What the transport saw: its entry, the switch it was sent, the key it read. */
+		/** What the host saw of a request: the switch the codec was given, the URL and the key sent. */
 		z.object({
 			kind: z.literal("sent"),
-			transport: z.string(),
-			zdrOnly: z.boolean(),
-			key: z.string().nullable(),
-			path: z.string(),
+			zdrOnly: z.boolean().nullable(),
+			url: z.string().nullable(),
+			authorization: z.string().nullable(),
+			failure: Failure.nullable(),
+			thrown: z.string().nullable(),
 		}),
+		/** A direct `route` call. */
+		z.object({ kind: z.literal("routed"), thrown: z.string().nullable() }),
 		z.object({ kind: z.literal("none") }),
 	]);
 
@@ -131,38 +160,97 @@ const REQUEST: CanonicalRequest = {
 	zdrOnly: true,
 };
 
-const NO_NETWORK: Fetch = async () => {
-	throw new Error("No network.");
-};
-
-/** What a stub transport answers to a request. */
-interface Sent {
-	transport: string;
-	zdrOnly: boolean;
-	key: string | null;
-	path: string;
+/** What the host saw of a request. */
+interface Seen {
+	url: string;
+	authorization: string | null;
 }
 
-/** A transport that answers each request with what it saw. */
-function stubTransport(label: string, key: { get(): Promise<string | undefined> }): Transport {
+const UTF8 = new TextEncoder();
+
+/** A host that answers every request with success, or with the failure it was told to. */
+function echoHost(seen: Seen[], failing: { status: number; body: unknown } | undefined = undefined) {
+	const holder = { next: failing };
+	const fetch: Fetch = async (request: FetchRequest) => {
+		seen.push({
+			url: request.url,
+			authorization: request.headers.find(([name]) => name === "Authorization")?.[1] ?? null,
+		});
+		const asked = request.headers.find(([name]) => name === "Accept")?.[1] ?? "";
+		const failure = holder.next;
+		holder.next = undefined;
+		const stream = failure === undefined && asked === "text/event-stream";
+		const body = failure === undefined ? (stream ? "data: {}\n\n" : "{}") : JSON.stringify(failure.body);
+		return {
+			status: failure?.status ?? 200,
+			headers: [["content-type", stream ? "text/event-stream" : "application/json"]],
+			chunks: (async function* () {
+				yield UTF8.encode(body);
+			})(),
+		};
+	};
 	return {
-		complete: async (codec: Codec, request: CanonicalRequest): Promise<Sent> => ({
-			transport: label,
-			zdrOnly: request.zdrOnly,
-			key: (await key.get()) ?? null,
-			path: codec.encode(request, "complete").path,
-		}),
-		stream: async () => {
-			throw new Error("No stream.");
+		fetch,
+		/** The next request answers this. */
+		fail: (failure: { status: number; body: unknown } | undefined) => {
+			holder.next = failure;
 		},
-		getJson: async () => {
-			throw new Error("No network.");
+	};
+}
+
+const NOTHING: StepResult = { parts: [], finish: "stop", serving: {} };
+
+/** A request through a route: what its codec was given and what the host saw. */
+async function sendThrough(
+	found: Resolved,
+	seen: Seen[],
+	host: ReturnType<typeof echoHost>,
+	step: { mode?: "complete" | "stream" | undefined; fail?: { status: number; body: unknown } | undefined },
+): Promise<Extract<AnswerOf, { kind: "sent" }>> {
+	let zdrOnly: boolean | null = null;
+	const codec: Codec = {
+		...found.codec,
+		encode: (request, mode) => {
+			zdrOnly = request.zdrOnly;
+			return found.codec.encode(request, mode);
 		},
-	} as unknown as Transport;
+		complete: () => NOTHING,
+		stream: async function* (items) {
+			for await (const _ of items) {
+				// Only the request is asked about.
+			}
+			yield* [];
+		},
+	};
+	const before = seen.length;
+	host.fail(step.fail);
+	const request = { ...REQUEST, model: found.key };
+	const signal = new AbortController().signal;
+	let failure: z.infer<typeof Failure> | null = null;
+	let thrown: string | null = null;
+	try {
+		if (step.mode === "stream") for await (const _ of found.transport.stream(codec, request, signal));
+		else await found.transport.complete(codec, request, signal);
+	} catch (error) {
+		failure = failureOf(error) ?? null;
+		thrown = failure === null ? (error instanceof Error ? error.message : String(error)) : null;
+	}
+	host.fail(undefined);
+	const sent = seen.length > before ? seen[seen.length - 1] : undefined;
+	return {
+		kind: "sent",
+		zdrOnly,
+		url: sent?.url ?? null,
+		authorization: sent?.authorization ?? null,
+		failure,
+		thrown,
+	};
 }
 
 /** The names of the six kinds of NyaaAI. */
 const NAMES = ProviderKindName.options;
+
+const KEY = "key-0123456789abcdef";
 
 const candidateOf = (resolved: Resolved): z.infer<typeof Candidate> => ({
 	entry: resolved.entry.id,
@@ -255,12 +343,21 @@ export const resolver = caseGroup("resolver", {
 							? undefined
 							: { row: rowFor(key), status: input.view, efforts: [], hosts: [] },
 				};
-				const transport = stubTransport(input.entry.label, { get: async () => undefined });
+				const seen: Seen[] = [];
+				const host = echoHost(seen);
+				const deps = {
+					fetch: host.fetch,
+					scheduler: fakeScheduler(new TimerWheel(0)),
+					log: () => {},
+					userAgent: "cases/1.0",
+				};
+				const transport = named.transport(input.entry, { get: async () => KEY }, deps);
 				const plan = servedBy({
 					entry: input.entry,
 					kind: named,
 					transport,
 					catalog,
+					deps,
 					zdrOnly: () => zdr,
 				});
 				const routes = await plan(input.key, input.use);
@@ -268,11 +365,7 @@ export const resolver = caseGroup("resolver", {
 				const [first] = routes.candidates;
 				const zdrOnResolve = first.zdrOnly;
 				zdr = input.flippedTo;
-				const sent = (await first.transport.complete(
-					first.codec,
-					{ ...REQUEST, model: input.key },
-					new AbortController().signal,
-				)) as unknown as Sent;
+				const sent = await sendThrough(first, seen, host, {});
 				return {
 					key: routes.key,
 					entry: first.entry.id,
@@ -282,17 +375,17 @@ export const resolver = caseGroup("resolver", {
 					passed: [...routes.passed],
 					candidates: routes.candidates.length,
 					zdrOnResolve,
-					sent: { zdrOnly: sent.zdrOnly, path: sent.path },
+					sent: { zdrOnly: sent.zdrOnly ?? false, path: first.codec.encode(REQUEST, "complete").path },
 				};
 			},
 		),
-		/** A resolver over scripted ports and stub kinds, driven by a script. */
+		/** A resolver over scripted ports and kinds with stub catalogs, driven by a script. */
 		routes: kind(
 			z.object({
 				entries: z.array(ProviderEntry),
 				/** The key answers by entry id; an entry with none answers none. */
 				answers: z.record(z.string(), KeyAnswerIn),
-				/** Entries whose key read fails. */
+				/** Entries whose key store cannot be read: the port answers `unready`. */
 				failing: z.array(z.string()),
 				/** The registry's rows, by key. */
 				rows: z.array(z.string()),
@@ -300,6 +393,10 @@ export const resolver = caseGroup("resolver", {
 				kinds: z.array(ProviderKindName),
 				/** What each entry's catalog lists, per row key; a row not named is listed `ok`. */
 				listings: z.record(z.string(), z.record(z.string(), Listing)),
+				/** Entries whose catalog fails when stopped. */
+				disposeFails: z.array(z.string()).exactOptional(),
+				/** The scheduler's first instant. */
+				startMs: z.int().exactOptional(),
 				zdrOnly: z.boolean(),
 				steps: z.array(RouteStep()).min(1),
 			}),
@@ -313,34 +410,41 @@ export const resolver = caseGroup("resolver", {
 						disposed: z.int(),
 					}),
 				),
-				/** The transports made, in order, by label. */
+				/** The transports made, by label; those of one step in the list's order. */
 				transports: z.array(z.string()),
 				/** The catalogs stopped, in order, by label. */
 				stopped: z.array(z.string()),
-				/** The entries told a catalog refreshed. */
-				refreshed: z.array(z.string()),
+				/** The entries told a catalog refreshed, as told. */
+				refreshed: z.array(Via),
 				/** The key reads made. */
 				keyReads: z.int(),
-				/** The list reads made. */
-				listReads: z.int(),
 			}),
 			async (input) => {
-				const wheel = new TimerWheel(0);
+				const wheel = new TimerWheel(input.startMs ?? 0);
 				const scheduler = fakeScheduler(wheel);
 				const scriptedKeys = scriptedEntryKeys(input.answers as Record<string, KeyAnswer>);
+				let armed: { reached: () => void; release: Promise<void> } | null = null;
 				const keys = {
-					get: (id: string) =>
-						input.failing.includes(id)
-							? Promise.reject(new Error("Key read failed."))
-							: scriptedKeys.get(id),
+					get: async (id: string): Promise<KeyAnswer> => {
+						const gate = armed;
+						if (gate !== null) {
+							armed = null;
+							gate.reached();
+							await gate.release;
+						}
+						return input.failing.includes(id) ? { kind: "unready" } : scriptedKeys.get(id);
+					},
 					onChange: scriptedKeys.onChange,
 				};
 				const list = scriptedProviderList(input.entries);
 				const registry = scriptedModelRegistry(input.rows.map(rowFor));
 				const transports: string[] = [];
+				const madeNow: Array<{ id: string; label: string }> = [];
 				const stopped: string[] = [];
-				const refreshed: string[] = [];
+				const refreshed: Array<z.infer<typeof Via>> = [];
 				const refreshes = new Map<string, () => void>();
+				const seen: Seen[] = [];
+				const host = echoHost(seen);
 				let zdr = input.zdrOnly;
 
 				const stub = (name: z.infer<typeof ProviderKindName>): ProviderKind => {
@@ -348,14 +452,14 @@ export const resolver = caseGroup("resolver", {
 					if (real === undefined) throw new Error(`No ${name} kind.`);
 					return {
 						...real,
-						transport: (entry, key) => {
-							const label = labelOf(entry);
-							transports.push(label);
-							return stubTransport(label, key);
+						transport: (entry, key, deps) => {
+							const made = real.transport(entry, key, deps);
+							madeNow.push({ id: (entry as ProviderEntry).id, label: labelOf(entry) });
+							return made;
 						},
 						catalog: (entry, _transport, deps) => {
 							refreshes.set(entry.id, deps.refreshed);
-							const catalog: EntryCatalog & { dispose(): void } = {
+							const catalog: EntryCatalog = {
 								views: async (_use, zdrOnly) =>
 									deps.rows.rows().flatMap((row): ModelView[] => {
 										const bound = row.bindings[name] !== undefined;
@@ -368,7 +472,11 @@ export const resolver = caseGroup("resolver", {
 										return [{ row, status: status ?? "ok", efforts: [], hosts: [] }];
 									}),
 								idle: async () => {},
-								dispose: () => void stopped.push(labelOf(entry)),
+								dispose: () => {
+									stopped.push(labelOf(entry));
+									if (input.disposeFails?.includes(entry.id) === true)
+										throw new Error("Stopping failed.");
+								},
 							};
 							return catalog;
 						},
@@ -383,14 +491,22 @@ export const resolver = caseGroup("resolver", {
 					keys,
 					registry,
 					kinds,
-					kindDeps: () => ({ fetch: NO_NETWORK, scheduler, log: () => {}, userAgent: "cases/1.0" }),
+					kindDeps: () => ({ fetch: host.fetch, scheduler, log: () => {}, userAgent: "cases/1.0" }),
 					zdrOnly: () => zdr,
-					refreshed: (entry) => refreshed.push(entry.id),
+					refreshed: (entry) => refreshed.push(viaOf(entry)),
 				});
 
 				const held: Resolved[][] = [];
 				const steps: Array<{ answer: AnswerOf; built: number; disposed: number }> = [];
-				const said = async (step: StepOf): Promise<AnswerOf> => {
+
+				const change = (step: z.infer<(typeof CHANGES)[number]>): void => {
+					if (step.kind === "list") list.set(step.entries);
+					else if (step.kind === "answer") scriptedKeys.set(step.id, step.answer);
+					else if (step.kind === "registry") registry.setRows(step.rows.map(rowFor));
+					else zdr = step.on;
+				};
+
+				const called = async (step: z.infer<(typeof CALLS)[number]>): Promise<AnswerOf> => {
 					switch (step.kind) {
 						case "routes": {
 							const routes = await resolver.routes(step.model, step.use);
@@ -429,43 +545,77 @@ export const resolver = caseGroup("resolver", {
 									via: option.via,
 								})),
 							};
+						case "send": {
+							const found = held[step.from]?.[step.candidate];
+							if (found === undefined) return { kind: "none" };
+							return sendThrough(found, seen, host, step);
+						}
+					}
+				};
+
+				const said = async (step: StepOf): Promise<AnswerOf> => {
+					switch (step.kind) {
 						case "list":
-							list.set(step.entries);
-							return { kind: "changed" };
 						case "answer":
-							scriptedKeys.set(step.id, step.answer);
-							return { kind: "changed" };
 						case "registry":
-							registry.setRows(step.rows.map(rowFor));
-							return { kind: "changed" };
 						case "zdr":
-							zdr = step.on;
+							change(step);
 							return { kind: "changed" };
 						case "refreshed":
 							refreshes.get(step.entry)?.();
 							return { kind: "changed" };
-						case "send": {
-							const found = held[step.from]?.[step.candidate];
-							if (found === undefined) return { kind: "none" };
-							const sent = (await found.transport.complete(
-								found.codec,
-								{ ...REQUEST, model: found.key },
-								new AbortController().signal,
-							)) as unknown as Sent;
-							return {
-								kind: "sent",
-								transport: sent.transport,
-								zdrOnly: sent.zdrOnly,
-								key: sent.key,
-								path: sent.path,
+						case "route":
+							try {
+								resolver.route(step.entry);
+								return { kind: "routed", thrown: null };
+							} catch (error) {
+								return {
+									kind: "routed",
+									thrown: error instanceof Error ? error.message : String(error),
+								};
+							}
+						case "dispose":
+							resolver.dispose();
+							return { kind: "changed" };
+						case "during": {
+							let reached = () => {};
+							const arrived = new Promise<void>((resolve) => {
+								reached = resolve;
+							});
+							let release = () => {};
+							armed = {
+								reached: () => reached(),
+								release: new Promise<void>((resolve) => {
+									release = resolve;
+								}),
 							};
+							const call = called(step.call);
+							await Promise.race([
+								arrived,
+								call.then(
+									() => undefined,
+									() => undefined,
+								),
+							]);
+							for (const each of step.changes) change(each);
+							armed = null;
+							release();
+							return call;
 						}
+						default:
+							return called(step);
 					}
 				};
 
 				for (const step of input.steps) {
 					held.push([]);
 					const answer = await said(step);
+					const position = (id: string) => {
+						const at = list.entries().findIndex((each) => each.id === id);
+						return at < 0 ? Number.MAX_SAFE_INTEGER : at;
+					};
+					madeNow.sort((left, right) => position(left.id) - position(right.id));
+					transports.push(...madeNow.splice(0).map((each) => each.label));
 					steps.push({ answer, built: transports.length, disposed: stopped.length });
 				}
 				resolver.dispose();
@@ -475,7 +625,6 @@ export const resolver = caseGroup("resolver", {
 					stopped,
 					refreshed,
 					keyReads: scriptedKeys.reads(),
-					listReads: list.reads(),
 				};
 			},
 		),

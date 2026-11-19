@@ -10177,12 +10177,6 @@
 						}
 					]
 				},
-				"thrown": {
-					"type": [
-						"string",
-						"null"
-					]
-				},
 				"requests": {
 					"type": "array",
 					"items": {
@@ -10226,7 +10220,6 @@
 			"required": [
 				"present",
 				"limits",
-				"thrown",
 				"requests",
 				"waiting"
 			],
@@ -13996,6 +13989,17 @@
 						}
 					}
 				},
+				"disposeFails": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"startMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
 				"zdrOnly": {
 					"type": "boolean"
 				},
@@ -14004,82 +14008,6 @@
 					"type": "array",
 					"items": {
 						"oneOf": [
-							{
-								"type": "object",
-								"properties": {
-									"kind": {
-										"type": "string",
-										"const": "routes"
-									},
-									"model": {
-										"type": "string"
-									},
-									"use": {
-										"$ref": "model.output.json#/$defs/ModelUse"
-									}
-								},
-								"required": [
-									"kind",
-									"model",
-									"use"
-								],
-								"additionalProperties": false
-							},
-							{
-								"type": "object",
-								"properties": {
-									"kind": {
-										"type": "string",
-										"const": "resolve"
-									},
-									"model": {
-										"type": "string"
-									},
-									"use": {
-										"$ref": "model.output.json#/$defs/ModelUse"
-									}
-								},
-								"required": [
-									"kind",
-									"model",
-									"use"
-								],
-								"additionalProperties": false
-							},
-							{
-								"type": "object",
-								"properties": {
-									"kind": {
-										"type": "string",
-										"const": "rows"
-									},
-									"use": {
-										"$ref": "model.output.json#/$defs/ModelUse"
-									}
-								},
-								"required": [
-									"kind",
-									"use"
-								],
-								"additionalProperties": false
-							},
-							{
-								"type": "object",
-								"properties": {
-									"kind": {
-										"type": "string",
-										"const": "candidates"
-									},
-									"use": {
-										"$ref": "model.output.json#/$defs/ModelUse"
-									}
-								},
-								"required": [
-									"kind",
-									"use"
-								],
-								"additionalProperties": false
-							},
 							{
 								"type": "object",
 								"properties": {
@@ -14221,15 +14149,74 @@
 								"properties": {
 									"kind": {
 										"type": "string",
-										"const": "refreshed"
+										"const": "routes"
 									},
-									"entry": {
+									"model": {
 										"type": "string"
+									},
+									"use": {
+										"$ref": "model.output.json#/$defs/ModelUse"
 									}
 								},
 								"required": [
 									"kind",
-									"entry"
+									"model",
+									"use"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "resolve"
+									},
+									"model": {
+										"type": "string"
+									},
+									"use": {
+										"$ref": "model.output.json#/$defs/ModelUse"
+									}
+								},
+								"required": [
+									"kind",
+									"model",
+									"use"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "rows"
+									},
+									"use": {
+										"$ref": "model.output.json#/$defs/ModelUse"
+									}
+								},
+								"required": [
+									"kind",
+									"use"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "candidates"
+									},
+									"use": {
+										"$ref": "model.output.json#/$defs/ModelUse"
+									}
+								},
+								"required": [
+									"kind",
+									"use"
 								],
 								"additionalProperties": false
 							},
@@ -14249,12 +14236,370 @@
 										"type": "integer",
 										"minimum": 0,
 										"maximum": 9007199254740991
+									},
+									"mode": {
+										"type": "string",
+										"enum": [
+											"complete",
+											"stream"
+										]
+									},
+									"fail": {
+										"type": "object",
+										"properties": {
+											"status": {
+												"type": "integer",
+												"minimum": -9007199254740991,
+												"maximum": 9007199254740991
+											},
+											"body": {}
+										},
+										"required": [
+											"status",
+											"body"
+										],
+										"additionalProperties": false
 									}
 								},
 								"required": [
 									"kind",
 									"from",
 									"candidate"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "refreshed"
+									},
+									"entry": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"kind",
+									"entry"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "route"
+									},
+									"entry": {
+										"$ref": "provider.output.json#/$defs/ProviderEntry"
+									}
+								},
+								"required": [
+									"kind",
+									"entry"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "dispose"
+									}
+								},
+								"required": [
+									"kind"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "during"
+									},
+									"changes": {
+										"type": "array",
+										"items": {
+											"oneOf": [
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"type": "string",
+															"const": "list"
+														},
+														"entries": {
+															"type": "array",
+															"items": {
+																"$ref": "provider.output.json#/$defs/ProviderEntry"
+															}
+														}
+													},
+													"required": [
+														"kind",
+														"entries"
+													],
+													"additionalProperties": false
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"type": "string",
+															"const": "answer"
+														},
+														"id": {
+															"type": "string"
+														},
+														"answer": {
+															"oneOf": [
+																{
+																	"type": "object",
+																	"properties": {
+																		"kind": {
+																			"type": "string",
+																			"const": "key"
+																		},
+																		"key": {
+																			"type": "string"
+																		}
+																	},
+																	"required": [
+																		"kind",
+																		"key"
+																	],
+																	"additionalProperties": false
+																},
+																{
+																	"type": "object",
+																	"properties": {
+																		"kind": {
+																			"type": "string",
+																			"const": "none"
+																		}
+																	},
+																	"required": [
+																		"kind"
+																	],
+																	"additionalProperties": false
+																},
+																{
+																	"type": "object",
+																	"properties": {
+																		"kind": {
+																			"type": "string",
+																			"const": "refused"
+																		}
+																	},
+																	"required": [
+																		"kind"
+																	],
+																	"additionalProperties": false
+																},
+																{
+																	"type": "object",
+																	"properties": {
+																		"kind": {
+																			"type": "string",
+																			"const": "unready"
+																		}
+																	},
+																	"required": [
+																		"kind"
+																	],
+																	"additionalProperties": false
+																}
+															],
+															"x-tag": "kind"
+														}
+													},
+													"required": [
+														"kind",
+														"id",
+														"answer"
+													],
+													"additionalProperties": false
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"type": "string",
+															"const": "registry"
+														},
+														"rows": {
+															"type": "array",
+															"items": {
+																"type": "string"
+															}
+														}
+													},
+													"required": [
+														"kind",
+														"rows"
+													],
+													"additionalProperties": false
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"type": "string",
+															"const": "zdr"
+														},
+														"on": {
+															"type": "boolean"
+														}
+													},
+													"required": [
+														"kind",
+														"on"
+													],
+													"additionalProperties": false
+												}
+											],
+											"x-tag": "kind"
+										}
+									},
+									"call": {
+										"oneOf": [
+											{
+												"type": "object",
+												"properties": {
+													"kind": {
+														"type": "string",
+														"const": "routes"
+													},
+													"model": {
+														"type": "string"
+													},
+													"use": {
+														"$ref": "model.output.json#/$defs/ModelUse"
+													}
+												},
+												"required": [
+													"kind",
+													"model",
+													"use"
+												],
+												"additionalProperties": false
+											},
+											{
+												"type": "object",
+												"properties": {
+													"kind": {
+														"type": "string",
+														"const": "resolve"
+													},
+													"model": {
+														"type": "string"
+													},
+													"use": {
+														"$ref": "model.output.json#/$defs/ModelUse"
+													}
+												},
+												"required": [
+													"kind",
+													"model",
+													"use"
+												],
+												"additionalProperties": false
+											},
+											{
+												"type": "object",
+												"properties": {
+													"kind": {
+														"type": "string",
+														"const": "rows"
+													},
+													"use": {
+														"$ref": "model.output.json#/$defs/ModelUse"
+													}
+												},
+												"required": [
+													"kind",
+													"use"
+												],
+												"additionalProperties": false
+											},
+											{
+												"type": "object",
+												"properties": {
+													"kind": {
+														"type": "string",
+														"const": "candidates"
+													},
+													"use": {
+														"$ref": "model.output.json#/$defs/ModelUse"
+													}
+												},
+												"required": [
+													"kind",
+													"use"
+												],
+												"additionalProperties": false
+											},
+											{
+												"type": "object",
+												"properties": {
+													"kind": {
+														"type": "string",
+														"const": "send"
+													},
+													"from": {
+														"type": "integer",
+														"minimum": 0,
+														"maximum": 9007199254740991
+													},
+													"candidate": {
+														"type": "integer",
+														"minimum": 0,
+														"maximum": 9007199254740991
+													},
+													"mode": {
+														"type": "string",
+														"enum": [
+															"complete",
+															"stream"
+														]
+													},
+													"fail": {
+														"type": "object",
+														"properties": {
+															"status": {
+																"type": "integer",
+																"minimum": -9007199254740991,
+																"maximum": 9007199254740991
+															},
+															"body": {}
+														},
+														"required": [
+															"status",
+															"body"
+														],
+														"additionalProperties": false
+													}
+												},
+												"required": [
+													"kind",
+													"from",
+													"candidate"
+												],
+												"additionalProperties": false
+											}
+										],
+										"x-tag": "kind"
+									}
+								},
+								"required": [
+									"kind",
+									"changes",
+									"call"
 								],
 								"additionalProperties": false
 							}
@@ -14545,28 +14890,68 @@
 												"type": "string",
 												"const": "sent"
 											},
-											"transport": {
-												"type": "string"
-											},
 											"zdrOnly": {
-												"type": "boolean"
+												"type": [
+													"boolean",
+													"null"
+												]
 											},
-											"key": {
+											"url": {
 												"type": [
 													"string",
 													"null"
 												]
 											},
-											"path": {
-												"type": "string"
+											"authorization": {
+												"type": [
+													"string",
+													"null"
+												]
+											},
+											"failure": {
+												"anyOf": [
+													{
+														"$ref": "step.output.json#/$defs/Failure"
+													},
+													{
+														"type": "null"
+													}
+												]
+											},
+											"thrown": {
+												"type": [
+													"string",
+													"null"
+												]
 											}
 										},
 										"required": [
 											"kind",
-											"transport",
 											"zdrOnly",
-											"key",
-											"path"
+											"url",
+											"authorization",
+											"failure",
+											"thrown"
+										],
+										"additionalProperties": false
+									},
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "routed"
+											},
+											"thrown": {
+												"type": [
+													"string",
+													"null"
+												]
+											}
+										},
+										"required": [
+											"kind",
+											"thrown"
 										],
 										"additionalProperties": false
 									},
@@ -14620,15 +15005,10 @@
 				"refreshed": {
 					"type": "array",
 					"items": {
-						"type": "string"
+						"$ref": "model.output.json#/$defs/Via"
 					}
 				},
 				"keyReads": {
-					"type": "integer",
-					"minimum": -9007199254740991,
-					"maximum": 9007199254740991
-				},
-				"listReads": {
 					"type": "integer",
 					"minimum": -9007199254740991,
 					"maximum": 9007199254740991
@@ -14639,8 +15019,7 @@
 				"transports",
 				"stopped",
 				"refreshed",
-				"keyReads",
-				"listReads"
+				"keyReads"
 			],
 			"additionalProperties": false
 		}

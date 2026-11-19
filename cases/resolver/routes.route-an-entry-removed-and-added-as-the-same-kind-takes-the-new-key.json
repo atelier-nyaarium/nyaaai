@@ -1,0 +1,210 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routes",
+	"name": "route-an-entry-removed-and-added-as-the-same-kind-takes-the-new-key",
+	"input": {
+		"entries": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "First"
+			}
+		],
+		"answers": {
+			"a": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"failing": [],
+		"rows": [
+			"openai/gpt-6-luna",
+			"google/gemini-3.8-flash",
+			"openai/gpt-oss-120b"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama",
+			"lmstudio",
+			"llamacpp",
+			"compatible"
+		],
+		"listings": {},
+		"zdrOnly": true,
+		"steps": [
+			{
+				"kind": "resolve",
+				"model": "openai/gpt-6-luna",
+				"use": "chat"
+			},
+			{
+				"kind": "send",
+				"from": 0,
+				"candidate": 0
+			},
+			{
+				"kind": "list",
+				"entries": []
+			},
+			{
+				"kind": "send",
+				"from": 0,
+				"candidate": 0
+			},
+			{
+				"kind": "list",
+				"entries": [
+					{
+						"id": "a",
+						"kind": "openrouter",
+						"label": "First"
+					}
+				]
+			},
+			{
+				"kind": "answer",
+				"id": "a",
+				"answer": {
+					"kind": "key",
+					"key": "key-fedcba9876543210"
+				}
+			},
+			{
+				"kind": "send",
+				"from": 0,
+				"candidate": 0
+			},
+			{
+				"kind": "resolve",
+				"model": "openai/gpt-6-luna",
+				"use": "chat"
+			},
+			{
+				"kind": "send",
+				"from": 7,
+				"candidate": 0
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answer": {
+					"kind": "resolve",
+					"unresolved": null,
+					"candidate": {
+						"entry": "a",
+						"kind": "openrouter",
+						"binding": "openai/gpt-6-luna",
+						"status": "ok",
+						"zdrOnly": true,
+						"path": "/chat/completions"
+					}
+				},
+				"built": 1,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "sent",
+					"zdrOnly": true,
+					"url": "https://openrouter.ai/api/v1/chat/completions",
+					"authorization": "Bearer key-0123456789abcdef",
+					"failure": null,
+					"thrown": null
+				},
+				"built": 1,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "changed"
+				},
+				"built": 1,
+				"disposed": 1
+			},
+			{
+				"answer": {
+					"kind": "sent",
+					"zdrOnly": true,
+					"url": null,
+					"authorization": null,
+					"failure": {
+						"category": "keyMissing",
+						"status": "keyMissing",
+						"message": "No OpenRouter key is set."
+					},
+					"thrown": null
+				},
+				"built": 1,
+				"disposed": 1
+			},
+			{
+				"answer": {
+					"kind": "changed"
+				},
+				"built": 1,
+				"disposed": 1
+			},
+			{
+				"answer": {
+					"kind": "changed"
+				},
+				"built": 1,
+				"disposed": 1
+			},
+			{
+				"answer": {
+					"kind": "sent",
+					"zdrOnly": true,
+					"url": "https://openrouter.ai/api/v1/chat/completions",
+					"authorization": "Bearer key-fedcba9876543210",
+					"failure": null,
+					"thrown": null
+				},
+				"built": 1,
+				"disposed": 1
+			},
+			{
+				"answer": {
+					"kind": "resolve",
+					"unresolved": null,
+					"candidate": {
+						"entry": "a",
+						"kind": "openrouter",
+						"binding": "openai/gpt-6-luna",
+						"status": "ok",
+						"zdrOnly": true,
+						"path": "/chat/completions"
+					}
+				},
+				"built": 2,
+				"disposed": 1
+			},
+			{
+				"answer": {
+					"kind": "sent",
+					"zdrOnly": true,
+					"url": "https://openrouter.ai/api/v1/chat/completions",
+					"authorization": "Bearer key-fedcba9876543210",
+					"failure": null,
+					"thrown": null
+				},
+				"built": 2,
+				"disposed": 1
+			}
+		],
+		"transports": [
+			"First",
+			"First"
+		],
+		"stopped": [
+			"First",
+			"First"
+		],
+		"refreshed": [],
+		"keyReads": 6
+	}
+}

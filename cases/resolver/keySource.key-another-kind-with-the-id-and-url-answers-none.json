@@ -2,24 +2,24 @@
 	"format": 2,
 	"type": "function",
 	"kind": "resolver.keySource",
-	"name": "key-a-plan-change-keeps-the-key-for-the-same-url",
+	"name": "key-another-kind-with-the-id-and-url-answers-none",
 	"input": {
 		"entry": {
-			"id": "go",
-			"kind": "opencode",
-			"plan": "go",
-			"label": "Go"
+			"id": "lab",
+			"kind": "ollama",
+			"label": "Lab",
+			"url": "http://lab.local:11434"
 		},
 		"list": [
 			{
-				"id": "go",
-				"kind": "opencode",
-				"plan": "payg",
-				"label": "Go"
+				"id": "lab",
+				"kind": "lmstudio",
+				"label": "Lab",
+				"url": "http://lab.local:11434"
 			}
 		],
 		"answers": {
-			"go": {
+			"lab": {
 				"kind": "key",
 				"key": "key-0123456789abcdef"
 			}
@@ -32,7 +32,7 @@
 	},
 	"expected": {
 		"gets": [
-			"key-0123456789abcdef"
+			null
 		]
 	}
 }

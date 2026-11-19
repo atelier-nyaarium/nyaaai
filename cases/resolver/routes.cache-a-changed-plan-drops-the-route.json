@@ -115,7 +115,6 @@
 			"Go/payg"
 		],
 		"refreshed": [],
-		"keyReads": 2,
-		"listReads": 3
+		"keyReads": 2
 	}
 }

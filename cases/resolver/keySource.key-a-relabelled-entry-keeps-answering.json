@@ -2,24 +2,24 @@
 	"format": 2,
 	"type": "function",
 	"kind": "resolver.keySource",
-	"name": "key-another-entry-with-the-id-of-a-different-url",
+	"name": "key-a-relabelled-entry-keeps-answering",
 	"input": {
 		"entry": {
-			"id": "lab",
-			"kind": "ollama",
-			"label": "Lab",
-			"url": "http://lab.local:11434"
+			"id": "go",
+			"kind": "opencode",
+			"plan": "go",
+			"label": "Go"
 		},
 		"list": [
 			{
-				"id": "lab",
-				"kind": "lmstudio",
-				"label": "Lab",
-				"url": "http://lab.local:11434"
+				"id": "go",
+				"kind": "opencode",
+				"plan": "go",
+				"label": "Renamed"
 			}
 		],
 		"answers": {
-			"lab": {
+			"go": {
 				"kind": "key",
 				"key": "key-0123456789abcdef"
 			}

@@ -31,6 +31,16 @@ const LAB = { id: "lab", kind: "ollama", label: "Lab", url: "http://lab.local:11
 const LAB2 = { id: "lab2", kind: "ollama", label: "Lab Two", url: "http://lab2.local:11434" };
 const STUDIO = { id: "studio", kind: "lmstudio", label: "Studio", url: "http://lab.local:1234" };
 
+const COMPAT = { id: "c", kind: "compatible", label: "Host", url: "http://lab.local:8000/v1" };
+const BAD = { id: "bad", kind: "compatible", label: "Broken", url: "not a url" };
+const COMPAT_ROW = "compatible:qwen";
+
+const ALLOWANCE = {
+	status: 429,
+	body: { type: "error", error: { type: "SubscriptionUsageLimitError", message: "Limit.", resetsAt: 1_790_341_200 } },
+};
+const RATE = { status: 429, body: { type: "error", error: { type: "RateLimitError", message: "Slow down." } } };
+
 const ROWS = [LUNA, GEMINI, OSS];
 
 ////////////////////////////////
@@ -45,7 +55,15 @@ const answer = (id: string, held: unknown) => ({ kind: "answer", id, answer: hel
 const registry = (...held: string[]) => ({ kind: "registry", rows: held });
 const zdr = (on: boolean) => ({ kind: "zdr", on });
 const refreshed = (entry: string) => ({ kind: "refreshed", entry });
-const send = (from: number, candidate = 0) => ({ kind: "send", from, candidate });
+const send = (from: number, candidate = 0, extra: Record<string, unknown> = {}) => ({
+	kind: "send",
+	from,
+	candidate,
+	...extra,
+});
+const during = (changes: unknown[], call: unknown) => ({ kind: "during", changes, call });
+const route = (entry: unknown) => ({ kind: "route", entry });
+const dispose = { kind: "dispose" };
 
 const run = (name: string, input: Record<string, unknown>): CaseSource =>
 	caseOf("resolver.routes")(name, {
@@ -109,7 +127,7 @@ export const resolverCases: CaseSource[] = [
 		answers: { a: UNREADY, b: KEY },
 		steps: [routes(LUNA)],
 	}),
-	run("keys-a-failing-read-is-a-missing-key", {
+	run("keys-a-store-that-cannot-be-read-is-unready", {
 		failing: ["a"],
 		steps: [routes(LUNA)],
 	}),
@@ -369,7 +387,7 @@ export const resolverCases: CaseSource[] = [
 		rows: [HOSTED],
 		steps: [routes(HOSTED), list({ ...LAB, url: "http://lab.local:9999" }), routes(HOSTED)],
 	}),
-	run("cache-the-key-of-a-route-has-no-kind", {
+	run("cache-a-changed-kind-drops-the-route", {
 		entries: [FIRST],
 		steps: [routes(LUNA), list({ ...FIRST, kind: "opencode" }), routes(LUNA)],
 	}),
@@ -414,7 +432,7 @@ export const resolverCases: CaseSource[] = [
 	run("url-a-refused-key-reads-as-none-at-the-request", {
 		steps: [routes(LUNA), answer("a", REFUSED), send(0)],
 	}),
-	run("url-a-key-entry-removed-from-the-list-keeps-answering", {
+	run("url-a-key-entry-removed-from-the-list-answers-none", {
 		steps: [routes(LUNA), list(SECOND), send(0)],
 	}),
 	run("url-an-entry-moved-back-answers-again", {
@@ -422,6 +440,241 @@ export const resolverCases: CaseSource[] = [
 		answers: { lab: KEY },
 		rows: [HOSTED],
 		steps: [routes(HOSTED), list({ ...LAB, url: "http://lab.local:9999" }), send(0), list(LAB), send(0)],
+	}),
+	run("keys-a-url-kind-whose-store-cannot-be-read-is-unreachable", {
+		entries: [LAB],
+		answers: { lab: KEY },
+		failing: ["lab"],
+		rows: [HOSTED],
+		steps: [routes(HOSTED), rows()],
+	}),
+	run("keys-a-route-whose-read-fails-sends-no-key", {
+		answers: { a: KEY },
+		steps: [routes(LUNA), answer("a", UNREADY), send(0)],
+	}),
+	run("keys-a-url-route-whose-read-fails-sends-no-key", {
+		entries: [COMPAT],
+		answers: { c: KEY },
+		rows: [COMPAT_ROW],
+		steps: [routes(COMPAT_ROW), send(0), answer("c", UNREADY), send(0)],
+	}),
+
+	// A route is for one id, kind, plan and URL.
+	run("route-an-entry-edited-to-another-kind-sends-no-key-to-the-other-host", {
+		entries: [FIRST],
+		answers: { a: KEY },
+		steps: [
+			resolve(LUNA),
+			list({ ...FIRST, kind: "opencode", plan: "go" }),
+			answer("a", OTHER_KEY),
+			send(0),
+			resolve(LUNA),
+			send(4),
+		],
+	}),
+	run("route-an-entry-removed-and-added-as-another-kind", {
+		entries: [FIRST],
+		answers: { a: KEY },
+		steps: [
+			resolve(LUNA),
+			list(),
+			list({ id: "a", kind: "opencode", plan: "go", label: "Zen" }),
+			answer("a", OTHER_KEY),
+			send(0),
+			resolve(LUNA),
+			send(5),
+		],
+	}),
+	run("route-an-entry-removed-and-added-as-the-same-kind-takes-the-new-key", {
+		entries: [FIRST],
+		answers: { a: KEY },
+		steps: [
+			resolve(LUNA),
+			send(0),
+			list(),
+			send(0),
+			list(FIRST),
+			answer("a", OTHER_KEY),
+			send(0),
+			resolve(LUNA),
+			send(7),
+		],
+	}),
+	run("route-go-edited-to-payg-with-a-route-held", {
+		entries: [GO],
+		answers: { go: KEY },
+		steps: [resolve(LUNA), send(0), list({ ...GO, plan: "payg" }), send(0), resolve(LUNA), send(4)],
+	}),
+	run("route-an-entry-relabelled-keeps-its-route-and-its-key", {
+		entries: [FIRST],
+		answers: { a: KEY },
+		steps: [resolve(LUNA), list({ ...FIRST, label: "Renamed" }), send(0), resolve(LUNA), send(3)],
+	}),
+	run("route-the-url-of-a-url-entry-is-the-host-asked", {
+		entries: [COMPAT],
+		answers: { c: KEY },
+		rows: [COMPAT_ROW],
+		steps: [
+			routes(COMPAT_ROW),
+			send(0),
+			list({ ...COMPAT, url: "http://lab.local:9000/v1" }),
+			send(0),
+			resolve(COMPAT_ROW),
+			send(4),
+		],
+	}),
+
+	// The list is checked after the read.
+	run("during-the-list-changes-while-the-key-is-read", {
+		entries: [COMPAT],
+		answers: { c: KEY },
+		rows: [COMPAT_ROW],
+		steps: [
+			routes(COMPAT_ROW),
+			during([list({ ...COMPAT, url: "http://lab.local:9000/v1" }), answer("c", OTHER_KEY)], send(0)),
+		],
+	}),
+	run("during-the-entry-is-removed-while-the-key-is-read", {
+		entries: [COMPAT],
+		answers: { c: KEY },
+		rows: [COMPAT_ROW],
+		steps: [routes(COMPAT_ROW), during([list()], send(0))],
+	}),
+	run("during-the-key-changes-while-it-is-read", {
+		answers: { a: KEY },
+		steps: [routes(LUNA), during([answer("a", OTHER_KEY)], send(0))],
+	}),
+
+	// An entry that left during a call.
+	run("left-an-entry-that-leaves-while-its-key-is-read-is-skipped", {
+		answers: { a: KEY, b: KEY },
+		steps: [during([list(SECOND)], routes(LUNA)), routes(LUNA)],
+	}),
+	run("left-the-only-entry-leaves-while-its-key-is-read", {
+		entries: [FIRST],
+		steps: [during([list()], routes(LUNA))],
+	}),
+	run("left-an-entry-edited-while-its-key-is-read-is-skipped", {
+		answers: { a: KEY, b: KEY },
+		steps: [during([list({ ...FIRST, label: "Moved", kind: "opencode", plan: "go" }, SECOND)], routes(LUNA))],
+	}),
+	run("left-an-entry-relabelled-while-its-key-is-read-stands", {
+		answers: { a: KEY, b: KEY },
+		steps: [during([list({ ...FIRST, label: "Renamed" }, SECOND)], routes(LUNA))],
+	}),
+	run("left-rows-with-an-entry-that-leaves", {
+		answers: { a: KEY, b: KEY },
+		steps: [during([list(SECOND)], rows())],
+	}),
+
+	// A disposed resolver builds nothing.
+	run("dispose-routes-after-it-answer-as-over-an-empty-list", {
+		steps: [routes(LUNA), dispose, routes(LUNA), resolve(LUNA), rows(), candidates(), dispose],
+	}),
+	run("dispose-a-direct-route-refuses", {
+		steps: [dispose, route(FIRST)],
+	}),
+	run("dispose-stops-every-catalog-and-a-list-change-after-it-does-nothing", {
+		steps: [routes(LUNA), dispose, list(SECOND), routes(LUNA)],
+	}),
+
+	// A local row whose entry is not listed.
+	run("local-a-row-of-an-entry-that-is-not-listed-is-no-model", {
+		entries: [LAB],
+		answers: {},
+		rows: [OTHER],
+		steps: [routes(OTHER), resolve(OTHER), rows(), candidates()],
+	}),
+	run("local-a-row-of-an-entry-that-was-removed", {
+		entries: [LAB],
+		answers: {},
+		rows: [LOCAL],
+		steps: [routes(LOCAL), list(LAB2), routes(LOCAL)],
+	}),
+	run("local-a-row-of-an-entry-of-a-kind-not-held-keeps-keymissing", {
+		entries: [LAB],
+		answers: {},
+		kinds: ["openrouter"],
+		rows: [LOCAL],
+		steps: [routes(LOCAL)],
+	}),
+
+	// An entry whose route cannot be made.
+	run("bad-an-entry-that-cannot-be-routed-is-passed-as-unreachable", {
+		entries: [BAD, COMPAT],
+		answers: { bad: KEY, c: KEY },
+		rows: [COMPAT_ROW],
+		steps: [routes(COMPAT_ROW), resolve(COMPAT_ROW), rows(), candidates(), route(BAD), route(COMPAT)],
+	}),
+	run("bad-the-only-entry-cannot-be-routed", {
+		entries: [BAD],
+		answers: { bad: KEY },
+		rows: [COMPAT_ROW],
+		steps: [routes(COMPAT_ROW), rows(), candidates()],
+	}),
+	run("bad-a-route-that-cannot-be-made-is-tried-again", {
+		entries: [BAD],
+		answers: { bad: KEY },
+		rows: [COMPAT_ROW],
+		steps: [routes(COMPAT_ROW), list({ ...BAD, url: "http://lab.local:8000/v1" }), routes(COMPAT_ROW)],
+	}),
+	run("bad-the-good-entry-behind-keeps-its-rows", {
+		entries: [BAD, FIRST],
+		answers: { bad: KEY, a: KEY },
+		rows: [COMPAT_ROW, LUNA],
+		steps: [rows(), candidates()],
+	}),
+
+	// The routes of one step are reported in the list's order.
+	run("order-the-routes-a-step-made-are-in-the-lists-order", {
+		entries: [LAB, FIRST, STUDIO],
+		answers: { a: KEY },
+		rows: [HOSTED, LUNA, "lmstudio:qwen"],
+		steps: [rows()],
+	}),
+
+	// Clocks: one per route.
+	run("clock-an-allowance-reset-is-dated-by-the-scripted-clock", {
+		entries: [GO],
+		answers: { go: KEY },
+		startMs: 1_790_337_600_000,
+		steps: [
+			resolve(LUNA),
+			send(0, 0, { fail: ALLOWANCE }),
+			send(0, 0, { fail: RATE }),
+			send(0, 0, { mode: "stream", fail: ALLOWANCE }),
+		],
+	}),
+	run("clock-a-later-clock-moves-the-reset", {
+		entries: [GO],
+		answers: { go: KEY },
+		startMs: 1_790_340_000_000,
+		steps: [resolve(LUNA), send(0, 0, { fail: ALLOWANCE })],
+	}),
+
+	// A stream's request.
+	run("stream-the-switch-is-stamped-at-the-request", {
+		steps: [resolve(LUNA), zdr(false), send(0, 0, { mode: "stream" }), zdr(true), send(0, 0, { mode: "stream" })],
+	}),
+	run("stream-a-failure-reads-as-the-kind-reads-it", {
+		steps: [
+			resolve(LUNA),
+			send(0, 0, { mode: "stream", fail: { status: 401, body: { error: { message: "No." } } } }),
+		],
+	}),
+
+	// What a catalog's refresh tells.
+	run("refreshed-a-relabelled-entry-is-told-as-the-list-holds-it", {
+		steps: [routes(LUNA), list({ ...FIRST, label: "Renamed" }, SECOND), refreshed("a")],
+	}),
+	run("refreshed-a-route-of-an-entry-that-left-is-told-with-its-own", {
+		entries: [FIRST],
+		steps: [routes(LUNA), list(), refreshed("a")],
+	}),
+	run("refreshed-a-catalog-that-fails-to-stop-does-not-keep-the-others", {
+		answers: { a: KEY, b: KEY },
+		disposeFails: ["a", "b"],
+		steps: [routes(LUNA), list()],
 	}),
 ];
 

@@ -32,10 +32,10 @@
 	},
 	"expected": {
 		"keys": [
-			"a\ngo\n",
-			"a\n\ngo",
-			"a\n\ngo",
-			"ago\n\n"
+			"a\nopencode\ngo\n",
+			"a\nollama\n\ngo",
+			"a\nollama\n\ngo",
+			"ago\nopenrouter\n\n"
 		]
 	}
 }

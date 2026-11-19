@@ -112,7 +112,6 @@
 			"First"
 		],
 		"refreshed": [],
-		"keyReads": 2,
-		"listReads": 4
+		"keyReads": 2
 	}
 }

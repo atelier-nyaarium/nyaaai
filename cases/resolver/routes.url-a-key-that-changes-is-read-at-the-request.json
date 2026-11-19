@@ -112,10 +112,11 @@
 			{
 				"answer": {
 					"kind": "sent",
-					"transport": "First",
 					"zdrOnly": true,
-					"key": "key-0123456789abcdef",
-					"path": "/chat/completions"
+					"url": "https://openrouter.ai/api/v1/chat/completions",
+					"authorization": "Bearer key-0123456789abcdef",
+					"failure": null,
+					"thrown": null
 				},
 				"built": 2,
 				"disposed": 0
@@ -130,10 +131,11 @@
 			{
 				"answer": {
 					"kind": "sent",
-					"transport": "First",
 					"zdrOnly": true,
-					"key": "key-fedcba9876543210",
-					"path": "/chat/completions"
+					"url": "https://openrouter.ai/api/v1/chat/completions",
+					"authorization": "Bearer key-fedcba9876543210",
+					"failure": null,
+					"thrown": null
 				},
 				"built": 2,
 				"disposed": 0
@@ -148,10 +150,15 @@
 			{
 				"answer": {
 					"kind": "sent",
-					"transport": "First",
 					"zdrOnly": true,
-					"key": null,
-					"path": "/chat/completions"
+					"url": null,
+					"authorization": null,
+					"failure": {
+						"category": "keyMissing",
+						"status": "keyMissing",
+						"message": "No OpenRouter key is set."
+					},
+					"thrown": null
 				},
 				"built": 2,
 				"disposed": 0
@@ -166,7 +173,6 @@
 			"Second"
 		],
 		"refreshed": [],
-		"keyReads": 5,
-		"listReads": 4
+		"keyReads": 5
 	}
 }

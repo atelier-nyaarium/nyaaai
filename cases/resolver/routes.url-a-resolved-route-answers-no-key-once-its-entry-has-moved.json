@@ -95,10 +95,11 @@
 			{
 				"answer": {
 					"kind": "sent",
-					"transport": "Lab http://lab.local:11434",
 					"zdrOnly": true,
-					"key": "key-0123456789abcdef",
-					"path": "/v1/chat/completions"
+					"url": "http://lab.local:11434/v1/chat/completions",
+					"authorization": null,
+					"failure": null,
+					"thrown": null
 				},
 				"built": 1,
 				"disposed": 0
@@ -113,10 +114,11 @@
 			{
 				"answer": {
 					"kind": "sent",
-					"transport": "Lab http://lab.local:11434",
 					"zdrOnly": true,
-					"key": null,
-					"path": "/v1/chat/completions"
+					"url": "http://lab.local:11434/v1/chat/completions",
+					"authorization": null,
+					"failure": null,
+					"thrown": null
 				},
 				"built": 1,
 				"disposed": 1
@@ -143,10 +145,11 @@
 			{
 				"answer": {
 					"kind": "sent",
-					"transport": "Lab http://lab.local:9999",
 					"zdrOnly": true,
-					"key": "key-0123456789abcdef",
-					"path": "/v1/chat/completions"
+					"url": "http://lab.local:9999/v1/chat/completions",
+					"authorization": null,
+					"failure": null,
+					"thrown": null
 				},
 				"built": 2,
 				"disposed": 1
@@ -161,7 +164,6 @@
 			"Lab http://lab.local:9999"
 		],
 		"refreshed": [],
-		"keyReads": 4,
-		"listReads": 6
+		"keyReads": 2
 	}
 }

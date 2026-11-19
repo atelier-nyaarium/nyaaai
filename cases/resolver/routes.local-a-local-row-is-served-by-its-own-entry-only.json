@@ -91,7 +91,6 @@
 			"Lab http://lab.local:11434"
 		],
 		"refreshed": [],
-		"keyReads": 2,
-		"listReads": 2
+		"keyReads": 2
 	}
 }

@@ -87,10 +87,11 @@
 			{
 				"answer": {
 					"kind": "sent",
-					"transport": "First",
 					"zdrOnly": false,
-					"key": "key-0123456789abcdef",
-					"path": "/chat/completions"
+					"url": "https://openrouter.ai/api/v1/chat/completions",
+					"authorization": "Bearer key-0123456789abcdef",
+					"failure": null,
+					"thrown": null
 				},
 				"built": 2,
 				"disposed": 0
@@ -105,7 +106,6 @@
 			"Second"
 		],
 		"refreshed": [],
-		"keyReads": 3,
-		"listReads": 2
+		"keyReads": 3
 	}
 }

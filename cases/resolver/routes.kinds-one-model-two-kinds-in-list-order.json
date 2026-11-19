@@ -93,10 +93,11 @@
 			{
 				"answer": {
 					"kind": "sent",
-					"transport": "Go/go",
 					"zdrOnly": true,
-					"key": "key-0123456789abcdef",
-					"path": "/openai/v1/chat/completions"
+					"url": "https://opencode.ai/inference/go/openai/v1/chat/completions",
+					"authorization": "Bearer key-0123456789abcdef",
+					"failure": null,
+					"thrown": null
 				},
 				"built": 2,
 				"disposed": 0
@@ -104,10 +105,11 @@
 			{
 				"answer": {
 					"kind": "sent",
-					"transport": "First",
 					"zdrOnly": true,
-					"key": "key-0123456789abcdef",
-					"path": "/chat/completions"
+					"url": "https://openrouter.ai/api/v1/chat/completions",
+					"authorization": "Bearer key-0123456789abcdef",
+					"failure": null,
+					"thrown": null
 				},
 				"built": 2,
 				"disposed": 0
@@ -122,7 +124,6 @@
 			"First"
 		],
 		"refreshed": [],
-		"keyReads": 4,
-		"listReads": 3
+		"keyReads": 4
 	}
 }

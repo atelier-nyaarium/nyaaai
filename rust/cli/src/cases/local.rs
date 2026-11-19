@@ -1108,9 +1108,10 @@ pub fn flow(input: LocalFlowInput) -> Outcome<LocalFlowResult> {
         transport: Arc::clone(&transport),
         catalog: Arc::clone(&catalog),
     };
-    let (Some(browser), Some(tester)) =
-        (named.browse(&entry, &route), named.tester(&entry, &route))
-    else {
+    let (Some(browser), Some(tester)) = (
+        named.browse(&entry, &route, &net.deps),
+        named.tester(&entry, &route, &net.deps),
+    ) else {
         return Err("A local kind has a browser and a tester.".to_owned());
     };
     let mut tags = 0;
@@ -1146,7 +1147,7 @@ pub fn flow(input: LocalFlowInput) -> Outcome<LocalFlowResult> {
                     }
                 }
                 LocalFlowInputStepsItem::Chat(held) => {
-                    let codec = named.codec(None, &fields);
+                    let codec = named.codec(None, &fields, &net.deps);
                     match chat_request(&held.model) {
                         Err(message) => flow_thrown(message, None),
                         Ok(request) => match transport.complete(&*codec, &request, &token).await {
@@ -1280,7 +1281,9 @@ pub fn kind_codec(input: LocalKindCodecInput) -> Outcome<LocalKindCodecResult> {
         url: None,
         extra_usage: None,
     };
-    let codec = which.kind().codec(view.as_ref(), &fields);
+    let codec = which
+        .kind()
+        .codec(view.as_ref(), &fields, &net_of(0, &[]).deps);
     let facts = codec_facts_of(view.as_ref());
     let mode = match input.mode {
         LocalKindCodecInputMode::Stream => Mode::Stream,

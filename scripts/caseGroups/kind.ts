@@ -1,6 +1,4 @@
-import { opencodeKind } from "@nyaaai/agentic/kinds/opencode/kind";
 import { checkKey } from "@nyaaai/agentic/kinds/openrouter/key";
-import { openrouterKind } from "@nyaaai/agentic/kinds/openrouter/kind";
 import { codecFactsOf } from "@nyaaai/agentic/models/view";
 import { KINDS, kindLines, type ProviderKind, providerView } from "@nyaaai/agentic/provider/kind";
 import type { KeyAuth } from "@nyaaai/agentic/transport";
@@ -19,9 +17,7 @@ import {
 	ProviderView,
 } from "@nyaaai/contract/shapes/provider";
 import { ApiFacts, CanonicalRequest, Effort, Encoded, Failure } from "@nyaaai/contract/shapes/step";
-import type { Scheduler } from "@nyaaai/contract/time";
 import { caseGroup, casesFor, kind } from "@nyaaai/testkit/caseGroup";
-import { fakeScheduler, TimerWheel } from "@nyaaai/testkit/scheduler";
 import { scriptedModelRegistry } from "@nyaaai/testkit/scriptedPorts";
 import { kindCases } from "../caseSources/kindCases";
 import { kindCheckCases } from "../caseSources/kindCheck";
@@ -103,13 +99,12 @@ type RouteAnswerOf = z.infer<ReturnType<typeof RouteAnswer>>;
 
 const messageOf = (error: unknown): string => (error instanceof Error ? error.message : jsString(error));
 
-/** A hosted kind; the clock dates what its codec and browser read. */
-function hostedKind(name: HostedKindName, scheduler: Scheduler): ProviderKind {
-	return name === "openrouter" ? openrouterKind(scheduler) : opencodeKind(scheduler);
+/** A hosted kind of the table. */
+function hostedKind(name: HostedKindName): ProviderKind {
+	const held = KINDS[name];
+	if (held === undefined) throw new Error(`No ${name} kind.`);
+	return held;
 }
-
-/** A scheduler that stands at `nowMs` and moves for nobody. */
-const standingAt = (nowMs: number): Scheduler => fakeScheduler(new TimerWheel(nowMs));
 
 /** The entry of a case. */
 const entryOf = (name: HostedKindName, entry: z.infer<typeof HostedEntry>) => ({
@@ -261,7 +256,7 @@ export const kindGroup = caseGroup("kind", {
 			}),
 			z.object({ facts: z.array(z.string().nullable()) }),
 			(input) => {
-				const named = hostedKind(input.kind, standingAt(0));
+				const named = hostedKind(input.kind);
 				const entry = entryOf(input.kind, input.entry);
 				return { facts: input.rows.map((row) => named.facts?.(row.state, entry, row.bill) ?? null) };
 			},
@@ -288,7 +283,7 @@ export const kindGroup = caseGroup("kind", {
 			}),
 			async (input) => {
 				const net = kindNetworkOf(input.startMs, input.exchanges);
-				const named = hostedKind(input.kind, net.scheduler);
+				const named = hostedKind(input.kind);
 				const entry = entryOf(input.kind, input.entry);
 				const deps = input.baseUrl === undefined ? net.deps : { ...net.deps, baseUrl: input.baseUrl };
 				const signal = callerSignal(net.wheel, "caller", input);
@@ -324,29 +319,19 @@ export const kindGroup = caseGroup("kind", {
 				/** The kind has limits to read. */
 				present: z.boolean(),
 				limits: Limits.nullable(),
-				thrown: z.string().nullable(),
 				requests: z.array(RequestLine()),
 				waiting: z.array(z.string()),
 			}),
 			async (input) => {
 				const net = kindNetworkOf(input.startMs, input.exchanges);
-				const named = hostedKind(input.kind, net.scheduler);
+				const named = hostedKind(input.kind);
 				const transport = named.transport(entryOf(input.kind, input.entry), keysOf(input.stored), net.deps);
 				const signal = callerSignal(net.wheel, "caller", input);
-				let limits: z.infer<typeof Limits> | null = null;
-				let thrown: string | null = null;
-				if (named.limits !== undefined) {
-					try {
-						limits = (await named.limits(transport, signal)) ?? null;
-					} catch (error) {
-						thrown = messageOf(error);
-					}
-				}
+				const limits = named.limits === undefined ? null : ((await named.limits(transport, signal)) ?? null);
 				net.wheel.cancel("caller");
 				return {
 					present: named.limits !== undefined,
 					limits,
-					thrown,
 					requests: net.played.requests.map(requestLine),
 					waiting: net.wheel.waiting(),
 				};
@@ -381,7 +366,7 @@ export const kindGroup = caseGroup("kind", {
 				failures: z.array(Failure),
 			}),
 			(input) => {
-				const named = hostedKind(input.kind, standingAt(input.nowMs));
+				const named = hostedKind(input.kind);
 				const view: ModelView | undefined =
 					input.view === null
 						? undefined
@@ -396,7 +381,11 @@ export const kindGroup = caseGroup("kind", {
 									: { outputLimit: input.view.outputLimit }),
 								...(input.view.price === undefined ? {} : { price: input.view.price }),
 							};
-				const codec = named.codec(view, { kind: input.kind, label: input.label });
+				const codec = named.codec(
+					view,
+					{ kind: input.kind, label: input.label },
+					kindNetworkOf(input.nowMs, []).deps,
+				);
 				const facts = codecFactsOf(view);
 				let encoded: z.infer<typeof Encoded> | null = null;
 				let refusal: string | null = null;
@@ -435,7 +424,7 @@ export const kindGroup = caseGroup("kind", {
 			}),
 			z.object({ dispositions: z.array(Disposition) }),
 			(input) => {
-				const named = hostedKind(input.kind, standingAt(0));
+				const named = hostedKind(input.kind);
 				const row = rowsOfKeys(["openai/gpt-6-luna"])[0] as ModelView["row"];
 				return {
 					dispositions: input.rows.map((each) => {
@@ -467,7 +456,7 @@ export const kindGroup = caseGroup("kind", {
 			}),
 			async (input) => {
 				const net = networkOf(input.startMs, input.exchanges);
-				const named = hostedKind(input.kind, net.scheduler);
+				const named = hostedKind(input.kind);
 				const entry = { id: "e1", ...entryOf(input.kind, input.entry) };
 				const deps = {
 					fetch: net.played.fetch,
@@ -484,8 +473,8 @@ export const kindGroup = caseGroup("kind", {
 					refreshed: () => {},
 				});
 				const route = { transport, catalog };
-				const browser = named.browse?.(entry, route);
-				const tester = named.tester?.(entry, route);
+				const browser = named.browse?.(entry, route, deps);
+				const tester = named.tester?.(entry, route, deps);
 				if (browser === undefined || tester === undefined)
 					throw new Error("The kind has no browser or tester.");
 				const outcomes: Array<{ nowMs: number; answer: RouteAnswerOf }> = [];

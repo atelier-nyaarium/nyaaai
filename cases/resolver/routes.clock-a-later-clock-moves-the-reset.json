@@ -1,0 +1,107 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routes",
+	"name": "clock-a-later-clock-moves-the-reset",
+	"input": {
+		"entries": [
+			{
+				"id": "go",
+				"kind": "opencode",
+				"plan": "go",
+				"label": "Go"
+			}
+		],
+		"answers": {
+			"go": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"failing": [],
+		"rows": [
+			"openai/gpt-6-luna",
+			"google/gemini-3.8-flash",
+			"openai/gpt-oss-120b"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama",
+			"lmstudio",
+			"llamacpp",
+			"compatible"
+		],
+		"listings": {},
+		"zdrOnly": true,
+		"startMs": 1790340000000,
+		"steps": [
+			{
+				"kind": "resolve",
+				"model": "openai/gpt-6-luna",
+				"use": "chat"
+			},
+			{
+				"kind": "send",
+				"from": 0,
+				"candidate": 0,
+				"fail": {
+					"status": 429,
+					"body": {
+						"type": "error",
+						"error": {
+							"type": "SubscriptionUsageLimitError",
+							"message": "Limit.",
+							"resetsAt": 1790341200
+						}
+					}
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answer": {
+					"kind": "resolve",
+					"unresolved": null,
+					"candidate": {
+						"entry": "go",
+						"kind": "opencode",
+						"binding": "gpt-6-luna",
+						"status": "ok",
+						"zdrOnly": true,
+						"path": "/openai/v1/chat/completions"
+					}
+				},
+				"built": 1,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "sent",
+					"zdrOnly": true,
+					"url": "https://opencode.ai/inference/go/openai/v1/chat/completions",
+					"authorization": "Bearer key-0123456789abcdef",
+					"failure": {
+						"category": "rateLimited",
+						"status": 429,
+						"retryAfterMs": 1200000,
+						"message": "Limit."
+					},
+					"thrown": null
+				},
+				"built": 1,
+				"disposed": 0
+			}
+		],
+		"transports": [
+			"Go/go"
+		],
+		"stopped": [
+			"Go/go"
+		],
+		"refreshed": [],
+		"keyReads": 2
+	}
+}

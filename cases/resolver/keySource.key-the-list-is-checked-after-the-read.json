@@ -2,7 +2,7 @@
 	"format": 2,
 	"type": "function",
 	"kind": "resolver.keySource",
-	"name": "key-a-removed-key-entry-has-no-url-to-differ",
+	"name": "key-the-list-is-checked-after-the-read",
 	"input": {
 		"entry": {
 			"id": "a",
@@ -28,7 +28,13 @@
 			},
 			{
 				"kind": "list",
-				"entries": []
+				"entries": [
+					{
+						"id": "b",
+						"kind": "openrouter",
+						"label": "Second"
+					}
+				]
 			},
 			{
 				"kind": "get"
@@ -38,7 +44,7 @@
 	"expected": {
 		"gets": [
 			"key-0123456789abcdef",
-			"key-0123456789abcdef"
+			null
 		]
 	}
 }

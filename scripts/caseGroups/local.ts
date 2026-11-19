@@ -702,8 +702,8 @@ export const local = caseGroup("local", {
 					},
 				});
 				const route = { transport, catalog };
-				const browser = named.browse?.(entry, route);
-				const tester = named.tester?.(entry, route);
+				const browser = named.browse?.(entry, route, net.deps);
+				const tester = named.tester?.(entry, route, net.deps);
 				if (browser === undefined || tester === undefined)
 					throw new Error("A local kind has a browser and a tester.");
 				let tags = 0;
@@ -723,7 +723,7 @@ export const local = caseGroup("local", {
 								),
 							};
 						if (call.kind === "chat") {
-							const codec = named.codec(undefined, entry);
+							const codec = named.codec(undefined, entry, net.deps);
 							return {
 								kind: "chat",
 								text: replyText(await transport.complete(codec, CHAT_REQUEST(call.model), signal)),
@@ -800,7 +800,7 @@ export const local = caseGroup("local", {
 			(input) => {
 				const named = LOCAL_KINDS[input.kind];
 				const view = viewOfFacts(input.view);
-				const codec = named.codec(view, { kind: input.kind, label: input.label });
+				const codec = named.codec(view, { kind: input.kind, label: input.label }, networkOf(0, []).deps);
 				const facts = codecFactsOf(view);
 				let encoded: z.infer<typeof Encoded> | null = null;
 				let refusal: string | null = null;

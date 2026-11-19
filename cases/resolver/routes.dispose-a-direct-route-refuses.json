@@ -1,0 +1,82 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routes",
+	"name": "dispose-a-direct-route-refuses",
+	"input": {
+		"entries": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "First"
+			},
+			{
+				"id": "b",
+				"kind": "openrouter",
+				"label": "Second"
+			}
+		],
+		"answers": {
+			"a": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			},
+			"b": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"failing": [],
+		"rows": [
+			"openai/gpt-6-luna",
+			"google/gemini-3.8-flash",
+			"openai/gpt-oss-120b"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama",
+			"lmstudio",
+			"llamacpp",
+			"compatible"
+		],
+		"listings": {},
+		"zdrOnly": true,
+		"steps": [
+			{
+				"kind": "dispose"
+			},
+			{
+				"kind": "route",
+				"entry": {
+					"id": "a",
+					"kind": "openrouter",
+					"label": "First"
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answer": {
+					"kind": "changed"
+				},
+				"built": 0,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "routed",
+					"thrown": "The resolver is disposed."
+				},
+				"built": 0,
+				"disposed": 0
+			}
+		],
+		"transports": [],
+		"stopped": [],
+		"refreshed": [],
+		"keyReads": 0
+	}
+}

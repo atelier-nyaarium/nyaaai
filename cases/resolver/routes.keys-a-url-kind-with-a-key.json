@@ -69,10 +69,11 @@
 			{
 				"answer": {
 					"kind": "sent",
-					"transport": "Lab http://lab.local:11434",
 					"zdrOnly": true,
-					"key": "key-0123456789abcdef",
-					"path": "/v1/chat/completions"
+					"url": "http://lab.local:11434/v1/chat/completions",
+					"authorization": null,
+					"failure": null,
+					"thrown": null
 				},
 				"built": 1,
 				"disposed": 0
@@ -85,7 +86,6 @@
 			"Lab http://lab.local:11434"
 		],
 		"refreshed": [],
-		"keyReads": 2,
-		"listReads": 2
+		"keyReads": 1
 	}
 }

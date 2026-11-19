@@ -1,0 +1,96 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routes",
+	"name": "bad-the-only-entry-cannot-be-routed",
+	"input": {
+		"entries": [
+			{
+				"id": "bad",
+				"kind": "compatible",
+				"label": "Broken",
+				"url": "not a url"
+			}
+		],
+		"answers": {
+			"bad": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"failing": [],
+		"rows": [
+			"compatible:qwen"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama",
+			"lmstudio",
+			"llamacpp",
+			"compatible"
+		],
+		"listings": {},
+		"zdrOnly": true,
+		"steps": [
+			{
+				"kind": "routes",
+				"model": "compatible:qwen",
+				"use": "chat"
+			},
+			{
+				"kind": "rows",
+				"use": "chat"
+			},
+			{
+				"kind": "candidates",
+				"use": "chat"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answer": {
+					"kind": "routes",
+					"unresolved": {
+						"ok": false,
+						"key": "compatible:qwen",
+						"refusal": "unreachable",
+						"entry": "Broken"
+					},
+					"candidates": [],
+					"passed": []
+				},
+				"built": 0,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "rows",
+					"options": [
+						{
+							"key": "compatible:qwen",
+							"status": "unknown",
+							"via": null
+						}
+					]
+				},
+				"built": 0,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "candidates",
+					"served": []
+				},
+				"built": 0,
+				"disposed": 0
+			}
+		],
+		"transports": [],
+		"stopped": [],
+		"refreshed": [],
+		"keyReads": 3
+	}
+}

@@ -14,6 +14,7 @@ pub enum KeyAnswer {
 
 /// Keys by entry id.
 pub trait EntryKeys: Send + Sync {
+    /// Never fails: a store that cannot be read answers `Unready`.
     fn get(&self, id: &str) -> BoxFuture<'_, KeyAnswer>;
 
     /// Told the id of an entry whose key changed; the result unsubscribes.

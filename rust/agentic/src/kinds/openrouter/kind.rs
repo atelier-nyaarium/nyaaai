@@ -1,6 +1,6 @@
 //! The OpenRouter kind.
 
-use std::sync::{Arc, LazyLock};
+use std::sync::Arc;
 
 use nyaaai_contract::cancel::CancelToken;
 use nyaaai_contract::future::BoxFuture;
@@ -11,7 +11,6 @@ use nyaaai_contract::shapes::provider::{
     KeyStateUnreachable, Limits, ProviderEntry, ProviderKindName,
 };
 use nyaaai_contract::shapes::step::Failure;
-use nyaaai_contract::time::{Scheduler, SystemScheduler};
 
 use super::browser::{open_router_browser, open_router_tester};
 use super::catalog::{ModelCatalog, ModelCatalogDeps};
@@ -80,14 +79,8 @@ fn catalog_of(route: &Route) -> Option<Arc<ModelCatalog>> {
         .ok()
 }
 
-pub struct OpenRouterKind {
-    scheduler: Arc<dyn Scheduler>,
-}
-
-/// The kind; the scheduler times its browser and tester.
-pub fn openrouter_kind(scheduler: Arc<dyn Scheduler>) -> Arc<OpenRouterKind> {
-    Arc::new(OpenRouterKind { scheduler })
-}
+/// The OpenRouter kind; it reads no clock of its own.
+pub struct OpenRouterKind;
 
 impl ProviderKind for OpenRouterKind {
     fn kind(&self) -> ProviderKindName {
@@ -173,25 +166,40 @@ impl ProviderKind for OpenRouterKind {
         }))
     }
 
-    fn browse(&self, _entry: &ProviderEntry, route: &Route) -> Option<Box<dyn Browser>> {
+    fn browse(
+        &self,
+        _entry: &ProviderEntry,
+        route: &Route,
+        deps: &KindDeps,
+    ) -> Option<Box<dyn Browser>> {
         let catalog = catalog_of(route)?;
         Some(Box::new(open_router_browser(
             catalog,
             Arc::clone(&route.transport),
-            Arc::clone(&self.scheduler),
+            Arc::clone(&deps.scheduler),
         )))
     }
 
-    fn tester(&self, _entry: &ProviderEntry, route: &Route) -> Option<Box<dyn Tester>> {
+    fn tester(
+        &self,
+        _entry: &ProviderEntry,
+        route: &Route,
+        deps: &KindDeps,
+    ) -> Option<Box<dyn Tester>> {
         let catalog = catalog_of(route)?;
         Some(Box::new(open_router_tester(
             catalog,
             Arc::clone(&route.transport),
-            Arc::clone(&self.scheduler),
+            Arc::clone(&deps.scheduler),
         )))
     }
 
-    fn codec(&self, _view: Option<&ModelView>, _entry: &EntryFields) -> Box<dyn Codec> {
+    fn codec(
+        &self,
+        _view: Option<&ModelView>,
+        _entry: &EntryFields,
+        _deps: &KindDeps,
+    ) -> Box<dyn Codec> {
         Box::new(OPENROUTER_CHAT)
     }
 
@@ -217,5 +225,4 @@ impl ProviderKind for OpenRouterKind {
     }
 }
 
-pub static OPENROUTER: LazyLock<Arc<dyn ProviderKind>> =
-    LazyLock::new(|| openrouter_kind(Arc::new(SystemScheduler)) as Arc<dyn ProviderKind>);
+pub static OPENROUTER: OpenRouterKind = OpenRouterKind;

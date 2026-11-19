@@ -113,7 +113,6 @@
 			"Lab http://lab.local:9999"
 		],
 		"refreshed": [],
-		"keyReads": 2,
-		"listReads": 3
+		"keyReads": 2
 	}
 }

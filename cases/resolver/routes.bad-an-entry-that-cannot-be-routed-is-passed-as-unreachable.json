@@ -1,0 +1,188 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routes",
+	"name": "bad-an-entry-that-cannot-be-routed-is-passed-as-unreachable",
+	"input": {
+		"entries": [
+			{
+				"id": "bad",
+				"kind": "compatible",
+				"label": "Broken",
+				"url": "not a url"
+			},
+			{
+				"id": "c",
+				"kind": "compatible",
+				"label": "Host",
+				"url": "http://lab.local:8000/v1"
+			}
+		],
+		"answers": {
+			"bad": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			},
+			"c": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"failing": [],
+		"rows": [
+			"compatible:qwen"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama",
+			"lmstudio",
+			"llamacpp",
+			"compatible"
+		],
+		"listings": {},
+		"zdrOnly": true,
+		"steps": [
+			{
+				"kind": "routes",
+				"model": "compatible:qwen",
+				"use": "chat"
+			},
+			{
+				"kind": "resolve",
+				"model": "compatible:qwen",
+				"use": "chat"
+			},
+			{
+				"kind": "rows",
+				"use": "chat"
+			},
+			{
+				"kind": "candidates",
+				"use": "chat"
+			},
+			{
+				"kind": "route",
+				"entry": {
+					"id": "bad",
+					"kind": "compatible",
+					"label": "Broken",
+					"url": "not a url"
+				}
+			},
+			{
+				"kind": "route",
+				"entry": {
+					"id": "c",
+					"kind": "compatible",
+					"label": "Host",
+					"url": "http://lab.local:8000/v1"
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answer": {
+					"kind": "routes",
+					"unresolved": null,
+					"candidates": [
+						{
+							"entry": "c",
+							"kind": "compatible",
+							"binding": "qwen",
+							"status": "ok",
+							"zdrOnly": true,
+							"path": "/chat/completions"
+						}
+					],
+					"passed": [
+						{
+							"entry": "bad",
+							"label": "Broken",
+							"reason": "network",
+							"before": 0
+						}
+					]
+				},
+				"built": 1,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "resolve",
+					"unresolved": null,
+					"candidate": {
+						"entry": "c",
+						"kind": "compatible",
+						"binding": "qwen",
+						"status": "ok",
+						"zdrOnly": true,
+						"path": "/chat/completions"
+					}
+				},
+				"built": 1,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "rows",
+					"options": [
+						{
+							"key": "compatible:qwen",
+							"status": "ok",
+							"via": {
+								"entry": "c",
+								"label": "Host"
+							}
+						}
+					]
+				},
+				"built": 1,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "candidates",
+					"served": [
+						{
+							"key": "compatible:qwen",
+							"status": "ok",
+							"via": {
+								"entry": "c",
+								"label": "Host"
+							}
+						}
+					]
+				},
+				"built": 1,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "routed",
+					"thrown": "Invalid URL."
+				},
+				"built": 1,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "routed",
+					"thrown": null
+				},
+				"built": 1,
+				"disposed": 0
+			}
+		],
+		"transports": [
+			"Host http://lab.local:8000/v1"
+		],
+		"stopped": [
+			"Host http://lab.local:8000/v1"
+		],
+		"refreshed": [],
+		"keyReads": 8
+	}
+}

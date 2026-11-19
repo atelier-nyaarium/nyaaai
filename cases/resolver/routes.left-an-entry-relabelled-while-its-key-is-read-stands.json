@@ -2,13 +2,18 @@
 	"format": 2,
 	"type": "function",
 	"kind": "resolver.routes",
-	"name": "cache-the-key-of-a-route-has-no-kind",
+	"name": "left-an-entry-relabelled-while-its-key-is-read-stands",
 	"input": {
 		"entries": [
 			{
 				"id": "a",
 				"kind": "openrouter",
 				"label": "First"
+			},
+			{
+				"id": "b",
+				"kind": "openrouter",
+				"label": "Second"
 			}
 		],
 		"answers": {
@@ -39,24 +44,29 @@
 		"zdrOnly": true,
 		"steps": [
 			{
-				"kind": "routes",
-				"model": "openai/gpt-6-luna",
-				"use": "chat"
-			},
-			{
-				"kind": "list",
-				"entries": [
+				"kind": "during",
+				"changes": [
 					{
-						"id": "a",
-						"kind": "opencode",
-						"label": "First"
+						"kind": "list",
+						"entries": [
+							{
+								"id": "a",
+								"kind": "openrouter",
+								"label": "Renamed"
+							},
+							{
+								"id": "b",
+								"kind": "openrouter",
+								"label": "Second"
+							}
+						]
 					}
-				]
-			},
-			{
-				"kind": "routes",
-				"model": "openai/gpt-6-luna",
-				"use": "chat"
+				],
+				"call": {
+					"kind": "routes",
+					"model": "openai/gpt-6-luna",
+					"use": "chat"
+				}
 			}
 		]
 	},
@@ -74,48 +84,31 @@
 							"status": "ok",
 							"zdrOnly": true,
 							"path": "/chat/completions"
-						}
-					],
-					"passed": []
-				},
-				"built": 1,
-				"disposed": 0
-			},
-			{
-				"answer": {
-					"kind": "changed"
-				},
-				"built": 1,
-				"disposed": 0
-			},
-			{
-				"answer": {
-					"kind": "routes",
-					"unresolved": null,
-					"candidates": [
+						},
 						{
-							"entry": "a",
-							"kind": "opencode",
-							"binding": "gpt-6-luna",
+							"entry": "b",
+							"kind": "openrouter",
+							"binding": "openai/gpt-6-luna",
 							"status": "ok",
 							"zdrOnly": true,
-							"path": "/openai/v1/chat/completions"
+							"path": "/chat/completions"
 						}
 					],
 					"passed": []
 				},
-				"built": 1,
+				"built": 2,
 				"disposed": 0
 			}
 		],
 		"transports": [
-			"First"
+			"First",
+			"Second"
 		],
 		"stopped": [
-			"First"
+			"First",
+			"Second"
 		],
 		"refreshed": [],
-		"keyReads": 2,
-		"listReads": 3
+		"keyReads": 2
 	}
 }

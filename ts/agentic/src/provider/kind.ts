@@ -32,7 +32,7 @@ import type { KeySource, Transport } from "../transport";
 /** What a kind stands on. */
 export interface KindDeps {
 	fetch: Fetch;
-	/** The idle timer and the dates of a failure. */
+	/** Every date and deadline of a route, its codec and browser included. */
 	scheduler: Scheduler;
 	log(line: string): void;
 	/** The consumer's `name/version`. */
@@ -123,10 +123,10 @@ export interface ProviderKind {
 	transport(entry: EntryFields, key: KeySource, deps: KindDeps): Transport;
 	catalog(entry: ProviderEntry, transport: Transport, deps: CatalogDeps): EntryCatalog;
 	/** Omitted if unavailable. */
-	browse?(entry: ProviderEntry, route: Route): Browser;
-	tester?(entry: ProviderEntry, route: Route): Tester;
+	browse?(entry: ProviderEntry, route: Route, deps: KindDeps): Browser;
+	tester?(entry: ProviderEntry, route: Route, deps: KindDeps): Tester;
 	/** Model request codec. */
-	codec(view: ModelView | undefined, entry: EntryFields): Codec;
+	codec(view: ModelView | undefined, entry: EntryFields, deps: KindDeps): Codec;
 	/** Retry, fall-through, or stop. */
 	failure(failure: Failure, view: ModelView | undefined): Disposition;
 	/** Optional provider limits. */
@@ -158,7 +158,7 @@ export function kindLines(kinds: Partial<Record<ProviderKindName, ProviderKind>>
 			...(kind.url === undefined ? {} : { url: kind.url }),
 			...(kind.optionalKey === undefined ? {} : { optionalKey: kind.optionalKey }),
 		};
-		if (kind.plans === undefined) return [{ ...line, label: kind.label }];
+		if (kind.plans === undefined || kind.plans.length === 0) return [{ ...line, label: kind.label }];
 		return kind.plans.map(({ plan, label }) => ({ ...line, plan, label }));
 	});
 }

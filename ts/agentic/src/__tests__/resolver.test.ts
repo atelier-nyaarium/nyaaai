@@ -5,8 +5,8 @@ import { fakeScheduler, TimerWheel } from "@nyaaai/testkit/scheduler";
 import { scriptedEntryKeys, scriptedModelRegistry, scriptedProviderList } from "@nyaaai/testkit/scriptedPorts";
 import { OPENCODE } from "../kinds/opencode/kind";
 import { OPENROUTER } from "../kinds/openrouter/kind";
-import { KINDS } from "../provider/kind";
-import { ModelResolver } from "../provider/resolver";
+import { KINDS, kindLines } from "../provider/kind";
+import { keySourceOf, ModelResolver } from "../provider/resolver";
 
 ////////////////////////////////
 //  Functions & Helpers
@@ -68,12 +68,63 @@ describe("ModelResolver", () => {
 		expect(resolver.route(FIRST)).toBe(route);
 	});
 
-	it("stops listening once disposed", () => {
-		const { list, resolver } = resolverOver([FIRST]);
-		const route = resolver.route(FIRST);
+	it("stops listening and builds nothing once disposed, and unsubscribes once", () => {
+		let unsubscribed = 0;
+		const list = scriptedProviderList([FIRST]);
+		const resolver = new ModelResolver({
+			list: {
+				entries: () => list.entries(),
+				onChange: (listener) => {
+					const off = list.onChange(listener);
+					return () => {
+						unsubscribed += 1;
+						off();
+					};
+				},
+			},
+			keys: scriptedEntryKeys(),
+			registry: scriptedModelRegistry(),
+			kinds: KINDS,
+			kindDeps: () => ({
+				fetch: async () => {
+					throw new Error("No network.");
+				},
+				scheduler: fakeScheduler(new TimerWheel(0)),
+				log: () => {},
+				userAgent: "tests/1.0",
+			}),
+			zdrOnly: () => true,
+		});
+		resolver.route(FIRST);
 		resolver.dispose();
-		list.set([]);
-		expect(resolver.route(FIRST)).not.toBe(route);
+		resolver.dispose();
+		expect(unsubscribed).toBe(1);
+		expect(() => resolver.route(FIRST)).toThrow("The resolver is disposed.");
+	});
+
+	it("reads a key store that rejects as unready and as no key", async () => {
+		const keys = {
+			get: () => Promise.reject(new Error("The store is unreadable.")),
+			onChange: () => () => {},
+		};
+		const list = scriptedProviderList([FIRST]);
+		const resolver = new ModelResolver({
+			list,
+			keys,
+			registry: scriptedModelRegistry(),
+			kinds: KINDS,
+			kindDeps: () => ({
+				fetch: async () => {
+					throw new Error("No network.");
+				},
+				scheduler: fakeScheduler(new TimerWheel(0)),
+				log: () => {},
+				userAgent: "tests/1.0",
+			}),
+			zdrOnly: () => true,
+		});
+		expect(await resolver.reach(FIRST)).toBe("unreachable");
+		expect(await keySourceOf(keys, list, FIRST).get()).toBeUndefined();
 	});
 
 	it("refuses a kind it does not hold", () => {
@@ -89,5 +140,56 @@ describe("ModelResolver", () => {
 			zdrOnly: () => true,
 		});
 		expect(() => resolver.route(FIRST)).toThrow("No openrouter provider kind.");
+	});
+});
+
+describe("kindLines", () => {
+	it("reads an empty list of plans as none", () => {
+		const open = KINDS.opencode;
+		if (open === undefined) throw new Error("No kind.");
+		expect(kindLines({ opencode: { ...open, plans: [] } }).map((line) => [line.plan, line.label])).toEqual([
+			[undefined, "OpenCode"],
+		]);
+	});
+});
+
+describe("a catalog that fails to stop", () => {
+	it("does not keep the others from going", () => {
+		const FIRST = { id: "a", kind: "openrouter", label: "First" } as const;
+		const SECOND = { id: "b", kind: "openrouter", label: "Second" } as const;
+		const stopped: string[] = [];
+		const base = KINDS.openrouter;
+		if (base === undefined) throw new Error("No kind.");
+		const kind = {
+			...base,
+			catalog: (entry: { id: string }) => ({
+				views: async () => [],
+				idle: async () => {},
+				dispose: () => {
+					stopped.push(entry.id);
+					throw new Error("Stopping failed.");
+				},
+			}),
+		};
+		const list = scriptedProviderList([FIRST, SECOND]);
+		const resolver = new ModelResolver({
+			list,
+			keys: scriptedEntryKeys(),
+			registry: scriptedModelRegistry(),
+			kinds: { openrouter: kind },
+			kindDeps: () => ({
+				fetch: async () => {
+					throw new Error("No network.");
+				},
+				scheduler: fakeScheduler(new TimerWheel(0)),
+				log: () => {},
+				userAgent: "tests/1.0",
+			}),
+			zdrOnly: () => true,
+		});
+		resolver.route(FIRST);
+		resolver.route(SECOND);
+		list.set([]);
+		expect(stopped).toEqual(["a", "b"]);
 	});
 });

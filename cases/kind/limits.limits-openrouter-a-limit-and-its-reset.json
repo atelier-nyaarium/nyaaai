@@ -29,7 +29,6 @@
 			"limit": 20,
 			"reset": "monthly"
 		},
-		"thrown": null,
 		"requests": [
 			{
 				"method": "GET",

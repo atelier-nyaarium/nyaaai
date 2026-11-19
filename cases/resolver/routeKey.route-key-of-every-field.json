@@ -43,12 +43,12 @@
 	},
 	"expected": {
 		"keys": [
-			"a\n\n",
-			"go\ngo\n",
-			"lab\n\nhttp://lab.local:11434",
-			"go\npayg\n",
-			"lab\n\nhttp://lab.local:11434",
-			"a\n\n"
+			"a\nopenrouter\n\n",
+			"go\nopencode\ngo\n",
+			"lab\nollama\n\nhttp://lab.local:11434",
+			"go\nopencode\npayg\n",
+			"lab\nollama\n\nhttp://lab.local:11434",
+			"a\nopenrouter\n\n"
 		]
 	}
 }

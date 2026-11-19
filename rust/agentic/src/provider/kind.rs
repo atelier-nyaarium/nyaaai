@@ -248,16 +248,31 @@ pub trait ProviderKind: Send + Sync {
     ) -> Arc<dyn EntryCatalog>;
 
     /// Omitted if unavailable.
-    fn browse(&self, _entry: &ProviderEntry, _route: &Route) -> Option<Box<dyn Browser>> {
+    fn browse(
+        &self,
+        _entry: &ProviderEntry,
+        _route: &Route,
+        _deps: &KindDeps,
+    ) -> Option<Box<dyn Browser>> {
         None
     }
 
-    fn tester(&self, _entry: &ProviderEntry, _route: &Route) -> Option<Box<dyn Tester>> {
+    fn tester(
+        &self,
+        _entry: &ProviderEntry,
+        _route: &Route,
+        _deps: &KindDeps,
+    ) -> Option<Box<dyn Tester>> {
         None
     }
 
     /// Model request codec.
-    fn codec(&self, view: Option<&ModelView>, entry: &EntryFields) -> Box<dyn Codec>;
+    fn codec(
+        &self,
+        view: Option<&ModelView>,
+        entry: &EntryFields,
+        deps: &KindDeps,
+    ) -> Box<dyn Codec>;
 
     /// Retry, fall-through, or stop.
     fn failure(&self, failure: &Failure, view: Option<&ModelView>) -> Disposition;
@@ -281,8 +296,8 @@ pub trait ProviderKind: Send + Sync {
 pub static KINDS: std::sync::LazyLock<Vec<Arc<dyn ProviderKind>>> =
     std::sync::LazyLock::new(|| {
         vec![
-            Arc::clone(&crate::kinds::opencode::kind::OPENCODE),
-            Arc::clone(&crate::kinds::openrouter::kind::OPENROUTER),
+            Arc::new(crate::kinds::opencode::kind::OpenCodeKind),
+            Arc::new(crate::kinds::openrouter::kind::OpenRouterKind),
             crate::kinds::ollama::OLLAMA.clone() as Arc<dyn ProviderKind>,
             crate::kinds::lmstudio::LMSTUDIO.clone() as Arc<dyn ProviderKind>,
             crate::kinds::llamacpp::LLAMACPP.clone() as Arc<dyn ProviderKind>,

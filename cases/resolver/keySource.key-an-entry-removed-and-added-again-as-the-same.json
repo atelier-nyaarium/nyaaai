@@ -1,0 +1,62 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.keySource",
+	"name": "key-an-entry-removed-and-added-again-as-the-same",
+	"input": {
+		"entry": {
+			"id": "a",
+			"kind": "openrouter",
+			"label": "First"
+		},
+		"list": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "First"
+			}
+		],
+		"answers": {
+			"a": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"steps": [
+			{
+				"kind": "list",
+				"entries": []
+			},
+			{
+				"kind": "get"
+			},
+			{
+				"kind": "list",
+				"entries": [
+					{
+						"id": "a",
+						"kind": "openrouter",
+						"label": "First"
+					}
+				]
+			},
+			{
+				"kind": "answer",
+				"id": "a",
+				"answer": {
+					"kind": "key",
+					"key": "key-fedcba9876543210"
+				}
+			},
+			{
+				"kind": "get"
+			}
+		]
+	},
+	"expected": {
+		"gets": [
+			null,
+			"key-fedcba9876543210"
+		]
+	}
+}

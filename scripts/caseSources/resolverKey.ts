@@ -47,13 +47,13 @@ export const resolverKeyCases: CaseSource[] = [
 		answers: { lab: KEY },
 		steps: [get, list(), get],
 	}),
-	key("key-a-removed-key-entry-has-no-url-to-differ", {
+	key("key-a-removed-entry-answers-none", {
 		entry: FIRST,
 		list: [FIRST],
 		answers: { a: KEY },
 		steps: [get, list(), get],
 	}),
-	key("key-another-entry-with-the-id-of-a-different-url", {
+	key("key-another-kind-with-the-id-and-url-answers-none", {
 		entry: LAB,
 		list: [{ ...LAB, kind: "lmstudio" }],
 		answers: { lab: KEY },
@@ -71,11 +71,35 @@ export const resolverKeyCases: CaseSource[] = [
 		answers: { lab: KEY },
 		steps: [get],
 	}),
-	key("key-a-plan-change-keeps-the-key-for-the-same-url", {
+	key("key-a-plan-change-answers-none", {
 		entry: GO,
 		list: [{ ...GO, plan: "payg" }],
 		answers: { go: KEY },
 		steps: [get],
+	}),
+	key("key-a-relabelled-entry-keeps-answering", {
+		entry: GO,
+		list: [{ ...GO, label: "Renamed" }],
+		answers: { go: KEY },
+		steps: [get],
+	}),
+	key("key-a-kind-change-and-back", {
+		entry: FIRST,
+		list: [FIRST],
+		answers: { a: KEY },
+		steps: [get, list({ ...FIRST, kind: "opencode" }), get, list(FIRST), get],
+	}),
+	key("key-an-entry-removed-and-added-again-as-the-same", {
+		entry: FIRST,
+		list: [FIRST],
+		answers: { a: KEY },
+		steps: [list(), get, list(FIRST), answer("a", OTHER_KEY), get],
+	}),
+	key("key-the-list-is-checked-after-the-read", {
+		entry: FIRST,
+		list: [FIRST],
+		answers: { a: KEY },
+		steps: [get, list(SECOND), get],
 	}),
 	key("key-other-entries-are-not-read", {
 		entry: FIRST,

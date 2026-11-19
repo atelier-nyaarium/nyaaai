@@ -1,0 +1,141 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routes",
+	"name": "stream-the-switch-is-stamped-at-the-request",
+	"input": {
+		"entries": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "First"
+			},
+			{
+				"id": "b",
+				"kind": "openrouter",
+				"label": "Second"
+			}
+		],
+		"answers": {
+			"a": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			},
+			"b": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"failing": [],
+		"rows": [
+			"openai/gpt-6-luna",
+			"google/gemini-3.8-flash",
+			"openai/gpt-oss-120b"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama",
+			"lmstudio",
+			"llamacpp",
+			"compatible"
+		],
+		"listings": {},
+		"zdrOnly": true,
+		"steps": [
+			{
+				"kind": "resolve",
+				"model": "openai/gpt-6-luna",
+				"use": "chat"
+			},
+			{
+				"kind": "zdr",
+				"on": false
+			},
+			{
+				"kind": "send",
+				"from": 0,
+				"candidate": 0,
+				"mode": "stream"
+			},
+			{
+				"kind": "zdr",
+				"on": true
+			},
+			{
+				"kind": "send",
+				"from": 0,
+				"candidate": 0,
+				"mode": "stream"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answer": {
+					"kind": "resolve",
+					"unresolved": null,
+					"candidate": {
+						"entry": "a",
+						"kind": "openrouter",
+						"binding": "openai/gpt-6-luna",
+						"status": "ok",
+						"zdrOnly": true,
+						"path": "/chat/completions"
+					}
+				},
+				"built": 2,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "changed"
+				},
+				"built": 2,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "sent",
+					"zdrOnly": false,
+					"url": "https://openrouter.ai/api/v1/chat/completions",
+					"authorization": "Bearer key-0123456789abcdef",
+					"failure": null,
+					"thrown": null
+				},
+				"built": 2,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "changed"
+				},
+				"built": 2,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "sent",
+					"zdrOnly": true,
+					"url": "https://openrouter.ai/api/v1/chat/completions",
+					"authorization": "Bearer key-0123456789abcdef",
+					"failure": null,
+					"thrown": null
+				},
+				"built": 2,
+				"disposed": 0
+			}
+		],
+		"transports": [
+			"First",
+			"Second"
+		],
+		"stopped": [
+			"First",
+			"Second"
+		],
+		"refreshed": [],
+		"keyReads": 4
+	}
+}

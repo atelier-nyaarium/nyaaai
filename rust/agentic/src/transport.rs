@@ -1,5 +1,6 @@
 //! A codec's calls over the Fetch port.
 
+use std::borrow::Cow;
 use std::collections::VecDeque;
 use std::error::Error;
 use std::fmt;
@@ -289,7 +290,7 @@ enum StreamState<'a> {
 pub struct EventStream<'a> {
     transport: &'a Transport,
     codec: &'a dyn Codec,
-    request: &'a CanonicalRequest,
+    request: Cow<'a, CanonicalRequest>,
     cancel: CancelToken,
     state: StreamState<'a>,
     /// What an opening learned before it was dropped.
@@ -308,7 +309,7 @@ impl EventStream<'_> {
             self.state = StreamState::Opening;
             match self
                 .transport
-                .open(self.codec, self.request, &self.cancel, &mut self.seen)
+                .open(self.codec, &self.request, &self.cancel, &mut self.seen)
                 .await
             {
                 Ok(open) => self.state = StreamState::Open(Box::new(open)),
@@ -402,6 +403,25 @@ impl Transport {
         &'a self,
         codec: &'a dyn Codec,
         request: &'a CanonicalRequest,
+        cancel: &CancelToken,
+    ) -> EventStream<'a> {
+        self.events(codec, Cow::Borrowed(request), cancel)
+    }
+
+    /// A stream over a request it owns.
+    pub fn stream_owned<'a>(
+        &'a self,
+        codec: &'a dyn Codec,
+        request: CanonicalRequest,
+        cancel: &CancelToken,
+    ) -> EventStream<'a> {
+        self.events(codec, Cow::Owned(request), cancel)
+    }
+
+    fn events<'a>(
+        &'a self,
+        codec: &'a dyn Codec,
+        request: Cow<'a, CanonicalRequest>,
         cancel: &CancelToken,
     ) -> EventStream<'a> {
         EventStream {

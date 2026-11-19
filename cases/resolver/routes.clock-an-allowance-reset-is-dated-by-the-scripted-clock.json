@@ -1,0 +1,172 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routes",
+	"name": "clock-an-allowance-reset-is-dated-by-the-scripted-clock",
+	"input": {
+		"entries": [
+			{
+				"id": "go",
+				"kind": "opencode",
+				"plan": "go",
+				"label": "Go"
+			}
+		],
+		"answers": {
+			"go": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"failing": [],
+		"rows": [
+			"openai/gpt-6-luna",
+			"google/gemini-3.8-flash",
+			"openai/gpt-oss-120b"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama",
+			"lmstudio",
+			"llamacpp",
+			"compatible"
+		],
+		"listings": {},
+		"zdrOnly": true,
+		"startMs": 1790337600000,
+		"steps": [
+			{
+				"kind": "resolve",
+				"model": "openai/gpt-6-luna",
+				"use": "chat"
+			},
+			{
+				"kind": "send",
+				"from": 0,
+				"candidate": 0,
+				"fail": {
+					"status": 429,
+					"body": {
+						"type": "error",
+						"error": {
+							"type": "SubscriptionUsageLimitError",
+							"message": "Limit.",
+							"resetsAt": 1790341200
+						}
+					}
+				}
+			},
+			{
+				"kind": "send",
+				"from": 0,
+				"candidate": 0,
+				"fail": {
+					"status": 429,
+					"body": {
+						"type": "error",
+						"error": {
+							"type": "RateLimitError",
+							"message": "Slow down."
+						}
+					}
+				}
+			},
+			{
+				"kind": "send",
+				"from": 0,
+				"candidate": 0,
+				"mode": "stream",
+				"fail": {
+					"status": 429,
+					"body": {
+						"type": "error",
+						"error": {
+							"type": "SubscriptionUsageLimitError",
+							"message": "Limit.",
+							"resetsAt": 1790341200
+						}
+					}
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answer": {
+					"kind": "resolve",
+					"unresolved": null,
+					"candidate": {
+						"entry": "go",
+						"kind": "opencode",
+						"binding": "gpt-6-luna",
+						"status": "ok",
+						"zdrOnly": true,
+						"path": "/openai/v1/chat/completions"
+					}
+				},
+				"built": 1,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "sent",
+					"zdrOnly": true,
+					"url": "https://opencode.ai/inference/go/openai/v1/chat/completions",
+					"authorization": "Bearer key-0123456789abcdef",
+					"failure": {
+						"category": "rateLimited",
+						"status": 429,
+						"retryAfterMs": 3600000,
+						"message": "Limit."
+					},
+					"thrown": null
+				},
+				"built": 1,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "sent",
+					"zdrOnly": true,
+					"url": "https://opencode.ai/inference/go/openai/v1/chat/completions",
+					"authorization": "Bearer key-0123456789abcdef",
+					"failure": {
+						"category": "rateLimited",
+						"status": 429,
+						"message": "Slow down."
+					},
+					"thrown": null
+				},
+				"built": 1,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "sent",
+					"zdrOnly": true,
+					"url": "https://opencode.ai/inference/go/openai/v1/chat/completions",
+					"authorization": "Bearer key-0123456789abcdef",
+					"failure": {
+						"category": "rateLimited",
+						"status": 429,
+						"retryAfterMs": 3600000,
+						"message": "Limit."
+					},
+					"thrown": null
+				},
+				"built": 1,
+				"disposed": 0
+			}
+		],
+		"transports": [
+			"Go/go"
+		],
+		"stopped": [
+			"Go/go"
+		],
+		"refreshed": [],
+		"keyReads": 4
+	}
+}

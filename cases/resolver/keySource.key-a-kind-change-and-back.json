@@ -1,0 +1,64 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.keySource",
+	"name": "key-a-kind-change-and-back",
+	"input": {
+		"entry": {
+			"id": "a",
+			"kind": "openrouter",
+			"label": "First"
+		},
+		"list": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "First"
+			}
+		],
+		"answers": {
+			"a": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"steps": [
+			{
+				"kind": "get"
+			},
+			{
+				"kind": "list",
+				"entries": [
+					{
+						"id": "a",
+						"kind": "opencode",
+						"label": "First"
+					}
+				]
+			},
+			{
+				"kind": "get"
+			},
+			{
+				"kind": "list",
+				"entries": [
+					{
+						"id": "a",
+						"kind": "openrouter",
+						"label": "First"
+					}
+				]
+			},
+			{
+				"kind": "get"
+			}
+		]
+	},
+	"expected": {
+		"gets": [
+			"key-0123456789abcdef",
+			null,
+			"key-0123456789abcdef"
+		]
+	}
+}

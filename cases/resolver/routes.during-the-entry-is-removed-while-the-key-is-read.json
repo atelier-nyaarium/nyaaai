@@ -1,0 +1,100 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routes",
+	"name": "during-the-entry-is-removed-while-the-key-is-read",
+	"input": {
+		"entries": [
+			{
+				"id": "c",
+				"kind": "compatible",
+				"label": "Host",
+				"url": "http://lab.local:8000/v1"
+			}
+		],
+		"answers": {
+			"c": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"failing": [],
+		"rows": [
+			"compatible:qwen"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama",
+			"lmstudio",
+			"llamacpp",
+			"compatible"
+		],
+		"listings": {},
+		"zdrOnly": true,
+		"steps": [
+			{
+				"kind": "routes",
+				"model": "compatible:qwen",
+				"use": "chat"
+			},
+			{
+				"kind": "during",
+				"changes": [
+					{
+						"kind": "list",
+						"entries": []
+					}
+				],
+				"call": {
+					"kind": "send",
+					"from": 0,
+					"candidate": 0
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answer": {
+					"kind": "routes",
+					"unresolved": null,
+					"candidates": [
+						{
+							"entry": "c",
+							"kind": "compatible",
+							"binding": "qwen",
+							"status": "ok",
+							"zdrOnly": true,
+							"path": "/chat/completions"
+						}
+					],
+					"passed": []
+				},
+				"built": 1,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "sent",
+					"zdrOnly": true,
+					"url": "http://lab.local:8000/v1/chat/completions",
+					"authorization": null,
+					"failure": null,
+					"thrown": null
+				},
+				"built": 1,
+				"disposed": 1
+			}
+		],
+		"transports": [
+			"Host http://lab.local:8000/v1"
+		],
+		"stopped": [
+			"Host http://lab.local:8000/v1"
+		],
+		"refreshed": [],
+		"keyReads": 2
+	}
+}

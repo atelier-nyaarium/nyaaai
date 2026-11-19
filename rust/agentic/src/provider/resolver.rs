@@ -2,6 +2,8 @@
 
 use std::collections::{HashMap, HashSet};
 use std::fmt;
+use std::panic::{AssertUnwindSafe, catch_unwind};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, MutexGuard};
 
 use nyaaai_contract::cancel::{CancelToken, Unsubscribe};
@@ -20,7 +22,7 @@ use nyaaai_contract::shapes::provider::{
 use nyaaai_contract::shapes::step::{CanonicalRequest, StepResult};
 use tokio::sync::OnceCell;
 
-use super::kind::{KindDeps, KindField, ProviderKind, Route};
+use super::kind::{EntryCatalog, KindDeps, KindField, ProviderKind, Route};
 use crate::codec::Codec;
 use crate::models::row_key::{parse_row_key_text, served_id_of};
 use crate::models::view::unknown_view;
@@ -62,15 +64,20 @@ impl RouteTransport {
         self.transport.complete(codec, &stamped, cancel).await
     }
 
-    /// The request is stamped with the switch as it stands, in place.
+    /// A stream over the request, stamped with the switch as it stands; the stream owns it.
     pub fn stream<'a>(
         &'a self,
         codec: &'a dyn Codec,
-        request: &'a mut CanonicalRequest,
+        mut request: CanonicalRequest,
         cancel: &CancelToken,
     ) -> EventStream<'a> {
         request.zdr_only = (self.zdr_only)();
-        self.transport.stream(codec, request, cancel)
+        self.transport.stream_owned(codec, request, cancel)
+    }
+
+    /// The route's own transport, for what a request through the stamping does not cover.
+    pub fn transport(&self) -> &Arc<Transport> {
+        &self.transport
     }
 
     pub async fn get_json(
@@ -206,10 +213,11 @@ pub fn via_of(entry: &ProviderEntry) -> Via {
     }
 }
 
-/// What identifies a route: id, plan and URL.
+/// What identifies a route: id, kind, plan and URL.
 pub fn route_key(entry: &ProviderEntry) -> String {
     [
         entry.id.as_str(),
+        entry.kind.as_str(),
         entry.plan.map_or("", |plan| plan.as_str()),
         entry.url.as_deref().unwrap_or(""),
     ]
@@ -248,17 +256,19 @@ pub fn key_source_of(
 }
 
 impl KeySource for EntryKeySource {
+    /// The key is read first; it is given only while the list holds the same id, kind, plan and URL.
     fn get(&self) -> BoxFuture<'_, Option<String>> {
         Box::pin(async move {
+            let answer = self.keys.get(&self.entry.id).await;
             let listed = self
                 .list
                 .entries()
                 .into_iter()
                 .find(|each| each.id == self.entry.id);
-            if listed.and_then(|held| held.url) != self.entry.url {
+            if !listed.is_some_and(|held| route_key(&held) == route_key(&self.entry)) {
                 return None;
             }
-            match self.keys.get(&self.entry.id).await {
+            match answer {
                 KeyAnswer::Key(key) => Some(key),
                 _ => None,
             }
@@ -344,6 +354,8 @@ pub struct ServedByDeps {
     pub kind: Arc<dyn ProviderKind>,
     pub transport: Arc<Transport>,
     pub catalog: Arc<dyn Catalog>,
+    /// The deps the route was made with.
+    pub deps: KindDeps,
     pub zdr_only: Live,
 }
 
@@ -353,7 +365,7 @@ pub async fn served_by(d: &ServedByDeps, key: &str, use_: ModelUse) -> Routes {
         Some(view) => view,
         None => unknown_view(&adhoc_row(key, d.kind.kind())),
     };
-    let codec = d.kind.codec(Some(&view), &fields_of(&d.entry));
+    let codec = d.kind.codec(Some(&view), &fields_of(&d.entry), &d.deps);
     let binding = view
         .row
         .bindings
@@ -377,10 +389,22 @@ pub async fn served_by(d: &ServedByDeps, key: &str, use_: ModelUse) -> Routes {
     }
 }
 
-type Made = Arc<Mutex<Vec<(String, Route)>>>;
+/// A route with the deps it was made with.
+#[derive(Clone)]
+struct Held {
+    route: Route,
+    deps: KindDeps,
+}
+
+type Made = Arc<Mutex<Vec<(String, Held)>>>;
 
 fn locked<T>(held: &Mutex<T>) -> MutexGuard<'_, T> {
     held.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
+}
+
+/// Stops a catalog that listens; a failure stops nothing else.
+fn disposed(catalog: &dyn EntryCatalog) {
+    let _ = catch_unwind(AssertUnwindSafe(|| catalog.dispose()));
 }
 
 /// One key check per entry in one read, shared by the rows reading at once.
@@ -391,6 +415,7 @@ pub struct ModelResolver {
     d: ResolverDeps,
     made: Made,
     unsubscribe: Mutex<Option<Unsubscribe>>,
+    closed: AtomicBool,
 }
 
 impl ModelResolver {
@@ -400,7 +425,7 @@ impl ModelResolver {
         let list = Arc::clone(&d.list);
         let unsubscribe = d.list.on_change(Box::new(move || {
             let listed: HashSet<String> = list.entries().iter().map(route_key).collect();
-            let gone: Vec<Route> = {
+            let gone: Vec<Held> = {
                 let mut held = locked(&held);
                 let mut gone = Vec::new();
                 let mut kept = Vec::new();
@@ -415,24 +440,32 @@ impl ModelResolver {
                 gone
             };
             for route in gone {
-                route.catalog.dispose();
+                disposed(&*route.route.catalog);
             }
         }));
         Self {
             d,
             made,
             unsubscribe: Mutex::new(Some(unsubscribe)),
+            closed: AtomicBool::new(false),
         }
     }
 
-    /// Stops listening; the routes go.
+    fn is_closed(&self) -> bool {
+        self.closed.load(Ordering::SeqCst)
+    }
+
+    /// Stops listening; the routes go; nothing is built after.
     pub fn dispose(&self) {
+        if self.closed.swap(true, Ordering::SeqCst) {
+            return;
+        }
         if let Some(unsubscribe) = locked(&self.unsubscribe).take() {
             unsubscribe();
         }
-        let routes: Vec<(String, Route)> = std::mem::take(&mut *locked(&self.made));
-        for (_, route) in routes {
-            route.catalog.dispose();
+        let routes: Vec<(String, Held)> = std::mem::take(&mut *locked(&self.made));
+        for (_, held) in routes {
+            disposed(&*held.route.catalog);
         }
     }
 
@@ -440,8 +473,15 @@ impl ModelResolver {
         self.d.kinds.iter().find(|held| held.kind() == name)
     }
 
-    /// The entry's route, made once per id, plan and URL.
+    /// The entry's route, made once per id, kind, plan and URL.
     pub fn route(&self, entry: &ProviderEntry) -> Result<Route, ResolveError> {
+        Ok(self.held(entry)?.route)
+    }
+
+    fn held(&self, entry: &ProviderEntry) -> Result<Held, ResolveError> {
+        if self.is_closed() {
+            return Err(ResolveError("The resolver is disposed.".to_owned()));
+        }
         let at = route_key(entry);
         if let Some((_, known)) = locked(&self.made).iter().find(|(held, _)| *held == at) {
             return Ok(known.clone());
@@ -460,6 +500,7 @@ impl ModelResolver {
             .map_err(ResolveError)?;
         let told = self.d.refreshed.clone();
         let named = entry.clone();
+        let list = Arc::clone(&self.d.list);
         let catalog = kind.catalog(
             entry,
             Arc::clone(&transport),
@@ -467,15 +508,58 @@ impl ModelResolver {
                 scheduler: Arc::clone(&deps.scheduler),
                 rows: Arc::clone(&self.d.registry),
                 refreshed: Arc::new(move || {
-                    if let Some(told) = &told {
-                        told(&named);
-                    }
+                    let Some(told) = &told else {
+                        return;
+                    };
+                    // The entry as the list holds it, else the route's own.
+                    let listed = list
+                        .entries()
+                        .into_iter()
+                        .find(|each| route_key(each) == route_key(&named));
+                    told(listed.as_ref().unwrap_or(&named));
                 }),
             },
         );
-        let made = Route { transport, catalog };
-        locked(&self.made).push((at, made.clone()));
+        let made = Held {
+            route: Route { transport, catalog },
+            deps,
+        };
+        // Another task may have made it first; the first one stays.
+        let extra = {
+            let mut held = locked(&self.made);
+            if self.is_closed() {
+                Some(made.clone())
+            } else if let Some((_, first)) = held.iter().find(|(held, _)| *held == at) {
+                let first = first.clone();
+                drop(held);
+                disposed(&*made.route.catalog);
+                return Ok(first);
+            } else {
+                held.push((at, made.clone()));
+                None
+            }
+        };
+        if let Some(extra) = extra {
+            disposed(&*extra.route.catalog);
+            return Err(ResolveError("The resolver is disposed.".to_owned()));
+        }
         Ok(made)
+    }
+
+    /// The route, or none when it cannot be made.
+    fn tried(&self, entry: &ProviderEntry) -> Option<Held> {
+        self.held(entry).ok()
+    }
+
+    /// The entry is still listed as it was.
+    fn stands(&self, entry: &ProviderEntry) -> bool {
+        !self.is_closed()
+            && self
+                .d
+                .list
+                .entries()
+                .iter()
+                .any(|each| route_key(each) == route_key(entry))
     }
 
     /// What a key says of one entry.
@@ -486,29 +570,29 @@ impl ModelResolver {
         reach_of(field, &self.d.keys.get(&entry.id).await)
     }
 
-    pub async fn resolve(&self, key: &str, use_: ModelUse) -> Result<Resolution, ResolveError> {
-        Ok(match self.routes(key, use_).await? {
+    pub async fn resolve(&self, key: &str, use_: ModelUse) -> Resolution {
+        match self.routes(key, use_).await {
             Planned::Routes(mut routes) => {
                 Resolution::Resolved(Box::new(routes.candidates.swap_remove(0)))
             }
             Planned::Unresolved(unresolved) => Resolution::Unresolved(unresolved),
-        })
+        }
     }
 
     /// Eligible entries, priority order.
-    pub async fn routes(&self, key: &str, use_: ModelUse) -> Result<Planned, ResolveError> {
+    pub async fn routes(&self, key: &str, use_: ModelUse) -> Planned {
         let rows = self.d.registry.rows();
         let Some(row) = rows.iter().find(|each| each.key == key) else {
-            return Ok(Planned::Unresolved(Unresolved {
+            return Planned::Unresolved(Unresolved {
                 key: key.to_owned(),
                 refusal: Refusal::NoModel,
                 entry: None,
-            }));
+            });
         };
         let routed = self
             .routed(row, use_, (self.d.zdr_only)(), &self.reaches(), false, true)
-            .await?;
-        Ok(match routed {
+            .await;
+        match routed {
             Routed::Ok { candidates, passed } => Planned::Routes(Routes {
                 key: key.to_owned(),
                 candidates,
@@ -519,20 +603,19 @@ impl ModelResolver {
                 refusal: unserved.refusal,
                 entry: unserved.entry,
             }),
-        })
+        }
     }
 
     /// Settings rows in order.
-    pub async fn rows(&self, use_: ModelUse) -> Result<Vec<ResolvedOption>, ResolveError> {
+    pub async fn rows(&self, use_: ModelUse) -> Vec<ResolvedOption> {
         let zdr_only = (self.d.zdr_only)();
         let reach = self.reaches();
         let rows = self.d.registry.rows();
-        let answers = crate::kinds::join::join_all(
+        crate::kinds::join::join_all(
             rows.iter()
                 .map(|row| self.option_of(row, use_, zdr_only, &reach)),
         )
-        .await;
-        answers.into_iter().collect()
+        .await
     }
 
     /// One row's option; it asks the entries as a Settings row does.
@@ -542,9 +625,8 @@ impl ModelResolver {
         use_: ModelUse,
         zdr_only: bool,
         reach: &Reaches,
-    ) -> Result<ResolvedOption, ResolveError> {
-        let routed = self.routed(row, use_, zdr_only, reach, true, false).await?;
-        Ok(match routed {
+    ) -> ResolvedOption {
+        match self.routed(row, use_, zdr_only, reach, true, false).await {
             Routed::Refused(unserved) => ResolvedOption {
                 key: row.key.clone(),
                 view: unserved.view.unwrap_or_else(|| unknown_view(row)),
@@ -558,17 +640,16 @@ impl ModelResolver {
                     via: Some(via_of(&first.entry)),
                 }
             }
-        })
+        }
     }
 
     /// Resolvable keys with their serving entries.
-    pub async fn candidates(&self, use_: ModelUse) -> Result<Vec<ResolvedOption>, ResolveError> {
-        Ok(self
-            .rows(use_)
-            .await?
+    pub async fn candidates(&self, use_: ModelUse) -> Vec<ResolvedOption> {
+        self.rows(use_)
+            .await
             .into_iter()
             .filter(|option| option.via.is_some())
-            .collect())
+            .collect()
     }
 
     /// Key check per read.
@@ -589,7 +670,7 @@ impl ModelResolver {
         reaches: &Reaches,
         standing: bool,
         all: bool,
-    ) -> Result<Routed, ResolveError> {
+    ) -> Routed {
         let mut worst = Unserved {
             refusal: Refusal::NoModel,
             view: None,
@@ -598,19 +679,39 @@ impl ModelResolver {
         let mut matched = false;
         let mut found: Vec<Resolved> = Vec::new();
         let mut passed: Vec<Passed> = Vec::new();
-        for entry in self.d.list.entries() {
+        let listed = if self.is_closed() {
+            Vec::new()
+        } else {
+            self.d.list.entries()
+        };
+        let owner = match &row.identity {
+            RowIdentity::Local(local) => Some(local.entry.clone()),
+            _ => None,
+        };
+        if let Some(owner) = &owner
+            && !listed.iter().any(|each| &each.id == owner)
+        {
+            return Routed::Refused(Box::new(Unserved {
+                refusal: Refusal::NoModel,
+                view: None,
+                entry: None,
+            }));
+        }
+        for entry in listed {
             if !found.is_empty() && !all {
                 break;
             }
             let kind = self.kind_of(entry.kind);
             let binding = row.bindings.get(entry.kind.as_str());
-            let elsewhere =
-                matches!(&row.identity, RowIdentity::Local(local) if local.entry != entry.id);
+            let elsewhere = owner.as_ref().is_some_and(|owner| *owner != entry.id);
             let (Some(kind), Some(binding), false) = (kind, binding, elsewhere) else {
                 continue;
             };
-            matched = true;
             let reached = self.reach_once(reaches, &entry).await;
+            if !self.stands(&entry) {
+                continue;
+            }
+            matched = true;
             if reached != KeyReach::Ok {
                 passed.push(Passed {
                     entry: entry.id.clone(),
@@ -618,15 +719,29 @@ impl ModelResolver {
                     reason: skip_of(reached),
                     before: found.len() as f64,
                 });
-                let behind = if standing && worst.view.is_none() {
-                    self.view_of(&entry, row, use_, zdr_only).await?
+                let held = if standing && worst.view.is_none() {
+                    self.tried(&entry)
                 } else {
                     None
+                };
+                let behind = match held {
+                    Some(held) => self.view_of(&held.route, row, use_, zdr_only).await,
+                    None => None,
                 };
                 worst = raised(worst, reach_refusal(reached), behind, &entry.label);
                 continue;
             }
-            let view = self.view_of(&entry, row, use_, zdr_only).await?;
+            let Some(held) = self.tried(&entry) else {
+                passed.push(Passed {
+                    entry: entry.id.clone(),
+                    label: entry.label.clone(),
+                    reason: SkipReason::Network,
+                    before: found.len() as f64,
+                });
+                worst = raised(worst, Refusal::Unreachable, None, &entry.label);
+                continue;
+            };
+            let view = self.view_of(&held.route, row, use_, zdr_only).await;
             let view = match view {
                 Some(held) if usable(&held) => held,
                 other => {
@@ -640,19 +755,19 @@ impl ModelResolver {
                 entry: entry.clone(),
                 kind: Arc::clone(kind),
                 binding: binding.clone(),
-                codec: kind.codec(Some(&view), &fields_of(&entry)),
+                codec: kind.codec(Some(&view), &fields_of(&entry), &held.deps),
                 view,
-                transport: RouteTransport::new(self.route(&entry)?.transport, Arc::clone(&live)),
+                transport: RouteTransport::new(held.route.transport, Arc::clone(&live)),
                 zdr_only: live,
             });
         }
         if !found.is_empty() {
-            return Ok(Routed::Ok {
+            return Routed::Ok {
                 candidates: found,
                 passed,
-            });
+            };
         }
-        Ok(Routed::Refused(Box::new(if matched {
+        Routed::Refused(Box::new(if matched {
             worst
         } else {
             Unserved {
@@ -660,22 +775,195 @@ impl ModelResolver {
                 view: None,
                 entry: None,
             }
-        })))
+        }))
     }
 
     async fn view_of(
         &self,
-        entry: &ProviderEntry,
+        route: &Route,
         row: &ModelRow,
         use_: ModelUse,
         zdr_only: bool,
-    ) -> Result<Option<ModelView>, ResolveError> {
-        let route = self.route(entry)?;
+    ) -> Option<ModelView> {
         let views = route
             .catalog
             .views(use_, zdr_only, None)
             .await
             .unwrap_or_default();
-        Ok(views.into_iter().find(|each| each.row.key == row.key))
+        views.into_iter().find(|each| each.row.key == row.key)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::sync::Barrier;
+    use std::sync::atomic::AtomicUsize;
+
+    use nyaaai_contract::shapes::provider::{KeyState, KeyStateNone};
+    use nyaaai_contract::shapes::step::Failure;
+    use nyaaai_testkit::scheduler::{FakeScheduler, TimerWheel};
+    use nyaaai_testkit::scripted_fetch::ScriptedFetch;
+    use nyaaai_testkit::scripted_ports::{
+        ScriptedEntryKeys, ScriptedModelRegistry, ScriptedProviderList,
+    };
+
+    use super::*;
+    use crate::dialects::openrouter::OPENROUTER_CHAT;
+    use crate::provider::disposition::disposition_of;
+    use crate::provider::kind::{CatalogDeps, KindError};
+    use crate::transport::{Auth, TransportDeps};
+
+    struct Stopping(Arc<AtomicUsize>);
+
+    impl EntryCatalog for Stopping {
+        fn views(
+            &self,
+            _use: ModelUse,
+            _zdr_only: bool,
+            _cancel: Option<&CancelToken>,
+        ) -> BoxFuture<'_, Result<Vec<ModelView>, crate::kinds::fetcher::Aborted>> {
+            Box::pin(async { Ok(Vec::new()) })
+        }
+
+        fn dispose(&self) {
+            self.0.fetch_add(1, Ordering::SeqCst);
+        }
+
+        fn as_any(&self) -> &dyn std::any::Any {
+            self
+        }
+
+        fn arc_any(self: Arc<Self>) -> Arc<dyn std::any::Any + Send + Sync> {
+            self
+        }
+    }
+
+    /// A kind whose catalogs wait for each other, so two routes are built before either is kept.
+    struct Meeting {
+        barrier: Barrier,
+        built: AtomicUsize,
+        stopped: Arc<AtomicUsize>,
+    }
+
+    impl ProviderKind for Meeting {
+        fn kind(&self) -> ProviderKindName {
+            ProviderKindName::Openrouter
+        }
+
+        fn label(&self) -> &str {
+            "Stub"
+        }
+
+        fn field(&self) -> KindField {
+            KindField::Key
+        }
+
+        fn check<'a>(
+            &'a self,
+            _entry: &'a EntryFields,
+            _secret: Option<&'a str>,
+            _deps: &'a KindDeps,
+            _cancel: &'a CancelToken,
+        ) -> BoxFuture<'a, Result<KeyState, KindError>> {
+            Box::pin(async { Ok(KeyState::None(KeyStateNone {})) })
+        }
+
+        fn transport(
+            &self,
+            _entry: &EntryFields,
+            key: Arc<dyn KeySource>,
+            deps: &KindDeps,
+        ) -> Result<Arc<Transport>, String> {
+            Ok(Arc::new(Transport::new(TransportDeps {
+                fetch: Arc::clone(&deps.fetch),
+                scheduler: Arc::clone(&deps.scheduler),
+                key,
+                log: Box::new(|_| {}),
+                base_url: "https://stub.test".to_owned(),
+                label: "Stub".to_owned(),
+                user_agent: "tests/1.0".to_owned(),
+                errors: Arc::new(OPENROUTER_CHAT),
+                auth: Auth::Optional,
+                idle_ms: None,
+                max_bytes: None,
+            })))
+        }
+
+        fn catalog(
+            &self,
+            _entry: &ProviderEntry,
+            _transport: Arc<Transport>,
+            _deps: CatalogDeps,
+        ) -> Arc<dyn EntryCatalog> {
+            self.built.fetch_add(1, Ordering::SeqCst);
+            self.barrier.wait();
+            Arc::new(Stopping(Arc::clone(&self.stopped)))
+        }
+
+        fn codec(
+            &self,
+            _view: Option<&ModelView>,
+            _entry: &EntryFields,
+            _deps: &KindDeps,
+        ) -> Box<dyn Codec> {
+            Box::new(OPENROUTER_CHAT)
+        }
+
+        fn failure(
+            &self,
+            failure: &Failure,
+            view: Option<&ModelView>,
+        ) -> nyaaai_contract::shapes::provider::Disposition {
+            disposition_of(failure, view)
+        }
+    }
+
+    #[test]
+    fn two_tasks_making_one_route_keep_the_first_and_stop_the_extra() {
+        let wheel = Arc::new(TimerWheel::new(0));
+        let scheduler = Arc::new(FakeScheduler::new(Arc::clone(&wheel)));
+        let fetch = Arc::new(ScriptedFetch::new(Vec::new(), wheel));
+        let stopped = Arc::new(AtomicUsize::new(0));
+        let kind = Arc::new(Meeting {
+            barrier: Barrier::new(2),
+            built: AtomicUsize::new(0),
+            stopped: Arc::clone(&stopped),
+        });
+        let entry = ProviderEntry {
+            id: "a".to_owned(),
+            kind: ProviderKindName::Openrouter,
+            label: "First".to_owned(),
+            plan: None,
+            url: None,
+            extra_usage: None,
+        };
+        let resolver = ModelResolver::new(ResolverDeps {
+            list: Arc::new(ScriptedProviderList::new(vec![entry.clone()])),
+            keys: Arc::new(ScriptedEntryKeys::new()),
+            registry: Arc::new(ScriptedModelRegistry::empty()),
+            kinds: vec![kind.clone() as Arc<dyn ProviderKind>],
+            kind_deps: Arc::new(move |_| KindDeps {
+                fetch: fetch.clone(),
+                scheduler: scheduler.clone(),
+                log: Arc::new(|_| {}),
+                user_agent: "tests/1.0".to_owned(),
+                base_url: None,
+            }),
+            zdr_only: Arc::new(|| true),
+            refreshed: None,
+        });
+        let routes: Vec<Route> = std::thread::scope(|scope| {
+            let first = scope.spawn(|| resolver.route(&entry));
+            let second = scope.spawn(|| resolver.route(&entry));
+            vec![
+                first.join().expect("joined").expect("a route"),
+                second.join().expect("joined").expect("a route"),
+            ]
+        });
+        assert_eq!(kind.built.load(Ordering::SeqCst), 2);
+        assert!(Arc::ptr_eq(&routes[0].catalog, &routes[1].catalog));
+        assert_eq!(stopped.load(Ordering::SeqCst), 1);
+        resolver.dispose();
+        assert_eq!(stopped.load(Ordering::SeqCst), 2);
     }
 }

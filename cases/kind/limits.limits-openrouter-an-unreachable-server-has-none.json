@@ -24,7 +24,6 @@
 	"expected": {
 		"present": true,
 		"limits": null,
-		"thrown": null,
 		"requests": [
 			{
 				"method": "GET",

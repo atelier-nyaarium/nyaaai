@@ -1,0 +1,112 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routes",
+	"name": "left-rows-with-an-entry-that-leaves",
+	"input": {
+		"entries": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "First"
+			},
+			{
+				"id": "b",
+				"kind": "openrouter",
+				"label": "Second"
+			}
+		],
+		"answers": {
+			"a": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			},
+			"b": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"failing": [],
+		"rows": [
+			"openai/gpt-6-luna",
+			"google/gemini-3.8-flash",
+			"openai/gpt-oss-120b"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama",
+			"lmstudio",
+			"llamacpp",
+			"compatible"
+		],
+		"listings": {},
+		"zdrOnly": true,
+		"steps": [
+			{
+				"kind": "during",
+				"changes": [
+					{
+						"kind": "list",
+						"entries": [
+							{
+								"id": "b",
+								"kind": "openrouter",
+								"label": "Second"
+							}
+						]
+					}
+				],
+				"call": {
+					"kind": "rows",
+					"use": "chat"
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answer": {
+					"kind": "rows",
+					"options": [
+						{
+							"key": "openai/gpt-6-luna",
+							"status": "ok",
+							"via": {
+								"entry": "b",
+								"label": "Second"
+							}
+						},
+						{
+							"key": "google/gemini-3.8-flash",
+							"status": "ok",
+							"via": {
+								"entry": "b",
+								"label": "Second"
+							}
+						},
+						{
+							"key": "openai/gpt-oss-120b",
+							"status": "ok",
+							"via": {
+								"entry": "b",
+								"label": "Second"
+							}
+						}
+					]
+				},
+				"built": 1,
+				"disposed": 0
+			}
+		],
+		"transports": [
+			"Second"
+		],
+		"stopped": [
+			"Second"
+		],
+		"refreshed": [],
+		"keyReads": 2
+	}
+}

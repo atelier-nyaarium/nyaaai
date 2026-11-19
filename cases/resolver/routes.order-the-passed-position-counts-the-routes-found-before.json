@@ -125,7 +125,6 @@
 			"Third"
 		],
 		"refreshed": [],
-		"keyReads": 6,
-		"listReads": 2
+		"keyReads": 6
 	}
 }

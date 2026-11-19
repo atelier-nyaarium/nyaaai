@@ -7,8 +7,6 @@ use nyaaai_testkit::cases::{Outcome, block_on};
 use std::sync::Arc;
 
 use nyaaai_agentic::codec::Mode;
-use nyaaai_agentic::kinds::opencode::kind::opencode_kind;
-use nyaaai_agentic::kinds::openrouter::kind::openrouter_kind;
 use nyaaai_agentic::models::view::{codec_facts_of, unknown_view};
 use nyaaai_agentic::provider::kind::{
     CatalogDeps, KINDS, ProviderKind, Route, kind_lines, provider_view as view_of,
@@ -131,13 +129,13 @@ fn standing_at(now_ms: i64) -> Arc<FakeScheduler> {
     Arc::new(FakeScheduler::new(Arc::new(TimerWheel::new(now_ms))))
 }
 
-/// A hosted kind; the scheduler dates what its codec and browser read.
-fn hosted_kind(name: ProviderKindName, scheduler: Arc<FakeScheduler>) -> Arc<dyn ProviderKind> {
-    if name == ProviderKindName::Openrouter {
-        openrouter_kind(scheduler)
-    } else {
-        opencode_kind(scheduler)
-    }
+/// A hosted kind of the table.
+fn hosted_kind(name: ProviderKindName) -> Arc<dyn ProviderKind> {
+    KINDS
+        .iter()
+        .find(|held| held.kind() == name)
+        .map(Arc::clone)
+        .expect("the table holds both hosted kinds")
 }
 
 fn hosted_entry(name: ProviderKindName, label: &str, plan: Option<ProviderPlan>) -> EntryFields {
@@ -186,7 +184,7 @@ pub fn provider_view(input: KindProviderViewInput) -> Outcome<KindProviderViewRe
 
 pub fn facts(input: KindFactsInput) -> Outcome<KindFactsResult> {
     let name = ProviderKindName::from(&input.kind);
-    let named = hosted_kind(name, standing_at(0));
+    let named = hosted_kind(name);
     let entry = hosted_entry(name, &input.entry.label, input.entry.plan);
     Ok(KindFactsResult {
         facts: input
@@ -227,7 +225,7 @@ fn request_lines(
 pub fn check(input: KindCheckInput) -> Outcome<KindCheckResult> {
     let name = ProviderKindName::from(&input.kind);
     let net = net_of(input.start_ms, &input.exchanges);
-    let named = hosted_kind(name, Arc::clone(&net.scheduler));
+    let named = hosted_kind(name);
     let entry = hosted_entry(name, &input.entry.label, input.entry.plan);
     let mut deps = net.deps.clone();
     if let Some(base) = &input.base_url {
@@ -269,7 +267,7 @@ pub fn check(input: KindCheckInput) -> Outcome<KindCheckResult> {
 pub fn limits(input: KindLimitsInput) -> Outcome<KindLimitsResult> {
     let name = ProviderKindName::from(&input.kind);
     let net = net_of(input.start_ms, &input.exchanges);
-    let named = hosted_kind(name, Arc::clone(&net.scheduler));
+    let named = hosted_kind(name);
     let entry = hosted_entry(name, &input.entry.label, input.entry.plan);
     let transport = named.transport(&entry, keys_of(&input.stored)?, &net.deps)?;
     let token = caller_token(
@@ -288,7 +286,6 @@ pub fn limits(input: KindLimitsInput) -> Outcome<KindLimitsResult> {
     Ok(KindLimitsResult {
         present,
         limits,
-        thrown: None,
         requests: request_lines(&net.played)
             .into_iter()
             .map(
@@ -306,7 +303,9 @@ pub fn limits(input: KindLimitsInput) -> Outcome<KindLimitsResult> {
 
 pub fn codec(input: KindCodecInput) -> Outcome<KindCodecResult> {
     let name = ProviderKindName::from(&input.kind);
-    let named = hosted_kind(name, standing_at(input.now_ms));
+    let named = hosted_kind(name);
+    let mut deps = net_of(0, &[]).deps;
+    deps.scheduler = standing_at(input.now_ms);
     let view = match &input.view {
         None => None,
         Some(held) => {
@@ -322,7 +321,11 @@ pub fn codec(input: KindCodecInput) -> Outcome<KindCodecResult> {
             Some(view)
         }
     };
-    let codec = named.codec(view.as_ref(), &hosted_entry(name, &input.label, None));
+    let codec = named.codec(
+        view.as_ref(),
+        &hosted_entry(name, &input.label, None),
+        &deps,
+    );
     let facts = codec_facts_of(view.as_ref());
     let mode = match input.mode {
         KindCodecInputMode::Stream => Mode::Stream,
@@ -356,7 +359,7 @@ pub fn codec(input: KindCodecInput) -> Outcome<KindCodecResult> {
 
 pub fn disposition(input: KindDispositionInput) -> Outcome<KindDispositionResult> {
     let name = ProviderKindName::from(&input.kind);
-    let named = hosted_kind(name, standing_at(0));
+    let named = hosted_kind(name);
     let row = row_of_key("openai/gpt-6-luna")?;
     Ok(KindDispositionResult {
         dispositions: input
@@ -385,7 +388,7 @@ type Answer = KindRouteResultStepsItemAnswer;
 pub fn route(input: KindRouteInput) -> Outcome<KindRouteResult> {
     let name = ProviderKindName::from(&input.kind);
     let net = network_of(input.start_ms, &input.exchanges, None)?;
-    let named = hosted_kind(name, Arc::clone(&net.scheduler));
+    let named = hosted_kind(name);
     let fields = hosted_entry(name, &input.entry.label, input.entry.plan);
     let entry = ProviderEntry {
         id: "e1".to_owned(),
@@ -416,9 +419,10 @@ pub fn route(input: KindRouteInput) -> Outcome<KindRouteResult> {
         transport: Arc::clone(&transport),
         catalog: Arc::clone(&catalog),
     };
-    let (Some(browser), Some(tester)) =
-        (named.browse(&entry, &route), named.tester(&entry, &route))
-    else {
+    let (Some(browser), Some(tester)) = (
+        named.browse(&entry, &route, &deps),
+        named.tester(&entry, &route, &deps),
+    ) else {
         return Err("The kind has no browser or tester.".to_owned());
     };
     let mut steps = Vec::new();

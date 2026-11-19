@@ -1,0 +1,90 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routes",
+	"name": "keys-a-url-kind-whose-store-cannot-be-read-is-unreachable",
+	"input": {
+		"entries": [
+			{
+				"id": "lab",
+				"kind": "ollama",
+				"label": "Lab",
+				"url": "http://lab.local:11434"
+			}
+		],
+		"answers": {
+			"lab": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"failing": [
+			"lab"
+		],
+		"rows": [
+			"ollama:qwen"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama",
+			"lmstudio",
+			"llamacpp",
+			"compatible"
+		],
+		"listings": {},
+		"zdrOnly": true,
+		"steps": [
+			{
+				"kind": "routes",
+				"model": "ollama:qwen",
+				"use": "chat"
+			},
+			{
+				"kind": "rows",
+				"use": "chat"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answer": {
+					"kind": "routes",
+					"unresolved": {
+						"ok": false,
+						"key": "ollama:qwen",
+						"refusal": "unreachable",
+						"entry": "Lab"
+					},
+					"candidates": [],
+					"passed": []
+				},
+				"built": 0,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "rows",
+					"options": [
+						{
+							"key": "ollama:qwen",
+							"status": "ok",
+							"via": null
+						}
+					]
+				},
+				"built": 1,
+				"disposed": 0
+			}
+		],
+		"transports": [
+			"Lab http://lab.local:11434"
+		],
+		"stopped": [
+			"Lab http://lab.local:11434"
+		],
+		"refreshed": [],
+		"keyReads": 0
+	}
+}

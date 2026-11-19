@@ -86,7 +86,11 @@ export function reportOf(models: unknown, zdr: unknown, rows: readonly ModelRow[
 	for (const row of rows) {
 		const id = row.bindings["openrouter"]?.id;
 		if (id === undefined) continue;
-		const created = entries.get(id)?.created ?? 0;
+		const created = entries.get(id)?.created ?? undefined;
+		if (created === undefined) {
+			lines.push(`${row.key}: its date is unknown, newer models are not listed`);
+			continue;
+		}
 		const newer = [...entries.values()]
 			.filter(
 				(entry) =>

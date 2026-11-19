@@ -101,10 +101,15 @@
 			{
 				"answer": {
 					"kind": "sent",
-					"transport": "First",
 					"zdrOnly": true,
-					"key": null,
-					"path": "/chat/completions"
+					"url": null,
+					"authorization": null,
+					"failure": {
+						"category": "keyMissing",
+						"status": "keyMissing",
+						"message": "No OpenRouter key is set."
+					},
+					"thrown": null
 				},
 				"built": 2,
 				"disposed": 0
@@ -119,7 +124,6 @@
 			"Second"
 		],
 		"refreshed": [],
-		"keyReads": 3,
-		"listReads": 2
+		"keyReads": 3
 	}
 }

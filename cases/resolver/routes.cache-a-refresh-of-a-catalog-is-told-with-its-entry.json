@@ -122,10 +122,15 @@
 			"Second"
 		],
 		"refreshed": [
-			"a",
-			"b"
+			{
+				"entry": "a",
+				"label": "First"
+			},
+			{
+				"entry": "b",
+				"label": "Second"
+			}
 		],
-		"keyReads": 2,
-		"listReads": 1
+		"keyReads": 2
 	}
 }

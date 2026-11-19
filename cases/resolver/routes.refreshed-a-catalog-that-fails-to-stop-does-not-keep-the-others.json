@@ -2,7 +2,7 @@
 	"format": 2,
 	"type": "function",
 	"kind": "resolver.routes",
-	"name": "keys-a-failing-read-is-a-missing-key",
+	"name": "refreshed-a-catalog-that-fails-to-stop-does-not-keep-the-others",
 	"input": {
 		"entries": [
 			{
@@ -26,9 +26,7 @@
 				"key": "key-0123456789abcdef"
 			}
 		},
-		"failing": [
-			"a"
-		],
+		"failing": [],
 		"rows": [
 			"openai/gpt-6-luna",
 			"google/gemini-3.8-flash",
@@ -44,11 +42,19 @@
 		],
 		"listings": {},
 		"zdrOnly": true,
+		"disposeFails": [
+			"a",
+			"b"
+		],
 		"steps": [
 			{
 				"kind": "routes",
 				"model": "openai/gpt-6-luna",
 				"use": "chat"
+			},
+			{
+				"kind": "list",
+				"entries": []
 			}
 		]
 	},
@@ -60,6 +66,14 @@
 					"unresolved": null,
 					"candidates": [
 						{
+							"entry": "a",
+							"kind": "openrouter",
+							"binding": "openai/gpt-6-luna",
+							"status": "ok",
+							"zdrOnly": true,
+							"path": "/chat/completions"
+						},
+						{
 							"entry": "b",
 							"kind": "openrouter",
 							"binding": "openai/gpt-6-luna",
@@ -68,27 +82,28 @@
 							"path": "/chat/completions"
 						}
 					],
-					"passed": [
-						{
-							"entry": "a",
-							"label": "First",
-							"reason": "keyMissing",
-							"before": 0
-						}
-					]
+					"passed": []
 				},
-				"built": 1,
+				"built": 2,
 				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "changed"
+				},
+				"built": 2,
+				"disposed": 2
 			}
 		],
 		"transports": [
+			"First",
 			"Second"
 		],
 		"stopped": [
+			"First",
 			"Second"
 		],
 		"refreshed": [],
-		"keyReads": 1,
-		"listReads": 1
+		"keyReads": 2
 	}
 }

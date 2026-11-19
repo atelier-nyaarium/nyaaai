@@ -199,7 +199,6 @@
 			"First"
 		],
 		"refreshed": [],
-		"keyReads": 4,
-		"listReads": 8
+		"keyReads": 4
 	}
 }

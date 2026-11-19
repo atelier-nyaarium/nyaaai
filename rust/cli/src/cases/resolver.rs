@@ -1,46 +1,53 @@
 //! Resolver cases.
 //!
-//! The resolver runs over stub kinds: a stub kind builds a real `Transport` over a fetch that
-//! answers with what it saw, a codec that carries it back, and a catalog that lists what the
-//! script says. The real kinds are cased by `kind.*`.
+//! The resolver runs over the real kinds, each with a wrapped catalog that lists what the script
+//! says and records when it is stopped. The kinds' own transports talk to a host that answers
+//! every request and records its URL and `Authorization`, so a key's shape and the asked URL show.
 
 use std::collections::HashMap;
+use std::future::Future;
+use std::pin::Pin;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
+use std::task::Poll;
 
 use nyaaai_agentic::codec::{Codec, Mode, StreamDecoder};
-use nyaaai_agentic::dialects::openrouter::OPENROUTER_CHAT;
 use nyaaai_agentic::failure::ProviderError;
 use nyaaai_agentic::kinds::fetcher::Aborted;
 use nyaaai_agentic::models::view::unknown_view;
 use nyaaai_agentic::provider::kind::{
-    Browser, CatalogDeps, EntryCatalog, KindDeps, KindError, KindField, ProviderKind, Route, Tester,
+    CatalogDeps, EntryCatalog, KINDS, KindDeps, KindError, KindField, ProviderKind,
 };
 use nyaaai_agentic::provider::resolver::{
     Catalog, ModelResolver, Planned, Resolution, Resolved, ResolverDeps, ServedByDeps,
     key_source_of, reach_of, served_by as plan_served,
 };
-use nyaaai_agentic::step::reply_text;
-use nyaaai_agentic::transport::{Auth, KeySource, Transport, TransportDeps};
+use nyaaai_agentic::transport::{KeySource, Transport, TransportError, static_key};
 use nyaaai_contract::cancel::{CancelToken, Unsubscribe};
 use nyaaai_contract::entry_keys::{EntryKeys, KeyAnswer};
 use nyaaai_contract::fetch::{Chunks, Fetch, FetchError, FetchRequest, FetchResponse};
 use nyaaai_contract::future::BoxFuture;
-use nyaaai_contract::json::{Object, Value, parse_json};
+use nyaaai_contract::json::{Value, parse_json, stringify_json};
 use nyaaai_contract::model_registry::ModelRegistry;
+use nyaaai_contract::provider_list::ProviderList;
 use nyaaai_contract::shape::Shape;
-use nyaaai_contract::shapes::model::{ModelRow, ModelUse, ModelView, ModelViewStatus};
+use nyaaai_contract::shapes::model::{ModelRow, ModelUse, ModelView, ModelViewStatus, Via};
 use nyaaai_contract::shapes::provider::{EntryFields, ProviderEntry, ProviderKindName};
-use nyaaai_contract::shapes::step::{CanonicalRequest, Failure, HeaderList, StepResult};
+use nyaaai_contract::shapes::step::{
+    CanonicalRequest, Failure, HeaderList, SseItem, StepEvent, StepResult,
+};
 use nyaaai_testkit::cases::{Outcome, block_on};
 use nyaaai_testkit::scheduler::{FakeScheduler, TimerWheel};
 use nyaaai_testkit::scripted_ports::{
     ScriptedEntryKeys, ScriptedModelRegistry, ScriptedProviderList,
 };
+use tokio::sync::oneshot;
 
 use super::catalog::{convert, row_of_key};
 use super::local::local_row_of;
 use super::shapes::*;
+
+const KEY: &str = "key-0123456789abcdef";
 
 ////////////////////////////////
 //  Shared pieces
@@ -79,21 +86,29 @@ fn answer_of<T: Shape>(held: &T) -> Outcome<KeyAnswer> {
     })
 }
 
-/// The name a transport is told by.
-fn label_of(label: &str, plan: Option<&str>, url: Option<&str>) -> String {
+/// The name a route is told by.
+fn entry_label(entry: &ProviderEntry) -> String {
     format!(
-        "{label}{}{}",
-        plan.map_or(String::new(), |plan| format!("/{plan}")),
-        url.map_or(String::new(), |url| format!(" {url}")),
+        "{}{}{}",
+        entry.label,
+        entry
+            .plan
+            .map_or(String::new(), |plan| format!("/{}", plan.as_str())),
+        entry
+            .url
+            .as_deref()
+            .map_or(String::new(), |url| format!(" {url}")),
     )
 }
 
-fn entry_label(entry: &ProviderEntry) -> String {
-    label_of(
-        &entry.label,
-        entry.plan.map(|plan| plan.as_str()),
-        entry.url.as_deref(),
-    )
+fn fields_of(entry: &ProviderEntry) -> EntryFields {
+    EntryFields {
+        kind: entry.kind,
+        label: entry.label.clone(),
+        plan: entry.plan,
+        url: entry.url.clone(),
+        extra_usage: entry.extra_usage,
+    }
 }
 
 fn request(model: &str) -> Outcome<CanonicalRequest> {
@@ -105,13 +120,12 @@ fn request(model: &str) -> Outcome<CanonicalRequest> {
     CanonicalRequest::decode(&value).map_err(|refused| refused.to_string())
 }
 
-////////////////////////////////
-//  The stubs
-
-/// What the stub transport saw, carried back through the codec.
-struct Echo {
-    label: String,
+fn locked<T>(held: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
+    held.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
 }
+
+////////////////////////////////
+//  The host
 
 struct Body(Option<Vec<u8>>);
 
@@ -122,89 +136,113 @@ impl Chunks for Body {
     }
 }
 
-impl Fetch for Echo {
+/// A host that answers every request with success, or with the failure it was told to, and
+/// records the URL and `Authorization` of each.
+#[derive(Default)]
+struct Host {
+    seen: Mutex<Vec<(String, Option<String>)>>,
+    next: Mutex<Option<(i64, Value)>>,
+}
+
+impl Host {
+    /// The next request answers this.
+    fn fail(&self, failure: Option<(i64, Value)>) {
+        *locked(&self.next) = failure;
+    }
+}
+
+impl Fetch for Host {
     fn fetch(
         &self,
         request: FetchRequest,
         _cancel: CancelToken,
     ) -> BoxFuture<'_, Result<FetchResponse, FetchError>> {
-        let key = request
-            .headers
-            .iter()
-            .find(|(name, _)| name == "Authorization")
-            .and_then(|(_, value)| value.strip_prefix("Bearer "))
-            .map(str::to_owned);
-        let mut seen = Object::new();
-        seen.insert("transport", Value::from(self.label.as_str()));
-        seen.insert(
-            "key",
-            key.map_or(Value::Null, |key| Value::from(key.as_str())),
-        );
-        let text = nyaaai_contract::json::stringify_json(&Value::Object(seen));
+        let header = |name: &str| {
+            request
+                .headers
+                .iter()
+                .find(|(each, _)| each == name)
+                .map(|(_, value)| value.clone())
+        };
+        locked(&self.seen).push((request.url.clone(), header("Authorization")));
+        let asked = header("Accept").unwrap_or_default();
+        let failure = locked(&self.next).take();
+        let stream = failure.is_none() && asked == "text/event-stream";
+        let (status, body) = match &failure {
+            None => (
+                200,
+                if stream {
+                    "data: {}\n\n".to_owned()
+                } else {
+                    "{}".to_owned()
+                },
+            ),
+            Some((status, body)) => (*status, stringify_json(body)),
+        };
         Box::pin(async move {
             Ok(FetchResponse {
-                status: 200,
-                headers: vec![("content-type".to_owned(), "application/json".to_owned())],
-                chunks: Box::new(Body(Some(text.into_bytes()))),
+                status: status as u16,
+                headers: vec![(
+                    "content-type".to_owned(),
+                    if stream {
+                        "text/event-stream"
+                    } else {
+                        "application/json"
+                    }
+                    .to_owned(),
+                )],
+                chunks: Box::new(Body(Some(body.into_bytes()))),
             })
         })
     }
 }
 
-/// The real kind's codec, carrying what the transport saw back as the reply.
-struct Carrying {
-    inner: Box<dyn Codec>,
-    sent: Mutex<(bool, String)>,
+/// A decoder that reads items and says nothing.
+struct Silent;
+
+impl StreamDecoder for Silent {
+    fn push(&mut self, _item: &SseItem, _events: &mut Vec<StepEvent>) -> Result<(), ProviderError> {
+        Ok(())
+    }
+
+    fn over(&self) -> bool {
+        false
+    }
+
+    fn end(&mut self, _events: &mut Vec<StepEvent>) -> Result<(), ProviderError> {
+        Ok(())
+    }
 }
 
-impl Codec for Carrying {
+/// A candidate's codec, noting the switch it is given; its reads carry nothing.
+struct Probe<'a> {
+    inner: &'a dyn Codec,
+    zdr_only: Mutex<Option<bool>>,
+}
+
+impl Codec for Probe<'_> {
     fn encode(
         &self,
         request: &CanonicalRequest,
         mode: Mode,
     ) -> Result<nyaaai_contract::shapes::step::Encoded, String> {
-        let encoded = self.inner.encode(request, mode)?;
-        *self.sent.lock().unwrap_or_else(|held| held.into_inner()) =
-            (request.zdr_only, encoded.path.clone());
-        Ok(encoded)
+        *locked(&self.zdr_only) = Some(request.zdr_only);
+        self.inner.encode(request, mode)
     }
 
     fn stream(&self) -> Box<dyn StreamDecoder + '_> {
-        self.inner.stream()
+        Box::new(Silent)
     }
 
-    fn complete(&self, body: &Value) -> Result<StepResult, ProviderError> {
-        let (zdr_only, path) = self
-            .sent
-            .lock()
-            .unwrap_or_else(|held| held.into_inner())
-            .clone();
-        let mut seen = Object::new();
-        for name in ["transport", "key"] {
-            seen.insert(
-                name,
-                body.as_object()
-                    .and_then(|fields| fields.get(name))
-                    .cloned()
-                    .unwrap_or(Value::Null),
-            );
-        }
-        seen.insert("zdrOnly", Value::Bool(zdr_only));
-        seen.insert("path", Value::from(path.as_str()));
-        let text = nyaaai_contract::json::stringify_json(&Value::Object(seen));
-        let mut part = Object::new();
-        part.insert("kind", Value::from("text"));
-        part.insert("text", Value::from(text.as_str()));
-        let mut result = Object::new();
-        result.insert("parts", Value::Array(vec![Value::Object(part)]));
-        result.insert("finish", Value::from("stop"));
-        result.insert("serving", Value::Object(Object::new()));
-        StepResult::decode(&Value::Object(result)).map_err(|refused| {
-            nyaaai_agentic::failure::failed(
-                nyaaai_contract::shapes::step::FailureCategory::Stream,
-                &refused.to_string(),
-                nyaaai_agentic::failure::FailureExtra::default(),
-            )
+    fn complete(&self, _body: &Value) -> Result<StepResult, ProviderError> {
+        Ok(StepResult {
+            parts: Vec::new(),
+            finish: nyaaai_contract::shapes::step::FinishReason::Stop,
+            usage: None,
+            serving: nyaaai_contract::shapes::step::Serving {
+                host: None,
+                generation_id: None,
+            },
         })
     }
 
@@ -212,6 +250,61 @@ impl Codec for Carrying {
         self.inner.failure(status, body, headers)
     }
 }
+
+type Sent = ResolverRoutesResultStepsItemAnswerSent;
+
+/// A request through a route: what its codec was given and what the host saw.
+async fn send_through(
+    found: &Resolved,
+    host: &Host,
+    mode: Option<bool>,
+    fail: Option<(i64, Value)>,
+) -> Outcome<Sent> {
+    let probe = Probe {
+        inner: &*found.codec,
+        zdr_only: Mutex::new(None),
+    };
+    let before = locked(&host.seen).len();
+    host.fail(fail);
+    let token = CancelToken::new();
+    let asked = request(&found.key)?;
+    let outcome: Result<(), TransportError> = if mode == Some(true) {
+        let mut stream = found.transport.stream(&probe, asked, &token);
+        loop {
+            match stream.next().await {
+                Ok(Some(_)) => {}
+                Ok(None) => break Ok(()),
+                Err(error) => break Err(error),
+            }
+        }
+    } else {
+        found
+            .transport
+            .complete(&probe, &asked, &token)
+            .await
+            .map(|_| ())
+    };
+    host.fail(None);
+    let (failure, thrown) = match outcome {
+        Ok(()) => (None, None),
+        Err(TransportError::Provider(held)) => (Some((*held.failure).clone()), None),
+        Err(error) => (None, Some(error.to_string())),
+    };
+    let sent = locked(&host.seen)
+        .get(before..)
+        .and_then(|each| each.last().cloned());
+    let zdr_only = *locked(&probe.zdr_only);
+    Ok(Sent {
+        zdr_only,
+        url: sent.as_ref().map(|(url, _)| url.clone()),
+        authorization: sent.and_then(|(_, authorization)| authorization),
+        failure,
+        thrown,
+    })
+}
+
+////////////////////////////////
+//  The stubs
 
 /// What a catalog lists of a row for an entry.
 #[derive(Clone, Copy)]
@@ -228,14 +321,12 @@ struct Listing {
 
 #[derive(Default)]
 struct Hub {
-    transports: Mutex<Vec<String>>,
+    /// Routes made in the current step, by entry id and label.
+    made: Mutex<Vec<(String, String)>>,
     stopped: Mutex<Vec<String>>,
     refreshes: Mutex<HashMap<String, Arc<dyn Fn() + Send + Sync>>>,
     listings: HashMap<String, HashMap<String, Listing>>,
-}
-
-fn locked<T>(held: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
-    held.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
+    dispose_fails: Vec<String>,
 }
 
 struct StubCatalog {
@@ -273,13 +364,10 @@ impl EntryCatalog for StubCatalog {
                     Some(held) if zdr_only => held.status,
                     Some(held) => held.when_zdr_off.unwrap_or(held.status),
                 };
-                match status {
-                    Listed::Unlisted => {}
-                    Listed::Status(status) => {
-                        let mut view = unknown_view(&row);
-                        view.status = status;
-                        views.push(view);
-                    }
+                if let Listed::Status(status) = status {
+                    let mut view = unknown_view(&row);
+                    view.status = status;
+                    views.push(view);
                 }
             }
             Ok(views)
@@ -288,6 +376,9 @@ impl EntryCatalog for StubCatalog {
 
     fn dispose(&self) {
         locked(&self.hub.stopped).push(entry_label(&self.entry));
+        if self.hub.dispose_fails.contains(&self.entry.id) {
+            std::panic::resume_unwind(Box::new("Stopping failed."));
+        }
     }
 
     fn as_any(&self) -> &dyn std::any::Any {
@@ -299,7 +390,7 @@ impl EntryCatalog for StubCatalog {
     }
 }
 
-/// A real kind's codec and field, with a stub transport and catalog.
+/// The real kind with a stub catalog; its transport is the kind's own.
 struct Stub {
     real: Arc<dyn ProviderKind>,
     hub: Arc<Hub>,
@@ -334,27 +425,7 @@ impl ProviderKind for Stub {
         key: Arc<dyn KeySource>,
         deps: &KindDeps,
     ) -> Result<Arc<Transport>, String> {
-        let label = label_of(
-            &entry.label,
-            entry.plan.map(|plan| plan.as_str()),
-            entry.url.as_deref(),
-        );
-        locked(&self.hub.transports).push(label.clone());
-        Ok(Arc::new(Transport::new(TransportDeps {
-            fetch: Arc::new(Echo {
-                label: label.clone(),
-            }),
-            scheduler: Arc::clone(&deps.scheduler),
-            key,
-            log: Box::new(|_| {}),
-            base_url: "https://stub.test".to_owned(),
-            label,
-            user_agent: "cases/1.0".to_owned(),
-            errors: Arc::new(OPENROUTER_CHAT),
-            auth: Auth::Optional,
-            idle_ms: None,
-            max_bytes: None,
-        })))
+        self.real.transport(entry, key, deps)
     }
 
     fn catalog(
@@ -363,6 +434,7 @@ impl ProviderKind for Stub {
         _transport: Arc<Transport>,
         deps: CatalogDeps,
     ) -> Arc<dyn EntryCatalog> {
+        locked(&self.hub.made).push((entry.id.clone(), entry_label(entry)));
         locked(&self.hub.refreshes).insert(entry.id.clone(), Arc::clone(&deps.refreshed));
         Arc::new(StubCatalog {
             name: self.real.kind(),
@@ -372,19 +444,13 @@ impl ProviderKind for Stub {
         })
     }
 
-    fn browse(&self, _entry: &ProviderEntry, _route: &Route) -> Option<Box<dyn Browser>> {
-        None
-    }
-
-    fn tester(&self, _entry: &ProviderEntry, _route: &Route) -> Option<Box<dyn Tester>> {
-        None
-    }
-
-    fn codec(&self, view: Option<&ModelView>, entry: &EntryFields) -> Box<dyn Codec> {
-        Box::new(Carrying {
-            inner: self.real.codec(view, entry),
-            sent: Mutex::new((false, String::new())),
-        })
+    fn codec(
+        &self,
+        view: Option<&ModelView>,
+        entry: &EntryFields,
+        deps: &KindDeps,
+    ) -> Box<dyn Codec> {
+        self.real.codec(view, entry, deps)
     }
 
     fn failure(
@@ -396,22 +462,24 @@ impl ProviderKind for Stub {
     }
 }
 
-fn stub_of(name: ProviderKindName, hub: &Arc<Hub>) -> Outcome<Arc<dyn ProviderKind>> {
-    let real = nyaaai_agentic::provider::kind::KINDS
+fn real_of(name: ProviderKindName) -> Outcome<Arc<dyn ProviderKind>> {
+    KINDS
         .iter()
         .find(|held| held.kind() == name)
-        .ok_or_else(|| format!("No {} kind.", name.as_str()))?;
+        .map(Arc::clone)
+        .ok_or_else(|| format!("No {} kind.", name.as_str()))
+}
+
+fn stub_of(name: ProviderKindName, hub: &Arc<Hub>) -> Outcome<Arc<dyn ProviderKind>> {
     Ok(Arc::new(Stub {
-        real: Arc::clone(real),
+        real: real_of(name)?,
         hub: Arc::clone(hub),
     }))
 }
 
-fn deps_of(scheduler: Arc<FakeScheduler>) -> KindDeps {
+fn deps_of(host: &Arc<Host>, scheduler: Arc<FakeScheduler>) -> KindDeps {
     KindDeps {
-        fetch: Arc::new(Echo {
-            label: String::new(),
-        }),
+        fetch: host.clone(),
         scheduler,
         log: Arc::new(|_| {}),
         user_agent: "cases/1.0".to_owned(),
@@ -419,22 +487,34 @@ fn deps_of(scheduler: Arc<FakeScheduler>) -> KindDeps {
     }
 }
 
-fn scheduler_of() -> Arc<FakeScheduler> {
-    Arc::new(FakeScheduler::new(Arc::new(TimerWheel::new(0))))
+/// A key read held at its first call until it is let go.
+struct Gate {
+    reached: oneshot::Sender<()>,
+    release: oneshot::Receiver<()>,
 }
 
-/// Keys that fail to read answer none, without reading the scripted ones.
+/// The scripted keys; a failing store answers `unready`, and a read can be held.
 struct Keys {
     inner: Arc<ScriptedEntryKeys>,
     failing: Vec<String>,
+    gate: Mutex<Option<Gate>>,
 }
 
 impl EntryKeys for Keys {
     fn get(&self, id: &str) -> BoxFuture<'_, KeyAnswer> {
-        if self.failing.iter().any(|held| held == id) {
-            return Box::pin(async { KeyAnswer::None });
-        }
-        self.inner.get(id)
+        let gate = locked(&self.gate).take();
+        let id = id.to_owned();
+        Box::pin(async move {
+            if let Some(gate) = gate {
+                let _ = gate.reached.send(());
+                let _ = gate.release.await;
+            }
+            if self.failing.contains(&id) {
+                KeyAnswer::Unready
+            } else {
+                self.inner.get(&id).await
+            }
+        })
     }
 
     fn on_change(&self, listener: Box<dyn Fn(&str) + Send + Sync>) -> Unsubscribe {
@@ -506,80 +586,51 @@ impl Catalog for Standing {
     }
 }
 
-fn sent_of(result: &StepResult) -> Outcome<Object> {
-    match parse_json(&reply_text(result)) {
-        Some(Value::Object(fields)) => Ok(fields),
-        _ => Err("the stub transport did not answer".to_owned()),
-    }
-}
-
 pub fn served_by(input: ResolverServedByInput) -> Outcome<ResolverServedByResult> {
-    let hub = Arc::new(Hub::default());
-    let kind = stub_of(input.kind, &hub)?;
-    let scheduler = scheduler_of();
+    let named = real_of(input.kind)?;
+    let host = Arc::new(Host::default());
+    let deps = deps_of(
+        &host,
+        Arc::new(FakeScheduler::new(Arc::new(TimerWheel::new(0)))),
+    );
     let zdr = Arc::new(AtomicBool::new(input.zdr_only));
-    let fields = EntryFields {
-        kind: input.entry.kind,
-        label: input.entry.label.clone(),
-        plan: input.entry.plan,
-        url: input.entry.url.clone(),
-        extra_usage: input.entry.extra_usage,
-    };
-    let transport = kind.transport(&fields, Arc::new(NoKey), &deps_of(scheduler))?;
+    let transport = named.transport(&fields_of(&input.entry), Arc::new(static_key(KEY)), &deps)?;
     let live = Arc::clone(&zdr);
     let status = match &input.view {
         None => None,
         Some(held) => Some(convert::<ResolverServedByInputView, ModelViewStatus>(held)?),
     };
-    let deps = ServedByDeps {
+    let served = ServedByDeps {
         entry: input.entry.clone(),
-        kind,
+        kind: Arc::clone(&named),
         transport,
         catalog: Arc::new(Standing { status }),
+        deps,
         zdr_only: Arc::new(move || live.load(Ordering::SeqCst)),
     };
-    let routes = block_on(plan_served(&deps, &input.key, input.use_))?;
+    let routes = block_on(plan_served(&served, &input.key, input.use_))?;
     let first = routes
         .candidates
         .first()
         .ok_or_else(|| "A plan serves its entry.".to_owned())?;
     let zdr_on_resolve = first.zdr_only();
     zdr.store(input.flipped_to, Ordering::SeqCst);
-    let sent = sent_of(
-        &block_on(first.transport.complete(
-            &*first.codec,
-            &request(&input.key)?,
-            &CancelToken::new(),
-        ))?
-        .map_err(|error| error.to_string())?,
-    )?;
+    let sent = block_on(send_through(first, &host, None, None))??;
     let path = first.codec.encode(&request("m")?, Mode::Complete)?.path;
     Ok(ResolverServedByResult {
         key: routes.key.clone(),
         entry: first.entry.id.clone(),
         binding: first.binding.id.clone(),
         view: first.view.clone(),
-        path,
+        path: path.clone(),
         passed: routes.passed.clone(),
         candidates: routes.candidates.len() as i64,
         zdr_on_resolve,
         sent: ResolverServedByResultSent {
-            zdr_only: sent.get("zdrOnly") == Some(&Value::Bool(true)),
-            path: sent
-                .get("path")
-                .and_then(Value::as_str)
-                .unwrap_or_default()
-                .to_owned(),
+            zdr_only: sent.zdr_only.unwrap_or(false),
+            path,
         },
     })
-}
-
-struct NoKey;
-
-impl KeySource for NoKey {
-    fn get(&self) -> BoxFuture<'_, Option<String>> {
-        Box::pin(async { None })
-    }
 }
 
 fn listed_of<T: Shape>(held: &T) -> Outcome<Listed> {
@@ -615,211 +666,6 @@ fn candidate_of(resolved: &Resolved) -> Outcome<Candidate> {
 
 type Answer = ResolverRoutesResultStepsItemAnswer;
 
-pub fn routes(input: ResolverRoutesInput) -> Outcome<ResolverRoutesResult> {
-    let scheduler = scheduler_of();
-    let scripted = Arc::new(ScriptedEntryKeys::new());
-    for (id, answer) in input.answers.iter() {
-        scripted.set(id, answer_of(answer)?);
-    }
-    let keys = Arc::new(Keys {
-        inner: Arc::clone(&scripted),
-        failing: input.failing.clone(),
-    });
-    let list = Arc::new(ScriptedProviderList::new(input.entries.clone()));
-    let registry = Arc::new(ScriptedModelRegistry::empty());
-    registry.set_rows(rows_for(&input.rows)?);
-    let mut listings: HashMap<String, HashMap<String, Listing>> = HashMap::new();
-    for (entry, rows) in input.listings.iter() {
-        let mut held = HashMap::new();
-        for (key, listing) in rows.iter() {
-            held.insert(
-                key.to_owned(),
-                Listing {
-                    status: listed_of(&listing.status)?,
-                    when_zdr_off: match &listing.when_zdr_off {
-                        None => None,
-                        Some(off) => Some(listed_of(off)?),
-                    },
-                },
-            );
-        }
-        listings.insert(entry.to_owned(), held);
-    }
-    let hub = Arc::new(Hub {
-        listings,
-        ..Hub::default()
-    });
-    let zdr = Arc::new(AtomicBool::new(input.zdr_only));
-    let refreshed = Arc::new(Mutex::new(Vec::<String>::new()));
-    let mut kinds = Vec::new();
-    for name in ProviderKindName::ALL {
-        if input.kinds.contains(&name) {
-            kinds.push(stub_of(name, &hub)?);
-        }
-    }
-    let told = Arc::clone(&refreshed);
-    let live = Arc::clone(&zdr);
-    let resolver = ModelResolver::new(ResolverDeps {
-        list: list.clone(),
-        keys,
-        registry: registry.clone(),
-        kinds,
-        kind_deps: Arc::new({
-            let scheduler = Arc::clone(&scheduler);
-            move |_| deps_of(Arc::clone(&scheduler))
-        }),
-        zdr_only: Arc::new(move || live.load(Ordering::SeqCst)),
-        refreshed: Some(Arc::new(move |entry| locked(&told).push(entry.id.clone()))),
-    });
-    let mut held: Vec<Vec<Resolved>> = Vec::new();
-    let mut steps = Vec::new();
-    for step in &input.steps {
-        held.push(Vec::new());
-        let answer = match step {
-            ResolverRoutesInputStepsItem::Routes(each) => {
-                match block_on(resolver.routes(&each.model, each.use_))?.map_err(|e| e.0)? {
-                    Planned::Routes(routes) => {
-                        let mut candidates = Vec::new();
-                        for resolved in &routes.candidates {
-                            candidates.push(candidate_line(&candidate_of(resolved)?)?);
-                        }
-                        let passed = routes.passed.clone();
-                        if let Some(last) = held.last_mut() {
-                            *last = routes.candidates;
-                        }
-                        Answer::Routes(ResolverRoutesResultStepsItemAnswerRoutes {
-                            unresolved: None,
-                            candidates,
-                            passed,
-                        })
-                    }
-                    Planned::Unresolved(unresolved) => {
-                        Answer::Routes(ResolverRoutesResultStepsItemAnswerRoutes {
-                            unresolved: Some(unresolved),
-                            candidates: Vec::new(),
-                            passed: Vec::new(),
-                        })
-                    }
-                }
-            }
-            ResolverRoutesInputStepsItem::Resolve(each) => {
-                match block_on(resolver.resolve(&each.model, each.use_))?.map_err(|e| e.0)? {
-                    Resolution::Resolved(resolved) => {
-                        let line = resolve_line(&candidate_of(&resolved)?)?;
-                        if let Some(last) = held.last_mut() {
-                            *last = vec![*resolved];
-                        }
-                        Answer::Resolve(ResolverRoutesResultStepsItemAnswerResolve {
-                            unresolved: None,
-                            candidate: Some(line),
-                        })
-                    }
-                    Resolution::Unresolved(unresolved) => {
-                        Answer::Resolve(ResolverRoutesResultStepsItemAnswerResolve {
-                            unresolved: Some(unresolved),
-                            candidate: None,
-                        })
-                    }
-                }
-            }
-            ResolverRoutesInputStepsItem::Rows(each) => {
-                let options = block_on(resolver.rows(each.use_))?.map_err(|e| e.0)?;
-                let mut lines = Vec::new();
-                for option in options {
-                    lines.push(ResolverRoutesResultStepsItemAnswerRowsOptionsItem {
-                        key: option.key,
-                        status: convert(&option.view.status)?,
-                        via: option.via,
-                    });
-                }
-                Answer::Rows(ResolverRoutesResultStepsItemAnswerRows { options: lines })
-            }
-            ResolverRoutesInputStepsItem::Candidates(each) => {
-                let options = block_on(resolver.candidates(each.use_))?.map_err(|e| e.0)?;
-                let mut served = Vec::new();
-                for option in options {
-                    served.push(ResolverRoutesResultStepsItemAnswerCandidatesServedItem {
-                        key: option.key,
-                        status: convert(&option.view.status)?,
-                        via: option
-                            .via
-                            .ok_or_else(|| "a served row has a via".to_owned())?,
-                    });
-                }
-                Answer::Candidates(ResolverRoutesResultStepsItemAnswerCandidates { served })
-            }
-            ResolverRoutesInputStepsItem::List(each) => {
-                list.set(each.entries.clone());
-                changed()
-            }
-            ResolverRoutesInputStepsItem::Answer(each) => {
-                scripted.set(&each.id, answer_of(&each.answer)?);
-                changed()
-            }
-            ResolverRoutesInputStepsItem::Registry(each) => {
-                registry.set_rows(rows_for(&each.rows)?);
-                changed()
-            }
-            ResolverRoutesInputStepsItem::Zdr(each) => {
-                zdr.store(each.on, Ordering::SeqCst);
-                changed()
-            }
-            ResolverRoutesInputStepsItem::Refreshed(each) => {
-                let told = locked(&hub.refreshes).get(&each.entry).cloned();
-                if let Some(told) = told {
-                    told();
-                }
-                changed()
-            }
-            ResolverRoutesInputStepsItem::Send(each) => {
-                match held
-                    .get(each.from as usize)
-                    .and_then(|from| from.get(each.candidate as usize))
-                {
-                    None => Answer::None(ResolverRoutesResultStepsItemAnswerNone {}),
-                    Some(found) => {
-                        let result = block_on(found.transport.complete(
-                            &*found.codec,
-                            &request(&found.key)?,
-                            &CancelToken::new(),
-                        ))?
-                        .map_err(|error| error.to_string())?;
-                        let sent = sent_of(&result)?;
-                        Answer::Sent(ResolverRoutesResultStepsItemAnswerSent {
-                            transport: sent
-                                .get("transport")
-                                .and_then(Value::as_str)
-                                .unwrap_or_default()
-                                .to_owned(),
-                            zdr_only: sent.get("zdrOnly") == Some(&Value::Bool(true)),
-                            key: sent.get("key").and_then(Value::as_str).map(str::to_owned),
-                            path: sent
-                                .get("path")
-                                .and_then(Value::as_str)
-                                .unwrap_or_default()
-                                .to_owned(),
-                        })
-                    }
-                }
-            }
-        };
-        steps.push(ResolverRoutesResultStepsItem {
-            answer,
-            built: locked(&hub.transports).len() as i64,
-            disposed: locked(&hub.stopped).len() as i64,
-        });
-    }
-    resolver.dispose();
-    Ok(ResolverRoutesResult {
-        steps,
-        transports: locked(&hub.transports).clone(),
-        stopped: locked(&hub.stopped).clone(),
-        refreshed: locked(&refreshed).clone(),
-        key_reads: scripted.reads() as i64,
-        list_reads: list.reads() as i64,
-    })
-}
-
 fn changed() -> Answer {
     Answer::Changed(ResolverRoutesResultStepsItemAnswerChanged {})
 }
@@ -845,5 +691,315 @@ fn resolve_line(held: &Candidate) -> Outcome<ResolverRoutesResultStepsItemAnswer
         status: convert(&held.status)?,
         zdr_only: held.zdr_only,
         path: held.path.clone(),
+    })
+}
+
+/// A nested step (a change or a call of `during`) as a step of its own.
+fn step_of<T: Shape>(held: &T) -> Outcome<ResolverRoutesInputStepsItem> {
+    ResolverRoutesInputStepsItem::decode(&held.encode()).map_err(|refused| refused.to_string())
+}
+
+/// What the script's ports and resolver stand on.
+struct Rig {
+    list: Arc<ScriptedProviderList>,
+    keys: Arc<ScriptedEntryKeys>,
+    registry: Arc<ScriptedModelRegistry>,
+    zdr: Arc<AtomicBool>,
+    host: Arc<Host>,
+    hub: Arc<Hub>,
+    resolver: ModelResolver,
+    refreshed: Arc<Mutex<Vec<Via>>>,
+    gate: Arc<Keys>,
+}
+
+impl Rig {
+    fn change(&self, step: &ResolverRoutesInputStepsItem) -> Outcome<()> {
+        match step {
+            ResolverRoutesInputStepsItem::List(each) => self.list.set(each.entries.clone()),
+            ResolverRoutesInputStepsItem::Answer(each) => {
+                self.keys.set(&each.id, answer_of(&each.answer)?);
+            }
+            ResolverRoutesInputStepsItem::Registry(each) => {
+                self.registry.set_rows(rows_for(&each.rows)?);
+            }
+            ResolverRoutesInputStepsItem::Zdr(each) => self.zdr.store(each.on, Ordering::SeqCst),
+            _ => return Err("not a change".to_owned()),
+        }
+        Ok(())
+    }
+
+    /// A call on the resolver, or a request through a candidate an earlier step gave.
+    async fn called(
+        &self,
+        held: &mut [Vec<Resolved>],
+        step: &ResolverRoutesInputStepsItem,
+    ) -> Outcome<Answer> {
+        Ok(match step {
+            ResolverRoutesInputStepsItem::Routes(each) => {
+                match self.resolver.routes(&each.model, each.use_).await {
+                    Planned::Routes(routes) => {
+                        let mut candidates = Vec::new();
+                        for resolved in &routes.candidates {
+                            candidates.push(candidate_line(&candidate_of(resolved)?)?);
+                        }
+                        let passed = routes.passed.clone();
+                        if let Some(last) = held.last_mut() {
+                            *last = routes.candidates;
+                        }
+                        Answer::Routes(ResolverRoutesResultStepsItemAnswerRoutes {
+                            unresolved: None,
+                            candidates,
+                            passed,
+                        })
+                    }
+                    Planned::Unresolved(unresolved) => {
+                        Answer::Routes(ResolverRoutesResultStepsItemAnswerRoutes {
+                            unresolved: Some(unresolved),
+                            candidates: Vec::new(),
+                            passed: Vec::new(),
+                        })
+                    }
+                }
+            }
+            ResolverRoutesInputStepsItem::Resolve(each) => {
+                match self.resolver.resolve(&each.model, each.use_).await {
+                    Resolution::Resolved(resolved) => {
+                        let line = resolve_line(&candidate_of(&resolved)?)?;
+                        if let Some(last) = held.last_mut() {
+                            *last = vec![*resolved];
+                        }
+                        Answer::Resolve(ResolverRoutesResultStepsItemAnswerResolve {
+                            unresolved: None,
+                            candidate: Some(line),
+                        })
+                    }
+                    Resolution::Unresolved(unresolved) => {
+                        Answer::Resolve(ResolverRoutesResultStepsItemAnswerResolve {
+                            unresolved: Some(unresolved),
+                            candidate: None,
+                        })
+                    }
+                }
+            }
+            ResolverRoutesInputStepsItem::Rows(each) => {
+                let mut options = Vec::new();
+                for option in self.resolver.rows(each.use_).await {
+                    options.push(ResolverRoutesResultStepsItemAnswerRowsOptionsItem {
+                        key: option.key,
+                        status: convert(&option.view.status)?,
+                        via: option.via,
+                    });
+                }
+                Answer::Rows(ResolverRoutesResultStepsItemAnswerRows { options })
+            }
+            ResolverRoutesInputStepsItem::Candidates(each) => {
+                let mut served = Vec::new();
+                for option in self.resolver.candidates(each.use_).await {
+                    served.push(ResolverRoutesResultStepsItemAnswerCandidatesServedItem {
+                        key: option.key,
+                        status: convert(&option.view.status)?,
+                        via: option
+                            .via
+                            .ok_or_else(|| "a served row has a via".to_owned())?,
+                    });
+                }
+                Answer::Candidates(ResolverRoutesResultStepsItemAnswerCandidates { served })
+            }
+            ResolverRoutesInputStepsItem::Send(each) => {
+                let Some(found) = held
+                    .get(each.from as usize)
+                    .and_then(|from| from.get(each.candidate as usize))
+                else {
+                    return Ok(Answer::None(ResolverRoutesResultStepsItemAnswerNone {}));
+                };
+                let mode = each
+                    .mode
+                    .as_ref()
+                    .map(|mode| matches!(mode, ResolverRoutesInputStepsItemSendMode::Stream));
+                let fail = each
+                    .fail
+                    .as_ref()
+                    .map(|fail| (fail.status, fail.body.clone()));
+                Answer::Sent(send_through(found, &self.host, mode, fail).await?)
+            }
+            _ => return Err("not a call".to_owned()),
+        })
+    }
+
+    async fn said(
+        &self,
+        held: &mut [Vec<Resolved>],
+        step: &ResolverRoutesInputStepsItem,
+    ) -> Outcome<Answer> {
+        match step {
+            ResolverRoutesInputStepsItem::List(_)
+            | ResolverRoutesInputStepsItem::Answer(_)
+            | ResolverRoutesInputStepsItem::Registry(_)
+            | ResolverRoutesInputStepsItem::Zdr(_) => {
+                self.change(step)?;
+                Ok(changed())
+            }
+            ResolverRoutesInputStepsItem::Refreshed(each) => {
+                let told = locked(&self.hub.refreshes).get(&each.entry).cloned();
+                if let Some(told) = told {
+                    told();
+                }
+                Ok(changed())
+            }
+            ResolverRoutesInputStepsItem::Route(each) => {
+                let thrown = self.resolver.route(&each.entry).err().map(|error| error.0);
+                Ok(Answer::Routed(ResolverRoutesResultStepsItemAnswerRouted {
+                    thrown,
+                }))
+            }
+            ResolverRoutesInputStepsItem::Dispose(_) => {
+                self.resolver.dispose();
+                Ok(changed())
+            }
+            ResolverRoutesInputStepsItem::During(each) => {
+                let changes = each
+                    .changes
+                    .iter()
+                    .map(step_of)
+                    .collect::<Outcome<Vec<_>>>()?;
+                let call = step_of(&each.call)?;
+                let (reached, mut arrived) = oneshot::channel();
+                let (release, held_back) = oneshot::channel();
+                *locked(&self.gate.gate) = Some(Gate {
+                    reached,
+                    release: held_back,
+                });
+                let mut running = Box::pin(self.called(held, &call));
+                // The call runs until it holds at its first key read, or ends.
+                let first = std::future::poll_fn(|context| {
+                    if let Poll::Ready(done) = running.as_mut().poll(context) {
+                        return Poll::Ready(Some(done));
+                    }
+                    if Pin::new(&mut arrived).poll(context).is_ready() {
+                        return Poll::Ready(None);
+                    }
+                    Poll::Pending
+                })
+                .await;
+                for change in &changes {
+                    self.change(change)?;
+                }
+                *locked(&self.gate.gate) = None;
+                let _ = release.send(());
+                match first {
+                    Some(done) => done,
+                    None => running.await,
+                }
+            }
+            other => self.called(held, other).await,
+        }
+    }
+}
+
+pub fn routes(input: ResolverRoutesInput) -> Outcome<ResolverRoutesResult> {
+    let wheel = Arc::new(TimerWheel::new(input.start_ms.unwrap_or(0)));
+    let scheduler = Arc::new(FakeScheduler::new(Arc::clone(&wheel)));
+    let scripted = Arc::new(ScriptedEntryKeys::new());
+    for (id, answer) in input.answers.iter() {
+        scripted.set(id, answer_of(answer)?);
+    }
+    let gate = Arc::new(Keys {
+        inner: Arc::clone(&scripted),
+        failing: input.failing.clone(),
+        gate: Mutex::new(None),
+    });
+    let list = Arc::new(ScriptedProviderList::new(input.entries.clone()));
+    let registry = Arc::new(ScriptedModelRegistry::empty());
+    registry.set_rows(rows_for(&input.rows)?);
+    let mut listings: HashMap<String, HashMap<String, Listing>> = HashMap::new();
+    for (entry, rows) in input.listings.iter() {
+        let mut held = HashMap::new();
+        for (key, listing) in rows.iter() {
+            held.insert(
+                key.to_owned(),
+                Listing {
+                    status: listed_of(&listing.status)?,
+                    when_zdr_off: match &listing.when_zdr_off {
+                        None => None,
+                        Some(off) => Some(listed_of(off)?),
+                    },
+                },
+            );
+        }
+        listings.insert(entry.to_owned(), held);
+    }
+    let hub = Arc::new(Hub {
+        listings,
+        dispose_fails: input.dispose_fails.clone().unwrap_or_default(),
+        ..Hub::default()
+    });
+    let zdr = Arc::new(AtomicBool::new(input.zdr_only));
+    let refreshed = Arc::new(Mutex::new(Vec::<Via>::new()));
+    let host = Arc::new(Host::default());
+    let mut kinds = Vec::new();
+    for name in ProviderKindName::ALL {
+        if input.kinds.contains(&name) {
+            kinds.push(stub_of(name, &hub)?);
+        }
+    }
+    let told = Arc::clone(&refreshed);
+    let live = Arc::clone(&zdr);
+    let deps_host = Arc::clone(&host);
+    let resolver = ModelResolver::new(ResolverDeps {
+        list: list.clone(),
+        keys: gate.clone(),
+        registry: registry.clone() as Arc<dyn ModelRegistry>,
+        kinds,
+        kind_deps: Arc::new(move |_| deps_of(&deps_host, Arc::clone(&scheduler))),
+        zdr_only: Arc::new(move || live.load(Ordering::SeqCst)),
+        refreshed: Some(Arc::new(move |entry| {
+            locked(&told).push(nyaaai_agentic::provider::resolver::via_of(entry));
+        })),
+    });
+    let rig = Rig {
+        list: Arc::clone(&list),
+        keys: Arc::clone(&scripted),
+        registry,
+        zdr,
+        host,
+        hub: Arc::clone(&hub),
+        resolver,
+        refreshed: Arc::clone(&refreshed),
+        gate,
+    };
+    let mut held: Vec<Vec<Resolved>> = Vec::new();
+    let mut steps = Vec::new();
+    let mut transports: Vec<String> = Vec::new();
+    block_on(async {
+        for step in &input.steps {
+            held.push(Vec::new());
+            let answer = rig.said(&mut held, step).await?;
+            // The routes a step made are reported in the list's order.
+            let order = rig.list.entries();
+            let position = |id: &str| {
+                order
+                    .iter()
+                    .position(|each| each.id == id)
+                    .unwrap_or(usize::MAX)
+            };
+            let mut made = std::mem::take(&mut *locked(&hub.made));
+            made.sort_by_key(|(id, _)| position(id));
+            transports.extend(made.into_iter().map(|(_, label)| label));
+            steps.push(ResolverRoutesResultStepsItem {
+                answer,
+                built: transports.len() as i64,
+                disposed: locked(&hub.stopped).len() as i64,
+            });
+        }
+        Ok::<(), String>(())
+    })??;
+    rig.resolver.dispose();
+    let refreshed = locked(&rig.refreshed).clone();
+    Ok(ResolverRoutesResult {
+        steps,
+        transports,
+        stopped: locked(&hub.stopped).clone(),
+        refreshed,
+        key_reads: scripted.reads() as i64,
     })
 }

@@ -3,7 +3,6 @@
 import { fixedText } from "@nyaaai/contract/number";
 import type { ModelView } from "@nyaaai/contract/shapes/model";
 import type { Billed, EntryFields, KeyState, ProviderPlan } from "@nyaaai/contract/shapes/provider";
-import { type Clock, systemClock } from "@nyaaai/contract/time";
 import type { Codec } from "../../codec";
 import { opencodeChat, opencodeErrors } from "../../dialects/opencode";
 import { failureOf } from "../../failure";
@@ -12,7 +11,7 @@ import { opencodeHost } from "../../hosts/opencode";
 import { messagesCodec } from "../../messages/codec";
 import { codecFactsOf } from "../../models/view";
 import { dispositionOf } from "../../provider/disposition";
-import type { ProviderKind, Route } from "../../provider/kind";
+import type { KindDeps, ProviderKind, Route } from "../../provider/kind";
 import { responsesCodec } from "../../responses/codec";
 import { staticKey, Transport } from "../../transport";
 import { OpenCodeCatalog, opencodeBrowser, opencodeTester } from "./catalog";
@@ -66,26 +65,22 @@ function billingFacts(_state: KeyState, entry: EntryFields, bill: Billed | undef
 	return facts.length === 0 ? undefined : facts.join(DOT);
 }
 
-/** The kind; the clock dates what its codecs and browser read. */
-export function opencodeKind(clock: Clock): ProviderKind {
-	const openai = opencodeHost("/openai/v1", clock);
-	const anthropic = opencodeHost("/anthropic/v1", clock);
-	const google = opencodeHost("/google/v1beta", clock);
+/** Unknown views use Chat. */
+function codecOf(view: ModelView | undefined, deps: KindDeps): Codec {
+	const clock = deps.scheduler;
+	switch (view?.api?.family) {
+		case "responses":
+			return responsesCodec(opencodeHost("/openai/v1", clock), codecFactsOf(view));
+		case "messages":
+			return messagesCodec(opencodeHost("/anthropic/v1", clock), codecFactsOf(view));
+		case "generate-content":
+			return geminiCodec(opencodeHost("/google/v1beta", clock), codecFactsOf(view));
+		default:
+			return opencodeChat(codecFactsOf(view), clock);
+	}
+}
 
-	/** Unknown views use Chat. */
-	const codecOf = (view: ModelView | undefined): Codec => {
-		switch (view?.api?.family) {
-			case "responses":
-				return responsesCodec(openai, codecFactsOf(view));
-			case "messages":
-				return messagesCodec(anthropic, codecFactsOf(view));
-			case "generate-content":
-				return geminiCodec(google, codecFactsOf(view));
-			default:
-				return opencodeChat(codecFactsOf(view), clock);
-		}
-	};
-
+export const OPENCODE: ProviderKind = (() => {
 	const self: ProviderKind = {
 		kind: "opencode",
 		label: "OpenCode",
@@ -118,9 +113,9 @@ export function opencodeKind(clock: Clock): ProviderKind {
 				userAgent: deps.userAgent,
 			}),
 		catalog: (entry, transport, deps) => new OpenCodeCatalog({ plan: planOf(entry), transport, ...deps }),
-		browse: (entry, route) => opencodeBrowser(catalogOf(route), planOf(entry), clock),
+		browse: (entry, route, deps) => opencodeBrowser(catalogOf(route), planOf(entry), deps.scheduler),
 		tester: (_entry, route) => opencodeTester(catalogOf(route)),
-		codec: codecOf,
+		codec: (view, _entry, deps) => codecOf(view, deps),
 		// notFound means unavailable.
 		failure: (failure, view) => {
 			const disposition = dispositionOf(failure, view);
@@ -130,6 +125,4 @@ export function opencodeKind(clock: Clock): ProviderKind {
 		},
 	};
 	return self;
-}
-
-export const OPENCODE: ProviderKind = opencodeKind(systemClock);
+})();

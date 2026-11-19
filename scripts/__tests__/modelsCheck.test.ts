@@ -69,6 +69,7 @@ describe("reportOf", () => {
 			"lab/bare",
 			"other/x",
 			"lab/glm-5: newer with a zero-retention host: lab/glm-6",
+			"lab/gone: its date is unknown, newer models are not listed",
 			"other/x: newer with a zero-retention host: other/new-x",
 		]);
 		expect(report?.lines.map((line) => line.split("  ")[1])).toEqual([
@@ -78,7 +79,35 @@ describe("reportOf", () => {
 			"noZdrHost",
 			undefined,
 			undefined,
+			undefined,
 		]);
+	});
+
+	it("lists no newer model for a row whose date is unknown, and says so", () => {
+		const models = {
+			data: [{ id: "lab/glm-5" }, { id: "lab/glm-4", created: 50 }, { id: "lab/glm-6", created: 200 }],
+		};
+		const zdr = {
+			data: ["lab/glm-5", "lab/glm-4", "lab/glm-6"].map((model_id) => ({
+				model_id,
+				tag: "a",
+				supported_parameters: ["tools"],
+			})),
+		};
+		const report = reportOf(models, zdr, [ROWS[0] as ModelRow], NOW);
+		expect(report?.lines.map((line) => line.split("  ")[0])).toEqual([
+			"lab/glm-5",
+			"lab/glm-5: its date is unknown, newer models are not listed",
+		]);
+	});
+
+	it("lists no newer model for a row the catalog lacks, and says so", () => {
+		const report = reportOf(MODELS, ZDR, [ROWS[1] as ModelRow], NOW);
+		expect(report?.lines.map((line) => line.split("  ")[0])).toEqual([
+			"lab/gone",
+			"lab/gone: its date is unknown, newer models are not listed",
+		]);
+		expect(report?.failed).toBe(true);
 	});
 
 	it("fails when a curated model is retired or has no host, and passes when none is", () => {
@@ -125,6 +154,7 @@ describe("reportOf", () => {
 		);
 		expect(report?.lines).toEqual([
 			"lab/glm-5  ok  1 hosts  $0.5 in, $2.5 out per M (up); verified $1 in, $2 out  removal 2026-12-01",
+			"lab/glm-5: its date is unknown, newer models are not listed",
 		]);
 	});
 });
