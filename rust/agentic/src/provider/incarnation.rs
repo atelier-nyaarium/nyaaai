@@ -89,7 +89,7 @@ impl Era {
         locked(&self.state)
     }
 
-    /// None once nothing holds the incarnation any more.
+    /// None once nothing holds the incarnation.
     pub fn incarnation(&self) -> Option<Arc<Incarnation>> {
         self.incarnation.upgrade()
     }

@@ -840,8 +840,7 @@ impl ProviderHealth {
             .flatten()
     }
 
-    /// Accumulates reply billing.
-    /// With a ticket its era takes the bill; with none, the route's incarnation does, while it lives.
+    /// A ticket's era takes the bill; with none, the route's incarnation does.
     pub fn billed(
         &self,
         id: &str,
@@ -952,9 +951,7 @@ impl ProviderHealth {
 }
 
 impl Gate for ProviderHealth {
-    /// The ticket is told to health inside the gate call that makes it. A key change answers the
-    /// waiters of the old era at once and each asks again under the new era's open gate, so they
-    /// go out together. A route of another registry answers `Retired`.
+    /// A key change retires old-era waiters, which ask again under the new era's open gate.
     fn admit(
         &self,
         route: RouteRef<'_>,

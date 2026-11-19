@@ -730,7 +730,7 @@ fn candidate_line(
     })
 }
 
-/// A routes answer as the answer of a call that waited.
+/// A route's answer as the answer of a call that waited.
 fn waited_of(
     held: ResolverRoutesResultStepsItemAnswerRoutes,
 ) -> ResolverRoutesResultStepsItemAnswerWaitedRoutes {

@@ -453,7 +453,7 @@ export class ModelResolver {
 		}
 	}
 
-	/** A read past the bound goes on and the next call shares it; every kind's catalog shares its reads. */
+	/** A read past the bound goes on and is shared. */
 	private bound(deps: KindDeps): Bound {
 		const bound = { expired: false, cancel: () => {}, late: Promise.resolve() };
 		bound.late = new Promise<void>((resolve) => {

@@ -617,8 +617,7 @@ impl ModelResolver {
             disposed(&*made.route.catalog);
             return Err(ResolveError("The resolver is disposed.".to_owned()));
         }
-        // The incarnation may have ended since it was last tested; its `retired` event
-        // may already have gone by, so what was stored is taken back.
+        // Its `retired` event may have passed already; take back what was stored.
         if !incarnation.live() {
             release(&self.made, incarnation.number);
         }
@@ -878,8 +877,7 @@ impl ModelResolver {
         }))
     }
 
-    /// The view, or none once the bound ends; a read past it goes on and the next call shares it
-    /// (every kind's catalog shares its reads).
+    /// The view, or none once the bound ends; a read past it goes on and is shared.
     async fn within(
         &self,
         bound: &Bound,

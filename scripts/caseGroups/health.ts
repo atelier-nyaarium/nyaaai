@@ -42,7 +42,7 @@ const NoIdle = { idle: z.literal(false).exactOptional() };
 
 const Step = () =>
 	z.discriminatedUnion("kind", [
-		/** Arms a hold the next check parks at; holds count from 1. `store` is the key read, `check` the kind's check. Does not wait for `idle`, as with `idle: false`. */
+		/** Arms a hold the next check parks at; holds count from 1. `store` is the key read, `check` the kind's check. Does not wait for `idle`. */
 		z.object({ kind: z.literal("hold"), at: z.enum(["store", "check"]) }),
 		/** Releases a hold: a store answers `answer`, a check answers `state`; each defaults to the real one. */
 		z.object({
@@ -54,7 +54,7 @@ const Step = () =>
 		}),
 		/** On this entry's first change told, a listener starts a check. */
 		z.object({ kind: z.literal("listenAndCheck"), id: z.string() }),
-		/** Holds the route as it stands now, under a name; later routes name it with `taken`. */
+		/** Holds the route under a name; later routes name it with `taken`. */
 		z.object({ kind: z.literal("take"), name: z.string(), route: HealthRoute }),
 		/** The list changes, and tells. */
 		z.object({ kind: z.literal("list"), entries: z.array(ProviderEntry), ...NoIdle }),
@@ -279,7 +279,7 @@ export const health = caseGroup("health", {
 				const run = new Set<string>();
 				const tickets = new Map<string, z.infer<typeof Ticket>>();
 				const held = new Map<string, Resolved>();
-				/** The route over the entry's incarnation as it stands now. */
+				/** The route over the entry's incarnation. */
 				const standing = (route: { entry: z.infer<typeof ProviderEntry>; key: string }) => {
 					name(route.entry.id);
 					const incarnation = entries.incarnation(route.entry.id) ?? leftIncarnation(entries, route.entry);

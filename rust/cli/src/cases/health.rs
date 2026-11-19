@@ -81,7 +81,7 @@ impl Owned {
     }
 }
 
-/// The route over the entry's incarnation as it stands now.
+/// The route over the entry's incarnation.
 fn standing(entries: &EntryRegistry, route: &HealthRoute) -> Owned {
     Owned {
         entry: route.entry.clone(),

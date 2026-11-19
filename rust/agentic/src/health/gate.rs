@@ -615,8 +615,7 @@ impl ProviderGate {
         }
     }
 
-    /// Retries go first; a cancelled or dropped waiter leaves the queue and takes no turn.
-    /// A retired book answers `Retired`.
+    /// Retries go first; a retired book answers `Retired`.
     pub fn admit(
         &self,
         book: &Arc<GateBook>,
@@ -782,7 +781,7 @@ impl ProviderGate {
         });
     }
 
-    /// A success resets the give-up count even while paused; another gate's or era's ticket does nothing.
+    /// A success resets the give-up count, even paused.
     pub fn settle(
         &self,
         book: &Arc<GateBook>,

@@ -33,8 +33,7 @@ pub const MAX_LISTED: usize = 2000;
 /// Reads in flight at once, for a read per listed row.
 pub const READS_AT_ONCE: usize = 8;
 
-/// Starts reads in list order, at most `limit` at once. A failure starts no more and waits for
-/// those started; the earliest failure in list order is answered.
+/// At most `limit` reads at once, in list order; a failure starts no more, waits for those started, and the earliest is answered.
 pub async fn join_limited<T, E, F: Future<Output = Result<T, E>>>(
     reads: impl IntoIterator<Item = F>,
     limit: usize,
