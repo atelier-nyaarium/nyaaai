@@ -1,8 +1,4 @@
-//! Offsets of POSIX rules, held against the C library.
-//!
-//! Every row was read from this machine's glibc 2.39 (Ubuntu 2.39-0ubuntu8.9): `zdump -v -c` for
-//! the instants a rule changes, one second either side, and GNU coreutils 9.4 `date -d @t +%::z`
-//! for the others, with the rule as `TZ`. None comes from this crate's reader.
+//! Offsets of POSIX rules, read from glibc 2.39 with `zdump` and `date`, never from this crate.
 
 use nyaaai_contract::zone::Zone;
 

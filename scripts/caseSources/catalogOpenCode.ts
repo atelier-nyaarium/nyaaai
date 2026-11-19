@@ -185,6 +185,8 @@ export const catalogOpenCodeCases: CaseSource[] = [
 	decode("models-cost.text.input-wrong-type", data(setIn(MODEL, ["cost", "text", "input"], 1.5))),
 	decode("models-cost.text.output-price-wrong-type", data(setIn(MODEL, ["cost", "text", "output", "price"], null))),
 	decode("models-cost.text.output-missing", data(setIn(MODEL, ["cost", "text"], { input: { price: 1.5 } }))),
+	decode("models-cost.text.output-wrong-type", data(setIn(MODEL, ["cost", "text", "output"], 6))),
+	decode("models-cost.text.output-price-missing", data(setIn(MODEL, ["cost", "text", "output"], {}))),
 	decode(
 		"models-cost.text.free-price-zero",
 		data(setIn(MODEL, ["cost", "text"], { input: { price: 0 }, output: { price: 0 } })),

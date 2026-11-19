@@ -94,9 +94,7 @@ pub trait Scheduler: Clock + Send + Sync {
     fn schedule(&self, ms: i64, run: Box<dyn FnOnce() + Send>) -> Scheduled;
 }
 
-/// Waits and schedules on the runtime it is given, from any thread; the runtime needs its time
-/// driver. A deadline starts at the call. The zone is the system clock's. A runtime that has ended
-/// drops what was waiting on it: a sleep ends cancelled, a scheduled call never runs.
+/// Waits on the given runtime, which needs its time driver; on an ended runtime a sleep ends cancelled.
 pub struct SystemScheduler {
     runtime: Handle,
 }

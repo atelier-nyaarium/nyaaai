@@ -108,8 +108,7 @@ pub struct Billing {
 }
 
 pub struct HealthDeps {
-    /// Where checks, rechecks and waits run, from any thread. A runtime that has ended drops
-    /// what was spawned on it: nothing answers after that, and nothing panics.
+    /// Where checks and waits run; nothing answers once it has ended.
     pub runtime: Handle,
     /// Gate pauses, rechecks and the time of every pool event.
     pub scheduler: Arc<dyn Scheduler>,
@@ -708,9 +707,7 @@ impl EntryKeys for HealthKeys {
 }
 
 impl ProviderHealth {
-    /// Defers initial key checks. Asks `ids` once, for the gate's name. Work runs on
-    /// `deps.runtime`, from any thread; a runtime that has ended drops what was spawned on it, so
-    /// nothing answers after that and nothing panics.
+    /// Defers initial key checks; asks `ids` once, for the gate's name.
     pub fn new(deps: HealthDeps, ids: &dyn Ids) -> Self {
         let core = Arc::new_cyclic(|weak: &Weak<Core>| {
             let told = weak.clone();

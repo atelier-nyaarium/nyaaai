@@ -347,6 +347,31 @@ const scrubs: CaseSource[] = [
 		],
 	),
 	exchange(
+		"scrub-key-spellings-in-a-response-header-reach-no-failure",
+		[streamCall()],
+		[
+			jsonReply({ error: { code: 429, message: "Slow down" } }, 429, [
+				["x-echo", forms(ODD_KEY)[1]],
+				["x-request-id", forms(ODD_KEY)[2]],
+			]),
+		],
+		{ keys: [ODD_KEY] },
+	),
+	exchange(
+		"scrub-key-spellings-in-a-response-header-reach-no-event",
+		[streamCall()],
+		[
+			sseReply(HI, {
+				headers: [
+					["content-type", "text/event-stream"],
+					["x-echo", forms(ODD_KEY)[1]],
+					["x-request-id", forms(ODD_KEY)[2]],
+				],
+			}),
+		],
+		{ keys: [ODD_KEY] },
+	),
+	exchange(
 		"scrub-without-a-key-nothing-changes",
 		[streamCall()],
 		[jsonReply({ error: { code: 401, message: `Bad ${KEY}` } }, 401)],
