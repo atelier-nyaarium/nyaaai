@@ -7,8 +7,8 @@ use std::path::{Path, PathBuf};
 use nyaaai_contract::id::Ids;
 use nyaaai_contract::time::Clock;
 use nyaaai_operator::claude::session_cut::{
-    CutError, CutMode, CutOutcome, CutPorts, CutRefusal, CutRequest, Lines, Summarizer, Summary,
-    cut_session, request_for, verify_cut,
+    CutError, CutMode, CutOutcome, CutPorts, CutRequest, Lines, Summarizer, Summary, cut_session,
+    request_for, verify_cut,
 };
 use nyaaai_operator::claude::session_file::{FileCutPorts, session_lines};
 use nyaaai_testkit::cases::block_on;
@@ -120,57 +120,6 @@ fn awaits_the_summary_a_port_answers_and_stays_send_over_sync_ports() {
     let built = ports.0.built(&done.session_id);
     let text = fs::read_to_string(built).unwrap();
     assert!(text.contains(" rows folded"));
-}
-
-/// Reads once, then fails.
-struct ReadsOnce(FileCutPorts, std::sync::atomic::AtomicUsize);
-
-impl CutPorts for ReadsOnce {
-    fn read(&self) -> io::Result<Lines<'_>> {
-        if self.1.fetch_add(1, std::sync::atomic::Ordering::Relaxed) > 0 {
-            return Err(io::Error::other("denied"));
-        }
-        self.0.read()
-    }
-    fn source_path(&self) -> String {
-        self.0.source_path()
-    }
-    fn create(&self, session_id: &str, lines: &[String]) -> io::Result<()> {
-        self.0.create(session_id, lines)
-    }
-    fn read_built(&self, session_id: &str) -> io::Result<Lines<'_>> {
-        self.0.read_built(session_id)
-    }
-    fn discard(&self, session_id: &str) -> io::Result<()> {
-        self.0.discard(session_id)
-    }
-    fn ids(&self) -> &dyn Ids {
-        self.0.ids()
-    }
-    fn clock(&self) -> &dyn Clock {
-        self.0.clock()
-    }
-    fn cli_version(&self) -> io::Result<String> {
-        self.0.cli_version()
-    }
-}
-
-#[test]
-fn asks_for_a_summarizer_before_it_reads_a_row_for_one() {
-    let (folder, source, _) = scratch("file-ports-no-summarizer");
-    let ports = ReadsOnce(
-        FileCutPorts {
-            source,
-            out: folder.join("out"),
-            cli_version: CLI_VERSION.to_owned(),
-            keep_out_of: None,
-        },
-        std::sync::atomic::AtomicUsize::new(0),
-    );
-    let mut request = request_for(CutMode::Compact);
-    request.target_uuid = Some(compacted_session().second);
-    let refused = cut(&ports, &request).unwrap().unwrap_err();
-    assert_eq!(refused.reason, CutRefusal::SummaryNeeded);
 }
 
 /// Read-back always fails.

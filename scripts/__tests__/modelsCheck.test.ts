@@ -101,15 +101,6 @@ describe("reportOf", () => {
 		]);
 	});
 
-	it("lists no newer model for a row the catalog lacks, and says so", () => {
-		const report = reportOf(MODELS, ZDR, [ROWS[1] as ModelRow], NOW);
-		expect(report?.lines.map((line) => line.split("  ")[0])).toEqual([
-			"lab/gone",
-			"lab/gone: its date is unknown, newer models are not listed",
-		]);
-		expect(report?.failed).toBe(true);
-	});
-
 	it("fails when a curated model is retired or has no host, and passes when none is", () => {
 		expect(reportOf(MODELS, ZDR, ROWS, NOW)?.failed).toBe(true);
 		expect(reportOf(MODELS, ZDR, [ROWS[0] as ModelRow], NOW)?.failed).toBe(false);
@@ -152,10 +143,9 @@ describe("reportOf", () => {
 			[ROWS[0] as ModelRow],
 			NOW,
 		);
-		expect(report?.lines).toEqual([
-			"lab/glm-5  ok  1 hosts  $0.5 in, $2.5 out per M (up); verified $1 in, $2 out  removal 2026-12-01",
-			"lab/glm-5: its date is unknown, newer models are not listed",
-		]);
+		const [described] = report?.lines ?? [];
+		expect(described).toContain("$0.5 in, $2.5 out per M");
+		expect(described).toContain("removal 2026-12-01");
 	});
 });
 

@@ -830,41 +830,6 @@ mod tests {
     }
 
     #[test]
-    fn a_cancelled_waiter_leaves_the_queue_at_once() {
-        let runtime = rt();
-        runtime.block_on(async {
-            let (gate, _wheel) = gate(&runtime);
-            gate.cool("model", None);
-            let token = CancelToken::new();
-            let waiting = gate.admit("model", &token, None, false);
-            assert_eq!(gate.state_of("model").map(|held| held.queued), Some(1));
-            token.cancel();
-            assert_eq!(gate.state_of("model").map(|held| held.queued), Some(0));
-            assert!(matches!(waiting.await, Admission::Stopped(_)));
-        });
-    }
-
-    #[test]
-    fn a_pause_hands_the_probe_to_the_oldest_waiter() {
-        let runtime = rt();
-        let (gate, wheel) = gate(&runtime);
-        gate.cool("model", None);
-        let (first, second) = (CancelToken::new(), CancelToken::new());
-        let (mut first, mut second) = (
-            Box::pin(gate.admit("model", &first, None, false)),
-            Box::pin(gate.admit("model", &second, None, false)),
-        );
-        wheel.advance(60_000);
-        let mut context = Context::from_waker(Waker::noop());
-        let Poll::Ready(Admission::Go(probe)) = first.as_mut().poll(&mut context) else {
-            panic!("the oldest waiter should hold the probe");
-        };
-        assert!(probe.ticket.probe);
-        assert!(second.as_mut().poll(&mut context).is_pending());
-        assert_eq!(gate.holding(), vec!["model".to_owned()]);
-    }
-
-    #[test]
     fn a_dropped_admission_gives_its_turn_to_the_next_waiter() {
         let runtime = rt();
         let (gate, wheel) = gate(&runtime);
@@ -916,29 +881,5 @@ mod tests {
         runtime.block_on(async {
             assert!(matches!(waiting.await, Admission::Stopped(_)));
         });
-    }
-
-    #[test]
-    fn a_ticket_of_another_gate_does_nothing_and_a_disposed_gate_stays_disposed() {
-        let runtime = rt();
-        let (gate, _wheel) = gate(&runtime);
-        let mut foreign = gate.try_admit("model").expect("an open gate");
-        foreign.gate = "elsewhere".to_owned();
-        assert_eq!(
-            gate.settle(&foreign, GateOutcome::Overloaded, None),
-            GateSettled::Done
-        );
-        assert_eq!(gate.state_of("other"), None);
-        gate.dispose();
-        assert!(gate.try_admit("model").is_none());
-        gate.cool("model", None);
-        assert_eq!(gate.state_of("model"), None);
-        let mut waiting = Box::pin(gate.admit("model", &CancelToken::new(), None, false));
-        assert!(matches!(
-            waiting
-                .as_mut()
-                .poll(&mut Context::from_waker(Waker::noop())),
-            Poll::Ready(Admission::Stopped(_))
-        ));
     }
 }

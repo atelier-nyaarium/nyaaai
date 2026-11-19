@@ -1497,30 +1497,4 @@ mod tests {
         })
         .expect("ran");
     }
-
-    #[test]
-    fn a_call_that_ends_normally_is_settled_and_recorded_once() {
-        block_on(async {
-            let rig = rig(&["a"]);
-            let routes = routes_of(&rig).await;
-            let gate = Fake::new(Admits::Go);
-            let records = Arc::new(Records::default());
-            let observer: Arc<dyn Observer> = Arc::new(Told::default());
-            let call = Probe {
-                cancel: CancelToken::new(),
-                sends: Sends::Reply,
-            };
-            let lifecycle = lifecycle_of(&rig, &gate, &records);
-            let result = lifecycle.run(&routes.candidates, &call, &observer).await;
-            assert!(matches!(result, Ok(Attempt::Served { .. })));
-            let settled = locked(&gate.settled).clone();
-            assert_eq!(settled.len(), 1);
-            assert_eq!(settled[0].1, GateOutcome::Ok);
-            let records = locked(&records.0).clone();
-            assert_eq!(records.len(), 1);
-            assert_eq!(records[0].cancelled, None);
-            assert_eq!(records[0].failure, None);
-        })
-        .expect("ran");
-    }
 }

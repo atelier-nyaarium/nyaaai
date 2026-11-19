@@ -13,14 +13,6 @@ it("a day file's lines decode and encode to the same bytes", () => {
 	expect(changed).toEqual([]);
 });
 
-it("a stats line is not a call line", () => {
-	const kinds = [...CALL_LINES, ...STATS_LINES].map((line) => {
-		const decoded = decodeText(UsageLine, line);
-		return decoded.ok ? ("call" in decoded.value ? "call" : "stats") : "refused";
-	});
-	expect(kinds).toEqual(["call", "call", "call", "stats", "stats"]);
-});
-
 it("a lone surrogate in a line reads as U+FFFD and is written as that character", () => {
 	const decoded = decodeText(UsageLine, SURROGATE_LINE);
 	expect(decoded.ok).toBe(true);

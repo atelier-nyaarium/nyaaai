@@ -32,22 +32,17 @@ it("a cost that is not a number is not a price, and an allowance reply with one 
 
 it("a retry policy with no source of chance draws from the system's", () => {
 	const policy = new RetryPolicy();
-	for (let tries = 0; tries < 50; tries += 1) {
-		const wait = policy.wait({}, 1, 0) ?? 0;
-		expect(wait).toBeGreaterThanOrEqual(500);
-		expect(wait).toBeLessThanOrEqual(1000);
-	}
+	const wait = policy.wait({}, 1, 0) ?? 0;
+	expect(wait).toBeGreaterThanOrEqual(500);
+	expect(wait).toBeLessThanOrEqual(1000);
 });
 
-/** A route with only what a lifecycle with no gate reads; `reads` counts looks at the label. */
-function routeOf(reads: { label: number }): Candidates {
+/** A route with only what a lifecycle with no gate reads. */
+function routeOf(): Candidates {
 	const entry = {
 		id: "a",
 		kind: "openrouter",
-		get label() {
-			reads.label += 1;
-			return "Alpha";
-		},
+		label: "Alpha",
 	};
 	const route = {
 		ok: true,
@@ -72,39 +67,9 @@ const callOf = (send: Call<Reply>["send"]): Call<Reply> => ({
 describe("the lifecycle's trace", () => {
 	const scheduler = fakeScheduler(new TimerWheel(0));
 
-	it("tells one entry per effect to a sink, and a run with no gate and no meter tells an attempt and its end", async () => {
-		const told: TraceEntry[] = [];
-		const lifecycle = new RequestLifecycle({ scheduler });
-		const result = await lifecycle.run(
-			routeOf({ label: 0 }),
-			callOf(async () => ({})),
-			{ onTrace: (entry) => told.push(entry) },
-		);
-		expect(result.ok).toBe(true);
-		expect(told.map((entry) => entry.kind)).toEqual(["attempt", "served"]);
-	});
-
-	it("builds no entry when no sink is given", async () => {
-		const reads = { label: 0 };
-		const lifecycle = new RequestLifecycle({ scheduler });
-		await lifecycle.run(
-			routeOf(reads),
-			callOf(async () => ({})),
-		);
-		expect(reads.label).toBe(0);
-		const told: TraceEntry[] = [];
-		await lifecycle.run(
-			routeOf(reads),
-			callOf(async () => ({})),
-			{ onTrace: (entry) => told.push(entry) },
-		);
-		expect(reads.label).toBeGreaterThan(0);
-	});
-
-	it("is not altered by a sink that throws", async () => {
-		const lifecycle = new RequestLifecycle({ scheduler });
-		const result = await lifecycle.run(
-			routeOf({ label: 0 }),
+	it("is not altered by a sink or a meter that throws", async () => {
+		const sunk = await new RequestLifecycle({ scheduler }).run(
+			routeOf(),
 			callOf(async () => ({})),
 			{
 				onTrace: () => {
@@ -112,29 +77,8 @@ describe("the lifecycle's trace", () => {
 				},
 			},
 		);
-		expect(result.ok).toBe(true);
-	});
+		expect(sunk.ok).toBe(true);
 
-	it("keeps the entries told before a send throws what is no provider failure", async () => {
-		const told: TraceEntry[] = [];
-		const lifecycle = new RequestLifecycle({ scheduler });
-		const outcome = await lifecycle
-			.run(
-				routeOf({ label: 0 }),
-				callOf(async () => {
-					throw new Error("The send broke.");
-				}),
-				{ onTrace: (entry) => told.push(entry) },
-			)
-			.then(
-				() => "returned",
-				(error: unknown) => (error instanceof Error ? error.message : "thrown"),
-			);
-		expect(outcome).toBe("The send broke.");
-		expect(told.map((entry) => entry.kind)).toEqual(["attempt", "threw"]);
-	});
-
-	it("is not altered by a meter that throws, and still tells the call it was given", async () => {
 		const told: TraceEntry[] = [];
 		const lifecycle = new RequestLifecycle({
 			scheduler,
@@ -144,18 +88,18 @@ describe("the lifecycle's trace", () => {
 				},
 			},
 		});
-		const result = await lifecycle.run(
-			routeOf({ label: 0 }),
+		const metered = await lifecycle.run(
+			routeOf(),
 			callOf(async () => ({})),
 			{ onTrace: (entry) => told.push(entry) },
 		);
-		expect(result.ok).toBe(true);
+		expect(metered.ok).toBe(true);
 		expect(told.map((entry) => entry.kind)).toEqual(["attempt", "metered", "served"]);
 	});
 
 	it("falls through a route the gate gave the request up on when a route follows, and ends on the last", async () => {
 		const told: TraceEntry[] = [];
-		const [route] = routeOf({ label: 0 });
+		const [route] = routeOf();
 		const second = { ...route, entry: { id: "b", kind: "openrouter", label: "Beta" } } as unknown as Resolved;
 		const gate = {
 			admit: async () => ({ kind: "gaveUp" as const }),

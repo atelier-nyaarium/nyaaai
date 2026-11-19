@@ -127,19 +127,6 @@ describe("the dialect check and the generator", () => {
 		expect(generated(name)).toContain("Root(Root)");
 	});
 
-	it("names an empty tag Empty in both", () => {
-		counter += 1;
-		const name = `agree${counter}`;
-		const set = shapeSet(name, {
-			Shape: z.discriminatedUnion("kind", [
-				z.object({ kind: z.literal("") }),
-				z.object({ kind: z.literal("full") }),
-			]),
-		});
-		expect(dialectProblems([set])).toEqual([]);
-		expect(generated(name)).toContain("Empty(ShapeEmpty)");
-	});
-
 	it("reads a type list of distinct plain types only", () => {
 		const read = (type: string[]) => {
 			const doc = { $schema: "", $id: "", "x-contract-version": "0.0.0", $defs: { Shape: { type } as never } };

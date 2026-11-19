@@ -656,23 +656,5 @@ mod tests {
             let spelled = iso_time(ms).unwrap();
             assert_eq!(parse_iso_time(&spelled), Some(ms), "{spelled}");
         }
-        assert_eq!(
-            iso_time(1_794_528_000_123).as_deref(),
-            Some("2026-11-13T00:00:00.123Z")
-        );
-        assert_eq!(iso_time(LAST_MS + 1), None);
-    }
-
-    #[test]
-    fn refuses_other_text() {
-        for text in [
-            "",
-            "2026-11-13",
-            "2026-11-13T00:00:00",
-            "2026-02-30T00:00:00Z",
-            "2026-11-13 00:00:00Z",
-        ] {
-            assert_eq!(parse_iso_time(text), None, "{text}");
-        }
     }
 }

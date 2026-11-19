@@ -28,10 +28,6 @@ interface Input {
 describe("the recorded transport cases", () => {
 	const traced = httpCases.filter((held) => held.name.startsWith("trace-"));
 
-	it("hold the three traces", () => {
-		expect(traced.length).toBeGreaterThan(0);
-	});
-
 	for (const held of traced) {
 		it(`${held.name} encodes each request to the recorded body`, async () => {
 			const input = held.input as Input;

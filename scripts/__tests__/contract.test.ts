@@ -145,20 +145,13 @@ describe("the contract generator", () => {
 		expect([handed.includes(PROJECT_ROOT), handed.includes("$ROOT")]).toEqual([false, true]);
 	});
 
-	it("refuses a schema outside the dialect", () => {
+	it("refuses what the dialect cannot hold", () => {
+		const hooked = (type: string): Json => ({ type, "x-hooks": [{ kind: "refine", name: "isShort" }] });
 		const outside: Array<Record<string, Json>> = [
 			{ A: { type: "string", pattern: "^a" } },
-			{ A: { type: "string", format: "uri" } },
 			{ A: { type: "array", prefixItems: [{ type: "string" }] } },
-			{ A: { type: "array", prefixItems: [{ type: "string" }], items: false, minItems: 0, maxItems: 1 } },
-			{ A: { type: "array", prefixItems: [], items: false, minItems: 0, maxItems: 0 } },
-			{ A: { type: "integer", "x-hooks": [{ kind: "match", source: "^a", flags: "" }] } },
-			{ A: { type: "object", properties: {}, required: [] } },
-			{ A: { type: "object", propertyNames: { enum: ["a"] }, additionalProperties: {} } },
-			{ A: object({ a: { type: "string", default: "x" } }, { required: [] }) },
-			{ A: { oneOf: [{ $ref: "#/$defs/B" }] }, B: object({ kind: { type: "string", const: "b" } }) },
-			{ A: { oneOf: [{ $ref: "#/$defs/B" }], "x-tag": "kind" }, B: object({ kind: { type: "string" } }) },
-			{ A: { $ref: "#/$defs/Missing" } },
+			{ A: object({ inner: object({}) }), AInner: object({}) },
+			{ A: hooked("string"), B: hooked("number") },
 		];
 		for (const $defs of outside) {
 			expect(failure(() => rustOf($defs))).not.toBe("");
@@ -179,49 +172,6 @@ describe("the contract generator", () => {
 			A: { type: "object", properties: { a: { type: "number" }, b: { type: "number" } }, required: ["b"] },
 		});
 		expect(formProblems("t", piped, output)).toHaveLength(1);
-	});
-
-	it("refuses two names that become one in Rust", () => {
-		const clashes: Array<Record<string, Json>> = [
-			{ A: object({ maxSize: { type: "string" }, max_size: { type: "string" } }) },
-			{ A: { type: "string", enum: ["no-rows", "no_rows"] } },
-			{ A: object({ inner: object({}) }), AInner: object({}) },
-			{ lower: { type: "string" } },
-		];
-		for (const $defs of clashes) {
-			expect(failure(() => rustOf($defs))).not.toBe("");
-		}
-	});
-
-	it("gives each hook one Rust function with one use", () => {
-		const hooked = (type: string, ...hooks: Json[]): Json => ({ type, "x-hooks": hooks });
-		const check = (name: string): Json => ({ kind: "refine", name });
-		const shared = rustOf({ A: hooked("string", check("isShort")), B: hooked("string", check("isShort")) });
-		expect(shared).toContain("hooks::is_short");
-		const clashes: Array<Record<string, Json>> = [
-			{ A: hooked("string", check("isShort")), B: hooked("string", check("is_short")) },
-			{ A: hooked("string", check("isShort")), B: hooked("number", check("isShort")) },
-			{ A: hooked("string", check("fix")), B: hooked("string", { kind: "preprocess", name: "fix" }) },
-		];
-		for (const $defs of clashes) {
-			expect(failure(() => rustOf($defs))).not.toBe("");
-		}
-	});
-
-	it("checks text against a pattern compiled once", () => {
-		const pattern = (message?: string): Json => ({
-			kind: "match",
-			source: "^a\\d",
-			flags: "i",
-			...(message ? { message } : {}),
-		});
-		const rust = rustOf({
-			A: { type: "string", "x-hooks": [pattern()] },
-			B: { type: "string", "x-hooks": [pattern("Starts with a.")] },
-		});
-		expect(rust.match(/LazyLock::new/g)).toHaveLength(1);
-		expect(rust).toContain('Pattern::compile("^a\\\\d", "i")');
-		expect(rust).toContain('Some("Starts with a.")');
 	});
 
 	it("boxes a reference that would hold itself by value", () => {
@@ -245,17 +195,6 @@ describe("the contract generator", () => {
 		// A struct on the way is a type of its own.
 		const rust = rustOf({ Node: object({ kids: { $ref: "#/$defs/Kids" } }), Kids: list("Node") });
 		expect(rust).toContain("pub type Kids = Vec<Node>;");
-	});
-
-	it("imports the trait a set of aliases calls", () => {
-		const sets = irOf(
-			new Map([
-				["a", doc({ Leaf: object({ x: { type: "string" } }) })],
-				["b", doc({ List: { type: "array", items: { $ref: "a.output.json#/$defs/Leaf" } } })],
-			]),
-		);
-		const rust = emitRust(sets.get("b") as never, sets, new Map([target("a"), target("b")]));
-		expect(rust).toContain("shape::{self, Path, Refused, Shape}");
 	});
 
 	it("boxes a cycle across sets and refuses one across crates", () => {

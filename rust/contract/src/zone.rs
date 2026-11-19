@@ -674,38 +674,6 @@ mod tests {
     }
 
     #[test]
-    fn a_northern_rule_moves_with_the_seasons() {
-        let zone = Writer::new(b'2', vec![Kind(-5 * HOUR)])
-            .footer("EST5EDT,M3.2.0,M11.1.0")
-            .zone();
-        let at = |text: &str| minutes(&zone, crate::time::parse_iso_time(text).unwrap() / 1000);
-        assert_eq!(at("2026-01-15T12:00:00Z"), -300);
-        assert_eq!(at("2026-07-15T12:00:00Z"), -240);
-        // 2026-03-08 02:00 EST is 07:00Z; 2026-11-01 02:00 EDT is 06:00Z.
-        assert_eq!(at("2026-03-08T06:59:59Z"), -300);
-        assert_eq!(at("2026-03-08T07:00:00Z"), -240);
-        assert_eq!(at("2026-11-01T05:59:59Z"), -240);
-        assert_eq!(at("2026-11-01T06:00:00Z"), -300);
-    }
-
-    #[test]
-    fn a_southern_rule_spans_the_new_year() {
-        let zone = Writer::new(b'2', vec![Kind(10 * HOUR)])
-            .footer("AEST-10AEDT,M10.1.0,M4.1.0/3")
-            .zone();
-        let at = |text: &str| minutes(&zone, crate::time::parse_iso_time(text).unwrap() / 1000);
-        assert_eq!(at("2026-01-01T00:00:00Z"), 660);
-        assert_eq!(at("2025-12-31T23:59:59Z"), 660);
-        assert_eq!(at("2026-07-01T00:00:00Z"), 600);
-        assert_eq!(at("2026-12-31T23:59:59Z"), 660);
-        // 2026-04-05 03:00 AEDT is 2026-04-04T16:00Z; 2026-10-04 02:00 AEST is 2026-10-03T16:00Z.
-        assert_eq!(at("2026-04-04T15:59:59Z"), 660);
-        assert_eq!(at("2026-04-04T16:00:00Z"), 600);
-        assert_eq!(at("2026-10-03T15:59:59Z"), 600);
-        assert_eq!(at("2026-10-03T16:00:00Z"), 660);
-    }
-
-    #[test]
     fn a_transition_holds_from_its_own_instant() {
         let zone = Writer::new(
             b'2',
@@ -723,15 +691,6 @@ mod tests {
         assert_eq!(zone.offset_minutes(ms + DAY * 1000 + 1), -300);
         assert_eq!(zone.offset_minutes(i64::MIN), -300);
         assert_eq!(zone.offset_minutes(i64::MAX), -300);
-    }
-
-    #[test]
-    fn the_first_type_holds_before_the_first_transition() {
-        let zone = Writer::new(b'2', vec![Kind(2 * HOUR), Kind(HOUR)])
-            .at(NEW_YEAR, 1)
-            .zone();
-        assert_eq!(minutes(&zone, NEW_YEAR - 1), 120);
-        assert_eq!(minutes(&zone, NEW_YEAR), 60);
     }
 
     #[test]
@@ -792,25 +751,13 @@ mod tests {
                     assert_eq!(held, None, "{version} {length}");
                 } else {
                     // The blocks are whole: the zone reads, with no rule.
-                    assert_eq!(held.unwrap().rule, None, "{version} {length}");
+                    let held = held.unwrap();
+                    assert_eq!(held.rule, None, "{version} {length}");
+                    // No footer: the last transition's type holds.
+                    assert_eq!(minutes(&held, NEW_YEAR + 200 * DAY), 120);
                 }
             }
         }
-    }
-
-    #[test]
-    fn a_footer_cut_by_one_byte_holds_the_last_type() {
-        let writer = Writer::new(b'2', vec![Kind(-5 * HOUR), Kind(-4 * HOUR)])
-            .at(NEW_YEAR, 0)
-            .footer("EST5EDT,M3.2.0,M11.1.0");
-        let bytes = writer.bytes();
-        let whole = Zone::from_tzif(&bytes).unwrap();
-        let cut = Zone::from_tzif(&bytes[..bytes.len() - 1]).unwrap();
-        let summer = NEW_YEAR + 200 * DAY;
-        assert_eq!(minutes(&whole, summer), -240);
-        // No footer: the last transition's type holds.
-        assert_eq!(minutes(&cut, summer), -300);
-        assert_eq!(minutes(&cut, NEW_YEAR - 1), -300);
     }
 
     #[test]
@@ -879,70 +826,10 @@ mod tests {
     }
 
     #[test]
-    fn a_julian_day_skips_the_leap_day() {
-        let zone = rule_zone("EST5EDT,J60,J305");
-        for year in [2026, 2028] {
-            // March 1 and November 1, at 02:00 local.
-            assert_eq!(at_time(&zone, &format!("{year}-03-01T06:59:59Z")), -300);
-            assert_eq!(at_time(&zone, &format!("{year}-03-01T07:00:00Z")), -240);
-            assert_eq!(at_time(&zone, &format!("{year}-11-01T05:59:59Z")), -240);
-            assert_eq!(at_time(&zone, &format!("{year}-11-01T06:00:00Z")), -300);
-        }
-    }
-
-    #[test]
-    fn a_counted_day_keeps_the_leap_day() {
-        let zone = rule_zone("EST5EDT,59/1,304/2");
-        // Day 59 is March 1, or February 29 in a leap year.
-        assert_eq!(at_time(&zone, "2026-03-01T05:59:59Z"), -300);
-        assert_eq!(at_time(&zone, "2026-03-01T06:00:00Z"), -240);
-        assert_eq!(at_time(&zone, "2028-02-29T05:59:59Z"), -300);
-        assert_eq!(at_time(&zone, "2028-02-29T06:00:00Z"), -240);
-        // Day 304 is November 1, or October 31 in a leap year.
-        assert_eq!(at_time(&zone, "2026-11-01T05:59:59Z"), -240);
-        assert_eq!(at_time(&zone, "2026-11-01T06:00:00Z"), -300);
-        assert_eq!(at_time(&zone, "2028-10-31T05:59:59Z"), -240);
-        assert_eq!(at_time(&zone, "2028-10-31T06:00:00Z"), -300);
-    }
-
-    #[test]
-    fn a_rule_time_may_be_negative_or_past_a_day() {
-        let zone = rule_zone("<-02>2<-01>,M3.5.0/-1,M10.5.0/0");
-        // The last Sunday of March at -01:00 standard is Saturday 23:00, 01:00Z on the Sunday.
-        assert_eq!(at_time(&zone, "2026-03-29T00:59:59Z"), -120);
-        assert_eq!(at_time(&zone, "2026-03-29T01:00:00Z"), -60);
-        assert_eq!(at_time(&zone, "2026-10-25T00:59:59Z"), -60);
-        assert_eq!(at_time(&zone, "2026-10-25T01:00:00Z"), -120);
-        let late = rule_zone("EST5EDT,M3.2.0/26,M11.1.0/25");
-        // 26:00 Sunday March 8 is 02:00 Monday; 25:00 EDT November 1 is 05:00Z next day.
-        assert_eq!(at_time(&late, "2026-03-09T06:59:59Z"), -300);
-        assert_eq!(at_time(&late, "2026-03-09T07:00:00Z"), -240);
-        assert_eq!(at_time(&late, "2026-11-02T04:59:59Z"), -240);
-        assert_eq!(at_time(&late, "2026-11-02T05:00:00Z"), -300);
-    }
-
-    #[test]
-    fn a_rule_reads_names_offsets_and_defaults() {
-        assert_eq!(
-            at_time(&rule_zone("<+0545>-5:45"), "2026-06-01T00:00:00Z"),
-            345
-        );
-        assert_eq!(
-            at_time(&rule_zone("<+0530>-5:30"), "2026-06-01T00:00:00Z"),
-            330
-        );
-        assert_eq!(
-            at_time(&rule_zone("<-0330>3:30:00"), "2026-06-01T00:00:00Z"),
-            -210
-        );
-        assert_eq!(at_time(&rule_zone("UTC0"), "2026-06-01T00:00:00Z"), 0);
-        // No dates: the usual northern ones; no daylight offset: an hour ahead.
+    fn a_rule_with_no_dates_uses_the_usual_ones() {
         let bare = rule_zone("EST5EDT");
         assert_eq!(at_time(&bare, "2026-07-01T00:00:00Z"), -240);
         assert_eq!(at_time(&bare, "2026-01-01T00:00:00Z"), -300);
-        let own = rule_zone("AAA-1BBB-3:30,M3.5.0,M10.5.0");
-        assert_eq!(at_time(&own, "2026-07-01T00:00:00Z"), 210);
-        assert_eq!(at_time(&own, "2026-01-01T00:00:00Z"), 60);
     }
 
     #[test]

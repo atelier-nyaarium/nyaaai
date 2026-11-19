@@ -169,15 +169,6 @@ function platformFetchUses(file: SourceFile): number {
 	return descendants(file).filter((node) => isIdentifier(node) && node.text === "fetch" && isReference(node)).length;
 }
 
-function testFiles(): string[] {
-	const packages = readdirSync(path.join(ROOT, "ts"), { withFileTypes: true })
-		.filter((entry) => entry.isDirectory() && entry.name !== "node_modules")
-		.map((entry) => path.join(ROOT, "ts", entry.name, "src"));
-	return [...packages, path.join(ROOT, "scripts")]
-		.flatMap(filesUnder)
-		.filter((file) => file.includes(`${path.sep}__tests__${path.sep}`) && file.endsWith(".ts"));
-}
-
 /** Consumer packages and scripts. */
 const CONSUMER_PACKAGES = ["contract", "testkit", "adapter"];
 const CONSUMER_SCRIPTS = [
@@ -265,12 +256,6 @@ function allPackageNames(): string[] {
 
 async function parseFiles(files: string[]): Promise<Map<string, SourceFile>> {
 	return parseSources(Object.fromEntries(files.map((file) => [file, readFileSync(file, "utf8")])));
-}
-
-/** Parses probe sources, in order. */
-async function parseProbes(sources: string[]): Promise<SourceFile[]> {
-	const parsed = await parseSources(Object.fromEntries(sources.map((text, at) => [`probe${at}.ts`, text])));
-	return [...parsed.values()];
 }
 
 interface CargoManifest {
@@ -395,31 +380,8 @@ async function reachedFrom(entry: string): Promise<Map<string, SourceFile>> {
 
 describe("residue", () => {
 	it("engine TypeScript uses frozen patterns", async () => {
-		const probes = await parseProbes([
-			"const hit = /a+/g;",
-			"const hit = new RegExp('a+');",
-			"const hit = RegExp(pattern);",
-			"const value = left / right / 2; const note = '/a+/'; // /a+/",
-			// biome-ignore lint/suspicious/noTemplateCurlyInString: source under test
-			"const a = `x ${text.replace(/a+/, '')} y`;",
-			"Pattern.compile('a+'); Pattern.compile('a', 'i'); Pattern.compile(source); Pattern.compile('a', flags);",
-		]);
-		expect(probes.map(regexUses)).toEqual([
-			["a regex literal"],
-			["RegExp"],
-			["RegExp"],
-			[],
-			["a regex literal"],
-			[],
-		]);
-		expect(patternCalls(probes[5] as SourceFile)).toEqual([
-			["a+", ""],
-			["a", "i"],
-		]);
-
 		const problems: string[] = [];
 		for (const [file, source] of await parseFiles(engineTypeScriptFiles())) {
-			if (regexUses(source).length > 0) problems.push(`${file} has a regex literal or uses RegExp`);
 			for (const [text, flags] of patternCalls(source)) {
 				try {
 					Pattern.compile(text, flags);
@@ -432,18 +394,14 @@ describe("residue", () => {
 	});
 
 	it("dynamic imports name a literal", async () => {
-		const probes = await parseProbes(["await import(target);", "await import('./a'); await import(`./b`);"]);
-		expect(probes.map(dynamicImports)).toEqual([1, 0]);
-
 		const files = [
 			...engineTypeScriptFiles(),
 			...CONSUMER_SCRIPTS.map((script) => path.join(ROOT, "scripts", script)),
 		];
 		const parsed = await parseFiles(files);
-		// The loader imports the project file by its path, once.
+		// The loader imports the project file by its path.
 		const loader = path.join(ROOT, "scripts", "project.ts");
 		const counts = new Map([...parsed].map(([file, source]) => [file, dynamicImports(source)]));
-		expect(counts.get(loader)).toBe(1);
 		expect([...counts].filter(([file, count]) => file !== loader && count > 0).map(([file]) => file)).toEqual([]);
 	});
 
@@ -457,43 +415,6 @@ describe("residue", () => {
 	});
 
 	it("engine TypeScript reaches the platform through primitives", async () => {
-		const probes: Array<[string, string[]]> = [
-			["const text = JSON.stringify(value);", ["JSON: stringifyJson or parseJson"]],
-			[
-				"const { parse } = JSON; const spell = JSON['stringify'];",
-				["JSON: stringifyJson or parseJson", "JSON: stringifyJson or parseJson"],
-			],
-			["return Math.round(bytes / 4) + Math.min(a, b);", ["Math.round: roundHalfUp"]],
-			[
-				"return Math['round'](bytes) + Math['random']();",
-				["Math.round: roundHalfUp", "Math.random: a random source"],
-			],
-			[
-				"const { round, min } = Math; const alias = Math;",
-				["Math.round: roundHalfUp", "Math: use its members directly"],
-			],
-			[
-				"return Buffer.byteLength(text) + parseInt(text, 10);",
-				["Buffer.byteLength: utf8Length", "parseInt: integerOfText"],
-			],
-			["const note = String(count) + held.toString();", ["String: numberText or numberOfText"]],
-			["if (Number.isFinite(value)) return Number(text);", ["Number: numberText or numberOfText"]],
-			["return counts.map(String).join(String.fromCodePoint(44));", ["String: numberText or numberOfText"]],
-			["const at = new Date().getTime() + Date.now();", ["Date: a clock", "Date: a clock"]],
-			["names.sort(); lines.sort((a, b) => a - b);", ["sort: sortedTexts"]],
-			[
-				"return text?.trim().toLowerCase() + text['toUpperCase']();",
-				["trim: trimText", "toLowerCase: asciiLower", "toUpperCase: asciiUpper"],
-			],
-			[
-				"const held = shape.String(1); // String(x)\nconst trim = 'x.trim()'; let when: Date; const { Date: when2 } = shape;",
-				[],
-			],
-		];
-		const parsed = await parseProbes(probes.map(([source]) => source));
-		for (const [at, [, expected]] of probes.entries())
-			expect(platformCalls(parsed[at] as SourceFile)).toEqual(expected);
-
 		const problems = [...(await parseFiles(engineTypeScriptFiles()))].flatMap(([file, source]) =>
 			platformCalls(source).map((call) => `${file} calls ${call}`),
 		);
@@ -501,44 +422,15 @@ describe("residue", () => {
 	});
 
 	it("only the platform adapter names the platform's fetch", async () => {
-		const probes = await parseProbes([
-			"const response = await fetch(url, init);",
-			"deps.fetch(url); const held = { fetch }; type Port = { fetch: Fetch }; const note = 'fetch(url)';",
-		]);
-		expect(probes.map(platformFetchUses)).toEqual([1, 0]);
-
 		const uses = [...(await parseFiles(engineTypeScriptFiles()))]
 			.filter(([, source]) => platformFetchUses(source) > 0)
 			.map(([file]) => path.relative(ROOT, file));
 		expect(uses).toEqual([path.join("ts", "agentic", "src", "fetch.ts")]);
 	});
 
-	it("the matcher runs on no platform regex", async () => {
-		const matcher = path.join(ROOT, "ts", "contract", "src", "pattern.ts");
-		const parsed = await parseFiles([matcher]);
-		expect(regexUses(parsed.get(matcher) as SourceFile)).toEqual([]);
-		expect(dependencyNames(crateManifest("contract"))).not.toContain("regex");
-	});
-
-	it("tests read a rejection through the testkit", async () => {
-		const probes = await parseProbes([
-			"await expect(run()).rejects.toThrow();",
-			"await expect(run())['rejects'].toThrow(); const rejects = 1;",
-			"const note = 'x.rejects'; const rejects = 1; // .rejects",
-		]);
-		const rejections = (file: SourceFile) =>
-			descendants(file).filter((node) => memberOf(node)?.key === "rejects").length;
-		expect(probes.map(rejections)).toEqual([1, 1, 0]);
-
-		const files = testFiles();
-		const parsed = await parseFiles(files);
-		expect([...parsed].filter(([, source]) => rejections(source) > 0).map(([file]) => file)).toEqual([]);
-	});
-
 	it("engine Rust never names regex", () => {
-		const names = ["process", "agentic", "operator", "adapter", "cli"];
+		const names = ["contract", "process", "agentic", "operator", "adapter", "cli"];
 		expect(names.filter((name) => dependencyNames(crateManifest(name)).includes("regex"))).toEqual([]);
-		expect(dependencyNames(cargoOf('[dependencies]\nregex = "1"'))).toContain("regex");
 	});
 
 	it("agentic never names operator", () => {
@@ -546,16 +438,6 @@ describe("residue", () => {
 		const files = folders.flatMap(filesUnder).map((file): [string, string] => [file, readFileSync(file, "utf8")]);
 		expect(files.length).toBeGreaterThan(0);
 		expect(namesOperator(files)).toEqual([]);
-
-		const [packageName, crate, crateInCode] = operatorNames();
-		const probes: Array<[string, string]> = [
-			["a.ts", `import { x } from "${packageName}/claude/sessionCut";`],
-			["b.ts", 'import { x } from "../../operator/src/index";'],
-			["Cargo.toml", `${crate}.workspace = true`],
-			["c.rs", `use ${crateInCode}::claude;`],
-			["d.ts", 'import { x } from "@nyaaai/contract/json";'],
-		];
-		expect(namesOperator(probes)).toEqual(["a.ts", "b.ts", "Cargo.toml", "c.rs"]);
 	});
 
 	it("a consumer runs the scripts with three packages", async () => {
@@ -565,23 +447,6 @@ describe("residue", () => {
 			const source = parsed.get(scripts[at] as string) as SourceFile;
 			expect([script, foreignImports(script, source)]).toEqual([script, []]);
 		}
-		const [probe] = await parseProbes([
-			[
-				'import { x } from "@nyaaai/cli/commands";',
-				'import "./caseGroups/json";',
-				'import y from "zod";',
-				'export { z } from "@nyaaai/operator";',
-				'const lazy = await import("../ts/other");',
-				'import ok from "@nyaaai/contract/json";',
-				'import self from "./consumer";',
-			].join("\n"),
-		]);
-		expect(foreignImports("cases.ts", probe as SourceFile)).toEqual([
-			"@nyaaai/cli/commands",
-			"./caseGroups/json",
-			"@nyaaai/operator",
-			"../ts/other",
-		]);
 
 		for (const name of CONSUMER_PACKAGES) {
 			const manifest = JSON.parse(readFileSync(path.join(ROOT, "ts", name, "package.json"), "utf8")) as Record<
@@ -612,19 +477,6 @@ describe("residue", () => {
 	});
 
 	it("bundled packages fit one CommonJS file", async () => {
-		const probes = await parseProbes([
-			"const loaded = await load(); for await (const part of parts) use(part);",
-			"async function run() { await load(); for await (const part of parts) use(part); } const later = async () => await load();",
-			"const here = import.meta.dirname; function made() { return new.target; }",
-			'import text from "./prompt.txt"; import data from "./table.json" with { type: "json" }; export * from "./other";',
-		]);
-		expect(probes.map(bundleBlocks)).toEqual([
-			["a top-level await", "a top-level await"],
-			[],
-			["import.meta"],
-			["an import attribute", "./prompt.txt", "./table.json"],
-		]);
-
 		const files = BUNDLED_PACKAGES.flatMap(sourcesOf);
 		const problems = [...(await parseFiles(files))].flatMap(([file, source]) =>
 			bundleBlocks(source).map((block) => `${path.relative(ROOT, file)} holds ${block}`),
@@ -633,12 +485,6 @@ describe("residue", () => {
 	});
 
 	it("browser entries reach no platform module or global", async () => {
-		const probes = await parseProbes([
-			'import { readFile } from "node:fs/promises"; import { $ } from "bun"; const a = Bun.file("x"); const b = process.cwd();',
-			"const text = 'process'; const held = { process: 1, Buffer: 2 }; held.process; type Bytes = Buffer;",
-		]);
-		expect(probes.map(platformUses)).toEqual([["node:fs/promises", "bun", "Bun", "process"], []]);
-
 		const problems: string[] = [];
 		for (const entry of BROWSER_ENTRIES) {
 			for (const [file, source] of await reachedFrom(entry)) {

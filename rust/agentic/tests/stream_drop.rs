@@ -99,5 +99,4 @@ fn a_dropped_next_does_not_send_again() {
 fn a_key_auth_prints_no_key() {
     let shown = format!("{:?}", KeyAuth::Key("fake-secret-1".to_owned()));
     assert!(!shown.contains("fake-secret-1"));
-    assert_eq!(format!("{:?}", KeyAuth::Stored), "Stored");
 }

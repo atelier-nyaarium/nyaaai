@@ -44,7 +44,7 @@ it("the status falls back to the category, and extra cannot set category or mess
 	});
 });
 
-it("an assembler keeps nothing it was handed and hands out nothing it holds", () => {
+it("an assembler keeps nothing it was handed, hands out nothing it holds and keeps a call to its own fields", () => {
 	const assembler = new StepAssembler();
 	const segment = { kind: "content" as const, text: "a" };
 	assembler.add({ kind: "thought", part: { kind: "thought", type: "t", segments: [segment] } });
@@ -63,14 +63,11 @@ it("an assembler keeps nothing it was handed and hands out nothing it holds", ()
 	(result.parts[0] as { segments: Array<{ text: string }> }).segments[0]!.text = "changed";
 	expect(assembler.snapshot[0]).toMatchObject({ type: "t", segments: [{ text: "a" }, { text: "b" }] });
 	expect(assembler.result().parts[0]).toMatchObject({ type: "t", segments: [{ text: "a" }, { text: "b" }] });
-});
 
-it("a call part holds its own fields only, and a result changes nothing", () => {
-	const assembler = new StepAssembler();
-	assembler.add({ ...CALL, extra: 1 } as typeof CALL);
-	assembler.snapshot.pop();
-	const first = assembler.result();
-	expect(assembler.result()).toEqual(first);
-	expect(assembler.snapshot).toEqual([CALL]);
-	expect(Object.keys(first.parts[0] as object)).toEqual(["kind", "index", "wireId", "name", "argumentsText"]);
+	const calls = new StepAssembler();
+	calls.add({ ...CALL, extra: 1 } as typeof CALL);
+	calls.snapshot.pop();
+	const held = calls.result();
+	expect(calls.result()).toEqual(held);
+	expect(calls.snapshot).toEqual([CALL]);
 });

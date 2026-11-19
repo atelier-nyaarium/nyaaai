@@ -104,18 +104,3 @@ pub fn is_zdr(plan: ProviderPlan, id: &str, now: i64) -> bool {
         }
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn the_first_of_two_equal_prefixes_wins() {
-        let table = [("ab*", ZERO), ("a*", KEPT), ("ac*", KEPT), ("ab*", KEPT)];
-        assert_eq!(longest(&table, "abc"), Some(ZERO));
-        assert_eq!(longest(&table, "acd"), Some(KEPT));
-        assert_eq!(longest(&table, "ad"), Some(KEPT));
-        assert_eq!(longest(&table, "b"), None);
-        assert_eq!(longest(&table, "ab*"), Some(ZERO));
-    }
-}

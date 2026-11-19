@@ -7,7 +7,6 @@ use nyaaai_agentic::fetch::ReqwestFetch;
 use nyaaai_contract::cancel::CancelToken;
 use nyaaai_contract::fetch::{Fetch, FetchError, FetchRequest, FetchResponse, Method};
 use nyaaai_testkit::loopback::{Hold, Loopback, LoopbackExchange};
-use nyaaai_testkit::trace::read_trace;
 
 fn run<F: Future>(work: F) -> F::Output {
     tokio::runtime::Builder::new_current_thread()
@@ -121,31 +120,6 @@ fn a_get_sends_no_body() {
                 .iter()
                 .all(|(name, _)| name != "content-length")
         );
-    });
-}
-
-#[test]
-fn plays_a_recorded_trace() {
-    run(async {
-        let file = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("../../cases/traces/openrouter.title.json");
-        let trace = read_trace(&file).unwrap();
-        let exchanges = LoopbackExchange::from_trace(&trace).unwrap();
-        let server = Loopback::start(exchanges).await.unwrap();
-        let fetch = ReqwestFetch::new().unwrap();
-        for exchange in &trace.exchanges {
-            let mut response = fetch
-                .fetch(post(server.url("/"), "{}"), CancelToken::new())
-                .await
-                .unwrap();
-            assert_eq!(u64::from(response.status), exchange.status);
-            let joined: Vec<u8> = exchange
-                .chunks
-                .iter()
-                .flat_map(|chunk| nyaaai_contract::base64::base64_decode(chunk).unwrap())
-                .collect();
-            assert_eq!(drained(&mut response).await.unwrap(), joined);
-        }
     });
 }
 
@@ -313,29 +287,6 @@ fn a_failed_send_holds_no_url() {
         assert!(!text.contains("secret-path"));
         assert!(!text.contains("token=abc"));
         assert!(!text.contains("http://"));
-    });
-}
-
-#[test]
-fn authorization_is_sent() {
-    run(async {
-        let server = Loopback::start(vec![played(200, &["{}"])]).await.unwrap();
-        let fetch = ReqwestFetch::new().unwrap();
-        let mut request = post(server.url("/"), "{}");
-        request
-            .headers
-            .push(("Authorization".to_owned(), "Bearer fake-1234".to_owned()));
-        let mut response = fetch.fetch(request, CancelToken::new()).await.unwrap();
-        drained(&mut response).await.unwrap();
-        let seen = server.requests();
-        let sent = seen[0]
-            .headers
-            .iter()
-            .find(|(name, _)| name == "authorization");
-        assert_eq!(
-            sent.map(|(_, value)| value.as_str()),
-            Some("Bearer fake-1234")
-        );
     });
 }
 

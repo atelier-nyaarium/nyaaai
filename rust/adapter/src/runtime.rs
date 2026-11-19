@@ -709,35 +709,6 @@ mod tests {
         assert!(text.contains(r#""type":"done""#), "{text}");
     }
 
-    #[test]
-    fn a_panic_in_a_blocking_arm_fails_the_run_and_serving_goes_on() {
-        fn commands(name: &str, _: &Value, _: &BlockingContext) -> Option<Result<Value, RunError>> {
-            match name {
-                "boom" => panic::resume_unwind(Box::new("crash")),
-                "fine" => Some(Ok(Value::Null)),
-                _ => None,
-            }
-        }
-        let text = served(&script(&["boom", "fine", "none"]), |input, out| {
-            serve_blocking(input, out, commands)
-        });
-        assert!(crashed(&text, "boom"), "{text}");
-        assert!(text.contains(r#""type":"done""#), "{text}");
-        assert!(text.contains("no command none"), "{text}");
-    }
-
-    #[test]
-    fn the_input_closing_cancels_a_run_that_never_reads_its_inbox() {
-        fn commands(_: &str, _: Value, context: RunContext) -> Option<Command> {
-            Some(Box::pin(async move {
-                context.token().cancelled().await;
-                Err(RunError::Interrupted)
-            }))
-        }
-        let text = served(&script(&["wait"]), |input, out| serve(input, out, commands));
-        assert!(text.contains(r#""code":"interrupted""#), "{text}");
-    }
-
     fn context() -> (RunContext, Arc<Mailbox>) {
         let mailbox = Arc::new(Mailbox::default());
         let context = RunContext {

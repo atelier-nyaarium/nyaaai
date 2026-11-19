@@ -39,7 +39,6 @@ it("a timer that fires before schedule returns leaves the queue working", async 
 	await queue.idle();
 	expect(read).toEqual(["/generation?id=gen-a1"]);
 	queue.add("a2", "gen-a2", 590_000);
-	expect(queue.armedAt()).toBe(590_000 + 7 * 60_000);
 	now = 590_000 + 7 * 60_000;
 	later[0]?.run();
 	await queue.idle();

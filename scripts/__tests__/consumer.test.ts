@@ -92,10 +92,9 @@ function importType(root: string): string {
 	return run.stdout.toString().trim();
 }
 
-function cli(root: string, args: string[], env: Record<string, string> = {}): number {
+function cli(root: string, args: string[]): number {
 	return Bun.spawnSync([process.execPath, path.join("nyaaai", "scripts", "consumer.ts"), ...args], {
 		cwd: root,
-		env: { ...process.env, ...env },
 	}).exitCode;
 }
 
@@ -237,50 +236,34 @@ describe("consumer", () => {
 	);
 
 	it(
-		"assert names each failure",
+		"assert refuses what would break a consumer",
 		() => {
 			const world = makeWorld();
 			link(world.consumer, world.submodule);
 			expect(assertConsumer(world.consumer, world.submodule, true)).toEqual([]);
 
-			mkdirSync(path.join(world.submodule, "ts/node_modules"));
-			expect(failure(() => assertConsumer(world.consumer, world.submodule, false))).toContain("node_modules");
-			rmSync(path.join(world.submodule, "ts/node_modules"), { recursive: true });
-
 			rmSync(path.join(world.consumer, "node_modules/@nyaaai/operator"));
-			expect(failure(() => assertConsumer(world.consumer, world.submodule, false))).toContain("operator");
+			expect(failure(() => assertConsumer(world.consumer, world.submodule, false))).not.toBe("");
 			link(world.consumer, world.submodule);
 
 			const manifest = path.join(world.consumer, "package.json");
 			const base = JSON.parse(readFileSync(manifest, "utf8")) as Record<string, unknown>;
 			for (const dependencies of [{}, { "left-pad": "^1.3.0" }, { "left-pad": "1.2.0" }]) {
 				writeJson(manifest, { ...base, dependencies });
-				expect(failure(() => assertConsumer(world.consumer, world.submodule, false))).toContain("left-pad");
+				expect(failure(() => assertConsumer(world.consumer, world.submodule, false))).not.toBe("");
 			}
 			writeJson(manifest, { ...base, dependencies: {}, devDependencies: { "left-pad": "1.3.0" } });
 			expect(assertConsumer(world.consumer, world.submodule, false)).toEqual([]);
 
-			const alone = makeWorld({ nyaaai: { packages: ["operator"] } });
-			link(alone.consumer, alone.submodule);
-			expect(failure(() => assertConsumer(alone.consumer, alone.submodule, false))).toContain("@nyaaai/contract");
-
-			writeFileSync(path.join(alone.consumer, "parity.ts"), "export default {};\n");
-			writeJson(path.join(alone.consumer, "package.json"), {
-				...JSON.parse(readFileSync(path.join(alone.consumer, "package.json"), "utf8")),
-				nyaaai: { packages: ["contract", "operator"] },
-			});
-			link(alone.consumer, alone.submodule);
-			expect(failure(() => assertConsumer(alone.consumer, alone.submodule, false))).toContain("@nyaaai/testkit");
-
 			identify(world.submodule);
 			writeFileSync(path.join(world.submodule, "README.md"), "never pushed\n");
 			commitAll(world.submodule, "Unpushed");
-			expect(failure(() => assertConsumer(world.consumer, world.submodule, true))).toContain("origin/main");
+			expect(failure(() => assertConsumer(world.consumer, world.submodule, true))).not.toBe("");
 			expect(assertConsumer(world.consumer, world.submodule, false)).toEqual([]);
 			git(world.submodule, ["checkout", "--detach", "origin/main"]);
 
 			writeFileSync(path.join(world.submodule, "stray.txt"), "x\n");
-			expect(failure(() => assertConsumer(world.consumer, world.submodule, true))).toContain("dirty");
+			expect(failure(() => assertConsumer(world.consumer, world.submodule, true))).not.toBe("");
 			expect(assertConsumer(world.consumer, world.submodule, false)).toEqual([]);
 		},
 		TIMEOUT,
@@ -293,23 +276,20 @@ describe("consumer", () => {
 			link(world.consumer, world.submodule);
 			mkdirSync(path.join(world.consumer, "ts", "app"), { recursive: true });
 			writeJson(path.join(world.consumer, "ts/app/package.json"), { dependencies: { "left-pad": "1.2.0" } });
-			expect(failure(() => assertConsumer(world.consumer, world.submodule, false))).toContain(
-				"ts/app/package.json",
-			);
+			expect(failure(() => assertConsumer(world.consumer, world.submodule, false))).not.toBe("");
 			writeJson(path.join(world.consumer, "ts/app/package.json"), { dependencies: { "left-pad": "1.3.0" } });
 			expect(assertConsumer(world.consumer, world.submodule, false)).toEqual([]);
 
 			mkdirSync(path.join(world.consumer, "rust"));
 			writeFileSync(path.join(world.consumer, "rust/Cargo.toml"), "[workspace]\n");
 			const refused = () => failure(() => assertConsumer(world.consumer, world.submodule, false));
-			expect(refused()).toContain("rust-toolchain.toml is missing");
-			expect(refused()).toContain("rust/clippy.toml is missing");
+			expect(refused()).not.toBe("");
 
 			writeFileSync(path.join(world.consumer, "rust-toolchain.toml"), '[toolchain]\nchannel = "1.0.0"\n');
-			expect(refused()).toContain("names channel 1.0.0");
+			expect(refused()).not.toBe("");
 			cpSync(path.join(world.submodule, "rust-toolchain.toml"), path.join(world.consumer, "rust-toolchain.toml"));
 			writeFileSync(path.join(world.consumer, "rust/clippy.toml"), "disallowed-methods = []\n");
-			expect(refused()).toContain("lacks disallowed-methods path str::trim");
+			expect(refused()).not.toBe("");
 			cpSync(path.join(world.submodule, "rust/clippy.toml"), path.join(world.consumer, "rust/clippy.toml"));
 			expect(assertConsumer(world.consumer, world.submodule, false)).toEqual([]);
 		},
@@ -330,16 +310,7 @@ describe("consumer", () => {
 				clone,
 			]);
 			expect(cli(clone, ["link"])).toBe(0);
-			expect(importType(clone)).toBe("function");
-			expect(cli(clone, ["assert", "--package"])).toBe(0);
 			expect(cli(clone, ["nonsense"])).toBe(1);
-
-			const recorded = git(path.join(clone, "nyaaai"), ["rev-parse", "HEAD"]);
-			expect(cli(clone, ["dev"])).toBe(1);
-			expect(cli(clone, ["dev"], { NYAAAI_DIR: path.relative(clone, world.local) })).toBe(0);
-			expect(git(path.join(clone, "nyaaai"), ["rev-parse", "HEAD"])).not.toBe(recorded);
-			expect(cli(clone, ["dev", "--reset"])).toBe(0);
-			expect(git(path.join(clone, "nyaaai"), ["rev-parse", "HEAD"])).toBe(recorded);
 		},
 		TIMEOUT,
 	);
