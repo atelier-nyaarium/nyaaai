@@ -1,0 +1,29 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.sameOrigin",
+	"name": "origin-absent",
+	"input": {
+		"rows": [
+			{
+				"left": null,
+				"right": null
+			},
+			{
+				"left": null,
+				"right": "http://lab.local"
+			},
+			{
+				"left": "http://lab.local",
+				"right": null
+			}
+		]
+	},
+	"expected": {
+		"same": [
+			false,
+			false,
+			false
+		]
+	}
+}

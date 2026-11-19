@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "compatible-non-ascii-path",
+	"input": {
+		"value": {
+			"id": "api",
+			"kind": "compatible",
+			"label": "Lab",
+			"url": "https://api.example.com/café"
+		}
+	},
+	"expected": {
+		"entry": {
+			"id": "api",
+			"kind": "compatible",
+			"label": "Lab",
+			"url": "https://api.example.com/caf%C3%A9"
+		}
+	}
+}

@@ -1,0 +1,68 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retention.isZdr",
+	"name": "unlisted-never",
+	"input": {
+		"rows": [
+			{
+				"plan": "go",
+				"id": "gemini-3.8-flash",
+				"now": 0
+			},
+			{
+				"plan": "go",
+				"id": "",
+				"now": 0
+			},
+			{
+				"plan": "go",
+				"id": "constructor",
+				"now": 0
+			},
+			{
+				"plan": "go",
+				"id": "__proto__",
+				"now": 0
+			},
+			{
+				"plan": "go",
+				"id": "toString",
+				"now": 1796083200000
+			},
+			{
+				"plan": "payg",
+				"id": "unknown-model",
+				"now": 0
+			},
+			{
+				"plan": "payg",
+				"id": "",
+				"now": 0
+			},
+			{
+				"plan": "payg",
+				"id": "constructor",
+				"now": 0
+			},
+			{
+				"plan": "payg",
+				"id": "valueOf",
+				"now": 0
+			}
+		]
+	},
+	"expected": {
+		"values": [
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false
+		]
+	}
+}

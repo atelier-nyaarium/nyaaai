@@ -1,0 +1,64 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "view.codecFacts",
+	"name": "api-kept",
+	"input": {
+		"views": [
+			{
+				"reasoning": true,
+				"status": "ok",
+				"efforts": [],
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"required"
+					],
+					"strict": true,
+					"reasoning": "reasoning_content",
+					"toggle": true
+				}
+			},
+			{
+				"reasoning": true,
+				"status": "ok",
+				"efforts": [],
+				"api": {
+					"family": "messages",
+					"structured": false,
+					"choice": [],
+					"strict": false
+				}
+			}
+		]
+	},
+	"expected": {
+		"facts": [
+			{
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"required"
+					],
+					"strict": true,
+					"reasoning": "reasoning_content",
+					"toggle": true
+				},
+				"efforts": []
+			},
+			{
+				"api": {
+					"family": "messages",
+					"structured": false,
+					"choice": [],
+					"strict": false
+				},
+				"efforts": []
+			}
+		]
+	}
+}

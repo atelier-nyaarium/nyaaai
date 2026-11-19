@@ -1,0 +1,14 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.select",
+	"name": "select-empty-list",
+	"input": {
+		"wanted": "openai/gpt-6-luna",
+		"list": []
+	},
+	"expected": {
+		"id": null,
+		"marked": true
+	}
+}

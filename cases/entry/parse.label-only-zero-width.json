@@ -1,0 +1,20 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "label-only-zero-width",
+	"input": {
+		"value": {
+			"id": "or1",
+			"kind": "openrouter",
+			"label": "\u200b"
+		}
+	},
+	"expected": {
+		"entry": {
+			"id": "or1",
+			"kind": "openrouter",
+			"label": "\u200b"
+		}
+	}
+}

@@ -1,0 +1,29 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parseList",
+	"name": "list-duplicate-after-trim",
+	"input": {
+		"value": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": " One "
+			},
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "One"
+			}
+		]
+	},
+	"expected": {
+		"entries": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "One"
+			}
+		]
+	}
+}

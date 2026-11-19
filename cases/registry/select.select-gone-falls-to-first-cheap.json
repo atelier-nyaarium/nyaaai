@@ -1,0 +1,23 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.select",
+	"name": "select-gone-falls-to-first-cheap",
+	"input": {
+		"wanted": "openrouter:x/gone",
+		"list": [
+			{
+				"key": "openai/gpt-6-luna",
+				"verifiedCompletion": 0.55
+			},
+			{
+				"key": "moonshotai/kimi-k3",
+				"verifiedCompletion": 15
+			}
+		]
+	},
+	"expected": {
+		"id": "openai/gpt-6-luna",
+		"marked": true
+	}
+}

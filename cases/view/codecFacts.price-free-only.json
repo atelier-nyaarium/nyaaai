@@ -1,0 +1,118 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "view.codecFacts",
+	"name": "price-free-only",
+	"input": {
+		"views": [
+			{
+				"reasoning": true,
+				"status": "ok",
+				"efforts": [],
+				"price": "free"
+			},
+			{
+				"reasoning": true,
+				"status": "ok",
+				"efforts": [],
+				"price": "unknown"
+			},
+			{
+				"reasoning": true,
+				"status": "ok",
+				"efforts": [],
+				"price": {
+					"prompt": [
+						0.5,
+						1
+					],
+					"completion": [
+						1,
+						2
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 0,
+							"prompt": 1,
+							"completion": 2
+						},
+						{
+							"minPromptTokens": 200000,
+							"prompt": 2,
+							"completion": 4,
+							"cacheRead": 0.5,
+							"cacheWrite": 2.5,
+							"cacheWrite1h": 4
+						}
+					]
+				}
+			},
+			{
+				"reasoning": true,
+				"status": "ok",
+				"efforts": [],
+				"price": "free",
+				"outputLimit": 100,
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"required"
+					],
+					"strict": true,
+					"reasoning": "reasoning_content",
+					"toggle": true
+				}
+			}
+		]
+	},
+	"expected": {
+		"facts": [
+			{
+				"api": {
+					"family": "chat-completions",
+					"structured": false,
+					"choice": [],
+					"strict": false
+				},
+				"efforts": [],
+				"free": true
+			},
+			{
+				"api": {
+					"family": "chat-completions",
+					"structured": false,
+					"choice": [],
+					"strict": false
+				},
+				"efforts": []
+			},
+			{
+				"api": {
+					"family": "chat-completions",
+					"structured": false,
+					"choice": [],
+					"strict": false
+				},
+				"efforts": []
+			},
+			{
+				"api": {
+					"family": "responses",
+					"structured": true,
+					"choice": [
+						"auto",
+						"required"
+					],
+					"strict": true,
+					"reasoning": "reasoning_content",
+					"toggle": true
+				},
+				"efforts": [],
+				"outputLimit": 100,
+				"free": true
+			}
+		]
+	}
+}

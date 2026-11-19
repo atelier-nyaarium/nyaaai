@@ -1,0 +1,29 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.parse",
+	"name": "hidden-local-bad-tag",
+	"input": {
+		"raw": {
+			"records": {},
+			"added": {},
+			"hidden": [
+				"local:box/a\u0001b",
+				"local:box/ "
+			]
+		},
+		"entries": [
+			{
+				"id": "box",
+				"kind": "ollama"
+			}
+		]
+	},
+	"expected": {
+		"stored": {
+			"tested": {},
+			"added": {},
+			"hidden": []
+		}
+	}
+}

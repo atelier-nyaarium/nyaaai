@@ -1,0 +1,71 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.rows",
+	"name": "rows-local-hf-label",
+	"input": {
+		"raw": {
+			"records": {
+				"e1": {
+					"local:e1/hf.co/user/Coder-30B-A3B-Instruct-1M-Distill-Reasoning-Long-Context-Experimental-GGUF:Q4_K_M-imatrix-extra-long-name-here": {
+						"label": "hf.co/user/Coder-30B-A3B-Instruct-1M-Distill-Reasoning-Long-Context-Experimental-GGUF:Q4_K_M-imatrix-extra-long-name-here",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					}
+				}
+			},
+			"added": {
+				"e1": [
+					"local:e1/hf.co/user/Coder-30B-A3B-Instruct-1M-Distill-Reasoning-Long-Context-Experimental-GGUF:Q4_K_M-imatrix-extra-long-name-here"
+				]
+			},
+			"hidden": []
+		},
+		"entries": [
+			{
+				"id": "e1",
+				"kind": "ollama"
+			}
+		]
+	},
+	"expected": {
+		"curatedFirst": true,
+		"rest": [
+			{
+				"key": "local:e1/hf.co/user/Coder-30B-A3B-Instruct-1M-Distill-Reasoning-Long-Context-Experimental-GGUF:Q4_K_M-imatrix-extra-long-name-here",
+				"bindings": {
+					"ollama": {
+						"id": "hf.co/user/Coder-30B-A3B-Instruct-1M-Distill-Reasoning-Long-Context-Experimental-GGUF:Q4_K_M-imatrix-extra-long-name-here"
+					}
+				},
+				"family": "local:e1/hf.co/user/Coder-30B-A3B-Instruct-1M-Distill-Reasoning-Long-Context-Experimental-GGUF:Q4_K_M-imatrix-extra-long-name-here",
+				"label": "hf.co/user/Coder-30B-A3B-Instruct-1M-Distill-Reasoning-Long-Context-Experimental-GGUF:Q4_K_M-imatrix-extra-long-name-here",
+				"reasoning": true,
+				"schema": true,
+				"cache": "implicit",
+				"verified": "2026-09-28",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				},
+				"identity": {
+					"kind": "local",
+					"entry": "e1",
+					"tag": "hf.co/user/Coder-30B-A3B-Instruct-1M-Distill-Reasoning-Long-Context-Experimental-GGUF:Q4_K_M-imatrix-extra-long-name-here"
+				}
+			}
+		]
+	}
+}

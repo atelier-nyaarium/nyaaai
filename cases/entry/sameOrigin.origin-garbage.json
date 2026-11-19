@@ -1,0 +1,54 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.sameOrigin",
+	"name": "origin-garbage",
+	"input": {
+		"rows": [
+			{
+				"left": "not a url",
+				"right": "not a url"
+			},
+			{
+				"left": "",
+				"right": ""
+			},
+			{
+				"left": "   ",
+				"right": "   "
+			},
+			{
+				"left": "http://",
+				"right": "http://"
+			},
+			{
+				"left": "lab.local",
+				"right": "lab.local"
+			},
+			{
+				"left": "http://lab local",
+				"right": "http://lab local"
+			},
+			{
+				"left": "http://lab.local:99999",
+				"right": "http://lab.local:99999"
+			},
+			{
+				"left": "http://[::1",
+				"right": "http://[::1"
+			}
+		]
+	},
+	"expected": {
+		"same": [
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false
+		]
+	}
+}

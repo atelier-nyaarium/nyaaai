@@ -1,0 +1,27 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.parse",
+	"name": "parse-added-without-record",
+	"input": {
+		"raw": {
+			"records": {
+				"e1": {}
+			},
+			"added": {
+				"e1": [
+					"openrouter:z-ai/glm-5.2"
+				]
+			},
+			"hidden": []
+		},
+		"entries": []
+	},
+	"expected": {
+		"stored": {
+			"tested": {},
+			"added": {},
+			"hidden": []
+		}
+	}
+}

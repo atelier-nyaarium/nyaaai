@@ -1,0 +1,21 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.parse",
+	"name": "parse-nulls",
+	"input": {
+		"raw": {
+			"records": null,
+			"added": null,
+			"hidden": null
+		},
+		"entries": []
+	},
+	"expected": {
+		"stored": {
+			"tested": {},
+			"added": {},
+			"hidden": []
+		}
+	}
+}

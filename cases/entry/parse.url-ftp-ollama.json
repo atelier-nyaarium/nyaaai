@@ -1,0 +1,17 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "url-ftp-ollama",
+	"input": {
+		"value": {
+			"id": "box",
+			"kind": "ollama",
+			"label": "Lab",
+			"url": "ftp://lab.local"
+		}
+	},
+	"expected": {
+		"entry": null
+	}
+}

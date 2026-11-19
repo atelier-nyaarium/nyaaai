@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "url-default-port-lmstudio",
+	"input": {
+		"value": {
+			"id": "box",
+			"kind": "lmstudio",
+			"label": "Lab",
+			"url": "http://lab.local:80"
+		}
+	},
+	"expected": {
+		"entry": {
+			"id": "box",
+			"kind": "lmstudio",
+			"label": "Lab",
+			"url": "http://lab.local"
+		}
+	}
+}

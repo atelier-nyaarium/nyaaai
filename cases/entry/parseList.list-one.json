@@ -1,0 +1,24 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parseList",
+	"name": "list-one",
+	"input": {
+		"value": [
+			{
+				"id": "or1",
+				"kind": "openrouter",
+				"label": "OpenRouter"
+			}
+		]
+	},
+	"expected": {
+		"entries": [
+			{
+				"id": "or1",
+				"kind": "openrouter",
+				"label": "OpenRouter"
+			}
+		]
+	}
+}

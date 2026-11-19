@@ -1,0 +1,156 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retention.of",
+	"name": "go-unlisted",
+	"input": {
+		"rows": [
+			{
+				"plan": "go",
+				"id": "gemini-4-argon-2"
+			},
+			{
+				"plan": "go",
+				"id": "gemini-3.8-flash"
+			},
+			{
+				"plan": "go",
+				"id": "gemini-4"
+			},
+			{
+				"plan": "go",
+				"id": "grok-4.8"
+			},
+			{
+				"plan": "go",
+				"id": "grok-4"
+			},
+			{
+				"plan": "go",
+				"id": "gpt-6-sol"
+			},
+			{
+				"plan": "go",
+				"id": "gpt-6-luna-2"
+			},
+			{
+				"plan": "go",
+				"id": "claude-sonnet-5-5"
+			},
+			{
+				"plan": "go",
+				"id": "claude-haiku-5-4"
+			},
+			{
+				"plan": "go",
+				"id": "beam"
+			},
+			{
+				"plan": "go",
+				"id": "beam-free-2"
+			},
+			{
+				"plan": "go",
+				"id": "muse-spark"
+			},
+			{
+				"plan": "go",
+				"id": "mistral-large"
+			},
+			{
+				"plan": "go",
+				"id": ""
+			},
+			{
+				"plan": "go",
+				"id": "unknown-model"
+			},
+			{
+				"plan": "go",
+				"id": "GLM-5"
+			},
+			{
+				"plan": "go",
+				"id": "Glm-5"
+			},
+			{
+				"plan": "go",
+				"id": "glm"
+			},
+			{
+				"plan": "go",
+				"id": "constructor"
+			},
+			{
+				"plan": "go",
+				"id": "__proto__"
+			},
+			{
+				"plan": "go",
+				"id": "toString"
+			},
+			{
+				"plan": "go",
+				"id": "hasOwnProperty"
+			},
+			{
+				"plan": "go",
+				"id": "valueOf"
+			},
+			{
+				"plan": "go",
+				"id": "*"
+			},
+			{
+				"plan": "go",
+				"id": "-*"
+			},
+			{
+				"plan": "go",
+				"id": " glm-5"
+			},
+			{
+				"plan": "go",
+				"id": "glm-5 "
+			},
+			{
+				"plan": "go",
+				"id": "é"
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			{
+				"zdr": true
+			},
+			null
+		]
+	}
+}

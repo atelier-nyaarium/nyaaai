@@ -1,0 +1,20 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "lmstudio-no-url",
+	"input": {
+		"value": {
+			"id": "box",
+			"kind": "lmstudio",
+			"label": "Lab"
+		}
+	},
+	"expected": {
+		"entry": {
+			"id": "box",
+			"kind": "lmstudio",
+			"label": "Lab"
+		}
+	}
+}

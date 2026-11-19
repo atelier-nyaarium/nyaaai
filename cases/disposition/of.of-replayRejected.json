@@ -1,0 +1,86 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "disposition.of",
+	"name": "of-replayRejected",
+	"input": {
+		"rows": [
+			{
+				"failure": {
+					"category": "replayRejected",
+					"status": "replayRejected",
+					"message": "m"
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "replayRejected",
+					"status": "replayRejected",
+					"message": "m"
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "replayRejected",
+					"status": "replayRejected",
+					"message": "m"
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "replayRejected",
+					"status": "replayRejected",
+					"message": "m"
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "replayRejected",
+					"status": "replayRejected",
+					"message": "m"
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "replayRejected",
+					"status": "replayRejected",
+					"message": "m"
+				},
+				"status": "unknown"
+			}
+		]
+	},
+	"expected": {
+		"dispositions": [
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			}
+		]
+	}
+}

@@ -1,0 +1,190 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "rowKey.shown",
+	"name": "table",
+	"input": {
+		"identities": [
+			{
+				"kind": "curated",
+				"key": "openai/gpt-6-luna"
+			},
+			{
+				"kind": "curated",
+				"key": "deepseek/deepseek-v4.1-flash"
+			},
+			{
+				"kind": "hosted",
+				"provider": "openrouter",
+				"id": "z-ai/glm-5.3-flash"
+			},
+			{
+				"kind": "hosted",
+				"provider": "openrouter",
+				"id": "openai/gpt-4o:extended"
+			},
+			{
+				"kind": "hosted",
+				"provider": "openrouter",
+				"id": "~anthropic/claude-sonnet-latest"
+			},
+			{
+				"kind": "hosted",
+				"provider": "openrouter",
+				"id": "a:b:c"
+			},
+			{
+				"kind": "hosted",
+				"provider": "openrouter",
+				"id": "a+b/c-d.e"
+			},
+			{
+				"kind": "hosted",
+				"provider": "opencode",
+				"id": "mimo-v2.6-flash"
+			},
+			{
+				"kind": "hosted",
+				"provider": "ollama",
+				"id": "model"
+			},
+			{
+				"kind": "hosted",
+				"provider": "lmstudio",
+				"id": "vendor/model"
+			},
+			{
+				"kind": "hosted",
+				"provider": "llamacpp",
+				"id": "model"
+			},
+			{
+				"kind": "hosted",
+				"provider": "compatible",
+				"id": "model"
+			},
+			{
+				"kind": "local",
+				"entry": "3f2a1b4c-5d6e-4f70-8a9b-0c1d2e3f4a5b",
+				"tag": "local-a:27b"
+			},
+			{
+				"kind": "local",
+				"entry": "lab",
+				"tag": "hf.co/user/repo:Q4_K_M"
+			},
+			{
+				"kind": "local",
+				"entry": "opencode",
+				"tag": "local-b:9b"
+			},
+			{
+				"kind": "local",
+				"entry": "local",
+				"tag": "local-b:9b"
+			},
+			{
+				"kind": "local",
+				"entry": "lab",
+				"tag": "/models/my model.gguf"
+			},
+			{
+				"kind": "local",
+				"entry": "lab",
+				"tag": "C:\\models\\a b.gguf"
+			},
+			{
+				"kind": "local",
+				"entry": "lab",
+				"tag": "a/b/c"
+			},
+			{
+				"kind": "local",
+				"entry": "lab",
+				"tag": "local:x/y"
+			},
+			{
+				"kind": "local",
+				"entry": "lab",
+				"tag": " padded "
+			},
+			{
+				"kind": "local",
+				"entry": "lab",
+				"tag": "é中😀"
+			},
+			{
+				"kind": "local",
+				"entry": "lab",
+				"tag": " x"
+			},
+			{
+				"kind": "local",
+				"entry": "lab",
+				"tag": "x y"
+			},
+			{
+				"kind": "local",
+				"entry": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+				"tag": "t"
+			}
+		],
+		"keys": [
+			"openai/gpt-6-luna",
+			"openrouter:z-ai/glm-5.3-flash",
+			"openrouter:a:b:c",
+			"opencode:mimo-v2.6-flash",
+			"local:3f2a1b4c-5d6e-4f70-8a9b-0c1d2e3f4a5b/local-a:27b",
+			"local:lab//models/my model.gguf",
+			"z-ai/glm-5.3-flash",
+			"vendor:model",
+			"local:",
+			"local:lab/a\u0001b",
+			"",
+			"openrouter:a b"
+		]
+	},
+	"expected": {
+		"ids": [
+			"openai/gpt-6-luna",
+			"deepseek/deepseek-v4.1-flash",
+			"z-ai/glm-5.3-flash",
+			"openai/gpt-4o:extended",
+			"~anthropic/claude-sonnet-latest",
+			"openrouter/a:b:c",
+			"a+b/c-d.e",
+			"opencode/mimo-v2.6-flash",
+			"ollama/model",
+			"vendor/model",
+			"llamacpp/model",
+			"compatible/model",
+			"3f2a1b4c-5d6e-4f70-8a9b-0c1d2e3f4a5b/local-a:27b",
+			"lab/hf.co/user/repo:Q4_K_M",
+			"opencode/local-b:9b",
+			"local/local-b:9b",
+			"lab//models/my model.gguf",
+			"lab/C:\\models\\a b.gguf",
+			"lab/a/b/c",
+			"lab/local:x/y",
+			"lab/ padded ",
+			"lab/é中😀",
+			"lab/ x",
+			"lab/x y",
+			"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/t"
+		],
+		"keyed": [
+			"openai/gpt-6-luna",
+			"z-ai/glm-5.3-flash",
+			"openrouter/a:b:c",
+			"opencode/mimo-v2.6-flash",
+			"3f2a1b4c-5d6e-4f70-8a9b-0c1d2e3f4a5b/local-a:27b",
+			"lab//models/my model.gguf",
+			"z-ai/glm-5.3-flash",
+			"vendor:model",
+			"local:",
+			"local:lab/a\u0001b",
+			"",
+			"openrouter:a b"
+		]
+	}
+}

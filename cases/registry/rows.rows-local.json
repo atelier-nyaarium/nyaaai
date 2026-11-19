@@ -1,0 +1,71 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.rows",
+	"name": "rows-local",
+	"input": {
+		"raw": {
+			"records": {
+				"e1": {
+					"local:e1/local-a:27b": {
+						"label": "Local A",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": false,
+						"cache": "explicit",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					}
+				}
+			},
+			"added": {
+				"e1": [
+					"local:e1/local-a:27b"
+				]
+			},
+			"hidden": []
+		},
+		"entries": [
+			{
+				"id": "e1",
+				"kind": "ollama"
+			}
+		]
+	},
+	"expected": {
+		"curatedFirst": true,
+		"rest": [
+			{
+				"key": "local:e1/local-a:27b",
+				"bindings": {
+					"ollama": {
+						"id": "local-a:27b"
+					}
+				},
+				"family": "local:e1/local-a:27b",
+				"label": "Local A",
+				"reasoning": false,
+				"schema": true,
+				"cache": "explicit",
+				"verified": "2026-09-28",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				},
+				"identity": {
+					"kind": "local",
+					"entry": "e1",
+					"tag": "local-a:27b"
+				}
+			}
+		]
+	}
+}

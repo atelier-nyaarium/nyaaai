@@ -1,0 +1,86 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "disposition.of",
+	"name": "of-keyRejected",
+	"input": {
+		"rows": [
+			{
+				"failure": {
+					"category": "keyRejected",
+					"status": "keyRejected",
+					"message": "m"
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "keyRejected",
+					"status": "keyRejected",
+					"message": "m"
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "keyRejected",
+					"status": "keyRejected",
+					"message": "m"
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "keyRejected",
+					"status": "keyRejected",
+					"message": "m"
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "keyRejected",
+					"status": "keyRejected",
+					"message": "m"
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "keyRejected",
+					"status": "keyRejected",
+					"message": "m"
+				},
+				"status": "unknown"
+			}
+		]
+	},
+	"expected": {
+		"dispositions": [
+			{
+				"act": "fallThrough",
+				"notice": "keyRejected"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "keyRejected"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "keyRejected"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "keyRejected"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "keyRejected"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "keyRejected"
+			}
+		]
+	}
+}

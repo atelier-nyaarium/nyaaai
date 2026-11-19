@@ -1,0 +1,17 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "url-ftp-llamacpp",
+	"input": {
+		"value": {
+			"id": "box",
+			"kind": "llamacpp",
+			"label": "Lab",
+			"url": "ftp://lab.local"
+		}
+	},
+	"expected": {
+		"entry": null
+	}
+}

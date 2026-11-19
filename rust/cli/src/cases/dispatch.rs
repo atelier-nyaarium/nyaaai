@@ -111,6 +111,9 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
         "url.origin" => {
             run::<shapes::UrlOriginInput, shapes::UrlOriginResult>(input, super::url::origin)
         }
+        "url.parts" => {
+            run::<shapes::UrlPartsInput, shapes::UrlPartsResult>(input, super::url::parts)
+        }
         "pattern.problems" => run::<shapes::PatternProblemsInput, shapes::PatternProblemsResult>(
             input,
             super::pattern::problems,
@@ -331,6 +334,102 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
         "secret.scrub" => {
             run::<shapes::SecretScrubInput, shapes::SecretScrubResult>(input, super::secret::scrub)
         }
+        "entry.parse" => {
+            run::<shapes::EntryParseInput, shapes::EntryParseResult>(input, super::entry::parse)
+        }
+        "entry.parseList" => run::<shapes::EntryParseListInput, shapes::EntryParseListResult>(
+            input,
+            super::entry::parse_list,
+        ),
+        "entry.sameOrigin" => run::<shapes::EntrySameOriginInput, shapes::EntrySameOriginResult>(
+            input,
+            super::entry::same_origin,
+        ),
+        "entry.id" => run::<shapes::EntryIdInput, shapes::EntryIdResult>(input, super::entry::id),
+        "entry.secretKey" => run::<shapes::EntrySecretKeyInput, shapes::EntrySecretKeyResult>(
+            input,
+            super::entry::secret_key,
+        ),
+        "rowKey.build" => {
+            run::<shapes::RowKeyBuildInput, shapes::RowKeyBuildResult>(input, super::row_key::build)
+        }
+        "rowKey.parse" => {
+            run::<shapes::RowKeyParseInput, shapes::RowKeyParseResult>(input, super::row_key::parse)
+        }
+        "rowKey.shown" => {
+            run::<shapes::RowKeyShownInput, shapes::RowKeyShownResult>(input, super::row_key::shown)
+        }
+        "rowKey.servedId" => run::<shapes::RowKeyServedIdInput, shapes::RowKeyServedIdResult>(
+            input,
+            super::row_key::served_id,
+        ),
+        "curated.rows" => {
+            run::<shapes::CuratedRowsInput, shapes::CuratedRowsResult>(input, super::curated::rows)
+        }
+        "registry.testRecord" => run::<
+            shapes::RegistryTestRecordInput,
+            shapes::RegistryTestRecordResult,
+        >(input, super::registry::test_record),
+        "registry.parse" => run::<shapes::RegistryParseInput, shapes::RegistryParseResult>(
+            input,
+            super::registry::parse,
+        ),
+        "registry.scoped" => run::<shapes::RegistryScopedInput, shapes::RegistryScopedResult>(
+            input,
+            super::registry::scoped,
+        ),
+        "registry.rows" => run::<shapes::RegistryRowsInput, shapes::RegistryRowsResult>(
+            input,
+            super::registry::rows,
+        ),
+        "registry.offered" => run::<shapes::RegistryOfferedInput, shapes::RegistryOfferedResult>(
+            input,
+            super::registry::offered,
+        ),
+        "registry.list" => run::<shapes::RegistryListInput, shapes::RegistryListResult>(
+            input,
+            super::registry::list,
+        ),
+        "registry.select" => run::<shapes::RegistrySelectInput, shapes::RegistrySelectResult>(
+            input,
+            super::registry::select,
+        ),
+        "registry.passed" => run::<shapes::RegistryPassedInput, shapes::RegistryPassedResult>(
+            input,
+            super::registry::passed,
+        ),
+        "registry.ids" => {
+            run::<shapes::RegistryIdsInput, shapes::RegistryIdsResult>(input, super::registry::ids)
+        }
+        "view.unknown" => {
+            run::<shapes::ViewUnknownInput, shapes::ViewUnknownResult>(input, super::view::unknown)
+        }
+        "view.tiers" => {
+            run::<shapes::ViewTiersInput, shapes::ViewTiersResult>(input, super::view::tiers)
+        }
+        "view.codecFacts" => run::<shapes::ViewCodecFactsInput, shapes::ViewCodecFactsResult>(
+            input,
+            super::view::codec_facts,
+        ),
+        "view.runEffort" => run::<shapes::ViewRunEffortInput, shapes::ViewRunEffortResult>(
+            input,
+            super::view::run_effort,
+        ),
+        "retention.of" => {
+            run::<shapes::RetentionOfInput, shapes::RetentionOfResult>(input, super::retention::of)
+        }
+        "retention.isZdr" => run::<shapes::RetentionIsZdrInput, shapes::RetentionIsZdrResult>(
+            input,
+            super::retention::is_zdr,
+        ),
+        "disposition.of" => run::<shapes::DispositionOfInput, shapes::DispositionOfResult>(
+            input,
+            super::disposition::of,
+        ),
+        "disposition.skipReason" => run::<
+            shapes::DispositionSkipReasonInput,
+            shapes::DispositionSkipReasonResult,
+        >(input, super::disposition::skip_reason),
         _ => return None,
     })
 }

@@ -1,0 +1,80 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "disposition.of",
+	"name": "of-idle",
+	"input": {
+		"rows": [
+			{
+				"failure": {
+					"category": "idle",
+					"status": "idle",
+					"message": "m"
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "idle",
+					"status": "idle",
+					"message": "m"
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "idle",
+					"status": "idle",
+					"message": "m"
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "idle",
+					"status": "idle",
+					"message": "m"
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "idle",
+					"status": "idle",
+					"message": "m"
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "idle",
+					"status": "idle",
+					"message": "m"
+				},
+				"status": "unknown"
+			}
+		]
+	},
+	"expected": {
+		"dispositions": [
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			}
+		]
+	}
+}

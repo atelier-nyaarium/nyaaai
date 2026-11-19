@@ -1,0 +1,71 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.rows",
+	"name": "rows-prices-and-dates",
+	"input": {
+		"raw": {
+			"records": {
+				"e1": {
+					"openrouter:a/b": {
+						"label": "  Spaced  ",
+						"date": "2026-01-02",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.5,
+							"completion": 1.25
+						}
+					}
+				}
+			},
+			"added": {
+				"e1": [
+					"openrouter:a/b"
+				]
+			},
+			"hidden": []
+		},
+		"entries": [
+			{
+				"id": "e1",
+				"kind": "openrouter"
+			}
+		]
+	},
+	"expected": {
+		"curatedFirst": true,
+		"rest": [
+			{
+				"key": "openrouter:a/b",
+				"bindings": {
+					"openrouter": {
+						"id": "a/b"
+					}
+				},
+				"family": "openrouter:a/b",
+				"label": "Spaced",
+				"reasoning": true,
+				"schema": true,
+				"cache": "implicit",
+				"verified": "2026-01-02",
+				"verifiedPrice": {
+					"prompt": 0.5,
+					"completion": 1.25
+				},
+				"identity": {
+					"kind": "hosted",
+					"provider": "openrouter",
+					"id": "a/b"
+				}
+			}
+		]
+	}
+}

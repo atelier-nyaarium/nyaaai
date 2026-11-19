@@ -1,0 +1,77 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retention.of",
+	"name": "go-kept",
+	"input": {
+		"rows": [
+			{
+				"plan": "go",
+				"id": "grok-4.7"
+			},
+			{
+				"plan": "go",
+				"id": "gpt-6-luna"
+			},
+			{
+				"plan": "go",
+				"id": "gpt-5.6-luna"
+			},
+			{
+				"plan": "go",
+				"id": "claude-haiku-5-5"
+			},
+			{
+				"plan": "go",
+				"id": "beam-free"
+			},
+			{
+				"plan": "go",
+				"id": "muse-spark-1"
+			},
+			{
+				"plan": "go",
+				"id": "muse-spark-"
+			},
+			{
+				"plan": "go",
+				"id": "iceman"
+			},
+			{
+				"plan": "go",
+				"id": "iceman-2"
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"zdr": false
+			},
+			{
+				"zdr": false
+			},
+			{
+				"zdr": false
+			},
+			{
+				"zdr": false
+			},
+			{
+				"zdr": false
+			},
+			{
+				"zdr": false
+			},
+			{
+				"zdr": false
+			},
+			{
+				"zdr": false
+			},
+			{
+				"zdr": false
+			}
+		]
+	}
+}

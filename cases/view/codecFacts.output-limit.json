@@ -1,0 +1,66 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "view.codecFacts",
+	"name": "output-limit",
+	"input": {
+		"views": [
+			{
+				"reasoning": true,
+				"status": "ok",
+				"efforts": [],
+				"outputLimit": 0
+			},
+			{
+				"reasoning": true,
+				"status": "ok",
+				"efforts": [],
+				"outputLimit": 8192
+			},
+			{
+				"reasoning": true,
+				"status": "ok",
+				"efforts": [
+					"medium"
+				],
+				"outputLimit": 128000
+			}
+		]
+	},
+	"expected": {
+		"facts": [
+			{
+				"api": {
+					"family": "chat-completions",
+					"structured": false,
+					"choice": [],
+					"strict": false
+				},
+				"efforts": [],
+				"outputLimit": 0
+			},
+			{
+				"api": {
+					"family": "chat-completions",
+					"structured": false,
+					"choice": [],
+					"strict": false
+				},
+				"efforts": [],
+				"outputLimit": 8192
+			},
+			{
+				"api": {
+					"family": "chat-completions",
+					"structured": false,
+					"choice": [],
+					"strict": false
+				},
+				"efforts": [
+					"medium"
+				],
+				"outputLimit": 128000
+			}
+		]
+	}
+}

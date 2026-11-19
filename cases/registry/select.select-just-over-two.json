@@ -1,0 +1,23 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.select",
+	"name": "select-just-over-two",
+	"input": {
+		"wanted": "gone",
+		"list": [
+			{
+				"key": "openai/gpt-6-luna",
+				"verifiedCompletion": 2.0000001
+			},
+			{
+				"key": "moonshotai/kimi-k3",
+				"verifiedCompletion": 1
+			}
+		]
+	},
+	"expected": {
+		"id": "moonshotai/kimi-k3",
+		"marked": true
+	}
+}

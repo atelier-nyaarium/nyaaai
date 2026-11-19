@@ -1,0 +1,96 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.rows",
+	"name": "rows-discovered-and-curated-under-kind",
+	"input": {
+		"raw": {
+			"records": {
+				"go1": {
+					"opencode:glm-5.3-flash": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					},
+					"opencode:gpt-6-luna": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					}
+				}
+			},
+			"added": {
+				"go1": [
+					"opencode:glm-5.3-flash",
+					"opencode:gpt-6-luna"
+				]
+			},
+			"hidden": [
+				"local:box/local-a:27b",
+				"local:gone/local-a:27b"
+			]
+		},
+		"entries": [
+			{
+				"id": "box",
+				"kind": "ollama"
+			},
+			{
+				"id": "go1",
+				"kind": "opencode"
+			}
+		]
+	},
+	"expected": {
+		"curatedFirst": true,
+		"rest": [
+			{
+				"key": "opencode:glm-5.3-flash",
+				"bindings": {
+					"opencode": {
+						"id": "glm-5.3-flash"
+					}
+				},
+				"family": "opencode:glm-5.3-flash",
+				"label": "Test Model",
+				"reasoning": true,
+				"schema": true,
+				"cache": "implicit",
+				"verified": "2026-09-28",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				},
+				"identity": {
+					"kind": "hosted",
+					"provider": "opencode",
+					"id": "glm-5.3-flash"
+				}
+			}
+		]
+	}
+}

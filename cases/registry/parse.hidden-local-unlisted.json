@@ -1,0 +1,23 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.parse",
+	"name": "hidden-local-unlisted",
+	"input": {
+		"raw": {
+			"records": {},
+			"added": {},
+			"hidden": [
+				"local:box/local-a:27b"
+			]
+		},
+		"entries": []
+	},
+	"expected": {
+		"stored": {
+			"tested": {},
+			"added": {},
+			"hidden": []
+		}
+	}
+}

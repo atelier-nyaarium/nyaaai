@@ -1,0 +1,21 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.parse",
+	"name": "parse-wrong-types",
+	"input": {
+		"raw": {
+			"records": [],
+			"added": "x",
+			"hidden": 7
+		},
+		"entries": []
+	},
+	"expected": {
+		"stored": {
+			"tested": {},
+			"added": {},
+			"hidden": []
+		}
+	}
+}

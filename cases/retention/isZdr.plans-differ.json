@@ -1,0 +1,62 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retention.isZdr",
+	"name": "plans-differ",
+	"input": {
+		"rows": [
+			{
+				"plan": "go",
+				"id": "gemini-3.8-flash",
+				"now": 0
+			},
+			{
+				"plan": "payg",
+				"id": "gemini-3.8-flash",
+				"now": 0
+			},
+			{
+				"plan": "go",
+				"id": "gemini-4-argon-2",
+				"now": 0
+			},
+			{
+				"plan": "payg",
+				"id": "gemini-4-argon-2",
+				"now": 0
+			},
+			{
+				"plan": "go",
+				"id": "grok-4.8",
+				"now": 0
+			},
+			{
+				"plan": "payg",
+				"id": "grok-4.8",
+				"now": 0
+			},
+			{
+				"plan": "go",
+				"id": "gpt-6-sol",
+				"now": 0
+			},
+			{
+				"plan": "payg",
+				"id": "gpt-6-sol",
+				"now": 0
+			}
+		]
+	},
+	"expected": {
+		"values": [
+			false,
+			true,
+			false,
+			true,
+			false,
+			false,
+			false,
+			false
+		]
+	}
+}

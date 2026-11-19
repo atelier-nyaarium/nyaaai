@@ -1,0 +1,20 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "id-uuid",
+	"input": {
+		"value": {
+			"id": "3f2a1b4c-5d6e-4f70-8a9b-0c1d2e3f4a5b",
+			"kind": "openrouter",
+			"label": "OpenRouter"
+		}
+	},
+	"expected": {
+		"entry": {
+			"id": "3f2a1b4c-5d6e-4f70-8a9b-0c1d2e3f4a5b",
+			"kind": "openrouter",
+			"label": "OpenRouter"
+		}
+	}
+}

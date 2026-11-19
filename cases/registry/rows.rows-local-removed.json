@@ -1,0 +1,69 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.rows",
+	"name": "rows-local-removed",
+	"input": {
+		"raw": {
+			"records": {
+				"e1": {
+					"local:e1/local-a:27b": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					}
+				}
+			},
+			"added": {
+				"e1": []
+			},
+			"hidden": []
+		},
+		"entries": [
+			{
+				"id": "e1",
+				"kind": "lmstudio"
+			}
+		]
+	},
+	"expected": {
+		"curatedFirst": true,
+		"rest": [
+			{
+				"key": "local:e1/local-a:27b",
+				"bindings": {
+					"lmstudio": {
+						"id": "local-a:27b"
+					}
+				},
+				"family": "local:e1/local-a:27b",
+				"label": "Test Model",
+				"reasoning": true,
+				"schema": true,
+				"cache": "implicit",
+				"verified": "2026-09-28",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				},
+				"identity": {
+					"kind": "local",
+					"entry": "e1",
+					"tag": "local-a:27b"
+				}
+			}
+		]
+	}
+}

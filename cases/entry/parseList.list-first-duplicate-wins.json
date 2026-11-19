@@ -1,0 +1,30 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parseList",
+	"name": "list-first-duplicate-wins",
+	"input": {
+		"value": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "First"
+			},
+			{
+				"id": "a",
+				"kind": "opencode",
+				"label": "Second",
+				"plan": "go"
+			}
+		]
+	},
+	"expected": {
+		"entries": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "First"
+			}
+		]
+	}
+}

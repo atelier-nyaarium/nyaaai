@@ -1,0 +1,80 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "disposition.of",
+	"name": "of-rateLimited",
+	"input": {
+		"rows": [
+			{
+				"failure": {
+					"category": "rateLimited",
+					"status": "rateLimited",
+					"message": "m"
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "rateLimited",
+					"status": "rateLimited",
+					"message": "m"
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "rateLimited",
+					"status": "rateLimited",
+					"message": "m"
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "rateLimited",
+					"status": "rateLimited",
+					"message": "m"
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "rateLimited",
+					"status": "rateLimited",
+					"message": "m"
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "rateLimited",
+					"status": "rateLimited",
+					"message": "m"
+				},
+				"status": "unknown"
+			}
+		]
+	},
+	"expected": {
+		"dispositions": [
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			}
+		]
+	}
+}

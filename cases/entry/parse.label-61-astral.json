@@ -1,0 +1,16 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "label-61-astral",
+	"input": {
+		"value": {
+			"id": "or1",
+			"kind": "openrouter",
+			"label": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+		}
+	},
+	"expected": {
+		"entry": null
+	}
+}

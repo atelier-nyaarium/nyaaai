@@ -1,0 +1,38 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retention.of",
+	"name": "payg-dated",
+	"input": {
+		"rows": [
+			{
+				"plan": "payg",
+				"id": "deepseek-v4"
+			},
+			{
+				"plan": "payg",
+				"id": "deepseek-v4.1-flash"
+			},
+			{
+				"plan": "payg",
+				"id": "deepseek-"
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"zdr": true,
+				"until": "2026-11-30"
+			},
+			{
+				"zdr": true,
+				"until": "2026-11-30"
+			},
+			{
+				"zdr": true,
+				"until": "2026-11-30"
+			}
+		]
+	}
+}

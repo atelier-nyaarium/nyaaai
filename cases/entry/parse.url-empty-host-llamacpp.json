@@ -1,0 +1,17 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "url-empty-host-llamacpp",
+	"input": {
+		"value": {
+			"id": "box",
+			"kind": "llamacpp",
+			"label": "Lab",
+			"url": "http:///"
+		}
+	},
+	"expected": {
+		"entry": null
+	}
+}

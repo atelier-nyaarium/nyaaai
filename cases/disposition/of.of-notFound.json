@@ -1,0 +1,86 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "disposition.of",
+	"name": "of-notFound",
+	"input": {
+		"rows": [
+			{
+				"failure": {
+					"category": "notFound",
+					"status": "notFound",
+					"message": "m"
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "notFound",
+					"status": "notFound",
+					"message": "m"
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "notFound",
+					"status": "notFound",
+					"message": "m"
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "notFound",
+					"status": "notFound",
+					"message": "m"
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "notFound",
+					"status": "notFound",
+					"message": "m"
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "notFound",
+					"status": "notFound",
+					"message": "m"
+				},
+				"status": "unknown"
+			}
+		]
+	},
+	"expected": {
+		"dispositions": [
+			{
+				"act": "fallThrough",
+				"notice": "badRequest"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "badRequest"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "modelRetired"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "noZdrHost"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "badRequest"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "badRequest"
+			}
+		]
+	}
+}

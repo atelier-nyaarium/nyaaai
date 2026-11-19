@@ -1,0 +1,128 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.rows",
+	"name": "rows-removed-follow-added",
+	"input": {
+		"raw": {
+			"records": {
+				"e1": {
+					"openrouter:x/removed": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					},
+					"openrouter:z-ai/glm-5.2": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "fail"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					},
+					"openrouter:x/failed": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "fail",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					}
+				}
+			},
+			"added": {
+				"e1": [
+					"openrouter:z-ai/glm-5.2"
+				]
+			},
+			"hidden": []
+		},
+		"entries": [
+			{
+				"id": "e1",
+				"kind": "openrouter"
+			}
+		]
+	},
+	"expected": {
+		"curatedFirst": true,
+		"rest": [
+			{
+				"key": "openrouter:z-ai/glm-5.2",
+				"bindings": {
+					"openrouter": {
+						"id": "z-ai/glm-5.2"
+					}
+				},
+				"family": "openrouter:z-ai/glm-5.2",
+				"label": "Test Model",
+				"reasoning": true,
+				"schema": false,
+				"cache": "implicit",
+				"verified": "2026-09-28",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				},
+				"identity": {
+					"kind": "hosted",
+					"provider": "openrouter",
+					"id": "z-ai/glm-5.2"
+				}
+			},
+			{
+				"key": "openrouter:x/removed",
+				"bindings": {
+					"openrouter": {
+						"id": "x/removed"
+					}
+				},
+				"family": "openrouter:x/removed",
+				"label": "Test Model",
+				"reasoning": true,
+				"schema": true,
+				"cache": "implicit",
+				"verified": "2026-09-28",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				},
+				"identity": {
+					"kind": "hosted",
+					"provider": "openrouter",
+					"id": "x/removed"
+				}
+			}
+		]
+	}
+}

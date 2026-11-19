@@ -1,0 +1,17 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "url-port-too-big-llamacpp",
+	"input": {
+		"value": {
+			"id": "box",
+			"kind": "llamacpp",
+			"label": "Lab",
+			"url": "http://lab.local:99999"
+		}
+	},
+	"expected": {
+		"entry": null
+	}
+}

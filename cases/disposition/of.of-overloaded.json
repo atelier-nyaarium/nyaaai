@@ -1,0 +1,80 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "disposition.of",
+	"name": "of-overloaded",
+	"input": {
+		"rows": [
+			{
+				"failure": {
+					"category": "overloaded",
+					"status": "overloaded",
+					"message": "m"
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "overloaded",
+					"status": "overloaded",
+					"message": "m"
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "overloaded",
+					"status": "overloaded",
+					"message": "m"
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "overloaded",
+					"status": "overloaded",
+					"message": "m"
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "overloaded",
+					"status": "overloaded",
+					"message": "m"
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "overloaded",
+					"status": "overloaded",
+					"message": "m"
+				},
+				"status": "unknown"
+			}
+		]
+	},
+	"expected": {
+		"dispositions": [
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			}
+		]
+	}
+}

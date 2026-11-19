@@ -1,0 +1,39 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.sameOrigin",
+	"name": "origin-hosts",
+	"input": {
+		"rows": [
+			{
+				"left": "http://192.168.1.20:8080",
+				"right": "http://192.168.1.20:8080/x"
+			},
+			{
+				"left": "http://[::1]:8080",
+				"right": "http://[0:0:0:0:0:0:0:1]:8080"
+			},
+			{
+				"left": "http://0x7f.1",
+				"right": "http://127.0.0.1"
+			},
+			{
+				"left": "http://lab.local.",
+				"right": "http://lab.local"
+			},
+			{
+				"left": "http://lab.local.",
+				"right": "http://LAB.local./"
+			}
+		]
+	},
+	"expected": {
+		"same": [
+			true,
+			true,
+			true,
+			false,
+			true
+		]
+	}
+}

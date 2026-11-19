@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.testRecord",
+	"name": "record-checks-missing",
+	"input": {
+		"values": [
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			}
+		]
+	},
+	"expected": {
+		"records": [
+			null
+		]
+	}
+}

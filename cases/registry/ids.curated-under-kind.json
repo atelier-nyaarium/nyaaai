@@ -1,0 +1,63 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.ids",
+	"name": "curated-under-kind",
+	"input": {
+		"modelIds": [],
+		"curated": [
+			{
+				"kind": "openrouter",
+				"id": "openai/gpt-6-luna"
+			},
+			{
+				"kind": "openrouter",
+				"id": "gpt-6-luna"
+			},
+			{
+				"kind": "opencode",
+				"id": "gpt-6-luna"
+			},
+			{
+				"kind": "opencode",
+				"id": "openai/gpt-6-luna"
+			},
+			{
+				"kind": "opencode",
+				"id": "claude-sonnet-5-5"
+			},
+			{
+				"kind": "openrouter",
+				"id": "google/gemma-4-26b-a4b-it"
+			},
+			{
+				"kind": "opencode",
+				"id": "google/gemma-4-26b-a4b-it"
+			},
+			{
+				"kind": "ollama",
+				"id": "openai/gpt-6-luna"
+			},
+			{
+				"kind": "compatible",
+				"id": ""
+			}
+		],
+		"tested": []
+	},
+	"expected": {
+		"modelIds": [],
+		"curated": [
+			true,
+			false,
+			true,
+			false,
+			true,
+			true,
+			false,
+			false,
+			false
+		],
+		"tested": []
+	}
+}

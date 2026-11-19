@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.parse",
+	"name": "parse-entry-values-not-objects",
+	"input": {
+		"raw": {
+			"records": {
+				"e1": [
+					{
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					}
+				],
+				"e2": "x",
+				"e3": null
+			},
+			"added": {
+				"e1": "x",
+				"e2": 5
+			},
+			"hidden": []
+		},
+		"entries": []
+	},
+	"expected": {
+		"stored": {
+			"tested": {},
+			"added": {},
+			"hidden": []
+		}
+	}
+}

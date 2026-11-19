@@ -225,10 +225,78 @@ fn host_of(raw: &str) -> Option<String> {
     }
 }
 
-/// The origin of an http, https, ws, wss or ftp URL as the WHATWG parser writes it:
-/// lowercase scheme and host, default port dropped, credentials ignored.
-/// `None` for any other scheme, a malformed URL, or a host with non-ASCII text.
-pub fn origin_of(text: &str) -> Option<String> {
+/// Path characters the parser writes as percent escapes, besides controls and non-ASCII.
+const PATH_ESCAPED: &str = " \"<>^`{}";
+
+/// What a URL reads as, for the schemes `origin_of` reads.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct UrlParts {
+    /// Lowercase, no colon.
+    pub scheme: String,
+    /// Raw text before the first colon of the credentials.
+    pub username: String,
+    /// Raw text after it.
+    pub password: String,
+    /// The host as the parser writes it, an IPv6 literal in brackets.
+    pub host: String,
+    /// Decimal digits; empty for a default or an absent port.
+    pub port: String,
+    pub origin: String,
+    /// As `pathname`: dot segments resolved, escapes written, `/` when empty.
+    pub path: String,
+    /// Raw text after the first `?`; empty for none.
+    pub query: String,
+    /// Raw text after the first `#`; empty for none.
+    pub fragment: String,
+}
+
+/// A path segment with its escapes written.
+fn path_segment(text: &str) -> String {
+    let mut out = String::new();
+    for char in text.chars() {
+        if char <= ' ' || char >= '\u{7f}' || PATH_ESCAPED.contains(char) {
+            let mut bytes = [0u8; 4];
+            for byte in char.encode_utf8(&mut bytes).bytes() {
+                out.push_str(&format!("%{byte:02X}"));
+            }
+        } else {
+            out.push(char);
+        }
+    }
+    out
+}
+
+/// The path of a special URL: slashes of either kind, dot segments resolved.
+fn path_of(raw: &str) -> String {
+    if raw.is_empty() {
+        return "/".to_owned();
+    }
+    let body = raw.strip_prefix(is_slash).unwrap_or(raw);
+    let pieces: Vec<&str> = body.split(is_slash).collect();
+    let mut segments: Vec<String> = Vec::new();
+    for (at, piece) in pieces.iter().enumerate() {
+        let last = at == pieces.len() - 1;
+        let lower = ascii_lower(piece);
+        if matches!(lower.as_str(), ".." | ".%2e" | "%2e." | "%2e%2e") {
+            segments.pop();
+            if last {
+                segments.push(String::new());
+            }
+        } else if matches!(lower.as_str(), "." | "%2e") {
+            if last {
+                segments.push(String::new());
+            }
+        } else {
+            segments.push(path_segment(piece));
+        }
+    }
+    format!("/{}", segments.join("/"))
+}
+
+/// The parts of an http, https, ws, wss or ftp URL as the WHATWG parser reads them:
+/// lowercase scheme and host, default port dropped, dot segments resolved.
+/// `None` for any other scheme, a malformed URL, or a host with non-ASCII text or escapes.
+pub fn parse_url(text: &str) -> Option<UrlParts> {
     let url: String = text
         .trim_matches(|char: char| char <= ' ')
         .chars()
@@ -247,14 +315,17 @@ pub fn origin_of(text: &str) -> Option<String> {
         return None;
     }
     let default = default_port(&scheme)?;
-    let rest = url[colon + 1..].trim_start_matches(is_slash);
-    let stop = rest
+    let rest = &url[colon + 1..];
+    let rest_at = url.len() - rest.trim_start_matches(is_slash).len();
+    let stop = url[rest_at..]
         .find(|char: char| is_slash(char) || char == '?' || char == '#')
-        .unwrap_or(rest.len());
-    let authority = &rest[..stop];
-    let authority = authority
-        .rfind('@')
-        .map_or(authority, |at| &authority[at + 1..]);
+        .map_or(url.len(), |at| rest_at + at);
+    let authority = &url[rest_at..stop];
+    let (credentials, authority) = match authority.rfind('@') {
+        Some(at) => (&authority[..at], &authority[at + 1..]),
+        None => ("", authority),
+    };
+    let (username, password) = credentials.split_once(':').unwrap_or((credentials, ""));
     let (host_text, port_text) = if authority.starts_with('[') {
         let close = authority.find(']')?;
         let rest = &authority[close + 1..];
@@ -278,8 +349,34 @@ pub fn origin_of(text: &str) -> Option<String> {
         }
         port = Some(value);
     }
-    Some(match port {
-        Some(value) if value != default => format!("{scheme}://{host}:{value}"),
-        _ => format!("{scheme}://{host}"),
+    let shown = match port {
+        Some(value) if value != default => value.to_string(),
+        _ => String::new(),
+    };
+    let tail = &url[stop..];
+    let (before_hash, fragment) = tail.split_once('#').unwrap_or((tail, ""));
+    let (path, query) = before_hash.split_once('?').unwrap_or((before_hash, ""));
+    let origin = if shown.is_empty() {
+        format!("{scheme}://{host}")
+    } else {
+        format!("{scheme}://{host}:{shown}")
+    };
+    Some(UrlParts {
+        scheme,
+        username: username.to_owned(),
+        password: password.to_owned(),
+        host,
+        port: shown,
+        origin,
+        path: path_of(path),
+        query: query.to_owned(),
+        fragment: fragment.to_owned(),
     })
+}
+
+/// The origin of an http, https, ws, wss or ftp URL as the WHATWG parser writes it:
+/// lowercase scheme and host, default port dropped, credentials ignored.
+/// `None` for any other scheme, a malformed URL, or a host with non-ASCII text.
+pub fn origin_of(text: &str) -> Option<String> {
+    parse_url(text).map(|parts| parts.origin)
 }

@@ -1,0 +1,114 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "view.codecFacts",
+	"name": "statuses-do-not-matter",
+	"input": {
+		"views": [
+			{
+				"reasoning": true,
+				"status": "ok",
+				"efforts": [
+					"low"
+				],
+				"outputLimit": 10
+			},
+			{
+				"reasoning": true,
+				"status": "retired",
+				"efforts": [
+					"low"
+				],
+				"outputLimit": 10
+			},
+			{
+				"reasoning": true,
+				"status": "noZdrHost",
+				"efforts": [
+					"low"
+				],
+				"outputLimit": 10
+			},
+			{
+				"reasoning": true,
+				"status": "noTools",
+				"efforts": [
+					"low"
+				],
+				"outputLimit": 10
+			},
+			{
+				"reasoning": true,
+				"status": "unknown",
+				"efforts": [
+					"low"
+				],
+				"outputLimit": 10
+			}
+		]
+	},
+	"expected": {
+		"facts": [
+			{
+				"api": {
+					"family": "chat-completions",
+					"structured": false,
+					"choice": [],
+					"strict": false
+				},
+				"efforts": [
+					"low"
+				],
+				"outputLimit": 10
+			},
+			{
+				"api": {
+					"family": "chat-completions",
+					"structured": false,
+					"choice": [],
+					"strict": false
+				},
+				"efforts": [
+					"low"
+				],
+				"outputLimit": 10
+			},
+			{
+				"api": {
+					"family": "chat-completions",
+					"structured": false,
+					"choice": [],
+					"strict": false
+				},
+				"efforts": [
+					"low"
+				],
+				"outputLimit": 10
+			},
+			{
+				"api": {
+					"family": "chat-completions",
+					"structured": false,
+					"choice": [],
+					"strict": false
+				},
+				"efforts": [
+					"low"
+				],
+				"outputLimit": 10
+			},
+			{
+				"api": {
+					"family": "chat-completions",
+					"structured": false,
+					"choice": [],
+					"strict": false
+				},
+				"efforts": [
+					"low"
+				],
+				"outputLimit": 10
+			}
+		]
+	}
+}

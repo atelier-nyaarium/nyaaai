@@ -1,0 +1,20 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "label-trims-ecma-space",
+	"input": {
+		"value": {
+			"id": "or1",
+			"kind": "openrouter",
+			"label": "\ufeff  Lab　 "
+		}
+	},
+	"expected": {
+		"entry": {
+			"id": "or1",
+			"kind": "openrouter",
+			"label": "Lab"
+		}
+	}
+}

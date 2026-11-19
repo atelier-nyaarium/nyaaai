@@ -1,0 +1,68 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.ids",
+	"name": "tested-under-entry",
+	"input": {
+		"modelIds": [],
+		"curated": [],
+		"tested": [
+			{
+				"key": "openrouter:a/b",
+				"entry": "e1"
+			},
+			{
+				"key": "opencode:a",
+				"entry": "e1"
+			},
+			{
+				"key": "ollama:a",
+				"entry": ""
+			},
+			{
+				"key": "local:e1/t",
+				"entry": "e1"
+			},
+			{
+				"key": "local:e1/t",
+				"entry": "e2"
+			},
+			{
+				"key": "local:e1/t",
+				"entry": ""
+			},
+			{
+				"key": "local:e1/",
+				"entry": "e1"
+			},
+			{
+				"key": "openai/gpt-6-luna",
+				"entry": "e1"
+			},
+			{
+				"key": "vendor:x",
+				"entry": "e1"
+			},
+			{
+				"key": "",
+				"entry": "e1"
+			}
+		]
+	},
+	"expected": {
+		"modelIds": [],
+		"curated": [],
+		"tested": [
+			true,
+			true,
+			true,
+			true,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false
+		]
+	}
+}

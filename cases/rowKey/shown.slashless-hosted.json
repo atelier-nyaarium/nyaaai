@@ -1,0 +1,48 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "rowKey.shown",
+	"name": "slashless-hosted",
+	"input": {
+		"identities": [
+			{
+				"kind": "hosted",
+				"provider": "openrouter",
+				"id": "model"
+			},
+			{
+				"kind": "hosted",
+				"provider": "opencode",
+				"id": "model"
+			},
+			{
+				"kind": "hosted",
+				"provider": "openrouter",
+				"id": "a/b"
+			},
+			{
+				"kind": "hosted",
+				"provider": "compatible",
+				"id": "a:b"
+			}
+		],
+		"keys": [
+			"openrouter:model",
+			"opencode:model",
+			"openrouter:a/b"
+		]
+	},
+	"expected": {
+		"ids": [
+			"openrouter/model",
+			"opencode/model",
+			"a/b",
+			"compatible/a:b"
+		],
+		"keyed": [
+			"openrouter/model",
+			"opencode/model",
+			"a/b"
+		]
+	}
+}

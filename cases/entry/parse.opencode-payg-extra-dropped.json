@@ -1,0 +1,23 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "opencode-payg-extra-dropped",
+	"input": {
+		"value": {
+			"id": "pay",
+			"kind": "opencode",
+			"label": "Pay",
+			"plan": "payg",
+			"extraUsage": true
+		}
+	},
+	"expected": {
+		"entry": {
+			"id": "pay",
+			"kind": "opencode",
+			"label": "Pay",
+			"plan": "payg"
+		}
+	}
+}

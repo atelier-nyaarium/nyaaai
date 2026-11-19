@@ -1,0 +1,16 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "rowKey.parse",
+	"name": "tag-escape",
+	"input": {
+		"values": [
+			"local:lab/\u001b[0m"
+		]
+	},
+	"expected": {
+		"identities": [
+			null
+		]
+	}
+}

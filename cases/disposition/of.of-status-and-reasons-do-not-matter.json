@@ -1,0 +1,284 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "disposition.of",
+	"name": "of-status-and-reasons-do-not-matter",
+	"input": {
+		"rows": [
+			{
+				"failure": {
+					"category": "rateLimited",
+					"status": 429,
+					"message": "m",
+					"retryAfterMs": 1000,
+					"reasons": [
+						"x"
+					]
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "rateLimited",
+					"status": 429,
+					"message": "m",
+					"retryAfterMs": 1000,
+					"reasons": [
+						"x"
+					]
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "rateLimited",
+					"status": 429,
+					"message": "m",
+					"retryAfterMs": 1000,
+					"reasons": [
+						"x"
+					]
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "rateLimited",
+					"status": 429,
+					"message": "m",
+					"retryAfterMs": 1000,
+					"reasons": [
+						"x"
+					]
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "rateLimited",
+					"status": 429,
+					"message": "m",
+					"retryAfterMs": 1000,
+					"reasons": [
+						"x"
+					]
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "rateLimited",
+					"status": 429,
+					"message": "m",
+					"retryAfterMs": 1000,
+					"reasons": [
+						"x"
+					]
+				},
+				"status": "unknown"
+			},
+			{
+				"failure": {
+					"category": "badRequest",
+					"status": 400,
+					"message": "m",
+					"reasons": [
+						"x"
+					]
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "badRequest",
+					"status": 400,
+					"message": "m",
+					"reasons": [
+						"x"
+					]
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "badRequest",
+					"status": 400,
+					"message": "m",
+					"reasons": [
+						"x"
+					]
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "badRequest",
+					"status": 400,
+					"message": "m",
+					"reasons": [
+						"x"
+					]
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "badRequest",
+					"status": 400,
+					"message": "m",
+					"reasons": [
+						"x"
+					]
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "badRequest",
+					"status": 400,
+					"message": "m",
+					"reasons": [
+						"x"
+					]
+				},
+				"status": "unknown"
+			},
+			{
+				"failure": {
+					"category": "refused",
+					"status": 403,
+					"message": "m",
+					"billed": {
+						"host": "h"
+					}
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "refused",
+					"status": 403,
+					"message": "m",
+					"billed": {
+						"host": "h"
+					}
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "refused",
+					"status": 403,
+					"message": "m",
+					"billed": {
+						"host": "h"
+					}
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "refused",
+					"status": 403,
+					"message": "m",
+					"billed": {
+						"host": "h"
+					}
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "refused",
+					"status": 403,
+					"message": "m",
+					"billed": {
+						"host": "h"
+					}
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "refused",
+					"status": 403,
+					"message": "m",
+					"billed": {
+						"host": "h"
+					}
+				},
+				"status": "unknown"
+			}
+		]
+	},
+	"expected": {
+		"dispositions": [
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "refused"
+			},
+			{
+				"act": "stop",
+				"notice": "refused"
+			},
+			{
+				"act": "stop",
+				"notice": "refused"
+			},
+			{
+				"act": "stop",
+				"notice": "refused"
+			},
+			{
+				"act": "stop",
+				"notice": "refused"
+			},
+			{
+				"act": "stop",
+				"notice": "refused"
+			}
+		]
+	}
+}

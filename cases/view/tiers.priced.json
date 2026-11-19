@@ -1,0 +1,108 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "view.tiers",
+	"name": "priced",
+	"input": {
+		"rows": [
+			{
+				"view": {
+					"price": {
+						"prompt": [
+							0,
+							0
+						],
+						"completion": [
+							0,
+							0
+						],
+						"tiers": []
+					}
+				}
+			},
+			{
+				"view": {
+					"price": {
+						"prompt": [
+							0.5,
+							1
+						],
+						"completion": [
+							1,
+							2
+						],
+						"tiers": [
+							{
+								"minPromptTokens": 0,
+								"prompt": 1,
+								"completion": 2
+							},
+							{
+								"minPromptTokens": 200000,
+								"prompt": 2,
+								"completion": 4,
+								"cacheRead": 0.5,
+								"cacheWrite": 2.5,
+								"cacheWrite1h": 4
+							}
+						]
+					}
+				}
+			},
+			{
+				"view": {
+					"price": {
+						"prompt": [
+							0.5,
+							1
+						],
+						"completion": [
+							1,
+							2
+						],
+						"tiers": [
+							{
+								"minPromptTokens": 200000,
+								"prompt": 2,
+								"completion": 4,
+								"cacheRead": 0.5,
+								"cacheWrite": 2.5,
+								"cacheWrite1h": 4
+							}
+						]
+					}
+				}
+			}
+		]
+	},
+	"expected": {
+		"tiers": [
+			[],
+			[
+				{
+					"minPromptTokens": 0,
+					"prompt": 1,
+					"completion": 2
+				},
+				{
+					"minPromptTokens": 200000,
+					"prompt": 2,
+					"completion": 4,
+					"cacheRead": 0.5,
+					"cacheWrite": 2.5,
+					"cacheWrite1h": 4
+				}
+			],
+			[
+				{
+					"minPromptTokens": 200000,
+					"prompt": 2,
+					"completion": 4,
+					"cacheRead": 0.5,
+					"cacheWrite": 2.5,
+					"cacheWrite1h": 4
+				}
+			]
+		]
+	}
+}

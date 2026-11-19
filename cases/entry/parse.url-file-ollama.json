@@ -1,0 +1,17 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "url-file-ollama",
+	"input": {
+		"value": {
+			"id": "box",
+			"kind": "ollama",
+			"label": "Lab",
+			"url": "file:///lab"
+		}
+	},
+	"expected": {
+		"entry": null
+	}
+}

@@ -1,0 +1,92 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "disposition.of",
+	"name": "of-allowance-with-retry-after",
+	"input": {
+		"rows": [
+			{
+				"failure": {
+					"category": "allowance",
+					"status": "allowance",
+					"message": "m",
+					"retryAfterMs": 5000
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "allowance",
+					"status": "allowance",
+					"message": "m",
+					"retryAfterMs": 5000
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "allowance",
+					"status": "allowance",
+					"message": "m",
+					"retryAfterMs": 5000
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "allowance",
+					"status": "allowance",
+					"message": "m",
+					"retryAfterMs": 5000
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "allowance",
+					"status": "allowance",
+					"message": "m",
+					"retryAfterMs": 5000
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "allowance",
+					"status": "allowance",
+					"message": "m",
+					"retryAfterMs": 5000
+				},
+				"status": "unknown"
+			}
+		]
+	},
+	"expected": {
+		"dispositions": [
+			{
+				"act": "fallThrough",
+				"notice": "spendLimit"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "spendLimit"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "spendLimit"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "spendLimit"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "spendLimit"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "spendLimit"
+			}
+		]
+	}
+}

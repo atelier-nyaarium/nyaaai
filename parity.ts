@@ -18,7 +18,10 @@ import { base64 } from "./scripts/caseGroups/base64";
 import { claude } from "./scripts/caseGroups/claude";
 import { codec } from "./scripts/caseGroups/codec";
 import { contract } from "./scripts/caseGroups/contract";
+import { curated } from "./scripts/caseGroups/curated";
+import { disposition } from "./scripts/caseGroups/disposition";
 import { effort } from "./scripts/caseGroups/effort";
+import { entry } from "./scripts/caseGroups/entry";
 import { failure } from "./scripts/caseGroups/failure";
 import { headers } from "./scripts/caseGroups/headers";
 import { js } from "./scripts/caseGroups/js";
@@ -29,6 +32,9 @@ import { number } from "./scripts/caseGroups/number";
 import { order } from "./scripts/caseGroups/order";
 import { paths } from "./scripts/caseGroups/paths";
 import { pattern } from "./scripts/caseGroups/pattern";
+import { registry } from "./scripts/caseGroups/registry";
+import { retention } from "./scripts/caseGroups/retention";
+import { rowKeyGroup } from "./scripts/caseGroups/rowKey";
 import { schemaProjection } from "./scripts/caseGroups/schemaProjection";
 import { secret } from "./scripts/caseGroups/secret";
 import { sessionCut } from "./scripts/caseGroups/sessionCut";
@@ -42,7 +48,9 @@ import { text } from "./scripts/caseGroups/text";
 import { time } from "./scripts/caseGroups/time";
 import { transport } from "./scripts/caseGroups/transport";
 import { url } from "./scripts/caseGroups/url";
+import { view } from "./scripts/caseGroups/view";
 import { adapterCases } from "./scripts/caseSources/adapter";
+import { curatedTableRust } from "./scripts/curatedTable";
 import { rustModule, rustText, rustTexts, rustWhole } from "./scripts/rustConstants";
 import { converse, crash, crashBlocking, misfit, spin, spinBlocking } from "./scripts/testCommands";
 
@@ -180,6 +188,13 @@ export default project({
 		codec,
 		transport,
 		secret,
+		entry,
+		rowKeyGroup,
+		curated,
+		registry,
+		view,
+		retention,
+		disposition,
 	],
 	runs: adapterCases,
 	cases: { crate: "nyaaai_cli", module: "cases", dir: "rust/cli/src/cases" },
@@ -218,6 +233,7 @@ export default project({
 				["rust/contract/src/strict_policy.rs", strictPolicyRust()],
 				["rust/contract/src/time_tokens.rs", timeTokensRust()],
 				["rust/contract/src/adapter_texts.rs", adapterTextsRust()],
+				["rust/agentic/src/models/curated_table.rs", curatedTableRust()],
 			]),
 	],
 });

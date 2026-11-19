@@ -1,0 +1,88 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.offered",
+	"name": "offered-removed-row",
+	"input": {
+		"raw": {
+			"records": {
+				"e1": {
+					"openrouter:x/removed": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					},
+					"openrouter:z-ai/glm-5.2": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "fail"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					},
+					"openrouter:x/failed": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "fail",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					}
+				}
+			},
+			"added": {
+				"e1": [
+					"openrouter:z-ai/glm-5.2"
+				]
+			},
+			"hidden": []
+		},
+		"entries": [
+			{
+				"id": "e1",
+				"kind": "openrouter"
+			}
+		],
+		"scope": "e1",
+		"keys": [
+			"openrouter:z-ai/glm-5.2",
+			"openrouter:x/removed"
+		]
+	},
+	"expected": {
+		"offered": [
+			true,
+			false
+		]
+	}
+}

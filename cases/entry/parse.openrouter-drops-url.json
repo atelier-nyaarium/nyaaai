@@ -1,0 +1,21 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "openrouter-drops-url",
+	"input": {
+		"value": {
+			"id": "or1",
+			"kind": "openrouter",
+			"label": "OpenRouter",
+			"url": "http://lab.local:1234"
+		}
+	},
+	"expected": {
+		"entry": {
+			"id": "or1",
+			"kind": "openrouter",
+			"label": "OpenRouter"
+		}
+	}
+}

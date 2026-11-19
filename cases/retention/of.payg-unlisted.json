@@ -1,0 +1,126 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retention.of",
+	"name": "payg-unlisted",
+	"input": {
+		"rows": [
+			{
+				"plan": "payg",
+				"id": "gemini"
+			},
+			{
+				"plan": "payg",
+				"id": "gpt"
+			},
+			{
+				"plan": "payg",
+				"id": "claude"
+			},
+			{
+				"plan": "payg",
+				"id": "mistral"
+			},
+			{
+				"plan": "payg",
+				"id": "grok"
+			},
+			{
+				"plan": "payg",
+				"id": "muse-spark-1"
+			},
+			{
+				"plan": "payg",
+				"id": "iceman"
+			},
+			{
+				"plan": "payg",
+				"id": ""
+			},
+			{
+				"plan": "payg",
+				"id": "unknown-model"
+			},
+			{
+				"plan": "payg",
+				"id": "GLM-5"
+			},
+			{
+				"plan": "payg",
+				"id": "Glm-5"
+			},
+			{
+				"plan": "payg",
+				"id": "glm"
+			},
+			{
+				"plan": "payg",
+				"id": "constructor"
+			},
+			{
+				"plan": "payg",
+				"id": "__proto__"
+			},
+			{
+				"plan": "payg",
+				"id": "toString"
+			},
+			{
+				"plan": "payg",
+				"id": "hasOwnProperty"
+			},
+			{
+				"plan": "payg",
+				"id": "valueOf"
+			},
+			{
+				"plan": "payg",
+				"id": "*"
+			},
+			{
+				"plan": "payg",
+				"id": "-*"
+			},
+			{
+				"plan": "payg",
+				"id": " glm-5"
+			},
+			{
+				"plan": "payg",
+				"id": "glm-5 "
+			},
+			{
+				"plan": "payg",
+				"id": "é"
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			{
+				"zdr": true
+			},
+			null
+		]
+	}
+}

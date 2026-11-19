@@ -1,0 +1,17 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "compatible-non-ascii-host",
+	"input": {
+		"value": {
+			"id": "api",
+			"kind": "compatible",
+			"label": "Lab",
+			"url": "https://api.exämple.com/v1"
+		}
+	},
+	"expected": {
+		"entry": null
+	}
+}

@@ -1,0 +1,230 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "disposition.of",
+	"name": "of-out-of-credit-with-retry-after",
+	"input": {
+		"rows": [
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "m",
+					"retryAfterMs": 1
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "m",
+					"retryAfterMs": 1
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "m",
+					"retryAfterMs": 1
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "m",
+					"retryAfterMs": 1
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "m",
+					"retryAfterMs": 1
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "m",
+					"retryAfterMs": 1
+				},
+				"status": "unknown"
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "m",
+					"retryAfterMs": 0
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "m",
+					"retryAfterMs": 0
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "m",
+					"retryAfterMs": 0
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "m",
+					"retryAfterMs": 0
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "m",
+					"retryAfterMs": 0
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "m",
+					"retryAfterMs": 0
+				},
+				"status": "unknown"
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": 402,
+					"message": "m",
+					"retryAfterMs": 60000
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": 402,
+					"message": "m",
+					"retryAfterMs": 60000
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": 402,
+					"message": "m",
+					"retryAfterMs": 60000
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": 402,
+					"message": "m",
+					"retryAfterMs": 60000
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": 402,
+					"message": "m",
+					"retryAfterMs": 60000
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": 402,
+					"message": "m",
+					"retryAfterMs": 60000
+				},
+				"status": "unknown"
+			}
+		]
+	},
+	"expected": {
+		"dispositions": [
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			}
+		]
+	}
+}

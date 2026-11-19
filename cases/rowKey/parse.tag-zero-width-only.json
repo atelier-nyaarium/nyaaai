@@ -1,0 +1,20 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "rowKey.parse",
+	"name": "tag-zero-width-only",
+	"input": {
+		"values": [
+			"local:lab/\u200b"
+		]
+	},
+	"expected": {
+		"identities": [
+			{
+				"kind": "local",
+				"entry": "lab",
+				"tag": "\u200b"
+			}
+		]
+	}
+}

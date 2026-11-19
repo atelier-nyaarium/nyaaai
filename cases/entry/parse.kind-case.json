@@ -1,0 +1,16 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "kind-case",
+	"input": {
+		"value": {
+			"id": "or1",
+			"kind": "OpenRouter",
+			"label": "OpenRouter"
+		}
+	},
+	"expected": {
+		"entry": null
+	}
+}

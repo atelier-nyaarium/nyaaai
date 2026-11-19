@@ -1,0 +1,16 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "rowKey.parse",
+	"name": "tag-control-at-end",
+	"input": {
+		"values": [
+			"local:lab/model"
+		]
+	},
+	"expected": {
+		"identities": [
+			null
+		]
+	}
+}

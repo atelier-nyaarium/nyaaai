@@ -1,0 +1,12 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parseList",
+	"name": "list-text",
+	"input": {
+		"value": "openrouter"
+	},
+	"expected": {
+		"entries": []
+	}
+}

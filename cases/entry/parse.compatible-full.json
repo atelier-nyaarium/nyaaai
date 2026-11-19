@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "compatible-full",
+	"input": {
+		"value": {
+			"id": "api",
+			"kind": "compatible",
+			"label": "Lab",
+			"url": "https://lab.local:8443/v1"
+		}
+	},
+	"expected": {
+		"entry": {
+			"id": "api",
+			"kind": "compatible",
+			"label": "Lab",
+			"url": "https://lab.local:8443/v1"
+		}
+	}
+}

@@ -1,0 +1,18 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.rows",
+	"name": "rows-empty",
+	"input": {
+		"raw": {
+			"records": {},
+			"added": {},
+			"hidden": []
+		},
+		"entries": []
+	},
+	"expected": {
+		"curatedFirst": true,
+		"rest": []
+	}
+}

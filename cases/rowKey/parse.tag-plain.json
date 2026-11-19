@@ -1,0 +1,20 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "rowKey.parse",
+	"name": "tag-plain",
+	"input": {
+		"values": [
+			"local:lab/local-a:27b"
+		]
+	},
+	"expected": {
+		"identities": [
+			{
+				"kind": "local",
+				"entry": "lab",
+				"tag": "local-a:27b"
+			}
+		]
+	}
+}

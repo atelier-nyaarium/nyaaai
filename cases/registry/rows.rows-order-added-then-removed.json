@@ -1,0 +1,192 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.rows",
+	"name": "rows-order-added-then-removed",
+	"input": {
+		"raw": {
+			"records": {
+				"e1": {
+					"openrouter:a/b": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					},
+					"openrouter:c/d": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					},
+					"openrouter:e/f": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					},
+					"openrouter:g/h": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					}
+				}
+			},
+			"added": {
+				"e1": [
+					"openrouter:g/h",
+					"openrouter:c/d"
+				]
+			},
+			"hidden": []
+		},
+		"entries": [
+			{
+				"id": "e1",
+				"kind": "openrouter"
+			}
+		]
+	},
+	"expected": {
+		"curatedFirst": true,
+		"rest": [
+			{
+				"key": "openrouter:g/h",
+				"bindings": {
+					"openrouter": {
+						"id": "g/h"
+					}
+				},
+				"family": "openrouter:g/h",
+				"label": "Test Model",
+				"reasoning": true,
+				"schema": true,
+				"cache": "implicit",
+				"verified": "2026-09-28",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				},
+				"identity": {
+					"kind": "hosted",
+					"provider": "openrouter",
+					"id": "g/h"
+				}
+			},
+			{
+				"key": "openrouter:c/d",
+				"bindings": {
+					"openrouter": {
+						"id": "c/d"
+					}
+				},
+				"family": "openrouter:c/d",
+				"label": "Test Model",
+				"reasoning": true,
+				"schema": true,
+				"cache": "implicit",
+				"verified": "2026-09-28",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				},
+				"identity": {
+					"kind": "hosted",
+					"provider": "openrouter",
+					"id": "c/d"
+				}
+			},
+			{
+				"key": "openrouter:a/b",
+				"bindings": {
+					"openrouter": {
+						"id": "a/b"
+					}
+				},
+				"family": "openrouter:a/b",
+				"label": "Test Model",
+				"reasoning": true,
+				"schema": true,
+				"cache": "implicit",
+				"verified": "2026-09-28",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				},
+				"identity": {
+					"kind": "hosted",
+					"provider": "openrouter",
+					"id": "a/b"
+				}
+			},
+			{
+				"key": "openrouter:e/f",
+				"bindings": {
+					"openrouter": {
+						"id": "e/f"
+					}
+				},
+				"family": "openrouter:e/f",
+				"label": "Test Model",
+				"reasoning": true,
+				"schema": true,
+				"cache": "implicit",
+				"verified": "2026-09-28",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				},
+				"identity": {
+					"kind": "hosted",
+					"provider": "openrouter",
+					"id": "e/f"
+				}
+			}
+		]
+	}
+}

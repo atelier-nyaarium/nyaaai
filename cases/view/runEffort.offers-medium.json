@@ -1,0 +1,102 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "view.runEffort",
+	"name": "offers-medium",
+	"input": {
+		"rows": [
+			{
+				"view": {
+					"reasoning": false,
+					"status": "ok",
+					"efforts": [
+						"medium"
+					]
+				},
+				"wanted": "none"
+			},
+			{
+				"view": {
+					"reasoning": false,
+					"status": "ok",
+					"efforts": [
+						"medium"
+					]
+				},
+				"wanted": "minimal"
+			},
+			{
+				"view": {
+					"reasoning": false,
+					"status": "ok",
+					"efforts": [
+						"medium"
+					]
+				},
+				"wanted": "low"
+			},
+			{
+				"view": {
+					"reasoning": false,
+					"status": "ok",
+					"efforts": [
+						"medium"
+					]
+				},
+				"wanted": "medium"
+			},
+			{
+				"view": {
+					"reasoning": false,
+					"status": "ok",
+					"efforts": [
+						"medium"
+					]
+				},
+				"wanted": "high"
+			},
+			{
+				"view": {
+					"reasoning": false,
+					"status": "ok",
+					"efforts": [
+						"medium"
+					]
+				},
+				"wanted": "xhigh"
+			},
+			{
+				"view": {
+					"reasoning": false,
+					"status": "ok",
+					"efforts": [
+						"medium"
+					]
+				},
+				"wanted": "max"
+			},
+			{
+				"view": {
+					"reasoning": false,
+					"status": "ok",
+					"efforts": [
+						"medium"
+					]
+				},
+				"wanted": null
+			}
+		]
+	},
+	"expected": {
+		"efforts": [
+			"medium",
+			"medium",
+			"medium",
+			"medium",
+			"medium",
+			"medium",
+			"medium",
+			null
+		]
+	}
+}

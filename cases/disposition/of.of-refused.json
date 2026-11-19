@@ -1,0 +1,86 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "disposition.of",
+	"name": "of-refused",
+	"input": {
+		"rows": [
+			{
+				"failure": {
+					"category": "refused",
+					"status": "refused",
+					"message": "m"
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "refused",
+					"status": "refused",
+					"message": "m"
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "refused",
+					"status": "refused",
+					"message": "m"
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "refused",
+					"status": "refused",
+					"message": "m"
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "refused",
+					"status": "refused",
+					"message": "m"
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "refused",
+					"status": "refused",
+					"message": "m"
+				},
+				"status": "unknown"
+			}
+		]
+	},
+	"expected": {
+		"dispositions": [
+			{
+				"act": "stop",
+				"notice": "refused"
+			},
+			{
+				"act": "stop",
+				"notice": "refused"
+			},
+			{
+				"act": "stop",
+				"notice": "refused"
+			},
+			{
+				"act": "stop",
+				"notice": "refused"
+			},
+			{
+				"act": "stop",
+				"notice": "refused"
+			},
+			{
+				"act": "stop",
+				"notice": "refused"
+			}
+		]
+	}
+}

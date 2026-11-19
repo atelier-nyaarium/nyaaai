@@ -1,0 +1,30 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.select",
+	"name": "select-catalog-price-high-end-counts",
+	"input": {
+		"wanted": "gone",
+		"list": [
+			{
+				"key": "openai/gpt-6-luna",
+				"verifiedCompletion": 0.1,
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0.1,
+						5
+					],
+					"tiers": []
+				}
+			}
+		]
+	},
+	"expected": {
+		"id": null,
+		"marked": true
+	}
+}

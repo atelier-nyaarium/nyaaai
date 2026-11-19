@@ -1,0 +1,232 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.passed",
+	"name": "gate-grid",
+	"input": {
+		"rows": [
+			{
+				"toolPlus": "pass",
+				"recovery": "pass",
+				"reasoning": "pass",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "pass",
+				"recovery": "pass",
+				"reasoning": "fail",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "pass",
+				"recovery": "pass",
+				"reasoning": "n/a",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "pass",
+				"recovery": "fail",
+				"reasoning": "pass",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "pass",
+				"recovery": "fail",
+				"reasoning": "fail",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "pass",
+				"recovery": "fail",
+				"reasoning": "n/a",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "pass",
+				"recovery": "n/a",
+				"reasoning": "pass",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "pass",
+				"recovery": "n/a",
+				"reasoning": "fail",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "pass",
+				"recovery": "n/a",
+				"reasoning": "n/a",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "fail",
+				"recovery": "pass",
+				"reasoning": "pass",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "fail",
+				"recovery": "pass",
+				"reasoning": "fail",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "fail",
+				"recovery": "pass",
+				"reasoning": "n/a",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "fail",
+				"recovery": "fail",
+				"reasoning": "pass",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "fail",
+				"recovery": "fail",
+				"reasoning": "fail",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "fail",
+				"recovery": "fail",
+				"reasoning": "n/a",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "fail",
+				"recovery": "n/a",
+				"reasoning": "pass",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "fail",
+				"recovery": "n/a",
+				"reasoning": "fail",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "fail",
+				"recovery": "n/a",
+				"reasoning": "n/a",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "n/a",
+				"recovery": "pass",
+				"reasoning": "pass",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "n/a",
+				"recovery": "pass",
+				"reasoning": "fail",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "n/a",
+				"recovery": "pass",
+				"reasoning": "n/a",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "n/a",
+				"recovery": "fail",
+				"reasoning": "pass",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "n/a",
+				"recovery": "fail",
+				"reasoning": "fail",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "n/a",
+				"recovery": "fail",
+				"reasoning": "n/a",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "n/a",
+				"recovery": "n/a",
+				"reasoning": "pass",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "n/a",
+				"recovery": "n/a",
+				"reasoning": "fail",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "n/a",
+				"recovery": "n/a",
+				"reasoning": "n/a",
+				"schema": "pass"
+			}
+		]
+	},
+	"expected": {
+		"passed": [
+			true,
+			false,
+			true,
+			false,
+			false,
+			false,
+			true,
+			false,
+			true,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false
+		],
+		"gates": [
+			null,
+			"reasoning",
+			null,
+			"recovery",
+			"recovery",
+			"recovery",
+			null,
+			"reasoning",
+			null,
+			"toolPlus",
+			"toolPlus",
+			"toolPlus",
+			"toolPlus",
+			"toolPlus",
+			"toolPlus",
+			"toolPlus",
+			"toolPlus",
+			"toolPlus",
+			"toolPlus",
+			"toolPlus",
+			"toolPlus",
+			"toolPlus",
+			"toolPlus",
+			"toolPlus",
+			"toolPlus",
+			"toolPlus",
+			"toolPlus"
+		]
+	}
+}

@@ -1,0 +1,12 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "true",
+	"input": {
+		"value": true
+	},
+	"expected": {
+		"entry": null
+	}
+}

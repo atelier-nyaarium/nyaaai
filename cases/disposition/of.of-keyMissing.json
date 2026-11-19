@@ -1,0 +1,86 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "disposition.of",
+	"name": "of-keyMissing",
+	"input": {
+		"rows": [
+			{
+				"failure": {
+					"category": "keyMissing",
+					"status": "keyMissing",
+					"message": "m"
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "keyMissing",
+					"status": "keyMissing",
+					"message": "m"
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "keyMissing",
+					"status": "keyMissing",
+					"message": "m"
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "keyMissing",
+					"status": "keyMissing",
+					"message": "m"
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "keyMissing",
+					"status": "keyMissing",
+					"message": "m"
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "keyMissing",
+					"status": "keyMissing",
+					"message": "m"
+				},
+				"status": "unknown"
+			}
+		]
+	},
+	"expected": {
+		"dispositions": [
+			{
+				"act": "fallThrough",
+				"notice": "keyMissing"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "keyMissing"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "keyMissing"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "keyMissing"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "keyMissing"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "keyMissing"
+			}
+		]
+	}
+}

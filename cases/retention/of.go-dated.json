@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retention.of",
+	"name": "go-dated",
+	"input": {
+		"rows": [
+			{
+				"plan": "go",
+				"id": "deepseek-v4"
+			},
+			{
+				"plan": "go",
+				"id": "deepseek-v4.1-flash"
+			},
+			{
+				"plan": "go",
+				"id": "deepseek-"
+			},
+			{
+				"plan": "go",
+				"id": "deepseek-*"
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"zdr": true,
+				"until": "2026-11-30"
+			},
+			{
+				"zdr": true,
+				"until": "2026-11-30"
+			},
+			{
+				"zdr": true,
+				"until": "2026-11-30"
+			},
+			{
+				"zdr": true,
+				"until": "2026-11-30"
+			}
+		]
+	}
+}

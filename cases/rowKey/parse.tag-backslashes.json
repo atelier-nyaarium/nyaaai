@@ -1,0 +1,20 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "rowKey.parse",
+	"name": "tag-backslashes",
+	"input": {
+		"values": [
+			"local:lab/\\\\x"
+		]
+	},
+	"expected": {
+		"identities": [
+			{
+				"kind": "local",
+				"entry": "lab",
+				"tag": "\\\\x"
+			}
+		]
+	}
+}

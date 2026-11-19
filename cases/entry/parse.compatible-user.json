@@ -1,0 +1,17 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "compatible-user",
+	"input": {
+		"value": {
+			"id": "api",
+			"kind": "compatible",
+			"label": "Lab",
+			"url": "https://user:pass@api.example.com/v1"
+		}
+	},
+	"expected": {
+		"entry": null
+	}
+}

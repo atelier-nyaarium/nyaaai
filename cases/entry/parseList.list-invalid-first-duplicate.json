@@ -1,0 +1,29 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parseList",
+	"name": "list-invalid-first-duplicate",
+	"input": {
+		"value": [
+			{
+				"id": "a",
+				"kind": "opencode",
+				"label": "Broken"
+			},
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "Whole"
+			}
+		]
+	},
+	"expected": {
+		"entries": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "Whole"
+			}
+		]
+	}
+}

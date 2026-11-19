@@ -1,0 +1,17 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "opencode-plan-null",
+	"input": {
+		"value": {
+			"id": "go1",
+			"kind": "opencode",
+			"label": "Go",
+			"plan": null
+		}
+	},
+	"expected": {
+		"entry": null
+	}
+}

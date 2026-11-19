@@ -1,0 +1,33 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.parse",
+	"name": "hidden-duplicates",
+	"input": {
+		"raw": {
+			"records": {
+				"e1": {}
+			},
+			"added": {
+				"e1": []
+			},
+			"hidden": [
+				"moonshotai/kimi-k*",
+				"moonshotai/kimi-k*",
+				"openai/gpt-*-luna",
+				"moonshotai/kimi-k*"
+			]
+		},
+		"entries": []
+	},
+	"expected": {
+		"stored": {
+			"tested": {},
+			"added": {},
+			"hidden": [
+				"moonshotai/kimi-k*",
+				"openai/gpt-*-luna"
+			]
+		}
+	}
+}

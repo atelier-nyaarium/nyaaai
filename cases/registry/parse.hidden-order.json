@@ -1,0 +1,33 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.parse",
+	"name": "hidden-order",
+	"input": {
+		"raw": {
+			"records": {
+				"e1": {}
+			},
+			"added": {
+				"e1": []
+			},
+			"hidden": [
+				"x-ai/grok-*",
+				"anthropic/claude-haiku-*",
+				"openai/gpt-oss-*"
+			]
+		},
+		"entries": []
+	},
+	"expected": {
+		"stored": {
+			"tested": {},
+			"added": {},
+			"hidden": [
+				"x-ai/grok-*",
+				"anthropic/claude-haiku-*",
+				"openai/gpt-oss-*"
+			]
+		}
+	}
+}

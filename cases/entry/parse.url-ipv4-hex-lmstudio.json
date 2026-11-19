@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "url-ipv4-hex-lmstudio",
+	"input": {
+		"value": {
+			"id": "box",
+			"kind": "lmstudio",
+			"label": "Lab",
+			"url": "http://0x7f.1:8080"
+		}
+	},
+	"expected": {
+		"entry": {
+			"id": "box",
+			"kind": "lmstudio",
+			"label": "Lab",
+			"url": "http://127.0.0.1:8080"
+		}
+	}
+}

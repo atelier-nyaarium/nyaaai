@@ -1,0 +1,86 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "disposition.of",
+	"name": "of-badRequest",
+	"input": {
+		"rows": [
+			{
+				"failure": {
+					"category": "badRequest",
+					"status": "badRequest",
+					"message": "m"
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "badRequest",
+					"status": "badRequest",
+					"message": "m"
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "badRequest",
+					"status": "badRequest",
+					"message": "m"
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "badRequest",
+					"status": "badRequest",
+					"message": "m"
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "badRequest",
+					"status": "badRequest",
+					"message": "m"
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "badRequest",
+					"status": "badRequest",
+					"message": "m"
+				},
+				"status": "unknown"
+			}
+		]
+	},
+	"expected": {
+		"dispositions": [
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			}
+		]
+	}
+}

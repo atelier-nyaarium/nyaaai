@@ -1,0 +1,15 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "id-missing",
+	"input": {
+		"value": {
+			"kind": "openrouter",
+			"label": "Lab"
+		}
+	},
+	"expected": {
+		"entry": null
+	}
+}

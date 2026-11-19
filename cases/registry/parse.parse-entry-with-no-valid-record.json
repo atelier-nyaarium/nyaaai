@@ -1,0 +1,31 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.parse",
+	"name": "parse-entry-with-no-valid-record",
+	"input": {
+		"raw": {
+			"records": {
+				"e1": {
+					"openrouter:z-ai/glm-5.2": {
+						"label": ""
+					}
+				}
+			},
+			"added": {
+				"e1": [
+					"openrouter:z-ai/glm-5.2"
+				]
+			},
+			"hidden": []
+		},
+		"entries": []
+	},
+	"expected": {
+		"stored": {
+			"tested": {},
+			"added": {},
+			"hidden": []
+		}
+	}
+}

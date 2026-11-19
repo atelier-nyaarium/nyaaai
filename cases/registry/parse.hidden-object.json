@@ -1,0 +1,23 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.parse",
+	"name": "hidden-object",
+	"input": {
+		"raw": {
+			"records": {},
+			"added": {},
+			"hidden": {
+				"a": 1
+			}
+		},
+		"entries": []
+	},
+	"expected": {
+		"stored": {
+			"tested": {},
+			"added": {},
+			"hidden": []
+		}
+	}
+}

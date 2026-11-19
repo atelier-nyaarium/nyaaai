@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "compatible-space-path",
+	"input": {
+		"value": {
+			"id": "api",
+			"kind": "compatible",
+			"label": "Lab",
+			"url": "https://api.example.com/my path/"
+		}
+	},
+	"expected": {
+		"entry": {
+			"id": "api",
+			"kind": "compatible",
+			"label": "Lab",
+			"url": "https://api.example.com/my%20path"
+		}
+	}
+}

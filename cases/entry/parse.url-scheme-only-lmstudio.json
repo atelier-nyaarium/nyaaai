@@ -1,0 +1,17 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "url-scheme-only-lmstudio",
+	"input": {
+		"value": {
+			"id": "box",
+			"kind": "lmstudio",
+			"label": "Lab",
+			"url": "http://"
+		}
+	},
+	"expected": {
+		"entry": null
+	}
+}

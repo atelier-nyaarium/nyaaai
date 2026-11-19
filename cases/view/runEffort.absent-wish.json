@@ -1,0 +1,36 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "view.runEffort",
+	"name": "absent-wish",
+	"input": {
+		"rows": [
+			{
+				"view": {
+					"reasoning": true,
+					"status": "ok",
+					"efforts": [
+						"low",
+						"high",
+						"xhigh"
+					]
+				},
+				"wanted": null
+			},
+			{
+				"view": {
+					"reasoning": true,
+					"status": "unknown",
+					"efforts": []
+				},
+				"wanted": null
+			}
+		]
+	},
+	"expected": {
+		"efforts": [
+			null,
+			null
+		]
+	}
+}

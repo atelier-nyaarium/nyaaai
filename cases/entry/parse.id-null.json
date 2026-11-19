@@ -1,0 +1,16 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "id-null",
+	"input": {
+		"value": {
+			"id": null,
+			"kind": "openrouter",
+			"label": "OpenRouter"
+		}
+	},
+	"expected": {
+		"entry": null
+	}
+}

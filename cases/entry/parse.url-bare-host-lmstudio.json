@@ -1,0 +1,17 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "url-bare-host-lmstudio",
+	"input": {
+		"value": {
+			"id": "box",
+			"kind": "lmstudio",
+			"label": "Lab",
+			"url": "lab.local"
+		}
+	},
+	"expected": {
+		"entry": null
+	}
+}

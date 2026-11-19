@@ -1,0 +1,24 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.sameOrigin",
+	"name": "origin-non-ascii-refused",
+	"input": {
+		"rows": [
+			{
+				"left": "http://läb.local",
+				"right": "http://läb.local"
+			},
+			{
+				"left": "http://l%61b.local",
+				"right": "http://lab.local"
+			}
+		]
+	},
+	"expected": {
+		"same": [
+			false,
+			false
+		]
+	}
+}

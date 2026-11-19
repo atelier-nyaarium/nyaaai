@@ -1,0 +1,64 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "rowKey.build",
+	"name": "unreadable-identities",
+	"input": {
+		"identities": [
+			{
+				"kind": "curated",
+				"key": "not-curated"
+			},
+			{
+				"kind": "hosted",
+				"provider": "openrouter",
+				"id": "a b"
+			},
+			{
+				"kind": "hosted",
+				"provider": "openrouter",
+				"id": ""
+			},
+			{
+				"kind": "local",
+				"entry": "bad entry",
+				"tag": "t"
+			},
+			{
+				"kind": "local",
+				"entry": "lab",
+				"tag": "a\u0001b"
+			},
+			{
+				"kind": "local",
+				"entry": "lab",
+				"tag": "  "
+			},
+			{
+				"kind": "local",
+				"entry": "",
+				"tag": "t"
+			}
+		]
+	},
+	"expected": {
+		"keys": [
+			"not-curated",
+			"openrouter:a b",
+			"openrouter:",
+			"local:bad entry/t",
+			"local:lab/a\u0001b",
+			"local:lab/  ",
+			"local:/t"
+		],
+		"back": [
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null
+		]
+	}
+}

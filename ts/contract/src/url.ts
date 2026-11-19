@@ -180,12 +180,106 @@ function hostOf(raw: string): string | undefined {
 	return endsInNumber(labels) ? ipv4Of(labels) : host;
 }
 
+const HEX = "0123456789ABCDEF";
+
+/** Path characters the parser writes as percent escapes, besides controls and non-ASCII. */
+const PATH_ESCAPED = ' "<>^`{}';
+
+/** What a URL reads as, for the schemes `originOf` reads. */
+export interface UrlParts {
+	/** Lowercase, no colon. */
+	scheme: string;
+	/** Raw text before the first colon of the credentials; not percent-encoded. */
+	username: string;
+	/** Raw text after it; not percent-encoded. */
+	password: string;
+	/** The host as the parser writes it, an IPv6 literal in brackets. */
+	host: string;
+	/** Decimal digits; empty for a default or an absent port. */
+	port: string;
+	origin: string;
+	/** As `pathname`: dot segments resolved, escapes written, `/` when empty. */
+	path: string;
+	/** Raw text after the first `?`; empty for none. */
+	query: string;
+	/** Raw text after the first `#`; empty for none. */
+	fragment: string;
+}
+
+/** One code point as UTF-8 percent escapes. */
+function escaped(point: number): string {
+	const bytes =
+		point < 0x80
+			? [point]
+			: point < 0x800
+				? [0xc0 | (point >> 6), 0x80 | (point & 0x3f)]
+				: point < 0x10000
+					? [0xe0 | (point >> 12), 0x80 | ((point >> 6) & 0x3f), 0x80 | (point & 0x3f)]
+					: [
+							0xf0 | (point >> 18),
+							0x80 | ((point >> 12) & 0x3f),
+							0x80 | ((point >> 6) & 0x3f),
+							0x80 | (point & 0x3f),
+						];
+	return bytes.map((byte) => `%${HEX[byte >> 4]}${HEX[byte & 15]}`).join("");
+}
+
+/** A path segment with its escapes written; a lone surrogate is U+FFFD. */
+function pathSegment(text: string): string {
+	let out = "";
+	for (let at = 0; at < text.length; at++) {
+		let point = text.charCodeAt(at);
+		if (point >= 0xd800 && point <= 0xdbff && at + 1 < text.length) {
+			const next = text.charCodeAt(at + 1);
+			if (next >= 0xdc00 && next <= 0xdfff) {
+				point = 0x10000 + ((point - 0xd800) << 10) + (next - 0xdc00);
+				at += 1;
+			}
+		}
+		if (point >= 0xd800 && point <= 0xdfff) point = 0xfffd;
+		const char = String.fromCharCode(point);
+		out += point <= 0x20 || point >= 0x7f || PATH_ESCAPED.includes(char) ? escaped(point) : char;
+	}
+	return out;
+}
+
+const DOT_SEGMENTS = [".", "%2e"];
+const DOUBLE_DOT_SEGMENTS = ["..", ".%2e", "%2e.", "%2e%2e"];
+
+/** The path of a special URL: slashes of either kind, dot segments resolved. */
+function pathOf(raw: string): string {
+	const body = raw.length > 0 && isSlash(raw[0] as string) ? raw.slice(1) : raw;
+	if (raw === "") return "/";
+	const segments: string[] = [];
+	let from = 0;
+	const pieces: string[] = [];
+	for (let at = 0; at <= body.length; at++) {
+		if (at === body.length || isSlash(body[at] as string)) {
+			pieces.push(body.slice(from, at));
+			from = at + 1;
+		}
+	}
+	for (const [at, piece] of pieces.entries()) {
+		const last = at === pieces.length - 1;
+		const lower = asciiLower(piece);
+		if (DOUBLE_DOT_SEGMENTS.includes(lower)) {
+			segments.pop();
+			if (last) segments.push("");
+		} else if (DOT_SEGMENTS.includes(lower)) {
+			if (last) segments.push("");
+		} else {
+			segments.push(pathSegment(piece));
+		}
+	}
+	return `/${segments.join("/")}`;
+}
+
 /**
- * The origin of an http, https, ws, wss or ftp URL as the WHATWG parser writes it:
- * lowercase scheme and host, default port dropped, credentials ignored.
- * Undefined for any other scheme, a malformed URL, or a host with non-ASCII text.
+ * The parts of an http, https, ws, wss or ftp URL as the WHATWG parser reads them:
+ * lowercase scheme and host, default port dropped, dot segments resolved.
+ * Undefined for any other scheme, a malformed URL, or a host with non-ASCII text or escapes.
  */
-export function originOf(text: string): string | undefined {
+export function parseUrl(text: string): UrlParts | undefined {
 	let start = 0;
 	let end = text.length;
 	while (start < end && text.charCodeAt(start) <= 0x20) start += 1;
@@ -211,7 +305,12 @@ export function originOf(text: string): string | undefined {
 	let stop = at;
 	while (stop < url.length && !isSlash(url[stop] as string) && url[stop] !== "?" && url[stop] !== "#") stop += 1;
 	let authority = url.slice(at, stop);
-	authority = authority.slice(authority.lastIndexOf("@") + 1);
+	const credentialsEnd = authority.lastIndexOf("@");
+	const credentials = credentialsEnd < 0 ? "" : authority.slice(0, credentialsEnd);
+	authority = authority.slice(credentialsEnd + 1);
+	const split = credentials.indexOf(":");
+	const username = split < 0 ? credentials : credentials.slice(0, split);
+	const password = split < 0 ? "" : credentials.slice(split + 1);
 	let hostText = authority;
 	let portText = "";
 	if (authority.startsWith("[")) {
@@ -237,5 +336,29 @@ export function originOf(text: string): string | undefined {
 		port = decimalValue(portText);
 		if (port === undefined || port > 65535) return undefined;
 	}
-	return `${scheme}://${host}${port === undefined || port === defaultPort ? "" : `:${port}`}`;
+	const shown = port === undefined || port === defaultPort ? "" : `${port}`;
+	const tail = url.slice(stop);
+	const hashAt = tail.indexOf("#");
+	const beforeHash = hashAt < 0 ? tail : tail.slice(0, hashAt);
+	const queryAt = beforeHash.indexOf("?");
+	return {
+		scheme,
+		username,
+		password,
+		host,
+		port: shown,
+		origin: `${scheme}://${host}${shown === "" ? "" : `:${shown}`}`,
+		path: pathOf(queryAt < 0 ? beforeHash : beforeHash.slice(0, queryAt)),
+		query: queryAt < 0 ? "" : beforeHash.slice(queryAt + 1),
+		fragment: hashAt < 0 ? "" : tail.slice(hashAt + 1),
+	};
+}
+
+/**
+ * The origin of an http, https, ws, wss or ftp URL as the WHATWG parser writes it:
+ * lowercase scheme and host, default port dropped, credentials ignored.
+ * Undefined for any other scheme, a malformed URL, or a host with non-ASCII text.
+ */
+export function originOf(text: string): string | undefined {
+	return parseUrl(text)?.origin;
 }

@@ -1,0 +1,20 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.select",
+	"name": "select-free-over-pricey-verified",
+	"input": {
+		"wanted": "gone",
+		"list": [
+			{
+				"key": "anthropic/claude-opus-5.5",
+				"verifiedCompletion": 22,
+				"price": "free"
+			}
+		]
+	},
+	"expected": {
+		"id": "anthropic/claude-opus-5.5",
+		"marked": true
+	}
+}

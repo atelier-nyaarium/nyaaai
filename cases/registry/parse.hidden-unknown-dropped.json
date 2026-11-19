@@ -1,0 +1,32 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.parse",
+	"name": "hidden-unknown-dropped",
+	"input": {
+		"raw": {
+			"records": {
+				"e1": {}
+			},
+			"added": {
+				"e1": []
+			},
+			"hidden": [
+				"moonshotai/kimi-k*",
+				"x/y",
+				"",
+				"openai/gpt-6-luna"
+			]
+		},
+		"entries": []
+	},
+	"expected": {
+		"stored": {
+			"tested": {},
+			"added": {},
+			"hidden": [
+				"moonshotai/kimi-k*"
+			]
+		}
+	}
+}

@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "url-backslash-llamacpp",
+	"input": {
+		"value": {
+			"id": "box",
+			"kind": "llamacpp",
+			"label": "Lab",
+			"url": "http:\\\\lab.local:11434\\"
+		}
+	},
+	"expected": {
+		"entry": {
+			"id": "box",
+			"kind": "llamacpp",
+			"label": "Lab",
+			"url": "http://lab.local:11434"
+		}
+	}
+}

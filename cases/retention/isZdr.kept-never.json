@@ -1,0 +1,62 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retention.isZdr",
+	"name": "kept-never",
+	"input": {
+		"rows": [
+			{
+				"plan": "go",
+				"id": "grok-4.7",
+				"now": 0
+			},
+			{
+				"plan": "go",
+				"id": "gpt-6-luna",
+				"now": 1796083200000
+			},
+			{
+				"plan": "go",
+				"id": "claude-haiku-5-5",
+				"now": 17960832000000
+			},
+			{
+				"plan": "payg",
+				"id": "gpt-6-luna",
+				"now": 0
+			},
+			{
+				"plan": "payg",
+				"id": "claude-opus-5-5",
+				"now": 1796083200000
+			},
+			{
+				"plan": "payg",
+				"id": "grok-5",
+				"now": 0
+			},
+			{
+				"plan": "payg",
+				"id": "mistral-large",
+				"now": 0
+			},
+			{
+				"plan": "payg",
+				"id": "beam-x",
+				"now": 0
+			}
+		]
+	},
+	"expected": {
+		"values": [
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false
+		]
+	}
+}

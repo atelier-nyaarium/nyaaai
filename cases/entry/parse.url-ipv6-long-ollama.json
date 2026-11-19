@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "url-ipv6-long-ollama",
+	"input": {
+		"value": {
+			"id": "box",
+			"kind": "ollama",
+			"label": "Lab",
+			"url": "http://[2001:DB8:0:0:0:0:0:1]/"
+		}
+	},
+	"expected": {
+		"entry": {
+			"id": "box",
+			"kind": "ollama",
+			"label": "Lab",
+			"url": "http://[2001:db8::1]"
+		}
+	}
+}

@@ -1,0 +1,16 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "kind-unknown",
+	"input": {
+		"value": {
+			"id": "or1",
+			"kind": "gemini",
+			"label": "OpenRouter"
+		}
+	},
+	"expected": {
+		"entry": null
+	}
+}

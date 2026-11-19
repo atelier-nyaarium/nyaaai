@@ -1,0 +1,62 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "view.codecFacts",
+	"name": "no-api-reads-as-none",
+	"input": {
+		"views": [
+			{
+				"reasoning": true,
+				"status": "ok",
+				"efforts": []
+			},
+			{
+				"reasoning": true,
+				"status": "ok",
+				"efforts": [
+					"low",
+					"high"
+				]
+			},
+			{
+				"reasoning": false,
+				"status": "unknown",
+				"efforts": []
+			}
+		]
+	},
+	"expected": {
+		"facts": [
+			{
+				"api": {
+					"family": "chat-completions",
+					"structured": false,
+					"choice": [],
+					"strict": false
+				},
+				"efforts": []
+			},
+			{
+				"api": {
+					"family": "chat-completions",
+					"structured": false,
+					"choice": [],
+					"strict": false
+				},
+				"efforts": [
+					"low",
+					"high"
+				]
+			},
+			{
+				"api": {
+					"family": "chat-completions",
+					"structured": false,
+					"choice": [],
+					"strict": false
+				},
+				"efforts": []
+			}
+		]
+	}
+}

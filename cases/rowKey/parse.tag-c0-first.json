@@ -1,0 +1,16 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "rowKey.parse",
+	"name": "tag-c0-first",
+	"input": {
+		"values": [
+			"local:lab/\u0001"
+		]
+	},
+	"expected": {
+		"identities": [
+			null
+		]
+	}
+}

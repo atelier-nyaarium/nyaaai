@@ -1,0 +1,91 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retention.of",
+	"name": "payg-kept",
+	"input": {
+		"rows": [
+			{
+				"plan": "payg",
+				"id": "gpt-6-luna"
+			},
+			{
+				"plan": "payg",
+				"id": "gpt-"
+			},
+			{
+				"plan": "payg",
+				"id": "claude-opus-5-5"
+			},
+			{
+				"plan": "payg",
+				"id": "claude-"
+			},
+			{
+				"plan": "payg",
+				"id": "mistral-large"
+			},
+			{
+				"plan": "payg",
+				"id": "mistral-small-2603"
+			},
+			{
+				"plan": "payg",
+				"id": "grok-4.7"
+			},
+			{
+				"plan": "payg",
+				"id": "grok-5"
+			},
+			{
+				"plan": "payg",
+				"id": "beam"
+			},
+			{
+				"plan": "payg",
+				"id": "beam-free"
+			},
+			{
+				"plan": "payg",
+				"id": "beam-anything"
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"zdr": false
+			},
+			{
+				"zdr": false
+			},
+			{
+				"zdr": false
+			},
+			{
+				"zdr": false
+			},
+			{
+				"zdr": false
+			},
+			{
+				"zdr": false
+			},
+			{
+				"zdr": false
+			},
+			{
+				"zdr": false
+			},
+			{
+				"zdr": false
+			},
+			{
+				"zdr": false
+			},
+			{
+				"zdr": false
+			}
+		]
+	}
+}

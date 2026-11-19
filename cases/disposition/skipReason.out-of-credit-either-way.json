@@ -1,0 +1,51 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "disposition.skipReason",
+	"name": "out-of-credit-either-way",
+	"input": {
+		"failures": [
+			{
+				"category": "outOfCredit",
+				"status": "outOfCredit",
+				"message": "m"
+			},
+			{
+				"category": "outOfCredit",
+				"status": "outOfCredit",
+				"message": "m",
+				"retryAfterMs": 1000
+			},
+			{
+				"category": "allowance",
+				"status": "allowance",
+				"message": "m",
+				"retryAfterMs": 1000
+			},
+			{
+				"category": "notFound",
+				"status": 404,
+				"message": "m"
+			}
+		]
+	},
+	"expected": {
+		"reasons": [
+			"credit",
+			"credit",
+			"allowance",
+			"model"
+		],
+		"all": [
+			"keyMissing",
+			"keyRejected",
+			"credit",
+			"allowance",
+			"model",
+			"overloaded",
+			"unavailable",
+			"network",
+			"paused"
+		]
+	}
+}

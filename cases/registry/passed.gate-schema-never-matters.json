@@ -1,0 +1,40 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.passed",
+	"name": "gate-schema-never-matters",
+	"input": {
+		"rows": [
+			{
+				"toolPlus": "pass",
+				"recovery": "pass",
+				"reasoning": "n/a",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "pass",
+				"recovery": "pass",
+				"reasoning": "n/a",
+				"schema": "fail"
+			},
+			{
+				"toolPlus": "pass",
+				"recovery": "pass",
+				"reasoning": "n/a",
+				"schema": "n/a"
+			}
+		]
+	},
+	"expected": {
+		"passed": [
+			true,
+			true,
+			true
+		],
+		"gates": [
+			null,
+			null,
+			null
+		]
+	}
+}

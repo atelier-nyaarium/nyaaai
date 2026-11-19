@@ -1,0 +1,117 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.parse",
+	"name": "parse-shared-and-discovered",
+	"input": {
+		"raw": {
+			"records": {
+				"go1": {
+					"opencode:glm-5.3-flash": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					},
+					"opencode:gpt-6-luna": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					}
+				}
+			},
+			"added": {
+				"go1": [
+					"opencode:glm-5.3-flash",
+					"opencode:gpt-6-luna"
+				]
+			},
+			"hidden": [
+				"local:box/local-a:27b",
+				"local:gone/local-a:27b"
+			]
+		},
+		"entries": [
+			{
+				"id": "box"
+			},
+			{
+				"id": "go1"
+			}
+		]
+	},
+	"expected": {
+		"stored": {
+			"tested": {
+				"go1": {
+					"opencode:glm-5.3-flash": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					},
+					"opencode:gpt-6-luna": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					}
+				}
+			},
+			"added": {
+				"go1": [
+					"opencode:glm-5.3-flash",
+					"opencode:gpt-6-luna"
+				]
+			},
+			"hidden": [
+				"local:box/local-a:27b"
+			]
+		}
+	}
+}

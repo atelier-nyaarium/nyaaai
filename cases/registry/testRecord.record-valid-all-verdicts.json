@@ -1,0 +1,48 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.testRecord",
+	"name": "record-valid-all-verdicts",
+	"input": {
+		"values": [
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "n/a",
+					"reasoning": "fail",
+					"schema": "n/a"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			}
+		]
+	},
+	"expected": {
+		"records": [
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "n/a",
+					"reasoning": "fail",
+					"schema": "n/a"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			}
+		]
+	}
+}

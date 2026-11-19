@@ -1,0 +1,17 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "url-bad-ipv6-ollama",
+	"input": {
+		"value": {
+			"id": "box",
+			"kind": "ollama",
+			"label": "Lab",
+			"url": "http://[::1"
+		}
+	},
+	"expected": {
+		"entry": null
+	}
+}

@@ -1,0 +1,121 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "disposition.skipReason",
+	"name": "every-category",
+	"input": {
+		"failures": [
+			{
+				"category": "keyMissing",
+				"status": "keyMissing",
+				"message": "m"
+			},
+			{
+				"category": "keyRejected",
+				"status": "keyRejected",
+				"message": "m"
+			},
+			{
+				"category": "outOfCredit",
+				"status": "outOfCredit",
+				"message": "m"
+			},
+			{
+				"category": "allowance",
+				"status": "allowance",
+				"message": "m"
+			},
+			{
+				"category": "refused",
+				"status": "refused",
+				"message": "m"
+			},
+			{
+				"category": "notFound",
+				"status": "notFound",
+				"message": "m"
+			},
+			{
+				"category": "badRequest",
+				"status": "badRequest",
+				"message": "m"
+			},
+			{
+				"category": "replayRejected",
+				"status": "replayRejected",
+				"message": "m"
+			},
+			{
+				"category": "rateLimited",
+				"status": "rateLimited",
+				"message": "m"
+			},
+			{
+				"category": "overloaded",
+				"status": "overloaded",
+				"message": "m"
+			},
+			{
+				"category": "unavailable",
+				"status": "unavailable",
+				"message": "m"
+			},
+			{
+				"category": "network",
+				"status": "network",
+				"message": "m"
+			},
+			{
+				"category": "stream",
+				"status": "stream",
+				"message": "m"
+			},
+			{
+				"category": "empty",
+				"status": "empty",
+				"message": "m"
+			},
+			{
+				"category": "truncated",
+				"status": "truncated",
+				"message": "m"
+			},
+			{
+				"category": "idle",
+				"status": "idle",
+				"message": "m"
+			}
+		]
+	},
+	"expected": {
+		"reasons": [
+			"keyMissing",
+			"keyRejected",
+			"credit",
+			"allowance",
+			"unavailable",
+			"model",
+			"unavailable",
+			"unavailable",
+			"unavailable",
+			"overloaded",
+			"unavailable",
+			"network",
+			"unavailable",
+			"unavailable",
+			"unavailable",
+			"unavailable"
+		],
+		"all": [
+			"keyMissing",
+			"keyRejected",
+			"credit",
+			"allowance",
+			"model",
+			"overloaded",
+			"unavailable",
+			"network",
+			"paused"
+		]
+	}
+}

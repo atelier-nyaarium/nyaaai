@@ -1,0 +1,44 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.sameOrigin",
+	"name": "origin-default-ports",
+	"input": {
+		"rows": [
+			{
+				"left": "http://lab.local",
+				"right": "http://lab.local:80"
+			},
+			{
+				"left": "https://lab.local",
+				"right": "https://lab.local:443/"
+			},
+			{
+				"left": "http://lab.local",
+				"right": "http://lab.local:443"
+			},
+			{
+				"left": "https://lab.local",
+				"right": "https://lab.local:80"
+			},
+			{
+				"left": "http://lab.local:81",
+				"right": "http://lab.local:81/"
+			},
+			{
+				"left": "http://lab.local:81",
+				"right": "http://lab.local:82"
+			}
+		]
+	},
+	"expected": {
+		"same": [
+			true,
+			true,
+			false,
+			false,
+			true,
+			false
+		]
+	}
+}

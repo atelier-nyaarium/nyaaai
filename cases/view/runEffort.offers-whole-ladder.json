@@ -1,0 +1,150 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "view.runEffort",
+	"name": "offers-whole-ladder",
+	"input": {
+		"rows": [
+			{
+				"view": {
+					"reasoning": true,
+					"status": "ok",
+					"efforts": [
+						"none",
+						"minimal",
+						"low",
+						"medium",
+						"high",
+						"xhigh",
+						"max"
+					]
+				},
+				"wanted": "none"
+			},
+			{
+				"view": {
+					"reasoning": true,
+					"status": "ok",
+					"efforts": [
+						"none",
+						"minimal",
+						"low",
+						"medium",
+						"high",
+						"xhigh",
+						"max"
+					]
+				},
+				"wanted": "minimal"
+			},
+			{
+				"view": {
+					"reasoning": true,
+					"status": "ok",
+					"efforts": [
+						"none",
+						"minimal",
+						"low",
+						"medium",
+						"high",
+						"xhigh",
+						"max"
+					]
+				},
+				"wanted": "low"
+			},
+			{
+				"view": {
+					"reasoning": true,
+					"status": "ok",
+					"efforts": [
+						"none",
+						"minimal",
+						"low",
+						"medium",
+						"high",
+						"xhigh",
+						"max"
+					]
+				},
+				"wanted": "medium"
+			},
+			{
+				"view": {
+					"reasoning": true,
+					"status": "ok",
+					"efforts": [
+						"none",
+						"minimal",
+						"low",
+						"medium",
+						"high",
+						"xhigh",
+						"max"
+					]
+				},
+				"wanted": "high"
+			},
+			{
+				"view": {
+					"reasoning": true,
+					"status": "ok",
+					"efforts": [
+						"none",
+						"minimal",
+						"low",
+						"medium",
+						"high",
+						"xhigh",
+						"max"
+					]
+				},
+				"wanted": "xhigh"
+			},
+			{
+				"view": {
+					"reasoning": true,
+					"status": "ok",
+					"efforts": [
+						"none",
+						"minimal",
+						"low",
+						"medium",
+						"high",
+						"xhigh",
+						"max"
+					]
+				},
+				"wanted": "max"
+			},
+			{
+				"view": {
+					"reasoning": true,
+					"status": "ok",
+					"efforts": [
+						"none",
+						"minimal",
+						"low",
+						"medium",
+						"high",
+						"xhigh",
+						"max"
+					]
+				},
+				"wanted": null
+			}
+		]
+	},
+	"expected": {
+		"efforts": [
+			"none",
+			"minimal",
+			"low",
+			"medium",
+			"high",
+			"xhigh",
+			"max",
+			null
+		]
+	}
+}

@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "compatible-path-slashes",
+	"input": {
+		"value": {
+			"id": "api",
+			"kind": "compatible",
+			"label": "Lab",
+			"url": "https://api.example.com/v1///"
+		}
+	},
+	"expected": {
+		"entry": {
+			"id": "api",
+			"kind": "compatible",
+			"label": "Lab",
+			"url": "https://api.example.com/v1"
+		}
+	}
+}

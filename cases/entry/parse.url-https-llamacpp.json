@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "url-https-llamacpp",
+	"input": {
+		"value": {
+			"id": "box",
+			"kind": "llamacpp",
+			"label": "Lab",
+			"url": "https://lab.local"
+		}
+	},
+	"expected": {
+		"entry": {
+			"id": "box",
+			"kind": "llamacpp",
+			"label": "Lab",
+			"url": "https://lab.local"
+		}
+	}
+}

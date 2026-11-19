@@ -1,0 +1,24 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.sameOrigin",
+	"name": "origin-case",
+	"input": {
+		"rows": [
+			{
+				"left": "http://LAB.local",
+				"right": "http://lab.LOCAL"
+			},
+			{
+				"left": "http://Lab.local:8080",
+				"right": "http://lab.local:8080"
+			}
+		]
+	},
+	"expected": {
+		"same": [
+			true,
+			true
+		]
+	}
+}

@@ -1,0 +1,70 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "view.unknown",
+	"name": "plain-row",
+	"input": {
+		"keys": [
+			"google/gemma-4-26b-a4b-it",
+			"moonshotai/kimi-k3"
+		]
+	},
+	"expected": {
+		"views": [
+			{
+				"row": {
+					"key": "google/gemma-4-26b-a4b-it",
+					"bindings": {
+						"openrouter": {
+							"id": "google/gemma-4-26b-a4b-it"
+						}
+					},
+					"family": "google/gemma-*",
+					"label": "Gemma 4 26B",
+					"reasoning": false,
+					"schema": false,
+					"cache": "implicit",
+					"verified": "2026-09-25",
+					"verifiedPrice": {
+						"prompt": 0.0675,
+						"completion": 0.225
+					},
+					"identity": {
+						"kind": "curated",
+						"key": "google/gemma-4-26b-a4b-it"
+					}
+				},
+				"status": "unknown",
+				"efforts": [],
+				"hosts": []
+			},
+			{
+				"row": {
+					"key": "moonshotai/kimi-k3",
+					"bindings": {
+						"openrouter": {
+							"id": "moonshotai/kimi-k3"
+						}
+					},
+					"family": "moonshotai/kimi-k*",
+					"label": "Kimi K3",
+					"reasoning": true,
+					"schema": true,
+					"cache": "implicit",
+					"verified": "2026-09-25",
+					"verifiedPrice": {
+						"prompt": 3,
+						"completion": 15
+					},
+					"identity": {
+						"kind": "curated",
+						"key": "moonshotai/kimi-k3"
+					}
+				},
+				"status": "unknown",
+				"efforts": [],
+				"hosts": []
+			}
+		]
+	}
+}

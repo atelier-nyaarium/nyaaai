@@ -1,0 +1,23 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.rows",
+	"name": "rows-no-records",
+	"input": {
+		"raw": {
+			"records": {},
+			"added": {},
+			"hidden": []
+		},
+		"entries": [
+			{
+				"id": "e1",
+				"kind": "openrouter"
+			}
+		]
+	},
+	"expected": {
+		"curatedFirst": true,
+		"rest": []
+	}
+}

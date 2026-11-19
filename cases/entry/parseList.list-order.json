@@ -1,0 +1,48 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parseList",
+	"name": "list-order",
+	"input": {
+		"value": [
+			{
+				"id": "b",
+				"kind": "openrouter",
+				"label": "B"
+			},
+			{
+				"id": "a",
+				"kind": "opencode",
+				"label": "A",
+				"plan": "go"
+			},
+			{
+				"id": "c",
+				"kind": "ollama",
+				"label": "C",
+				"url": "http://lab.local:11434/"
+			}
+		]
+	},
+	"expected": {
+		"entries": [
+			{
+				"id": "b",
+				"kind": "openrouter",
+				"label": "B"
+			},
+			{
+				"id": "a",
+				"kind": "opencode",
+				"label": "A",
+				"plan": "go"
+			},
+			{
+				"id": "c",
+				"kind": "ollama",
+				"label": "C",
+				"url": "http://lab.local:11434"
+			}
+		]
+	}
+}

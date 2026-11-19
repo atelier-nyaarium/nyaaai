@@ -1,0 +1,56 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retention.isZdr",
+	"name": "go-dated-boundary",
+	"input": {
+		"rows": [
+			{
+				"plan": "go",
+				"id": "deepseek-v4",
+				"now": 0
+			},
+			{
+				"plan": "go",
+				"id": "deepseek-v4",
+				"now": 1796083199998
+			},
+			{
+				"plan": "go",
+				"id": "deepseek-v4",
+				"now": 1796083199999
+			},
+			{
+				"plan": "go",
+				"id": "deepseek-v4",
+				"now": 1796083200000
+			},
+			{
+				"plan": "go",
+				"id": "deepseek-v4",
+				"now": 1796083200001
+			},
+			{
+				"plan": "go",
+				"id": "deepseek-v4",
+				"now": 1795996800000
+			},
+			{
+				"plan": "go",
+				"id": "deepseek-v4",
+				"now": -1
+			}
+		]
+	},
+	"expected": {
+		"values": [
+			true,
+			true,
+			true,
+			false,
+			false,
+			true,
+			true
+		]
+	}
+}

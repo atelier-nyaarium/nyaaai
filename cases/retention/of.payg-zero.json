@@ -1,0 +1,98 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retention.of",
+	"name": "payg-zero",
+	"input": {
+		"rows": [
+			{
+				"plan": "payg",
+				"id": "glm-5"
+			},
+			{
+				"plan": "payg",
+				"id": "kimi-k3"
+			},
+			{
+				"plan": "payg",
+				"id": "minimax-m3"
+			},
+			{
+				"plan": "payg",
+				"id": "qwen"
+			},
+			{
+				"plan": "payg",
+				"id": "qwen3-coder"
+			},
+			{
+				"plan": "payg",
+				"id": "gemini-4-argon"
+			},
+			{
+				"plan": "payg",
+				"id": "gemini-3.8-flash"
+			},
+			{
+				"plan": "payg",
+				"id": "gemini-"
+			},
+			{
+				"plan": "payg",
+				"id": "hy-1"
+			},
+			{
+				"plan": "payg",
+				"id": "longcat-flash"
+			},
+			{
+				"plan": "payg",
+				"id": "mimo-v2.6-flash"
+			},
+			{
+				"plan": "payg",
+				"id": "step-3"
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"zdr": true
+			},
+			{
+				"zdr": true
+			},
+			{
+				"zdr": true
+			},
+			{
+				"zdr": true
+			},
+			{
+				"zdr": true
+			},
+			{
+				"zdr": true
+			},
+			{
+				"zdr": true
+			},
+			{
+				"zdr": true
+			},
+			{
+				"zdr": true
+			},
+			{
+				"zdr": true
+			},
+			{
+				"zdr": true
+			},
+			{
+				"zdr": true
+			}
+		]
+	}
+}

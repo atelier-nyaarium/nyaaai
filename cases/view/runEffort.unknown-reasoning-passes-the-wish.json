@@ -1,0 +1,86 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "view.runEffort",
+	"name": "unknown-reasoning-passes-the-wish",
+	"input": {
+		"rows": [
+			{
+				"view": {
+					"reasoning": true,
+					"status": "unknown",
+					"efforts": []
+				},
+				"wanted": "none"
+			},
+			{
+				"view": {
+					"reasoning": true,
+					"status": "unknown",
+					"efforts": []
+				},
+				"wanted": "minimal"
+			},
+			{
+				"view": {
+					"reasoning": true,
+					"status": "unknown",
+					"efforts": []
+				},
+				"wanted": "low"
+			},
+			{
+				"view": {
+					"reasoning": true,
+					"status": "unknown",
+					"efforts": []
+				},
+				"wanted": "medium"
+			},
+			{
+				"view": {
+					"reasoning": true,
+					"status": "unknown",
+					"efforts": []
+				},
+				"wanted": "high"
+			},
+			{
+				"view": {
+					"reasoning": true,
+					"status": "unknown",
+					"efforts": []
+				},
+				"wanted": "xhigh"
+			},
+			{
+				"view": {
+					"reasoning": true,
+					"status": "unknown",
+					"efforts": []
+				},
+				"wanted": "max"
+			},
+			{
+				"view": {
+					"reasoning": true,
+					"status": "unknown",
+					"efforts": []
+				},
+				"wanted": null
+			}
+		]
+	},
+	"expected": {
+		"efforts": [
+			"none",
+			"minimal",
+			"low",
+			"medium",
+			"high",
+			"xhigh",
+			"max",
+			null
+		]
+	}
+}

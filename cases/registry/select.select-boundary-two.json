@@ -1,0 +1,19 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.select",
+	"name": "select-boundary-two",
+	"input": {
+		"wanted": "gone",
+		"list": [
+			{
+				"key": "openai/gpt-6-luna",
+				"verifiedCompletion": 2
+			}
+		]
+	},
+	"expected": {
+		"id": "openai/gpt-6-luna",
+		"marked": true
+	}
+}

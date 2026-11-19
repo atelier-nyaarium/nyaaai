@@ -1,0 +1,56 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.passed",
+	"name": "gate-order",
+	"input": {
+		"rows": [
+			{
+				"toolPlus": "fail",
+				"recovery": "fail",
+				"reasoning": "fail",
+				"schema": "fail"
+			},
+			{
+				"toolPlus": "n/a",
+				"recovery": "fail",
+				"reasoning": "fail",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "pass",
+				"recovery": "fail",
+				"reasoning": "fail",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "pass",
+				"recovery": "n/a",
+				"reasoning": "fail",
+				"schema": "pass"
+			},
+			{
+				"toolPlus": "pass",
+				"recovery": "n/a",
+				"reasoning": "n/a",
+				"schema": "pass"
+			}
+		]
+	},
+	"expected": {
+		"passed": [
+			false,
+			false,
+			false,
+			false,
+			true
+		],
+		"gates": [
+			"toolPlus",
+			"toolPlus",
+			"recovery",
+			"reasoning",
+			null
+		]
+	}
+}

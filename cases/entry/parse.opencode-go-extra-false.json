@@ -1,0 +1,24 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "opencode-go-extra-false",
+	"input": {
+		"value": {
+			"id": "go1",
+			"kind": "opencode",
+			"label": "Go",
+			"plan": "go",
+			"extraUsage": false
+		}
+	},
+	"expected": {
+		"entry": {
+			"id": "go1",
+			"kind": "opencode",
+			"label": "Go",
+			"plan": "go",
+			"extraUsage": false
+		}
+	}
+}

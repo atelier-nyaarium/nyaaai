@@ -1,0 +1,238 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.offered",
+	"name": "offered-no-scope",
+	"input": {
+		"raw": {
+			"records": {
+				"e1": {
+					"openrouter:z-ai/glm-5.2": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					},
+					"openrouter:x/failed": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "fail",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					},
+					"openrouter:x/unrecovered": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "fail",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					},
+					"openrouter:x/unreasoned": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "fail",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					},
+					"openrouter:x/broken": {
+						"label": ""
+					},
+					"local:e1/hf.co/user/Coder-30B-A3B-Instruct-1M-Distill-Reasoning-Long-Context-Experimental-GGUF:Q4_K_M-imatrix-extra-long-name-here": {
+						"label": "hf.co/user/Coder-30B-A3B-Instruct-1M-Distill-Reasoning-Long-Context-Experimental-GGUF:Q4_K_M-imatrix-extra-long-name-here",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					},
+					"not an id": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					},
+					"openai/gpt-6-luna": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					},
+					"local:e2/x": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					}
+				},
+				"e2": {
+					"openrouter:x/other": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					}
+				},
+				"openrouter:z-ai/glm-5.2": {
+					"openrouter:z-ai/glm-5.2": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					}
+				}
+			},
+			"added": {
+				"e1": [
+					"openrouter:z-ai/glm-5.2",
+					"openrouter:z-ai/glm-5.2",
+					"openrouter:x/failed",
+					"openrouter:x/unrecovered",
+					"openrouter:x/unreasoned",
+					"openrouter:x/untested",
+					"openai/gpt-6-luna",
+					"local:e2/x",
+					"local:e1/hf.co/user/Coder-30B-A3B-Instruct-1M-Distill-Reasoning-Long-Context-Experimental-GGUF:Q4_K_M-imatrix-extra-long-name-here",
+					7
+				],
+				"e2": [
+					"openrouter:x/other"
+				],
+				"openrouter:z-ai/glm-5.2": [
+					"openrouter:z-ai/glm-5.2"
+				]
+			},
+			"hidden": [
+				"moonshotai/kimi-k*",
+				"openrouter:z-ai/glm-5.2",
+				"moonshotai/kimi-k3",
+				"openrouter:x/failed",
+				"openrouter:x/other",
+				3
+			]
+		},
+		"entries": [
+			{
+				"id": "e1",
+				"kind": "openrouter"
+			}
+		],
+		"scope": null,
+		"keys": [
+			"openai/gpt-6-luna",
+			"openrouter:z-ai/glm-5.2",
+			"openrouter:x/failed"
+		]
+	},
+	"expected": {
+		"offered": [
+			true,
+			false,
+			null
+		]
+	}
+}

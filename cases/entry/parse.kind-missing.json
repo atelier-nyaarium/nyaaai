@@ -1,0 +1,15 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "kind-missing",
+	"input": {
+		"value": {
+			"id": "or1",
+			"label": "Lab"
+		}
+	},
+	"expected": {
+		"entry": null
+	}
+}

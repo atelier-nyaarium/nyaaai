@@ -1,0 +1,76 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.scoped",
+	"name": "scoped-hidden-local",
+	"input": {
+		"raw": {
+			"records": {},
+			"added": {},
+			"hidden": [
+				"local:box/local-a:27b",
+				"local:other/local-b:9b",
+				"openai/gpt-*-luna"
+			]
+		},
+		"entries": [
+			{
+				"id": "box",
+				"kind": "ollama"
+			},
+			{
+				"id": "other",
+				"kind": "lmstudio"
+			}
+		],
+		"scopes": [
+			"box",
+			"other",
+			null,
+			"third"
+		]
+	},
+	"expected": {
+		"scoped": [
+			{
+				"tested": {},
+				"added": [],
+				"hidden": [
+					"local:box/local-a:27b",
+					"openai/gpt-*-luna"
+				]
+			},
+			{
+				"tested": {},
+				"added": [],
+				"hidden": [
+					"local:other/local-b:9b",
+					"openai/gpt-*-luna"
+				]
+			},
+			{
+				"tested": {},
+				"added": [],
+				"hidden": [
+					"openai/gpt-*-luna"
+				]
+			},
+			{
+				"tested": {},
+				"added": [],
+				"hidden": [
+					"openai/gpt-*-luna"
+				]
+			}
+		],
+		"merged": {
+			"tested": {},
+			"added": [],
+			"hidden": [
+				"local:box/local-a:27b",
+				"local:other/local-b:9b",
+				"openai/gpt-*-luna"
+			]
+		}
+	}
+}

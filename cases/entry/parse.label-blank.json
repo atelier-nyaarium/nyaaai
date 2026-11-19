@@ -1,0 +1,16 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "label-blank",
+	"input": {
+		"value": {
+			"id": "or1",
+			"kind": "openrouter",
+			"label": " \t\n "
+		}
+	},
+	"expected": {
+		"entry": null
+	}
+}

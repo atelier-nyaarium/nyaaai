@@ -1,0 +1,29 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.sameOrigin",
+	"name": "origin-query-refused",
+	"input": {
+		"rows": [
+			{
+				"left": "http://lab.local/?a=1",
+				"right": "http://lab.local/?a=1"
+			},
+			{
+				"left": "http://lab.local/#a",
+				"right": "http://lab.local/#a"
+			},
+			{
+				"left": "http://lab.local/?a=1",
+				"right": "http://lab.local"
+			}
+		]
+	},
+	"expected": {
+		"same": [
+			false,
+			false,
+			false
+		]
+	}
+}

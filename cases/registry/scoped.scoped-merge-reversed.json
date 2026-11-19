@@ -1,0 +1,152 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.scoped",
+	"name": "scoped-merge-reversed",
+	"input": {
+		"raw": {
+			"records": {
+				"go1": {
+					"openrouter:z-ai/glm-5.2": {
+						"label": "Test Model",
+						"date": "2026-11-01",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					}
+				},
+				"e1": {
+					"openrouter:z-ai/glm-5.2": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					}
+				},
+				"e2": {
+					"openrouter:z-ai/glm-5.2": {
+						"label": "Test Model",
+						"date": "2026-10-01",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					}
+				}
+			},
+			"added": {
+				"go1": [
+					"openrouter:z-ai/glm-5.2"
+				],
+				"e1": [
+					"openrouter:z-ai/glm-5.2"
+				],
+				"e2": [
+					"openrouter:z-ai/glm-5.2"
+				]
+			},
+			"hidden": []
+		},
+		"entries": [
+			{
+				"id": "e2",
+				"kind": "openrouter"
+			},
+			{
+				"id": "e1",
+				"kind": "openrouter"
+			},
+			{
+				"id": "go1",
+				"kind": "opencode"
+			}
+		],
+		"scopes": [
+			"e2"
+		]
+	},
+	"expected": {
+		"scoped": [
+			{
+				"tested": {
+					"openrouter:z-ai/glm-5.2": {
+						"label": "Test Model",
+						"date": "2026-10-01",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					}
+				},
+				"added": [
+					"openrouter:z-ai/glm-5.2"
+				],
+				"hidden": []
+			}
+		],
+		"merged": {
+			"tested": {
+				"openrouter:z-ai/glm-5.2": {
+					"label": "Test Model",
+					"date": "2026-10-01",
+					"cost": 0.03,
+					"checks": {
+						"toolPlus": "pass",
+						"recovery": "pass",
+						"reasoning": "n/a",
+						"schema": "pass"
+					},
+					"reasoning": true,
+					"cache": "none",
+					"verifiedPrice": {
+						"prompt": 0.32,
+						"completion": 4.4
+					}
+				}
+			},
+			"added": [
+				"openrouter:z-ai/glm-5.2"
+			],
+			"hidden": []
+		}
+	}
+}

@@ -1,0 +1,31 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.parse",
+	"name": "hidden-family",
+	"input": {
+		"raw": {
+			"records": {
+				"e1": {}
+			},
+			"added": {
+				"e1": []
+			},
+			"hidden": [
+				"moonshotai/kimi-k*",
+				"openai/gpt-*-luna"
+			]
+		},
+		"entries": []
+	},
+	"expected": {
+		"stored": {
+			"tested": {},
+			"added": {},
+			"hidden": [
+				"moonshotai/kimi-k*",
+				"openai/gpt-*-luna"
+			]
+		}
+	}
+}

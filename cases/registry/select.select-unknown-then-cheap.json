@@ -1,0 +1,24 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.select",
+	"name": "select-unknown-then-cheap",
+	"input": {
+		"wanted": "gone",
+		"list": [
+			{
+				"key": "openai/gpt-6-luna",
+				"verifiedCompletion": 0,
+				"price": "unknown"
+			},
+			{
+				"key": "anthropic/claude-haiku-5.5",
+				"verifiedCompletion": 0.55
+			}
+		]
+	},
+	"expected": {
+		"id": "anthropic/claude-haiku-5.5",
+		"marked": true
+	}
+}

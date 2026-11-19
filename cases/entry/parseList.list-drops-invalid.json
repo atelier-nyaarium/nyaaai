@@ -1,0 +1,38 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parseList",
+	"name": "list-drops-invalid",
+	"input": {
+		"value": [
+			{
+				"id": "or1",
+				"kind": "openrouter",
+				"label": "OpenRouter"
+			},
+			7,
+			null,
+			"x",
+			[],
+			{
+				"id": "bad id",
+				"kind": "openrouter",
+				"label": "x"
+			},
+			{
+				"id": "or1",
+				"kind": "openrouter",
+				"label": "OpenRouter"
+			}
+		]
+	},
+	"expected": {
+		"entries": [
+			{
+				"id": "or1",
+				"kind": "openrouter",
+				"label": "OpenRouter"
+			}
+		]
+	}
+}

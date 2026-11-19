@@ -1,0 +1,62 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.list",
+	"name": "list-local-hidden-rows",
+	"input": {
+		"raw": {
+			"records": {
+				"e1": {
+					"local:e1/local-a:27b": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					}
+				}
+			},
+			"added": {
+				"e1": [
+					"local:e1/local-a:27b"
+				]
+			},
+			"hidden": [
+				"local:e1/local-a:27b"
+			]
+		},
+		"entries": [
+			{
+				"id": "e1",
+				"kind": "ollama"
+			}
+		],
+		"scope": "e1",
+		"use": "chat",
+		"views": [
+			{
+				"key": "local:e1/local-a:27b",
+				"status": "ok"
+			},
+			{
+				"key": "openai/gpt-6-luna",
+				"status": "ok"
+			}
+		]
+	},
+	"expected": {
+		"keys": [
+			"openai/gpt-6-luna"
+		]
+	}
+}

@@ -6,7 +6,7 @@ Shared AI framework for Nyaarium tools. TypeScript and Rust twins, judged by one
 
 - `ts/`: Bun workspace. Packages `contract`, `process`, `agentic`, `operator`, `ui`, `testkit`, `adapter`, `cli`, scope `@nyaaai`.
 - `rust/`: Cargo workspace. Crates `contract`, `process`, `agentic`, `operator`, `testkit`, `adapter`, `cli`.
-- Tables TypeScript owns and Rust reads as generated constants (`scripts/rustConstants.ts`, `parity.ts`): the strict schema keyword policy and limits (`strict_policy.rs`), the HTTP date tokens (`time_tokens.rs`), the adapter's limits and texts (`adapter_texts.rs`, in `contract` so `adapter` and `testkit` both reach it).
+- Tables TypeScript owns and Rust reads as generated constants (`scripts/rustConstants.ts`, `parity.ts`): the strict schema keyword policy and limits (`strict_policy.rs`), the HTTP date tokens (`time_tokens.rs`), the adapter's limits and texts (`adapter_texts.rs`, in `contract` so `adapter` and `testkit` both reach it), the curated model list as one JSON text of `ModelRow` (`models/curated_table.rs` in `agentic`, read through the shape).
 - `prompts/`: prompt texts, one file each, by package. Both languages get a generated module.
 - `schema/`: JSON Schema exported from the Zod contract, input and output form per set. Generated, committed.
 - `cases/`: language-neutral cases. Generated from the case groups, committed.
@@ -35,6 +35,7 @@ Same names in both languages; Rust files are snake case.
   - `secret`: `secretSpellings(secret)`, `scrubSpellings` (one pass, longest match, every match becomes `[key]`, what was written is never reread), `leaksSpelling`, `scrubSecret`. The spellings: as is; path-encoded with hex digits in either case; base64 at each of the three byte alignments, unpadded, as the characters holding only the secret's bits and as that run to the end of the text. An empty secret has none.
   - `headers`: `headerOf`, the first value of a name, ASCII case aside. `responseHeaders` (Rust `response_headers`): lowercase names, sorted by code unit, repeats joined with `, `, `set-cookie` one entry per value.
   - `url`: `originOf` (Rust `origin_of`), the origin of an http, https, ws, wss or ftp URL as the WHATWG parser writes it; `undefined` for another scheme, a malformed URL or a non-ASCII or percent-encoded host.
+    `parseUrl` (`UrlParts`: scheme, credentials, host, port, origin, path, query, fragment) reads the same URLs, and `originOf` is its `origin`. The path is the platform's `pathname`; credentials, query and fragment are raw text. Rust has none yet.
   - `fetch`: port `Fetch`, one call: `FetchRequest` and a cancel signal answer `FetchResponse`, its body read as chunks. Rust: `dyn Fetch`, `Chunks`, `FetchError`.
     - An adapter owes: the cancel covers the whole exchange, so a pending or later chunk read ends cancelled (Rust `FetchError::Cancelled`; TypeScript rejects with the signal's reason). Response headers are in the `responseHeaders` form. A `GET` carries no body. The connection is released at the end of the chunks, when the reader stops early (iterator `return`, Rust drop), or at the cancel.
   - Ports of the provider layer, each with a scripted fake in the test kit: `EntryKeys` (`get(id)` answers a key, none, refused or unready; `onChange` names the entry), `ProviderList` (`entries()` in priority order; `onChange`), `ModelRegistry` (`rows()`, `stored()`, awaited `record(entry, id, record)` answering null or why not; `onChange`). A consumer reacts to `onChange`, never to a changed reference. Rust: `entry_keys`, `provider_list`, `model_registry`; `cancel::Unsubscribe` ends a subscription.
@@ -57,6 +58,14 @@ Same names in both languages; Rust files are snake case.
   - `rustNames`: `snake`, `pascal`, `quote`, for a `parity.ts`'s generated Rust.
 - `agentic`: each module an entry (`@nyaaai/agentic/sse`); only `noticeText` is a browser entry.
   - `noticeText`: `overloadedText`, `unavailableText`, the sentences a notice shows.
+  - `provider/entry`: `PROVIDER_KINDS`, `PROVIDER_PLANS`, `isEntryId`, `secretKey(id, namespace)` (the consumer names the namespace), `sameOrigin`, `parseEntry`, `parseEntries`. A reader of a stored value: what does not fit is dropped, item by item. A local URL is an origin; a `compatible` URL keeps its path without trailing slashes; no user, query or fragment; a non-ASCII or percent-encoded host is refused.
+  - `provider/disposition`: `SKIP_REASONS`, `dispositionOf`, `skipReasonOf`.
+  - `models/rowKey`: `rowKey`, `parseRowKey`, `shownId`, `shownKey`, `servedIdOf`. A key is a curated key as it is, `<kind>:<id>` or `local:<entry>/<tag>`.
+  - `models/curated`: `MODELS`, the curated list; Rust reads it from the generated `CURATED_JSON`.
+  - `models/registry`: `parseTestRecord`, `parseRegistry` (settings form in, `StoredRegistry` out), `registryFor`, `registryOf`, `registryRows`, `rowOf`, `offered`, `modelList`, `select`, `passed`, `failedGate`, `isModelId`, `curatedUnder`, `testedUnder`. `RegistrySettings` is the in-memory form: a `Map` of records in stored order, an array, a `Set`.
+    Rust: `RegistrySettings` holds three vectors (records in stored order, added, hidden without repeats); `parse_registry` takes a `RawRegistry` of the three settings values and the entry ids; `parse_row_key_text` reads a `&str`, `parse_row_key` a `Value`; `Gate` names the failed gate.
+  - `models/view`: `unknownView`, `tiersOf`, `codecFactsOf`, `runEffort`, `raced` (TypeScript only: a signal is the platform's).
+  - `kinds/opencode/retention`: `retentionOf`, `isZdr` over the plan tables.
   - `effort`: `EFFORTS`, `resolveEffort`.
   - `sse`: `SseDecoder` (`push`, `end`).
   - `step`: `StepAssembler`, `replyText`, `replyCalls`, `replyThoughts`.

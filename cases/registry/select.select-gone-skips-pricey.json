@@ -1,0 +1,35 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.select",
+	"name": "select-gone-skips-pricey",
+	"input": {
+		"wanted": "openrouter:x/gone",
+		"list": [
+			{
+				"key": "anthropic/claude-sonnet-5.5",
+				"verifiedCompletion": 11
+			},
+			{
+				"key": "anthropic/claude-opus-5.5",
+				"verifiedCompletion": 22
+			},
+			{
+				"key": "openai/gpt-6.1-sol",
+				"verifiedCompletion": 11
+			},
+			{
+				"key": "moonshotai/kimi-k3",
+				"verifiedCompletion": 15
+			},
+			{
+				"key": "anthropic/claude-haiku-5.5",
+				"verifiedCompletion": 0.55
+			}
+		]
+	},
+	"expected": {
+		"id": "anthropic/claude-haiku-5.5",
+		"marked": true
+	}
+}

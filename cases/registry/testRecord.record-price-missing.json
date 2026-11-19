@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.testRecord",
+	"name": "record-price-missing",
+	"input": {
+		"values": [
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none"
+			}
+		]
+	},
+	"expected": {
+		"records": [
+			null
+		]
+	}
+}

@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "url-upper-case-ollama",
+	"input": {
+		"value": {
+			"id": "box",
+			"kind": "ollama",
+			"label": "Lab",
+			"url": "HTTP://LAB.Local:11434"
+		}
+	},
+	"expected": {
+		"entry": {
+			"id": "box",
+			"kind": "ollama",
+			"label": "Lab",
+			"url": "http://lab.local:11434"
+		}
+	}
+}

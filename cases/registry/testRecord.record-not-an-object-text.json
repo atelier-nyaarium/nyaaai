@@ -1,0 +1,16 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.testRecord",
+	"name": "record-not-an-object-text",
+	"input": {
+		"values": [
+			"record"
+		]
+	},
+	"expected": {
+		"records": [
+			null
+		]
+	}
+}

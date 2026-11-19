@@ -1,0 +1,15 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "label-missing",
+	"input": {
+		"value": {
+			"id": "or1",
+			"kind": "openrouter"
+		}
+	},
+	"expected": {
+		"entry": null
+	}
+}

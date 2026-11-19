@@ -1264,6 +1264,84 @@
 			],
 			"additionalProperties": false
 		},
+		"UrlPartsInput": {
+			"type": "object",
+			"properties": {
+				"urls": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"urls"
+			],
+			"additionalProperties": false
+		},
+		"UrlPartsResult": {
+			"type": "object",
+			"properties": {
+				"parts": {
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{
+								"type": "object",
+								"properties": {
+									"scheme": {
+										"type": "string"
+									},
+									"username": {
+										"type": "string"
+									},
+									"password": {
+										"type": "string"
+									},
+									"host": {
+										"type": "string"
+									},
+									"port": {
+										"type": "string"
+									},
+									"origin": {
+										"type": "string"
+									},
+									"path": {
+										"type": "string"
+									},
+									"query": {
+										"type": "string"
+									},
+									"fragment": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"scheme",
+									"username",
+									"password",
+									"host",
+									"port",
+									"origin",
+									"path",
+									"query",
+									"fragment"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				}
+			},
+			"required": [
+				"parts"
+			],
+			"additionalProperties": false
+		},
 		"PatternCaseMatch": {
 			"type": "object",
 			"properties": {
@@ -4961,6 +5039,1513 @@
 			"required": [
 				"scrubbed",
 				"leaks"
+			],
+			"additionalProperties": false
+		},
+		"EntryParseInput": {
+			"type": "object",
+			"properties": {
+				"value": {}
+			},
+			"required": [
+				"value"
+			],
+			"additionalProperties": false
+		},
+		"EntryParseResult": {
+			"type": "object",
+			"properties": {
+				"entry": {
+					"anyOf": [
+						{
+							"$ref": "provider.output.json#/$defs/ProviderEntry"
+						},
+						{
+							"type": "null"
+						}
+					]
+				}
+			},
+			"required": [
+				"entry"
+			],
+			"additionalProperties": false
+		},
+		"EntryParseListInput": {
+			"type": "object",
+			"properties": {
+				"value": {}
+			},
+			"required": [
+				"value"
+			],
+			"additionalProperties": false
+		},
+		"EntryParseListResult": {
+			"type": "object",
+			"properties": {
+				"entries": {
+					"type": "array",
+					"items": {
+						"$ref": "provider.output.json#/$defs/ProviderEntry"
+					}
+				}
+			},
+			"required": [
+				"entries"
+			],
+			"additionalProperties": false
+		},
+		"EntrySameOriginInput": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"left": {
+								"type": [
+									"string",
+									"null"
+								]
+							},
+							"right": {
+								"type": [
+									"string",
+									"null"
+								]
+							}
+						},
+						"required": [
+							"left",
+							"right"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"rows"
+			],
+			"additionalProperties": false
+		},
+		"EntrySameOriginResult": {
+			"type": "object",
+			"properties": {
+				"same": {
+					"type": "array",
+					"items": {
+						"type": "boolean"
+					}
+				}
+			},
+			"required": [
+				"same"
+			],
+			"additionalProperties": false
+		},
+		"EntryIdInput": {
+			"type": "object",
+			"properties": {
+				"values": {
+					"type": "array",
+					"items": {}
+				}
+			},
+			"required": [
+				"values"
+			],
+			"additionalProperties": false
+		},
+		"EntryIdResult": {
+			"type": "object",
+			"properties": {
+				"valid": {
+					"type": "array",
+					"items": {
+						"type": "boolean"
+					}
+				}
+			},
+			"required": [
+				"valid"
+			],
+			"additionalProperties": false
+		},
+		"EntrySecretKeyInput": {
+			"type": "object",
+			"properties": {
+				"ids": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"namespace": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"ids",
+				"namespace"
+			],
+			"additionalProperties": false
+		},
+		"EntrySecretKeyResult": {
+			"type": "object",
+			"properties": {
+				"keys": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"keys"
+			],
+			"additionalProperties": false
+		},
+		"RowKeyBuildInput": {
+			"type": "object",
+			"properties": {
+				"identities": {
+					"type": "array",
+					"items": {
+						"$ref": "model.output.json#/$defs/RowIdentity"
+					}
+				}
+			},
+			"required": [
+				"identities"
+			],
+			"additionalProperties": false
+		},
+		"RowKeyBuildResult": {
+			"type": "object",
+			"properties": {
+				"keys": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"back": {
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{
+								"$ref": "model.output.json#/$defs/RowIdentity"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				}
+			},
+			"required": [
+				"keys",
+				"back"
+			],
+			"additionalProperties": false
+		},
+		"RowKeyParseInput": {
+			"type": "object",
+			"properties": {
+				"values": {
+					"type": "array",
+					"items": {}
+				}
+			},
+			"required": [
+				"values"
+			],
+			"additionalProperties": false
+		},
+		"RowKeyParseResult": {
+			"type": "object",
+			"properties": {
+				"identities": {
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{
+								"$ref": "model.output.json#/$defs/RowIdentity"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				}
+			},
+			"required": [
+				"identities"
+			],
+			"additionalProperties": false
+		},
+		"RowKeyShownInput": {
+			"type": "object",
+			"properties": {
+				"identities": {
+					"type": "array",
+					"items": {
+						"$ref": "model.output.json#/$defs/RowIdentity"
+					}
+				},
+				"keys": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"identities",
+				"keys"
+			],
+			"additionalProperties": false
+		},
+		"RowKeyShownResult": {
+			"type": "object",
+			"properties": {
+				"ids": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"keyed": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"ids",
+				"keyed"
+			],
+			"additionalProperties": false
+		},
+		"RowKeyServedIdInput": {
+			"type": "object",
+			"properties": {
+				"identities": {
+					"type": "array",
+					"items": {
+						"$ref": "model.output.json#/$defs/RowIdentity"
+					}
+				}
+			},
+			"required": [
+				"identities"
+			],
+			"additionalProperties": false
+		},
+		"RowKeyServedIdResult": {
+			"type": "object",
+			"properties": {
+				"ids": {
+					"type": "array",
+					"items": {
+						"type": [
+							"string",
+							"null"
+						]
+					}
+				}
+			},
+			"required": [
+				"ids"
+			],
+			"additionalProperties": false
+		},
+		"CuratedRowsInput": {
+			"type": "object",
+			"properties": {},
+			"additionalProperties": false
+		},
+		"CuratedRowsResult": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"$ref": "model.output.json#/$defs/ModelRow"
+					}
+				}
+			},
+			"required": [
+				"rows"
+			],
+			"additionalProperties": false
+		},
+		"RegistryTestRecordInput": {
+			"type": "object",
+			"properties": {
+				"values": {
+					"type": "array",
+					"items": {}
+				}
+			},
+			"required": [
+				"values"
+			],
+			"additionalProperties": false
+		},
+		"RegistryTestRecordResult": {
+			"type": "object",
+			"properties": {
+				"records": {
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{
+								"$ref": "model.output.json#/$defs/TestRecord"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				}
+			},
+			"required": [
+				"records"
+			],
+			"additionalProperties": false
+		},
+		"RegistryParseInput": {
+			"type": "object",
+			"properties": {
+				"raw": {
+					"type": "object",
+					"properties": {
+						"records": {},
+						"added": {},
+						"hidden": {}
+					},
+					"additionalProperties": false
+				},
+				"entries": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"id": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"id"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"raw",
+				"entries"
+			],
+			"additionalProperties": false
+		},
+		"RegistryParseResult": {
+			"type": "object",
+			"properties": {
+				"stored": {
+					"$ref": "model.output.json#/$defs/StoredRegistry"
+				}
+			},
+			"required": [
+				"stored"
+			],
+			"additionalProperties": false
+		},
+		"RegistryScopedInput": {
+			"type": "object",
+			"properties": {
+				"raw": {
+					"type": "object",
+					"properties": {
+						"records": {},
+						"added": {},
+						"hidden": {}
+					},
+					"additionalProperties": false
+				},
+				"entries": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"id": {
+								"type": "string"
+							},
+							"kind": {
+								"$ref": "provider.output.json#/$defs/ProviderKindName"
+							}
+						},
+						"required": [
+							"id",
+							"kind"
+						],
+						"additionalProperties": false
+					}
+				},
+				"scopes": {
+					"type": "array",
+					"items": {
+						"type": [
+							"string",
+							"null"
+						]
+					}
+				}
+			},
+			"required": [
+				"raw",
+				"entries",
+				"scopes"
+			],
+			"additionalProperties": false
+		},
+		"RegistryScopedResult": {
+			"type": "object",
+			"properties": {
+				"scoped": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"tested": {
+								"type": "object",
+								"propertyNames": {
+									"type": "string"
+								},
+								"additionalProperties": {
+									"$ref": "model.output.json#/$defs/TestRecord"
+								}
+							},
+							"added": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"hidden": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							}
+						},
+						"required": [
+							"tested",
+							"added",
+							"hidden"
+						],
+						"additionalProperties": false
+					}
+				},
+				"merged": {
+					"type": "object",
+					"properties": {
+						"tested": {
+							"type": "object",
+							"propertyNames": {
+								"type": "string"
+							},
+							"additionalProperties": {
+								"$ref": "model.output.json#/$defs/TestRecord"
+							}
+						},
+						"added": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						},
+						"hidden": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						}
+					},
+					"required": [
+						"tested",
+						"added",
+						"hidden"
+					],
+					"additionalProperties": false
+				}
+			},
+			"required": [
+				"scoped",
+				"merged"
+			],
+			"additionalProperties": false
+		},
+		"RegistryRowsInput": {
+			"type": "object",
+			"properties": {
+				"raw": {
+					"type": "object",
+					"properties": {
+						"records": {},
+						"added": {},
+						"hidden": {}
+					},
+					"additionalProperties": false
+				},
+				"entries": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"id": {
+								"type": "string"
+							},
+							"kind": {
+								"$ref": "provider.output.json#/$defs/ProviderKindName"
+							}
+						},
+						"required": [
+							"id",
+							"kind"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"raw",
+				"entries"
+			],
+			"additionalProperties": false
+		},
+		"RegistryRowsResult": {
+			"type": "object",
+			"properties": {
+				"curatedFirst": {
+					"type": "boolean"
+				},
+				"rest": {
+					"type": "array",
+					"items": {
+						"$ref": "model.output.json#/$defs/ModelRow"
+					}
+				}
+			},
+			"required": [
+				"curatedFirst",
+				"rest"
+			],
+			"additionalProperties": false
+		},
+		"RegistryOfferedInput": {
+			"type": "object",
+			"properties": {
+				"raw": {
+					"type": "object",
+					"properties": {
+						"records": {},
+						"added": {},
+						"hidden": {}
+					},
+					"additionalProperties": false
+				},
+				"entries": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"id": {
+								"type": "string"
+							},
+							"kind": {
+								"$ref": "provider.output.json#/$defs/ProviderKindName"
+							}
+						},
+						"required": [
+							"id",
+							"kind"
+						],
+						"additionalProperties": false
+					}
+				},
+				"scope": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"keys": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"raw",
+				"entries",
+				"scope",
+				"keys"
+			],
+			"additionalProperties": false
+		},
+		"RegistryOfferedResult": {
+			"type": "object",
+			"properties": {
+				"offered": {
+					"type": "array",
+					"items": {
+						"type": [
+							"boolean",
+							"null"
+						]
+					}
+				}
+			},
+			"required": [
+				"offered"
+			],
+			"additionalProperties": false
+		},
+		"RegistryListInput": {
+			"type": "object",
+			"properties": {
+				"raw": {
+					"type": "object",
+					"properties": {
+						"records": {},
+						"added": {},
+						"hidden": {}
+					},
+					"additionalProperties": false
+				},
+				"entries": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"id": {
+								"type": "string"
+							},
+							"kind": {
+								"$ref": "provider.output.json#/$defs/ProviderKindName"
+							}
+						},
+						"required": [
+							"id",
+							"kind"
+						],
+						"additionalProperties": false
+					}
+				},
+				"scope": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"use": {
+					"$ref": "model.output.json#/$defs/ModelUse"
+				},
+				"views": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"key": {
+								"type": "string"
+							},
+							"status": {
+								"type": "string",
+								"enum": [
+									"ok",
+									"retired",
+									"noZdrHost",
+									"noTools",
+									"unknown"
+								]
+							}
+						},
+						"required": [
+							"key",
+							"status"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"raw",
+				"entries",
+				"scope",
+				"use",
+				"views"
+			],
+			"additionalProperties": false
+		},
+		"RegistryListResult": {
+			"type": "object",
+			"properties": {
+				"keys": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"keys"
+			],
+			"additionalProperties": false
+		},
+		"RegistrySelectInput": {
+			"type": "object",
+			"properties": {
+				"wanted": {
+					"type": "string"
+				},
+				"list": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"key": {
+								"type": "string"
+							},
+							"verifiedCompletion": {
+								"type": "number"
+							},
+							"price": {
+								"anyOf": [
+									{
+										"$ref": "model.output.json#/$defs/Price"
+									},
+									{
+										"type": "string",
+										"const": "free"
+									},
+									{
+										"type": "string",
+										"const": "unknown"
+									}
+								]
+							}
+						},
+						"required": [
+							"key",
+							"verifiedCompletion"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"wanted",
+				"list"
+			],
+			"additionalProperties": false
+		},
+		"RegistrySelectResult": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"marked": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"id",
+				"marked"
+			],
+			"additionalProperties": false
+		},
+		"RegistryPassedInput": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"toolPlus": {
+								"type": "string",
+								"enum": [
+									"pass",
+									"fail",
+									"n/a"
+								]
+							},
+							"recovery": {
+								"type": "string",
+								"enum": [
+									"pass",
+									"fail",
+									"n/a"
+								]
+							},
+							"reasoning": {
+								"type": "string",
+								"enum": [
+									"pass",
+									"fail",
+									"n/a"
+								]
+							},
+							"schema": {
+								"type": "string",
+								"enum": [
+									"pass",
+									"fail",
+									"n/a"
+								]
+							}
+						},
+						"required": [
+							"toolPlus",
+							"recovery",
+							"reasoning",
+							"schema"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"rows"
+			],
+			"additionalProperties": false
+		},
+		"RegistryPassedResult": {
+			"type": "object",
+			"properties": {
+				"passed": {
+					"type": "array",
+					"items": {
+						"type": "boolean"
+					}
+				},
+				"gates": {
+					"type": "array",
+					"items": {
+						"type": [
+							"string",
+							"null"
+						]
+					}
+				}
+			},
+			"required": [
+				"passed",
+				"gates"
+			],
+			"additionalProperties": false
+		},
+		"RegistryIdsInput": {
+			"type": "object",
+			"properties": {
+				"modelIds": {
+					"type": "array",
+					"items": {}
+				},
+				"curated": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"kind": {
+								"$ref": "provider.output.json#/$defs/ProviderKindName"
+							},
+							"id": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"kind",
+							"id"
+						],
+						"additionalProperties": false
+					}
+				},
+				"tested": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"key": {
+								"type": "string"
+							},
+							"entry": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"key",
+							"entry"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"modelIds",
+				"curated",
+				"tested"
+			],
+			"additionalProperties": false
+		},
+		"RegistryIdsResult": {
+			"type": "object",
+			"properties": {
+				"modelIds": {
+					"type": "array",
+					"items": {
+						"type": "boolean"
+					}
+				},
+				"curated": {
+					"type": "array",
+					"items": {
+						"type": "boolean"
+					}
+				},
+				"tested": {
+					"type": "array",
+					"items": {
+						"type": "boolean"
+					}
+				}
+			},
+			"required": [
+				"modelIds",
+				"curated",
+				"tested"
+			],
+			"additionalProperties": false
+		},
+		"ViewUnknownInput": {
+			"type": "object",
+			"properties": {
+				"keys": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"keys"
+			],
+			"additionalProperties": false
+		},
+		"ViewUnknownResult": {
+			"type": "object",
+			"properties": {
+				"views": {
+					"type": "array",
+					"items": {
+						"$ref": "model.output.json#/$defs/ModelView"
+					}
+				}
+			},
+			"required": [
+				"views"
+			],
+			"additionalProperties": false
+		},
+		"ViewTiersInput": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"view": {
+								"anyOf": [
+									{
+										"type": "object",
+										"properties": {
+											"price": {
+												"anyOf": [
+													{
+														"$ref": "model.output.json#/$defs/Price"
+													},
+													{
+														"type": "string",
+														"const": "free"
+													},
+													{
+														"type": "string",
+														"const": "unknown"
+													}
+												]
+											}
+										},
+										"additionalProperties": false
+									},
+									{
+										"type": "null"
+									}
+								]
+							}
+						},
+						"required": [
+							"view"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"rows"
+			],
+			"additionalProperties": false
+		},
+		"ViewTiersResult": {
+			"type": "object",
+			"properties": {
+				"tiers": {
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{
+								"type": "array",
+								"items": {
+									"$ref": "model.output.json#/$defs/PriceTier"
+								}
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				}
+			},
+			"required": [
+				"tiers"
+			],
+			"additionalProperties": false
+		},
+		"ViewCodecFactsInput": {
+			"type": "object",
+			"properties": {
+				"views": {
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{
+								"type": "object",
+								"properties": {
+									"reasoning": {
+										"type": "boolean"
+									},
+									"status": {
+										"type": "string",
+										"enum": [
+											"ok",
+											"retired",
+											"noZdrHost",
+											"noTools",
+											"unknown"
+										]
+									},
+									"efforts": {
+										"type": "array",
+										"items": {
+											"$ref": "step.output.json#/$defs/Effort"
+										}
+									},
+									"outputLimit": {
+										"type": "number"
+									},
+									"price": {
+										"anyOf": [
+											{
+												"$ref": "model.output.json#/$defs/Price"
+											},
+											{
+												"type": "string",
+												"const": "free"
+											},
+											{
+												"type": "string",
+												"const": "unknown"
+											}
+										]
+									},
+									"api": {
+										"$ref": "step.output.json#/$defs/ApiFacts"
+									}
+								},
+								"required": [
+									"reasoning",
+									"status",
+									"efforts"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				}
+			},
+			"required": [
+				"views"
+			],
+			"additionalProperties": false
+		},
+		"ViewCodecFactsResult": {
+			"type": "object",
+			"properties": {
+				"facts": {
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{
+								"$ref": "step.output.json#/$defs/CodecFacts"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				}
+			},
+			"required": [
+				"facts"
+			],
+			"additionalProperties": false
+		},
+		"ViewRunEffortInput": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"view": {
+								"anyOf": [
+									{
+										"type": "object",
+										"properties": {
+											"reasoning": {
+												"type": "boolean"
+											},
+											"status": {
+												"type": "string",
+												"enum": [
+													"ok",
+													"retired",
+													"noZdrHost",
+													"noTools",
+													"unknown"
+												]
+											},
+											"efforts": {
+												"type": "array",
+												"items": {
+													"$ref": "step.output.json#/$defs/Effort"
+												}
+											},
+											"outputLimit": {
+												"type": "number"
+											},
+											"price": {
+												"anyOf": [
+													{
+														"$ref": "model.output.json#/$defs/Price"
+													},
+													{
+														"type": "string",
+														"const": "free"
+													},
+													{
+														"type": "string",
+														"const": "unknown"
+													}
+												]
+											},
+											"api": {
+												"$ref": "step.output.json#/$defs/ApiFacts"
+											}
+										},
+										"required": [
+											"reasoning",
+											"status",
+											"efforts"
+										],
+										"additionalProperties": false
+									},
+									{
+										"type": "null"
+									}
+								]
+							},
+							"wanted": {
+								"anyOf": [
+									{
+										"$ref": "step.output.json#/$defs/Effort"
+									},
+									{
+										"type": "null"
+									}
+								]
+							}
+						},
+						"required": [
+							"view",
+							"wanted"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"rows"
+			],
+			"additionalProperties": false
+		},
+		"ViewRunEffortResult": {
+			"type": "object",
+			"properties": {
+				"efforts": {
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{
+								"$ref": "step.output.json#/$defs/Effort"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				}
+			},
+			"required": [
+				"efforts"
+			],
+			"additionalProperties": false
+		},
+		"RetentionOfInput": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"plan": {
+								"$ref": "provider.output.json#/$defs/ProviderPlan"
+							},
+							"id": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"plan",
+							"id"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"rows"
+			],
+			"additionalProperties": false
+		},
+		"RetentionOfResult": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{
+								"type": "object",
+								"properties": {
+									"zdr": {
+										"type": "boolean"
+									},
+									"until": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"zdr"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				}
+			},
+			"required": [
+				"rows"
+			],
+			"additionalProperties": false
+		},
+		"RetentionIsZdrInput": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"plan": {
+								"$ref": "provider.output.json#/$defs/ProviderPlan"
+							},
+							"id": {
+								"type": "string"
+							},
+							"now": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							}
+						},
+						"required": [
+							"plan",
+							"id",
+							"now"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"rows"
+			],
+			"additionalProperties": false
+		},
+		"RetentionIsZdrResult": {
+			"type": "object",
+			"properties": {
+				"values": {
+					"type": "array",
+					"items": {
+						"type": "boolean"
+					}
+				}
+			},
+			"required": [
+				"values"
+			],
+			"additionalProperties": false
+		},
+		"DispositionOfInput": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"failure": {
+								"$ref": "step.output.json#/$defs/Failure"
+							},
+							"status": {
+								"anyOf": [
+									{
+										"type": "string",
+										"enum": [
+											"ok",
+											"retired",
+											"noZdrHost",
+											"noTools",
+											"unknown"
+										]
+									},
+									{
+										"type": "null"
+									}
+								]
+							}
+						},
+						"required": [
+							"failure",
+							"status"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"rows"
+			],
+			"additionalProperties": false
+		},
+		"DispositionOfResult": {
+			"type": "object",
+			"properties": {
+				"dispositions": {
+					"type": "array",
+					"items": {
+						"$ref": "provider.output.json#/$defs/Disposition"
+					}
+				}
+			},
+			"required": [
+				"dispositions"
+			],
+			"additionalProperties": false
+		},
+		"DispositionSkipReasonInput": {
+			"type": "object",
+			"properties": {
+				"failures": {
+					"type": "array",
+					"items": {
+						"$ref": "step.output.json#/$defs/Failure"
+					}
+				}
+			},
+			"required": [
+				"failures"
+			],
+			"additionalProperties": false
+		},
+		"DispositionSkipReasonResult": {
+			"type": "object",
+			"properties": {
+				"reasons": {
+					"type": "array",
+					"items": {
+						"$ref": "provider.output.json#/$defs/SkipReason"
+					}
+				},
+				"all": {
+					"type": "array",
+					"items": {
+						"$ref": "provider.output.json#/$defs/SkipReason"
+					}
+				}
+			},
+			"required": [
+				"reasons",
+				"all"
 			],
 			"additionalProperties": false
 		}

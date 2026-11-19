@@ -1,0 +1,38 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retention.isZdr",
+	"name": "payg-dated-boundary",
+	"input": {
+		"rows": [
+			{
+				"plan": "payg",
+				"id": "deepseek-v4.1-flash",
+				"now": 1796083199999
+			},
+			{
+				"plan": "payg",
+				"id": "deepseek-v4.1-flash",
+				"now": 1796083200000
+			},
+			{
+				"plan": "payg",
+				"id": "deepseek-",
+				"now": 1796083199999
+			},
+			{
+				"plan": "payg",
+				"id": "deepseek-",
+				"now": 1796083200000
+			}
+		]
+	},
+	"expected": {
+		"values": [
+			true,
+			false,
+			true,
+			false
+		]
+	}
+}

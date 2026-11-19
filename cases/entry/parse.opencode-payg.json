@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "opencode-payg",
+	"input": {
+		"value": {
+			"id": "pay",
+			"kind": "opencode",
+			"label": "Pay",
+			"plan": "payg"
+		}
+	},
+	"expected": {
+		"entry": {
+			"id": "pay",
+			"kind": "opencode",
+			"label": "Pay",
+			"plan": "payg"
+		}
+	}
+}

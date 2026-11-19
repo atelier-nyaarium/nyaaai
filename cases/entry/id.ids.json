@@ -1,0 +1,66 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.id",
+	"name": "ids",
+	"input": {
+		"values": [
+			"a",
+			"A-b_c",
+			"3f2a1b4c-5d6e-4f70-8a9b-0c1d2e3f4a5b",
+			"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+			"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+			"",
+			"a b",
+			"a.b",
+			"a/b",
+			"a:b",
+			"é",
+			"abc\n",
+			"\nabc",
+			" abc",
+			"__proto__",
+			"constructor",
+			"-",
+			"_",
+			"0",
+			"Ａ",
+			42,
+			null,
+			true,
+			{},
+			[
+				"a"
+			]
+		]
+	},
+	"expected": {
+		"valid": [
+			true,
+			true,
+			true,
+			true,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			true,
+			true,
+			true,
+			true,
+			true,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false
+		]
+	}
+}

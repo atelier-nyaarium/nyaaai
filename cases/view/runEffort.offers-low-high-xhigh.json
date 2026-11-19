@@ -1,0 +1,118 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "view.runEffort",
+	"name": "offers-low-high-xhigh",
+	"input": {
+		"rows": [
+			{
+				"view": {
+					"reasoning": true,
+					"status": "ok",
+					"efforts": [
+						"low",
+						"high",
+						"xhigh"
+					]
+				},
+				"wanted": "none"
+			},
+			{
+				"view": {
+					"reasoning": true,
+					"status": "ok",
+					"efforts": [
+						"low",
+						"high",
+						"xhigh"
+					]
+				},
+				"wanted": "minimal"
+			},
+			{
+				"view": {
+					"reasoning": true,
+					"status": "ok",
+					"efforts": [
+						"low",
+						"high",
+						"xhigh"
+					]
+				},
+				"wanted": "low"
+			},
+			{
+				"view": {
+					"reasoning": true,
+					"status": "ok",
+					"efforts": [
+						"low",
+						"high",
+						"xhigh"
+					]
+				},
+				"wanted": "medium"
+			},
+			{
+				"view": {
+					"reasoning": true,
+					"status": "ok",
+					"efforts": [
+						"low",
+						"high",
+						"xhigh"
+					]
+				},
+				"wanted": "high"
+			},
+			{
+				"view": {
+					"reasoning": true,
+					"status": "ok",
+					"efforts": [
+						"low",
+						"high",
+						"xhigh"
+					]
+				},
+				"wanted": "xhigh"
+			},
+			{
+				"view": {
+					"reasoning": true,
+					"status": "ok",
+					"efforts": [
+						"low",
+						"high",
+						"xhigh"
+					]
+				},
+				"wanted": "max"
+			},
+			{
+				"view": {
+					"reasoning": true,
+					"status": "ok",
+					"efforts": [
+						"low",
+						"high",
+						"xhigh"
+					]
+				},
+				"wanted": null
+			}
+		]
+	},
+	"expected": {
+		"efforts": [
+			"low",
+			"low",
+			"low",
+			"low",
+			"high",
+			"xhigh",
+			"xhigh",
+			null
+		]
+	}
+}

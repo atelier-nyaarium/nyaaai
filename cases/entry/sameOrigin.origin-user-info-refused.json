@@ -1,0 +1,29 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.sameOrigin",
+	"name": "origin-user-info-refused",
+	"input": {
+		"rows": [
+			{
+				"left": "http://user@lab.local",
+				"right": "http://user@lab.local"
+			},
+			{
+				"left": "http://user:pass@lab.local",
+				"right": "http://lab.local"
+			},
+			{
+				"left": "http://lab.local",
+				"right": "http://user:pass@lab.local"
+			}
+		]
+	},
+	"expected": {
+		"same": [
+			false,
+			false,
+			false
+		]
+	}
+}

@@ -1,0 +1,44 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retention.isZdr",
+	"name": "go-undated-any-time",
+	"input": {
+		"rows": [
+			{
+				"plan": "go",
+				"id": "glm-5",
+				"now": 0
+			},
+			{
+				"plan": "go",
+				"id": "glm-5",
+				"now": 1796083200000
+			},
+			{
+				"plan": "go",
+				"id": "glm-5",
+				"now": 17960832000000
+			},
+			{
+				"plan": "go",
+				"id": "kimi-k3",
+				"now": -1
+			},
+			{
+				"plan": "go",
+				"id": "gemini-4-argon",
+				"now": 1796083200001
+			}
+		]
+	},
+	"expected": {
+		"values": [
+			true,
+			true,
+			true,
+			true,
+			true
+		]
+	}
+}

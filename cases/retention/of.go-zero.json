@@ -1,0 +1,112 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retention.of",
+	"name": "go-zero",
+	"input": {
+		"rows": [
+			{
+				"plan": "go",
+				"id": "glm-5"
+			},
+			{
+				"plan": "go",
+				"id": "glm-"
+			},
+			{
+				"plan": "go",
+				"id": "glm-*"
+			},
+			{
+				"plan": "go",
+				"id": "glm-5.3-flash"
+			},
+			{
+				"plan": "go",
+				"id": "kimi-k3"
+			},
+			{
+				"plan": "go",
+				"id": "minimax-m3"
+			},
+			{
+				"plan": "go",
+				"id": "qwen"
+			},
+			{
+				"plan": "go",
+				"id": "qwen3"
+			},
+			{
+				"plan": "go",
+				"id": "qwen3-coder"
+			},
+			{
+				"plan": "go",
+				"id": "gemini-4-argon"
+			},
+			{
+				"plan": "go",
+				"id": "hy-1"
+			},
+			{
+				"plan": "go",
+				"id": "longcat-flash"
+			},
+			{
+				"plan": "go",
+				"id": "mimo-v2.6-flash"
+			},
+			{
+				"plan": "go",
+				"id": "step-3"
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"zdr": true
+			},
+			{
+				"zdr": true
+			},
+			{
+				"zdr": true
+			},
+			{
+				"zdr": true
+			},
+			{
+				"zdr": true
+			},
+			{
+				"zdr": true
+			},
+			{
+				"zdr": true
+			},
+			{
+				"zdr": true
+			},
+			{
+				"zdr": true
+			},
+			{
+				"zdr": true
+			},
+			{
+				"zdr": true
+			},
+			{
+				"zdr": true
+			},
+			{
+				"zdr": true
+			},
+			{
+				"zdr": true
+			}
+		]
+	}
+}

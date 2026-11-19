@@ -1,0 +1,24 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "unknown-keys-dropped",
+	"input": {
+		"value": {
+			"id": "or1",
+			"kind": "openrouter",
+			"label": "OpenRouter",
+			"color": "red",
+			"nested": {
+				"a": 1
+			}
+		}
+	},
+	"expected": {
+		"entry": {
+			"id": "or1",
+			"kind": "openrouter",
+			"label": "OpenRouter"
+		}
+	}
+}

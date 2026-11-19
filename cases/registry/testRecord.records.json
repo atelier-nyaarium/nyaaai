@@ -1,0 +1,1581 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.testRecord",
+	"name": "records",
+	"input": {
+		"values": [
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				},
+				"estimated": true
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				},
+				"estimated": false
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "explicit",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "implicit",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "n/a",
+					"reasoning": "fail",
+					"schema": "n/a"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "fail",
+					"recovery": "fail",
+					"reasoning": "fail",
+					"schema": "fail"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0,
+					"completion": 0
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				},
+				"prediction": "pass",
+				"lanes": "x",
+				"latency": {
+					"cold": {
+						"p50": 1
+					}
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass",
+					"prediction": "pass",
+					"cache": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 1,
+					"completion": 2,
+					"cached": 3
+				}
+			},
+			{
+				"label": "  Test Model \n",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "\ufeff Test ",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": " LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL ",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": " \t ",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "\u200b",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": 7,
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": null,
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-9-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28T00:00:00Z",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": " 2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28\n",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026/09/28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-13-45",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "١026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": 20260928,
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": -0.01,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": "0.03",
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": null,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 1e+21,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				},
+				"estimated": "yes"
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				},
+				"estimated": null
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				},
+				"estimated": 1
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": null,
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": [],
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": "pass",
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "PASS",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": true,
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": null,
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "na",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "maybe"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": "true",
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "automatic",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": null,
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none"
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": null
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": [
+					1,
+					2
+				]
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"completion": 2
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 2
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": -1,
+					"completion": 2
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 1,
+					"completion": "2"
+				}
+			},
+			null,
+			"record",
+			3,
+			[
+				{
+					"label": "Test Model",
+					"date": "2026-09-28",
+					"cost": 0.03,
+					"checks": {
+						"toolPlus": "pass",
+						"recovery": "pass",
+						"reasoning": "n/a",
+						"schema": "pass"
+					},
+					"reasoning": true,
+					"cache": "none",
+					"verifiedPrice": {
+						"prompt": 0.32,
+						"completion": 4.4
+					}
+				}
+			],
+			{}
+		]
+	},
+	"expected": {
+		"records": [
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"estimated": true,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"estimated": false,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "explicit",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "implicit",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "n/a",
+					"reasoning": "fail",
+					"schema": "n/a"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "fail",
+					"recovery": "fail",
+					"reasoning": "fail",
+					"schema": "fail"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0,
+					"completion": 0
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 1,
+					"completion": 2
+				}
+			},
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "Test",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			null,
+			{
+				"label": "LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			{
+				"label": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			null,
+			null,
+			null,
+			{
+				"label": "\u200b",
+				"date": "2026-09-28",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			{
+				"label": "Test Model",
+				"date": "2026-13-45",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			{
+				"label": "Test Model",
+				"date": "2026-09-28",
+				"cost": 1e+21,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			},
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null
+		]
+	}
+}

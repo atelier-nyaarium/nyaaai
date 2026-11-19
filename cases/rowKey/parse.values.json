@@ -1,0 +1,177 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "rowKey.parse",
+	"name": "values",
+	"input": {
+		"values": [
+			"openai/gpt-6-luna",
+			"OpenAI/GPT-6-Luna",
+			"openai/gpt-6-luna ",
+			"z-ai/glm-5.3-flash",
+			"vendor:model",
+			"ollama",
+			"ollama:",
+			"",
+			"openrouter",
+			"OpenRouter:vendor/model",
+			"openrouter:vendor/model",
+			"openrouter:",
+			"openrouter:~",
+			"openrouter:~~a",
+			"openrouter:a b",
+			"openrouter:a/~b",
+			"openrouter:a//b",
+			"openrouter:a/",
+			"openrouter:/a",
+			"openrouter:a?b",
+			"openrouter:é",
+			"openrouter:a\n",
+			"openrouter:a:b:c",
+			"openrouter:a/b/c/d",
+			"openrouter:_a",
+			"openrouter:.a",
+			"openrouter:-a",
+			"openrouter:a.:+-",
+			"opencode:a//b",
+			"opencode:mimo-v2.6-flash",
+			"opencode:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+			"opencode:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+			"opencode:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+			"opencode:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+			"a/b:c",
+			"openai/gpt-6-luna:extended",
+			"local",
+			"local:",
+			"local:lab",
+			"local:lab/",
+			"local:lab/  ",
+			"local:/tag",
+			"local:bad entry/tag",
+			"local:lab/qwen:8b",
+			"local::x/y",
+			"local:a/b/c",
+			"local:LAB/x",
+			"LOCAL:lab/x",
+			"local:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/t",
+			"local:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/t",
+			42,
+			null,
+			true,
+			{},
+			[
+				"openai/gpt-6-luna"
+			]
+		]
+	},
+	"expected": {
+		"identities": [
+			{
+				"kind": "curated",
+				"key": "openai/gpt-6-luna"
+			},
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			{
+				"kind": "hosted",
+				"provider": "openrouter",
+				"id": "vendor/model"
+			},
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			{
+				"kind": "hosted",
+				"provider": "openrouter",
+				"id": "a:b:c"
+			},
+			{
+				"kind": "hosted",
+				"provider": "openrouter",
+				"id": "a/b/c/d"
+			},
+			{
+				"kind": "hosted",
+				"provider": "openrouter",
+				"id": "_a"
+			},
+			null,
+			null,
+			{
+				"kind": "hosted",
+				"provider": "openrouter",
+				"id": "a.:+-"
+			},
+			null,
+			{
+				"kind": "hosted",
+				"provider": "opencode",
+				"id": "mimo-v2.6-flash"
+			},
+			{
+				"kind": "hosted",
+				"provider": "opencode",
+				"id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+			},
+			null,
+			{
+				"kind": "hosted",
+				"provider": "opencode",
+				"id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+			},
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			{
+				"kind": "local",
+				"entry": "lab",
+				"tag": "qwen:8b"
+			},
+			null,
+			{
+				"kind": "local",
+				"entry": "a",
+				"tag": "b/c"
+			},
+			{
+				"kind": "local",
+				"entry": "LAB",
+				"tag": "x"
+			},
+			null,
+			{
+				"kind": "local",
+				"entry": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+				"tag": "t"
+			},
+			null,
+			null,
+			null,
+			null,
+			null,
+			null
+		]
+	}
+}

@@ -1,0 +1,16 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "rowKey.parse",
+	"name": "tag-carriage-return",
+	"input": {
+		"values": [
+			"local:lab/a\rb"
+		]
+	},
+	"expected": {
+		"identities": [
+			null
+		]
+	}
+}

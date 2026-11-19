@@ -1,0 +1,16 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "rowKey.parse",
+	"name": "tag-c1-next-line",
+	"input": {
+		"values": [
+			"local:lab/ab"
+		]
+	},
+	"expected": {
+		"identities": [
+			null
+		]
+	}
+}

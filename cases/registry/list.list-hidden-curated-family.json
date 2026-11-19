@@ -1,0 +1,43 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.list",
+	"name": "list-hidden-curated-family",
+	"input": {
+		"raw": {
+			"records": {},
+			"added": {},
+			"hidden": [
+				"openai/gpt-*-luna",
+				"anthropic/claude-haiku-*"
+			]
+		},
+		"entries": [
+			{
+				"id": "e1",
+				"kind": "openrouter"
+			}
+		],
+		"scope": "e1",
+		"use": "chat",
+		"views": [
+			{
+				"key": "openai/gpt-6-luna",
+				"status": "ok"
+			},
+			{
+				"key": "anthropic/claude-haiku-5.5",
+				"status": "ok"
+			},
+			{
+				"key": "anthropic/claude-opus-5.5",
+				"status": "ok"
+			}
+		]
+	},
+	"expected": {
+		"keys": [
+			"anthropic/claude-opus-5.5"
+		]
+	}
+}

@@ -1,0 +1,23 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "url-on-other-kinds-ignored",
+	"input": {
+		"value": {
+			"id": "go1",
+			"kind": "opencode",
+			"label": "Go",
+			"plan": "go",
+			"url": "javascript:1"
+		}
+	},
+	"expected": {
+		"entry": {
+			"id": "go1",
+			"kind": "opencode",
+			"label": "Go",
+			"plan": "go"
+		}
+	}
+}

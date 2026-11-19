@@ -1,0 +1,32 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.testRecord",
+	"name": "record-date-empty",
+	"input": {
+		"values": [
+			{
+				"label": "Test Model",
+				"date": "",
+				"cost": 0.03,
+				"checks": {
+					"toolPlus": "pass",
+					"recovery": "pass",
+					"reasoning": "n/a",
+					"schema": "pass"
+				},
+				"reasoning": true,
+				"cache": "none",
+				"verifiedPrice": {
+					"prompt": 0.32,
+					"completion": 4.4
+				}
+			}
+		]
+	},
+	"expected": {
+		"records": [
+			null
+		]
+	}
+}

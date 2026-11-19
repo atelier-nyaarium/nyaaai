@@ -1,0 +1,16 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "rowKey.parse",
+	"name": "tag-nul",
+	"input": {
+		"values": [
+			"local:lab/a\u0000b"
+		]
+	},
+	"expected": {
+		"identities": [
+			null
+		]
+	}
+}

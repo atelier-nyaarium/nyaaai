@@ -1,0 +1,86 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "disposition.of",
+	"name": "of-outOfCredit",
+	"input": {
+		"rows": [
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "m"
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "m"
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "m"
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "m"
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "m"
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "m"
+				},
+				"status": "unknown"
+			}
+		]
+	},
+	"expected": {
+		"dispositions": [
+			{
+				"act": "fallThrough",
+				"notice": "spendLimit"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "spendLimit"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "spendLimit"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "spendLimit"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "spendLimit"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "spendLimit"
+			}
+		]
+	}
+}

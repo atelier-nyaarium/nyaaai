@@ -1,0 +1,20 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.select",
+	"name": "select-wanted-unknown-price-still-listed",
+	"input": {
+		"wanted": "openai/gpt-6-luna",
+		"list": [
+			{
+				"key": "openai/gpt-6-luna",
+				"verifiedCompletion": 0,
+				"price": "unknown"
+			}
+		]
+	},
+	"expected": {
+		"id": "openai/gpt-6-luna",
+		"marked": false
+	}
+}

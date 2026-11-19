@@ -1,0 +1,31 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.parse",
+	"name": "hidden-local-of-listed-entry",
+	"input": {
+		"raw": {
+			"records": {},
+			"added": {},
+			"hidden": [
+				"local:box/local-a:27b",
+				"local:gone/local-a:27b"
+			]
+		},
+		"entries": [
+			{
+				"id": "box",
+				"kind": "ollama"
+			}
+		]
+	},
+	"expected": {
+		"stored": {
+			"tested": {},
+			"added": {},
+			"hidden": [
+				"local:box/local-a:27b"
+			]
+		}
+	}
+}

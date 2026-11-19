@@ -1,0 +1,86 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "view.runEffort",
+	"name": "offers-nothing",
+	"input": {
+		"rows": [
+			{
+				"view": {
+					"reasoning": true,
+					"status": "ok",
+					"efforts": []
+				},
+				"wanted": "none"
+			},
+			{
+				"view": {
+					"reasoning": true,
+					"status": "ok",
+					"efforts": []
+				},
+				"wanted": "minimal"
+			},
+			{
+				"view": {
+					"reasoning": true,
+					"status": "ok",
+					"efforts": []
+				},
+				"wanted": "low"
+			},
+			{
+				"view": {
+					"reasoning": true,
+					"status": "ok",
+					"efforts": []
+				},
+				"wanted": "medium"
+			},
+			{
+				"view": {
+					"reasoning": true,
+					"status": "ok",
+					"efforts": []
+				},
+				"wanted": "high"
+			},
+			{
+				"view": {
+					"reasoning": true,
+					"status": "ok",
+					"efforts": []
+				},
+				"wanted": "xhigh"
+			},
+			{
+				"view": {
+					"reasoning": true,
+					"status": "ok",
+					"efforts": []
+				},
+				"wanted": "max"
+			},
+			{
+				"view": {
+					"reasoning": true,
+					"status": "ok",
+					"efforts": []
+				},
+				"wanted": null
+			}
+		]
+	},
+	"expected": {
+		"efforts": [
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null
+		]
+	}
+}

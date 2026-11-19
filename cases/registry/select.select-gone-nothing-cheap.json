@@ -1,0 +1,23 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.select",
+	"name": "select-gone-nothing-cheap",
+	"input": {
+		"wanted": "openrouter:x/gone",
+		"list": [
+			{
+				"key": "anthropic/claude-sonnet-5.5",
+				"verifiedCompletion": 11
+			},
+			{
+				"key": "anthropic/claude-opus-5.5",
+				"verifiedCompletion": 22
+			}
+		]
+	},
+	"expected": {
+		"id": null,
+		"marked": true
+	}
+}

@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "url-default-port-ollama",
+	"input": {
+		"value": {
+			"id": "box",
+			"kind": "ollama",
+			"label": "Lab",
+			"url": "http://lab.local:80"
+		}
+	},
+	"expected": {
+		"entry": {
+			"id": "box",
+			"kind": "ollama",
+			"label": "Lab",
+			"url": "http://lab.local"
+		}
+	}
+}

@@ -1,0 +1,18 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "array",
+	"input": {
+		"value": [
+			{
+				"id": "or1",
+				"kind": "openrouter",
+				"label": "OpenRouter"
+			}
+		]
+	},
+	"expected": {
+		"entry": null
+	}
+}
