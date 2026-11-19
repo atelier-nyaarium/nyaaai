@@ -1,9 +1,11 @@
 // Contract round-trip cases.
 
 import type { CaseSource } from "../caseAdapter";
+import { healthShapeCases } from "./healthShapes";
 import { modelShapeCases } from "./modelShapes";
 import { providerShapeCases } from "./providerShapes";
 import { stepShapeCases } from "./stepShapes";
+import { usageShapeCases } from "./usageShapes";
 
 const roundTrip = (
 	set: string,
@@ -91,6 +93,8 @@ export const contractCases: CaseSource[] = [
 	...stepShapeCases,
 	...providerShapeCases,
 	...modelShapeCases,
+	...usageShapeCases,
+	...healthShapeCases,
 	cut("CutRequest", [
 		{ mode: "trim" },
 		{ mode: "compact", targetUuid: "u", throughUuid: "v", endBefore: "e", summaryText: "s", liveTail: true },

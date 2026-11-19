@@ -1,0 +1,74 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "health-Notice",
+	"input": {
+		"set": "health",
+		"shape": "Notice",
+		"texts": [
+			"{\"kind\":\"keyMissing\"}",
+			"{\"kind\":\"spendLimit\",\"status\":429,\"message\":\"Limit reached\",\"reasons\":[\"a\",\"b\"],\"limit\":5,\"reset\":\"2026-11-01T00:00:00Z\",\"resetsAt\":1794528001000,\"nextTryAt\":1794528002000,\"model\":\"Model A\",\"entry\":\"Main\"}",
+			"{\"kind\":\"refused\",\"status\":\"stream\",\"extra\":1}",
+			"{\"kind\":\"other\"}",
+			"{\"status\":500}",
+			"{\"kind\":\"keyMissing\",\"status\":true}",
+			"{\"kind\":\"keyMissing\",\"reasons\":[1]}",
+			"{\"kind\":\"keyMissing\",\"limit\":\"5\"}",
+			"{\"kind\":\"keyMissing\",\"model\":null}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"kind\":\"keyMissing\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"spendLimit\",\"status\":429,\"message\":\"Limit reached\",\"reasons\":[\"a\",\"b\"],\"limit\":5,\"reset\":\"2026-11-01T00:00:00Z\",\"resetsAt\":1794528001000,\"nextTryAt\":1794528002000,\"model\":\"Model A\",\"entry\":\"Main\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"refused\",\"status\":\"stream\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"status"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"reasons",
+					0
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"limit"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"model"
+				]
+			}
+		]
+	}
+}

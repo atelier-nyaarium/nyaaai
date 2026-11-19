@@ -1,0 +1,220 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.usageSink",
+	"name": "none-on-demand",
+	"input": {
+		"steps": [
+			{
+				"op": "ids",
+				"ids": [
+					"id-1",
+					"id-2",
+					"id-3"
+				]
+			},
+			{
+				"op": "none",
+				"on": true
+			},
+			{
+				"op": "record",
+				"model": "m1",
+				"at": 10
+			},
+			{
+				"op": "record",
+				"model": "m2",
+				"at": 20,
+				"generationId": "gen-a1"
+			},
+			{
+				"op": "none",
+				"on": false
+			},
+			{
+				"op": "record",
+				"model": "m3",
+				"at": 30
+			},
+			{
+				"op": "none",
+				"on": true
+			},
+			{
+				"op": "none",
+				"on": false
+			},
+			{
+				"op": "record",
+				"model": "m4",
+				"at": 40
+			},
+			{
+				"op": "record",
+				"model": "m5",
+				"at": 50
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"calls": {
+					"record": 0,
+					"fill": 0,
+					"filled": 0,
+					"unfilled": 0
+				},
+				"recorded": [],
+				"fills": [],
+				"filledAsks": [],
+				"unfilledAsks": []
+			},
+			{
+				"calls": {
+					"record": 0,
+					"fill": 0,
+					"filled": 0,
+					"unfilled": 0
+				},
+				"recorded": [],
+				"fills": [],
+				"filledAsks": [],
+				"unfilledAsks": []
+			},
+			{
+				"answer": null,
+				"calls": {
+					"record": 1,
+					"fill": 0,
+					"filled": 0,
+					"unfilled": 0
+				},
+				"recorded": [
+					"m1@10"
+				],
+				"fills": [],
+				"filledAsks": [],
+				"unfilledAsks": []
+			},
+			{
+				"answer": null,
+				"calls": {
+					"record": 2,
+					"fill": 0,
+					"filled": 0,
+					"unfilled": 0
+				},
+				"recorded": [
+					"m1@10",
+					"m2@20"
+				],
+				"fills": [],
+				"filledAsks": [],
+				"unfilledAsks": []
+			},
+			{
+				"calls": {
+					"record": 2,
+					"fill": 0,
+					"filled": 0,
+					"unfilled": 0
+				},
+				"recorded": [
+					"m1@10",
+					"m2@20"
+				],
+				"fills": [],
+				"filledAsks": [],
+				"unfilledAsks": []
+			},
+			{
+				"answer": "id-1",
+				"calls": {
+					"record": 3,
+					"fill": 0,
+					"filled": 0,
+					"unfilled": 0
+				},
+				"recorded": [
+					"m1@10",
+					"m2@20",
+					"m3@30"
+				],
+				"fills": [],
+				"filledAsks": [],
+				"unfilledAsks": []
+			},
+			{
+				"calls": {
+					"record": 3,
+					"fill": 0,
+					"filled": 0,
+					"unfilled": 0
+				},
+				"recorded": [
+					"m1@10",
+					"m2@20",
+					"m3@30"
+				],
+				"fills": [],
+				"filledAsks": [],
+				"unfilledAsks": []
+			},
+			{
+				"calls": {
+					"record": 3,
+					"fill": 0,
+					"filled": 0,
+					"unfilled": 0
+				},
+				"recorded": [
+					"m1@10",
+					"m2@20",
+					"m3@30"
+				],
+				"fills": [],
+				"filledAsks": [],
+				"unfilledAsks": []
+			},
+			{
+				"answer": "id-2",
+				"calls": {
+					"record": 4,
+					"fill": 0,
+					"filled": 0,
+					"unfilled": 0
+				},
+				"recorded": [
+					"m1@10",
+					"m2@20",
+					"m3@30",
+					"m4@40"
+				],
+				"fills": [],
+				"filledAsks": [],
+				"unfilledAsks": []
+			},
+			{
+				"answer": "id-3",
+				"calls": {
+					"record": 5,
+					"fill": 0,
+					"filled": 0,
+					"unfilled": 0
+				},
+				"recorded": [
+					"m1@10",
+					"m2@20",
+					"m3@30",
+					"m4@40",
+					"m5@50"
+				],
+				"fills": [],
+				"filledAsks": [],
+				"unfilledAsks": []
+			}
+		]
+	}
+}

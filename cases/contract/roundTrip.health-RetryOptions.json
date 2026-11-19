@@ -1,0 +1,76 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "health-RetryOptions",
+	"input": {
+		"set": "health",
+		"shape": "RetryOptions",
+		"texts": [
+			"{}",
+			"{\"tries\":4,\"budgetMs\":90000,\"capMs\":30000,\"baseMs\":1000}",
+			"{\"tries\":0}",
+			"{\"tries\":1,\"random\":0.5,\"extra\":{\"deep\":1}}",
+			"{\"tries\":1.5}",
+			"{\"tries\":-1}",
+			"{\"budgetMs\":-1}",
+			"{\"capMs\":\"30\"}",
+			"{\"baseMs\":null}",
+			"[]"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{}"
+			},
+			{
+				"ok": true,
+				"text": "{\"tries\":4,\"budgetMs\":90000,\"capMs\":30000,\"baseMs\":1000}"
+			},
+			{
+				"ok": true,
+				"text": "{\"tries\":0}"
+			},
+			{
+				"ok": true,
+				"text": "{\"tries\":1}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"tries"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"tries"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"budgetMs"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"capMs"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"baseMs"
+				]
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

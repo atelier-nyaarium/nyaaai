@@ -1,0 +1,61 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "health-ErrorStatus",
+	"input": {
+		"set": "health",
+		"shape": "ErrorStatus",
+		"texts": [
+			"429",
+			"0",
+			"-1.5",
+			"stream",
+			"",
+			"true",
+			"null",
+			"[]",
+			"{}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "429"
+			},
+			{
+				"ok": true,
+				"text": "0"
+			},
+			{
+				"ok": true,
+				"text": "-1.5"
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

@@ -1,0 +1,66 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "health-GateWaiting",
+	"input": {
+		"set": "health",
+		"shape": "GateWaiting",
+		"texts": [
+			"{\"model\":\"m1\",\"resumeAt\":null,\"pause\":0,\"of\":10}",
+			"{\"model\":\"m1\",\"resumeAt\":1794528001000,\"pause\":2,\"of\":10}",
+			"{\"model\":\"m1\",\"resumeAt\":5,\"pause\":1,\"of\":10,\"extra\":1}",
+			"{\"model\":\"m1\",\"pause\":1,\"of\":10}",
+			"{\"model\":\"m1\",\"resumeAt\":null,\"pause\":1.5,\"of\":10}",
+			"{\"model\":\"m1\",\"resumeAt\":null,\"pause\":-1,\"of\":10}",
+			"{\"model\":\"m1\",\"resumeAt\":\"soon\",\"pause\":1,\"of\":10}",
+			"{\"model\":\"m1\",\"resumeAt\":null,\"of\":10}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"model\":\"m1\",\"resumeAt\":null,\"pause\":0,\"of\":10}"
+			},
+			{
+				"ok": true,
+				"text": "{\"model\":\"m1\",\"resumeAt\":1794528001000,\"pause\":2,\"of\":10}"
+			},
+			{
+				"ok": true,
+				"text": "{\"model\":\"m1\",\"resumeAt\":5,\"pause\":1,\"of\":10}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"resumeAt"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"pause"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"pause"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"resumeAt"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"pause"
+				]
+			}
+		]
+	}
+}

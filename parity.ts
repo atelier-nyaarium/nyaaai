@@ -6,10 +6,12 @@ import { ISSUE_MESSAGES } from "@nyaaai/contract/issues";
 import { CONTRACT_VERSION } from "@nyaaai/contract/shape";
 import * as strict from "@nyaaai/contract/strictSchema";
 import * as httpDates from "@nyaaai/contract/time";
+import "@nyaaai/contract/shapes/health";
 import "@nyaaai/contract/shapes/model";
 import "@nyaaai/contract/shapes/provider";
 import "@nyaaai/contract/shapes/sessionCut";
 import "@nyaaai/contract/shapes/step";
+import "@nyaaai/contract/shapes/usage";
 import { NYAAAI_SETS, project } from "@nyaaai/testkit/project";
 import { pascal, quote } from "@nyaaai/testkit/rustNames";
 import "@nyaaai/testkit/tortureShapes";
@@ -159,6 +161,8 @@ export default project({
 		},
 		model: { crate: "nyaaai_contract", module: "shapes::model", file: "rust/contract/src/shapes/model.rs" },
 		step: { crate: "nyaaai_contract", module: "shapes::step", file: "rust/contract/src/shapes/step.rs" },
+		usage: { crate: "nyaaai_contract", module: "shapes::usage", file: "rust/contract/src/shapes/usage.rs" },
+		health: { crate: "nyaaai_contract", module: "shapes::health", file: "rust/contract/src/shapes/health.rs" },
 		torture: { crate: "nyaaai_testkit", module: "torture_shapes", file: "rust/testkit/src/torture_shapes.rs" },
 		trace: { crate: "nyaaai_testkit", module: "trace_shapes", file: "rust/testkit/src/trace_shapes.rs" },
 	},

@@ -4,10 +4,16 @@ import type { KeyAnswer } from "@nyaaai/contract/entryKeys";
 import { z } from "@nyaaai/contract/shape";
 import type { ModelRow, StoredRegistry, TestRecord } from "@nyaaai/contract/shapes/model";
 import type { ProviderEntry } from "@nyaaai/contract/shapes/provider";
-import { type Deadline, deadline } from "@nyaaai/contract/time";
+import { type MeteredCall, UnfilledRecord } from "@nyaaai/contract/shapes/usage";
+import { type Clock, type Deadline, dayKey, deadline, steppedClock } from "@nyaaai/contract/time";
 import { kind } from "@nyaaai/testkit/caseGroup";
 import { fakeScheduler, TimerWheel } from "@nyaaai/testkit/scheduler";
-import { scriptedEntryKeys, scriptedModelRegistry, scriptedProviderList } from "@nyaaai/testkit/scriptedPorts";
+import {
+	scriptedEntryKeys,
+	scriptedModelRegistry,
+	scriptedProviderList,
+	scriptedUsageSink,
+} from "@nyaaai/testkit/scriptedPorts";
 
 ////////////////////////////////
 //  Functions & Helpers
@@ -38,6 +44,16 @@ const recordOf = (label: string): TestRecord => ({
 });
 
 const entryOf = (id: string): ProviderEntry => ({ id, kind: "openrouter", label: id });
+
+/** A call of fixed values. */
+const callOf = (model: string, at: number, generationId: string | undefined): MeteredCall => ({
+	tag: { feature: "chat" },
+	model,
+	at,
+	ms: 1,
+	cost: { usd: 0, estimated: false },
+	...(generationId === undefined ? {} : { generationId }),
+});
 
 const settle = async () => {
 	for (let turn = 0; turn < 4; turn++) await Promise.resolve();
@@ -282,6 +298,147 @@ export const portKinds = {
 						ended: each.deadline.ended() ?? null,
 					})),
 				});
+			}
+			return { steps };
+		},
+	),
+	/** Ids from a list, none on demand; what was given is kept in order. */
+	usageSink: kind(
+		z.object({
+			steps: z.array(
+				z.object({
+					op: z.enum(["ids", "none", "record", "edit", "fill", "markFilled", "rows", "filled", "unfilled"]),
+					ids: z.array(z.string()).exactOptional(),
+					on: z.boolean().exactOptional(),
+					model: z.string().exactOptional(),
+					generationId: z.string().exactOptional(),
+					id: z.string().exactOptional(),
+					at: z.int().exactOptional(),
+					provider: z.string().exactOptional(),
+					rows: z.array(UnfilledRecord).exactOptional(),
+				}),
+			),
+		}),
+		z.object({
+			steps: z.array(
+				z.object({
+					/** Null: not kept. */
+					answer: z.string().nullable().exactOptional(),
+					filled: z.boolean().exactOptional(),
+					unfilled: z.array(UnfilledRecord).exactOptional(),
+					calls: z.object({ record: z.int(), fill: z.int(), filled: z.int(), unfilled: z.int() }),
+					/** `model@at`. */
+					recorded: z.array(z.string()),
+					/** `id/provider`. */
+					fills: z.array(z.string()),
+					/** `id@at`. */
+					filledAsks: z.array(z.string()),
+					unfilledAsks: z.array(z.int()),
+				}),
+			),
+		}),
+		async (input) => {
+			const sink = scriptedUsageSink();
+			/** The call last handed over, which a step may edit. */
+			let last: MeteredCall | undefined;
+			const steps = [];
+			for (const step of input.steps) {
+				let answer: string | null | undefined;
+				let filled: boolean | undefined;
+				let unfilled: UnfilledRecord[] | undefined;
+				if (step.op === "ids") sink.setIds(step.ids ?? []);
+				else if (step.op === "none") sink.answerNone(step.on ?? false);
+				else if (step.op === "record") {
+					last = callOf(step.model ?? "", step.at ?? 0, step.generationId);
+					answer = sink.record(last) ?? null;
+				} else if (step.op === "edit") {
+					if (last !== undefined) last.model = step.model ?? "";
+				} else if (step.op === "fill") sink.fill(step.id ?? "", { provider: step.provider ?? "" });
+				else if (step.op === "markFilled") sink.setFilled(step.ids ?? []);
+				else if (step.op === "rows") sink.setUnfilled(step.rows ?? []);
+				else if (step.op === "filled") filled = await sink.filled(step.id ?? "", step.at ?? 0);
+				else unfilled = await sink.unfilled(step.at ?? 0);
+				steps.push({
+					...(answer === undefined ? {} : { answer }),
+					...(filled === undefined ? {} : { filled }),
+					...(unfilled === undefined ? {} : { unfilled }),
+					calls: sink.calls(),
+					recorded: sink.recorded().map((call) => `${call.model}@${call.at}`),
+					fills: sink.fills().map((fill) => `${fill.id}/${fill.stats.provider ?? ""}`),
+					filledAsks: sink.filledAsks().map((ask) => `${ask.id}@${ask.at}`),
+					unfilledAsks: sink.unfilledAsks(),
+				});
+			}
+			return { steps };
+		},
+	),
+	/** A scripted clock's offsets and the local-day rule they feed. */
+	timeOffset: kind(
+		z.object({
+			clock: z.enum(["stepped", "wheel", "scheduler"]),
+			startMs: z.int(),
+			/** The test's zone: the latest `fromMs` at or before an instant, a later entry on a tie. */
+			offsets: z.array(z.object({ fromMs: z.int(), minutes: z.int() })),
+			asks: z.array(z.int()),
+		}),
+		z.object({
+			rows: z.array(
+				z.object({
+					atMs: z.int(),
+					minutes: z.int(),
+					/** `dayKey(atMs, minutes)`: the local day. */
+					day: z.string().nullable(),
+				}),
+			),
+		}),
+		(input) => {
+			const wheel = new TimerWheel(input.startMs, input.offsets);
+			const clock: Clock =
+				input.clock === "stepped"
+					? steppedClock(input.startMs, 1, input.offsets)
+					: input.clock === "wheel"
+						? wheel
+						: fakeScheduler(wheel);
+			return {
+				rows: input.asks.map((atMs) => {
+					const minutes = clock.utcOffsetMinutes(atMs);
+					return { atMs, minutes, day: dayKey(atMs, minutes) ?? null };
+				}),
+			};
+		},
+	),
+	/** A scheduler's offsets set at construction and later, while its time moves. */
+	timeOffsetRun: kind(
+		z.object({
+			startMs: z.int(),
+			offsets: z.array(z.object({ fromMs: z.int(), minutes: z.int() })),
+			steps: z.array(
+				z.object({
+					op: z.enum(["set", "advance", "ask"]),
+					offsets: z.array(z.object({ fromMs: z.int(), minutes: z.int() })).exactOptional(),
+					ms: z.int().exactOptional(),
+					atMs: z.int().exactOptional(),
+				}),
+			),
+		}),
+		z.object({
+			steps: z.array(
+				z.object({
+					/** The scheduler's own time; no offset moves it. */
+					nowMs: z.int(),
+					minutes: z.int().exactOptional(),
+				}),
+			),
+		}),
+		(input) => {
+			const scheduler = fakeScheduler(new TimerWheel(input.startMs, input.offsets));
+			const steps = [];
+			for (const step of input.steps) {
+				let minutes: number | undefined;
+				if (step.op === "set") scheduler.wheel.setOffsets(step.offsets ?? []);
+				else if (step.op === "advance") scheduler.wheel.advance(step.ms ?? 0);
+				else minutes = scheduler.utcOffsetMinutes(step.atMs ?? 0);
+				steps.push({ nowMs: scheduler.nowMs(), ...(minutes === undefined ? {} : { minutes }) });
 			}
 			return { steps };
 		},

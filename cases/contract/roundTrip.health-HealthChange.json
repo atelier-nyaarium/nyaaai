@@ -1,0 +1,70 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "health-HealthChange",
+	"input": {
+		"set": "health",
+		"shape": "HealthChange",
+		"texts": [
+			"{\"entry\":\"e1\",\"changed\":[\"key\"]}",
+			"{\"entry\":\"e1\",\"changed\":[\"key\",\"billed\",\"pool\",\"waiting\"],\"extra\":1}",
+			"{\"entry\":\"e1\",\"changed\":[]}",
+			"{\"entry\":\"e1\",\"changed\":[\"bill\"]}",
+			"{\"entry\":\"e1\",\"changed\":[\"key\",\"other\"]}",
+			"{\"entry\":\"e1\"}",
+			"{\"changed\":[\"key\"]}",
+			"{\"entry\":\"e1\",\"changed\":\"key\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"entry\":\"e1\",\"changed\":[\"key\"]}"
+			},
+			{
+				"ok": true,
+				"text": "{\"entry\":\"e1\",\"changed\":[\"key\",\"billed\",\"pool\",\"waiting\"]}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"changed"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"changed",
+					0
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"changed",
+					1
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"changed"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"entry"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"changed"
+				]
+			}
+		]
+	}
+}

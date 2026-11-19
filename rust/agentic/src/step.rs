@@ -12,8 +12,6 @@ use nyaaai_contract::text::trim_text;
 
 use crate::failure::{FailureExtra, ProviderError, failed};
 
-pub type Billed = FailureBilled;
-
 pub fn reply_text(result: &StepResult) -> String {
     result
         .parts
@@ -151,8 +149,8 @@ impl StepAssembler {
     }
 
     /// Failed-attempt billing, if reported.
-    pub fn billed(&self) -> Option<Billed> {
-        self.started.then(|| Billed {
+    pub fn billed(&self) -> Option<FailureBilled> {
+        self.started.then(|| FailureBilled {
             usage: self.usage.clone(),
             host: self.serving.host.clone(),
             generation_id: self.serving.generation_id.clone(),

@@ -1,0 +1,67 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "usage-GenerationStats",
+	"input": {
+		"set": "usage",
+		"shape": "GenerationStats",
+		"texts": [
+			"{}",
+			"{\"provider\":\"Lab\",\"latencyMs\":210,\"generationMs\":1100,\"cost\":0.5,\"accountCost\":0.3,\"upstreamCost\":0.2,\"byok\":false,\"in\":100,\"out\":20,\"finish\":\"stop\"}",
+			"{\"provider\":\"Lab\",\"latencyMs\":210,\"generationMs\":1100,\"cost\":0.0165,\"accountCost\":0.0125,\"upstreamCost\":0.004,\"byok\":true,\"in\":1000,\"out\":200,\"finish\":\"stop\"}",
+			"{\"provider\":\"Lab\",\"latencyMs\":5}",
+			"{\"provider\":\"Lab\",\"extra\":1}",
+			"{\"in\":\"1\"}",
+			"{\"byok\":1}",
+			"{\"finish\":null}",
+			"[]"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{}"
+			},
+			{
+				"ok": true,
+				"text": "{\"provider\":\"Lab\",\"latencyMs\":210,\"generationMs\":1100,\"cost\":0.5,\"accountCost\":0.3,\"upstreamCost\":0.2,\"byok\":false,\"in\":100,\"out\":20,\"finish\":\"stop\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"provider\":\"Lab\",\"latencyMs\":210,\"generationMs\":1100,\"cost\":0.0165,\"accountCost\":0.0125,\"upstreamCost\":0.004,\"byok\":true,\"in\":1000,\"out\":200,\"finish\":\"stop\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"provider\":\"Lab\",\"latencyMs\":5}"
+			},
+			{
+				"ok": true,
+				"text": "{\"provider\":\"Lab\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"in"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"byok"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"finish"
+				]
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

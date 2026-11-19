@@ -1,0 +1,65 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "usage-CallLine",
+	"input": {
+		"set": "usage",
+		"shape": "CallLine",
+		"texts": [
+			"{\"call\":{\"id\":\"call-9\",\"at\":1794528001000,\"feature\":\"chat\",\"model\":\"vendor/model-a\",\"ms\":10,\"cost\":0}}",
+			"{\"call\":{\"id\":\"call-9\",\"at\":1794528001000,\"feature\":\"chat\",\"lane\":\"title\",\"model\":\"vendor/model-a\",\"entry\":\"e1\",\"label\":\"Main\",\"app\":\"~/work/app/\",\"ms\":10,\"first\":5,\"in\":100,\"out\":20,\"cached\":10,\"cacheWrite\":4,\"reasoning\":2,\"cost\":0.5,\"accountCost\":0.3,\"upstreamCost\":0.2,\"byok\":true,\"billingSource\":\"balance\",\"estimated\":true,\"unpriced\":true,\"provider\":\"Lab\",\"gen\":\"gen-a1\",\"finish\":\"stop\",\"failure\":\"overloaded\",\"cancelled\":false}}",
+			"{\"call\":{\"id\":\"call-9\",\"at\":1794528001000,\"feature\":\"chat\",\"model\":\"vendor/model-a\",\"ms\":10,\"cost\":0},\"extra\":1}",
+			"{\"call\":{\"id\":\"call-9\",\"at\":1794528001000,\"feature\":\"chat\",\"model\":\"vendor/model-a\",\"ms\":10,\"cost\":0,\"extra\":1}}",
+			"{\"stats\":{\"id\":\"call-9\",\"of\":{}}}",
+			"{\"call\":{\"id\":\"call-9\",\"at\":1794528001000,\"feature\":\"\",\"model\":\"vendor/model-a\",\"ms\":10,\"cost\":0}}",
+			"{\"call\":null}",
+			"{}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"call\":{\"id\":\"call-9\",\"at\":1794528001000,\"feature\":\"chat\",\"model\":\"vendor/model-a\",\"ms\":10,\"cost\":0}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"call\":{\"id\":\"call-9\",\"at\":1794528001000,\"feature\":\"chat\",\"lane\":\"title\",\"model\":\"vendor/model-a\",\"entry\":\"e1\",\"label\":\"Main\",\"app\":\"~/work/app/\",\"ms\":10,\"first\":5,\"in\":100,\"out\":20,\"cached\":10,\"cacheWrite\":4,\"reasoning\":2,\"cost\":0.5,\"accountCost\":0.3,\"upstreamCost\":0.2,\"byok\":true,\"billingSource\":\"balance\",\"estimated\":true,\"unpriced\":true,\"provider\":\"Lab\",\"gen\":\"gen-a1\",\"finish\":\"stop\",\"failure\":\"overloaded\",\"cancelled\":false}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"call\":{\"id\":\"call-9\",\"at\":1794528001000,\"feature\":\"chat\",\"model\":\"vendor/model-a\",\"ms\":10,\"cost\":0}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"call\":{\"id\":\"call-9\",\"at\":1794528001000,\"feature\":\"chat\",\"model\":\"vendor/model-a\",\"ms\":10,\"cost\":0}}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"call"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"call",
+					"feature"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"call"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"call"
+				]
+			}
+		]
+	}
+}

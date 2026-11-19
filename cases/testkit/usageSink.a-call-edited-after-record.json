@@ -1,0 +1,112 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.usageSink",
+	"name": "a-call-edited-after-record",
+	"input": {
+		"steps": [
+			{
+				"op": "ids",
+				"ids": [
+					"id-1",
+					"id-2"
+				]
+			},
+			{
+				"op": "record",
+				"model": "m1",
+				"at": 10
+			},
+			{
+				"op": "edit",
+				"model": "changed"
+			},
+			{
+				"op": "record",
+				"model": "m2",
+				"at": 20,
+				"generationId": "gen-a2"
+			},
+			{
+				"op": "edit",
+				"model": "changed-too"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"calls": {
+					"record": 0,
+					"fill": 0,
+					"filled": 0,
+					"unfilled": 0
+				},
+				"recorded": [],
+				"fills": [],
+				"filledAsks": [],
+				"unfilledAsks": []
+			},
+			{
+				"answer": "id-1",
+				"calls": {
+					"record": 1,
+					"fill": 0,
+					"filled": 0,
+					"unfilled": 0
+				},
+				"recorded": [
+					"m1@10"
+				],
+				"fills": [],
+				"filledAsks": [],
+				"unfilledAsks": []
+			},
+			{
+				"calls": {
+					"record": 1,
+					"fill": 0,
+					"filled": 0,
+					"unfilled": 0
+				},
+				"recorded": [
+					"m1@10"
+				],
+				"fills": [],
+				"filledAsks": [],
+				"unfilledAsks": []
+			},
+			{
+				"answer": "id-2",
+				"calls": {
+					"record": 2,
+					"fill": 0,
+					"filled": 0,
+					"unfilled": 0
+				},
+				"recorded": [
+					"m1@10",
+					"m2@20"
+				],
+				"fills": [],
+				"filledAsks": [],
+				"unfilledAsks": []
+			},
+			{
+				"calls": {
+					"record": 2,
+					"fill": 0,
+					"filled": 0,
+					"unfilled": 0
+				},
+				"recorded": [
+					"m1@10",
+					"m2@20"
+				],
+				"fills": [],
+				"filledAsks": [],
+				"unfilledAsks": []
+			}
+		]
+	}
+}

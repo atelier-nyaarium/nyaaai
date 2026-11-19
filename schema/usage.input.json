@@ -1,0 +1,297 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "usage.input.json",
+	"x-contract-version": "0.1.0",
+	"$defs": {
+		"Cost": {
+			"type": "object",
+			"properties": {
+				"usd": {
+					"type": "number"
+				},
+				"estimated": {
+					"type": "boolean"
+				},
+				"unpriced": {
+					"type": "boolean",
+					"const": true
+				}
+			},
+			"required": [
+				"usd",
+				"estimated"
+			]
+		},
+		"CallTag": {
+			"type": "object",
+			"properties": {
+				"feature": {
+					"type": "string"
+				},
+				"lane": {
+					"type": "string"
+				},
+				"folder": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"feature"
+			]
+		},
+		"MeteredCall": {
+			"type": "object",
+			"properties": {
+				"tag": {
+					"$ref": "#/$defs/CallTag"
+				},
+				"model": {
+					"type": "string"
+				},
+				"entry": {
+					"type": "string"
+				},
+				"label": {
+					"type": "string"
+				},
+				"at": {
+					"type": "number"
+				},
+				"ms": {
+					"type": "number"
+				},
+				"firstTokenMs": {
+					"type": "number"
+				},
+				"usage": {
+					"$ref": "step.input.json#/$defs/NormalizedUsage"
+				},
+				"cost": {
+					"$ref": "#/$defs/Cost"
+				},
+				"provider": {
+					"type": "string"
+				},
+				"generationId": {
+					"type": "string"
+				},
+				"finishReason": {
+					"type": "string"
+				},
+				"failure": {
+					"type": "string"
+				},
+				"cancelled": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"tag",
+				"model",
+				"at",
+				"ms",
+				"cost"
+			]
+		},
+		"CallRecord": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "string"
+				},
+				"at": {
+					"type": "number"
+				},
+				"feature": {
+					"type": "string",
+					"minLength": 1
+				},
+				"lane": {
+					"type": "string"
+				},
+				"model": {
+					"type": "string"
+				},
+				"entry": {
+					"type": "string"
+				},
+				"label": {
+					"type": "string"
+				},
+				"app": {
+					"type": "string"
+				},
+				"ms": {
+					"type": "number"
+				},
+				"first": {
+					"type": "number"
+				},
+				"in": {
+					"type": "number"
+				},
+				"out": {
+					"type": "number"
+				},
+				"cached": {
+					"type": "number"
+				},
+				"cacheWrite": {
+					"type": "number"
+				},
+				"reasoning": {
+					"type": "number"
+				},
+				"cost": {
+					"type": "number"
+				},
+				"accountCost": {
+					"type": "number"
+				},
+				"upstreamCost": {
+					"type": "number"
+				},
+				"byok": {
+					"type": "boolean"
+				},
+				"billingSource": {
+					"type": "string"
+				},
+				"estimated": {
+					"type": "boolean"
+				},
+				"unpriced": {
+					"type": "boolean",
+					"const": true
+				},
+				"provider": {
+					"type": "string"
+				},
+				"gen": {
+					"type": "string"
+				},
+				"finish": {
+					"type": "string"
+				},
+				"failure": {
+					"type": "string"
+				},
+				"cancelled": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"id",
+				"at",
+				"feature",
+				"model",
+				"ms",
+				"cost"
+			]
+		},
+		"GenerationStats": {
+			"type": "object",
+			"properties": {
+				"provider": {
+					"type": "string"
+				},
+				"latencyMs": {
+					"type": "number"
+				},
+				"generationMs": {
+					"type": "number"
+				},
+				"cost": {
+					"type": "number"
+				},
+				"accountCost": {
+					"type": "number"
+				},
+				"upstreamCost": {
+					"type": "number"
+				},
+				"byok": {
+					"type": "boolean"
+				},
+				"in": {
+					"type": "number"
+				},
+				"out": {
+					"type": "number"
+				},
+				"finish": {
+					"type": "string"
+				}
+			}
+		},
+		"CallLine": {
+			"type": "object",
+			"properties": {
+				"call": {
+					"$ref": "#/$defs/CallRecord"
+				}
+			},
+			"required": [
+				"call"
+			]
+		},
+		"StatsRecord": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "string"
+				},
+				"of": {
+					"$ref": "#/$defs/GenerationStats"
+				}
+			},
+			"required": [
+				"id",
+				"of"
+			]
+		},
+		"StatsLine": {
+			"type": "object",
+			"properties": {
+				"stats": {
+					"$ref": "#/$defs/StatsRecord"
+				}
+			},
+			"required": [
+				"stats"
+			]
+		},
+		"UsageLine": {
+			"anyOf": [
+				{
+					"$ref": "#/$defs/CallLine"
+				},
+				{
+					"$ref": "#/$defs/StatsLine"
+				}
+			]
+		},
+		"UnfilledRecord": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "string"
+				},
+				"generationId": {
+					"type": "string"
+				},
+				"at": {
+					"type": "number"
+				},
+				"entry": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"id",
+				"generationId",
+				"at"
+			]
+		}
+	}
+}

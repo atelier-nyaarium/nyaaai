@@ -202,6 +202,20 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
             input,
             super::testkit::deadline,
         ),
+        "testkit.usageSink" => {
+            run::<shapes::TestkitUsageSinkInput, shapes::TestkitUsageSinkResult>(
+                input,
+                super::testkit::usage_sink,
+            )
+        }
+        "testkit.timeOffset" => run::<
+            shapes::TestkitTimeOffsetInput,
+            shapes::TestkitTimeOffsetResult,
+        >(input, super::testkit::time_offset),
+        "testkit.timeOffsetRun" => run::<
+            shapes::TestkitTimeOffsetRunInput,
+            shapes::TestkitTimeOffsetRunResult,
+        >(input, super::testkit::time_offset_run),
         "testkit.compactedSession" => run::<
             shapes::TestkitCompactedSessionInput,
             shapes::TestkitCompactedSessionResult,

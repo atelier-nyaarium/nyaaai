@@ -1,0 +1,57 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "usage-UnfilledRecord",
+	"input": {
+		"set": "usage",
+		"shape": "UnfilledRecord",
+		"texts": [
+			"{\"id\":\"call-1\",\"generationId\":\"gen-a1\",\"at\":1794528001000}",
+			"{\"id\":\"call-1\",\"generationId\":\"gen-a1\",\"at\":1794528001000,\"entry\":\"e1\"}",
+			"{\"id\":\"call-1\",\"generationId\":\"gen-a1\",\"at\":1794528001000,\"extra\":1}",
+			"{\"id\":\"call-1\",\"at\":1}",
+			"{\"id\":\"call-1\",\"generationId\":\"gen-a1\"}",
+			"{\"id\":\"call-1\",\"generationId\":\"gen-a1\",\"at\":1,\"entry\":5}",
+			"[]"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"id\":\"call-1\",\"generationId\":\"gen-a1\",\"at\":1794528001000}"
+			},
+			{
+				"ok": true,
+				"text": "{\"id\":\"call-1\",\"generationId\":\"gen-a1\",\"at\":1794528001000,\"entry\":\"e1\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"id\":\"call-1\",\"generationId\":\"gen-a1\",\"at\":1794528001000}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"generationId"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"at"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"entry"
+				]
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

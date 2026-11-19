@@ -1,0 +1,44 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.timeOffset",
+	"name": "change-forward-across-midnight",
+	"input": {
+		"clock": "stepped",
+		"startMs": 0,
+		"offsets": [
+			{
+				"fromMs": 0,
+				"minutes": 0
+			},
+			{
+				"fromMs": 1794700800000,
+				"minutes": 120
+			}
+		],
+		"asks": [
+			1794700799999,
+			1794700800000,
+			1794700800001
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"atMs": 1794700799999,
+				"minutes": 0,
+				"day": "2026-11-14"
+			},
+			{
+				"atMs": 1794700800000,
+				"minutes": 120,
+				"day": "2026-11-15"
+			},
+			{
+				"atMs": 1794700800001,
+				"minutes": 120,
+				"day": "2026-11-15"
+			}
+		]
+	}
+}

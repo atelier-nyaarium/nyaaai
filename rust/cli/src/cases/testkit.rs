@@ -18,7 +18,9 @@ use super::shapes::*;
 
 mod ports;
 
-pub use ports::{deadline, entry_keys, model_registry, provider_list};
+pub use ports::{
+    deadline, entry_keys, model_registry, provider_list, time_offset, time_offset_run, usage_sink,
+};
 
 pub fn wheel(input: TestkitWheelInput) -> Outcome<TestkitWheelResult> {
     let wheel = TimerWheel::new(input.start_ms);

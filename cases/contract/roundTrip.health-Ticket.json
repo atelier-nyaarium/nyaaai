@@ -1,0 +1,114 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "health-Ticket",
+	"input": {
+		"set": "health",
+		"shape": "Ticket",
+		"texts": [
+			"{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1}",
+			"{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":3,\"probe\":true,\"serial\":7}",
+			"{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1,\"extra\":{\"deep\":1}}",
+			"{\"gate\":\"g2\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1}",
+			"{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":true,\"serial\":1}",
+			"{\"gate\":\"g1\",\"model\":\"m2\",\"generation\":0,\"probe\":false,\"serial\":1}",
+			"{\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1}",
+			"{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false}",
+			"{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"serial\":1}",
+			"{\"gate\":1,\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1}",
+			"{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":-1}",
+			"{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1.5}",
+			"{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":-1,\"probe\":false,\"serial\":1}",
+			"{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":1,\"serial\":1}",
+			"{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":\"1\"}",
+			"[]"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1}"
+			},
+			{
+				"ok": true,
+				"text": "{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":3,\"probe\":true,\"serial\":7}"
+			},
+			{
+				"ok": true,
+				"text": "{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1}"
+			},
+			{
+				"ok": true,
+				"text": "{\"gate\":\"g2\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1}"
+			},
+			{
+				"ok": true,
+				"text": "{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":true,\"serial\":1}"
+			},
+			{
+				"ok": true,
+				"text": "{\"gate\":\"g1\",\"model\":\"m2\",\"generation\":0,\"probe\":false,\"serial\":1}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"gate"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"serial"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"probe"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"gate"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"serial"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"serial"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"generation"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"probe"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"serial"
+				]
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

@@ -1,0 +1,70 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "health-Admission",
+	"input": {
+		"set": "health",
+		"shape": "Admission",
+		"texts": [
+			"{\"kind\":\"go\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1}}",
+			"{\"kind\":\"go\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":3,\"probe\":true,\"serial\":7},\"extra\":1}",
+			"{\"kind\":\"gaveUp\"}",
+			"{\"kind\":\"stopped\"}",
+			"{\"kind\":\"stopped\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1}}",
+			"{\"kind\":\"go\"}",
+			"{\"kind\":\"go\",\"ticket\":{\"model\":\"m1\"}}",
+			"{\"kind\":\"wait\"}",
+			"{}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"kind\":\"go\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"go\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":3,\"probe\":true,\"serial\":7}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"gaveUp\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"stopped\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"stopped\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"ticket"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"ticket",
+					"gate"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			}
+		]
+	}
+}

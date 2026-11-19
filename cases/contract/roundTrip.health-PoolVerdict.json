@@ -1,0 +1,65 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "health-PoolVerdict",
+	"input": {
+		"set": "health",
+		"shape": "PoolVerdict",
+		"texts": [
+			"{\"skip\":\"allowance\"}",
+			"{\"skip\":\"credit\",\"blocked\":{\"kind\":\"keyRejected\"}}",
+			"{\"skip\":\"paused\",\"blocked\":{\"kind\":\"spendLimit\",\"resetsAt\":5,\"nextTryAt\":9},\"extra\":1}",
+			"{\"skip\":\"other\"}",
+			"{\"blocked\":{\"kind\":\"keyRejected\"}}",
+			"{\"skip\":\"credit\",\"blocked\":{\"kind\":\"other\"}}",
+			"{\"skip\":\"credit\",\"blocked\":null}",
+			"[]"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"skip\":\"allowance\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"skip\":\"credit\",\"blocked\":{\"kind\":\"keyRejected\"}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"skip\":\"paused\",\"blocked\":{\"kind\":\"spendLimit\",\"resetsAt\":5,\"nextTryAt\":9}}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"skip"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"skip"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"blocked",
+					"kind"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"blocked"
+				]
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

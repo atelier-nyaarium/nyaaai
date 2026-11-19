@@ -1,0 +1,40 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.timeOffset",
+	"name": "half-hour-zone",
+	"input": {
+		"clock": "stepped",
+		"startMs": 0,
+		"offsets": [
+			{
+				"fromMs": 0,
+				"minutes": 330
+			}
+		],
+		"asks": [
+			1794680999999,
+			1794681000000,
+			1794681000001
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"atMs": 1794680999999,
+				"minutes": 330,
+				"day": "2026-11-14"
+			},
+			{
+				"atMs": 1794681000000,
+				"minutes": 330,
+				"day": "2026-11-15"
+			},
+			{
+				"atMs": 1794681000001,
+				"minutes": 330,
+				"day": "2026-11-15"
+			}
+		]
+	}
+}

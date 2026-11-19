@@ -1,0 +1,126 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "usage-UsageLine",
+	"input": {
+		"set": "usage",
+		"shape": "UsageLine",
+		"texts": [
+			"{\"call\":{\"id\":\"call-1\",\"at\":1794528001000,\"feature\":\"chat\",\"lane\":\"title\",\"model\":\"vendor/model-a\",\"entry\":\"e1\",\"label\":\"Main\",\"app\":\"~/work/app/\",\"ms\":1234,\"first\":321,\"in\":1000,\"out\":200,\"cached\":300,\"cacheWrite\":50,\"reasoning\":40,\"cost\":0.0165,\"accountCost\":0.0125,\"upstreamCost\":0.004,\"byok\":true,\"billingSource\":\"balance\",\"provider\":\"Lab\",\"gen\":\"gen-a1\",\"finish\":\"stop\"}}",
+			"{\"call\":{\"id\":\"call-2\",\"at\":1794528002000,\"feature\":\"wand\",\"model\":\"local-a:27b\",\"ms\":90,\"cost\":0,\"estimated\":true,\"unpriced\":true,\"failure\":\"overloaded\",\"cancelled\":true}}",
+			"{\"call\":{\"id\":\"call-3\",\"at\":1794528003000,\"feature\":\"analysis\",\"lane\":\"summary\",\"model\":\"vendor/model-b\",\"entry\":\"e2\",\"ms\":15,\"cost\":0,\"estimated\":true}}",
+			"{\"stats\":{\"id\":\"call-1\",\"of\":{\"provider\":\"Lab\",\"latencyMs\":210,\"generationMs\":1100,\"cost\":0.0165,\"accountCost\":0.0125,\"upstreamCost\":0.004,\"byok\":true,\"in\":1000,\"out\":200,\"finish\":\"stop\"}}}",
+			"{\"stats\":{\"id\":\"call-2\",\"of\":{\"provider\":\"Lab\",\"latencyMs\":5}}}",
+			"{\"call\":{\"id\":\"call-9\",\"at\":1,\"feature\":\"\\ud800\",\"model\":\"m\\udc00x\",\"ms\":1,\"cost\":0}}",
+			"{\"stats\":{\"id\":\"call-9\",\"of\":{\"provider\":\"Lab\"}},\"call\":{\"id\":\"call-9\",\"at\":1794528001000,\"feature\":\"chat\",\"model\":\"vendor/model-a\",\"ms\":10,\"cost\":0}}",
+			"{\"call\":{\"id\":\"call-9\",\"at\":1794528001000,\"feature\":\"chat\",\"model\":\"vendor/model-a\",\"ms\":10,\"cost\":0},\"stats\":{\"id\":\"call-9\",\"of\":{\"provider\":\"Lab\"}}}",
+			"{\"call\":{\"id\":\"call-9\",\"at\":1794528001000,\"feature\":\"chat\",\"model\":\"vendor/model-a\",\"ms\":10,\"cost\":0}}",
+			"{\"stats\":{\"id\":\"call-9\",\"of\":{}}}",
+			"{\"call\":{\"id\":\"call-9\",\"at\":1794528001000,\"feature\":\"chat\",\"model\":\"vendor/model-a\",\"ms\":10,\"cost\":0},\"stats\":{\"id\":\"call-9\",\"of\":{\"provider\":\"Lab\",\"latencyMs\":210,\"generationMs\":1100,\"cost\":0.5,\"accountCost\":0.3,\"upstreamCost\":0.2,\"byok\":false,\"in\":100,\"out\":20,\"finish\":\"stop\"}}}",
+			"{\"call\":{\"id\":\"call-9\",\"at\":1794528001000,\"feature\":\"chat\",\"model\":\"vendor/model-a\",\"ms\":10,\"cost\":0,\"extra\":1},\"other\":2}",
+			"{\"stats\":{\"id\":\"call-9\",\"of\":{\"provider\":\"Lab\",\"latencyMs\":210,\"generationMs\":1100,\"cost\":0.5,\"accountCost\":0.3,\"upstreamCost\":0.2,\"byok\":false,\"in\":100,\"out\":20,\"finish\":\"stop\",\"extra\":1},\"extra\":2}}",
+			"{\"call\":{\"id\":\"call-9\",\"at\":1794528001000,\"feature\":\"\",\"model\":\"vendor/model-a\",\"ms\":10,\"cost\":0}}",
+			"{\"call\":{\"id\":\"call-9\",\"at\":1794528001000,\"feature\":\"chat\",\"model\":\"vendor/model-a\",\"ms\":10,\"cost\":0},\"stats\":{\"id\":1}}",
+			"{\"stats\":{\"id\":\"call-9\"}}",
+			"{\"stats\":{\"of\":{}}}",
+			"{\"stats\":{\"id\":\"call-9\",\"of\":{\"in\":\"1\"}}}",
+			"{\"call\":null}",
+			"{}",
+			"[]",
+			"call"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"call\":{\"id\":\"call-1\",\"at\":1794528001000,\"feature\":\"chat\",\"lane\":\"title\",\"model\":\"vendor/model-a\",\"entry\":\"e1\",\"label\":\"Main\",\"app\":\"~/work/app/\",\"ms\":1234,\"first\":321,\"in\":1000,\"out\":200,\"cached\":300,\"cacheWrite\":50,\"reasoning\":40,\"cost\":0.0165,\"accountCost\":0.0125,\"upstreamCost\":0.004,\"byok\":true,\"billingSource\":\"balance\",\"provider\":\"Lab\",\"gen\":\"gen-a1\",\"finish\":\"stop\"}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"call\":{\"id\":\"call-2\",\"at\":1794528002000,\"feature\":\"wand\",\"model\":\"local-a:27b\",\"ms\":90,\"cost\":0,\"estimated\":true,\"unpriced\":true,\"failure\":\"overloaded\",\"cancelled\":true}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"call\":{\"id\":\"call-3\",\"at\":1794528003000,\"feature\":\"analysis\",\"lane\":\"summary\",\"model\":\"vendor/model-b\",\"entry\":\"e2\",\"ms\":15,\"cost\":0,\"estimated\":true}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"stats\":{\"id\":\"call-1\",\"of\":{\"provider\":\"Lab\",\"latencyMs\":210,\"generationMs\":1100,\"cost\":0.0165,\"accountCost\":0.0125,\"upstreamCost\":0.004,\"byok\":true,\"in\":1000,\"out\":200,\"finish\":\"stop\"}}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"stats\":{\"id\":\"call-2\",\"of\":{\"provider\":\"Lab\",\"latencyMs\":5}}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"call\":{\"id\":\"call-9\",\"at\":1,\"feature\":\"�\",\"model\":\"m�x\",\"ms\":1,\"cost\":0}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"call\":{\"id\":\"call-9\",\"at\":1794528001000,\"feature\":\"chat\",\"model\":\"vendor/model-a\",\"ms\":10,\"cost\":0}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"call\":{\"id\":\"call-9\",\"at\":1794528001000,\"feature\":\"chat\",\"model\":\"vendor/model-a\",\"ms\":10,\"cost\":0}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"call\":{\"id\":\"call-9\",\"at\":1794528001000,\"feature\":\"chat\",\"model\":\"vendor/model-a\",\"ms\":10,\"cost\":0}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"stats\":{\"id\":\"call-9\",\"of\":{}}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"call\":{\"id\":\"call-9\",\"at\":1794528001000,\"feature\":\"chat\",\"model\":\"vendor/model-a\",\"ms\":10,\"cost\":0}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"call\":{\"id\":\"call-9\",\"at\":1794528001000,\"feature\":\"chat\",\"model\":\"vendor/model-a\",\"ms\":10,\"cost\":0}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"stats\":{\"id\":\"call-9\",\"of\":{\"provider\":\"Lab\",\"latencyMs\":210,\"generationMs\":1100,\"cost\":0.5,\"accountCost\":0.3,\"upstreamCost\":0.2,\"byok\":false,\"in\":100,\"out\":20,\"finish\":\"stop\"}}}"
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": true,
+				"text": "{\"call\":{\"id\":\"call-9\",\"at\":1794528001000,\"feature\":\"chat\",\"model\":\"vendor/model-a\",\"ms\":10,\"cost\":0}}"
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

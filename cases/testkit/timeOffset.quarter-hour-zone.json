@@ -1,0 +1,40 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.timeOffset",
+	"name": "quarter-hour-zone",
+	"input": {
+		"clock": "scheduler",
+		"startMs": 0,
+		"offsets": [
+			{
+				"fromMs": 0,
+				"minutes": 345
+			}
+		],
+		"asks": [
+			1794680099999,
+			1794680100000,
+			1794680100001
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"atMs": 1794680099999,
+				"minutes": 345,
+				"day": "2026-11-14"
+			},
+			{
+				"atMs": 1794680100000,
+				"minutes": 345,
+				"day": "2026-11-15"
+			},
+			{
+				"atMs": 1794680100001,
+				"minutes": 345,
+				"day": "2026-11-15"
+			}
+		]
+	}
+}

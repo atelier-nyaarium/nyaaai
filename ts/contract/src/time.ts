@@ -1,6 +1,6 @@
 // Time primitives.
 
-import { numberOfText } from "./number";
+import { numberOfText, roundHalfUp } from "./number";
 import { trimText } from "./text";
 
 ////////////////////////////////
@@ -9,6 +9,17 @@ import { trimText } from "./text";
 /** Time in milliseconds. */
 export interface Clock {
 	nowMs: () => number;
+	/**
+	 * Whole minutes east of UTC at that instant; 0 when the zone is unknown. The system clock asks
+	 * the platform at each call; Rust's reads the zone once and keeps it until a restart.
+	 */
+	utcOffsetMinutes: (atMs: number) => number;
+}
+
+/** An offset in force from an instant on. */
+export interface OffsetFrom {
+	fromMs: number;
+	minutes: number;
 }
 
 /** Delays are whole milliseconds, at most 2^53-1. */
@@ -229,7 +240,21 @@ export function dayKey(ms: number, offsetMinutes = 0): string | undefined {
 	return text?.length === 24 ? text.slice(0, 10) : undefined;
 }
 
-export const systemClock: Clock = { nowMs: () => Date.now() };
+/** The platform's zone: whole minutes east, 0 for an instant it cannot place. */
+function platformOffset(atMs: number): number {
+	const west = new Date(atMs).getTimezoneOffset();
+	return Number.isFinite(west) ? roundHalfUp(-west) + 0 : 0;
+}
+
+export const systemClock: Clock = { nowMs: () => Date.now(), utcOffsetMinutes: platformOffset };
+
+/** The offset of the latest entry at or before `atMs` (a later entry wins a tie); 0 before the first. */
+export function scriptedOffset(offsets: readonly OffsetFrom[], atMs: number): number {
+	let held: OffsetFrom | undefined;
+	for (const offset of offsets)
+		if (offset.fromMs <= atMs && (held === undefined || offset.fromMs >= held.fromMs)) held = offset;
+	return held?.minutes ?? 0;
+}
 
 /** Longest single platform timer. */
 const MAX_TIMER_MS = 2 ** 31 - 1;
@@ -301,8 +326,8 @@ export function deadline(scheduler: Scheduler, ms: number, caller?: AbortSignal)
 	return result;
 }
 
-/** Advances on each read. */
-export function steppedClock(startMs: number, stepMs = 0): Clock {
+/** Advances on each read; the offsets are the test's. */
+export function steppedClock(startMs: number, stepMs = 0, offsets: readonly OffsetFrom[] = []): Clock {
 	let reads = 0;
-	return { nowMs: () => startMs + stepMs * reads++ };
+	return { nowMs: () => startMs + stepMs * reads++, utcOffsetMinutes: (atMs) => scriptedOffset(offsets, atMs) };
 }

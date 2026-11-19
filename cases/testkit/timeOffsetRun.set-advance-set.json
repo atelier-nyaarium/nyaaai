@@ -1,0 +1,114 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.timeOffsetRun",
+	"name": "set-advance-set",
+	"input": {
+		"startMs": 1794700000000,
+		"offsets": [
+			{
+				"fromMs": 0,
+				"minutes": 60
+			}
+		],
+		"steps": [
+			{
+				"op": "ask",
+				"atMs": 1794700800000
+			},
+			{
+				"op": "advance",
+				"ms": 500000
+			},
+			{
+				"op": "ask",
+				"atMs": 1794700800000
+			},
+			{
+				"op": "set",
+				"offsets": [
+					{
+						"fromMs": 0,
+						"minutes": -300
+					}
+				]
+			},
+			{
+				"op": "ask",
+				"atMs": 1794700800000
+			},
+			{
+				"op": "advance",
+				"ms": 1000
+			},
+			{
+				"op": "set",
+				"offsets": [
+					{
+						"fromMs": 1794700800000,
+						"minutes": 330
+					}
+				]
+			},
+			{
+				"op": "ask",
+				"atMs": 1794700799999
+			},
+			{
+				"op": "ask",
+				"atMs": 1794700800000
+			},
+			{
+				"op": "set",
+				"offsets": []
+			},
+			{
+				"op": "ask",
+				"atMs": 1794700800000
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1794700000000,
+				"minutes": 60
+			},
+			{
+				"nowMs": 1794700500000
+			},
+			{
+				"nowMs": 1794700500000,
+				"minutes": 60
+			},
+			{
+				"nowMs": 1794700500000
+			},
+			{
+				"nowMs": 1794700500000,
+				"minutes": -300
+			},
+			{
+				"nowMs": 1794700501000
+			},
+			{
+				"nowMs": 1794700501000
+			},
+			{
+				"nowMs": 1794700501000,
+				"minutes": 0
+			},
+			{
+				"nowMs": 1794700501000,
+				"minutes": 330
+			},
+			{
+				"nowMs": 1794700501000
+			},
+			{
+				"nowMs": 1794700501000,
+				"minutes": 0
+			}
+		]
+	}
+}

@@ -1,0 +1,62 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.timeOffset",
+	"name": "out-of-order",
+	"input": {
+		"clock": "stepped",
+		"startMs": 0,
+		"offsets": [
+			{
+				"fromMs": 200,
+				"minutes": 7
+			},
+			{
+				"fromMs": 100,
+				"minutes": 3
+			}
+		],
+		"asks": [
+			99,
+			100,
+			150,
+			199,
+			200,
+			250
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"atMs": 99,
+				"minutes": 0,
+				"day": "1970-01-01"
+			},
+			{
+				"atMs": 100,
+				"minutes": 3,
+				"day": "1970-01-01"
+			},
+			{
+				"atMs": 150,
+				"minutes": 3,
+				"day": "1970-01-01"
+			},
+			{
+				"atMs": 199,
+				"minutes": 3,
+				"day": "1970-01-01"
+			},
+			{
+				"atMs": 200,
+				"minutes": 7,
+				"day": "1970-01-01"
+			},
+			{
+				"atMs": 250,
+				"minutes": 7,
+				"day": "1970-01-01"
+			}
+		]
+	}
+}

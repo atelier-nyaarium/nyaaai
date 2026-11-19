@@ -10,21 +10,56 @@ use crate::json::Value;
 use crate::number::{number_of_text, round_half_up};
 use crate::text::trim_text;
 use crate::time_tokens::{LONG_DAYS, MONTHS, SHORT_DAYS};
+use crate::zone::system_zone;
 
 const DAY_MS: i64 = 86_400_000;
 
 /// Clock values use milliseconds.
 pub trait Clock {
     fn now_ms(&self) -> i64;
+
+    /// Whole minutes east of UTC at that instant; 0 when the zone is unknown. The system clocks
+    /// read the zone once, at first use: a change of the machine's zone is seen after a restart.
+    fn utc_offset_minutes(&self, at_ms: i64) -> i64;
 }
 
+/// An offset in force from an instant on.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct OffsetFrom {
+    pub from_ms: i64,
+    pub minutes: i64,
+}
+
+/// The offset of the latest entry at or before `at_ms` (a later entry wins a tie); 0 before the first.
+pub fn scripted_offset(offsets: &[OffsetFrom], at_ms: i64) -> i64 {
+    let mut held: Option<&OffsetFrom> = None;
+    for offset in offsets {
+        if offset.from_ms <= at_ms && held.is_none_or(|last| offset.from_ms >= last.from_ms) {
+            held = Some(offset);
+        }
+    }
+    held.map_or(0, |offset| offset.minutes)
+}
+
+/// The system's time. Its offsets are the process's zone: `TZ`, else `/etc/localtime`, read as the
+/// C library does, once at first use and kept for the life of the process, so a change of the
+/// machine's zone is seen after a restart. A zone that cannot be read, and a platform without TZif
+/// data, are UTC.
 pub struct SystemClock;
+
+fn system_now_ms() -> i64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map_or(0, |since| since.as_millis() as i64)
+}
 
 impl Clock for SystemClock {
     fn now_ms(&self) -> i64 {
-        SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .map_or(0, |since| since.as_millis() as i64)
+        system_now_ms()
+    }
+
+    fn utc_offset_minutes(&self, at_ms: i64) -> i64 {
+        system_zone().offset_minutes(at_ms)
     }
 }
 
@@ -61,7 +96,8 @@ pub trait Scheduler: Clock + Send + Sync {
     fn schedule(&self, ms: i64, run: Box<dyn FnOnce() + Send>) -> Scheduled;
 }
 
-/// Needs a `tokio` runtime with time enabled; deadlines start at the call.
+/// Needs a `tokio` runtime with time enabled; deadlines start at the call. The zone is the
+/// system clock's.
 pub struct SystemScheduler;
 
 fn wait(ms: i64) -> tokio::time::Sleep {
@@ -70,7 +106,11 @@ fn wait(ms: i64) -> tokio::time::Sleep {
 
 impl Clock for SystemScheduler {
     fn now_ms(&self) -> i64 {
-        SystemClock.now_ms()
+        system_now_ms()
+    }
+
+    fn utc_offset_minutes(&self, at_ms: i64) -> i64 {
+        SystemClock.utc_offset_minutes(at_ms)
     }
 }
 
@@ -185,19 +225,25 @@ pub fn deadline(scheduler: &dyn Scheduler, ms: i64, caller: &CancelToken) -> Dea
     }
 }
 
-/// Advances on each read.
+/// Advances on each read; the offsets are the test's.
 pub struct SteppedClock {
     start_ms: i64,
     step_ms: i64,
     reads: AtomicI64,
+    offsets: Vec<OffsetFrom>,
 }
 
 impl SteppedClock {
     pub fn new(start_ms: i64, step_ms: i64) -> Self {
+        Self::with_offsets(start_ms, step_ms, Vec::new())
+    }
+
+    pub fn with_offsets(start_ms: i64, step_ms: i64, offsets: Vec<OffsetFrom>) -> Self {
         Self {
             start_ms,
             step_ms,
             reads: AtomicI64::new(0),
+            offsets,
         }
     }
 }
@@ -208,13 +254,17 @@ impl Clock for SteppedClock {
         self.start_ms
             .saturating_add(self.step_ms.saturating_mul(reads))
     }
+
+    fn utc_offset_minutes(&self, at_ms: i64) -> i64 {
+        scripted_offset(&self.offsets, at_ms)
+    }
 }
 
-fn leap(year: i64) -> bool {
+pub(crate) fn leap(year: i64) -> bool {
     (year % 4 == 0 && year % 100 != 0) || year % 400 == 0
 }
 
-fn days_in(year: i64, month: i64) -> i64 {
+pub(crate) fn days_in(year: i64, month: i64) -> i64 {
     match month {
         2 if leap(year) => 29,
         2 => 28,
@@ -223,7 +273,7 @@ fn days_in(year: i64, month: i64) -> i64 {
     }
 }
 
-fn days_from_civil(year: i64, month: i64, day: i64) -> i64 {
+pub(crate) fn days_from_civil(year: i64, month: i64, day: i64) -> i64 {
     let shifted = if month <= 2 { year - 1 } else { year };
     let era = shifted.div_euclid(400);
     let year_of_era = shifted - era * 400;
@@ -232,7 +282,7 @@ fn days_from_civil(year: i64, month: i64, day: i64) -> i64 {
     era * 146_097 + day_of_era - 719_468
 }
 
-fn civil_from_days(days: i64) -> (i64, i64, i64) {
+pub(crate) fn civil_from_days(days: i64) -> (i64, i64, i64) {
     let shifted = days + 719_468;
     let era = shifted.div_euclid(146_097);
     let day_of_era = shifted - era * 146_097;

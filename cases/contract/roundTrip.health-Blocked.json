@@ -1,0 +1,57 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "health-Blocked",
+	"input": {
+		"set": "health",
+		"shape": "Blocked",
+		"texts": [
+			"{\"kind\":\"keyRejected\"}",
+			"{\"kind\":\"keyRejected\",\"extra\":1}",
+			"{\"kind\":\"spendLimit\"}",
+			"{\"kind\":\"spendLimit\",\"resetsAt\":1794528001000,\"nextTryAt\":1794528002000}",
+			"{\"kind\":\"spendLimit\",\"resetsAt\":\"soon\"}",
+			"{\"kind\":\"other\"}",
+			"{}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"kind\":\"keyRejected\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"keyRejected\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"spendLimit\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"spendLimit\",\"resetsAt\":1794528001000,\"nextTryAt\":1794528002000}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"resetsAt"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			}
+		]
+	}
+}

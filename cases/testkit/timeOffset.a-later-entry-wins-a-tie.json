@@ -1,0 +1,82 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.timeOffset",
+	"name": "a-later-entry-wins-a-tie",
+	"input": {
+		"clock": "scheduler",
+		"startMs": 0,
+		"offsets": [
+			{
+				"fromMs": 100,
+				"minutes": 10
+			},
+			{
+				"fromMs": 50,
+				"minutes": 5
+			},
+			{
+				"fromMs": 100,
+				"minutes": 20
+			},
+			{
+				"fromMs": 200,
+				"minutes": -30
+			}
+		],
+		"asks": [
+			49,
+			50,
+			99,
+			100,
+			150,
+			199,
+			200,
+			1000
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"atMs": 49,
+				"minutes": 0,
+				"day": "1970-01-01"
+			},
+			{
+				"atMs": 50,
+				"minutes": 5,
+				"day": "1970-01-01"
+			},
+			{
+				"atMs": 99,
+				"minutes": 5,
+				"day": "1970-01-01"
+			},
+			{
+				"atMs": 100,
+				"minutes": 20,
+				"day": "1970-01-01"
+			},
+			{
+				"atMs": 150,
+				"minutes": 20,
+				"day": "1970-01-01"
+			},
+			{
+				"atMs": 199,
+				"minutes": 20,
+				"day": "1970-01-01"
+			},
+			{
+				"atMs": 200,
+				"minutes": -30,
+				"day": "1969-12-31"
+			},
+			{
+				"atMs": 1000,
+				"minutes": -30,
+				"day": "1969-12-31"
+			}
+		]
+	}
+}

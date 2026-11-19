@@ -1,0 +1,468 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.usageSink",
+	"name": "unfilled",
+	"input": {
+		"steps": [
+			{
+				"op": "ids",
+				"ids": [
+					"id-1",
+					"id-2",
+					"id-3"
+				]
+			},
+			{
+				"op": "unfilled",
+				"at": 0
+			},
+			{
+				"op": "record",
+				"model": "m1",
+				"at": 10,
+				"generationId": "gen-a1"
+			},
+			{
+				"op": "record",
+				"model": "m2",
+				"at": 20,
+				"generationId": "gen-a2"
+			},
+			{
+				"op": "record",
+				"model": "m3",
+				"at": 30,
+				"generationId": "gen-a3"
+			},
+			{
+				"op": "rows",
+				"rows": [
+					{
+						"id": "id-1",
+						"generationId": "gen-a1",
+						"at": 10
+					},
+					{
+						"id": "id-2",
+						"generationId": "gen-a2",
+						"at": 20,
+						"entry": "e1"
+					},
+					{
+						"id": "id-3",
+						"generationId": "gen-a3",
+						"at": 30
+					}
+				]
+			},
+			{
+				"op": "unfilled",
+				"at": 0
+			},
+			{
+				"op": "unfilled",
+				"at": 20
+			},
+			{
+				"op": "unfilled",
+				"at": 21
+			},
+			{
+				"op": "fill",
+				"id": "id-2",
+				"provider": "Lab"
+			},
+			{
+				"op": "unfilled",
+				"at": 0
+			},
+			{
+				"op": "markFilled",
+				"ids": [
+					"id-1"
+				]
+			},
+			{
+				"op": "unfilled",
+				"at": 0
+			},
+			{
+				"op": "rows",
+				"rows": []
+			},
+			{
+				"op": "unfilled",
+				"at": 0
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"calls": {
+					"record": 0,
+					"fill": 0,
+					"filled": 0,
+					"unfilled": 0
+				},
+				"recorded": [],
+				"fills": [],
+				"filledAsks": [],
+				"unfilledAsks": []
+			},
+			{
+				"unfilled": [],
+				"calls": {
+					"record": 0,
+					"fill": 0,
+					"filled": 0,
+					"unfilled": 1
+				},
+				"recorded": [],
+				"fills": [],
+				"filledAsks": [],
+				"unfilledAsks": [
+					0
+				]
+			},
+			{
+				"answer": "id-1",
+				"calls": {
+					"record": 1,
+					"fill": 0,
+					"filled": 0,
+					"unfilled": 1
+				},
+				"recorded": [
+					"m1@10"
+				],
+				"fills": [],
+				"filledAsks": [],
+				"unfilledAsks": [
+					0
+				]
+			},
+			{
+				"answer": "id-2",
+				"calls": {
+					"record": 2,
+					"fill": 0,
+					"filled": 0,
+					"unfilled": 1
+				},
+				"recorded": [
+					"m1@10",
+					"m2@20"
+				],
+				"fills": [],
+				"filledAsks": [],
+				"unfilledAsks": [
+					0
+				]
+			},
+			{
+				"answer": "id-3",
+				"calls": {
+					"record": 3,
+					"fill": 0,
+					"filled": 0,
+					"unfilled": 1
+				},
+				"recorded": [
+					"m1@10",
+					"m2@20",
+					"m3@30"
+				],
+				"fills": [],
+				"filledAsks": [],
+				"unfilledAsks": [
+					0
+				]
+			},
+			{
+				"calls": {
+					"record": 3,
+					"fill": 0,
+					"filled": 0,
+					"unfilled": 1
+				},
+				"recorded": [
+					"m1@10",
+					"m2@20",
+					"m3@30"
+				],
+				"fills": [],
+				"filledAsks": [],
+				"unfilledAsks": [
+					0
+				]
+			},
+			{
+				"unfilled": [
+					{
+						"id": "id-1",
+						"generationId": "gen-a1",
+						"at": 10
+					},
+					{
+						"id": "id-2",
+						"generationId": "gen-a2",
+						"at": 20,
+						"entry": "e1"
+					},
+					{
+						"id": "id-3",
+						"generationId": "gen-a3",
+						"at": 30
+					}
+				],
+				"calls": {
+					"record": 3,
+					"fill": 0,
+					"filled": 0,
+					"unfilled": 2
+				},
+				"recorded": [
+					"m1@10",
+					"m2@20",
+					"m3@30"
+				],
+				"fills": [],
+				"filledAsks": [],
+				"unfilledAsks": [
+					0,
+					0
+				]
+			},
+			{
+				"unfilled": [
+					{
+						"id": "id-2",
+						"generationId": "gen-a2",
+						"at": 20,
+						"entry": "e1"
+					},
+					{
+						"id": "id-3",
+						"generationId": "gen-a3",
+						"at": 30
+					}
+				],
+				"calls": {
+					"record": 3,
+					"fill": 0,
+					"filled": 0,
+					"unfilled": 3
+				},
+				"recorded": [
+					"m1@10",
+					"m2@20",
+					"m3@30"
+				],
+				"fills": [],
+				"filledAsks": [],
+				"unfilledAsks": [
+					0,
+					0,
+					20
+				]
+			},
+			{
+				"unfilled": [
+					{
+						"id": "id-3",
+						"generationId": "gen-a3",
+						"at": 30
+					}
+				],
+				"calls": {
+					"record": 3,
+					"fill": 0,
+					"filled": 0,
+					"unfilled": 4
+				},
+				"recorded": [
+					"m1@10",
+					"m2@20",
+					"m3@30"
+				],
+				"fills": [],
+				"filledAsks": [],
+				"unfilledAsks": [
+					0,
+					0,
+					20,
+					21
+				]
+			},
+			{
+				"calls": {
+					"record": 3,
+					"fill": 1,
+					"filled": 0,
+					"unfilled": 4
+				},
+				"recorded": [
+					"m1@10",
+					"m2@20",
+					"m3@30"
+				],
+				"fills": [
+					"id-2/Lab"
+				],
+				"filledAsks": [],
+				"unfilledAsks": [
+					0,
+					0,
+					20,
+					21
+				]
+			},
+			{
+				"unfilled": [
+					{
+						"id": "id-1",
+						"generationId": "gen-a1",
+						"at": 10
+					},
+					{
+						"id": "id-3",
+						"generationId": "gen-a3",
+						"at": 30
+					}
+				],
+				"calls": {
+					"record": 3,
+					"fill": 1,
+					"filled": 0,
+					"unfilled": 5
+				},
+				"recorded": [
+					"m1@10",
+					"m2@20",
+					"m3@30"
+				],
+				"fills": [
+					"id-2/Lab"
+				],
+				"filledAsks": [],
+				"unfilledAsks": [
+					0,
+					0,
+					20,
+					21,
+					0
+				]
+			},
+			{
+				"calls": {
+					"record": 3,
+					"fill": 1,
+					"filled": 0,
+					"unfilled": 5
+				},
+				"recorded": [
+					"m1@10",
+					"m2@20",
+					"m3@30"
+				],
+				"fills": [
+					"id-2/Lab"
+				],
+				"filledAsks": [],
+				"unfilledAsks": [
+					0,
+					0,
+					20,
+					21,
+					0
+				]
+			},
+			{
+				"unfilled": [
+					{
+						"id": "id-3",
+						"generationId": "gen-a3",
+						"at": 30
+					}
+				],
+				"calls": {
+					"record": 3,
+					"fill": 1,
+					"filled": 0,
+					"unfilled": 6
+				},
+				"recorded": [
+					"m1@10",
+					"m2@20",
+					"m3@30"
+				],
+				"fills": [
+					"id-2/Lab"
+				],
+				"filledAsks": [],
+				"unfilledAsks": [
+					0,
+					0,
+					20,
+					21,
+					0,
+					0
+				]
+			},
+			{
+				"calls": {
+					"record": 3,
+					"fill": 1,
+					"filled": 0,
+					"unfilled": 6
+				},
+				"recorded": [
+					"m1@10",
+					"m2@20",
+					"m3@30"
+				],
+				"fills": [
+					"id-2/Lab"
+				],
+				"filledAsks": [],
+				"unfilledAsks": [
+					0,
+					0,
+					20,
+					21,
+					0,
+					0
+				]
+			},
+			{
+				"unfilled": [],
+				"calls": {
+					"record": 3,
+					"fill": 1,
+					"filled": 0,
+					"unfilled": 7
+				},
+				"recorded": [
+					"m1@10",
+					"m2@20",
+					"m3@30"
+				],
+				"fills": [
+					"id-2/Lab"
+				],
+				"filledAsks": [],
+				"unfilledAsks": [
+					0,
+					0,
+					20,
+					21,
+					0,
+					0,
+					0
+				]
+			}
+		]
+	}
+}

@@ -1,0 +1,55 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "usage-StatsLine",
+	"input": {
+		"set": "usage",
+		"shape": "StatsLine",
+		"texts": [
+			"{\"stats\":{\"id\":\"call-9\",\"of\":{}}}",
+			"{\"stats\":{\"id\":\"call-9\",\"of\":{\"provider\":\"Lab\",\"latencyMs\":210,\"generationMs\":1100,\"cost\":0.5,\"accountCost\":0.3,\"upstreamCost\":0.2,\"byok\":false,\"in\":100,\"out\":20,\"finish\":\"stop\"},\"extra\":1},\"extra\":2}",
+			"{\"call\":{\"id\":\"call-9\",\"at\":1794528001000,\"feature\":\"chat\",\"model\":\"vendor/model-a\",\"ms\":10,\"cost\":0}}",
+			"{\"stats\":{\"id\":\"call-9\"}}",
+			"{\"stats\":null}",
+			"{}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"stats\":{\"id\":\"call-9\",\"of\":{}}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"stats\":{\"id\":\"call-9\",\"of\":{\"provider\":\"Lab\",\"latencyMs\":210,\"generationMs\":1100,\"cost\":0.5,\"accountCost\":0.3,\"upstreamCost\":0.2,\"byok\":false,\"in\":100,\"out\":20,\"finish\":\"stop\"}}}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"stats"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"stats",
+					"of"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"stats"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"stats"
+				]
+			}
+		]
+	}
+}

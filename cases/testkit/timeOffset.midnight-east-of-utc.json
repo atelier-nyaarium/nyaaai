@@ -1,0 +1,40 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.timeOffset",
+	"name": "midnight-east-of-utc",
+	"input": {
+		"clock": "stepped",
+		"startMs": 0,
+		"offsets": [
+			{
+				"fromMs": -31536000000,
+				"minutes": 60
+			}
+		],
+		"asks": [
+			1794697199999,
+			1794697200000,
+			1794697200001
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"atMs": 1794697199999,
+				"minutes": 60,
+				"day": "2026-11-14"
+			},
+			{
+				"atMs": 1794697200000,
+				"minutes": 60,
+				"day": "2026-11-15"
+			},
+			{
+				"atMs": 1794697200001,
+				"minutes": 60,
+				"day": "2026-11-15"
+			}
+		]
+	}
+}

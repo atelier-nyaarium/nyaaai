@@ -1,0 +1,84 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "usage-MeteredCall",
+	"input": {
+		"set": "usage",
+		"shape": "MeteredCall",
+		"texts": [
+			"{\"tag\":{\"feature\":\"chat\"},\"model\":\"vendor/model-a\",\"at\":1794528001000,\"ms\":1200,\"cost\":{\"usd\":0.25,\"estimated\":false}}",
+			"{\"tag\":{\"feature\":\"analysis\",\"lane\":\"title\",\"folder\":\"/home/user/work/app\"},\"model\":\"vendor/model-a\",\"entry\":\"e1\",\"label\":\"Main\",\"at\":1794528001000,\"ms\":1200,\"firstTokenMs\":300,\"usage\":{\"input\":100,\"output\":20,\"cached\":10,\"cacheWrite\":5,\"reasoning\":2,\"cost\":0.01,\"billingSource\":\"go\"},\"cost\":{\"usd\":0,\"estimated\":true,\"unpriced\":true},\"provider\":\"Lab\",\"generationId\":\"gen-a1\",\"finishReason\":\"stop\",\"failure\":\"overloaded\",\"cancelled\":true}",
+			"{\"tag\":{\"feature\":\"chat\"},\"model\":\"vendor/model-a\",\"at\":1794528001000,\"ms\":1200,\"cost\":{\"usd\":0.25,\"estimated\":false},\"usage\":{\"input\":100,\"output\":20}}",
+			"{\"tag\":{\"feature\":\"chat\"},\"model\":\"vendor/model-a\",\"at\":1794528001000,\"ms\":1200,\"cost\":{\"usd\":0.25,\"estimated\":false},\"extra\":[1]}",
+			"{\"tag\":{\"feature\":\"chat\"},\"model\":\"vendor/model-a\",\"at\":1794528001000,\"ms\":1200,\"cost\":{\"usd\":1,\"estimated\":true,\"extra\":1}}",
+			"{\"tag\":{\"feature\":\"chat\"},\"model\":\"vendor/model-a\",\"at\":1794528001000,\"ms\":1200,\"cost\":{\"usd\":0.25,\"estimated\":false},\"usage\":{\"input\":1}}",
+			"{\"tag\":{\"feature\":\"chat\"},\"model\":\"vendor/model-a\",\"at\":1794528001000,\"ms\":1200}",
+			"{\"model\":\"vendor/model-a\",\"at\":1794528001000,\"ms\":1200,\"cost\":{\"usd\":0.25,\"estimated\":false}}",
+			"{\"tag\":{\"feature\":\"chat\"},\"model\":\"vendor/model-a\",\"at\":\"now\",\"ms\":1200,\"cost\":{\"usd\":0.25,\"estimated\":false}}",
+			"{\"tag\":{\"feature\":\"chat\"},\"model\":\"vendor/model-a\",\"at\":1794528001000,\"ms\":1200,\"cost\":{\"usd\":0.25,\"estimated\":false},\"cancelled\":\"yes\"}",
+			"{\"tag\":{\"feature\":\"chat\"},\"model\":\"vendor/model-a\",\"at\":1794528001000,\"ms\":1200,\"cost\":{\"usd\":0.25,\"estimated\":false},\"firstTokenMs\":null}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"tag\":{\"feature\":\"chat\"},\"model\":\"vendor/model-a\",\"at\":1794528001000,\"ms\":1200,\"cost\":{\"usd\":0.25,\"estimated\":false}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"tag\":{\"feature\":\"analysis\",\"lane\":\"title\",\"folder\":\"/home/user/work/app\"},\"model\":\"vendor/model-a\",\"entry\":\"e1\",\"label\":\"Main\",\"at\":1794528001000,\"ms\":1200,\"firstTokenMs\":300,\"usage\":{\"input\":100,\"output\":20,\"cached\":10,\"cacheWrite\":5,\"reasoning\":2,\"cost\":0.01,\"billingSource\":\"go\"},\"cost\":{\"usd\":0,\"estimated\":true,\"unpriced\":true},\"provider\":\"Lab\",\"generationId\":\"gen-a1\",\"finishReason\":\"stop\",\"failure\":\"overloaded\",\"cancelled\":true}"
+			},
+			{
+				"ok": true,
+				"text": "{\"tag\":{\"feature\":\"chat\"},\"model\":\"vendor/model-a\",\"at\":1794528001000,\"ms\":1200,\"usage\":{\"input\":100,\"output\":20},\"cost\":{\"usd\":0.25,\"estimated\":false}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"tag\":{\"feature\":\"chat\"},\"model\":\"vendor/model-a\",\"at\":1794528001000,\"ms\":1200,\"cost\":{\"usd\":0.25,\"estimated\":false}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"tag\":{\"feature\":\"chat\"},\"model\":\"vendor/model-a\",\"at\":1794528001000,\"ms\":1200,\"cost\":{\"usd\":1,\"estimated\":true}}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"usage",
+					"output"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"cost"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"tag"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"at"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"cancelled"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"firstTokenMs"
+				]
+			}
+		]
+	}
+}

@@ -1,0 +1,529 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "health.output.json",
+	"x-contract-version": "0.1.0",
+	"$defs": {
+		"Ticket": {
+			"type": "object",
+			"properties": {
+				"gate": {
+					"type": "string"
+				},
+				"model": {
+					"type": "string"
+				},
+				"generation": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				},
+				"probe": {
+					"type": "boolean"
+				},
+				"serial": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				}
+			},
+			"required": [
+				"gate",
+				"model",
+				"generation",
+				"probe",
+				"serial"
+			],
+			"additionalProperties": false
+		},
+		"Admission": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "go"
+						},
+						"ticket": {
+							"$ref": "#/$defs/Ticket"
+						}
+					},
+					"required": [
+						"kind",
+						"ticket"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "gaveUp"
+						}
+					},
+					"required": [
+						"kind"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "stopped"
+						}
+					},
+					"required": [
+						"kind"
+					],
+					"additionalProperties": false
+				}
+			],
+			"x-tag": "kind"
+		},
+		"GateWaiting": {
+			"type": "object",
+			"properties": {
+				"model": {
+					"type": "string"
+				},
+				"resumeAt": {
+					"type": [
+						"number",
+						"null"
+					]
+				},
+				"pause": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				},
+				"of": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				}
+			},
+			"required": [
+				"model",
+				"resumeAt",
+				"pause",
+				"of"
+			],
+			"additionalProperties": false
+		},
+		"GateSettled": {
+			"type": "string",
+			"enum": [
+				"done",
+				"again",
+				"gaveUp"
+			]
+		},
+		"GateOutcome": {
+			"type": "string",
+			"enum": [
+				"ok",
+				"overloaded",
+				"failed",
+				"cancelled"
+			]
+		},
+		"PoolState": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "clear"
+						}
+					},
+					"required": [
+						"kind"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "paused"
+						},
+						"reason": {
+							"type": "string",
+							"enum": [
+								"allowance",
+								"credit"
+							]
+						},
+						"until": {
+							"type": "number"
+						}
+					},
+					"required": [
+						"kind",
+						"reason",
+						"until"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "reset"
+						},
+						"at": {
+							"type": "number"
+						}
+					},
+					"required": [
+						"kind",
+						"at"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "balance"
+						},
+						"eta": {
+							"type": "number"
+						},
+						"next": {
+							"type": "number"
+						},
+						"probe": {
+							"anyOf": [
+								{
+									"type": "object",
+									"properties": {
+										"ticket": {
+											"$ref": "#/$defs/Ticket"
+										},
+										"at": {
+											"type": "number"
+										}
+									},
+									"required": [
+										"ticket",
+										"at"
+									],
+									"additionalProperties": false
+								},
+								{
+									"type": "null"
+								}
+							]
+						}
+					},
+					"required": [
+						"kind",
+						"eta",
+						"next",
+						"probe"
+					],
+					"additionalProperties": false
+				}
+			],
+			"x-tag": "kind"
+		},
+		"PoolEvent": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "billed"
+						},
+						"source": {
+							"type": "string"
+						},
+						"plan": {
+							"type": "string"
+						},
+						"extraUsage": {
+							"type": "boolean"
+						}
+					},
+					"required": [
+						"kind",
+						"source",
+						"extraUsage"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "refused"
+						},
+						"reason": {
+							"type": "string",
+							"enum": [
+								"allowance",
+								"credit"
+							]
+						},
+						"resetsAt": {
+							"type": "number"
+						},
+						"retryAfterMs": {
+							"type": "number"
+						}
+					},
+					"required": [
+						"kind",
+						"reason"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "extraUsage"
+						},
+						"on": {
+							"type": "boolean"
+						},
+						"lastBill": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"kind",
+						"on"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "admitted"
+						},
+						"ticket": {
+							"$ref": "#/$defs/Ticket"
+						}
+					},
+					"required": [
+						"kind",
+						"ticket"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "settled"
+						},
+						"ticket": {
+							"$ref": "#/$defs/Ticket"
+						}
+					},
+					"required": [
+						"kind",
+						"ticket"
+					],
+					"additionalProperties": false
+				}
+			],
+			"x-tag": "kind"
+		},
+		"PoolVerdict": {
+			"type": "object",
+			"properties": {
+				"skip": {
+					"$ref": "provider.output.json#/$defs/SkipReason"
+				},
+				"blocked": {
+					"$ref": "#/$defs/Blocked"
+				}
+			},
+			"required": [
+				"skip"
+			],
+			"additionalProperties": false
+		},
+		"Blocked": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "keyRejected"
+						}
+					},
+					"required": [
+						"kind"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "spendLimit"
+						},
+						"resetsAt": {
+							"type": "number"
+						},
+						"nextTryAt": {
+							"type": "number"
+						}
+					},
+					"required": [
+						"kind"
+					],
+					"additionalProperties": false
+				}
+			],
+			"x-tag": "kind"
+		},
+		"HealthChange": {
+			"type": "object",
+			"properties": {
+				"entry": {
+					"type": "string"
+				},
+				"changed": {
+					"minItems": 1,
+					"type": "array",
+					"items": {
+						"type": "string",
+						"enum": [
+							"key",
+							"billed",
+							"pool",
+							"waiting"
+						]
+					}
+				}
+			},
+			"required": [
+				"entry",
+				"changed"
+			],
+			"additionalProperties": false
+		},
+		"EntryHealth": {
+			"type": "object",
+			"properties": {
+				"entry": {
+					"type": "string"
+				},
+				"key": {
+					"$ref": "provider.output.json#/$defs/KeyState"
+				},
+				"billed": {
+					"$ref": "provider.output.json#/$defs/Billed"
+				},
+				"pool": {
+					"$ref": "#/$defs/PoolState"
+				},
+				"waiting": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"entry",
+				"key",
+				"pool",
+				"waiting"
+			],
+			"additionalProperties": false
+		},
+		"Notice": {
+			"type": "object",
+			"properties": {
+				"kind": {
+					"$ref": "provider.output.json#/$defs/NoticeKind"
+				},
+				"status": {
+					"$ref": "#/$defs/ErrorStatus"
+				},
+				"message": {
+					"type": "string"
+				},
+				"reasons": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"limit": {
+					"type": "number"
+				},
+				"reset": {
+					"type": "string"
+				},
+				"resetsAt": {
+					"type": "number"
+				},
+				"nextTryAt": {
+					"type": "number"
+				},
+				"model": {
+					"type": "string"
+				},
+				"entry": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"kind"
+			],
+			"additionalProperties": false
+		},
+		"ErrorStatus": {
+			"type": [
+				"number",
+				"string"
+			]
+		},
+		"RetryOptions": {
+			"type": "object",
+			"properties": {
+				"tries": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				},
+				"budgetMs": {
+					"type": "number",
+					"minimum": 0
+				},
+				"capMs": {
+					"type": "number",
+					"minimum": 0
+				},
+				"baseMs": {
+					"type": "number",
+					"minimum": 0
+				}
+			},
+			"additionalProperties": false
+		}
+	}
+}

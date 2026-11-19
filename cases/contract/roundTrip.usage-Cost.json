@@ -1,0 +1,71 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "usage-Cost",
+	"input": {
+		"set": "usage",
+		"shape": "Cost",
+		"texts": [
+			"{\"usd\":0.25,\"estimated\":false}",
+			"{\"usd\":0,\"estimated\":true,\"unpriced\":true}",
+			"{\"usd\":0.25,\"estimated\":false,\"extra\":{\"deep\":1}}",
+			"{\"usd\":0.25,\"estimated\":false,\"unpriced\":false}",
+			"{\"usd\":0.25,\"estimated\":false,\"unpriced\":null}",
+			"{\"usd\":1}",
+			"{\"estimated\":true}",
+			"{\"usd\":\"1\",\"estimated\":false}",
+			"[]"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"usd\":0.25,\"estimated\":false}"
+			},
+			{
+				"ok": true,
+				"text": "{\"usd\":0,\"estimated\":true,\"unpriced\":true}"
+			},
+			{
+				"ok": true,
+				"text": "{\"usd\":0.25,\"estimated\":false}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"unpriced"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"unpriced"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"estimated"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"usd"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"usd"
+				]
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

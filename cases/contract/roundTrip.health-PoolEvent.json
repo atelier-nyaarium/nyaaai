@@ -1,0 +1,106 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "health-PoolEvent",
+	"input": {
+		"set": "health",
+		"shape": "PoolEvent",
+		"texts": [
+			"{\"kind\":\"billed\",\"source\":\"balance\",\"extraUsage\":false}",
+			"{\"kind\":\"billed\",\"source\":\"go\",\"plan\":\"go\",\"extraUsage\":true,\"extra\":1}",
+			"{\"kind\":\"refused\",\"reason\":\"allowance\"}",
+			"{\"kind\":\"refused\",\"reason\":\"credit\",\"resetsAt\":1794528001000,\"retryAfterMs\":60000}",
+			"{\"kind\":\"extraUsage\",\"on\":true}",
+			"{\"kind\":\"extraUsage\",\"on\":false,\"lastBill\":\"balance\"}",
+			"{\"kind\":\"admitted\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1}}",
+			"{\"kind\":\"settled\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":3,\"probe\":true,\"serial\":7}}",
+			"{\"kind\":\"billed\",\"source\":\"balance\"}",
+			"{\"kind\":\"refused\",\"reason\":\"other\"}",
+			"{\"kind\":\"refused\"}",
+			"{\"kind\":\"extraUsage\",\"lastBill\":\"balance\"}",
+			"{\"kind\":\"admitted\"}",
+			"{\"kind\":\"settled\",\"ticket\":{}}",
+			"{\"kind\":\"other\"}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"kind\":\"billed\",\"source\":\"balance\",\"extraUsage\":false}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"billed\",\"source\":\"go\",\"plan\":\"go\",\"extraUsage\":true}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"refused\",\"reason\":\"allowance\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"refused\",\"reason\":\"credit\",\"resetsAt\":1794528001000,\"retryAfterMs\":60000}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"extraUsage\",\"on\":true}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"extraUsage\",\"on\":false,\"lastBill\":\"balance\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"admitted\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"settled\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":3,\"probe\":true,\"serial\":7}}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"extraUsage"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"reason"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"reason"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"on"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"ticket"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"ticket",
+					"gate"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			}
+		]
+	}
+}

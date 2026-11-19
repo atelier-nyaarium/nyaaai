@@ -1,6 +1,6 @@
 // Virtual-time scheduler.
 
-import type { Scheduler } from "@nyaaai/contract/time";
+import { type OffsetFrom, type Scheduler, scriptedOffset } from "@nyaaai/contract/time";
 
 ////////////////////////////////
 //  Interfaces & Types
@@ -23,9 +23,19 @@ interface Timer {
 export class TimerWheel {
 	private timers: Timer[] = [];
 
-	constructor(private atMs = 0) {}
+	constructor(
+		private atMs = 0,
+		private offsets: readonly OffsetFrom[] = [],
+	) {}
 
 	nowMs = (): number => this.atMs;
+
+	/** The test's zone: the latest offset at or before the instant. */
+	utcOffsetMinutes = (atMs: number): number => scriptedOffset(this.offsets, atMs);
+
+	setOffsets(offsets: readonly OffsetFrom[]): void {
+		this.offsets = offsets;
+	}
 
 	/** Re-setting a tag replaces its timer. */
 	after(ms: number, tag: string, run?: () => void): void {
@@ -73,6 +83,7 @@ export function fakeScheduler(wheel: TimerWheel = new TimerWheel()): Scheduler &
 	return {
 		wheel,
 		nowMs: wheel.nowMs,
+		utcOffsetMinutes: wheel.utcOffsetMinutes,
 		sleep: (ms, signal) =>
 			new Promise((resolve, reject) => {
 				if (signal?.aborted) return reject(signal.reason);

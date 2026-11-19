@@ -19,7 +19,7 @@ import { failed } from "./failure";
 
 export type ReplyCall = Extract<ReplyPart, { kind: "call" }>;
 
-export type Billed = NonNullable<Failure["billed"]>;
+export type FailureBilled = NonNullable<Failure["billed"]>;
 
 ////////////////////////////////
 //  Functions & Helpers
@@ -97,7 +97,7 @@ export class StepAssembler {
 	}
 
 	/** Failed-attempt billing, if reported. */
-	get billed(): Billed | undefined {
+	get billed(): FailureBilled | undefined {
 		if (!this.started) return undefined;
 		return {
 			...(this.usage === undefined ? {} : { usage: this.usage }),

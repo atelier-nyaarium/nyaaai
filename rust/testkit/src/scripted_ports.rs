@@ -1,6 +1,6 @@
 //! Scripted ports: values set by the test.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex, MutexGuard};
 
@@ -12,6 +12,8 @@ use nyaaai_contract::model_registry::ModelRegistry;
 use nyaaai_contract::provider_list::ProviderList;
 use nyaaai_contract::shapes::model::{ModelRow, StoredRegistry, TestRecord};
 use nyaaai_contract::shapes::provider::ProviderEntry;
+use nyaaai_contract::shapes::usage::{GenerationStats, MeteredCall, UnfilledRecord};
+use nyaaai_contract::usage_sink::UsageSink;
 
 fn locked<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
     mutex
@@ -236,5 +238,141 @@ impl ModelRegistry for ScriptedModelRegistry {
 
     fn on_change(&self, listener: Box<Listener>) -> Unsubscribe {
         self.listeners.add(listener)
+    }
+}
+
+/// How many times each method was called.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct UsageCalls {
+    pub record: usize,
+    pub fill: usize,
+    pub filled: usize,
+    pub unfilled: usize,
+}
+
+#[derive(Default)]
+struct SinkState {
+    ids: VecDeque<String>,
+    none: bool,
+    rows: Vec<UnfilledRecord>,
+    /// Ids `fill` or `set_filled` named.
+    named: HashSet<String>,
+    /// The call each answered id was recorded with.
+    kept: HashMap<String, MeteredCall>,
+    recorded: Vec<MeteredCall>,
+    fills: Vec<(String, GenerationStats)>,
+    filled_asks: Vec<(String, i64)>,
+    unfilled_asks: Vec<i64>,
+}
+
+/// A usage sink the test scripts: it keeps what it is given, in order.
+#[derive(Default)]
+pub struct ScriptedUsageSink {
+    state: Mutex<SinkState>,
+}
+
+impl ScriptedUsageSink {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// The ids `record` answers, in order, replacing what is left; none once they run out.
+    pub fn set_ids(&self, ids: Vec<String>) {
+        locked(&self.state).ids = ids.into();
+    }
+
+    /// While true, `record` answers none; it still keeps the call.
+    pub fn answer_none(&self, none: bool) {
+        locked(&self.state).none = none;
+    }
+
+    /// Ids that count as filled, like those `fill` was given; only a recorded id whose call is not
+    /// before the ask answers true.
+    pub fn set_filled(&self, ids: Vec<String>) {
+        locked(&self.state).named.extend(ids);
+    }
+
+    /// What `unfilled` lists, less the rows before its `since` and the ids filled by the same rule.
+    pub fn set_unfilled(&self, rows: Vec<UnfilledRecord>) {
+        locked(&self.state).rows = rows;
+    }
+
+    /// Calls `record` was given, in order.
+    pub fn recorded(&self) -> Vec<MeteredCall> {
+        locked(&self.state).recorded.clone()
+    }
+
+    /// Calls `fill` was given, in order.
+    pub fn fills(&self) -> Vec<(String, GenerationStats)> {
+        locked(&self.state).fills.clone()
+    }
+
+    /// Asks of `filled`, in order: the id and `at`.
+    pub fn filled_asks(&self) -> Vec<(String, i64)> {
+        locked(&self.state).filled_asks.clone()
+    }
+
+    /// The `since` of each `unfilled`, in order.
+    pub fn unfilled_asks(&self) -> Vec<i64> {
+        locked(&self.state).unfilled_asks.clone()
+    }
+
+    pub fn calls(&self) -> UsageCalls {
+        let state = locked(&self.state);
+        UsageCalls {
+            record: state.recorded.len(),
+            fill: state.fills.len(),
+            filled: state.filled_asks.len(),
+            unfilled: state.unfilled_asks.len(),
+        }
+    }
+}
+
+impl SinkState {
+    /// As a log answers: a recorded id, named, whose call is not before `at`.
+    fn is_filled(&self, id: &str, at: f64) -> bool {
+        self.named.contains(id) && self.kept.get(id).is_some_and(|call| call.at >= at)
+    }
+}
+
+impl UsageSink for ScriptedUsageSink {
+    fn record(&self, call: &MeteredCall) -> Option<String> {
+        let mut state = locked(&self.state);
+        state.recorded.push(call.clone());
+        let id = if state.none {
+            None
+        } else {
+            state.ids.pop_front()
+        };
+        if let Some(id) = &id {
+            state.kept.insert(id.clone(), call.clone());
+        }
+        id
+    }
+
+    fn fill(&self, id: &str, stats: &GenerationStats) {
+        let mut state = locked(&self.state);
+        state.fills.push((id.to_owned(), stats.clone()));
+        state.named.insert(id.to_owned());
+    }
+
+    fn filled(&self, id: &str, at: i64) -> BoxFuture<'_, bool> {
+        let mut state = locked(&self.state);
+        state.filled_asks.push((id.to_owned(), at));
+        let answer = state.is_filled(id, at as f64);
+        Box::pin(async move { answer })
+    }
+
+    fn unfilled(&self, since: i64) -> BoxFuture<'_, Vec<UnfilledRecord>> {
+        let mut state = locked(&self.state);
+        state.unfilled_asks.push(since);
+        let since = since as f64;
+        let answer = state
+            .rows
+            .iter()
+            .filter(|row| row.at >= since && !state.is_filled(&row.id, since))
+            .cloned()
+            .collect();
+        Box::pin(async move { answer })
     }
 }

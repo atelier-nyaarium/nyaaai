@@ -1,0 +1,51 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "health-GateOutcome",
+	"input": {
+		"set": "health",
+		"shape": "GateOutcome",
+		"texts": [
+			"\"ok\"",
+			"\"overloaded\"",
+			"\"failed\"",
+			"\"cancelled\"",
+			"\"other\"",
+			"null",
+			"1"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "\"ok\""
+			},
+			{
+				"ok": true,
+				"text": "\"overloaded\""
+			},
+			{
+				"ok": true,
+				"text": "\"failed\""
+			},
+			{
+				"ok": true,
+				"text": "\"cancelled\""
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

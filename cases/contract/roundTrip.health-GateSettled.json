@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "health-GateSettled",
+	"input": {
+		"set": "health",
+		"shape": "GateSettled",
+		"texts": [
+			"\"done\"",
+			"\"again\"",
+			"\"gaveUp\"",
+			"\"other\"",
+			"null",
+			"1"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "\"done\""
+			},
+			{
+				"ok": true,
+				"text": "\"again\""
+			},
+			{
+				"ok": true,
+				"text": "\"gaveUp\""
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

@@ -1,0 +1,40 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.timeOffset",
+	"name": "half-hour-zone-west",
+	"input": {
+		"clock": "wheel",
+		"startMs": 0,
+		"offsets": [
+			{
+				"fromMs": 0,
+				"minutes": -210
+			}
+		],
+		"asks": [
+			1794713399999,
+			1794713400000,
+			1794713400001
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"atMs": 1794713399999,
+				"minutes": -210,
+				"day": "2026-11-14"
+			},
+			{
+				"atMs": 1794713400000,
+				"minutes": -210,
+				"day": "2026-11-15"
+			},
+			{
+				"atMs": 1794713400001,
+				"minutes": -210,
+				"day": "2026-11-15"
+			}
+		]
+	}
+}

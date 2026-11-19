@@ -45,6 +45,10 @@ impl Clock for ArcClock {
     fn now_ms(&self) -> i64 {
         self.0.now_ms()
     }
+
+    fn utc_offset_minutes(&self, at_ms: i64) -> i64 {
+        self.0.utc_offset_minutes(at_ms)
+    }
 }
 
 /// Missing plan: Go.

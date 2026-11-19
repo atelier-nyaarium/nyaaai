@@ -15,11 +15,15 @@ use nyaaai_contract::shapes::model::{
     TestRecordVerifiedPrice,
 };
 use nyaaai_contract::shapes::provider::{ProviderEntry, ProviderKindName};
-use nyaaai_contract::time::{Clock, Deadline, Ended, Scheduler, deadline as deadline_of};
+use nyaaai_contract::shapes::usage::{CallTag, Cost, GenerationStats, MeteredCall};
+use nyaaai_contract::time::{
+    Clock, Deadline, Ended, OffsetFrom, Scheduler, SteppedClock, day_key, deadline as deadline_of,
+};
+use nyaaai_contract::usage_sink::UsageSink;
 use nyaaai_testkit::cases::{Outcome, block_on};
 use nyaaai_testkit::scheduler::{FakeScheduler, TimerWheel};
 use nyaaai_testkit::scripted_ports::{
-    ScriptedEntryKeys, ScriptedModelRegistry, ScriptedProviderList,
+    ScriptedEntryKeys, ScriptedModelRegistry, ScriptedProviderList, ScriptedUsageSink,
 };
 
 use super::super::shapes::*;
@@ -351,4 +355,206 @@ pub fn deadline(input: TestkitDeadlineInput) -> Outcome<TestkitDeadlineResult> {
         });
     }
     Ok(TestkitDeadlineResult { steps })
+}
+
+/// A call of fixed values.
+fn call_of(model: &str, at: i64, generation_id: Option<&String>) -> MeteredCall {
+    MeteredCall {
+        tag: CallTag {
+            feature: "chat".to_owned(),
+            lane: None,
+            folder: None,
+        },
+        model: model.to_owned(),
+        entry: None,
+        label: None,
+        at: at as f64,
+        ms: 1.0,
+        first_token_ms: None,
+        usage: None,
+        cost: Cost {
+            usd: 0.0,
+            estimated: false,
+            unpriced: None,
+        },
+        provider: None,
+        generation_id: generation_id.cloned(),
+        finish_reason: None,
+        failure: None,
+        cancelled: None,
+    }
+}
+
+pub fn usage_sink(input: TestkitUsageSinkInput) -> Outcome<TestkitUsageSinkResult> {
+    block_on(async move {
+        let sink = ScriptedUsageSink::new();
+        // The call last handed over, which a step may edit.
+        let mut last: Option<MeteredCall> = None;
+        let mut steps = Vec::new();
+        for step in &input.steps {
+            let id = step.id.clone().unwrap_or_default();
+            let at = step.at.unwrap_or(0);
+            let mut answer = None;
+            let mut filled = None;
+            let mut unfilled = None;
+            match step.op {
+                TestkitUsageSinkInputStepsItemOp::Ids => {
+                    sink.set_ids(step.ids.clone().unwrap_or_default());
+                }
+                TestkitUsageSinkInputStepsItemOp::None => {
+                    sink.answer_none(step.on.unwrap_or(false));
+                }
+                TestkitUsageSinkInputStepsItemOp::Record => {
+                    let call = call_of(
+                        step.model.as_deref().unwrap_or(""),
+                        at,
+                        step.generation_id.as_ref(),
+                    );
+                    answer = Some(sink.record(&call));
+                    last = Some(call);
+                }
+                TestkitUsageSinkInputStepsItemOp::Edit => {
+                    if let Some(call) = last.as_mut() {
+                        call.model = step.model.clone().unwrap_or_default();
+                    }
+                }
+                TestkitUsageSinkInputStepsItemOp::Fill => {
+                    sink.fill(
+                        &id,
+                        &GenerationStats {
+                            provider: Some(step.provider.clone().unwrap_or_default()),
+                            latency_ms: None,
+                            generation_ms: None,
+                            cost: None,
+                            account_cost: None,
+                            upstream_cost: None,
+                            byok: None,
+                            in_: None,
+                            out: None,
+                            finish: None,
+                        },
+                    );
+                }
+                TestkitUsageSinkInputStepsItemOp::MarkFilled => {
+                    sink.set_filled(step.ids.clone().unwrap_or_default());
+                }
+                TestkitUsageSinkInputStepsItemOp::Rows => {
+                    sink.set_unfilled(step.rows.clone().unwrap_or_default());
+                }
+                TestkitUsageSinkInputStepsItemOp::Filled => {
+                    filled = Some(sink.filled(&id, at).await);
+                }
+                TestkitUsageSinkInputStepsItemOp::Unfilled => {
+                    unfilled = Some(sink.unfilled(at).await);
+                }
+            }
+            let calls = sink.calls();
+            steps.push(TestkitUsageSinkResultStepsItem {
+                answer,
+                filled,
+                unfilled,
+                calls: TestkitUsageSinkResultStepsItemCalls {
+                    record: calls.record as i64,
+                    fill: calls.fill as i64,
+                    filled: calls.filled as i64,
+                    unfilled: calls.unfilled as i64,
+                },
+                recorded: sink
+                    .recorded()
+                    .iter()
+                    .map(|call| format!("{}@{}", call.model, call.at))
+                    .collect(),
+                fills: sink
+                    .fills()
+                    .iter()
+                    .map(|(id, stats)| format!("{id}/{}", stats.provider.as_deref().unwrap_or("")))
+                    .collect(),
+                filled_asks: sink
+                    .filled_asks()
+                    .iter()
+                    .map(|(id, at)| format!("{id}@{at}"))
+                    .collect(),
+                unfilled_asks: sink.unfilled_asks(),
+            });
+        }
+        TestkitUsageSinkResult { steps }
+    })
+}
+
+pub fn time_offset(input: TestkitTimeOffsetInput) -> Outcome<TestkitTimeOffsetResult> {
+    let offsets: Vec<OffsetFrom> = input
+        .offsets
+        .iter()
+        .map(|each| OffsetFrom {
+            from_ms: each.from_ms,
+            minutes: each.minutes,
+        })
+        .collect();
+    let wheel = TimerWheel::new(input.start_ms);
+    wheel.set_offsets(offsets.clone());
+    let clock: Box<dyn Clock> = match input.clock {
+        TestkitTimeOffsetInputClock::Stepped => {
+            Box::new(SteppedClock::with_offsets(input.start_ms, 1, offsets))
+        }
+        TestkitTimeOffsetInputClock::Wheel => Box::new(wheel),
+        TestkitTimeOffsetInputClock::Scheduler => Box::new(FakeScheduler::new(Arc::new(wheel))),
+    };
+    let rows = input
+        .asks
+        .iter()
+        .map(|at_ms| {
+            let minutes = clock.utc_offset_minutes(*at_ms);
+            TestkitTimeOffsetResultRowsItem {
+                at_ms: *at_ms,
+                minutes,
+                day: day_key(*at_ms, minutes),
+            }
+        })
+        .collect();
+    Ok(TestkitTimeOffsetResult { rows })
+}
+
+pub fn time_offset_run(input: TestkitTimeOffsetRunInput) -> Outcome<TestkitTimeOffsetRunResult> {
+    let rows = |offsets: &[TestkitTimeOffsetRunInputOffsetsItem]| -> Vec<OffsetFrom> {
+        offsets
+            .iter()
+            .map(|each| OffsetFrom {
+                from_ms: each.from_ms,
+                minutes: each.minutes,
+            })
+            .collect()
+    };
+    let wheel = Arc::new(TimerWheel::with_offsets(
+        input.start_ms,
+        rows(&input.offsets),
+    ));
+    let scheduler = FakeScheduler::new(Arc::clone(&wheel));
+    let mut steps = Vec::new();
+    for step in &input.steps {
+        let mut minutes = None;
+        match step.op {
+            TestkitTimeOffsetRunInputStepsItemOp::Set => {
+                let held = step.offsets.clone().unwrap_or_default();
+                let converted = held
+                    .iter()
+                    .map(|each| OffsetFrom {
+                        from_ms: each.from_ms,
+                        minutes: each.minutes,
+                    })
+                    .collect();
+                wheel.set_offsets(converted);
+            }
+            TestkitTimeOffsetRunInputStepsItemOp::Advance => {
+                wheel.advance(step.ms.unwrap_or(0));
+            }
+            TestkitTimeOffsetRunInputStepsItemOp::Ask => {
+                minutes = Some(scheduler.utc_offset_minutes(step.at_ms.unwrap_or(0)));
+            }
+        }
+        steps.push(TestkitTimeOffsetRunResultStepsItem {
+            now_ms: scheduler.now_ms(),
+            minutes,
+        });
+    }
+    Ok(TestkitTimeOffsetRunResult { steps })
 }

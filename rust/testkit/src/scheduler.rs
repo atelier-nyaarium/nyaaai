@@ -8,7 +8,7 @@ use std::task::Poll;
 
 use nyaaai_contract::cancel::CancelToken;
 use nyaaai_contract::future::BoxFuture;
-use nyaaai_contract::time::{Clock, Scheduled, Scheduler, Slept};
+use nyaaai_contract::time::{Clock, OffsetFrom, Scheduled, Scheduler, Slept, scripted_offset};
 use tokio::sync::oneshot;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -27,6 +27,7 @@ struct Timer {
 struct State {
     at_ms: i64,
     timers: Vec<Timer>,
+    offsets: Vec<OffsetFrom>,
 }
 
 /// Tagged timers fire by deadline, insertion order on ties.
@@ -36,12 +37,23 @@ pub struct TimerWheel {
 
 impl TimerWheel {
     pub fn new(at_ms: i64) -> Self {
+        Self::with_offsets(at_ms, Vec::new())
+    }
+
+    /// A wheel with the test's zone from the start.
+    pub fn with_offsets(at_ms: i64, offsets: Vec<OffsetFrom>) -> Self {
         Self {
             state: Mutex::new(State {
                 at_ms,
                 timers: Vec::new(),
+                offsets,
             }),
         }
+    }
+
+    /// The test's zone: the latest offset at or before an instant.
+    pub fn set_offsets(&self, offsets: Vec<OffsetFrom>) {
+        self.locked().offsets = offsets;
     }
 
     /// The state, cancelled timers gone.
@@ -150,6 +162,10 @@ impl Clock for TimerWheel {
     fn now_ms(&self) -> i64 {
         self.locked().at_ms
     }
+
+    fn utc_offset_minutes(&self, at_ms: i64) -> i64 {
+        scripted_offset(&self.locked().offsets, at_ms)
+    }
 }
 
 /// Time moves only when the wheel advances.
@@ -176,6 +192,10 @@ impl FakeScheduler {
 impl Clock for FakeScheduler {
     fn now_ms(&self) -> i64 {
         self.wheel.now_ms()
+    }
+
+    fn utc_offset_minutes(&self, at_ms: i64) -> i64 {
+        self.wheel.utc_offset_minutes(at_ms)
     }
 }
 

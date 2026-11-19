@@ -2562,6 +2562,374 @@
 				"steps"
 			]
 		},
+		"TestkitUsageSinkInput": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"op": {
+								"type": "string",
+								"enum": [
+									"ids",
+									"none",
+									"record",
+									"edit",
+									"fill",
+									"markFilled",
+									"rows",
+									"filled",
+									"unfilled"
+								]
+							},
+							"ids": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"on": {
+								"type": "boolean"
+							},
+							"model": {
+								"type": "string"
+							},
+							"generationId": {
+								"type": "string"
+							},
+							"id": {
+								"type": "string"
+							},
+							"at": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"provider": {
+								"type": "string"
+							},
+							"rows": {
+								"type": "array",
+								"items": {
+									"$ref": "usage.input.json#/$defs/UnfilledRecord"
+								}
+							}
+						},
+						"required": [
+							"op"
+						]
+					}
+				}
+			},
+			"required": [
+				"steps"
+			]
+		},
+		"TestkitUsageSinkResult": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"answer": {
+								"type": [
+									"string",
+									"null"
+								]
+							},
+							"filled": {
+								"type": "boolean"
+							},
+							"unfilled": {
+								"type": "array",
+								"items": {
+									"$ref": "usage.input.json#/$defs/UnfilledRecord"
+								}
+							},
+							"calls": {
+								"type": "object",
+								"properties": {
+									"record": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991
+									},
+									"fill": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991
+									},
+									"filled": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991
+									},
+									"unfilled": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991
+									}
+								},
+								"required": [
+									"record",
+									"fill",
+									"filled",
+									"unfilled"
+								]
+							},
+							"recorded": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"fills": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"filledAsks": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"unfilledAsks": {
+								"type": "array",
+								"items": {
+									"type": "integer",
+									"minimum": -9007199254740991,
+									"maximum": 9007199254740991
+								}
+							}
+						},
+						"required": [
+							"calls",
+							"recorded",
+							"fills",
+							"filledAsks",
+							"unfilledAsks"
+						]
+					}
+				}
+			},
+			"required": [
+				"steps"
+			]
+		},
+		"TestkitTimeOffsetInput": {
+			"type": "object",
+			"properties": {
+				"clock": {
+					"type": "string",
+					"enum": [
+						"stepped",
+						"wheel",
+						"scheduler"
+					]
+				},
+				"startMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"offsets": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"fromMs": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"minutes": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							}
+						},
+						"required": [
+							"fromMs",
+							"minutes"
+						]
+					}
+				},
+				"asks": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"minimum": -9007199254740991,
+						"maximum": 9007199254740991
+					}
+				}
+			},
+			"required": [
+				"clock",
+				"startMs",
+				"offsets",
+				"asks"
+			]
+		},
+		"TestkitTimeOffsetResult": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"atMs": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"minutes": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"day": {
+								"type": [
+									"string",
+									"null"
+								]
+							}
+						},
+						"required": [
+							"atMs",
+							"minutes",
+							"day"
+						]
+					}
+				}
+			},
+			"required": [
+				"rows"
+			]
+		},
+		"TestkitTimeOffsetRunInput": {
+			"type": "object",
+			"properties": {
+				"startMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"offsets": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"fromMs": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"minutes": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							}
+						},
+						"required": [
+							"fromMs",
+							"minutes"
+						]
+					}
+				},
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"op": {
+								"type": "string",
+								"enum": [
+									"set",
+									"advance",
+									"ask"
+								]
+							},
+							"offsets": {
+								"type": "array",
+								"items": {
+									"type": "object",
+									"properties": {
+										"fromMs": {
+											"type": "integer",
+											"minimum": -9007199254740991,
+											"maximum": 9007199254740991
+										},
+										"minutes": {
+											"type": "integer",
+											"minimum": -9007199254740991,
+											"maximum": 9007199254740991
+										}
+									},
+									"required": [
+										"fromMs",
+										"minutes"
+									]
+								}
+							},
+							"ms": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"atMs": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							}
+						},
+						"required": [
+							"op"
+						]
+					}
+				}
+			},
+			"required": [
+				"startMs",
+				"offsets",
+				"steps"
+			]
+		},
+		"TestkitTimeOffsetRunResult": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"nowMs": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"minutes": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							}
+						},
+						"required": [
+							"nowMs"
+						]
+					}
+				}
+			},
+			"required": [
+				"steps"
+			]
+		},
 		"TestkitCompactedSessionInput": {
 			"type": "object",
 			"properties": {}

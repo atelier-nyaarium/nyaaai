@@ -1,0 +1,57 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "usage-CallTag",
+	"input": {
+		"set": "usage",
+		"shape": "CallTag",
+		"texts": [
+			"{\"feature\":\"chat\"}",
+			"{\"feature\":\"wand\",\"lane\":\"summary\",\"folder\":\"/home/user/app\"}",
+			"{\"feature\":\"\"}",
+			"{\"feature\":\"chat\",\"extra\":1}",
+			"{\"lane\":\"title\"}",
+			"{\"feature\":\"chat\",\"lane\":1}",
+			"{\"feature\":\"chat\",\"folder\":null}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"feature\":\"chat\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"feature\":\"wand\",\"lane\":\"summary\",\"folder\":\"/home/user/app\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"feature\":\"\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"feature\":\"chat\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"feature"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"lane"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"folder"
+				]
+			}
+		]
+	}
+}

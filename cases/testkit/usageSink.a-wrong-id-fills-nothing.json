@@ -1,0 +1,233 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.usageSink",
+	"name": "a-wrong-id-fills-nothing",
+	"input": {
+		"steps": [
+			{
+				"op": "ids",
+				"ids": [
+					"id-1"
+				]
+			},
+			{
+				"op": "record",
+				"model": "m1",
+				"at": 10
+			},
+			{
+				"op": "fill",
+				"id": "id-4",
+				"provider": "Lab"
+			},
+			{
+				"op": "markFilled",
+				"ids": [
+					"id-9"
+				]
+			},
+			{
+				"op": "filled",
+				"id": "id-4",
+				"at": 0
+			},
+			{
+				"op": "filled",
+				"id": "id-9",
+				"at": 0
+			},
+			{
+				"op": "filled",
+				"id": "id-1",
+				"at": 0
+			},
+			{
+				"op": "rows",
+				"rows": [
+					{
+						"id": "id-4",
+						"generationId": "gen-a4",
+						"at": 10
+					}
+				]
+			},
+			{
+				"op": "unfilled",
+				"at": 0
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"calls": {
+					"record": 0,
+					"fill": 0,
+					"filled": 0,
+					"unfilled": 0
+				},
+				"recorded": [],
+				"fills": [],
+				"filledAsks": [],
+				"unfilledAsks": []
+			},
+			{
+				"answer": "id-1",
+				"calls": {
+					"record": 1,
+					"fill": 0,
+					"filled": 0,
+					"unfilled": 0
+				},
+				"recorded": [
+					"m1@10"
+				],
+				"fills": [],
+				"filledAsks": [],
+				"unfilledAsks": []
+			},
+			{
+				"calls": {
+					"record": 1,
+					"fill": 1,
+					"filled": 0,
+					"unfilled": 0
+				},
+				"recorded": [
+					"m1@10"
+				],
+				"fills": [
+					"id-4/Lab"
+				],
+				"filledAsks": [],
+				"unfilledAsks": []
+			},
+			{
+				"calls": {
+					"record": 1,
+					"fill": 1,
+					"filled": 0,
+					"unfilled": 0
+				},
+				"recorded": [
+					"m1@10"
+				],
+				"fills": [
+					"id-4/Lab"
+				],
+				"filledAsks": [],
+				"unfilledAsks": []
+			},
+			{
+				"filled": false,
+				"calls": {
+					"record": 1,
+					"fill": 1,
+					"filled": 1,
+					"unfilled": 0
+				},
+				"recorded": [
+					"m1@10"
+				],
+				"fills": [
+					"id-4/Lab"
+				],
+				"filledAsks": [
+					"id-4@0"
+				],
+				"unfilledAsks": []
+			},
+			{
+				"filled": false,
+				"calls": {
+					"record": 1,
+					"fill": 1,
+					"filled": 2,
+					"unfilled": 0
+				},
+				"recorded": [
+					"m1@10"
+				],
+				"fills": [
+					"id-4/Lab"
+				],
+				"filledAsks": [
+					"id-4@0",
+					"id-9@0"
+				],
+				"unfilledAsks": []
+			},
+			{
+				"filled": false,
+				"calls": {
+					"record": 1,
+					"fill": 1,
+					"filled": 3,
+					"unfilled": 0
+				},
+				"recorded": [
+					"m1@10"
+				],
+				"fills": [
+					"id-4/Lab"
+				],
+				"filledAsks": [
+					"id-4@0",
+					"id-9@0",
+					"id-1@0"
+				],
+				"unfilledAsks": []
+			},
+			{
+				"calls": {
+					"record": 1,
+					"fill": 1,
+					"filled": 3,
+					"unfilled": 0
+				},
+				"recorded": [
+					"m1@10"
+				],
+				"fills": [
+					"id-4/Lab"
+				],
+				"filledAsks": [
+					"id-4@0",
+					"id-9@0",
+					"id-1@0"
+				],
+				"unfilledAsks": []
+			},
+			{
+				"unfilled": [
+					{
+						"id": "id-4",
+						"generationId": "gen-a4",
+						"at": 10
+					}
+				],
+				"calls": {
+					"record": 1,
+					"fill": 1,
+					"filled": 3,
+					"unfilled": 1
+				},
+				"recorded": [
+					"m1@10"
+				],
+				"fills": [
+					"id-4/Lab"
+				],
+				"filledAsks": [
+					"id-4@0",
+					"id-9@0",
+					"id-1@0"
+				],
+				"unfilledAsks": [
+					0
+				]
+			}
+		]
+	}
+}

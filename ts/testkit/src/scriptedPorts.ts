@@ -5,6 +5,8 @@ import type { ModelRegistry } from "@nyaaai/contract/modelRegistry";
 import type { ProviderList } from "@nyaaai/contract/providerList";
 import type { ModelRow, StoredRegistry, TestRecord } from "@nyaaai/contract/shapes/model";
 import type { ProviderEntry } from "@nyaaai/contract/shapes/provider";
+import type { GenerationStats, MeteredCall, UnfilledRecord } from "@nyaaai/contract/shapes/usage";
+import type { UsageSink } from "@nyaaai/contract/usageSink";
 
 ////////////////////////////////
 //  Interfaces & Types
@@ -31,6 +33,27 @@ export interface ScriptedModelRegistry extends ModelRegistry {
 	reads: () => number;
 	/** Records written, in order. */
 	written: () => Array<{ entry: string; id: string; record: TestRecord }>;
+}
+
+export interface ScriptedUsageSink extends UsageSink {
+	/** The ids `record` answers, in order, replacing what is left; none once they run out. */
+	setIds: (ids: readonly string[]) => void;
+	/** While true, `record` answers none; it still keeps the call. */
+	answerNone: (none: boolean) => void;
+	/** Ids that count as filled, like those `fill` was given; only a recorded id whose call is not before the ask answers true. */
+	setFilled: (ids: readonly string[]) => void;
+	/** What `unfilled` lists, less the rows before its `since` and the ids filled by the same rule. */
+	setUnfilled: (rows: readonly UnfilledRecord[]) => void;
+	/** Calls `record` was given, in order. */
+	recorded: () => MeteredCall[];
+	/** Calls `fill` was given, in order. */
+	fills: () => Array<{ id: string; stats: GenerationStats }>;
+	/** Asks of `filled`, in order. */
+	filledAsks: () => Array<{ id: string; at: number }>;
+	/** The `since` of each `unfilled`, in order. */
+	unfilledAsks: () => number[];
+	/** Times each method was called. */
+	calls: () => { record: number; fill: number; filled: number; unfilled: number };
 }
 
 ////////////////////////////////
@@ -132,5 +155,67 @@ export function scriptedModelRegistry(
 		},
 		reads: () => reads,
 		written: () => [...written],
+	};
+}
+
+export function scriptedUsageSink(): ScriptedUsageSink {
+	let ids: string[] = [];
+	let none = false;
+	let rows: UnfilledRecord[] = [];
+	/** Ids `fill` or `setFilled` named. */
+	const named = new Set<string>();
+	/** The call each answered id was recorded with. */
+	const kept = new Map<string, MeteredCall>();
+	const recorded: MeteredCall[] = [];
+	const fills: Array<{ id: string; stats: GenerationStats }> = [];
+	const filledAsks: Array<{ id: string; at: number }> = [];
+	const unfilledAsks: number[] = [];
+	/** As a log answers: a recorded id, named, whose call is not before `at`. */
+	const isFilled = (id: string, at: number): boolean => {
+		const call = kept.get(id);
+		return named.has(id) && call !== undefined && call.at >= at;
+	};
+	return {
+		record: (call) => {
+			const copy = structuredClone(call);
+			recorded.push(copy);
+			const id = none ? undefined : ids.shift();
+			if (id !== undefined) kept.set(id, structuredClone(call));
+			return id;
+		},
+		fill: (id, stats) => {
+			fills.push({ id, stats: structuredClone(stats) });
+			named.add(id);
+		},
+		filled: async (id, at) => {
+			filledAsks.push({ id, at });
+			return isFilled(id, at);
+		},
+		unfilled: async (since) => {
+			unfilledAsks.push(since);
+			return rows.filter((row) => row.at >= since && !isFilled(row.id, since)).map((row) => ({ ...row }));
+		},
+		setIds: (next) => {
+			ids = [...next];
+		},
+		answerNone: (next) => {
+			none = next;
+		},
+		setFilled: (next) => {
+			for (const id of next) named.add(id);
+		},
+		setUnfilled: (next) => {
+			rows = next.map((row) => ({ ...row }));
+		},
+		recorded: () => recorded.map((call) => structuredClone(call)),
+		fills: () => fills.map((fill) => structuredClone(fill)),
+		filledAsks: () => [...filledAsks],
+		unfilledAsks: () => [...unfilledAsks],
+		calls: () => ({
+			record: recorded.length,
+			fill: fills.length,
+			filled: filledAsks.length,
+			unfilled: unfilledAsks.length,
+		}),
 	};
 }
