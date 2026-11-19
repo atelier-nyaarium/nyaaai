@@ -1,10 +1,11 @@
 //! Entry health: key status, bills, pool cooldowns and gates, read through ports.
 
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::future::Future;
 use std::mem::discriminant;
 use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::pin::Pin;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, MutexGuard, Weak};
 use std::task::{Context, Poll, Waker};
 
@@ -127,6 +128,7 @@ struct Status {
 /// Tracked provider fields.
 #[derive(Clone, PartialEq)]
 struct Identity {
+    kind: ProviderKindName,
     plan: Option<ProviderPlan>,
     url: Option<String>,
     extra_usage: bool,
@@ -159,6 +161,10 @@ struct Core {
     kind_deps: Arc<dyn Fn(ProviderKindName) -> KindDeps + Send + Sync>,
     pause_ms: i64,
     gate: ProviderGate,
+    disposed: AtomicBool,
+    /// Changes made and not yet told, oldest first.
+    outbox: Mutex<VecDeque<HealthChange>>,
+    delivering: AtomicBool,
     state: Mutex<State>,
     listeners: Mutex<Vec<(u64, Listener)>>,
     next_listener: Mutex<u64>,
@@ -212,6 +218,7 @@ fn billed_with(was: Option<&Billed>, reply: &Billing) -> Billed {
 
 fn identity_of(entry: &ProviderEntry) -> Identity {
     Identity {
+        kind: entry.kind,
         plan: entry.plan,
         url: entry.url.clone(),
         extra_usage: entry.extra_usage == Some(true),
@@ -246,22 +253,6 @@ where
     {
         Poll::Ready(held) => Box::pin(async move { held }),
         Poll::Pending => future,
-    }
-}
-
-/// Gives up the current turn once.
-struct Turn(bool);
-
-impl Future for Turn {
-    type Output = ();
-
-    fn poll(mut self: Pin<&mut Self>, context: &mut Context<'_>) -> Poll<()> {
-        if self.0 {
-            return Poll::Ready(());
-        }
-        self.0 = true;
-        context.waker().wake_by_ref();
-        Poll::Pending
     }
 }
 
@@ -305,22 +296,43 @@ impl Core {
         }
     }
 
-    /// Tells each entry's parts once, in the shape's order.
+    /// Tells each entry's parts once, in the shape's order, in the order the changes were made: a
+    /// change a listener makes is told behind those already waiting.
     fn flush(&self) {
         let held = std::mem::take(&mut locked(&self.state).pending);
-        for (entry, parts) in held {
-            let changed: Vec<Part> = PARTS
-                .into_iter()
-                .filter(|part| parts.contains(part))
-                .collect();
-            let change = HealthChange { entry, changed };
-            let listeners: Vec<Listener> = locked(&self.listeners)
-                .iter()
-                .map(|(_, listener)| Arc::clone(listener))
-                .collect();
-            for listener in listeners {
-                // A listener cannot change health.
-                let _ = catch_unwind(AssertUnwindSafe(|| listener(&change)));
+        if self.disposed.load(Ordering::SeqCst) {
+            return;
+        }
+        {
+            let mut outbox = locked(&self.outbox);
+            for (entry, parts) in held {
+                let changed: Vec<Part> = PARTS
+                    .into_iter()
+                    .filter(|part| parts.contains(part))
+                    .collect();
+                outbox.push_back(HealthChange { entry, changed });
+            }
+        }
+        loop {
+            if self.delivering.swap(true, Ordering::AcqRel) {
+                return;
+            }
+            loop {
+                let Some(change) = locked(&self.outbox).pop_front() else {
+                    break;
+                };
+                let listeners: Vec<Listener> = locked(&self.listeners)
+                    .iter()
+                    .map(|(_, listener)| Arc::clone(listener))
+                    .collect();
+                for listener in listeners {
+                    // A listener cannot change health.
+                    let _ = catch_unwind(AssertUnwindSafe(|| listener(&change)));
+                }
+            }
+            self.delivering.store(false, Ordering::Release);
+            if locked(&self.outbox).is_empty() {
+                return;
             }
         }
     }
@@ -402,6 +414,9 @@ impl Core {
 
     /// The only pool writer.
     fn apply(&self, id: &str, event: PoolEvent) {
+        if !self.listed(id) {
+            return;
+        }
         let now = self.now() as f64;
         let changed = {
             let mut state = locked(&self.state);
@@ -420,6 +435,9 @@ impl Core {
     }
 
     fn admitted(&self, id: &str, ticket: Ticket) {
+        if !self.listed(id) {
+            return;
+        }
         let _batch = self.batch();
         locked(&self.state)
             .probes
@@ -499,51 +517,65 @@ impl Core {
         self: &Arc<Self>,
         id: &str,
         limit: Arc<Deadline>,
-    ) -> BoxFuture<'static, Result<KeyState, Failed>> {
+    ) -> BoxFuture<'static, Result<Option<KeyState>, Failed>> {
         let (core, id) = (Arc::clone(self), id.to_owned());
-        let work = eager(Caught(Box::pin(async move {
-            core.key_state(&id, &limit).await
-        })));
-        Box::pin(async move { work.await.unwrap_or(Err(Failed)) })
+        Box::pin(async move { core.key_state(&id, &limit).await })
     }
 
-    async fn key_state(&self, id: &str, limit: &Deadline) -> Result<KeyState, Failed> {
+    /// Ends without effect once its token ended or the entry's identity changed.
+    async fn key_state(&self, id: &str, limit: &Deadline) -> Result<Option<KeyState>, Failed> {
         let entry = self.entry_of(id);
         let kind = entry
             .as_ref()
             .and_then(|entry| self.kind_of(entry))
             .cloned();
         let (Some(entry), Some(kind)) = (entry, kind) else {
-            return Ok(none());
+            return Ok(Some(none()));
         };
+        let began = identity_of(&entry);
+        let stale = || limit.token().is_cancelled() || !self.same_identity(id, &began);
         let answer = self.keys.get(id).await;
-        // The store's answer arrives after a turn, so a change that follows the start drops the check.
-        Turn(false).await;
-        let secret = match answer {
-            KeyAnswer::Refused => return Ok(KeyState::Rejected(KeyStateRejected {})),
-            KeyAnswer::Unready => return Ok(KeyState::Unreachable(KeyStateUnreachable {})),
-            KeyAnswer::Key(key) => Some(key),
-            KeyAnswer::None => None,
-        };
-        if kind.field() == KindField::Key && secret.is_none() {
-            return Ok(none());
+        if stale() {
+            return Ok(None);
         }
-        let fields = EntryFields {
-            kind: entry.kind,
-            label: entry.label.clone(),
-            plan: entry.plan,
-            url: entry.url.clone(),
-            extra_usage: entry.extra_usage,
+        let state = match answer {
+            KeyAnswer::Refused => KeyState::Rejected(KeyStateRejected {}),
+            KeyAnswer::Unready => KeyState::Unreachable(KeyStateUnreachable {}),
+            held => {
+                let secret = match held {
+                    KeyAnswer::Key(key) => Some(key),
+                    _ => None,
+                };
+                if kind.field() == KindField::Key && secret.is_none() {
+                    none()
+                } else {
+                    let fields = EntryFields {
+                        kind: entry.kind,
+                        label: entry.label.clone(),
+                        plan: entry.plan,
+                        url: entry.url.clone(),
+                        extra_usage: entry.extra_usage,
+                    };
+                    let deps = (self.kind_deps)(entry.kind);
+                    kind.check(&fields, secret.as_deref(), &deps, limit.token())
+                        .await
+                        .map_err(|_| Failed)?
+                }
+            }
         };
-        let deps = (self.kind_deps)(entry.kind);
-        kind.check(&fields, secret.as_deref(), &deps, limit.token())
-            .await
-            .map_err(|_| Failed)
+        Ok(if stale() { None } else { Some(state) })
+    }
+
+    fn same_identity(&self, id: &str, began: &Identity) -> bool {
+        self.entry_of(id).is_some_and(|entry| {
+            let now = identity_of(&entry);
+            now.kind == began.kind && now.plan == began.plan && now.url == began.url
+        })
     }
 
     /// Replaces pending checks.
     fn check(self: &Arc<Self>, id: &str) {
-        if !self.listed(id) {
+        if self.disposed.load(Ordering::SeqCst) || !self.listed(id) {
             return;
         }
         let _batch = self.batch();
@@ -551,10 +583,14 @@ impl Core {
         drop(status.reader.read());
     }
 
-    fn invalidate(&self, id: &str, unbill: bool) {
+    fn invalidate(&self, id: &str, unbill: bool, identity: bool) {
         let _batch = self.batch();
         let status = {
             let mut state = locked(&self.state);
+            state.probes.retain(|_, owner| owner != id);
+            if identity {
+                state.rechecked.remove(id);
+            }
             let status = state.statuses.remove(id);
             if let Some(status) = &status {
                 status.reader.dispose();
@@ -580,10 +616,14 @@ impl Core {
     }
 
     fn snapshot(&self) -> Vec<(String, Identity)> {
-        self.entries()
-            .iter()
-            .map(|entry| (entry.id.clone(), identity_of(entry)))
-            .collect()
+        let mut held: Vec<(String, Identity)> = Vec::new();
+        // A repeated id keeps its first row.
+        for entry in self.entries() {
+            if !held.iter().any(|(id, _)| *id == entry.id) {
+                held.push((entry.id.clone(), identity_of(&entry)));
+            }
+        }
+        held
     }
 
     fn diff(self: &Arc<Self>) {
@@ -592,9 +632,11 @@ impl Core {
         let before = locked(&self.state).identities.clone();
         for (id, was) in &before {
             match next.iter().find(|(held, _)| held == id) {
-                None => self.invalidate(id, true),
-                Some((_, now)) if now.plan != was.plan || now.url != was.url => {
-                    self.invalidate(id, false);
+                None => self.invalidate(id, true, true),
+                Some((_, now))
+                    if now.kind != was.kind || now.plan != was.plan || now.url != was.url =>
+                {
+                    self.invalidate(id, false, true);
                     self.check(id);
                 }
                 Some((_, now)) if now.extra_usage != was.extra_usage => {
@@ -659,26 +701,37 @@ impl EntryKeys for HealthKeys {
 impl ProviderHealth {
     /// Defers initial key checks. Asks `ids` once, for the gate's name.
     pub fn new(deps: HealthDeps, ids: &dyn Ids) -> Self {
-        let gate = ProviderGate::new(
-            GateDeps {
-                scheduler: Arc::clone(&deps.scheduler),
-                pause_ms: deps.pause_ms,
-                max_pauses: deps.max_pauses,
-            },
-            ids,
-        );
-        let core = Arc::new(Core {
-            scheduler: deps.scheduler,
-            list: deps.list,
-            keys: deps.keys,
-            kinds: deps.kinds,
-            kind_deps: deps.kind_deps,
-            pause_ms: deps.pause_ms.unwrap_or(PAUSE_MS),
-            gate,
-            state: Mutex::new(State::default()),
-            listeners: Mutex::new(Vec::new()),
-            next_listener: Mutex::new(0),
-            unsubscribe: Mutex::new(Vec::new()),
+        let core = Arc::new_cyclic(|weak: &Weak<Core>| {
+            let told = weak.clone();
+            let gate = ProviderGate::new(
+                GateDeps {
+                    scheduler: Arc::clone(&deps.scheduler),
+                    pause_ms: deps.pause_ms,
+                    max_pauses: deps.max_pauses,
+                    on_ticket: Some(Arc::new(move |ticket: &Ticket| {
+                        if let Some(core) = told.upgrade() {
+                            core.admitted(entry_of_model(&ticket.model), ticket.clone());
+                        }
+                    })),
+                },
+                ids,
+            );
+            Core {
+                scheduler: deps.scheduler,
+                list: deps.list,
+                keys: deps.keys,
+                kinds: deps.kinds,
+                kind_deps: deps.kind_deps,
+                pause_ms: deps.pause_ms.unwrap_or(PAUSE_MS),
+                gate,
+                disposed: AtomicBool::new(false),
+                outbox: Mutex::new(VecDeque::new()),
+                delivering: AtomicBool::new(false),
+                state: Mutex::new(State::default()),
+                listeners: Mutex::new(Vec::new()),
+                next_listener: Mutex::new(0),
+                unsubscribe: Mutex::new(Vec::new()),
+            }
         });
         locked(&core.state).identities = core.snapshot();
         let keys_off = {
@@ -686,7 +739,7 @@ impl ProviderHealth {
             core.keys.on_change(Box::new(move |id| {
                 if let Some(core) = weak.upgrade() {
                     let _batch = core.batch();
-                    core.invalidate(id, true);
+                    core.invalidate(id, true, false);
                     core.check(id);
                 }
             }))
@@ -827,6 +880,7 @@ impl ProviderHealth {
     }
 
     pub fn dispose(&self) {
+        self.core.disposed.store(true, Ordering::SeqCst);
         let offs = std::mem::take(&mut *locked(&self.core.unsubscribe));
         for off in offs {
             off();
@@ -848,7 +902,7 @@ impl ProviderHealth {
 }
 
 impl Gate for ProviderHealth {
-    /// Probes require admitted tickets.
+    /// The ticket is recorded inside the gate call that makes it.
     fn admit(
         &self,
         route: RouteRef<'_>,
@@ -856,28 +910,13 @@ impl Gate for ProviderHealth {
         on_wait: Option<WaitFn>,
         again: bool,
     ) -> BoxFuture<'static, Admission> {
-        let core = Arc::clone(&self.core);
-        let id = route.entry.id.clone();
-        let admission = {
-            let _batch = core.batch();
-            core.gate.admit(&key_of(route), cancel, on_wait, again)
-        };
-        Box::pin(async move {
-            let admission = admission.await;
-            if let Admission::Go(held) = &admission {
-                core.admitted(&id, held.ticket.clone());
-            }
-            admission
-        })
+        let _batch = self.core.batch();
+        Box::pin(self.core.gate.admit(&key_of(route), cancel, on_wait, again))
     }
 
     fn try_admit(&self, route: RouteRef<'_>) -> Option<Ticket> {
         let _batch = self.core.batch();
-        let ticket = self.core.gate.try_admit(&key_of(route));
-        if let Some(ticket) = &ticket {
-            self.core.admitted(&route.entry.id, ticket.clone());
-        }
-        ticket
+        self.core.gate.try_admit(&key_of(route))
     }
 
     fn settle(

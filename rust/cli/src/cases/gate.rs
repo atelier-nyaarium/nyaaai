@@ -8,7 +8,7 @@ use nyaaai_agentic::health::gate::{GateDeps, GateState, Phase, ProviderGate, Wai
 use nyaaai_contract::cancel::CancelToken;
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::id::CountedIds;
-use nyaaai_contract::shapes::health::{Admission, GateWaiting, Ticket};
+use nyaaai_contract::shapes::health::{Admission, GateOutcome, GateWaiting, Ticket};
 use nyaaai_contract::time::Clock;
 use nyaaai_testkit::cases::{Outcome, block_on};
 use nyaaai_testkit::scheduler::{FakeScheduler, TimerWheel};
@@ -55,6 +55,24 @@ fn phase_of(phase: Phase) -> GateRunResultStepsItemGatesItemGatePhase {
     }
 }
 
+/// What a waiter's callback saw of its gate, by request.
+type Inside = Arc<Mutex<Vec<(String, Option<GateState>)>>>;
+
+fn inside_of(state: GateState) -> GateRunResultStepsItemInsideItemGate {
+    GateRunResultStepsItemInsideItemGate {
+        phase: match state.phase {
+            Phase::Open => GateRunResultStepsItemInsideItemGatePhase::Open,
+            Phase::Paused => GateRunResultStepsItemInsideItemGatePhase::Paused,
+            Phase::Probing => GateRunResultStepsItemInsideItemGatePhase::Probing,
+        },
+        generation: state.generation as i64,
+        pauses: state.pauses as i64,
+        resume_at: state.resume_at,
+        probe: state.probe,
+        queued: state.queued as i64,
+    }
+}
+
 fn gate_of(state: GateState) -> GateRunResultStepsItemGatesItemGate {
     GateRunResultStepsItemGatesItemGate {
         phase: phase_of(state.phase),
@@ -71,7 +89,7 @@ fn resolve(
     pending: &mut HashMap<String, BoxFuture<'static, Admission>>,
     request: &str,
     resolved: &mut Vec<(String, Admission)>,
-    tickets: &mut HashMap<String, Ticket>,
+    tickets: &Mutex<HashMap<String, Ticket>>,
 ) -> Outcome<()> {
     let Some(mut admission) = pending.remove(request) else {
         return Ok(());
@@ -83,7 +101,7 @@ fn resolve(
         return Err(format!("The admission of {request} has not resolved."));
     };
     if let Admission::Go(go) = &admission {
-        tickets.insert(request.to_owned(), go.ticket.clone());
+        locked(tickets).insert(request.to_owned(), go.ticket.clone());
     }
     resolved.push((request.to_owned(), admission));
     Ok(())
@@ -96,18 +114,20 @@ pub fn run(input: GateRunInput) -> Outcome<GateRunResult> {
 async fn play(input: GateRunInput) -> Outcome<GateRunResult> {
     let wheel = Arc::new(TimerWheel::new(input.start_ms));
     let scheduler = Arc::new(FakeScheduler::new(Arc::clone(&wheel)));
-    let gate = ProviderGate::new(
+    let gate = Arc::new(ProviderGate::new(
         GateDeps {
             scheduler,
             pause_ms: input.pause_ms.map(|held| held as i64),
             max_pauses: input.max_pauses,
+            on_ticket: None,
         },
         &CountedIds::new("gate-"),
-    );
+    ));
     let mut resolved: Vec<(String, Admission)> = Vec::new();
     let waits: Arc<Mutex<Vec<(String, GateWaiting)>>> = Arc::default();
     let told: Arc<Mutex<Vec<String>>> = Arc::default();
-    let mut tickets: HashMap<String, Ticket> = HashMap::new();
+    let tickets: Arc<Mutex<HashMap<String, Ticket>>> = Arc::default();
+    let inside: Inside = Arc::default();
     let mirror: Arc<Mutex<Mirror>> = Arc::default();
     // Each request's admission, until it resolves.
     let mut pending: HashMap<String, BoxFuture<'static, Admission>> = HashMap::new();
@@ -147,7 +167,26 @@ async fn play(input: GateRunInput) -> Outcome<GateRunResult> {
                 let before = queued_of(&held.model);
                 let on_wait: WaitFn = {
                     let (waits, request) = (Arc::clone(&waits), held.request.clone());
-                    Arc::new(move |waiting| locked(&waits).push((request.clone(), waiting)))
+                    let (gate, inside, tickets) =
+                        (Arc::clone(&gate), Arc::clone(&inside), Arc::clone(&tickets));
+                    let (model, action) = (held.model.clone(), held.inside);
+                    Arc::new(move |waiting| {
+                        locked(&waits).push((request.clone(), waiting));
+                        locked(&inside).push((request.clone(), gate.state_of(&model)));
+                        match action {
+                            Some(GateRunInputStepsItemAdmitInside::Cool) => gate.cool(&model, None),
+                            Some(GateRunInputStepsItemAdmitInside::TryAdmit) => {
+                                let _ = gate.try_admit(&model);
+                            }
+                            Some(GateRunInputStepsItemAdmitInside::SettleTrigger) => {
+                                let held = locked(&tickets).get("trigger").cloned();
+                                if let Some(held) = held {
+                                    gate.settle(&held, GateOutcome::Overloaded, None);
+                                }
+                            }
+                            None => {}
+                        }
+                    })
                 };
                 let again = held.again == Some(true);
                 let admission = Box::pin(gate.admit(&held.model, &token, Some(on_wait), again));
@@ -173,7 +212,7 @@ async fn play(input: GateRunInput) -> Outcome<GateRunResult> {
                         queue.push(held.request.clone());
                     }
                 } else {
-                    resolve(&mut pending, &held.request, &mut resolved, &mut tickets)?;
+                    resolve(&mut pending, &held.request, &mut resolved, &tickets)?;
                 }
             }
             GateRunInputStepsItem::TryAdmit(held) => {
@@ -182,11 +221,11 @@ async fn play(input: GateRunInput) -> Outcome<GateRunResult> {
                 }
                 ticket = gate.try_admit(&held.model);
                 if let Some(ticket) = &ticket {
-                    tickets.insert(held.request.clone(), ticket.clone());
+                    locked(&tickets).insert(held.request.clone(), ticket.clone());
                 }
             }
             GateRunInputStepsItem::Settle(held) => {
-                let ticket = tickets
+                let ticket = locked(&tickets)
                     .get(&held.request)
                     .cloned()
                     .ok_or_else(|| format!("No ticket for {}.", held.request))?;
@@ -198,6 +237,12 @@ async fn play(input: GateRunInput) -> Outcome<GateRunResult> {
                     held.outcome,
                     held.retry_after_ms.map(|after| after as i64),
                 ));
+            }
+            GateRunInputStepsItem::SettleTicket(held) => {
+                if !models.contains(&held.ticket.model) {
+                    models.push(held.ticket.model.clone());
+                }
+                settled = Some(gate.settle(&held.ticket, held.outcome, None));
             }
             GateRunInputStepsItem::Cool(held) => {
                 if !models.contains(&held.model) {
@@ -236,7 +281,7 @@ async fn play(input: GateRunInput) -> Outcome<GateRunResult> {
             held
         };
         for request in held {
-            resolve(&mut pending, &request, &mut resolved, &mut tickets)?;
+            resolve(&mut pending, &request, &mut resolved, &tickets)?;
         }
         steps.push(GateRunResultStepsItem {
             now_ms: wheel.now_ms(),
@@ -247,6 +292,13 @@ async fn play(input: GateRunInput) -> Outcome<GateRunResult> {
                 .map(|(request, admission)| GateRunResultStepsItemResolvedItem {
                     request,
                     admission,
+                })
+                .collect(),
+            inside: std::mem::take(&mut *locked(&inside))
+                .into_iter()
+                .map(|(request, state)| GateRunResultStepsItemInsideItem {
+                    request,
+                    gate: state.map(inside_of),
                 })
                 .collect(),
             waits: std::mem::take(&mut *locked(&waits))
@@ -269,7 +321,7 @@ async fn play(input: GateRunInput) -> Outcome<GateRunResult> {
     }
     let rest: Vec<String> = pending.keys().cloned().collect();
     for request in rest {
-        resolve(&mut pending, &request, &mut resolved, &mut tickets)?;
+        resolve(&mut pending, &request, &mut resolved, &tickets)?;
     }
     for request in &order {
         wheel.cancel(&format!("abort-{request}"));

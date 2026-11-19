@@ -67,6 +67,7 @@
 						}
 					}
 				],
+				"inside": [],
 				"waits": [],
 				"told": [],
 				"gates": [
@@ -89,6 +90,7 @@
 				"settled": "again",
 				"ticket": null,
 				"resolved": [],
+				"inside": [],
 				"waits": [],
 				"told": [
 					"lab/model-a"
@@ -115,6 +117,19 @@
 				"settled": null,
 				"ticket": null,
 				"resolved": [],
+				"inside": [
+					{
+						"request": "b",
+						"gate": {
+							"phase": "paused",
+							"generation": 0,
+							"pauses": 1,
+							"resumeAt": 1060000,
+							"probe": null,
+							"queued": 1
+						}
+					}
+				],
 				"waits": [
 					{
 						"request": "b",
@@ -149,6 +164,19 @@
 				"settled": null,
 				"ticket": null,
 				"resolved": [],
+				"inside": [
+					{
+						"request": "c",
+						"gate": {
+							"phase": "paused",
+							"generation": 0,
+							"pauses": 1,
+							"resumeAt": 1060000,
+							"probe": null,
+							"queued": 2
+						}
+					}
+				],
 				"waits": [
 					{
 						"request": "c",
@@ -197,6 +225,7 @@
 						}
 					}
 				],
+				"inside": [],
 				"waits": [],
 				"told": [],
 				"gates": [
@@ -232,6 +261,7 @@
 				"settled": null,
 				"ticket": null,
 				"resolved": [],
+				"inside": [],
 				"waits": [],
 				"told": [],
 				"gates": [
@@ -278,6 +308,25 @@
 								"probe": true,
 								"serial": 3
 							}
+						}
+					}
+				],
+				"inside": [
+					{
+						"request": "c",
+						"gate": {
+							"phase": "probing",
+							"generation": 0,
+							"pauses": 1,
+							"resumeAt": 1060000,
+							"probe": {
+								"gate": "gate-1",
+								"model": "lab/model-a",
+								"generation": 0,
+								"probe": true,
+								"serial": 3
+							},
+							"queued": 1
 						}
 					}
 				],
@@ -346,6 +395,7 @@
 						}
 					}
 				],
+				"inside": [],
 				"waits": [],
 				"told": [
 					"lab/model-a"

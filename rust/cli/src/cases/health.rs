@@ -1,20 +1,31 @@
 //! Provider health cases.
 
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, VecDeque};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, MutexGuard};
 
+use nyaaai_agentic::codec::Codec;
+use nyaaai_agentic::health::gate::Phase;
 use nyaaai_agentic::health::health::{Billing, Gate, HealthDeps, ProviderHealth, RouteRef};
-use nyaaai_agentic::provider::kind::KINDS;
+use nyaaai_agentic::provider::kind::{
+    CatalogDeps, EntryCatalog, KINDS, KindDeps, KindError, KindField, ProviderKind,
+};
+use nyaaai_agentic::transport::{KeySource, Transport};
 use nyaaai_contract::cancel::{CancelToken, Unsubscribe};
 use nyaaai_contract::entry_keys::{EntryKeys, KeyAnswer};
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::id::CountedIds;
 use nyaaai_contract::shapes::health::{Admission, HealthChange, Ticket};
+use nyaaai_contract::shapes::model::ModelView;
+use nyaaai_contract::shapes::provider::{
+    EntryFields, KeyState, KeyStateNone, ProviderEntry, ProviderKindName,
+};
 use nyaaai_contract::shapes::step::{Failure, FailureCategory, FailureStatus, NormalizedUsage};
 use nyaaai_contract::time::Clock;
 use nyaaai_testkit::cases::Outcome;
 use nyaaai_testkit::cases::block_on;
 use nyaaai_testkit::scripted_ports::{ScriptedEntryKeys, ScriptedProviderList};
+use tokio::sync::{oneshot, watch};
 
 use super::local::net_of;
 use super::shapes::*;
@@ -44,7 +55,8 @@ fn shown_of(held: &KeyAnswer) -> HealthKeyAnswer {
 }
 
 /// Remembers an entry the script named, in the order first named.
-fn name(named: &mut Vec<String>, id: &str) {
+fn name(named: &Mutex<Vec<String>>, id: &str) {
+    let mut named = locked(named);
     if !named.iter().any(|held| held == id) {
         named.push(id.to_owned());
     }
@@ -75,36 +87,236 @@ fn deps_of(
     }
 }
 
+/// What a released hold lets go.
+#[derive(Default)]
+struct Go {
+    state: Option<KeyState>,
+    answer: Option<KeyAnswer>,
+}
+
+/// A place a check parks until the script releases it.
+struct Hold {
+    at: HealthRunInputStepsItemHoldAt,
+    seen: AtomicBool,
+    parked: AtomicBool,
+    reached: watch::Sender<bool>,
+    release: Mutex<Option<oneshot::Sender<Go>>>,
+    wait: Mutex<Option<oneshot::Receiver<Go>>>,
+}
+
+impl Hold {
+    fn new(at: HealthRunInputStepsItemHoldAt) -> Arc<Self> {
+        let (release, wait) = oneshot::channel();
+        Arc::new(Self {
+            at,
+            seen: AtomicBool::new(false),
+            parked: AtomicBool::new(false),
+            reached: watch::channel(false).0,
+            release: Mutex::new(Some(release)),
+            wait: Mutex::new(Some(wait)),
+        })
+    }
+
+    fn arrive(&self) {
+        self.parked.store(true, Ordering::SeqCst);
+        self.seen.store(true, Ordering::SeqCst);
+        self.reached.send_replace(true);
+    }
+
+    fn let_go(&self, go: Go) {
+        self.parked.store(false, Ordering::SeqCst);
+        if let Some(release) = locked(&self.release).take() {
+            let _ = release.send(go);
+        }
+    }
+
+    async fn released(&self) -> Go {
+        let wait = locked(&self.wait).take();
+        match wait {
+            Some(wait) => wait.await.unwrap_or_default(),
+            None => Go::default(),
+        }
+    }
+
+    async fn reached(&self) {
+        let mut reached = self.reached.subscribe();
+        let _ = reached.wait_for(|held| *held).await;
+    }
+}
+
+/// The holds armed and not yet taken by a check, by place.
+#[derive(Default)]
+struct Armed {
+    store: Mutex<VecDeque<Arc<Hold>>>,
+    check: Mutex<VecDeque<Arc<Hold>>>,
+}
+
+/// The store's keys, whose next read can be held.
+struct Held {
+    raw: Arc<ScriptedEntryKeys>,
+    armed: Arc<Armed>,
+}
+
+impl EntryKeys for Held {
+    fn get(&self, id: &str) -> BoxFuture<'_, KeyAnswer> {
+        let Some(hold) = locked(&self.armed.store).pop_front() else {
+            return self.raw.get(id);
+        };
+        let id = id.to_owned();
+        Box::pin(async move {
+            hold.arrive();
+            match hold.released().await.answer {
+                Some(answer) => answer,
+                None => self.raw.get(&id).await,
+            }
+        })
+    }
+
+    fn on_change(&self, listener: Box<dyn Fn(&str) + Send + Sync>) -> Unsubscribe {
+        self.raw.on_change(listener)
+    }
+}
+
+/// A real kind whose next check can be held.
+struct Parking {
+    real: Arc<dyn ProviderKind>,
+    armed: Arc<Armed>,
+}
+
+impl ProviderKind for Parking {
+    fn kind(&self) -> ProviderKindName {
+        self.real.kind()
+    }
+
+    fn label(&self) -> &str {
+        self.real.label()
+    }
+
+    fn field(&self) -> KindField {
+        self.real.field()
+    }
+
+    fn check<'a>(
+        &'a self,
+        entry: &'a EntryFields,
+        secret: Option<&'a str>,
+        deps: &'a KindDeps,
+        cancel: &'a CancelToken,
+    ) -> BoxFuture<'a, Result<KeyState, KindError>> {
+        let Some(hold) = locked(&self.armed.check).pop_front() else {
+            return self.real.check(entry, secret, deps, cancel);
+        };
+        Box::pin(async move {
+            hold.arrive();
+            match hold.released().await.state {
+                Some(state) => Ok(state),
+                None => self.real.check(entry, secret, deps, cancel).await,
+            }
+        })
+    }
+
+    fn transport(
+        &self,
+        entry: &EntryFields,
+        key: Arc<dyn KeySource>,
+        deps: &KindDeps,
+    ) -> Result<Arc<Transport>, String> {
+        self.real.transport(entry, key, deps)
+    }
+
+    fn catalog(
+        &self,
+        entry: &ProviderEntry,
+        transport: Arc<Transport>,
+        deps: CatalogDeps,
+    ) -> Arc<dyn EntryCatalog> {
+        self.real.catalog(entry, transport, deps)
+    }
+
+    fn codec(
+        &self,
+        view: Option<&ModelView>,
+        entry: &EntryFields,
+        deps: &KindDeps,
+    ) -> Box<dyn Codec> {
+        self.real.codec(view, entry, deps)
+    }
+
+    fn failure(
+        &self,
+        failure: &Failure,
+        view: Option<&ModelView>,
+    ) -> nyaaai_contract::shapes::provider::Disposition {
+        self.real.failure(failure, view)
+    }
+}
+
 pub fn run(input: HealthRunInput) -> Outcome<HealthRunResult> {
     block_on(play(input))?
+}
+
+/// Whether a step leaves the wait for `idle` out.
+fn no_idle(step: &HealthRunInputStepsItem) -> bool {
+    match step {
+        HealthRunInputStepsItem::Release(held) => held.idle.is_some(),
+        HealthRunInputStepsItem::List(held) => held.idle.is_some(),
+        HealthRunInputStepsItem::Key(held) => held.idle.is_some(),
+        HealthRunInputStepsItem::Check(held) => held.idle.is_some(),
+        HealthRunInputStepsItem::Advance(held) => held.idle.is_some(),
+        _ => false,
+    }
 }
 
 async fn play(input: HealthRunInput) -> Outcome<HealthRunResult> {
     let net = net_of(input.start_ms, &input.exchanges);
     let list = Arc::new(ScriptedProviderList::new(input.entries.clone()));
-    let keys = Arc::new(ScriptedEntryKeys::new());
+    let raw = Arc::new(ScriptedEntryKeys::new());
     for (id, answer) in input.keys.iter() {
-        keys.set(id, answer_of(answer));
+        raw.set(id, answer_of(answer));
     }
-    let health = ProviderHealth::new(
-        deps_of(
-            &net,
-            Arc::clone(&list),
-            keys.clone(),
-            input.pause_ms.map(|held| held as i64),
-        ),
-        &CountedIds::new("gate-"),
+    let armed: Arc<Armed> = Arc::default();
+    let mut holds: Vec<Arc<Hold>> = Vec::new();
+    let keys = Arc::new(Held {
+        raw: Arc::clone(&raw),
+        armed: Arc::clone(&armed),
+    });
+    let mut deps = deps_of(
+        &net,
+        Arc::clone(&list),
+        keys,
+        input.pause_ms.map(|held| held as i64),
     );
+    deps.kinds = KINDS
+        .iter()
+        .map(|real| {
+            Arc::new(Parking {
+                real: Arc::clone(real),
+                armed: Arc::clone(&armed),
+            }) as Arc<dyn ProviderKind>
+        })
+        .collect();
+    let health = ProviderHealth::new(deps, &CountedIds::new("gate-"));
     let changes: Arc<Mutex<Vec<HealthChange>>> = Arc::default();
+    let named: Arc<Mutex<Vec<String>>> = Arc::default();
+    let starters: Arc<Mutex<HashSet<String>>> = Arc::default();
+    {
+        let (starters, named, health) = (Arc::clone(&starters), Arc::clone(&named), health.clone());
+        drop(health.clone().on_change(Box::new(move |change| {
+            if !locked(&starters).remove(&change.entry) {
+                return;
+            }
+            name(&named, &change.entry);
+            health.check(&change.entry);
+        })));
+    }
     {
         let changes = Arc::clone(&changes);
         drop(health.on_change(Box::new(move |change| {
             locked(&changes).push(change.clone());
         })));
     }
-    let mut named: Vec<String> = Vec::new();
     for entry in &input.entries {
-        name(&mut named, &entry.id);
+        name(&named, &entry.id);
     }
     let mut run: HashSet<String> = HashSet::new();
     let mut tickets: HashMap<String, Ticket> = HashMap::new();
@@ -112,31 +324,61 @@ async fn play(input: HealthRunInput) -> Outcome<HealthRunResult> {
     for step in &input.steps {
         let mut answer =
             HealthRunResultStepsItemAnswer::None(HealthRunResultStepsItemAnswerNone {});
+        let seen_before: Vec<bool> = holds
+            .iter()
+            .map(|held| held.seen.load(Ordering::SeqCst))
+            .collect();
         match step {
+            HealthRunInputStepsItem::Hold(held) => {
+                let hold = Hold::new(held.at);
+                match held.at {
+                    HealthRunInputStepsItemHoldAt::Store => {
+                        locked(&armed.store).push_back(Arc::clone(&hold));
+                    }
+                    HealthRunInputStepsItemHoldAt::Check => {
+                        locked(&armed.check).push_back(Arc::clone(&hold));
+                    }
+                }
+                holds.push(hold);
+            }
+            HealthRunInputStepsItem::Release(held) => {
+                let hold = held
+                    .hold
+                    .checked_sub(1)
+                    .and_then(|at| holds.get(at as usize))
+                    .ok_or_else(|| format!("No hold {}.", held.hold))?;
+                hold.let_go(Go {
+                    state: held.state.clone(),
+                    answer: held.answer.as_ref().map(answer_of),
+                });
+            }
+            HealthRunInputStepsItem::ListenAndCheck(held) => {
+                locked(&starters).insert(held.id.clone());
+            }
             HealthRunInputStepsItem::List(held) => {
                 for entry in &held.entries {
-                    name(&mut named, &entry.id);
+                    name(&named, &entry.id);
                 }
                 list.set(held.entries.clone());
             }
             HealthRunInputStepsItem::Key(held) => {
-                name(&mut named, &held.id);
-                keys.set(&held.id, answer_of(&held.answer));
+                name(&named, &held.id);
+                raw.set(&held.id, answer_of(&held.answer));
             }
             HealthRunInputStepsItem::Check(held) => {
-                name(&mut named, &held.id);
+                name(&named, &held.id);
                 health.check(&held.id);
             }
             HealthRunInputStepsItem::CheckUnread(_) => health.check_unread(),
             HealthRunInputStepsItem::Keys(held) => {
-                name(&mut named, &held.id);
+                name(&named, &held.id);
                 let answered = health.entry_keys().get(&held.id).await;
                 answer = HealthRunResultStepsItemAnswer::Keys(HealthRunResultStepsItemAnswerKeys {
                     answer: shown_of(&answered),
                 });
             }
             HealthRunInputStepsItem::Served(held) => {
-                name(&mut named, &held.route.entry.id);
+                name(&named, &held.route.entry.id);
                 let usage = NormalizedUsage {
                     input: 1.0,
                     output: 1.0,
@@ -154,11 +396,11 @@ async fn play(input: HealthRunInput) -> Outcome<HealthRunResult> {
                 health.served(route_of(&held.route), Some(&usage), keep);
             }
             HealthRunInputStepsItem::Failed(held) => {
-                name(&mut named, &held.route.entry.id);
+                name(&named, &held.route.entry.id);
                 health.failed(route_of(&held.route), &held.failure, held.onward);
             }
             HealthRunInputStepsItem::Billed(held) => {
-                name(&mut named, &held.id);
+                name(&named, &held.id);
                 health.billed(
                     &held.id,
                     &Billing {
@@ -169,14 +411,14 @@ async fn play(input: HealthRunInput) -> Outcome<HealthRunResult> {
                 );
             }
             HealthRunInputStepsItem::Deferred(held) => {
-                name(&mut named, &held.route.entry.id);
+                name(&named, &held.route.entry.id);
                 let keep = (held.keep == Some(true)).then_some(&run);
                 answer = HealthRunResultStepsItemAnswer::Skip(HealthRunResultStepsItemAnswerSkip {
                     skip: health.deferred(route_of(&held.route), keep),
                 });
             }
             HealthRunInputStepsItem::Blocked(held) => {
-                name(&mut named, &held.route.entry.id);
+                name(&named, &held.route.entry.id);
                 let keep = (held.keep == Some(true)).then_some(&run);
                 answer = HealthRunResultStepsItemAnswer::Blocked(
                     HealthRunResultStepsItemAnswerBlocked {
@@ -185,7 +427,7 @@ async fn play(input: HealthRunInput) -> Outcome<HealthRunResult> {
                 );
             }
             HealthRunInputStepsItem::TryAdmit(held) => {
-                name(&mut named, &held.route.entry.id);
+                name(&named, &held.route.entry.id);
                 let ticket = health.try_admit(route_of(&held.route));
                 if let Some(ticket) = &ticket {
                     tickets.insert(held.request.clone(), ticket.clone());
@@ -196,12 +438,11 @@ async fn play(input: HealthRunInput) -> Outcome<HealthRunResult> {
                     });
             }
             HealthRunInputStepsItem::Admit(held) => {
-                name(&mut named, &held.route.entry.id);
+                name(&named, &held.route.entry.id);
                 let route = route_of(&held.route);
                 if let Some(gate) = health.gate_state(route)
-                    && (gate.phase == nyaaai_agentic::health::gate::Phase::Paused
-                        || (gate.phase == nyaaai_agentic::health::gate::Phase::Probing
-                            && gate.probe.is_some()))
+                    && (gate.phase == Phase::Paused
+                        || (gate.phase == Phase::Probing && gate.probe.is_some()))
                 {
                     return Err(format!("The admission of {} would wait.", held.request));
                 }
@@ -232,17 +473,58 @@ async fn play(input: HealthRunInput) -> Outcome<HealthRunResult> {
             }
             HealthRunInputStepsItem::Dispose(_) => health.dispose(),
         }
-        health.idle().await;
+        // A step that starts a check meets the holds armed before it, and leaves them parked.
+        let starts = matches!(
+            step,
+            HealthRunInputStepsItem::List(_)
+                | HealthRunInputStepsItem::Key(_)
+                | HealthRunInputStepsItem::Check(_)
+                | HealthRunInputStepsItem::CheckUnread(_)
+                | HealthRunInputStepsItem::Keys(_)
+        );
+        let mut met = false;
+        if starts {
+            for (at, hold) in holds.iter().enumerate() {
+                if seen_before.get(at).copied().unwrap_or(false) {
+                    continue;
+                }
+                met = true;
+                hold.reached().await;
+            }
+        }
+        if !met && !no_idle(step) {
+            health.idle().await;
+        }
         let mut sorted: Vec<String> = run.iter().cloned().collect();
         sorted.sort_by(|left, right| nyaaai_contract::order::compare_text(left, right));
         steps.push(HealthRunResultStepsItem {
             now_ms: net.wheel.now_ms(),
             answer,
             changes: std::mem::take(&mut *locked(&changes)),
-            entries: named.iter().map(|id| health.state(id)).collect(),
+            entries: locked(&named).iter().map(|id| health.state(id)).collect(),
             run: sorted,
             requests: net.played.requests().len() as i64,
+            parked: holds
+                .iter()
+                .enumerate()
+                .filter(|(_, hold)| hold.parked.load(Ordering::SeqCst))
+                .map(|(at, _)| at as i64 + 1)
+                .collect(),
         });
+    }
+    for hold in &holds {
+        if hold.parked.load(Ordering::SeqCst) {
+            hold.let_go(match hold.at {
+                HealthRunInputStepsItemHoldAt::Check => Go {
+                    state: Some(KeyState::None(KeyStateNone {})),
+                    answer: None,
+                },
+                HealthRunInputStepsItemHoldAt::Store => Go {
+                    state: None,
+                    answer: Some(KeyAnswer::None),
+                },
+            });
+        }
     }
     health.idle().await;
     health.dispose();

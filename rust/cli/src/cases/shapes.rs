@@ -30738,6 +30738,7 @@ pub enum GateRunInputStepsItem {
     Admit(GateRunInputStepsItemAdmit),
     TryAdmit(GateRunInputStepsItemTryAdmit),
     Settle(GateRunInputStepsItemSettle),
+    SettleTicket(GateRunInputStepsItemSettleTicket),
     Cool(GateRunInputStepsItemCool),
     Clear(GateRunInputStepsItemClear),
     Advance(GateRunInputStepsItemAdvance),
@@ -30752,6 +30753,9 @@ impl Shape for GateRunInputStepsItem {
             "admit" => GateRunInputStepsItemAdmit::decode_at(value, at).map(Self::Admit),
             "tryAdmit" => GateRunInputStepsItemTryAdmit::decode_at(value, at).map(Self::TryAdmit),
             "settle" => GateRunInputStepsItemSettle::decode_at(value, at).map(Self::Settle),
+            "settleTicket" => {
+                GateRunInputStepsItemSettleTicket::decode_at(value, at).map(Self::SettleTicket)
+            }
             "cool" => GateRunInputStepsItemCool::decode_at(value, at).map(Self::Cool),
             "clear" => GateRunInputStepsItemClear::decode_at(value, at).map(Self::Clear),
             "advance" => GateRunInputStepsItemAdvance::decode_at(value, at).map(Self::Advance),
@@ -30766,6 +30770,7 @@ impl Shape for GateRunInputStepsItem {
             Self::Admit(held) => held.encode(),
             Self::TryAdmit(held) => held.encode(),
             Self::Settle(held) => held.encode(),
+            Self::SettleTicket(held) => held.encode(),
             Self::Cool(held) => held.encode(),
             Self::Clear(held) => held.encode(),
             Self::Advance(held) => held.encode(),
@@ -30782,6 +30787,7 @@ pub struct GateRunInputStepsItemAdmit {
     pub again: Option<bool>,
     pub abort_after_ms: Option<u64>,
     pub aborted_before: Option<bool>,
+    pub inside: Option<GateRunInputStepsItemAdmitInside>,
 }
 
 impl Shape for GateRunInputStepsItemAdmit {
@@ -30795,12 +30801,19 @@ impl Shape for GateRunInputStepsItemAdmit {
         let again = shape::optional(object, "again", at, shape::flag)?;
         let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::natural)?;
         let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        let inside = shape::optional(
+            object,
+            "inside",
+            at,
+            GateRunInputStepsItemAdmitInside::decode_at,
+        )?;
         Ok(Self {
             request,
             model,
             again,
             abort_after_ms,
             aborted_before,
+            inside,
         })
     }
 
@@ -30817,6 +30830,9 @@ impl Shape for GateRunInputStepsItemAdmit {
         }
         if let Some(held) = &self.aborted_before {
             object.insert("abortedBefore", Value::Bool(*held));
+        }
+        if let Some(held) = &self.inside {
+            object.insert("inside", held.encode());
         }
         Value::Object(object)
     }
@@ -30884,6 +30900,42 @@ impl Shape for GateRunInputStepsItemSettle {
         if let Some(held) = &self.retry_after_ms {
             object.insert("retryAfterMs", Value::Number(*held as f64));
         }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct GateRunInputStepsItemSettleTicket {
+    pub ticket: nyaaai_contract::shapes::health::Ticket,
+    pub outcome: nyaaai_contract::shapes::health::GateOutcome,
+}
+
+impl Shape for GateRunInputStepsItemSettleTicket {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "settleTicket")
+        })?;
+        let ticket = shape::required(
+            object,
+            "ticket",
+            at,
+            nyaaai_contract::shapes::health::Ticket::decode_at,
+        )?;
+        let outcome = shape::required(
+            object,
+            "outcome",
+            at,
+            nyaaai_contract::shapes::health::GateOutcome::decode_at,
+        )?;
+        Ok(Self { ticket, outcome })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("settleTicket"));
+        object.insert("ticket", self.ticket.encode());
+        object.insert("outcome", self.outcome.encode());
         Value::Object(object)
     }
 }
@@ -31007,6 +31059,42 @@ impl Shape for GateRunInputStepsItemDispose {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum GateRunInputStepsItemAdmitInside {
+    Cool,
+    TryAdmit,
+    SettleTrigger,
+}
+
+impl GateRunInputStepsItemAdmitInside {
+    pub const ALL: [Self; 3] = [Self::Cool, Self::TryAdmit, Self::SettleTrigger];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Cool => "cool",
+            Self::TryAdmit => "tryAdmit",
+            Self::SettleTrigger => "settleTrigger",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for GateRunInputStepsItemAdmitInside {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GateRunResult {
     pub steps: Vec<GateRunResultStepsItem>,
@@ -31050,6 +31138,7 @@ pub struct GateRunResultStepsItem {
     pub settled: Option<nyaaai_contract::shapes::health::GateSettled>,
     pub ticket: Option<nyaaai_contract::shapes::health::Ticket>,
     pub resolved: Vec<GateRunResultStepsItemResolvedItem>,
+    pub inside: Vec<GateRunResultStepsItemInsideItem>,
     pub waits: Vec<GateRunResultStepsItemWaitsItem>,
     pub told: Vec<String>,
     pub gates: Vec<GateRunResultStepsItemGatesItem>,
@@ -31077,6 +31166,9 @@ impl Shape for GateRunResultStepsItem {
         let resolved = shape::required(object, "resolved", at, |value, at| {
             shape::list(value, at, GateRunResultStepsItemResolvedItem::decode_at)
         })?;
+        let inside = shape::required(object, "inside", at, |value, at| {
+            shape::list(value, at, GateRunResultStepsItemInsideItem::decode_at)
+        })?;
         let waits = shape::required(object, "waits", at, |value, at| {
             shape::list(value, at, GateRunResultStepsItemWaitsItem::decode_at)
         })?;
@@ -31094,6 +31186,7 @@ impl Shape for GateRunResultStepsItem {
             settled,
             ticket,
             resolved,
+            inside,
             waits,
             told,
             gates,
@@ -31119,6 +31212,10 @@ impl Shape for GateRunResultStepsItem {
         object.insert(
             "resolved",
             Value::Array(self.resolved.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "inside",
+            Value::Array(self.inside.iter().map(|held| held.encode()).collect()),
         );
         object.insert(
             "waits",
@@ -31178,6 +31275,33 @@ impl Shape for GateRunResultStepsItemResolvedItem {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+pub struct GateRunResultStepsItemInsideItem {
+    pub request: String,
+    pub gate: Option<GateRunResultStepsItemInsideItemGate>,
+}
+
+impl Shape for GateRunResultStepsItemInsideItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let request = shape::required(object, "request", at, shape::text)?;
+        let gate = shape::required(object, "gate", at, |value, at| {
+            shape::nullable(value, at, GateRunResultStepsItemInsideItemGate::decode_at)
+        })?;
+        Ok(Self { request, gate })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("request", Value::from(self.request.as_str()));
+        object.insert(
+            "gate",
+            self.gate.as_ref().map_or(Value::Null, |held| held.encode()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct GateRunResultStepsItemWaitsItem {
     pub request: String,
     pub waiting: nyaaai_contract::shapes::health::GateWaiting,
@@ -31227,6 +31351,63 @@ impl Shape for GateRunResultStepsItemGatesItem {
             "gate",
             self.gate.as_ref().map_or(Value::Null, |held| held.encode()),
         );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct GateRunResultStepsItemInsideItemGate {
+    pub phase: GateRunResultStepsItemInsideItemGatePhase,
+    pub generation: i64,
+    pub pauses: i64,
+    pub resume_at: f64,
+    pub probe: Option<nyaaai_contract::shapes::health::Ticket>,
+    pub queued: i64,
+}
+
+impl Shape for GateRunResultStepsItemInsideItemGate {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let phase = shape::required(
+            object,
+            "phase",
+            at,
+            GateRunResultStepsItemInsideItemGatePhase::decode_at,
+        )?;
+        let generation = shape::required(object, "generation", at, shape::integer)?;
+        let pauses = shape::required(object, "pauses", at, shape::integer)?;
+        let resume_at = shape::required(object, "resumeAt", at, shape::number)?;
+        let probe = shape::required(object, "probe", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                nyaaai_contract::shapes::health::Ticket::decode_at,
+            )
+        })?;
+        let queued = shape::required(object, "queued", at, shape::integer)?;
+        Ok(Self {
+            phase,
+            generation,
+            pauses,
+            resume_at,
+            probe,
+            queued,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("phase", self.phase.encode());
+        object.insert("generation", Value::Number(self.generation as f64));
+        object.insert("pauses", Value::Number(self.pauses as f64));
+        object.insert("resumeAt", Value::Number(self.resume_at));
+        object.insert(
+            "probe",
+            self.probe
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert("queued", Value::Number(self.queued as f64));
         Value::Object(object)
     }
 }
@@ -31289,6 +31470,42 @@ impl Shape for GateRunResultStepsItemGatesItemGate {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum GateRunResultStepsItemInsideItemGatePhase {
+    Open,
+    Paused,
+    Probing,
+}
+
+impl GateRunResultStepsItemInsideItemGatePhase {
+    pub const ALL: [Self; 3] = [Self::Open, Self::Paused, Self::Probing];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Open => "open",
+            Self::Paused => "paused",
+            Self::Probing => "probing",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for GateRunResultStepsItemInsideItemGatePhase {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum GateRunResultStepsItemGatesItemGatePhase {
     Open,
     Paused,
@@ -31327,6 +31544,7 @@ impl Shape for GateRunResultStepsItemGatesItemGatePhase {
 #[derive(Debug, Clone, PartialEq)]
 pub struct KeyReaderRunInput {
     pub start_ms: i64,
+    pub checks: Option<KeyReaderRunInputChecks>,
     pub steps: Vec<KeyReaderRunInputStepsItem>,
 }
 
@@ -31334,6 +31552,7 @@ impl Shape for KeyReaderRunInput {
     fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
         let object = shape::object(value, at)?;
         let start_ms = shape::required(object, "startMs", at, shape::integer)?;
+        let checks = shape::optional(object, "checks", at, KeyReaderRunInputChecks::decode_at)?;
         let steps = shape::required(object, "steps", at, |value, at| {
             shape::list_within(
                 value,
@@ -31343,17 +31562,60 @@ impl Shape for KeyReaderRunInput {
                 KeyReaderRunInputStepsItem::decode_at,
             )
         })?;
-        Ok(Self { start_ms, steps })
+        Ok(Self {
+            start_ms,
+            checks,
+            steps,
+        })
     }
 
     fn encode(&self) -> Value {
         let mut object = Object::new();
         object.insert("startMs", Value::Number(self.start_ms as f64));
+        if let Some(held) = &self.checks {
+            object.insert("checks", held.encode());
+        }
         object.insert(
             "steps",
             Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
         );
         Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum KeyReaderRunInputChecks {
+    EndOnSignal,
+    IgnoreSignal,
+    ThrowAtOnce,
+}
+
+impl KeyReaderRunInputChecks {
+    pub const ALL: [Self; 3] = [Self::EndOnSignal, Self::IgnoreSignal, Self::ThrowAtOnce];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::EndOnSignal => "endOnSignal",
+            Self::IgnoreSignal => "ignoreSignal",
+            Self::ThrowAtOnce => "throwAtOnce",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for KeyReaderRunInputChecks {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
     }
 }
 
@@ -31881,6 +32143,9 @@ impl Shape for HealthRunInput {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum HealthRunInputStepsItem {
+    Hold(HealthRunInputStepsItemHold),
+    Release(HealthRunInputStepsItemRelease),
+    ListenAndCheck(HealthRunInputStepsItemListenAndCheck),
     List(HealthRunInputStepsItemList),
     Key(HealthRunInputStepsItemKey),
     Check(HealthRunInputStepsItemCheck),
@@ -31902,6 +32167,10 @@ impl Shape for HealthRunInputStepsItem {
     fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
         let object = shape::object(value, at)?;
         match shape::tag(object, "kind", at)? {
+            "hold" => HealthRunInputStepsItemHold::decode_at(value, at).map(Self::Hold),
+            "release" => HealthRunInputStepsItemRelease::decode_at(value, at).map(Self::Release),
+            "listenAndCheck" => HealthRunInputStepsItemListenAndCheck::decode_at(value, at)
+                .map(Self::ListenAndCheck),
             "list" => HealthRunInputStepsItemList::decode_at(value, at).map(Self::List),
             "key" => HealthRunInputStepsItemKey::decode_at(value, at).map(Self::Key),
             "check" => HealthRunInputStepsItemCheck::decode_at(value, at).map(Self::Check),
@@ -31925,6 +32194,9 @@ impl Shape for HealthRunInputStepsItem {
 
     fn encode(&self) -> Value {
         match self {
+            Self::Hold(held) => held.encode(),
+            Self::Release(held) => held.encode(),
+            Self::ListenAndCheck(held) => held.encode(),
             Self::List(held) => held.encode(),
             Self::Key(held) => held.encode(),
             Self::Check(held) => held.encode(),
@@ -31945,8 +32217,107 @@ impl Shape for HealthRunInputStepsItem {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+pub struct HealthRunInputStepsItemHold {
+    pub at: HealthRunInputStepsItemHoldAt,
+}
+
+impl Shape for HealthRunInputStepsItemHold {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "hold")
+        })?;
+        let at_field = shape::required(object, "at", at, HealthRunInputStepsItemHoldAt::decode_at)?;
+        Ok(Self { at: at_field })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("hold"));
+        object.insert("at", self.at.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HealthRunInputStepsItemRelease {
+    pub hold: u64,
+    pub state: Option<nyaaai_contract::shapes::provider::KeyState>,
+    pub answer: Option<HealthKeyAnswer>,
+    pub idle: Option<()>,
+}
+
+impl Shape for HealthRunInputStepsItemRelease {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "release")
+        })?;
+        let hold = shape::required(object, "hold", at, |value, at| {
+            shape::natural(value, at).and_then(|held| shape::at_least(held, 1, at))
+        })?;
+        let state = shape::optional(
+            object,
+            "state",
+            at,
+            nyaaai_contract::shapes::provider::KeyState::decode_at,
+        )?;
+        let answer = shape::optional(object, "answer", at, HealthKeyAnswer::decode_at)?;
+        let idle = shape::optional(object, "idle", at, |value, at| {
+            shape::is_flag(value, at, false)
+        })?;
+        Ok(Self {
+            hold,
+            state,
+            answer,
+            idle,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("release"));
+        object.insert("hold", Value::Number(self.hold as f64));
+        if let Some(held) = &self.state {
+            object.insert("state", held.encode());
+        }
+        if let Some(held) = &self.answer {
+            object.insert("answer", held.encode());
+        }
+        if self.idle.is_some() {
+            object.insert("idle", Value::Bool(false));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HealthRunInputStepsItemListenAndCheck {
+    pub id: String,
+}
+
+impl Shape for HealthRunInputStepsItemListenAndCheck {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "listenAndCheck")
+        })?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        Ok(Self { id })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("listenAndCheck"));
+        object.insert("id", Value::from(self.id.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct HealthRunInputStepsItemList {
     pub entries: Vec<nyaaai_contract::shapes::provider::ProviderEntry>,
+    pub idle: Option<()>,
 }
 
 impl Shape for HealthRunInputStepsItemList {
@@ -31962,7 +32333,10 @@ impl Shape for HealthRunInputStepsItemList {
                 nyaaai_contract::shapes::provider::ProviderEntry::decode_at,
             )
         })?;
-        Ok(Self { entries })
+        let idle = shape::optional(object, "idle", at, |value, at| {
+            shape::is_flag(value, at, false)
+        })?;
+        Ok(Self { entries, idle })
     }
 
     fn encode(&self) -> Value {
@@ -31972,6 +32346,9 @@ impl Shape for HealthRunInputStepsItemList {
             "entries",
             Value::Array(self.entries.iter().map(|held| held.encode()).collect()),
         );
+        if self.idle.is_some() {
+            object.insert("idle", Value::Bool(false));
+        }
         Value::Object(object)
     }
 }
@@ -31980,6 +32357,7 @@ impl Shape for HealthRunInputStepsItemList {
 pub struct HealthRunInputStepsItemKey {
     pub id: String,
     pub answer: HealthKeyAnswer,
+    pub idle: Option<()>,
 }
 
 impl Shape for HealthRunInputStepsItemKey {
@@ -31990,7 +32368,10 @@ impl Shape for HealthRunInputStepsItemKey {
         })?;
         let id = shape::required(object, "id", at, shape::text)?;
         let answer = shape::required(object, "answer", at, HealthKeyAnswer::decode_at)?;
-        Ok(Self { id, answer })
+        let idle = shape::optional(object, "idle", at, |value, at| {
+            shape::is_flag(value, at, false)
+        })?;
+        Ok(Self { id, answer, idle })
     }
 
     fn encode(&self) -> Value {
@@ -31998,6 +32379,9 @@ impl Shape for HealthRunInputStepsItemKey {
         object.insert("kind", Value::from("key"));
         object.insert("id", Value::from(self.id.as_str()));
         object.insert("answer", self.answer.encode());
+        if self.idle.is_some() {
+            object.insert("idle", Value::Bool(false));
+        }
         Value::Object(object)
     }
 }
@@ -32005,6 +32389,7 @@ impl Shape for HealthRunInputStepsItemKey {
 #[derive(Debug, Clone, PartialEq)]
 pub struct HealthRunInputStepsItemCheck {
     pub id: String,
+    pub idle: Option<()>,
 }
 
 impl Shape for HealthRunInputStepsItemCheck {
@@ -32014,13 +32399,19 @@ impl Shape for HealthRunInputStepsItemCheck {
             shape::is_text(value, at, "check")
         })?;
         let id = shape::required(object, "id", at, shape::text)?;
-        Ok(Self { id })
+        let idle = shape::optional(object, "idle", at, |value, at| {
+            shape::is_flag(value, at, false)
+        })?;
+        Ok(Self { id, idle })
     }
 
     fn encode(&self) -> Value {
         let mut object = Object::new();
         object.insert("kind", Value::from("check"));
         object.insert("id", Value::from(self.id.as_str()));
+        if self.idle.is_some() {
+            object.insert("idle", Value::Bool(false));
+        }
         Value::Object(object)
     }
 }
@@ -32324,6 +32715,7 @@ impl Shape for HealthRunInputStepsItemSettle {
 #[derive(Debug, Clone, PartialEq)]
 pub struct HealthRunInputStepsItemAdvance {
     pub ms: u64,
+    pub idle: Option<()>,
 }
 
 impl Shape for HealthRunInputStepsItemAdvance {
@@ -32333,13 +32725,19 @@ impl Shape for HealthRunInputStepsItemAdvance {
             shape::is_text(value, at, "advance")
         })?;
         let ms = shape::required(object, "ms", at, shape::natural)?;
-        Ok(Self { ms })
+        let idle = shape::optional(object, "idle", at, |value, at| {
+            shape::is_flag(value, at, false)
+        })?;
+        Ok(Self { ms, idle })
     }
 
     fn encode(&self) -> Value {
         let mut object = Object::new();
         object.insert("kind", Value::from("advance"));
         object.insert("ms", Value::Number(self.ms as f64));
+        if self.idle.is_some() {
+            object.insert("idle", Value::Bool(false));
+        }
         Value::Object(object)
     }
 }
@@ -32360,6 +32758,40 @@ impl Shape for HealthRunInputStepsItemDispose {
         let mut object = Object::new();
         object.insert("kind", Value::from("dispose"));
         Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum HealthRunInputStepsItemHoldAt {
+    Store,
+    Check,
+}
+
+impl HealthRunInputStepsItemHoldAt {
+    pub const ALL: [Self; 2] = [Self::Store, Self::Check];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Store => "store",
+            Self::Check => "check",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for HealthRunInputStepsItemHoldAt {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
     }
 }
 
@@ -32458,6 +32890,7 @@ pub struct HealthRunResultStepsItem {
     pub entries: Vec<nyaaai_contract::shapes::health::EntryHealth>,
     pub run: Vec<String>,
     pub requests: i64,
+    pub parked: Vec<i64>,
 }
 
 impl Shape for HealthRunResultStepsItem {
@@ -32488,6 +32921,9 @@ impl Shape for HealthRunResultStepsItem {
             shape::list(value, at, shape::text)
         })?;
         let requests = shape::required(object, "requests", at, shape::integer)?;
+        let parked = shape::required(object, "parked", at, |value, at| {
+            shape::list(value, at, shape::integer)
+        })?;
         Ok(Self {
             now_ms,
             answer,
@@ -32495,6 +32931,7 @@ impl Shape for HealthRunResultStepsItem {
             entries,
             run,
             requests,
+            parked,
         })
     }
 
@@ -32520,6 +32957,15 @@ impl Shape for HealthRunResultStepsItem {
             ),
         );
         object.insert("requests", Value::Number(self.requests as f64));
+        object.insert(
+            "parked",
+            Value::Array(
+                self.parked
+                    .iter()
+                    .map(|held| Value::Number(*held as f64))
+                    .collect(),
+            ),
+        );
         Value::Object(object)
     }
 }

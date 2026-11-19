@@ -25,6 +25,8 @@ const settle = (request: string, outcome: string, retryAfterMs?: number): Step =
 	outcome,
 	...(retryAfterMs === undefined ? {} : { retryAfterMs }),
 });
+const settleTicket = (ticket: Step, outcome: string): Step => ({ kind: "settleTicket", ticket, outcome });
+const TICKET = (gate: string, serial = 1): Step => ({ gate, model: LUNA, generation: 0, probe: false, serial });
 const cool = (model = LUNA, retryAfterMs?: number): Step => ({
 	kind: "cool",
 	model,
@@ -425,6 +427,58 @@ export const gateCases: CaseSource[] = [
 	run("dispose-stops-the-waiters-and-cancels-the-timers", [...overloaded(), admit("w1"), admit("w2"), dispose()]),
 	run("dispose-with-no-gate-open", [dispose()]),
 	run("dispose-with-a-probe-out", [...overloaded(), admit("p"), advance(MINUTE), dispose()]),
+
+	// A ticket of another gate, or from before a dispose.
+	run("a-ticket-of-another-gate-does-nothing", [
+		admit("a"),
+		settleTicket(TICKET("elsewhere"), "overloaded"),
+		admit("b"),
+		settleTicket(TICKET("elsewhere", 7), "ok"),
+	]),
+	run("a-settle-of-another-gates-ticket-creates-no-gate", [settleTicket(TICKET("elsewhere"), "overloaded")]),
+	run("a-settle-of-this-gates-ticket-for-an-unknown-model-creates-no-gate", [
+		settleTicket(TICKET("gate-1"), "overloaded"),
+	]),
+	run("a-ticket-from-before-a-dispose-does-nothing-to-the-new-state", [
+		admit("a"),
+		dispose(),
+		settleTicket(TICKET("gate-1"), "overloaded"),
+	]),
+
+	// After a dispose.
+	run("a-disposed-gate-admits-nothing", [
+		...overloaded(),
+		admit("w"),
+		dispose(),
+		admit("late"),
+		tryAdmit("try"),
+		cool(),
+		advance(MINUTE),
+	]),
+	run("a-disposed-gate-keeps-no-timer", [
+		admit("a"),
+		dispose(),
+		cool(),
+		cool(FLASH, MINUTE),
+		clear(""),
+		advance(MINUTE),
+	]),
+
+	// Callbacks run after the change.
+	run("a-waiters-callback-sees-a-whole-gate", [
+		...overloaded(),
+		admit("w1", LUNA, { inside: "tryAdmit" }),
+		admit("w2", LUNA, { inside: "cool" }),
+		advance(MINUTE),
+		settle("w1", "overloaded"),
+	]),
+	run("a-waiters-callback-that-settles-meets-a-consistent-gate", [
+		...overloaded(),
+		admit("w1", LUNA, { inside: "settleTrigger" }),
+		admit("w2", LUNA, { inside: "settleTrigger" }),
+		advance(MINUTE),
+		settle("w1", "failed"),
+	]),
 
 	// What a waiting request is told.
 	run("a-waiter-is-told-of-each-pause", [

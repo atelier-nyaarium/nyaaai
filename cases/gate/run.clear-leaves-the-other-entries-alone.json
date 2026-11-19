@@ -63,6 +63,7 @@
 						}
 					}
 				],
+				"inside": [],
 				"waits": [],
 				"told": [],
 				"gates": [
@@ -85,6 +86,7 @@
 				"settled": "again",
 				"ticket": null,
 				"resolved": [],
+				"inside": [],
 				"waits": [],
 				"told": [
 					"one\nlab/model-a"
@@ -125,6 +127,7 @@
 						}
 					}
 				],
+				"inside": [],
 				"waits": [],
 				"told": [],
 				"gates": [
@@ -160,6 +163,7 @@
 				"settled": "again",
 				"ticket": null,
 				"resolved": [],
+				"inside": [],
 				"waits": [],
 				"told": [
 					"two\nlab/model-a"
@@ -198,6 +202,19 @@
 				"settled": null,
 				"ticket": null,
 				"resolved": [],
+				"inside": [
+					{
+						"request": "wa",
+						"gate": {
+							"phase": "paused",
+							"generation": 0,
+							"pauses": 1,
+							"resumeAt": 1060000,
+							"probe": null,
+							"queued": 1
+						}
+					}
+				],
 				"waits": [
 					{
 						"request": "wa",
@@ -244,6 +261,19 @@
 				"settled": null,
 				"ticket": null,
 				"resolved": [],
+				"inside": [
+					{
+						"request": "wb",
+						"gate": {
+							"phase": "paused",
+							"generation": 0,
+							"pauses": 1,
+							"resumeAt": 1060000,
+							"probe": null,
+							"queued": 1
+						}
+					}
+				],
 				"waits": [
 					{
 						"request": "wb",
@@ -304,6 +334,7 @@
 						}
 					}
 				],
+				"inside": [],
 				"waits": [],
 				"told": [
 					"one\nlab/model-a"

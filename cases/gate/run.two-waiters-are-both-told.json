@@ -58,6 +58,7 @@
 						}
 					}
 				],
+				"inside": [],
 				"waits": [],
 				"told": [],
 				"gates": [
@@ -80,6 +81,7 @@
 				"settled": "again",
 				"ticket": null,
 				"resolved": [],
+				"inside": [],
 				"waits": [],
 				"told": [
 					"lab/model-a"
@@ -106,6 +108,19 @@
 				"settled": null,
 				"ticket": null,
 				"resolved": [],
+				"inside": [
+					{
+						"request": "w1",
+						"gate": {
+							"phase": "paused",
+							"generation": 0,
+							"pauses": 1,
+							"resumeAt": 1060000,
+							"probe": null,
+							"queued": 1
+						}
+					}
+				],
 				"waits": [
 					{
 						"request": "w1",
@@ -140,6 +155,19 @@
 				"settled": null,
 				"ticket": null,
 				"resolved": [],
+				"inside": [
+					{
+						"request": "w2",
+						"gate": {
+							"phase": "paused",
+							"generation": 0,
+							"pauses": 1,
+							"resumeAt": 1060000,
+							"probe": null,
+							"queued": 2
+						}
+					}
+				],
 				"waits": [
 					{
 						"request": "w2",
@@ -188,6 +216,25 @@
 						}
 					}
 				],
+				"inside": [
+					{
+						"request": "w2",
+						"gate": {
+							"phase": "probing",
+							"generation": 0,
+							"pauses": 1,
+							"resumeAt": 1060000,
+							"probe": {
+								"gate": "gate-1",
+								"model": "lab/model-a",
+								"generation": 0,
+								"probe": true,
+								"serial": 2
+							},
+							"queued": 1
+						}
+					}
+				],
 				"waits": [
 					{
 						"request": "w2",
@@ -228,6 +275,19 @@
 				"settled": "again",
 				"ticket": null,
 				"resolved": [],
+				"inside": [
+					{
+						"request": "w2",
+						"gate": {
+							"phase": "paused",
+							"generation": 0,
+							"pauses": 2,
+							"resumeAt": 1120000,
+							"probe": null,
+							"queued": 1
+						}
+					}
+				],
 				"waits": [
 					{
 						"request": "w2",

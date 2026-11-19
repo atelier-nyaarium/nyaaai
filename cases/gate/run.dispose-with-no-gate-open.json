@@ -18,6 +18,7 @@
 				"settled": null,
 				"ticket": null,
 				"resolved": [],
+				"inside": [],
 				"waits": [],
 				"told": [],
 				"gates": [],

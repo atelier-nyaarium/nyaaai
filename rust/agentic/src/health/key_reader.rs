@@ -1,6 +1,10 @@
 //! One entry's key status; a newer read drops the last.
 
+use std::future::Future;
+use std::panic::{AssertUnwindSafe, catch_unwind};
+use std::pin::Pin;
 use std::sync::{Arc, Mutex, MutexGuard};
+use std::task::{Context, Poll};
 
 use nyaaai_contract::cancel::CancelToken;
 use nyaaai_contract::future::BoxFuture;
@@ -15,9 +19,10 @@ pub const KEY_CHECK_MS: i64 = 30_000;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Failed;
 
-/// One check: it ends with the deadline's token.
-pub type Check =
-    Arc<dyn Fn(Arc<Deadline>) -> BoxFuture<'static, Result<KeyState, Failed>> + Send + Sync>;
+/// One check: it ends with the deadline's token. `Ok(None)` is a check that ended without effect.
+pub type Check = Arc<
+    dyn Fn(Arc<Deadline>) -> BoxFuture<'static, Result<Option<KeyState>, Failed>> + Send + Sync,
+>;
 
 /// Told each state the reader shows.
 pub type Shown = Arc<dyn Fn(KeyState) + Send + Sync>;
@@ -34,6 +39,21 @@ fn locked<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
     mutex
         .lock()
         .unwrap_or_else(|poisoned| poisoned.into_inner())
+}
+
+/// A future whose panic ends it with none.
+struct Caught<F>(Pin<Box<F>>);
+
+impl<F: Future> Future for Caught<F> {
+    type Output = Option<F::Output>;
+
+    fn poll(mut self: Pin<&mut Self>, context: &mut Context<'_>) -> Poll<Self::Output> {
+        match catch_unwind(AssertUnwindSafe(|| self.0.as_mut().poll(context))) {
+            Ok(Poll::Ready(held)) => Poll::Ready(Some(held)),
+            Ok(Poll::Pending) => Poll::Pending,
+            Err(_) => Poll::Ready(None),
+        }
+    }
 }
 
 /// Ends a check's count when its task ends, by a panic too.
@@ -77,7 +97,15 @@ impl KeyReader {
         }
         (self.inner.shown)(KeyState::Checking(KeyStateChecking {}));
         let limit = Arc::new(deadline(&*self.inner.scheduler, KEY_CHECK_MS, &abort));
-        let work = (self.inner.check)(Arc::clone(&limit));
+        // A check that throws at once is a failed check and leaves no timer.
+        let Ok(work) = catch_unwind(AssertUnwindSafe(|| (self.inner.check)(Arc::clone(&limit))))
+        else {
+            if !abort.is_cancelled() {
+                (self.inner.shown)(KeyState::Unreachable(KeyStateUnreachable {}));
+            }
+            limit.clear();
+            return Box::pin(async {});
+        };
         self.inner.running.send_modify(|count| *count += 1);
         let count = Count(Arc::clone(&self.inner));
         let (done, ended) = oneshot::channel::<()>();
@@ -85,12 +113,16 @@ impl KeyReader {
         let inner = Arc::clone(&self.inner);
         let finish = async move {
             let _count = count;
-            let result = work.await;
+            // Raced against the deadline: a miss shows `unreachable`, a later answer is dropped.
+            let raced = limit.token().run_until(Caught(Box::pin(work))).await;
             if !abort.is_cancelled() {
-                (inner.shown)(match result {
-                    Ok(state) => state,
-                    Err(Failed) => KeyState::Unreachable(KeyStateUnreachable {}),
-                });
+                match raced.flatten() {
+                    Some(Ok(Some(state))) => (inner.shown)(state),
+                    Some(Ok(None)) => {}
+                    Some(Err(Failed)) | None => {
+                        (inner.shown)(KeyState::Unreachable(KeyStateUnreachable {}));
+                    }
+                }
             }
             limit.clear();
             drop(_count);
@@ -145,7 +177,7 @@ mod tests {
         let shown: Arc<Mutex<Vec<KeyState>>> = Arc::default();
         let reader = KeyReader::new(
             Arc::new(FakeScheduler::new(Arc::clone(&wheel))),
-            Arc::new(|_| Box::pin(async { Ok(KeyState::Checking(KeyStateChecking {})) })),
+            Arc::new(|_| Box::pin(async { Ok(Some(KeyState::Checking(KeyStateChecking {}))) })),
             {
                 let shown = Arc::clone(&shown);
                 Arc::new(move |state| locked(&shown).push(state))

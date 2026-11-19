@@ -3,6 +3,7 @@
 use std::collections::VecDeque;
 use std::future::Future;
 use std::panic::{AssertUnwindSafe, catch_unwind};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, MutexGuard, Weak};
 
 use nyaaai_contract::cancel::{CancelToken, Unsubscribe};
@@ -20,6 +21,9 @@ use tokio::sync::oneshot;
 pub type WaitFn = Arc<dyn Fn(GateWaiting) + Send + Sync>;
 
 type Listener = Arc<dyn Fn(&str) + Send + Sync>;
+
+/// Told a ticket as it is made.
+pub type TicketFn = Arc<dyn Fn(&Ticket) + Send + Sync>;
 
 const PAUSE_MS: i64 = 60_000;
 
@@ -52,6 +56,8 @@ pub struct GateDeps {
     pub scheduler: Arc<dyn Scheduler>,
     pub pause_ms: Option<i64>,
     pub max_pauses: Option<u64>,
+    /// Told each ticket in the gate call that makes it, once its holder has it.
+    pub on_ticket: Option<TicketFn>,
 }
 
 struct Waiter {
@@ -79,15 +85,23 @@ struct State {
     models: Vec<Model>,
     serial: u64,
     epoch: u64,
+    disposed: bool,
 }
 
 /// What an operation did, done in order once no lock is held.
 enum Effect {
-    Admit(oneshot::Sender<Admission>, Admission),
+    /// An answer to a waiter; a ticket in it is told once the waiter has it.
+    Hand(oneshot::Sender<Admission>, Admission),
+    /// A ticket an admission returns at once.
+    Made(Ticket),
     Wait(WaitFn, GateWaiting),
     Tell(String),
     Cancel(Scheduled),
-    Schedule { model: String, epoch: u64, ms: i64 },
+    Schedule {
+        model: String,
+        epoch: u64,
+        ms: i64,
+    },
 }
 
 struct Core {
@@ -95,7 +109,11 @@ struct Core {
     id: String,
     pause_ms: i64,
     max_pauses: u64,
+    on_ticket: Option<TicketFn>,
     state: Mutex<State>,
+    /// Effects made and not yet done, oldest first.
+    outbox: Mutex<VecDeque<Effect>>,
+    flushing: AtomicBool,
     listeners: Mutex<Vec<(u64, Listener)>>,
     next_listener: Mutex<u64>,
 }
@@ -163,6 +181,15 @@ impl Machine<'_> {
         Admission::Go(AdmissionGo { ticket })
     }
 
+    /// A ticket the caller of this call gets at once.
+    fn go_now(&mut self, at: usize, probe: bool) -> Admission {
+        let admission = self.go(at, probe);
+        if let Admission::Go(held) = &admission {
+            self.effects.push(Effect::Made(held.ticket.clone()));
+        }
+        admission
+    }
+
     fn wait_of(&self, at: usize) -> GateWaiting {
         let model = &self.state.models[at];
         GateWaiting {
@@ -190,11 +217,18 @@ impl Machine<'_> {
         model.pauses = 0;
         let queue = std::mem::take(&mut model.queue);
         for waiter in queue {
+            if waiter.cancel.is_cancelled() {
+                self.effects.push(Effect::Hand(waiter.send, stopped()));
+                continue;
+            }
+            if waiter.send.is_closed() {
+                continue;
+            }
             let admission = match release {
                 Release::Go => self.go(at, false),
                 Release::GaveUp => Admission::GaveUp(AdmissionGaveUp {}),
             };
-            self.effects.push(Effect::Admit(waiter.send, admission));
+            self.effects.push(Effect::Hand(waiter.send, admission));
         }
     }
 
@@ -219,9 +253,18 @@ impl Machine<'_> {
 
     /// Oldest waiter probes first.
     fn next_probe(&mut self, at: usize) {
-        if let Some(waiter) = self.state.models[at].queue.pop_front() {
+        while let Some(waiter) = self.state.models[at].queue.pop_front() {
+            // A waiter is looked at again as it is chosen: one gone is passed over.
+            if waiter.cancel.is_cancelled() {
+                self.effects.push(Effect::Hand(waiter.send, stopped()));
+                continue;
+            }
+            if waiter.send.is_closed() {
+                continue;
+            }
             let admission = self.go(at, true);
-            self.effects.push(Effect::Admit(waiter.send, admission));
+            self.effects.push(Effect::Hand(waiter.send, admission));
+            break;
         }
         self.notify(at);
     }
@@ -255,20 +298,19 @@ impl Machine<'_> {
     }
 }
 
-/// Removes the waiters whose caller cancelled, as stopped.
+/// Removes the waiters whose caller cancelled, as stopped, and those whose caller is gone.
 fn sweep(state: &mut State, effects: &mut Vec<Effect>) {
     for model in &mut state.models {
-        if !model
-            .queue
-            .iter()
-            .any(|waiter| waiter.cancel.is_cancelled())
-        {
+        let gone = |waiter: &Waiter| waiter.cancel.is_cancelled() || waiter.send.is_closed();
+        if !model.queue.iter().any(gone) {
             continue;
         }
         let queue = std::mem::take(&mut model.queue);
         for waiter in queue {
             if waiter.cancel.is_cancelled() {
-                effects.push(Effect::Admit(waiter.send, stopped()));
+                effects.push(Effect::Hand(waiter.send, stopped()));
+            } else if waiter.send.is_closed() {
+                continue;
             } else {
                 model.queue.push_back(waiter);
             }
@@ -277,12 +319,12 @@ fn sweep(state: &mut State, effects: &mut Vec<Effect>) {
 }
 
 impl Core {
-    /// Runs one operation, then its effects in order.
+    /// Runs one operation, then the effects it made, in order; an effect's own calls queue behind.
     fn act<T>(self: &Arc<Self>, run: impl FnOnce(&mut Machine<'_>) -> T) -> T {
-        let now = self.scheduler.now_ms();
         let mut effects = Vec::new();
         let result = {
             let mut state = locked(&self.state);
+            let now = self.scheduler.now_ms();
             sweep(&mut state, &mut effects);
             run(&mut Machine {
                 core: self,
@@ -291,8 +333,28 @@ impl Core {
                 now,
             })
         };
-        self.perform(effects);
+        locked(&self.outbox).extend(effects);
+        self.flush();
         result
+    }
+
+    /// Does the effects owed, one flusher at a time.
+    fn flush(self: &Arc<Self>) {
+        loop {
+            if self.flushing.swap(true, Ordering::AcqRel) {
+                return;
+            }
+            loop {
+                let Some(effect) = locked(&self.outbox).pop_front() else {
+                    break;
+                };
+                self.perform(effect);
+            }
+            self.flushing.store(false, Ordering::Release);
+            if locked(&self.outbox).is_empty() {
+                return;
+            }
+        }
     }
 
     /// A change of one model, told when it turned ready or not ready.
@@ -310,41 +372,119 @@ impl Core {
         result
     }
 
-    fn perform(self: &Arc<Self>, effects: Vec<Effect>) {
-        for effect in effects {
-            match effect {
-                Effect::Admit(send, admission) => {
-                    let _ = send.send(admission);
-                }
-                Effect::Wait(on_wait, waiting) => on_wait(waiting),
-                Effect::Tell(model) => self.tell(&model),
-                Effect::Cancel(timer) => timer.cancel(),
-                Effect::Schedule { model, epoch, ms } => {
-                    let weak = Arc::downgrade(self);
-                    let name = model.clone();
-                    let timer = self.scheduler.schedule(
-                        ms,
-                        Box::new(move || {
-                            if let Some(core) = weak.upgrade() {
-                                core.fire(&name, epoch);
-                            }
-                        }),
-                    );
-                    let mut state = locked(&self.state);
-                    match state
-                        .models
-                        .iter_mut()
-                        .find(|held| held.name == model && held.epoch == epoch)
-                    {
-                        Some(held) if held.timer.is_none() => held.timer = Some(timer),
-                        _ => {
-                            drop(state);
-                            timer.cancel();
+    fn perform(self: &Arc<Self>, effect: Effect) {
+        match effect {
+            Effect::Hand(send, admission) => {
+                let ticket = match &admission {
+                    Admission::Go(held) => Some(held.ticket.clone()),
+                    _ => None,
+                };
+                match send.send(admission) {
+                    Ok(()) => {
+                        if let Some(ticket) = &ticket {
+                            self.made(ticket);
+                        }
+                    }
+                    // The caller is gone: the turn passes on as if it had cancelled.
+                    Err(_) => {
+                        if let Some(ticket) = &ticket {
+                            self.settle(ticket, GateOutcome::Cancelled, None);
                         }
                     }
                 }
             }
+            Effect::Made(ticket) => self.made(&ticket),
+            Effect::Wait(on_wait, waiting) => {
+                // A callback cannot change the gate.
+                let _ = catch_unwind(AssertUnwindSafe(|| on_wait(waiting)));
+            }
+            Effect::Tell(model) => self.tell(&model),
+            Effect::Cancel(timer) => timer.cancel(),
+            Effect::Schedule { model, epoch, ms } => {
+                let weak = Arc::downgrade(self);
+                let name = model.clone();
+                let timer = self.scheduler.schedule(
+                    ms,
+                    Box::new(move || {
+                        if let Some(core) = weak.upgrade() {
+                            core.fire(&name, epoch);
+                        }
+                    }),
+                );
+                let mut state = locked(&self.state);
+                match state
+                    .models
+                    .iter_mut()
+                    .find(|held| held.name == model && held.epoch == epoch)
+                {
+                    Some(held) if held.timer.is_none() => held.timer = Some(timer),
+                    _ => {
+                        drop(state);
+                        timer.cancel();
+                    }
+                }
+            }
         }
+    }
+
+    fn made(&self, ticket: &Ticket) {
+        if let Some(told) = &self.on_ticket {
+            told(ticket);
+        }
+    }
+
+    /// Settles a ticket of this gate; another gate's does nothing.
+    fn settle(
+        self: &Arc<Self>,
+        ticket: &Ticket,
+        outcome: GateOutcome,
+        retry_after_ms: Option<i64>,
+    ) -> GateSettled {
+        if ticket.gate != self.id {
+            return GateSettled::Done;
+        }
+        self.act(|machine| {
+            if machine.state.disposed {
+                return GateSettled::Done;
+            }
+            if !machine
+                .state
+                .models
+                .iter()
+                .any(|held| held.name == ticket.model)
+            {
+                return GateSettled::Done;
+            }
+            Self::shifting(machine, &ticket.model, |machine, at| {
+                let (is_probe, phase, generation) = {
+                    let model = &machine.state.models[at];
+                    (
+                        model.probe.as_ref().is_some_and(|probe| probe == ticket),
+                        model.phase,
+                        model.generation,
+                    )
+                };
+                if is_probe {
+                    return machine.settle_probe(at, outcome, retry_after_ms);
+                }
+                if outcome != GateOutcome::Overloaded {
+                    if outcome == GateOutcome::Ok {
+                        machine.state.models[at].pauses = 0;
+                    }
+                    return GateSettled::Done;
+                }
+                if phase != Phase::Open {
+                    return GateSettled::Again;
+                }
+                // Ignore stale probe refusals.
+                if ticket.generation < generation {
+                    return GateSettled::Again;
+                }
+                machine.state.models[at].pauses = 1;
+                machine.pause(at, retry_after_ms);
+                GateSettled::Again
+            })
+        })
     }
 
     /// A pause ended.
@@ -393,18 +533,24 @@ impl ProviderGate {
                 id: ids.new_id(),
                 pause_ms: deps.pause_ms.unwrap_or(PAUSE_MS),
                 max_pauses: deps.max_pauses.unwrap_or(MAX_PAUSES),
+                on_ticket: deps.on_ticket,
                 state: Mutex::new(State {
                     models: Vec::new(),
                     serial: 0,
                     epoch: 0,
+                    disposed: false,
                 }),
+                outbox: Mutex::new(VecDeque::new()),
+                flushing: AtomicBool::new(false),
                 listeners: Mutex::new(Vec::new()),
                 next_listener: Mutex::new(0),
             }),
         }
     }
 
-    /// Retries get front priority. The turn in the queue is taken at the call; the answer comes later.
+    /// Retries get front priority. The turn in the queue is taken at the call; the answer comes
+    /// later. A cancelled waiter is released at the next gate call, or at once when a runtime is
+    /// current; one whose future was dropped leaves the queue the same way and takes no turn.
     pub fn admit(
         &self,
         model: &str,
@@ -424,16 +570,19 @@ impl ProviderGate {
                 _held: held,
             };
             let waiting = self.core.act(|machine| {
+                if machine.state.disposed {
+                    return Err(stopped());
+                }
                 let at = index_of(machine.state, model);
                 let phase = machine.state.models[at].phase;
                 if phase == Phase::Open {
                     let admission =
-                        Core::shifting(machine, model, |machine, at| machine.go(at, false));
+                        Core::shifting(machine, model, |machine, at| machine.go_now(at, false));
                     return Err(admission);
                 }
                 if phase == Phase::Probing && machine.state.models[at].probe.is_none() {
                     let admission =
-                        Core::shifting(machine, model, |machine, at| machine.go(at, true));
+                        Core::shifting(machine, model, |machine, at| machine.go_now(at, true));
                     return Err(admission);
                 }
                 if again {
@@ -483,12 +632,15 @@ impl ProviderGate {
     /// Nonblocking, even for probes.
     pub fn try_admit(&self, model: &str) -> Option<Ticket> {
         self.core.act(|machine| {
+            if machine.state.disposed {
+                return None;
+            }
             let at = index_of(machine.state, model);
             if !ready_of(&machine.state.models[at]) {
                 return None;
             }
             let probe = machine.state.models[at].phase == Phase::Probing;
-            match Core::shifting(machine, model, |machine, at| machine.go(at, probe)) {
+            match Core::shifting(machine, model, |machine, at| machine.go_now(at, probe)) {
                 Admission::Go(held) => Some(held.ticket),
                 _ => None,
             }
@@ -510,6 +662,9 @@ impl ProviderGate {
     /// Pauses an open model.
     pub fn cool(&self, model: &str, retry_after_ms: Option<i64>) {
         self.core.act(|machine| {
+            if machine.state.disposed {
+                return;
+            }
             let at = index_of(machine.state, model);
             if machine.state.models[at].phase != Phase::Open {
                 return;
@@ -524,6 +679,9 @@ impl ProviderGate {
     /// Reopens matching gates.
     pub fn clear(&self, matches: impl Fn(&str) -> bool) {
         self.core.act(|machine| {
+            if machine.state.disposed {
+                return;
+            }
             let names: Vec<String> = machine
                 .state
                 .models
@@ -548,44 +706,16 @@ impl ProviderGate {
         });
     }
 
-    /// Every admitted ticket settles once.
+    /// Every admitted ticket settles once. A success of a request admitted earlier resets the
+    /// give-up count even while the gate is paused or probing. A ticket of another gate does
+    /// nothing, and a settle never makes a model's gate.
     pub fn settle(
         &self,
         ticket: &Ticket,
         outcome: GateOutcome,
         retry_after_ms: Option<i64>,
     ) -> GateSettled {
-        self.core.act(|machine| {
-            Core::shifting(machine, &ticket.model, |machine, at| {
-                let (is_probe, phase, generation) = {
-                    let model = &machine.state.models[at];
-                    (
-                        model.probe.as_ref().is_some_and(|probe| probe == ticket),
-                        model.phase,
-                        model.generation,
-                    )
-                };
-                if is_probe {
-                    return machine.settle_probe(at, outcome, retry_after_ms);
-                }
-                if outcome != GateOutcome::Overloaded {
-                    if outcome == GateOutcome::Ok {
-                        machine.state.models[at].pauses = 0;
-                    }
-                    return GateSettled::Done;
-                }
-                if phase != Phase::Open {
-                    return GateSettled::Again;
-                }
-                // Ignore stale probe refusals.
-                if ticket.generation < generation {
-                    return GateSettled::Again;
-                }
-                machine.state.models[at].pauses = 1;
-                machine.pause(at, retry_after_ms);
-                GateSettled::Again
-            })
-        })
+        self.core.settle(ticket, outcome, retry_after_ms)
     }
 
     /// One model's gate; none until the gate is first used.
@@ -637,8 +767,13 @@ impl ProviderGate {
         })
     }
 
+    /// A disposed gate stays disposed: it admits nothing and makes no state.
     pub fn dispose(&self) {
+        if locked(&self.core.state).disposed {
+            return;
+        }
         self.core.act(|machine| {
+            machine.state.disposed = true;
             let mut turned = Vec::new();
             let models = std::mem::take(&mut machine.state.models);
             for mut model in models {
@@ -649,7 +784,7 @@ impl ProviderGate {
                     machine.effects.push(Effect::Cancel(timer));
                 }
                 for waiter in model.queue.drain(..) {
-                    machine.effects.push(Effect::Admit(waiter.send, stopped()));
+                    machine.effects.push(Effect::Hand(waiter.send, stopped()));
                 }
             }
             for name in turned {
@@ -677,6 +812,7 @@ mod tests {
                 scheduler,
                 pause_ms: None,
                 max_pauses: None,
+                on_ticket: None,
             },
             &CountedIds::new("gate-"),
         );
@@ -717,5 +853,77 @@ mod tests {
         assert!(probe.ticket.probe);
         assert!(second.as_mut().poll(&mut context).is_pending());
         assert_eq!(gate.holding(), vec!["model".to_owned()]);
+    }
+
+    #[test]
+    fn a_dropped_admission_gives_its_turn_to_the_next_waiter() {
+        let (gate, wheel) = gate();
+        gate.cool("model", None);
+        let (first, second) = (CancelToken::new(), CancelToken::new());
+        let dropped = gate.admit("model", &first, None, false);
+        let mut kept = Box::pin(gate.admit("model", &second, None, false));
+        drop(dropped);
+        wheel.advance(60_000);
+        let mut context = Context::from_waker(Waker::noop());
+        let Poll::Ready(Admission::Go(probe)) = kept.as_mut().poll(&mut context) else {
+            panic!("the waiter that is still there should hold the probe");
+        };
+        assert!(probe.ticket.probe);
+        assert_eq!(gate.state_of("model").map(|held| held.queued), Some(0));
+        assert_eq!(
+            gate.settle(&probe.ticket, GateOutcome::Ok, None),
+            GateSettled::Done
+        );
+        assert!(gate.holding().is_empty());
+    }
+
+    #[test]
+    fn a_dropped_admission_does_not_hold_the_model_for_good() {
+        let (gate, wheel) = gate();
+        gate.cool("model", None);
+        drop(gate.admit("model", &CancelToken::new(), None, false));
+        wheel.advance(60_000);
+        assert!(gate.ready("model"));
+        assert!(gate.try_admit("model").is_some());
+    }
+
+    #[test]
+    fn a_cancel_with_no_runtime_releases_at_the_next_gate_call() {
+        let (gate, _wheel) = gate();
+        gate.cool("model", None);
+        let token = CancelToken::new();
+        let mut waiting = Box::pin(gate.admit("model", &token, None, false));
+        let mut context = Context::from_waker(Waker::noop());
+        assert!(waiting.as_mut().poll(&mut context).is_pending());
+        token.cancel();
+        assert!(waiting.as_mut().poll(&mut context).is_pending());
+        assert!(!gate.ready("model"));
+        assert!(matches!(
+            waiting.as_mut().poll(&mut context),
+            Poll::Ready(Admission::Stopped(_))
+        ));
+    }
+
+    #[test]
+    fn a_ticket_of_another_gate_does_nothing_and_a_disposed_gate_stays_disposed() {
+        let (gate, _wheel) = gate();
+        let mut foreign = gate.try_admit("model").expect("an open gate");
+        foreign.gate = "elsewhere".to_owned();
+        assert_eq!(
+            gate.settle(&foreign, GateOutcome::Overloaded, None),
+            GateSettled::Done
+        );
+        assert_eq!(gate.state_of("other"), None);
+        gate.dispose();
+        assert!(gate.try_admit("model").is_none());
+        gate.cool("model", None);
+        assert_eq!(gate.state_of("model"), None);
+        let mut waiting = Box::pin(gate.admit("model", &CancelToken::new(), None, false));
+        assert!(matches!(
+            waiting
+                .as_mut()
+                .poll(&mut Context::from_waker(Waker::noop())),
+            Poll::Ready(Admission::Stopped(_))
+        ));
     }
 }

@@ -1,0 +1,180 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.run",
+	"name": "an-entry-whose-url-changed-during-its-store-read-ends-without-effect",
+	"input": {
+		"startMs": 2000000,
+		"entries": [
+			{
+				"id": "box",
+				"kind": "ollama",
+				"label": "Box",
+				"url": "http://lab.local:11434"
+			}
+		],
+		"keys": {},
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"models": [
+						{
+							"name": "local-a:27b"
+						},
+						{
+							"name": "local-b:9b"
+						}
+					]
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "hold",
+				"at": "store"
+			},
+			{
+				"kind": "check",
+				"id": "box"
+			},
+			{
+				"kind": "list",
+				"entries": [
+					{
+						"id": "box",
+						"kind": "ollama",
+						"label": "Box",
+						"url": "http://lab.local:11500"
+					}
+				]
+			},
+			{
+				"kind": "release",
+				"hold": 1
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "box",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0,
+				"parked": []
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "box",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "box",
+						"key": {
+							"kind": "checking"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0,
+				"parked": [
+					1
+				]
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "box",
+						"changed": [
+							"key"
+						]
+					},
+					{
+						"entry": "box",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "box",
+						"key": {
+							"kind": "ok",
+							"models": 2
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 1,
+				"parked": [
+					1
+				]
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "box",
+						"key": {
+							"kind": "ok",
+							"models": 2
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 1,
+				"parked": []
+			}
+		],
+		"requests": [
+			"http://lab.local:11500/api/tags"
+		],
+		"waiting": []
+	}
+}

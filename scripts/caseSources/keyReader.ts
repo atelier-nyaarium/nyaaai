@@ -19,7 +19,8 @@ const dispose: Step = { kind: "dispose" };
 const OK: Step = { kind: "ok", usage: 4.12, limit: 20 };
 const REJECTED: Step = { kind: "rejected" };
 
-const run = (name: string, steps: Step[]): CaseSource => caseOf("keyReader.run")(name, { startMs: START, steps });
+const run = (name: string, steps: Step[], extra: Step = {}): CaseSource =>
+	caseOf("keyReader.run")(name, { startMs: START, steps, ...extra });
 
 ////////////////////////////////
 //  Cases
@@ -68,4 +69,28 @@ export const keyReaderCases: CaseSource[] = [
 		read,
 		answer(2, OK),
 	]),
+	run(
+		"a-check-that-ignores-its-signal-shows-unreachable-at-the-deadline",
+		[read, advance(29_999), advance(1), answer(1, OK)],
+		{
+			checks: "ignoreSignal",
+		},
+	),
+	run(
+		"a-check-that-ignores-its-signal-is-not-busy-after-the-deadline",
+		[read, advance(30_000), read, answer(2, OK)],
+		{
+			checks: "ignoreSignal",
+		},
+	),
+	run(
+		"a-dropped-check-that-ignores-its-signal-shows-nothing-later",
+		[read, read, answer(1, OK), answer(2, REJECTED)],
+		{
+			checks: "ignoreSignal",
+		},
+	),
+	run("a-check-that-throws-at-once-shows-unreachable-and-leaves-no-timer", [read, advance(60_000)], {
+		checks: "throwAtOnce",
+	}),
 ];

@@ -24,21 +24,30 @@ type Answer = Result<KeyState, ()>;
 struct Held {
     settle: Option<oneshot::Sender<Answer>>,
     closed: bool,
+    /// Its signal ended.
+    ended: bool,
     chain: Option<BoxFuture<'static, ()>>,
     awaited: bool,
     limit: Arc<Deadline>,
 }
 
-/// Ends the checks whose signal ended, as the script sees it.
-fn signals(checks: &Mutex<Vec<Held>>) -> Vec<KeyReaderRunResultStepsItemSignalledItem> {
+/// Notes the checks whose signal ended, and ends those that end on it.
+fn signals(
+    checks: &Mutex<Vec<Held>>,
+    ignore: bool,
+) -> Vec<KeyReaderRunResultStepsItemSignalledItem> {
     let mut told = Vec::new();
     for (at, held) in locked(checks).iter_mut().enumerate() {
-        if held.closed {
+        if held.ended {
             continue;
         }
         let Some(ended) = held.limit.ended() else {
             continue;
         };
+        held.ended = true;
+        if held.closed {
+            continue;
+        }
         told.push(KeyReaderRunResultStepsItemSignalledItem {
             check: at as i64 + 1,
             by: match ended {
@@ -46,9 +55,11 @@ fn signals(checks: &Mutex<Vec<Held>>) -> Vec<KeyReaderRunResultStepsItemSignalle
                 Ended::Caller => KeyReaderRunResultStepsItemSignalledItemBy::Caller,
             },
         });
-        held.closed = true;
-        if let Some(settle) = held.settle.take() {
-            let _ = settle.send(Err(()));
+        if !ignore {
+            held.closed = true;
+            if let Some(settle) = held.settle.take() {
+                let _ = settle.send(Err(()));
+            }
         }
     }
     told
@@ -79,18 +90,23 @@ pub fn run(input: KeyReaderRunInput) -> Outcome<KeyReaderRunResult> {
         let shown: Arc<Mutex<Vec<KeyState>>> = Arc::new(Mutex::new(Vec::new()));
         let check: Check = {
             let checks = Arc::clone(&checks);
+            let throws = matches!(input.checks, Some(KeyReaderRunInputChecks::ThrowAtOnce));
             Arc::new(move |limit| {
+                if throws {
+                    std::panic::resume_unwind(Box::new("thrown"));
+                }
                 let (settle, wait) = oneshot::channel::<Answer>();
                 locked(&checks).push(Held {
                     settle: Some(settle),
                     closed: false,
+                    ended: false,
                     chain: None,
                     awaited: false,
                     limit,
                 });
                 Box::pin(async move {
                     match wait.await {
-                        Ok(Ok(state)) => Ok(state),
+                        Ok(Ok(state)) => Ok(Some(state)),
                         _ => Err(Failed),
                     }
                 })
@@ -101,14 +117,27 @@ pub fn run(input: KeyReaderRunInput) -> Outcome<KeyReaderRunResult> {
             Arc::new(move |state| locked(&shown).push(state))
         };
         let reader = KeyReader::new(scheduler, check, seen);
+        let ignore = matches!(input.checks, Some(KeyReaderRunInputChecks::IgnoreSignal));
         let mut steps = Vec::new();
         let mut signalled = Vec::new();
         for step in &input.steps {
             match step {
                 KeyReaderRunInputStepsItem::Read(_) => {
+                    let began = locked(&checks).len();
                     let chain = reader.read();
-                    if let Some(held) = locked(&checks).last_mut() {
-                        held.chain = Some(chain);
+                    let missing = {
+                        let mut held = locked(&checks);
+                        match held.get_mut(began) {
+                            Some(held) => {
+                                held.chain = Some(chain);
+                                None
+                            }
+                            None => Some(chain),
+                        }
+                    };
+                    // A check that never began has ended with the read.
+                    if let Some(chain) = missing {
+                        chain.await;
                     }
                 }
                 KeyReaderRunInputStepsItem::Answer(held) => {
@@ -120,11 +149,11 @@ pub fn run(input: KeyReaderRunInput) -> Outcome<KeyReaderRunResult> {
                 }
                 KeyReaderRunInputStepsItem::Dispose(_) => reader.dispose(),
             }
-            signalled.extend(signals(&checks));
+            signalled.extend(signals(&checks, ignore));
             // A closed check's chain has run once awaited.
             let chains: Vec<BoxFuture<'static, ()>> = locked(&checks)
                 .iter_mut()
-                .filter(|held| held.closed && !held.awaited && held.chain.is_some())
+                .filter(|held| (held.closed || held.ended) && !held.awaited && held.chain.is_some())
                 .filter_map(|held| {
                     held.awaited = true;
                     held.chain.take()
@@ -147,7 +176,7 @@ pub fn run(input: KeyReaderRunInput) -> Outcome<KeyReaderRunResult> {
             });
         }
         reader.dispose();
-        signals(&checks);
+        signals(&checks, ignore);
         reader.idle().await;
         KeyReaderRunResult {
             steps,

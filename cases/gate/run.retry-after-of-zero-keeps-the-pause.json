@@ -49,6 +49,7 @@
 						}
 					}
 				],
+				"inside": [],
 				"waits": [],
 				"told": [],
 				"gates": [
@@ -71,6 +72,7 @@
 				"settled": "again",
 				"ticket": null,
 				"resolved": [],
+				"inside": [],
 				"waits": [],
 				"told": [
 					"lab/model-a"
@@ -97,6 +99,19 @@
 				"settled": null,
 				"ticket": null,
 				"resolved": [],
+				"inside": [
+					{
+						"request": "kept",
+						"gate": {
+							"phase": "paused",
+							"generation": 0,
+							"pauses": 1,
+							"resumeAt": 1060000,
+							"probe": null,
+							"queued": 1
+						}
+					}
+				],
 				"waits": [
 					{
 						"request": "kept",
@@ -145,6 +160,7 @@
 						}
 					}
 				],
+				"inside": [],
 				"waits": [],
 				"told": [],
 				"gates": [

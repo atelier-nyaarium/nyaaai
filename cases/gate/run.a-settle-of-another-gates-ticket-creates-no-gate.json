@@ -1,0 +1,43 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "gate.run",
+	"name": "a-settle-of-another-gates-ticket-creates-no-gate",
+	"input": {
+		"startMs": 1000000,
+		"steps": [
+			{
+				"kind": "settleTicket",
+				"ticket": {
+					"gate": "elsewhere",
+					"model": "lab/model-a",
+					"generation": 0,
+					"probe": false,
+					"serial": 1
+				},
+				"outcome": "overloaded"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1000000,
+				"settled": "done",
+				"ticket": null,
+				"resolved": [],
+				"inside": [],
+				"waits": [],
+				"told": [],
+				"gates": [
+					{
+						"model": "lab/model-a",
+						"gate": null
+					}
+				],
+				"holding": []
+			}
+		],
+		"waiting": []
+	}
+}

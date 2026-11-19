@@ -1,0 +1,104 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "gate.run",
+	"name": "a-ticket-from-before-a-dispose-does-nothing-to-the-new-state",
+	"input": {
+		"startMs": 1000000,
+		"steps": [
+			{
+				"kind": "admit",
+				"request": "a",
+				"model": "lab/model-a"
+			},
+			{
+				"kind": "dispose"
+			},
+			{
+				"kind": "settleTicket",
+				"ticket": {
+					"gate": "gate-1",
+					"model": "lab/model-a",
+					"generation": 0,
+					"probe": false,
+					"serial": 1
+				},
+				"outcome": "overloaded"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1000000,
+				"settled": null,
+				"ticket": null,
+				"resolved": [
+					{
+						"request": "a",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "lab/model-a",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						}
+					}
+				],
+				"inside": [],
+				"waits": [],
+				"told": [],
+				"gates": [
+					{
+						"model": "lab/model-a",
+						"gate": {
+							"phase": "open",
+							"generation": 0,
+							"pauses": 0,
+							"resumeAt": 0,
+							"probe": null,
+							"queued": 0
+						}
+					}
+				],
+				"holding": []
+			},
+			{
+				"nowMs": 1000000,
+				"settled": null,
+				"ticket": null,
+				"resolved": [],
+				"inside": [],
+				"waits": [],
+				"told": [],
+				"gates": [
+					{
+						"model": "lab/model-a",
+						"gate": null
+					}
+				],
+				"holding": []
+			},
+			{
+				"nowMs": 1000000,
+				"settled": "done",
+				"ticket": null,
+				"resolved": [],
+				"inside": [],
+				"waits": [],
+				"told": [],
+				"gates": [
+					{
+						"model": "lab/model-a",
+						"gate": null
+					}
+				],
+				"holding": []
+			}
+		],
+		"waiting": []
+	}
+}

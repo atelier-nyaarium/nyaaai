@@ -1,0 +1,84 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "keyReader.run",
+	"name": "a-check-that-ignores-its-signal-shows-unreachable-at-the-deadline",
+	"input": {
+		"startMs": 5000000,
+		"steps": [
+			{
+				"kind": "read"
+			},
+			{
+				"kind": "advance",
+				"ms": 29999
+			},
+			{
+				"kind": "advance",
+				"ms": 1
+			},
+			{
+				"kind": "answer",
+				"check": 1,
+				"state": {
+					"kind": "ok",
+					"usage": 4.12,
+					"limit": 20
+				}
+			}
+		],
+		"checks": "ignoreSignal"
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 5000000,
+				"shown": [
+					{
+						"kind": "checking"
+					}
+				],
+				"signalled": [],
+				"open": [
+					1
+				],
+				"busy": true
+			},
+			{
+				"nowMs": 5029999,
+				"shown": [],
+				"signalled": [],
+				"open": [
+					1
+				],
+				"busy": true
+			},
+			{
+				"nowMs": 5030000,
+				"shown": [
+					{
+						"kind": "unreachable"
+					}
+				],
+				"signalled": [
+					{
+						"check": 1,
+						"by": "deadline"
+					}
+				],
+				"open": [
+					1
+				],
+				"busy": false
+			},
+			{
+				"nowMs": 5030000,
+				"shown": [],
+				"signalled": [],
+				"open": [],
+				"busy": false
+			}
+		],
+		"waiting": []
+	}
+}

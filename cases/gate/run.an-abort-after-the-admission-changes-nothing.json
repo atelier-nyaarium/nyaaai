@@ -43,6 +43,7 @@
 						}
 					}
 				],
+				"inside": [],
 				"waits": [],
 				"told": [],
 				"gates": [
@@ -65,6 +66,7 @@
 				"settled": null,
 				"ticket": null,
 				"resolved": [],
+				"inside": [],
 				"waits": [],
 				"told": [],
 				"gates": [
@@ -87,6 +89,7 @@
 				"settled": "done",
 				"ticket": null,
 				"resolved": [],
+				"inside": [],
 				"waits": [],
 				"told": [],
 				"gates": [

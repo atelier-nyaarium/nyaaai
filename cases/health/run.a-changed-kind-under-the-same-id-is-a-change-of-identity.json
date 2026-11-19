@@ -1,0 +1,239 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.run",
+	"name": "a-changed-kind-under-the-same-id-is-a-change-of-identity",
+	"input": {
+		"startMs": 2000000,
+		"entries": [
+			{
+				"id": "main",
+				"kind": "openrouter",
+				"label": "Main"
+			}
+		],
+		"keys": {
+			"main": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"usage": 1
+					}
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "model-a"
+						}
+					]
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "check",
+				"id": "main"
+			},
+			{
+				"kind": "billed",
+				"id": "main",
+				"reply": {
+					"source": "go",
+					"allowance": 1
+				}
+			},
+			{
+				"kind": "failed",
+				"route": {
+					"entry": {
+						"id": "main",
+						"kind": "openrouter",
+						"label": "Main"
+					},
+					"key": "lab/model-a"
+				},
+				"failure": {
+					"category": "unavailable",
+					"status": "unavailable",
+					"message": "unavailable"
+				},
+				"onward": true
+			},
+			{
+				"kind": "list",
+				"entries": [
+					{
+						"id": "main",
+						"kind": "opencode",
+						"label": "Main",
+						"plan": "go"
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "main",
+						"changed": [
+							"key"
+						]
+					},
+					{
+						"entry": "main",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "ok",
+							"usage": 1
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 1,
+				"parked": []
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "main",
+						"changed": [
+							"billed"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "ok",
+							"usage": 1
+						},
+						"billed": {
+							"billing": "go",
+							"allowance": 1
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 1,
+				"parked": []
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "main",
+						"changed": [
+							"waiting"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "ok",
+							"usage": 1
+						},
+						"billed": {
+							"billing": "go",
+							"allowance": 1
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": [
+							"lab/model-a"
+						]
+					}
+				],
+				"run": [],
+				"requests": 1,
+				"parked": []
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "main",
+						"changed": [
+							"key",
+							"waiting"
+						]
+					},
+					{
+						"entry": "main",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "ok"
+						},
+						"billed": {
+							"billing": "go",
+							"allowance": 1
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 2,
+				"parked": []
+			}
+		],
+		"requests": [
+			"https://openrouter.ai/api/v1/key",
+			"https://opencode.ai/inference/go/v1/models"
+		],
+		"waiting": []
+	}
+}

@@ -36,13 +36,32 @@ const HealthKeyAnswer = z.discriminatedUnion("kind", [
 const HealthRoute = z.object({ entry: ProviderEntry, key: z.string() });
 
 /** A step of the script. A step that starts a check waits for it to end before it reports. */
+const NoIdle = { idle: z.literal(false).exactOptional() };
+
 const Step = () =>
 	z.discriminatedUnion("kind", [
+		/**
+		 * Arms a hold: the next check to reach it parks there until a `release`. `store` is the read of
+		 * the store's key; `check` is the kind's check, after the store answered. Holds count from 1 in the
+		 * order they are armed. A step that arms a hold waits for the hold to be reached and does not wait
+		 * for `idle`; so does a step with `idle: false`.
+		 */
+		z.object({ kind: z.literal("hold"), at: z.enum(["store", "check"]) }),
+		/** Lets a parked hold go on: a store answers `answer` (the store's own when absent); a check answers `state` at once (the kind's check runs when absent). */
+		z.object({
+			kind: z.literal("release"),
+			hold: z.int().min(1),
+			state: KeyState.exactOptional(),
+			answer: HealthKeyAnswer.exactOptional(),
+			...NoIdle,
+		}),
+		/** The first time this entry's change is told, a listener starts a check on it. */
+		z.object({ kind: z.literal("listenAndCheck"), id: z.string() }),
 		/** The list changes, and tells. */
-		z.object({ kind: z.literal("list"), entries: z.array(ProviderEntry) }),
+		z.object({ kind: z.literal("list"), entries: z.array(ProviderEntry), ...NoIdle }),
 		/** The store's key changes, and tells. */
-		z.object({ kind: z.literal("key"), id: z.string(), answer: HealthKeyAnswer }),
-		z.object({ kind: z.literal("check"), id: z.string() }),
+		z.object({ kind: z.literal("key"), id: z.string(), answer: HealthKeyAnswer, ...NoIdle }),
+		z.object({ kind: z.literal("check"), id: z.string(), ...NoIdle }),
 		z.object({ kind: z.literal("checkUnread") }),
 		/** What a resolver would read for the entry. */
 		z.object({ kind: z.literal("keys"), id: z.string() }),
@@ -80,7 +99,7 @@ const Step = () =>
 			outcome: GateOutcome,
 			retryAfterMs: z.int().min(0).exactOptional(),
 		}),
-		z.object({ kind: z.literal("advance"), ms: z.int().min(0) }),
+		z.object({ kind: z.literal("advance"), ms: z.int().min(0), ...NoIdle }),
 		z.object({ kind: z.literal("dispose") }),
 	]);
 
@@ -108,6 +127,8 @@ const Outcome = () =>
 		run: z.array(z.string()),
 		/** Requests the network has seen so far. */
 		requests: z.int(),
+		/** Holds reached and not released, in order. */
+		parked: z.array(z.int()),
 	});
 
 ////////////////////////////////
@@ -144,17 +165,91 @@ export const health = caseGroup("health", {
 			async (input) => {
 				const net = networkOf(input.startMs, input.exchanges);
 				const list = scriptedProviderList(input.entries);
-				const keys = scriptedEntryKeys(input.keys);
+				const raw = scriptedEntryKeys(input.keys);
+				interface Hold {
+					at: "store" | "check";
+					reached: Promise<void>;
+					arrive: () => void;
+					release: (go: {
+						state?: z.infer<typeof KeyState>;
+						answer?: z.infer<typeof HealthKeyAnswer>;
+					}) => void;
+					parkedNow: boolean;
+					seen: boolean;
+					released: Promise<{ state?: z.infer<typeof KeyState>; answer?: z.infer<typeof HealthKeyAnswer> }>;
+				}
+				const holds: Hold[] = [];
+				/** Armed holds of each place, in order, not yet taken by a check. */
+				const armed: Record<"store" | "check", Hold[]> = { store: [], check: [] };
+				const arm = (at: "store" | "check"): Hold => {
+					let arrive = () => {};
+					let release: Hold["release"] = () => {};
+					const held: Hold = {
+						at,
+						reached: new Promise<void>((resolve) => {
+							arrive = resolve;
+						}),
+						arrive: () => {},
+						release: () => {},
+						parkedNow: false,
+						seen: false,
+						released: new Promise((resolve) => {
+							release = resolve;
+						}),
+					};
+					held.arrive = () => {
+						held.parkedNow = true;
+						held.seen = true;
+						arrive();
+					};
+					held.release = (go) => {
+						held.parkedNow = false;
+						release(go);
+					};
+					holds.push(held);
+					armed[at].push(held);
+					return held;
+				};
+				const keys = {
+					get: async (id: string) => {
+						const held = armed.store.shift();
+						if (held === undefined) return raw.get(id);
+						held.arrive();
+						const go = await held.released;
+						return go.answer === undefined ? raw.get(id) : go.answer;
+					},
+					onChange: raw.onChange,
+				};
+				const kinds = Object.fromEntries(
+					Object.entries(KINDS).map(([name, real]) => [
+						name,
+						{
+							...real,
+							check: (...given: Parameters<typeof real.check>) => {
+								const held = armed.check.shift();
+								if (held === undefined) return real.check(...given);
+								held.arrive();
+								return held.released.then((go) => go.state ?? real.check(...given));
+							},
+						},
+					]),
+				) as typeof KINDS;
 				const health = new ProviderHealth({
 					scheduler: net.scheduler,
 					ids: countedIds("gate-"),
 					list,
 					keys,
-					kinds: KINDS,
+					kinds,
 					kindDeps: () => net.deps,
 					...(input.pauseMs === undefined ? {} : { pauseMs: input.pauseMs }),
 				});
 				let changes: Array<z.infer<typeof HealthChange>> = [];
+				const starters = new Set<string>();
+				health.onChange((change) => {
+					if (!starters.delete(change.entry)) return;
+					name(change.entry);
+					health.check(change.entry);
+				});
 				health.onChange((change) => changes.push(change));
 				const named: string[] = [];
 				const name = (id: string) => {
@@ -170,12 +265,24 @@ export const health = caseGroup("health", {
 				const steps: Array<z.infer<ReturnType<typeof Outcome>>> = [];
 				for (const step of input.steps) {
 					let answer: z.infer<ReturnType<typeof Answer>> = { kind: "none" };
-					if (step.kind === "list") {
+					const seenBefore = new Set(holds.filter((held) => held.seen));
+					if (step.kind === "hold") {
+						arm(step.at);
+					} else if (step.kind === "release") {
+						const held = holds[step.hold - 1];
+						if (held === undefined) throw new Error(`No hold ${step.hold}.`);
+						held.release({
+							...(step.state === undefined ? {} : { state: step.state }),
+							...(step.answer === undefined ? {} : { answer: step.answer }),
+						});
+					} else if (step.kind === "listenAndCheck") {
+						starters.add(step.id);
+					} else if (step.kind === "list") {
 						for (const entry of step.entries) name(entry.id);
 						list.set(step.entries);
 					} else if (step.kind === "key") {
 						name(step.id);
-						keys.set(step.id, step.answer);
+						raw.set(step.id, step.answer);
 					} else if (step.kind === "check") {
 						name(step.id);
 						health.check(step.id);
@@ -231,7 +338,16 @@ export const health = caseGroup("health", {
 					} else {
 						health.dispose();
 					}
-					await health.idle();
+					// A step that starts a check meets the holds armed before it, and leaves them parked.
+					const starts = ["list", "key", "check", "checkUnread", "keys"].includes(step.kind);
+					let met = false;
+					if (starts)
+						for (const held of holds) {
+							if (seenBefore.has(held)) continue;
+							met = true;
+							await held.reached;
+						}
+					if (!met && !("idle" in step && step.idle === false)) await health.idle();
 					steps.push({
 						nowMs: net.wheel.nowMs(),
 						answer,
@@ -239,9 +355,13 @@ export const health = caseGroup("health", {
 						entries: named.map((id) => health.state(id)),
 						run: [...run].sort(),
 						requests: net.played.requests.length,
+						parked: holds.flatMap((held, at) => (held.parkedNow ? [at + 1] : [])),
 					});
 					changes = [];
 				}
+				for (const held of holds)
+					if (held.parkedNow)
+						held.release(held.at === "check" ? { state: { kind: "none" } } : { answer: { kind: "none" } });
 				await health.idle();
 				health.dispose();
 				return {

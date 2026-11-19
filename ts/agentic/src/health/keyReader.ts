@@ -18,14 +18,16 @@ export class KeyReader {
 	constructor(
 		/** The deadline of each check comes from it. */
 		private readonly scheduler: Scheduler,
-		private readonly check: (signal: AbortSignal) => Promise<KeyState>,
+		/** Undefined: the check ended without effect. */
+		private readonly check: (signal: AbortSignal) => Promise<KeyState | undefined>,
 		private readonly shown: (state: KeyState) => void,
 	) {}
 
 	/**
-	 * Shows `checking`, then the check's state unless a newer read or a dispose came first; a check
-	 * that fails or outlives its deadline shows `unreachable`. The answer settles when the check has
-	 * ended and been shown or dropped.
+	 * Shows `checking`, then the check's state unless a newer read or a dispose came first. The check
+	 * is raced against its deadline: a check that fails, throws or misses the deadline shows
+	 * `unreachable`, and its later answer is dropped. The answer settles when the check has ended and
+	 * been shown or dropped.
 	 */
 	read(): Promise<void> {
 		this.abort?.abort();
@@ -33,9 +35,19 @@ export class KeyReader {
 		this.abort = abort;
 		this.shown({ kind: "checking" });
 		const limit = deadline(this.scheduler, KEY_CHECK_MS, abort.signal);
-		const ended = this.check(limit.signal).then(
+		const raced = new Promise<KeyState | undefined>((resolve, reject) => {
+			const end = () => reject(limit.signal.reason);
+			if (limit.signal.aborted) return end();
+			limit.signal.addEventListener("abort", end, { once: true });
+			try {
+				this.check(limit.signal).then(resolve, reject);
+			} catch (error) {
+				reject(error);
+			}
+		});
+		const ended = raced.then(
 			(state) => {
-				if (!abort.signal.aborted) this.shown(state);
+				if (state !== undefined && !abort.signal.aborted) this.shown(state);
 			},
 			() => {
 				if (!abort.signal.aborted) this.shown({ kind: "unreachable" });

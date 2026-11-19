@@ -83,6 +83,7 @@ interface Status {
 
 /** Tracked provider fields. */
 interface Identity {
+	kind: string;
 	plan?: string;
 	url?: string;
 	extraUsage: boolean;
@@ -131,6 +132,7 @@ function billedWith(was: Billed | undefined, reply: Billing): Billed {
 
 function identityOf(entry: ProviderEntry): Identity {
 	return {
+		kind: entry.kind,
 		...(entry.plan === undefined ? {} : { plan: entry.plan }),
 		...(entry.url === undefined ? {} : { url: entry.url }),
 		extraUsage: entry.extraUsage === true,
@@ -160,6 +162,10 @@ export class ProviderHealth implements Gate {
 	/** Depth of the running changes whose telling waits for their end. */
 	private batching = 0;
 	private readonly pending = new Map<string, Set<Part>>();
+	/** Changes made and not yet told, oldest first. */
+	private readonly outbox: HealthChange[] = [];
+	private delivering = false;
+	private disposed = false;
 
 	/** Defers initial key checks. */
 	constructor(private readonly d: HealthDeps) {
@@ -168,6 +174,7 @@ export class ProviderHealth implements Gate {
 			ids: d.ids,
 			...(d.pauseMs === undefined ? {} : { pauseMs: d.pauseMs }),
 			...(d.maxPauses === undefined ? {} : { maxPauses: d.maxPauses }),
+			onTicket: (ticket) => this.admitted(entryOfModel(ticket.model), ticket),
 		});
 		this.entryKeys = {
 			get: async (id) => {
@@ -240,7 +247,7 @@ export class ProviderHealth implements Gate {
 
 	/** Replaces pending checks. */
 	check(id: string): void {
-		if (!this.listed(id)) return;
+		if (this.disposed || !this.listed(id)) return;
 		this.batch(() => {
 			void this.statusOf(id).reader.read();
 		});
@@ -272,24 +279,18 @@ export class ProviderHealth implements Gate {
 		};
 	}
 
-	/** Probes require admitted tickets. */
-	async admit(
+	/** The ticket is recorded inside the gate call that makes it. */
+	admit(
 		route: Resolved,
 		signal: AbortSignal,
 		onWait?: (waiting: GateWaiting) => void,
 		again = false,
 	): Promise<Admission> {
-		const admission = await this.batch(() => this.gate.admit(keyOf(route), signal, onWait, again));
-		if (admission.kind === "go") this.admitted(route.entry.id, admission.ticket);
-		return admission;
+		return this.batch(() => this.gate.admit(keyOf(route), signal, onWait, again));
 	}
 
 	tryAdmit(route: Resolved): Ticket | null {
-		return this.batch(() => {
-			const ticket = this.gate.tryAdmit(keyOf(route));
-			if (ticket !== null) this.admitted(route.entry.id, ticket);
-			return ticket;
-		});
+		return this.batch(() => this.gate.tryAdmit(keyOf(route)));
 	}
 
 	settle(ticket: Ticket, outcome: GateOutcome, retryAfterMs?: number): GateSettled {
@@ -366,6 +367,7 @@ export class ProviderHealth implements Gate {
 	}
 
 	dispose(): void {
+		this.disposed = true;
 		for (const off of this.unsubscribe) off();
 		for (const status of this.statuses.values()) status.reader.dispose();
 		this.statuses.clear();
@@ -402,6 +404,7 @@ export class ProviderHealth implements Gate {
 
 	/** The only pool writer. */
 	private apply(id: string, event: PoolEvent): void {
+		if (!this.listed(id)) return;
 		const was = this.pools.get(id) ?? CLEAR;
 		const next = step(was, event, this.d.scheduler.nowMs(), this.d.pauseMs ?? PAUSE_MS);
 		if (next.kind === "clear") this.pools.delete(id);
@@ -410,6 +413,7 @@ export class ProviderHealth implements Gate {
 	}
 
 	private admitted(id: string, ticket: Ticket): void {
+		if (!this.listed(id)) return;
 		this.batch(() => {
 			this.probes.set(ticketKey(ticket), id);
 			this.apply(id, { kind: "admitted", ticket });
@@ -449,19 +453,36 @@ export class ProviderHealth implements Gate {
 		return fresh;
 	}
 
-	private async keyCheck(id: string, signal: AbortSignal): Promise<KeyState> {
+	/** Ends without effect once its signal ended or the entry's identity changed. */
+	private async keyCheck(id: string, signal: AbortSignal): Promise<KeyState | undefined> {
 		const entry = this.entryOf(id);
 		const kind = entry === undefined ? undefined : this.d.kinds[entry.kind];
 		if (entry === undefined || kind === undefined) return none();
+		const began = identityOf(entry);
+		const stale = () => signal.aborted || !this.sameIdentity(id, began);
 		const answer = await this.d.keys.get(id);
-		if (answer.kind === "refused") return { kind: "rejected" };
-		if (answer.kind === "unready") return { kind: "unreachable" };
-		const secret = answer.kind === "key" ? answer.key : undefined;
-		if (kind.field === "key" && secret === undefined) return none();
-		return kind.check(entry, secret, this.d.kindDeps(entry.kind), signal);
+		if (stale()) return undefined;
+		let state: KeyState;
+		if (answer.kind === "refused") state = { kind: "rejected" };
+		else if (answer.kind === "unready") state = { kind: "unreachable" };
+		else {
+			const secret = answer.kind === "key" ? answer.key : undefined;
+			state =
+				kind.field === "key" && secret === undefined
+					? none()
+					: await kind.check(entry, secret, this.d.kindDeps(entry.kind), signal);
+		}
+		return stale() ? undefined : state;
 	}
 
-	private invalidate(id: string, unbill: boolean): void {
+	private sameIdentity(id: string, began: Identity): boolean {
+		const entry = this.entryOf(id);
+		if (entry === undefined) return false;
+		const now = identityOf(entry);
+		return now.kind === began.kind && now.plan === began.plan && now.url === began.url;
+	}
+
+	private invalidate(id: string, unbill: boolean, identity = false): void {
 		this.batch(() => {
 			const status = this.statuses.get(id);
 			if (status !== undefined) {
@@ -472,6 +493,8 @@ export class ProviderHealth implements Gate {
 			}
 			if (unbill && this.bills.delete(id)) this.touch(id, "billed");
 			if (this.pools.delete(id)) this.touch(id, "pool");
+			for (const [held, owner] of [...this.probes]) if (owner === id) this.probes.delete(held);
+			if (identity) this.rechecked.delete(id);
 			this.gate.clear((key) => key.startsWith(`${id}\n`));
 		});
 	}
@@ -482,9 +505,9 @@ export class ProviderHealth implements Gate {
 			for (const [id, was] of this.identities) {
 				const now = next.get(id);
 				if (now === undefined) {
-					this.invalidate(id, true);
-				} else if (now.plan !== was.plan || now.url !== was.url) {
-					this.invalidate(id, false);
+					this.invalidate(id, true, true);
+				} else if (now.kind !== was.kind || now.plan !== was.plan || now.url !== was.url) {
+					this.invalidate(id, false, true);
 					this.check(id);
 				} else if (now.extraUsage !== was.extraUsage) {
 					const lastBill = this.bills.get(id)?.billing;
@@ -502,7 +525,10 @@ export class ProviderHealth implements Gate {
 	}
 
 	private snapshot(): Map<string, Identity> {
-		return new Map(this.d.list.entries().map((entry) => [entry.id, identityOf(entry)]));
+		const held = new Map<string, Identity>();
+		// A repeated id keeps its first row.
+		for (const entry of this.d.list.entries()) if (!held.has(entry.id)) held.set(entry.id, identityOf(entry));
+		return held;
 	}
 
 	/** Runs a change whose parts are told together, once it ends. */
@@ -526,18 +552,27 @@ export class ProviderHealth implements Gate {
 		if (this.batching === 0) this.flush();
 	}
 
+	/** Delivers in the order made: a change a listener makes is told behind those already waiting. */
 	private flush(): void {
 		const held = [...this.pending];
 		this.pending.clear();
-		for (const [entry, parts] of held) {
-			const changed = PARTS.filter((part) => parts.has(part));
-			for (const listener of [...this.listeners]) {
-				try {
-					listener({ entry, changed });
-				} catch {
-					// A listener cannot change health.
+		if (this.disposed) return;
+		for (const [entry, parts] of held)
+			this.outbox.push({ entry, changed: PARTS.filter((part) => parts.has(part)) });
+		if (this.delivering) return;
+		this.delivering = true;
+		try {
+			for (let change = this.outbox.shift(); change !== undefined; change = this.outbox.shift()) {
+				for (const listener of [...this.listeners]) {
+					try {
+						listener(change);
+					} catch {
+						// A listener cannot change health.
+					}
 				}
 			}
+		} finally {
+			this.delivering = false;
 		}
 	}
 

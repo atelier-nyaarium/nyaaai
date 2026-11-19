@@ -1,0 +1,45 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "keyReader.run",
+	"name": "a-check-that-throws-at-once-shows-unreachable-and-leaves-no-timer",
+	"input": {
+		"startMs": 5000000,
+		"steps": [
+			{
+				"kind": "read"
+			},
+			{
+				"kind": "advance",
+				"ms": 60000
+			}
+		],
+		"checks": "throwAtOnce"
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 5000000,
+				"shown": [
+					{
+						"kind": "checking"
+					},
+					{
+						"kind": "unreachable"
+					}
+				],
+				"signalled": [],
+				"open": [],
+				"busy": false
+			},
+			{
+				"nowMs": 5060000,
+				"shown": [],
+				"signalled": [],
+				"open": [],
+				"busy": false
+			}
+		],
+		"waiting": []
+	}
+}

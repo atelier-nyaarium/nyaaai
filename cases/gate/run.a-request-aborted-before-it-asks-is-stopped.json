@@ -33,6 +33,7 @@
 						}
 					}
 				],
+				"inside": [],
 				"waits": [],
 				"told": [],
 				"gates": [
@@ -54,6 +55,7 @@
 					"serial": 1
 				},
 				"resolved": [],
+				"inside": [],
 				"waits": [],
 				"told": [],
 				"gates": [

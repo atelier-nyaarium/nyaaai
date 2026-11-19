@@ -42,7 +42,12 @@ export const keyReader = caseGroup("keyReader", {
 	kinds: {
 		/** One reader on the timer wheel, over checks the script holds. */
 		run: kind(
-			z.object({ startMs: z.int(), steps: z.array(Step()).min(1) }),
+			z.object({
+				startMs: z.int(),
+				/** How the checks treat their signal: end on it (default), ignore it, or throw at once. */
+				checks: z.enum(["endOnSignal", "ignoreSignal", "throwAtOnce"]).exactOptional(),
+				steps: z.array(Step()).min(1),
+			}),
 			z.object({
 				steps: z.array(Outcome()),
 				/** Timers still waiting at the end, after the reader is disposed. */
@@ -54,6 +59,8 @@ export const keyReader = caseGroup("keyReader", {
 				interface Check {
 					settle: (answer: { state: z.infer<typeof KeyState> } | { failed: string }) => void;
 					closed: boolean;
+					/** Its signal ended. */
+					ended: boolean;
 					chain: Promise<void> | undefined;
 					awaited: boolean;
 				}
@@ -62,11 +69,13 @@ export const keyReader = caseGroup("keyReader", {
 				let signalled: Array<{ check: number; by: "deadline" | "caller" }> = [];
 				const reader = new KeyReader(
 					scheduler,
-					(signal) =>
-						new Promise((resolve, reject) => {
+					(signal) => {
+						if (input.checks === "throwAtOnce") throw new Error("thrown");
+						return new Promise((resolve, reject) => {
 							const number = checks.length + 1;
 							const held: Check = {
 								closed: false,
+								ended: false,
 								chain: undefined,
 								awaited: false,
 								settle: (answer) => {
@@ -80,32 +89,37 @@ export const keyReader = caseGroup("keyReader", {
 							signal.addEventListener(
 								"abort",
 								() => {
+									held.ended = true;
 									if (held.closed) return;
 									const reason = signal.reason as { name?: string } | undefined;
 									signalled.push({
 										check: number,
 										by: reason?.name === "TimeoutError" ? "deadline" : "caller",
 									});
-									held.settle({ failed: "ended" });
+									if (input.checks !== "ignoreSignal") held.settle({ failed: "ended" });
 								},
 								{ once: true },
 							);
-						}),
+						});
+					},
 					(state) => shown.push(state),
 				);
 				const steps: Array<z.infer<ReturnType<typeof Outcome>>> = [];
 				for (const step of input.steps) {
 					if (step.kind === "read") {
+						const began = checks.length;
 						const chain = reader.read();
-						const held = checks[checks.length - 1];
-						if (held !== undefined) held.chain = chain;
+						const held = checks[began];
+						// A check that never began has ended with the read.
+						if (held === undefined) await chain;
+						else held.chain = chain;
 					} else if (step.kind === "answer") checks[step.check - 1]?.settle({ state: step.state });
 					else if (step.kind === "fail") checks[step.check - 1]?.settle({ failed: step.message });
 					else if (step.kind === "advance") wheel.advance(step.ms);
 					else reader.dispose();
 					// A closed check's chain has run once awaited.
 					for (const held of checks) {
-						if (!held.closed || held.awaited || held.chain === undefined) continue;
+						if (!(held.closed || held.ended) || held.awaited || held.chain === undefined) continue;
 						held.awaited = true;
 						await held.chain;
 					}

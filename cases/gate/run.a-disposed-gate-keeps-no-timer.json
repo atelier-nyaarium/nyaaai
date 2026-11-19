@@ -1,0 +1,170 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "gate.run",
+	"name": "a-disposed-gate-keeps-no-timer",
+	"input": {
+		"startMs": 1000000,
+		"steps": [
+			{
+				"kind": "admit",
+				"request": "a",
+				"model": "lab/model-a"
+			},
+			{
+				"kind": "dispose"
+			},
+			{
+				"kind": "cool",
+				"model": "lab/model-a"
+			},
+			{
+				"kind": "cool",
+				"model": "lab/model-b",
+				"retryAfterMs": 60000
+			},
+			{
+				"kind": "clear",
+				"prefix": ""
+			},
+			{
+				"kind": "advance",
+				"ms": 60000
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1000000,
+				"settled": null,
+				"ticket": null,
+				"resolved": [
+					{
+						"request": "a",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "lab/model-a",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						}
+					}
+				],
+				"inside": [],
+				"waits": [],
+				"told": [],
+				"gates": [
+					{
+						"model": "lab/model-a",
+						"gate": {
+							"phase": "open",
+							"generation": 0,
+							"pauses": 0,
+							"resumeAt": 0,
+							"probe": null,
+							"queued": 0
+						}
+					}
+				],
+				"holding": []
+			},
+			{
+				"nowMs": 1000000,
+				"settled": null,
+				"ticket": null,
+				"resolved": [],
+				"inside": [],
+				"waits": [],
+				"told": [],
+				"gates": [
+					{
+						"model": "lab/model-a",
+						"gate": null
+					}
+				],
+				"holding": []
+			},
+			{
+				"nowMs": 1000000,
+				"settled": null,
+				"ticket": null,
+				"resolved": [],
+				"inside": [],
+				"waits": [],
+				"told": [],
+				"gates": [
+					{
+						"model": "lab/model-a",
+						"gate": null
+					}
+				],
+				"holding": []
+			},
+			{
+				"nowMs": 1000000,
+				"settled": null,
+				"ticket": null,
+				"resolved": [],
+				"inside": [],
+				"waits": [],
+				"told": [],
+				"gates": [
+					{
+						"model": "lab/model-a",
+						"gate": null
+					},
+					{
+						"model": "lab/model-b",
+						"gate": null
+					}
+				],
+				"holding": []
+			},
+			{
+				"nowMs": 1000000,
+				"settled": null,
+				"ticket": null,
+				"resolved": [],
+				"inside": [],
+				"waits": [],
+				"told": [],
+				"gates": [
+					{
+						"model": "lab/model-a",
+						"gate": null
+					},
+					{
+						"model": "lab/model-b",
+						"gate": null
+					}
+				],
+				"holding": []
+			},
+			{
+				"nowMs": 1060000,
+				"settled": null,
+				"ticket": null,
+				"resolved": [],
+				"inside": [],
+				"waits": [],
+				"told": [],
+				"gates": [
+					{
+						"model": "lab/model-a",
+						"gate": null
+					},
+					{
+						"model": "lab/model-b",
+						"gate": null
+					}
+				],
+				"holding": []
+			}
+		],
+		"waiting": []
+	}
+}

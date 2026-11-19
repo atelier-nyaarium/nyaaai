@@ -1,0 +1,122 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.run",
+	"name": "a-listener-that-starts-a-check-is-told-after-the-changes-already-waiting",
+	"input": {
+		"startMs": 2000000,
+		"entries": [
+			{
+				"id": "main",
+				"kind": "openrouter",
+				"label": "Main"
+			}
+		],
+		"keys": {
+			"main": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"usage": 1
+					}
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "listenAndCheck",
+				"id": "main"
+			},
+			{
+				"kind": "billed",
+				"id": "main",
+				"reply": {
+					"source": "go",
+					"allowance": 1
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0,
+				"parked": []
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "main",
+						"changed": [
+							"billed"
+						]
+					},
+					{
+						"entry": "main",
+						"changed": [
+							"key"
+						]
+					},
+					{
+						"entry": "main",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "ok",
+							"usage": 1
+						},
+						"billed": {
+							"billing": "go",
+							"allowance": 1
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 1,
+				"parked": []
+			}
+		],
+		"requests": [
+			"https://openrouter.ai/api/v1/key"
+		],
+		"waiting": []
+	}
+}

@@ -1,0 +1,156 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.run",
+	"name": "a-list-that-repeats-an-id-keeps-its-first-row",
+	"input": {
+		"startMs": 2000000,
+		"entries": [
+			{
+				"id": "main",
+				"kind": "openrouter",
+				"label": "Main"
+			},
+			{
+				"id": "main",
+				"kind": "opencode",
+				"label": "Again",
+				"plan": "go"
+			}
+		],
+		"keys": {},
+		"exchanges": [],
+		"steps": [
+			{
+				"kind": "billed",
+				"id": "main",
+				"reply": {
+					"source": "go",
+					"allowance": 1
+				}
+			},
+			{
+				"kind": "list",
+				"entries": [
+					{
+						"id": "main",
+						"kind": "openrouter",
+						"label": "Main"
+					},
+					{
+						"id": "main",
+						"kind": "ollama",
+						"label": "Main",
+						"url": "http://lab.local:1"
+					}
+				]
+			},
+			{
+				"kind": "list",
+				"entries": [
+					{
+						"id": "main",
+						"kind": "openrouter",
+						"label": "Renamed"
+					},
+					{
+						"id": "main",
+						"kind": "opencode",
+						"label": "Main"
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "main",
+						"changed": [
+							"billed"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "go",
+							"allowance": 1
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0,
+				"parked": []
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "go",
+							"allowance": 1
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0,
+				"parked": []
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "go",
+							"allowance": 1
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0,
+				"parked": []
+			}
+		],
+		"requests": [],
+		"waiting": []
+	}
+}

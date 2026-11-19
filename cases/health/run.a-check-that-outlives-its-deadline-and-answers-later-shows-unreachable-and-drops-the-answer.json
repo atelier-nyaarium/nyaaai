@@ -1,0 +1,186 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.run",
+	"name": "a-check-that-outlives-its-deadline-and-answers-later-shows-unreachable-and-drops-the-answer",
+	"input": {
+		"startMs": 2000000,
+		"entries": [
+			{
+				"id": "main",
+				"kind": "openrouter",
+				"label": "Main"
+			}
+		],
+		"keys": {
+			"main": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"exchanges": [],
+		"steps": [
+			{
+				"kind": "hold",
+				"at": "check"
+			},
+			{
+				"kind": "check",
+				"id": "main"
+			},
+			{
+				"kind": "advance",
+				"ms": 29999,
+				"idle": false
+			},
+			{
+				"kind": "advance",
+				"ms": 1
+			},
+			{
+				"kind": "release",
+				"hold": 1,
+				"state": {
+					"kind": "ok",
+					"usage": 9
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0,
+				"parked": []
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "main",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "checking"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0,
+				"parked": [
+					1
+				]
+			},
+			{
+				"nowMs": 2029999,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "checking"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0,
+				"parked": [
+					1
+				]
+			},
+			{
+				"nowMs": 2030000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "main",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "unreachable"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0,
+				"parked": [
+					1
+				]
+			},
+			{
+				"nowMs": 2030000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "unreachable"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0,
+				"parked": []
+			}
+		],
+		"requests": [],
+		"waiting": []
+	}
+}

@@ -16403,6 +16403,14 @@
 									},
 									"abortedBefore": {
 										"type": "boolean"
+									},
+									"inside": {
+										"type": "string",
+										"enum": [
+											"cool",
+											"tryAdmit",
+											"settleTrigger"
+										]
 									}
 								},
 								"required": [
@@ -16455,6 +16463,27 @@
 								"required": [
 									"kind",
 									"request",
+									"outcome"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "settleTicket"
+									},
+									"ticket": {
+										"$ref": "health.output.json#/$defs/Ticket"
+									},
+									"outcome": {
+										"$ref": "health.output.json#/$defs/GateOutcome"
+									}
+								},
+								"required": [
+									"kind",
+									"ticket",
 									"outcome"
 								],
 								"additionalProperties": false
@@ -16610,6 +16639,79 @@
 									"additionalProperties": false
 								}
 							},
+							"inside": {
+								"type": "array",
+								"items": {
+									"type": "object",
+									"properties": {
+										"request": {
+											"type": "string"
+										},
+										"gate": {
+											"anyOf": [
+												{
+													"type": "object",
+													"properties": {
+														"phase": {
+															"type": "string",
+															"enum": [
+																"open",
+																"paused",
+																"probing"
+															]
+														},
+														"generation": {
+															"type": "integer",
+															"minimum": -9007199254740991,
+															"maximum": 9007199254740991
+														},
+														"pauses": {
+															"type": "integer",
+															"minimum": -9007199254740991,
+															"maximum": 9007199254740991
+														},
+														"resumeAt": {
+															"type": "number"
+														},
+														"probe": {
+															"anyOf": [
+																{
+																	"$ref": "health.output.json#/$defs/Ticket"
+																},
+																{
+																	"type": "null"
+																}
+															]
+														},
+														"queued": {
+															"type": "integer",
+															"minimum": -9007199254740991,
+															"maximum": 9007199254740991
+														}
+													},
+													"required": [
+														"phase",
+														"generation",
+														"pauses",
+														"resumeAt",
+														"probe",
+														"queued"
+													],
+													"additionalProperties": false
+												},
+												{
+													"type": "null"
+												}
+											]
+										}
+									},
+									"required": [
+										"request",
+										"gate"
+									],
+									"additionalProperties": false
+								}
+							},
 							"waits": {
 								"type": "array",
 								"items": {
@@ -16720,6 +16822,7 @@
 							"settled",
 							"ticket",
 							"resolved",
+							"inside",
 							"waits",
 							"told",
 							"gates",
@@ -16748,6 +16851,14 @@
 					"type": "integer",
 					"minimum": -9007199254740991,
 					"maximum": 9007199254740991
+				},
+				"checks": {
+					"type": "string",
+					"enum": [
+						"endOnSignal",
+						"ignoreSignal",
+						"throwAtOnce"
+					]
 				},
 				"steps": {
 					"minItems": 1,
@@ -17056,6 +17167,73 @@
 								"properties": {
 									"kind": {
 										"type": "string",
+										"const": "hold"
+									},
+									"at": {
+										"type": "string",
+										"enum": [
+											"store",
+											"check"
+										]
+									}
+								},
+								"required": [
+									"kind",
+									"at"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "release"
+									},
+									"hold": {
+										"type": "integer",
+										"minimum": 1,
+										"maximum": 9007199254740991
+									},
+									"state": {
+										"$ref": "provider.output.json#/$defs/KeyState"
+									},
+									"answer": {
+										"$ref": "#/$defs/HealthKeyAnswer"
+									},
+									"idle": {
+										"type": "boolean",
+										"const": false
+									}
+								},
+								"required": [
+									"kind",
+									"hold"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "listenAndCheck"
+									},
+									"id": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"kind",
+									"id"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
 										"const": "list"
 									},
 									"entries": {
@@ -17063,6 +17241,10 @@
 										"items": {
 											"$ref": "provider.output.json#/$defs/ProviderEntry"
 										}
+									},
+									"idle": {
+										"type": "boolean",
+										"const": false
 									}
 								},
 								"required": [
@@ -17083,6 +17265,10 @@
 									},
 									"answer": {
 										"$ref": "#/$defs/HealthKeyAnswer"
+									},
+									"idle": {
+										"type": "boolean",
+										"const": false
 									}
 								},
 								"required": [
@@ -17101,6 +17287,10 @@
 									},
 									"id": {
 										"type": "string"
+									},
+									"idle": {
+										"type": "boolean",
+										"const": false
 									}
 								},
 								"required": [
@@ -17342,6 +17532,10 @@
 										"type": "integer",
 										"minimum": 0,
 										"maximum": 9007199254740991
+									},
+									"idle": {
+										"type": "boolean",
+										"const": false
 									}
 								},
 								"required": [
@@ -17553,6 +17747,14 @@
 								"type": "integer",
 								"minimum": -9007199254740991,
 								"maximum": 9007199254740991
+							},
+							"parked": {
+								"type": "array",
+								"items": {
+									"type": "integer",
+									"minimum": -9007199254740991,
+									"maximum": 9007199254740991
+								}
 							}
 						},
 						"required": [
@@ -17561,7 +17763,8 @@
 							"changes",
 							"entries",
 							"run",
-							"requests"
+							"requests",
+							"parked"
 						],
 						"additionalProperties": false
 					}

@@ -15,6 +15,8 @@ export interface GateDeps {
 	ids: Ids;
 	pauseMs?: number;
 	maxPauses?: number;
+	/** Told each ticket in the gate call that makes it. */
+	onTicket?: (ticket: Ticket) => void;
 }
 
 /** A model's gate as data. */
@@ -80,6 +82,11 @@ export class ProviderGate {
 	private readonly pauseMs: number;
 	private readonly maxPauses: number;
 	private serial = 0;
+	private disposed = false;
+	/** Callbacks owed once the gate's own state is whole. */
+	private readonly effects: Array<() => void> = [];
+	private depth = 0;
+	private flushing = false;
 
 	constructor(private readonly d: GateDeps) {
 		this.id = d.ids.newId();
@@ -87,44 +94,50 @@ export class ProviderGate {
 		this.maxPauses = d.maxPauses ?? MAX_PAUSES;
 	}
 
-	/** Retries get front priority. */
+	/** Retries get front priority. A disposed gate admits nothing. */
 	admit(
 		model: string,
 		signal: AbortSignal,
 		onWait?: (waiting: GateWaiting) => void,
 		again = false,
 	): Promise<Admission> {
-		if (signal.aborted) return Promise.resolve({ kind: "stopped" });
-		const gate = this.gateOf(model);
-		if (gate.phase === "open")
-			return Promise.resolve(this.shifting(model, gate, () => this.go(model, gate, false)));
-		if (gate.phase === "probing" && gate.probe === null)
-			return Promise.resolve(this.shifting(model, gate, () => this.go(model, gate, true)));
-		return new Promise((resolve) => {
-			const stop = () => {
-				gate.queue = gate.queue.filter((queued) => queued !== waiter);
-				resolve({ kind: "stopped" });
-			};
-			const waiter: Waiter = {
-				admit: (admission) => {
-					signal.removeEventListener("abort", stop);
-					resolve(admission);
-				},
-				onWait,
-			};
-			signal.addEventListener("abort", stop, { once: true });
-			if (again) gate.queue.unshift(waiter);
-			else gate.queue.push(waiter);
-			onWait?.(this.waitOf(model, gate));
+		if (signal.aborted || this.disposed) return Promise.resolve({ kind: "stopped" });
+		return this.act(() => {
+			const gate = this.gateOf(model);
+			if (gate.phase === "open")
+				return Promise.resolve(this.shifting(model, gate, () => this.go(model, gate, false)));
+			if (gate.phase === "probing" && gate.probe === null)
+				return Promise.resolve(this.shifting(model, gate, () => this.go(model, gate, true)));
+			return new Promise<Admission>((resolve) => {
+				const stop = () => {
+					gate.queue = gate.queue.filter((queued) => queued !== waiter);
+					resolve({ kind: "stopped" });
+				};
+				const waiter: Waiter = {
+					admit: (admission) => {
+						signal.removeEventListener("abort", stop);
+						resolve(admission);
+					},
+					onWait,
+				};
+				signal.addEventListener("abort", stop, { once: true });
+				if (again) gate.queue.unshift(waiter);
+				else gate.queue.push(waiter);
+				const waiting = this.waitOf(model, gate);
+				if (onWait !== undefined) this.effects.push(() => onWait(waiting));
+			});
 		});
 	}
 
 	/** Nonblocking, even for probes. */
 	tryAdmit(model: string): Ticket | null {
-		const gate = this.gateOf(model);
-		if (!readyOf(gate)) return null;
-		const admission = this.shifting(model, gate, () => this.go(model, gate, gate.phase === "probing"));
-		return admission.kind === "go" ? admission.ticket : null;
+		if (this.disposed) return null;
+		return this.act(() => {
+			const gate = this.gateOf(model);
+			if (!readyOf(gate)) return null;
+			const admission = this.shifting(model, gate, () => this.go(model, gate, gate.phase === "probing"));
+			return admission.kind === "go" ? admission.ticket : null;
+		});
 	}
 
 	/** Open or probe-ready. */
@@ -135,44 +148,57 @@ export class ProviderGate {
 
 	/** Pauses an open model. */
 	cool(model: string, retryAfterMs?: number): void {
-		const gate = this.gateOf(model);
-		if (gate.phase !== "open") return;
-		this.shifting(model, gate, () => {
-			gate.pauses = 1;
-			this.pause(model, gate, retryAfterMs);
+		if (this.disposed) return;
+		this.act(() => {
+			const gate = this.gateOf(model);
+			if (gate.phase !== "open") return;
+			this.shifting(model, gate, () => {
+				gate.pauses = 1;
+				this.pause(model, gate, retryAfterMs);
+			});
 		});
 	}
 
 	/** Reopens matching gates. */
 	clear(matches: (model: string) => boolean): void {
-		for (const [model, gate] of this.models) {
-			if (!matches(model) || gate.phase === "open") continue;
-			this.shifting(model, gate, () => {
-				gate.cancel?.();
-				gate.cancel = null;
-				gate.probe = null;
-				this.reopen(gate, (waiter) => waiter.admit(this.go(model, gate, false)));
-			});
-		}
+		if (this.disposed) return;
+		this.act(() => {
+			for (const [model, gate] of this.models) {
+				if (!matches(model) || gate.phase === "open") continue;
+				this.shifting(model, gate, () => {
+					gate.cancel?.();
+					gate.cancel = null;
+					gate.probe = null;
+					this.reopen(gate, (waiter) => waiter.admit(this.go(model, gate, false)));
+				});
+			}
+		});
 	}
 
-	/** Every admitted ticket settles once. */
+	/**
+	 * Every admitted ticket settles once. A success of a request admitted earlier resets the give-up
+	 * count even while the gate is paused or probing. A ticket of another gate does nothing.
+	 */
 	settle(ticket: Ticket, outcome: GateOutcome, retryAfterMs?: number): GateSettled {
-		const gate = this.gateOf(ticket.model);
-		return this.shifting(ticket.model, gate, () => {
-			if (gate.probe !== null && sameTicket(gate.probe, ticket))
-				return this.settleProbe(ticket.model, gate, outcome, retryAfterMs);
-			if (outcome !== "overloaded") {
-				if (outcome === "ok") gate.pauses = 0;
-				return "done";
-			}
-			if (gate.phase !== "open") return "again";
-			// Ignore stale probe refusals.
-			if (ticket.generation < gate.generation) return "again";
-			gate.pauses = 1;
-			this.pause(ticket.model, gate, retryAfterMs);
-			return "again";
-		});
+		if (this.disposed || ticket.gate !== this.id) return "done";
+		const gate = this.models.get(ticket.model);
+		if (gate === undefined) return "done";
+		return this.act(() =>
+			this.shifting(ticket.model, gate, () => {
+				if (gate.probe !== null && sameTicket(gate.probe, ticket))
+					return this.settleProbe(ticket.model, gate, outcome, retryAfterMs);
+				if (outcome !== "overloaded") {
+					if (outcome === "ok") gate.pauses = 0;
+					return "done";
+				}
+				if (gate.phase !== "open") return "again";
+				// Ignore stale probe refusals.
+				if (ticket.generation < gate.generation) return "again";
+				gate.pauses = 1;
+				this.pause(ticket.model, gate, retryAfterMs);
+				return "again";
+			}),
+		);
 	}
 
 	/** One model's gate; none until the gate is first used. */
@@ -205,14 +231,18 @@ export class ProviderGate {
 	}
 
 	dispose(): void {
-		const turned: string[] = [];
-		for (const [model, gate] of this.models) {
-			if (!readyOf(gate)) turned.push(model);
-			gate.cancel?.();
-			for (const waiter of gate.queue.splice(0)) waiter.admit({ kind: "stopped" });
-		}
-		this.models.clear();
-		for (const model of turned) this.tell(model);
+		if (this.disposed) return;
+		this.act(() => {
+			this.disposed = true;
+			const turned: string[] = [];
+			for (const [model, gate] of this.models) {
+				if (!readyOf(gate)) turned.push(model);
+				gate.cancel?.();
+				for (const waiter of gate.queue.splice(0)) waiter.admit({ kind: "stopped" });
+			}
+			this.models.clear();
+			for (const model of turned) this.tell(model);
+		});
 		this.listeners.clear();
 	}
 
@@ -249,13 +279,16 @@ export class ProviderGate {
 		gate.phase = "paused";
 		gate.resumeAt = this.d.scheduler.nowMs() + waitMs;
 		gate.cancel?.();
-		gate.cancel = this.d.scheduler.schedule(waitMs, () =>
-			this.shifting(model, gate, () => {
-				gate.cancel = null;
-				gate.phase = "probing";
-				this.nextProbe(model, gate);
-			}),
-		);
+		gate.cancel = this.d.scheduler.schedule(waitMs, () => {
+			if (this.disposed) return;
+			this.act(() =>
+				this.shifting(model, gate, () => {
+					gate.cancel = null;
+					gate.phase = "probing";
+					this.nextProbe(model, gate);
+				}),
+			);
+		});
 		this.notify(model, gate);
 	}
 
@@ -276,12 +309,17 @@ export class ProviderGate {
 			serial: this.serial,
 		});
 		if (probe) gate.probe = ticket;
+		this.d.onTicket?.(ticket);
 		return { kind: "go", ticket };
 	}
 
+	/** Each queued waiter is told, once the gate's state is whole. */
 	private notify(model: string, gate: ModelGate): void {
 		const waiting = this.waitOf(model, gate);
-		for (const waiter of gate.queue) waiter.onWait?.(waiting);
+		for (const waiter of gate.queue) {
+			const { onWait } = waiter;
+			if (onWait !== undefined) this.effects.push(() => onWait(waiting));
+		}
 	}
 
 	private waitOf(model: string, gate: ModelGate): GateWaiting {
@@ -303,12 +341,40 @@ export class ProviderGate {
 
 	private tell(model: string): void {
 		for (const listener of [...this.listeners]) {
+			this.effects.push(() => {
+				try {
+					listener(model);
+				} catch {
+					// A listener cannot change the gate.
+				}
+			});
+		}
+	}
+
+	/** Runs a change, then the callbacks it made, in order; a callback's own calls queue behind them. */
+	private act<T>(run: () => T): T {
+		this.depth += 1;
+		let result: T;
+		try {
+			result = run();
+		} finally {
+			this.depth -= 1;
+		}
+		if (this.depth === 0 && !this.flushing) {
+			this.flushing = true;
 			try {
-				listener(model);
-			} catch {
-				// A listener cannot change the gate.
+				for (let effect = this.effects.shift(); effect !== undefined; effect = this.effects.shift()) {
+					try {
+						effect();
+					} catch {
+						// A callback cannot change the gate.
+					}
+				}
+			} finally {
+				this.flushing = false;
 			}
 		}
+		return result;
 	}
 
 	private gateOf(model: string): ModelGate {

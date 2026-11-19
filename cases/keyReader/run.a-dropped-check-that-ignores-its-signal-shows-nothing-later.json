@@ -1,0 +1,91 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "keyReader.run",
+	"name": "a-dropped-check-that-ignores-its-signal-shows-nothing-later",
+	"input": {
+		"startMs": 5000000,
+		"steps": [
+			{
+				"kind": "read"
+			},
+			{
+				"kind": "read"
+			},
+			{
+				"kind": "answer",
+				"check": 1,
+				"state": {
+					"kind": "ok",
+					"usage": 4.12,
+					"limit": 20
+				}
+			},
+			{
+				"kind": "answer",
+				"check": 2,
+				"state": {
+					"kind": "rejected"
+				}
+			}
+		],
+		"checks": "ignoreSignal"
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 5000000,
+				"shown": [
+					{
+						"kind": "checking"
+					}
+				],
+				"signalled": [],
+				"open": [
+					1
+				],
+				"busy": true
+			},
+			{
+				"nowMs": 5000000,
+				"shown": [
+					{
+						"kind": "checking"
+					}
+				],
+				"signalled": [
+					{
+						"check": 1,
+						"by": "caller"
+					}
+				],
+				"open": [
+					1,
+					2
+				],
+				"busy": true
+			},
+			{
+				"nowMs": 5000000,
+				"shown": [],
+				"signalled": [],
+				"open": [
+					2
+				],
+				"busy": true
+			},
+			{
+				"nowMs": 5000000,
+				"shown": [
+					{
+						"kind": "rejected"
+					}
+				],
+				"signalled": [],
+				"open": [],
+				"busy": false
+			}
+		],
+		"waiting": []
+	}
+}

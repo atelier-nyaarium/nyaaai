@@ -1,0 +1,227 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.run",
+	"name": "an-entry-removed-and-added-again-after-late-events-starts-clean",
+	"input": {
+		"startMs": 2000000,
+		"entries": [
+			{
+				"id": "go",
+				"kind": "opencode",
+				"plan": "go",
+				"label": "Go"
+			}
+		],
+		"keys": {
+			"go": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "model-a"
+						}
+					]
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "list",
+				"entries": []
+			},
+			{
+				"kind": "served",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go"
+					},
+					"key": "lab/model-a"
+				},
+				"billingSource": "balance"
+			},
+			{
+				"kind": "failed",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go"
+					},
+					"key": "lab/model-a"
+				},
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "outOfCredit"
+				},
+				"onward": false
+			},
+			{
+				"kind": "list",
+				"entries": [
+					{
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go"
+					}
+				]
+			},
+			{
+				"kind": "deferred",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go"
+					},
+					"key": "lab/model-a"
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0,
+				"parked": []
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0,
+				"parked": []
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0,
+				"parked": []
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "go",
+						"changed": [
+							"key"
+						]
+					},
+					{
+						"entry": "go",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "ok"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 1,
+				"parked": []
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "skip",
+					"skip": null
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "ok"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 1,
+				"parked": []
+			}
+		],
+		"requests": [
+			"https://opencode.ai/inference/go/v1/models"
+		],
+		"waiting": []
+	}
+}

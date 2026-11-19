@@ -1,4 +1,4 @@
-import { ProviderGate } from "@nyaaai/agentic/health/gate";
+import { type GateState, ProviderGate } from "@nyaaai/agentic/health/gate";
 import { countedIds } from "@nyaaai/contract/id";
 import { z } from "@nyaaai/contract/shape";
 import { Admission, GateOutcome, GateSettled, GateWaiting, Ticket } from "@nyaaai/contract/shapes/health";
@@ -22,6 +22,8 @@ const Step = () =>
 			/** The caller's abort, this long after the step. */
 			abortAfterMs: z.int().min(0).exactOptional(),
 			abortedBefore: z.boolean().exactOptional(),
+			/** What the waiter's callback does inside the gate, after it records the gate it sees. */
+			inside: z.enum(["cool", "tryAdmit", "settleTrigger"]).exactOptional(),
 		}),
 		z.object({ kind: z.literal("tryAdmit"), request: z.string(), model: z.string() }),
 		/** Settles the ticket the named request was given. */
@@ -31,6 +33,8 @@ const Step = () =>
 			outcome: GateOutcome,
 			retryAfterMs: z.int().min(0).exactOptional(),
 		}),
+		/** Settles a ticket given as data: another gate's, or one made before a dispose. */
+		z.object({ kind: z.literal("settleTicket"), ticket: Ticket, outcome: GateOutcome }),
 		z.object({ kind: z.literal("cool"), model: z.string(), retryAfterMs: z.int().min(0).exactOptional() }),
 		/** Reopens every non-open gate whose model starts with the prefix. */
 		z.object({ kind: z.literal("clear"), prefix: z.string() }),
@@ -66,6 +70,8 @@ const Outcome = () =>
 		ticket: Ticket.nullable(),
 		/** Admissions that resolved during the step, in order. */
 		resolved: z.array(z.object({ request: z.string(), admission: Admission })),
+		/** The gate a waiter's callback saw when it ran, in order. */
+		inside: z.array(z.object({ request: z.string(), gate: GateData().shape.gate })),
 		/** What waiting requests were told, in order. */
 		waits: z.array(z.object({ request: z.string(), waiting: GateWaiting })),
 		/** Models whose gate turned ready or not ready, in order. */
@@ -116,6 +122,7 @@ export const gate = caseGroup("gate", {
 				type Resolved = Array<{ request: string; admission: z.infer<typeof Admission> }>;
 				let resolved: Resolved = [];
 				let waits: Array<{ request: string; waiting: z.infer<typeof GateWaiting> }> = [];
+				let inside: Array<{ request: string; gate: GateState | null }> = [];
 				let told: string[] = [];
 				gate.onChange((model) => told.push(model));
 				const tickets = new Map<string, z.infer<typeof Ticket>>();
@@ -160,7 +167,16 @@ export const gate = caseGroup("gate", {
 							.admit(
 								step.model,
 								controller.signal,
-								(waiting) => waits.push({ request: step.request, waiting }),
+								(waiting) => {
+									waits.push({ request: step.request, waiting });
+									inside.push({ request: step.request, gate: gate.stateOf(step.model) ?? null });
+									if (step.inside === "cool") gate.cool(step.model);
+									else if (step.inside === "tryAdmit") gate.tryAdmit(step.model);
+									else if (step.inside === "settleTrigger") {
+										const held = tickets.get("trigger");
+										if (held !== undefined) gate.settle(held, "overloaded");
+									}
+								},
 								step.again === true,
 							)
 							.then((admission) => {
@@ -183,6 +199,9 @@ export const gate = caseGroup("gate", {
 						const held = ticketOf(step.request);
 						use(held.model);
 						settled = gate.settle(held, step.outcome, step.retryAfterMs);
+					} else if (step.kind === "settleTicket") {
+						use(step.ticket.model);
+						settled = gate.settle(step.ticket, step.outcome);
 					} else if (step.kind === "cool") {
 						use(step.model);
 						gate.cool(step.model, step.retryAfterMs);
@@ -207,6 +226,7 @@ export const gate = caseGroup("gate", {
 						settled,
 						ticket,
 						resolved,
+						inside,
 						waits,
 						told,
 						gates: models.map((model) => ({ model, gate: gate.stateOf(model) ?? null })),
@@ -214,6 +234,7 @@ export const gate = caseGroup("gate", {
 					});
 					resolved = [];
 					waits = [];
+					inside = [];
 					told = [];
 				}
 				if (!disposed) gate.dispose();

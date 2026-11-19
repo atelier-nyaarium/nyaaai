@@ -104,7 +104,8 @@
 					}
 				],
 				"run": [],
-				"requests": 0
+				"requests": 0,
+				"parked": []
 			},
 			{
 				"nowMs": 2000000,
@@ -125,7 +126,8 @@
 					}
 				],
 				"run": [],
-				"requests": 0
+				"requests": 0,
+				"parked": []
 			},
 			{
 				"nowMs": 2000000,
@@ -146,7 +148,8 @@
 					}
 				],
 				"run": [],
-				"requests": 0
+				"requests": 0,
+				"parked": []
 			},
 			{
 				"nowMs": 2000000,
@@ -167,7 +170,8 @@
 					}
 				],
 				"run": [],
-				"requests": 0
+				"requests": 0,
+				"parked": []
 			},
 			{
 				"nowMs": 2000000,
@@ -182,15 +186,14 @@
 							"kind": "none"
 						},
 						"pool": {
-							"kind": "paused",
-							"reason": "allowance",
-							"until": 2060000
+							"kind": "clear"
 						},
 						"waiting": []
 					}
 				],
 				"run": [],
-				"requests": 0
+				"requests": 0,
+				"parked": []
 			}
 		],
 		"requests": [],

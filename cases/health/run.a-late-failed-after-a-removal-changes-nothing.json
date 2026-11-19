@@ -1,0 +1,214 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.run",
+	"name": "a-late-failed-after-a-removal-changes-nothing",
+	"input": {
+		"startMs": 2000000,
+		"entries": [
+			{
+				"id": "go",
+				"kind": "opencode",
+				"plan": "go",
+				"label": "Go"
+			}
+		],
+		"keys": {},
+		"exchanges": [],
+		"steps": [
+			{
+				"kind": "list",
+				"entries": []
+			},
+			{
+				"kind": "failed",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go"
+					},
+					"key": "lab/model-a"
+				},
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "outOfCredit"
+				},
+				"onward": false
+			},
+			{
+				"kind": "failed",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go"
+					},
+					"key": "lab/model-a"
+				},
+				"failure": {
+					"category": "allowance",
+					"status": "allowance",
+					"message": "allowance"
+				},
+				"onward": false
+			},
+			{
+				"kind": "list",
+				"entries": [
+					{
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go"
+					}
+				]
+			},
+			{
+				"kind": "deferred",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go"
+					},
+					"key": "lab/model-a"
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0,
+				"parked": []
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0,
+				"parked": []
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0,
+				"parked": []
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "go",
+						"changed": [
+							"key"
+						]
+					},
+					{
+						"entry": "go",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0,
+				"parked": []
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "skip",
+					"skip": null
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0,
+				"parked": []
+			}
+		],
+		"requests": [],
+		"waiting": []
+	}
+}

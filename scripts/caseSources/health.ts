@@ -80,7 +80,10 @@ const settle = (request: string, outcome: string, retryAfterMs?: number): Step =
 	outcome,
 	...(retryAfterMs === undefined ? {} : { retryAfterMs }),
 });
-const advance = (ms: number): Step => ({ kind: "advance", ms });
+const advance = (ms: number, extra: Fields = {}): Step => ({ kind: "advance", ms, ...extra });
+const hold = (at: string): Step => ({ kind: "hold", at });
+const release = (n: number, extra: Fields = {}): Step => ({ kind: "release", hold: n, ...extra });
+const listenAndCheck = (id: string): Step => ({ kind: "listenAndCheck", id });
 const dispose: Step = { kind: "dispose" };
 
 const NONE = { kind: "none" };
@@ -696,6 +699,131 @@ export const healthCases: CaseSource[] = [
 			list(),
 			failed(GO, failure("allowance")),
 		],
+	}),
+
+	// A check held open, and what happens to it.
+	run("a-key-change-during-a-held-store-read-drops-that-check", {
+		entries: [MAIN],
+		keys: { main: { kind: "key", key: KEY } },
+		exchanges: [reply({ data: { usage: 2 } })],
+		steps: [hold("store"), check("main"), key("main", OTHER), release(1)],
+	}),
+	run("a-key-change-during-a-held-check-drops-that-check", {
+		entries: [MAIN],
+		keys: { main: { kind: "key", key: KEY } },
+		exchanges: [reply({ data: { usage: 2 } })],
+		steps: [hold("check"), check("main"), key("main", OTHER), release(1)],
+	}),
+	run("a-held-check-that-answers-after-a-key-change-is-dropped", {
+		entries: [MAIN],
+		keys: { main: { kind: "key", key: KEY } },
+		exchanges: [reply({ data: { usage: 2 } })],
+		steps: [hold("check"), check("main"), key("main", OTHER), release(1, { state: { kind: "ok", usage: 9 } })],
+	}),
+	run("an-entry-removed-during-its-check-has-no-state-and-tells-nothing-after", {
+		entries: [MAIN],
+		keys: { main: { kind: "key", key: KEY } },
+		steps: [hold("check"), check("main"), list(), release(1, { state: { kind: "ok", usage: 9 } })],
+	}),
+	run("an-entry-removed-during-its-store-read-is-not-checked", {
+		entries: [MAIN],
+		keys: { main: { kind: "key", key: KEY } },
+		exchanges: [OR_OK],
+		steps: [hold("store"), check("main"), list(), release(1)],
+	}),
+	run("an-entry-whose-url-changed-during-its-check-is-checked-again-and-the-old-answer-is-dropped", {
+		entries: [BOX],
+		exchanges: [BOX_OK],
+		steps: [
+			hold("check"),
+			check("box"),
+			list({ ...BOX, url: "http://lab.local:11500" }),
+			release(1, { state: { kind: "unreachable" } }),
+		],
+	}),
+	run("an-entry-whose-url-changed-during-its-store-read-ends-without-effect", {
+		entries: [BOX],
+		exchanges: [BOX_OK],
+		steps: [hold("store"), check("box"), list({ ...BOX, url: "http://lab.local:11500" }), release(1)],
+	}),
+	run("a-changed-kind-under-the-same-id-is-a-change-of-identity", {
+		entries: [MAIN],
+		keys: { main: { kind: "key", key: KEY } },
+		exchanges: [OR_OK, OC_OK],
+		steps: [
+			check("main"),
+			billed("main", "go", { allowance: 1 }),
+			failed(MAIN, failure("unavailable"), true),
+			list({ ...MAIN, kind: "opencode", plan: "go" }),
+		],
+	}),
+	run("a-check-that-outlives-its-deadline-and-answers-later-shows-unreachable-and-drops-the-answer", {
+		entries: [MAIN],
+		keys: { main: { kind: "key", key: KEY } },
+		steps: [
+			hold("check"),
+			check("main"),
+			advance(29_999, { idle: false }),
+			advance(1),
+			release(1, { state: { kind: "ok", usage: 9 } }),
+		],
+	}),
+	run("a-store-read-that-never-answers-ends-at-the-deadline", {
+		entries: [MAIN],
+		keys: { main: { kind: "key", key: KEY } },
+		steps: [
+			hold("store"),
+			check("main"),
+			advance(29_999, { idle: false }),
+			advance(1),
+			release(1, { answer: { kind: "key", key: KEY } }),
+		],
+	}),
+	run("a-late-served-after-a-removal-changes-nothing", {
+		entries: [GO],
+		steps: [list(), served(GO, "balance"), deferred(GO), list(GO)],
+	}),
+	run("a-late-failed-after-a-removal-changes-nothing", {
+		entries: [GO],
+		steps: [list(), failed(GO, failure("outOfCredit")), failed(GO, failure("allowance")), list(GO), deferred(GO)],
+	}),
+	run("an-entry-removed-and-added-again-after-late-events-starts-clean", {
+		entries: [GO],
+		keys: { go: { kind: "key", key: KEY } },
+		exchanges: [OC_OK],
+		steps: [list(), served(GO, "balance"), failed(GO, failure("outOfCredit")), list(GO), deferred(GO)],
+	}),
+	run("a-removed-and-added-url-entry-may-recheck-at-once", {
+		entries: [BOX],
+		exchanges: [BOX_OK, BOX_OK],
+		steps: [
+			failed(BOX, failure("network")),
+			keysOf("box"),
+			list(),
+			list(BOX),
+			failed(BOX, failure("network")),
+			keysOf("box"),
+		],
+	}),
+	run("a-list-that-repeats-an-id-keeps-its-first-row", {
+		entries: [MAIN, { ...MAIN, kind: "opencode", plan: "go", label: "Again" }],
+		steps: [
+			billed("main", "go", { allowance: 1 }),
+			list(MAIN, { ...MAIN, kind: "ollama", url: "http://lab.local:1" }),
+			list({ ...MAIN, label: "Renamed" }, { ...MAIN, kind: "opencode" }),
+		],
+	}),
+	run("a-dispose-checks-nothing", {
+		entries: [MAIN],
+		keys: { main: { kind: "key", key: KEY } },
+		exchanges: [OR_OK],
+		steps: [dispose, check("main"), key("main", OTHER), list(), billed("main", "go", { allowance: 1 })],
+	}),
+	run("a-listener-that-starts-a-check-is-told-after-the-changes-already-waiting", {
+		entries: [MAIN],
+		keys: { main: { kind: "key", key: KEY } },
+		exchanges: [OR_OK],
+		steps: [listenAndCheck("main"), billed("main", "go", { allowance: 1 })],
 	}),
 
 	// What a resolver reads for an entry.
