@@ -196,6 +196,18 @@ describe("banned symbols", () => {
 		writeFileSync(path.join(folder, "each.txt"), each.map((symbol) => `a${symbol}b\n`).join(""));
 		expect(bannedSymbols(folder).filter((hit) => hit.startsWith("each.txt"))).toHaveLength(each.length);
 	});
+
+	it("skips a tracked file that .gitattributes marks linguist-generated", () => {
+		const folder = path.join(temp, "symbols-generated");
+		mkdirSync(folder);
+		git(folder, ["init", "-b", "main"]);
+		writeFileSync(path.join(folder, "bundle.js"), "a\u{200c}b\n");
+		git(folder, ["add", "bundle.js"]);
+		expect(bannedSymbols(folder)).toEqual(["bundle.js:1"]);
+
+		writeFileSync(path.join(folder, ".gitattributes"), "bundle.js linguist-generated\n");
+		expect(bannedSymbols(folder)).toEqual([]);
+	});
 });
 
 describe("generated files", () => {

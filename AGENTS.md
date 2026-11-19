@@ -272,7 +272,7 @@ Engine code calls these, never the platform's own. Each is judged by cases. A ne
 - `rust/clippy.toml` refuses Rust's diverging methods through Clippy's `disallowed-methods`: trimming, case mapping, rounding, whitespace splits, `lines`, character classes. `contract` allows one where it implements the primitive.
 - Text is measured in UTF-16 code units. A cut never splits a surrogate pair.
 - Whitespace is ECMAScript's: `trimText`, `collapseSpace`.
-- `nfc` is Unicode NFC on tables frozen at 17.0, never the platform's. A lone surrogate becomes U+FFFD first. A code point unassigned in 17.0 passes through. `bun scripts/unicodeTables.ts <ucd folder>` writes both table modules from `UnicodeData.txt` and `CompositionExclusions.txt`; a later Unicode version is added beside them, never in place.
+- `nfc` is Unicode NFC on tables frozen at 17.0, never the platform's. A text already in NFC is returned as it is. A lone surrogate becomes U+FFFD first. A code point unassigned in 17.0 passes through. `bun scripts/unicodeTables.ts <ucd folder>` writes both table modules from `UnicodeData.txt` and `CompositionExclusions.txt`; a later Unicode version is added beside them, never in place.
 - Order is by code unit. No locale compare.
 - `canonicalJson` sorts keys by code unit. Fingerprints and dedup keys use it.
 - `roundHalfUp` is `Math.round`. `fixedText` is `toFixed`. `numberOfText` takes a JSON number spelling and nothing else.
@@ -357,7 +357,7 @@ bun <submodule>/scripts/consumer.ts assert --package    # also refuses a snapsho
 Parity of its own:
 
 - Packages `contract`, `testkit`, `adapter`, and a `parity.ts` at its root: `export default project({ sets, schemaOnly, groups, runs, cases, commands, rustAdapter, generated })`. NyaaAI's own `parity.ts` is the example.
-- It runs `consumer.ts`, `contract.ts`, `cases.ts`, `samples.ts`, `crates.ts` and `bannedSymbols.ts` from its root, and Clippy with the shared `clippy.toml`. `consumer.ts assert` runs with `--package` on its release path. The other scripts are NyaaAI's own. A residue test keeps what a consumer runs on the three packages, and `assert` fails when one is not linked.
+- It runs `consumer.ts`, `contract.ts`, `cases.ts`, `samples.ts`, `crates.ts` and `bannedSymbols.ts` from its root, and Clippy with the shared `clippy.toml`. `crates.ts` takes lock paths and defaults to `rust/Cargo.lock`; a missing `crate-ages.json` beside the lock counts as empty. The everyday gate runs `consumer.ts assert`, and the release path runs `consumer.ts assert --package`. The other scripts are NyaaAI's own. A residue test keeps what a consumer runs on the three packages, and `assert` fails when one is not linked.
 - A `sets` value is `{ crate, module, file }`, `file` relative to its root. A set `parity.ts` imports sits in `sets`, `schemaOnly` or `external`; `contract.ts` fails on any other.
 - `external`: sets generated elsewhere, each with its Rust target, or `null` for none. NyaaAI's own (`frames`, `tree`, `caseFile`) are external without being listed.
 - Opt in: `tests`, a command that must pass before a case refresh; `prompts`, the prompt folder; `roundTrip`, the kind `samples.ts` runs.
@@ -368,7 +368,8 @@ Parity of its own:
 - A refresh writes what `parity.generated.json` then lists: case files, schema files, generated Rust and prompt modules. Any other file is left alone.
 - The first refresh has no list to compare with, so it removes nothing. Delete generated files left from before by hand, once.
 - Group and kind names are letters and digits, a letter first. Case and run names are letters and digits in parts joined by one `.`, `_` or `-`.
-- Rust: path dependencies on the submodule's `rust/contract`, `rust/adapter` and `rust/testkit`. `cases` names the crate, module and folder the generator writes `shapes.rs`, `dispatch.rs` and `mod.rs` into. Handlers are by hand: `cases/<group>.rs`, `pub fn <kind>(input: <Group><Kind>Input) -> Outcome<<Group><Kind>Result>`. A context kind takes `context: &CaseContext` second.
+- Rust: path dependencies on the submodule's `rust/contract`, `rust/adapter` and `rust/testkit`. `cases` names the crate, module and folder the generator writes `shapes.rs`, `dispatch.rs` and `mod.rs` into. Handlers are by hand: `cases/<group>.rs`, `pub fn <kind>(input: <Group><Kind>Input) -> Outcome<<Group><Kind>Result>`. A context kind takes `context: &CaseContext` second. The module listing a shape set's modules (`mod.rs` beside the set files) is written by hand: the generator writes only the set files.
+- `snake`, `pascal` and `variant` throw on a text that makes no Rust identifier.
 - Its `main` serves with `nyaaai_adapter::runtime::serve`. A `case:` command goes to `cases::dispatch::dispatch(kind, input, root)` inside `blocking`, the root being the current directory read once at start. `rust/cli/src/main.rs` is the example.
 - `rustAdapter.build` and `.run` are relative to its root. `rust/target` is ignored in git: the runner fails on a case run that changes the tree.
 - Toolchain: crates of edition 2024; its `rust-toolchain.toml` pins the submodule's channel exactly, with `rustfmt` and `clippy`. `cargo fmt` runs from `rust/`. Biome of its own, under `node_modules` at its root or in `ts/`.
@@ -379,6 +380,7 @@ Parity of its own:
 - TypeScript: a consumer type-checks NyaaAI's source. A `tsconfig` at its root extends `<submodule>/ts/tsconfig.base.json`, includes the `src` of the packages it uses, emits to a folder at its own root, and is referenced by its projects. NyaaAI builds with TypeScript 7.0.2; one consumer compiles it with 6.0.3.
 - A workspace package of the consumer imports `@nyaaai/*` through the root link and declares nothing. `nyaaai.packages` at the root is the declaration. The root pin of a package dependency (Zod) is what makes it resolvable from the linked source.
 - Case files hold banned characters and U+FEFF as escapes; a consumer's residue and symbols checks need no exemption.
+- `bannedSymbols.ts` skips a tracked file marked `linguist-generated` (set or `true`) in `.gitattributes`, such as committed build output.
 - An in-tree submodule is swept by the consumer's own tools: ignore it in its formatter, its test runner and its own residue tests.
 
 ## Rules

@@ -185,9 +185,60 @@ const isAscii = (text: string): boolean => {
 	return true;
 };
 
-/** Unicode 17.0 NFC. */
+const SLOW = 255;
+let quick: Uint8Array | undefined;
+
+/** Per code point: its class if Yes, SLOW if No or Maybe; derived once from the tables. */
+const quickTable = (): Uint8Array => {
+	if (quick !== undefined) return quick;
+	let top = 0;
+	for (const packed of CCC) top = Math.max(top, packed >>> 8);
+	for (let at = 0; at < DECOMP.length; at += 3) top = Math.max(top, DECOMP[at]!);
+	for (let at = 0; at < COMPOSE.length; at += 3) top = Math.max(top, COMPOSE[at + 1]!);
+	const table = new Uint8Array(top + 1);
+	for (const packed of CCC) table[packed >>> 8] = packed & 0xff;
+	for (let at = 0; at < DECOMP.length; at += 3) {
+		const cp = DECOMP[at]!;
+		const second = DECOMP[at + 2]!;
+		if (second === 0 || composeOf(DECOMP[at + 1]!, second) !== cp) table[cp] = SLOW;
+	}
+	for (let at = 0; at < COMPOSE.length; at += 3) table[COMPOSE[at + 1]!] = SLOW;
+	for (let cp = V_BASE; cp < V_BASE + V_COUNT; cp++) table[cp] = SLOW;
+	for (let cp = T_BASE + 1; cp < T_BASE + T_COUNT; cp++) table[cp] = SLOW;
+	quick = table;
+	return table;
+};
+
+/** UAX #15 quick check: true only for a text that is already NFC. */
+const isNormal = (text: string): boolean => {
+	const table = quickTable();
+	let last = 0;
+	for (let at = 0; at < text.length; at++) {
+		let cp = text.charCodeAt(at);
+		if (cp < 0x300) {
+			last = 0;
+			continue;
+		}
+		if (cp >= 0xd800 && cp <= 0xdfff) {
+			const next = text.charCodeAt(at + 1);
+			if (cp > 0xdbff || !(next >= 0xdc00 && next <= 0xdfff)) return false;
+			cp = 0x10000 + ((cp - 0xd800) << 10) + (next - 0xdc00);
+			at += 1;
+		}
+		const held = cp < table.length ? table[cp]! : 0;
+		if (held === 0) {
+			last = 0;
+			continue;
+		}
+		if (held === SLOW || held < last) return false;
+		last = held;
+	}
+	return true;
+};
+
+/** Unicode 17.0 NFC; a text already in NFC comes back as it is. */
 export function nfc(text: string): string {
-	if (isAscii(text)) return text;
+	if (isAscii(text) || isNormal(text)) return text;
 	const codes: number[] = [];
 	for (let at = 0; at < text.length; at++) {
 		const unit = text.charCodeAt(at);

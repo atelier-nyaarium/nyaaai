@@ -1,0 +1,30 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "text.nfc",
+	"name": "quick-check-edges",
+	"input": {
+		"texts": [
+			"新設定ファイル",
+			"abc éd",
+			"xÅy",
+			"ạ́",
+			"ạ́",
+			"가",
+			"𝄞𠮷",
+			"café \ud800 ok"
+		]
+	},
+	"expected": {
+		"texts": [
+			"新設定ファイル",
+			"abc éd",
+			"xÅy",
+			"ạ́",
+			"ạ́",
+			"가",
+			"𝄞𠮷",
+			"café � ok"
+		]
+	}
+}

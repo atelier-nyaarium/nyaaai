@@ -1,5 +1,7 @@
 //! UTF-16 cuts preserve pairs.
 
+use std::sync::OnceLock;
+
 use crate::nfc_tables::{CCC, COMPOSE, DECOMP};
 
 pub fn text_length(text: &str) -> usize {
@@ -282,9 +284,70 @@ fn compose(codes: &mut Vec<u32>) {
     *codes = out;
 }
 
-/// Unicode 17.0 NFC.
+const SLOW: u8 = 255;
+
+/// Per code point: its class if Yes, SLOW if No or Maybe; derived once from the tables.
+fn quick_table() -> &'static [u8] {
+    static TABLE: OnceLock<Vec<u8>> = OnceLock::new();
+    TABLE.get_or_init(|| {
+        let mut top = 0;
+        for packed in CCC {
+            top = top.max(packed >> 8);
+        }
+        for row in DECOMP.as_chunks::<3>().0 {
+            top = top.max(row[0]);
+        }
+        for row in COMPOSE.as_chunks::<3>().0 {
+            top = top.max(row[1]);
+        }
+        let mut table = vec![0u8; top as usize + 1];
+        for packed in CCC {
+            table[(packed >> 8) as usize] = (packed & 0xff) as u8;
+        }
+        for row in DECOMP.as_chunks::<3>().0 {
+            if row[2] == 0 || compose_of(row[1], row[2]) != Some(row[0]) {
+                table[row[0] as usize] = SLOW;
+            }
+        }
+        for row in COMPOSE.as_chunks::<3>().0 {
+            table[row[1] as usize] = SLOW;
+        }
+        for cp in V_BASE..V_BASE + V_COUNT {
+            table[cp as usize] = SLOW;
+        }
+        for cp in T_BASE + 1..T_BASE + T_COUNT {
+            table[cp as usize] = SLOW;
+        }
+        table
+    })
+}
+
+/// UAX #15 quick check: true only for a text that is already NFC.
+fn is_normal(text: &str) -> bool {
+    let table = quick_table();
+    let mut last = 0u8;
+    for char in text.chars() {
+        let cp = char as usize;
+        if cp < 0x300 {
+            last = 0;
+            continue;
+        }
+        let held = table.get(cp).copied().unwrap_or(0);
+        if held == 0 {
+            last = 0;
+            continue;
+        }
+        if held == SLOW || held < last {
+            return false;
+        }
+        last = held;
+    }
+    true
+}
+
+/// Unicode 17.0 NFC; the answer is a new string even when the text is already normal.
 pub fn nfc(text: &str) -> String {
-    if text.is_ascii() {
+    if text.is_ascii() || is_normal(text) {
         return text.to_owned();
     }
     let mut decomposed: Vec<u32> = Vec::with_capacity(text.len());

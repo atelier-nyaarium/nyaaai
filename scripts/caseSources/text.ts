@@ -21,6 +21,18 @@ const TEXTS = [
 
 const HAY = `ab${GRIN}ab\n\n${GRIN}${GRIN}ab\u{e9}\n\nab`;
 
+/** NFC quick-check edges. */
+const NFC_QUICK_TEXTS = [
+	"\u{65b0}\u{8a2d}\u{5b9a}\u{30d5}\u{30a1}\u{30a4}\u{30eb}",
+	"abc e\u{301}d",
+	"x\u{212b}y",
+	"a\u{323}\u{301}",
+	"a\u{301}\u{323}",
+	"\u{1100}\u{1161}",
+	"\u{1d11e}\u{20bb7}",
+	"caf\u{e9} \u{d800} ok",
+];
+
 /** NFC normalization texts. */
 const NFC_TEXTS = [
 	"",
@@ -249,6 +261,7 @@ export const textCases: CaseSource[] = [
 		},
 	},
 	{ kind: "text.nfc", name: "forms", input: { texts: NFC_TEXTS } },
+	{ kind: "text.nfc", name: "quick-check-edges", input: { texts: NFC_QUICK_TEXTS } },
 	{ kind: "text.utf8Chunks", name: "splits", input: { runs: UTF8_SPLIT_RUNS } },
 	{ kind: "text.utf8Chunks", name: "malformed", input: { runs: UTF8_MALFORMED_RUNS } },
 	{ kind: "text.utf8Chunks", name: "byte-order-mark", input: { runs: UTF8_BOM_RUNS } },

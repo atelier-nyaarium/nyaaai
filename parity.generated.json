@@ -5615,6 +5615,7 @@
 		"cases/text/find.matches.json",
 		"cases/text/hasControl.ranges.json",
 		"cases/text/nfc.forms.json",
+		"cases/text/nfc.quick-check-edges.json",
 		"cases/text/pathSegment.encoded.json",
 		"cases/text/slices.spans.json",
 		"cases/text/spaces.ecmascript-whitespace.json",
