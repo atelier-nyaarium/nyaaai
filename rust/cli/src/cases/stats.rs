@@ -333,6 +333,7 @@ async fn play(input: StatsRunInput, net: super::catalog::Net) -> Outcome<StatsRu
         let lines = Arc::clone(&reads);
         let script = Arc::clone(&script);
         StatsQueue::new(StatsQueueDeps {
+            runtime: nyaaai_testkit::cases::runtime(),
             scheduler: Arc::new(Tracking {
                 inner: net.scheduler.clone(),
                 live: Arc::clone(&live),
@@ -384,7 +385,6 @@ async fn play(input: StatsRunInput, net: super::catalog::Net) -> Outcome<StatsRu
                 })
             }),
         })
-        .map_err(|error| error.to_string())?
     };
     let times = |live: &Mutex<Vec<Live>>, script: &Script, target: i64| -> Vec<i64> {
         let mut times: Vec<i64> = locked(live)

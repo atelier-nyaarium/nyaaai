@@ -52,6 +52,8 @@ pub struct GateState {
 }
 
 pub struct GateDeps {
+    /// Where a cancelled waiter's release runs, from any thread.
+    pub runtime: Handle,
     /// Pauses are scheduled on it and read from it.
     pub scheduler: Arc<dyn Scheduler>,
     pub pause_ms: Option<i64>,
@@ -105,6 +107,7 @@ enum Effect {
 }
 
 struct Core {
+    runtime: Handle,
     scheduler: Arc<dyn Scheduler>,
     id: String,
     pause_ms: i64,
@@ -529,6 +532,7 @@ impl ProviderGate {
     pub fn new(deps: GateDeps, ids: &dyn Ids) -> Self {
         Self {
             core: Arc::new(Core {
+                runtime: deps.runtime,
                 scheduler: deps.scheduler,
                 id: ids.new_id(),
                 pause_ms: deps.pause_ms.unwrap_or(PAUSE_MS),
@@ -610,14 +614,11 @@ impl ProviderGate {
         }
     }
 
-    /// A cancel of the caller removes its waiter without waiting for the next call.
+    /// A cancel of the caller removes its waiter on the gate's runtime, without waiting for the next call.
     fn watch(&self, cancel: &CancelToken, watched: oneshot::Receiver<()>) {
-        let Ok(runtime) = Handle::try_current() else {
-            return;
-        };
         let weak: Weak<Core> = Arc::downgrade(&self.core);
         let cancel = cancel.clone();
-        runtime.spawn(async move {
+        self.core.runtime.spawn(async move {
             // The waiter ending first ends the cancel watch.
             if cancel.run_until(watched).await.is_none()
                 && let Some(core) = weak.upgrade()
@@ -800,11 +801,18 @@ mod tests {
 
     use super::*;
 
-    fn gate() -> (ProviderGate, Arc<TimerWheel>) {
+    fn rt() -> tokio::runtime::Runtime {
+        tokio::runtime::Builder::new_current_thread()
+            .build()
+            .unwrap()
+    }
+
+    fn gate(runtime: &tokio::runtime::Runtime) -> (ProviderGate, Arc<TimerWheel>) {
         let wheel = Arc::new(TimerWheel::new(0));
         let scheduler = Arc::new(FakeScheduler::new(Arc::clone(&wheel)));
         let gate = ProviderGate::new(
             GateDeps {
+                runtime: runtime.handle().clone(),
                 scheduler,
                 pause_ms: None,
                 max_pauses: None,
@@ -817,11 +825,9 @@ mod tests {
 
     #[test]
     fn a_cancelled_waiter_leaves_the_queue_at_once() {
-        let runtime = tokio::runtime::Builder::new_current_thread()
-            .build()
-            .unwrap();
+        let runtime = rt();
         runtime.block_on(async {
-            let (gate, _wheel) = gate();
+            let (gate, _wheel) = gate(&runtime);
             gate.cool("model", None);
             let token = CancelToken::new();
             let waiting = gate.admit("model", &token, None, false);
@@ -834,7 +840,8 @@ mod tests {
 
     #[test]
     fn a_pause_hands_the_probe_to_the_oldest_waiter() {
-        let (gate, wheel) = gate();
+        let runtime = rt();
+        let (gate, wheel) = gate(&runtime);
         gate.cool("model", None);
         let (first, second) = (CancelToken::new(), CancelToken::new());
         let (mut first, mut second) = (
@@ -853,7 +860,8 @@ mod tests {
 
     #[test]
     fn a_dropped_admission_gives_its_turn_to_the_next_waiter() {
-        let (gate, wheel) = gate();
+        let runtime = rt();
+        let (gate, wheel) = gate(&runtime);
         gate.cool("model", None);
         let (first, second) = (CancelToken::new(), CancelToken::new());
         let dropped = gate.admit("model", &first, None, false);
@@ -875,7 +883,8 @@ mod tests {
 
     #[test]
     fn a_dropped_admission_does_not_hold_the_model_for_good() {
-        let (gate, wheel) = gate();
+        let runtime = rt();
+        let (gate, wheel) = gate(&runtime);
         gate.cool("model", None);
         drop(gate.admit("model", &CancelToken::new(), None, false));
         wheel.advance(60_000);
@@ -884,25 +893,29 @@ mod tests {
     }
 
     #[test]
-    fn a_cancel_with_no_runtime_releases_at_the_next_gate_call() {
-        let (gate, _wheel) = gate();
-        gate.cool("model", None);
+    fn a_waiter_cancelled_from_a_plain_thread_is_released_without_another_gate_call() {
+        let runtime = rt();
+        let (gate, _wheel) = gate(&runtime);
         let token = CancelToken::new();
-        let mut waiting = Box::pin(gate.admit("model", &token, None, false));
-        let mut context = Context::from_waker(Waker::noop());
-        assert!(waiting.as_mut().poll(&mut context).is_pending());
+        let waiting = std::thread::scope(|scope| {
+            scope
+                .spawn(|| {
+                    gate.cool("model", None);
+                    gate.admit("model", &token, None, false)
+                })
+                .join()
+                .expect("joined")
+        });
         token.cancel();
-        assert!(waiting.as_mut().poll(&mut context).is_pending());
-        assert!(!gate.ready("model"));
-        assert!(matches!(
-            waiting.as_mut().poll(&mut context),
-            Poll::Ready(Admission::Stopped(_))
-        ));
+        runtime.block_on(async {
+            assert!(matches!(waiting.await, Admission::Stopped(_)));
+        });
     }
 
     #[test]
     fn a_ticket_of_another_gate_does_nothing_and_a_disposed_gate_stays_disposed() {
-        let (gate, _wheel) = gate();
+        let runtime = rt();
+        let (gate, _wheel) = gate(&runtime);
         let mut foreign = gate.try_admit("model").expect("an open gate");
         foreign.gate = "elsewhere".to_owned();
         assert_eq!(

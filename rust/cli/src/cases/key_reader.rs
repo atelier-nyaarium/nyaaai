@@ -116,7 +116,7 @@ pub fn run(input: KeyReaderRunInput) -> Outcome<KeyReaderRunResult> {
             let shown = Arc::clone(&shown);
             Arc::new(move |state| locked(&shown).push(state))
         };
-        let reader = KeyReader::new(scheduler, check, seen);
+        let reader = KeyReader::new(scheduler, nyaaai_testkit::cases::runtime(), check, seen);
         let ignore = matches!(input.checks, Some(KeyReaderRunInputChecks::IgnoreSignal));
         let mut steps = Vec::new();
         let mut signalled = Vec::new();

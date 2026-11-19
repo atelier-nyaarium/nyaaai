@@ -650,10 +650,11 @@ impl ModelCatalog {
         let unsubscribe = deps.deps.rows.on_change(Box::new(move || {
             counted.fetch_add(1, Ordering::SeqCst);
         }));
+        let fetcher = Fetcher::new(deps.deps.runtime.clone());
         Self {
             shared: Arc::new(Shared {
                 deps,
-                fetcher: Fetcher::new(),
+                fetcher,
                 joined: Mutex::new(HashMap::new()),
                 version,
             }),

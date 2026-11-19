@@ -25,6 +25,7 @@ use nyaaai_contract::shapes::provider::{
 };
 use nyaaai_contract::shapes::step::{Failure, FailureCategory, NormalizedUsage};
 use nyaaai_contract::time::{Deadline, Scheduler};
+use tokio::runtime::Handle;
 
 use super::gate::{GateDeps, GateState, ProviderGate, WaitFn};
 use super::key_reader::{Check, Failed, KEY_CHECK_MS, KeyReader, Shown};
@@ -107,6 +108,9 @@ pub struct Billing {
 }
 
 pub struct HealthDeps {
+    /// Where checks, rechecks and waits run, from any thread. A runtime that has ended drops
+    /// what was spawned on it: nothing answers after that, and nothing panics.
+    pub runtime: Handle,
     /// Gate pauses, rechecks and the time of every pool event.
     pub scheduler: Arc<dyn Scheduler>,
     /// The entries in priority order.
@@ -154,6 +158,7 @@ struct State {
 }
 
 struct Core {
+    runtime: Handle,
     scheduler: Arc<dyn Scheduler>,
     list: Arc<dyn ProviderList>,
     keys: Arc<dyn EntryKeys>,
@@ -504,7 +509,12 @@ impl Core {
         };
         let fresh = Arc::new(Status {
             state,
-            reader: KeyReader::new(Arc::clone(&self.scheduler), check, shown),
+            reader: KeyReader::new(
+                Arc::clone(&self.scheduler),
+                self.runtime.clone(),
+                check,
+                shown,
+            ),
         });
         locked(&self.state)
             .statuses
@@ -698,12 +708,15 @@ impl EntryKeys for HealthKeys {
 }
 
 impl ProviderHealth {
-    /// Defers initial key checks. Asks `ids` once, for the gate's name.
+    /// Defers initial key checks. Asks `ids` once, for the gate's name. Work runs on
+    /// `deps.runtime`, from any thread; a runtime that has ended drops what was spawned on it, so
+    /// nothing answers after that and nothing panics.
     pub fn new(deps: HealthDeps, ids: &dyn Ids) -> Self {
         let core = Arc::new_cyclic(|weak: &Weak<Core>| {
             let told = weak.clone();
             let gate = ProviderGate::new(
                 GateDeps {
+                    runtime: deps.runtime.clone(),
                     scheduler: Arc::clone(&deps.scheduler),
                     pause_ms: deps.pause_ms,
                     max_pauses: deps.max_pauses,
@@ -716,6 +729,7 @@ impl ProviderHealth {
                 ids,
             );
             Core {
+                runtime: deps.runtime,
                 scheduler: deps.scheduler,
                 list: deps.list,
                 keys: deps.keys,

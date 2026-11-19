@@ -412,6 +412,7 @@ pub fn route(input: KindRouteInput) -> Outcome<KindRouteResult> {
         &entry,
         Arc::clone(&transport),
         CatalogDeps {
+            runtime: nyaaai_testkit::cases::runtime(),
             scheduler: net.scheduler.clone(),
             rows: registry.clone() as Arc<dyn ModelRegistry>,
             refreshed: Arc::new(|| {}),

@@ -572,6 +572,7 @@ async fn play(input: LifecycleRunInput) -> Outcome<LifecycleRunResult> {
     usage.set_ids(input.usage_ids.clone().unwrap_or_default());
     let zdr = Arc::new(AtomicBool::new(input.zdr_only));
     let deps = KindDeps {
+        runtime: nyaaai_testkit::cases::runtime(),
         fetch: played.clone(),
         scheduler: scheduler.clone(),
         log: Arc::new(|_| {}),
@@ -607,6 +608,7 @@ async fn play(input: LifecycleRunInput) -> Outcome<LifecycleRunResult> {
     }
     let health = ProviderHealth::new(
         HealthDeps {
+            runtime: nyaaai_testkit::cases::runtime(),
             scheduler: scheduler.clone(),
             list: list.clone(),
             keys: scripted.clone(),
@@ -1245,6 +1247,7 @@ mod tests {
         let wheel = Arc::new(TimerWheel::new(0));
         let scheduler = Arc::new(FakeScheduler::new(Arc::clone(&wheel)));
         let deps = KindDeps {
+            runtime: nyaaai_testkit::cases::runtime(),
             fetch: Arc::new(ScriptedFetch::new(Vec::new(), Arc::clone(&wheel))),
             scheduler: scheduler.clone(),
             log: Arc::new(|_| {}),

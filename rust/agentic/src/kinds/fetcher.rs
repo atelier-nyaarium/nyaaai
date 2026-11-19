@@ -1,4 +1,4 @@
-//! One shared, cached refresh with a wait after a failure; needs a `tokio` runtime.
+//! One shared, cached refresh with a wait after a failure, run on the runtime it is given.
 
 use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::sync::{Arc, Mutex, MutexGuard};
@@ -73,6 +73,7 @@ impl<T: Clone> Waiter<T> {
 /// The last good data and the one refresh in flight.
 pub struct Fetcher<T> {
     state: Arc<Mutex<State<T>>>,
+    runtime: Handle,
 }
 
 fn locked<T>(state: &Mutex<State<T>>) -> MutexGuard<'_, State<T>> {
@@ -103,8 +104,10 @@ impl<T> Drop for Finish<T> {
 }
 
 impl<T: Clone + Send + Sync + 'static> Fetcher<T> {
-    pub fn new() -> Self {
+    /// A refresh runs on `runtime`, whatever thread asks.
+    pub fn new(runtime: Handle) -> Self {
         Self {
+            runtime,
             state: Arc::new(Mutex::new(State {
                 good: None,
                 failed_at: None,
@@ -184,9 +187,6 @@ impl<T: Clone + Send + Sync + 'static> Fetcher<T> {
         if let Some(answer) = &state.inflight {
             return Waiter::Pending(answer.clone());
         }
-        let Ok(runtime) = Handle::try_current() else {
-            return Waiter::Ready(None);
-        };
         let refresh = start();
         let (send, answer) = watch::channel(None);
         let mut finish = Finish {
@@ -195,7 +195,7 @@ impl<T: Clone + Send + Sync + 'static> Fetcher<T> {
         };
         let shared = Arc::clone(&self.state);
         // The mark is set once the task exists; the task waits for this lock.
-        runtime.spawn(async move {
+        self.runtime.spawn(async move {
             let outcome = refresh.await;
             let (result, told) = {
                 let mut state = locked(&shared);
@@ -221,12 +221,6 @@ impl<T: Clone + Send + Sync + 'static> Fetcher<T> {
     }
 }
 
-impl<T: Clone + Send + Sync + 'static> Default for Fetcher<T> {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -248,23 +242,22 @@ mod tests {
     }
 
     #[test]
-    fn no_runtime_answers_no_data_and_a_later_call_refreshes() {
-        let fetcher = Fetcher::new();
-        let mut started = false;
-        let waiter = fetcher.fetched(0, 10, || {
-            started = true;
-            good(1)
+    fn a_refresh_asked_from_a_plain_thread_runs_on_the_given_runtime() {
+        let runtime = runtime();
+        let fetcher = Fetcher::new(runtime.handle().clone());
+        let waiter = std::thread::scope(|scope| {
+            scope
+                .spawn(|| fetcher.fetched(0, 10, || good(2)))
+                .join()
+                .expect("joined")
         });
-        assert!(matches!(waiter, Waiter::Ready(None)));
-        assert!(!started);
-        let answer = runtime().block_on(async { fetcher.fetched(0, 10, || good(2)).wait().await });
-        assert_eq!(answer, Some(2));
+        assert_eq!(runtime.block_on(waiter.wait()), Some(2));
     }
 
     #[test]
     fn a_refresh_that_panics_tells_no_data_and_the_next_call_tries_again() {
         runtime().block_on(async {
-            let fetcher = Fetcher::new();
+            let fetcher = Fetcher::new(Handle::current());
             let waiter = fetcher.fetched(0, 10, || Box::pin(async { panic!("a decoder bug") }));
             assert_eq!(waiter.wait().await, None);
             fetcher.idle().await;
@@ -276,7 +269,7 @@ mod tests {
     #[test]
     fn a_start_that_panics_leaves_no_mark() {
         runtime().block_on(async {
-            let fetcher = Fetcher::new();
+            let fetcher = Fetcher::new(Handle::current());
             let failed = catch_unwind(AssertUnwindSafe(|| {
                 fetcher.fetched(0, 10, || panic!("no deadline"))
             }));
@@ -289,7 +282,7 @@ mod tests {
     #[test]
     fn a_told_that_panics_changes_nothing() {
         runtime().block_on(async {
-            let fetcher = Fetcher::new();
+            let fetcher = Fetcher::new(Handle::current());
             let waiter = fetcher.fetched(0, 10, || {
                 Box::pin(async {
                     Refreshed::Good {
@@ -309,7 +302,7 @@ mod tests {
     #[test]
     fn the_data_is_stored_before_told_runs() {
         runtime().block_on(async {
-            let fetcher = Arc::new(Fetcher::new());
+            let fetcher = Arc::new(Fetcher::new(Handle::current()));
             let seen = Arc::new(Mutex::new(None));
             let reader = Arc::clone(&fetcher);
             let told_seen = Arc::clone(&seen);

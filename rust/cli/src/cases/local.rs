@@ -264,6 +264,7 @@ pub(super) fn net_of(start_ms: i64, exchanges: &[NetExchange]) -> Net {
     ));
     let scheduler = Arc::new(FakeScheduler::new(Arc::clone(&wheel)));
     let deps = KindDeps {
+        runtime: nyaaai_testkit::cases::runtime(),
         fetch: played.clone(),
         scheduler: scheduler.clone(),
         log: Arc::new(|_| {}),
@@ -953,6 +954,7 @@ pub fn catalog_run(input: LocalCatalogRunInput) -> Outcome<LocalCatalogRunResult
             .map(|held| held == LocalCatalogRunInputOnRefreshed::ReadsAndThrows),
     );
     let catalog = LocalCatalog::new(LocalCatalogDeps {
+        runtime: nyaaai_testkit::cases::runtime(),
         entry: input.entry.clone(),
         server: scripted.clone(),
         terms: terms_from(&input.terms),
@@ -1099,6 +1101,7 @@ pub fn flow(input: LocalFlowInput) -> Outcome<LocalFlowResult> {
         &entry,
         Arc::clone(&transport),
         CatalogDeps {
+            runtime: nyaaai_testkit::cases::runtime(),
             scheduler: net.scheduler.clone(),
             rows: registry.clone() as Arc<dyn ModelRegistry>,
             refreshed: Arc::new(move || {

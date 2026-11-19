@@ -30,6 +30,8 @@ pub type ReadStats = Arc<
 
 /// What a queue stands on.
 pub struct StatsQueueDeps {
+    /// Where reads run, wherever a timer fires.
+    pub runtime: Handle,
     pub scheduler: Arc<dyn Scheduler>,
     /// Where stats are written, and where unfilled records are listed.
     pub usage: Arc<dyn UsageSink>,
@@ -167,18 +169,6 @@ impl<F: Future> Future for Caught<F> {
     }
 }
 
-/// Building a queue needs a `tokio` runtime to run its reads on.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct NoRuntime;
-
-impl std::fmt::Display for NoRuntime {
-    fn fmt(&self, out: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        out.write_str("a stats queue needs a tokio runtime")
-    }
-}
-
-impl std::error::Error for NoRuntime {}
-
 /// A queue timer; its callback acts only while the queue holds it.
 struct Timer {
     id: u64,
@@ -247,10 +237,9 @@ pub struct StatsQueue {
 }
 
 impl StatsQueue {
-    /// Needs a current `tokio` runtime.
-    pub fn new(d: StatsQueueDeps) -> Result<Self, NoRuntime> {
-        let runtime = Handle::try_current().map_err(|_| NoRuntime)?;
-        Ok(Self {
+    pub fn new(d: StatsQueueDeps) -> Self {
+        let runtime = d.runtime.clone();
+        Self {
             shared: Arc::new(Shared {
                 d,
                 runtime,
@@ -265,7 +254,7 @@ impl StatsQueue {
                 }),
                 running: watch::channel(0).0,
             }),
-        })
+        }
     }
 
     /// Schedules stats reads; a past time starts at once; a record waits once, at its earlier due.
@@ -599,6 +588,7 @@ mod tests {
     fn deps(scheduler: Arc<dyn Scheduler>, reads: &Arc<AtomicUsize>) -> StatsQueueDeps {
         let reads = Arc::clone(reads);
         StatsQueueDeps {
+            runtime: Handle::current(),
             scheduler,
             usage: Arc::new(ScriptedUsageSink::new()),
             read: Arc::new(move |_, _, _| {
@@ -620,7 +610,7 @@ mod tests {
             let wheel = Arc::new(TimerWheel::new(10_000_000));
             let reads = Arc::new(AtomicUsize::new(0));
             let early = Arc::new(Early(FakeScheduler::new(Arc::clone(&wheel))));
-            let queue = StatsQueue::new(deps(early, &reads)).unwrap();
+            let queue = StatsQueue::new(deps(early, &reads));
             queue.add("a", "gen-a", Some(0), None);
             queue.idle().await;
             assert_eq!(reads.load(Ordering::SeqCst), 1);
@@ -632,24 +622,13 @@ mod tests {
     }
 
     #[test]
-    fn a_queue_needs_a_runtime() {
-        let wheel = Arc::new(TimerWheel::new(0));
-        let reads = Arc::new(AtomicUsize::new(0));
-        let scheduler = Arc::new(FakeScheduler::new(wheel));
-        assert!(matches!(
-            StatsQueue::new(deps(scheduler, &reads)),
-            Err(NoRuntime)
-        ));
-    }
-
-    #[test]
     fn a_timer_fired_from_a_plain_thread_starts_its_read() {
         let runtime = runtime();
         runtime.block_on(async {
             let wheel = Arc::new(TimerWheel::new(0));
             let reads = Arc::new(AtomicUsize::new(0));
             let scheduler = Arc::new(FakeScheduler::new(Arc::clone(&wheel)));
-            let queue = StatsQueue::new(deps(scheduler, &reads)).unwrap();
+            let queue = StatsQueue::new(deps(scheduler, &reads));
             queue.add("a", "gen-a", Some(0), None);
             assert_eq!(queue.armed_at(), Some(420_000));
             let fired = Arc::clone(&wheel);

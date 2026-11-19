@@ -427,7 +427,7 @@ impl OpenCodeCatalog {
                 rows: deps.deps.rows,
                 refreshed: deps.deps.refreshed,
                 ttl_ms: deps.ttl_ms,
-                fetcher: Fetcher::new(),
+                fetcher: Fetcher::new(deps.deps.runtime.clone()),
             }),
         }
     }

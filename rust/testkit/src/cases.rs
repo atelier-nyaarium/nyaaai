@@ -1,10 +1,11 @@
 //! Case handler context.
 
-use std::cell::OnceCell;
+use std::cell::{OnceCell, RefCell};
 use std::fs;
 use std::future::Future;
 use std::io;
 use std::path::{Path, PathBuf};
+use std::rc::Rc;
 use std::sync::atomic::{AtomicU64, Ordering};
 
 use nyaaai_contract::adapter_texts::MISFIT;
@@ -12,6 +13,7 @@ use nyaaai_contract::id::CountedIds;
 use nyaaai_contract::json::{Object, Value};
 use nyaaai_contract::shape::Shape;
 use nyaaai_contract::time::SteppedClock;
+use tokio::runtime::{Handle, Runtime};
 
 /// Matches TypeScript's clock.
 pub const CASE_NOW_MS: i64 = 1_794_535_200_000;
@@ -130,21 +132,62 @@ pub fn failed(error: io::Error) -> String {
     error.to_string()
 }
 
+thread_local! {
+    /// The runtime of the case running on this thread.
+    static CASE_RUNTIME: RefCell<Option<Rc<Runtime>>> = const { RefCell::new(None) };
+}
+
+/// Gives a case its own runtime, and ends it with the case.
+struct Fresh;
+
+impl Fresh {
+    fn begin() -> Self {
+        CASE_RUNTIME.with(|held| *held.borrow_mut() = None);
+        Self
+    }
+}
+
+impl Drop for Fresh {
+    fn drop(&mut self) {
+        CASE_RUNTIME.with(|held| *held.borrow_mut() = None);
+    }
+}
+
+fn case_runtime() -> Outcome<Rc<Runtime>> {
+    CASE_RUNTIME.with(|held| {
+        let mut held = held.borrow_mut();
+        if let Some(runtime) = &*held {
+            return Ok(Rc::clone(runtime));
+        }
+        let runtime = Rc::new(
+            tokio::runtime::Builder::new_current_thread()
+                .enable_time()
+                .build()
+                .map_err(failed)?,
+        );
+        *held = Some(Rc::clone(&runtime));
+        Ok(runtime)
+    })
+}
+
+/// The runtime the case runs its futures on; the engine is given it, never finds it.
+pub fn runtime() -> Handle {
+    case_runtime().expect("a runtime builds").handle().clone()
+}
+
 /// Runs shaped case handlers, and holds results to their shape.
 pub fn run<Input: Shape, Output: Shape>(
     input: &Value,
     handler: fn(Input) -> Outcome<Output>,
 ) -> Outcome<Value> {
+    let _case = Fresh::begin();
     let input = Input::decode(input).map_err(|refused| format!("the input: {refused}"))?;
     held_to::<Output>(handler(input)?.encode())
 }
 
-/// Runs a future to its end on a current-thread runtime.
+/// Runs a future to its end on the case's current-thread runtime.
 pub fn block_on<F: Future>(future: F) -> Outcome<F::Output> {
-    let runtime = tokio::runtime::Builder::new_current_thread()
-        .enable_time()
-        .build()
-        .map_err(failed)?;
+    let runtime = case_runtime()?;
     Ok(runtime.block_on(future))
 }
 
@@ -154,6 +197,7 @@ pub fn run_with<Input: Shape, Output: Shape>(
     root: &Path,
     handler: fn(Input, &CaseContext) -> Outcome<Output>,
 ) -> Outcome<Value> {
+    let _case = Fresh::begin();
     let input = Input::decode(input).map_err(|refused| format!("the input: {refused}"))?;
     let context = CaseContext::new(root);
     let result = handler(input, &context)?;

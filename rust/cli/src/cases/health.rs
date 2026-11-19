@@ -77,6 +77,7 @@ fn deps_of(
 ) -> HealthDeps {
     let kind_deps = net.deps.clone();
     HealthDeps {
+        runtime: nyaaai_testkit::cases::runtime(),
         scheduler: net.scheduler.clone(),
         list,
         keys,

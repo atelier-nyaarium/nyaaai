@@ -3,6 +3,8 @@
 use std::any::Any;
 use std::sync::Arc;
 
+use tokio::runtime::Handle;
+
 use nyaaai_contract::cancel::CancelToken;
 use nyaaai_contract::fetch::Fetch;
 use nyaaai_contract::future::BoxFuture;
@@ -23,6 +25,8 @@ use crate::transport::{KeySource, Transport, TransportError};
 /// What a catalog stands on.
 #[derive(Clone)]
 pub struct CatalogDeps {
+    /// Where a refresh or a read runs, from any thread.
+    pub runtime: Handle,
     /// The time, and the deadlines of a fetch.
     pub scheduler: Arc<dyn Scheduler>,
     /// Rows; a catalog that caches a join rejoins when this tells a change.
@@ -152,6 +156,8 @@ pub trait Pins: Send + Sync {
 /// What a kind needs of its host.
 #[derive(Clone)]
 pub struct KindDeps {
+    /// Where the kind's background work runs, from any thread.
+    pub runtime: Handle,
     pub fetch: Arc<dyn Fetch>,
     pub scheduler: Arc<dyn Scheduler>,
     pub log: Arc<dyn Fn(&str) + Send + Sync>,

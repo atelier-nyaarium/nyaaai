@@ -105,6 +105,8 @@ pub struct Discovered {
 
 #[derive(Clone)]
 pub struct LocalCatalogDeps {
+    /// Where reads run, from any thread.
+    pub runtime: Handle,
     /// Discovering entry ID.
     pub entry: String,
     pub server: Arc<dyn LocalServer>,
@@ -274,6 +276,7 @@ struct Inner {
 type Models = Arc<Vec<LocalModel>>;
 
 struct Shared {
+    runtime: Handle,
     entry: String,
     server: Arc<dyn LocalServer>,
     terms: Terms,
@@ -413,9 +416,6 @@ fn settled(shared: &Arc<Shared>, tag: &str) {
     if !shared.server.reads_loaded() {
         return;
     }
-    let Ok(runtime) = Handle::try_current() else {
-        return;
-    };
     {
         let mut inner = shared.locked();
         if model.context.is_some()
@@ -428,6 +428,7 @@ fn settled(shared: &Arc<Shared>, tag: &str) {
     }
     let reading = Reading::begin(shared);
     let limit = deadline(&*shared.scheduler, DISCOVER_MS, &CancelToken::new());
+    let runtime = shared.runtime.clone();
     let shared = Arc::clone(shared);
     let tag = tag.to_owned();
     runtime.spawn(async move {
@@ -463,13 +464,14 @@ impl LocalCatalog {
     pub fn new(deps: LocalCatalogDeps) -> Self {
         Self {
             shared: Arc::new(Shared {
+                fetcher: Fetcher::new(deps.runtime.clone()),
+                runtime: deps.runtime,
                 entry: deps.entry,
                 server: deps.server,
                 terms: deps.terms,
                 scheduler: deps.scheduler,
                 rows: deps.rows,
                 refreshed: deps.refreshed,
-                fetcher: Fetcher::new(),
                 inner: Mutex::new(Inner {
                     loaded: HashMap::new(),
                     reread: HashMap::new(),

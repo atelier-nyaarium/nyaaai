@@ -403,7 +403,7 @@ fn the_transport_runs_over_the_adapter() {
         let sink = Arc::clone(&logged);
         let transport = Transport::new(TransportDeps {
             fetch: Arc::new(ReqwestFetch::new().unwrap()),
-            scheduler: Arc::new(SystemScheduler),
+            scheduler: Arc::new(SystemScheduler::new(tokio::runtime::Handle::current())),
             key: Arc::new(static_key(KEY)),
             log: Box::new(move |line| sink.lock().unwrap().push(line.to_owned())),
             base_url: server.url(""),

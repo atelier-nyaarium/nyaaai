@@ -274,6 +274,7 @@ impl ProviderKind for LocalKind {
             .terms
             .map_or(HOME, |terms| terms(&entry_fields(entry)));
         let catalog = LocalCatalog::new(LocalCatalogDeps {
+            runtime: deps.runtime,
             entry: entry.id.clone(),
             server: (self.spec.server)(Arc::clone(&transport)),
             terms,

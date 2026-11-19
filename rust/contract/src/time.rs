@@ -4,6 +4,8 @@ use std::sync::atomic::{AtomicBool, AtomicI64, AtomicU8, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
+use tokio::runtime::Handle;
+
 use crate::cancel::CancelToken;
 use crate::future::BoxFuture;
 use crate::json::Value;
@@ -92,11 +94,24 @@ pub trait Scheduler: Clock + Send + Sync {
     fn schedule(&self, ms: i64, run: Box<dyn FnOnce() + Send>) -> Scheduled;
 }
 
-/// Needs a `tokio` runtime with time enabled; deadlines start at the call.
-pub struct SystemScheduler;
+/// Waits and schedules on the runtime it is given, from any thread; the runtime needs its time
+/// driver. A deadline starts at the call. The zone is the system clock's. A runtime that has ended
+/// drops what was waiting on it: a sleep ends cancelled, a scheduled call never runs.
+pub struct SystemScheduler {
+    runtime: Handle,
+}
 
-fn wait(ms: i64) -> tokio::time::Sleep {
-    tokio::time::sleep(Duration::from_millis(ms.max(0).unsigned_abs()))
+impl SystemScheduler {
+    pub fn new(runtime: Handle) -> Self {
+        Self { runtime }
+    }
+}
+
+/// The instant `ms` from the call; a span too far to count is thirty years.
+fn due(ms: i64) -> tokio::time::Instant {
+    let now = tokio::time::Instant::now();
+    now.checked_add(Duration::from_millis(ms.max(0).unsigned_abs()))
+        .unwrap_or_else(|| now + Duration::from_secs(30 * 365 * 86_400))
 }
 
 impl Clock for SystemScheduler {
@@ -112,11 +127,19 @@ impl Clock for SystemScheduler {
 impl Scheduler for SystemScheduler {
     fn sleep(&self, ms: i64, cancel: &CancelToken) -> BoxFuture<'static, Slept> {
         let cancel = cancel.clone();
-        let waiting = wait(ms);
+        let at = due(ms);
+        let (done, woken) = tokio::sync::oneshot::channel();
+        self.runtime.spawn(async move {
+            let ended = cancel
+                .run_until(tokio::time::sleep_until(at))
+                .await
+                .is_some();
+            let _ = done.send(ended);
+        });
         Box::pin(async move {
-            match cancel.run_until(waiting).await {
-                Some(()) => Slept::Done,
-                None => Slept::Cancelled,
+            match woken.await {
+                Ok(true) => Slept::Done,
+                _ => Slept::Cancelled,
             }
         })
     }
@@ -124,9 +147,9 @@ impl Scheduler for SystemScheduler {
     fn schedule(&self, ms: i64, run: Box<dyn FnOnce() + Send>) -> Scheduled {
         let cancel = CancelToken::new();
         let held = cancel.clone();
-        let waiting = wait(ms);
-        tokio::spawn(async move {
-            if held.run_until(waiting).await.is_some() {
+        let at = due(ms);
+        self.runtime.spawn(async move {
+            if held.run_until(tokio::time::sleep_until(at)).await.is_some() {
                 run();
             }
         });
@@ -593,7 +616,7 @@ mod tests {
             .build()
             .unwrap();
         runtime.block_on(async {
-            let scheduler = SystemScheduler;
+            let scheduler = SystemScheduler::new(Handle::current());
             let token = CancelToken::new();
             assert_eq!(scheduler.sleep(1, &token).await, Slept::Done);
             let slept = scheduler.sleep(60_000, &token);

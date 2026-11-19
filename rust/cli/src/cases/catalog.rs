@@ -852,6 +852,7 @@ pub fn openrouter_run(input: CatalogOpenrouterRunInput) -> Outcome<CatalogOpenro
     let catalog = Arc::new(ModelCatalog::new(ModelCatalogDeps {
         transport: Arc::clone(&net.transport),
         deps: CatalogDeps {
+            runtime: nyaaai_testkit::cases::runtime(),
             scheduler: net.scheduler.clone(),
             rows: registry.clone() as Arc<dyn ModelRegistry>,
             refreshed: told.callback(),
@@ -1025,6 +1026,7 @@ pub fn opencode_run(input: CatalogOpencodeRunInput) -> Outcome<CatalogOpencodeRu
         plan: input.plan,
         transport: Arc::clone(&net.transport),
         deps: CatalogDeps {
+            runtime: nyaaai_testkit::cases::runtime(),
             scheduler: net.scheduler.clone(),
             rows: registry.clone() as Arc<dyn ModelRegistry>,
             refreshed: told.callback(),

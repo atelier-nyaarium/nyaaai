@@ -474,6 +474,7 @@ fn stub_of(name: ProviderKindName, hub: &Arc<Hub>) -> Outcome<Arc<dyn ProviderKi
 
 fn deps_of(host: &Arc<Host>, scheduler: Arc<FakeScheduler>) -> KindDeps {
     KindDeps {
+        runtime: nyaaai_testkit::cases::runtime(),
         fetch: host.clone(),
         scheduler,
         log: Arc::new(|_| {}),

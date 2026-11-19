@@ -29,6 +29,7 @@ pub type Shown = Arc<dyn Fn(KeyState) + Send + Sync>;
 
 struct Inner {
     scheduler: Arc<dyn Scheduler>,
+    runtime: Handle,
     check: Check,
     shown: Shown,
     last: Mutex<Option<CancelToken>>,
@@ -72,11 +73,12 @@ pub struct KeyReader {
 }
 
 impl KeyReader {
-    /// The deadline of each check comes from `scheduler`.
-    pub fn new(scheduler: Arc<dyn Scheduler>, check: Check, shown: Shown) -> Self {
+    /// The deadline of each check comes from `scheduler`; a check runs on `runtime`.
+    pub fn new(scheduler: Arc<dyn Scheduler>, runtime: Handle, check: Check, shown: Shown) -> Self {
         Self {
             inner: Arc::new(Inner {
                 scheduler,
+                runtime,
                 check,
                 shown,
                 last: Mutex::new(None),
@@ -85,7 +87,7 @@ impl KeyReader {
         }
     }
 
-    /// Shows `checking`, then the state unless a newer read or dispose won; failure, deadline or no runtime shows `unreachable`.
+    /// Shows `checking`, then the state unless a newer read or dispose won; failure or deadline shows `unreachable`.
     pub fn read(&self) -> BoxFuture<'static, ()> {
         let abort = CancelToken::new();
         let previous = locked(&self.inner.last).replace(abort.clone());
@@ -106,7 +108,6 @@ impl KeyReader {
         self.inner.running.send_modify(|count| *count += 1);
         let count = Count(Arc::clone(&self.inner));
         let (done, ended) = oneshot::channel::<()>();
-        let held = abort.clone();
         let inner = Arc::clone(&self.inner);
         let finish = async move {
             let _count = count;
@@ -125,18 +126,7 @@ impl KeyReader {
             drop(_count);
             let _ = done.send(());
         };
-        match Handle::try_current() {
-            Ok(runtime) => {
-                runtime.spawn(finish);
-            }
-            Err(_) => {
-                // No runtime to run the check on: the read cannot reach the server.
-                drop(finish);
-                if !held.is_cancelled() {
-                    (self.inner.shown)(KeyState::Unreachable(KeyStateUnreachable {}));
-                }
-            }
-        }
+        self.inner.runtime.spawn(finish);
         Box::pin(async move {
             let _ = ended.await;
         })
@@ -164,31 +154,36 @@ impl KeyReader {
 
 #[cfg(test)]
 mod tests {
-    use nyaaai_testkit::scheduler::{FakeScheduler, TimerWheel};
+    use nyaaai_contract::shapes::provider::KeyStateNone;
+    use nyaaai_contract::time::SystemScheduler;
 
     use super::*;
 
     #[test]
-    fn a_read_with_no_runtime_shows_unreachable() {
-        let wheel = Arc::new(TimerWheel::new(0));
+    fn a_read_from_a_plain_thread_sets_its_deadline_and_reaches_its_state() {
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .enable_time()
+            .build()
+            .unwrap();
         let shown: Arc<Mutex<Vec<KeyState>>> = Arc::default();
         let reader = KeyReader::new(
-            Arc::new(FakeScheduler::new(Arc::clone(&wheel))),
-            Arc::new(|_| Box::pin(async { Ok(Some(KeyState::Checking(KeyStateChecking {}))) })),
+            Arc::new(SystemScheduler::new(runtime.handle().clone())),
+            runtime.handle().clone(),
+            Arc::new(|_| Box::pin(async { Ok(Some(KeyState::None(KeyStateNone {}))) })),
             {
                 let shown = Arc::clone(&shown);
                 Arc::new(move |state| locked(&shown).push(state))
             },
         );
-        drop(reader.read());
+        let read = std::thread::scope(|scope| scope.spawn(|| reader.read()).join().unwrap());
+        runtime.block_on(read);
         assert_eq!(
             *locked(&shown),
             vec![
                 KeyState::Checking(KeyStateChecking {}),
-                KeyState::Unreachable(KeyStateUnreachable {})
+                KeyState::None(KeyStateNone {})
             ]
         );
         assert!(!reader.busy());
-        assert!(wheel.waiting().is_empty());
     }
 }

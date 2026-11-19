@@ -505,6 +505,7 @@ impl ModelResolver {
             entry,
             Arc::clone(&transport),
             super::kind::CatalogDeps {
+                runtime: deps.runtime.clone(),
                 scheduler: Arc::clone(&deps.scheduler),
                 rows: Arc::clone(&self.d.registry),
                 refreshed: Arc::new(move || {
@@ -923,6 +924,9 @@ mod tests {
         let wheel = Arc::new(TimerWheel::new(0));
         let scheduler = Arc::new(FakeScheduler::new(Arc::clone(&wheel)));
         let fetch = Arc::new(ScriptedFetch::new(Vec::new(), wheel));
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .build()
+            .unwrap();
         let stopped = Arc::new(AtomicUsize::new(0));
         let kind = Arc::new(Meeting {
             barrier: Barrier::new(2),
@@ -943,6 +947,7 @@ mod tests {
             registry: Arc::new(ScriptedModelRegistry::empty()),
             kinds: vec![kind.clone() as Arc<dyn ProviderKind>],
             kind_deps: Arc::new(move |_| KindDeps {
+                runtime: runtime.handle().clone(),
                 fetch: fetch.clone(),
                 scheduler: scheduler.clone(),
                 log: Arc::new(|_| {}),

@@ -558,6 +558,24 @@ describe("residue", () => {
 		expect(namesOperator(probes)).toEqual(["a.ts", "b.ts", "Cargo.toml", "c.rs"]);
 	});
 
+	it("agentic Rust is given its runtime and never asks the thread for one", () => {
+		const asks = ["try_current", "tokio::spawn", "Handle::current"];
+		const outside = (text: string) => text.split("#[cfg(test)]")[0] ?? "";
+		const named = (files: Array<[string, string]>) =>
+			files.filter(([, text]) => asks.some((ask) => outside(text).includes(ask))).map(([file]) => file);
+		const files = filesUnder(path.join(ROOT, "rust", "agentic", "src"))
+			.filter((file) => file.endsWith(".rs"))
+			.map((file): [string, string] => [file, readFileSync(file, "utf8")]);
+		expect(files.length).toBeGreaterThan(0);
+		expect(named(files)).toEqual([]);
+		const probes: Array<[string, string]> = [
+			["a.rs", "let held = Handle::try_current();"],
+			["b.rs", "tokio::spawn(async {});"],
+			["c.rs", "runtime.spawn(async {});\n#[cfg(test)]\nmod tests { fn t() { Handle::current(); } }"],
+		];
+		expect(named(probes)).toEqual(["a.rs", "b.rs"]);
+	});
+
 	it("a consumer runs the scripts with three packages", async () => {
 		const scripts = CONSUMER_SCRIPTS.map((script) => path.join(ROOT, "scripts", script));
 		const parsed = await parseFiles(scripts);

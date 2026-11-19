@@ -161,6 +161,7 @@ fn catalog_of(net: &Net) -> Arc<ModelCatalog> {
     Arc::new(ModelCatalog::new(ModelCatalogDeps {
         transport: Arc::clone(&net.transport),
         deps: CatalogDeps {
+            runtime: nyaaai_testkit::cases::runtime(),
             scheduler: net.scheduler.clone(),
             rows: empty_registry() as Arc<dyn ModelRegistry>,
             refreshed: Arc::new(|| {}),
@@ -275,6 +276,7 @@ pub fn opencode_browser(input: BrowseOpencodeBrowserInput) -> Outcome<BrowseOpen
         plan,
         transport: Arc::clone(&net.transport),
         deps: CatalogDeps {
+            runtime: nyaaai_testkit::cases::runtime(),
             scheduler: net.scheduler.clone(),
             rows: empty_registry() as Arc<dyn ModelRegistry>,
             refreshed: Arc::new(|| {}),

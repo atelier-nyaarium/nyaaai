@@ -116,6 +116,7 @@ async fn play(input: GateRunInput) -> Outcome<GateRunResult> {
     let scheduler = Arc::new(FakeScheduler::new(Arc::clone(&wheel)));
     let gate = Arc::new(ProviderGate::new(
         GateDeps {
+            runtime: nyaaai_testkit::cases::runtime(),
             scheduler,
             pause_ms: input.pause_ms.map(|held| held as i64),
             max_pauses: input.max_pauses,
