@@ -19,7 +19,7 @@
 		"answers": {
 			"a": {
 				"kind": "key",
-				"key": "key-0123456789abcdef"
+				"key": "fake-key-one"
 			}
 		},
 		"steps": [
@@ -37,7 +37,7 @@
 	},
 	"expected": {
 		"gets": [
-			"key-0123456789abcdef",
+			"fake-key-one",
 			null
 		]
 	}

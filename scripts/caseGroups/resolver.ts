@@ -252,7 +252,7 @@ async function sendThrough(
 /** The names of the six kinds of NyaaAI. */
 const NAMES = ProviderKindName.options;
 
-const KEY = "key-0123456789abcdef";
+const KEY = "fake-key-one";
 
 const candidateOf = (resolved: Resolved): z.infer<typeof Candidate> => ({
 	entry: resolved.entry.id,

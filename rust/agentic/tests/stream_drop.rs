@@ -63,7 +63,7 @@ fn a_dropped_next_does_not_send_again() {
         let transport = Transport::new(TransportDeps {
             fetch: Arc::new(Silent(Arc::clone(&sent))),
             scheduler: Arc::new(FakeScheduler::new(Arc::new(TimerWheel::new(0)))),
-            key: Arc::new(static_key("key-1")),
+            key: Arc::new(static_key("fake-1")),
             log: Box::new(move |line| sink.lock().unwrap().push(line.to_owned())),
             base_url: "http://silent.invalid".to_owned(),
             label: "L".to_owned(),
@@ -97,7 +97,7 @@ fn a_dropped_next_does_not_send_again() {
 
 #[test]
 fn a_key_auth_prints_no_key() {
-    let shown = format!("{:?}", KeyAuth::Key("key-secret-1".to_owned()));
-    assert!(!shown.contains("key-secret-1"));
+    let shown = format!("{:?}", KeyAuth::Key("fake-secret-1".to_owned()));
+    assert!(!shown.contains("fake-secret-1"));
     assert_eq!(format!("{:?}", KeyAuth::Stored), "Stored");
 }

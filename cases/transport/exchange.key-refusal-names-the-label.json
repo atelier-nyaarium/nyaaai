@@ -13,7 +13,7 @@
 		"userAgent": "lab-app/1.0",
 		"keys": [
 			null,
-			"bad key"
+			"fake bad key"
 		],
 		"startMs": 1800000000000,
 		"script": {

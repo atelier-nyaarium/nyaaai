@@ -6,7 +6,7 @@ import { failing, NOW, refused, reply } from "./catalogKit";
 ////////////////////////////////
 //  Fixtures
 
-const KEY = "key-0123456789abcdef";
+const KEY = "fake-key-one";
 
 const A = "local-a:27b";
 const B = "local-b:9b";

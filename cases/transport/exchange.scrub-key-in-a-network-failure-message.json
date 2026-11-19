@@ -12,7 +12,7 @@
 		"label": "OpenRouter",
 		"userAgent": "lab-app/1.0",
 		"keys": [
-			"key-0123456789abcdef"
+			"fake-key-one"
 		],
 		"startMs": 1800000000000,
 		"script": {
@@ -23,7 +23,7 @@
 					"headers": [],
 					"chunks": [],
 					"end": "refused",
-					"error": "connect failed for https://x.test/?key=key-0123456789abcdef"
+					"error": "connect failed for https://x.test/?key=fake-key-one"
 				}
 			]
 		},
@@ -79,7 +79,7 @@
 					],
 					[
 						"Authorization",
-						"Bearer key-0123456789abcdef"
+						"Bearer fake-key-one"
 					],
 					[
 						"User-Agent",

@@ -47,7 +47,7 @@ pub enum Auth {
     #[default]
     Bearer,
     None,
-    /// A bearer when a key exists.
+    /// Key auth only when a key exists.
     Optional,
 }
 

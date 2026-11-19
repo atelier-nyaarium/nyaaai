@@ -18,7 +18,7 @@ import { replaceTraceIds, SESSION } from "../traceIds";
 ////////////////////////////////
 //  Functions & Helpers
 
-const KEY = "key-0123456789abcdef";
+const KEY = "fake-key-one";
 const TRACES = path.join(ROOT, "cases", "traces");
 const bytes = (text: string): string => base64Encode(new TextEncoder().encode(text));
 const text = (chunk: string): string => new TextDecoder().decode(base64Decode(chunk));

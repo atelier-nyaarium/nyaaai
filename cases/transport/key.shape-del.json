@@ -4,7 +4,7 @@
 	"kind": "transport.key",
 	"name": "shape-del",
 	"input": {
-		"text": "key-or"
+		"text": "fake-or"
 	},
 	"expected": {
 		"shape": false,

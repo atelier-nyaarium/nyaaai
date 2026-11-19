@@ -9,7 +9,7 @@
 			"id": "lab",
 			"label": "Lab"
 		},
-		"stored": "key-0123456789abcdef",
+		"stored": "fake-key-one",
 		"startMs": 1790337600000,
 		"exchanges": [
 			{

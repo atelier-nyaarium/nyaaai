@@ -15,7 +15,7 @@
 		"answers": {
 			"c": {
 				"kind": "key",
-				"key": "key-0123456789abcdef"
+				"key": "fake-key-one"
 			}
 		},
 		"failing": [],
@@ -61,7 +61,7 @@
 						"id": "c",
 						"answer": {
 							"kind": "key",
-							"key": "key-fedcba9876543210"
+							"key": "fake-key-two"
 						}
 					}
 				],

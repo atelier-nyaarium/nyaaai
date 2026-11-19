@@ -16,8 +16,8 @@ const MISSING = "openrouter:lab/none";
 
 const ALL_KINDS = ["openrouter", "opencode", "ollama", "lmstudio", "llamacpp", "compatible"];
 
-const KEY = { kind: "key", key: "key-0123456789abcdef" };
-const OTHER_KEY = { kind: "key", key: "key-fedcba9876543210" };
+const KEY = { kind: "key", key: "fake-key-one" };
+const OTHER_KEY = { kind: "key", key: "fake-key-two" };
 const NONE = { kind: "none" };
 const REFUSED = { kind: "refused" };
 const UNREADY = { kind: "unready" };

@@ -4,7 +4,7 @@
 	"kind": "transport.key",
 	"name": "shape-a-newline-inside",
 	"input": {
-		"text": "key-v1-abc\ndef"
+		"text": "fake-v1-abc\ndef"
 	},
 	"expected": {
 		"shape": false,

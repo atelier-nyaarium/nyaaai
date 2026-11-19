@@ -324,7 +324,7 @@ fn authorization_is_sent() {
         let mut request = post(server.url("/"), "{}");
         request
             .headers
-            .push(("Authorization".to_owned(), "Bearer key-1234".to_owned()));
+            .push(("Authorization".to_owned(), "Bearer fake-1234".to_owned()));
         let mut response = fetch.fetch(request, CancelToken::new()).await.unwrap();
         drained(&mut response).await.unwrap();
         let seen = server.requests();
@@ -334,7 +334,7 @@ fn authorization_is_sent() {
             .find(|(name, _)| name == "authorization");
         assert_eq!(
             sent.map(|(_, value)| value.as_str()),
-            Some("Bearer key-1234")
+            Some("Bearer fake-1234")
         );
     });
 }
@@ -389,7 +389,7 @@ fn the_transport_runs_over_the_adapter() {
     use nyaaai_contract::shapes::step::StepEvent;
     use nyaaai_contract::time::SystemScheduler;
 
-    const KEY: &str = "key-0123456789abcdef";
+    const KEY: &str = "fake-key-one";
     run(async {
         let stream = "data: {\"id\":\"gen-7\",\"choices\":[{\"delta\":{\"content\":\"hi\"},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n";
         let mut failing = played(400, &[]);

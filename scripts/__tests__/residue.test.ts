@@ -2,7 +2,7 @@ import { describe, expect, it } from "bun:test";
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { Pattern } from "@nyaaai/contract/pattern";
-import { ROOT } from "../child";
+import { git, ROOT } from "../child";
 import {
 	descendants,
 	isAwaitExpression,
@@ -167,6 +167,26 @@ function isDestructured(node: Node): boolean {
 /** Bare `fetch` calls: the platform's own. */
 function platformFetchUses(file: SourceFile): number {
 	return descendants(file).filter((node) => isIdentifier(node) && node.text === "fetch" && isReference(node)).length;
+}
+
+/** Values written after `Bearer ` in a text, a value being a run of token characters. */
+function bearerValues(text: string): string[] {
+	const token = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._~+/=%-";
+	const found: string[] = [];
+	for (let at = text.indexOf("Bearer "); at >= 0; at = text.indexOf("Bearer ", at + 1)) {
+		let end = at + "Bearer ".length;
+		while (end < text.length && token.includes(text[end] as string)) end += 1;
+		found.push(text.slice(at + "Bearer ".length, end));
+	}
+	return found;
+}
+
+/** A value that is no made-up key: a run that is not a word, or `k`, the one-character key a case needs. */
+function unmarkedBearer(text: string): string[] {
+	const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	return bearerValues(text).filter(
+		(value) => letters.includes(value[0] ?? "=") && value !== "k" && !value.includes("fake"),
+	);
 }
 
 function testFiles(): string[] {
@@ -664,6 +684,26 @@ describe("residue", () => {
 					problems.push(`${entry} reaches ${use} in ${path.relative(ROOT, file)}`);
 			}
 		}
+		expect(problems).toEqual([]);
+	});
+
+	it("every made-up key in an auth header says it is fake", () => {
+		const held = (value: string) => `${"Bearer"} ${value}`;
+		const old = `key-${"0123456789"}${"abcdef"}`;
+		const probes: Array<[string, string[]]> = [
+			[`Authorization: ${held(old)}`, [old]],
+			[`Authorization: ${held("fake-key-one")}`, []],
+			[`${held("k")} and Self::${held("=>")} x`, []],
+		];
+		expect(probes.map(([text]) => unmarkedBearer(text))).toEqual(probes.map(([, found]) => found));
+
+		const files = git(ROOT, ["ls-files", "-z"])
+			.split("\0")
+			.filter((file) => file !== "");
+		expect(files.length).toBeGreaterThan(0);
+		const problems = files.flatMap((file) =>
+			unmarkedBearer(readFileSync(path.join(ROOT, file), "utf8")).map((value) => `${file} has Bearer ${value}`),
+		);
 		expect(problems).toEqual([]);
 	});
 });

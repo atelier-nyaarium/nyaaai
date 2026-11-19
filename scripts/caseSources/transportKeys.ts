@@ -44,19 +44,19 @@ const ECHOED = { id: `gen-${KEY}`, provider: `Azure ${KEY}` };
 
 const keyRules: CaseSource[] = [
 	exchange("key-missing-empty-and-malformed-make-no-request", [streamCall(), streamCall(), streamCall()], [], {
-		keys: [null, "", "key-v1-abc\ndef"],
+		keys: [null, "", "fake-v1-abc\ndef"],
 	}),
 	exchange("key-refusals-reach-complete-and-json-calls", NEEDS_KEY, [], { keys: [null] }),
-	exchange("key-malformed-reaches-complete-and-json-calls", NEEDS_KEY, [], { keys: ["sk or v1"] }),
+	exchange("key-malformed-reaches-complete-and-json-calls", NEEDS_KEY, [], { keys: ["fake or v1"] }),
 	exchange("key-refusal-names-the-label", [streamCall(), streamCall()], [], {
 		label: "Lab",
-		keys: [null, "bad key"],
+		keys: [null, "fake bad key"],
 	}),
 	exchange(
 		"key-is-read-again-for-each-request",
 		[streamCall(), streamCall(), streamCall()],
 		[sseReply(HI), sseReply(HI), sseReply(HI)],
-		{ keys: ["key-v1-first", "key-v1-second", null] },
+		{ keys: ["fake-v1-first", "fake-v1-second", null] },
 	),
 	exchange("key-refused-after-a-good-call", [streamCall(), streamCall()], [sseReply(HI)], {
 		keys: [KEY, ""],
@@ -84,7 +84,10 @@ const keyRules: CaseSource[] = [
 		keys: [null],
 	}),
 	exchange("auth-optional-an-empty-key-is-no-key", [streamCall()], [sseReply(HI)], { auth: "optional", keys: [""] }),
-	exchange("auth-optional-a-malformed-key-is-refused", [streamCall()], [], { auth: "optional", keys: ["bad key"] }),
+	exchange("auth-optional-a-malformed-key-is-refused", [streamCall()], [], {
+		auth: "optional",
+		keys: ["fake bad key"],
+	}),
 	exchange(
 		"auth-optional-reads-the-source-once-per-call",
 		[streamCall(), getCall("/models")],
@@ -111,8 +114,8 @@ const keyRules: CaseSource[] = [
 	exchange(
 		"json-explicit-key-is-sent-and-the-source-is-not-read",
 		[
-			getCall("/models", { keyAuth: { kind: "key", key: "key-explicit-123" } }),
-			postCall("/probe", { a: 1 }, { keyAuth: { kind: "key", key: "key-explicit-456" } }),
+			getCall("/models", { keyAuth: { kind: "key", key: "fake-explicit-1" } }),
+			postCall("/probe", { a: 1 }, { keyAuth: { kind: "key", key: "fake-explicit-2" } }),
 		],
 		[jsonReply({}), jsonReply({})],
 	),
@@ -120,7 +123,7 @@ const keyRules: CaseSource[] = [
 		"json-explicit-key-empty-or-malformed-is-refused",
 		[
 			getCall("/models", { keyAuth: { kind: "key", key: "" } }),
-			getCall("/models", { keyAuth: { kind: "key", key: "has space" } }),
+			getCall("/models", { keyAuth: { kind: "key", key: "fake has space" } }),
 		],
 		[],
 	),
@@ -148,31 +151,31 @@ const keyRules: CaseSource[] = [
 ];
 
 const shapes: CaseSource[] = [
-	keyed("shape-plain", "key-v1-abc"),
+	keyed("shape-plain", "fake-v1-abc"),
 	keyed("shape-every-printable-symbol", "!\"#$%&'()*+,-./0123456789:;<=>?@AZaz[\\]^_`{|}~"),
 	keyed("shape-empty", ""),
-	keyed("shape-a-space", "sk or"),
-	keyed("shape-a-leading-space", " key-or"),
-	keyed("shape-a-trailing-space", "key-or "),
-	keyed("shape-a-newline", "key-or\n"),
-	keyed("shape-a-newline-inside", "key-v1-abc\ndef"),
-	keyed("shape-a-carriage-return", "key-or\r"),
-	keyed("shape-a-tab", "sk\tor"),
-	keyed("shape-del", "key-or\u007f"),
-	keyed("shape-a-control", "sk\u0001or"),
-	keyed("shape-latin-1", "key-\u{e9}"),
-	keyed("shape-a-no-break-space", "sk\u{a0}or"),
-	keyed("shape-wide-text", "\u{30ad}\u{30fc}"),
-	keyed("shape-an-emoji", "key-\u{1f600}"),
-	keyed("shape-a-lone-surrogate", "key-\ud800"),
-	keyed("shape-a-byte-order-mark", "\u{feff}key-or"),
+	keyed("shape-a-space", "fake or"),
+	keyed("shape-a-leading-space", " fake-or"),
+	keyed("shape-a-trailing-space", "fake-or "),
+	keyed("shape-a-newline", "fake-or\n"),
+	keyed("shape-a-newline-inside", "fake-v1-abc\ndef"),
+	keyed("shape-a-carriage-return", "fake-or\r"),
+	keyed("shape-a-tab", "fake\tor"),
+	keyed("shape-del", "fake-or\u007f"),
+	keyed("shape-a-control", "fake\u0001or"),
+	keyed("shape-latin-1", "fake-\u{e9}"),
+	keyed("shape-a-no-break-space", "fake\u{a0}or"),
+	keyed("shape-wide-text", "fake\u{30ad}\u{30fc}"),
+	keyed("shape-an-emoji", "fake-\u{1f600}"),
+	keyed("shape-a-lone-surrogate", "fake-\ud800"),
+	keyed("shape-a-byte-order-mark", "\u{feff}fake-or"),
 	keyed("shape-a-single-character", "k"),
-	keyed("normal-trims-spaces", "  key-v1-abc  "),
-	keyed("normal-trims-whitespace-of-every-kind", "\u{a0}\t\n key-or \u{2003}\u{feff}"),
+	keyed("normal-trims-spaces", "  fake-v1-abc  "),
+	keyed("normal-trims-whitespace-of-every-kind", "\u{a0}\t\n fake-or \u{2003}\u{feff}"),
 	keyed("normal-blank-is-no-key", "   \n"),
 	keyed("normal-empty-is-no-key", ""),
-	keyed("normal-a-space-inside-is-refused", " sk or "),
-	keyed("normal-a-newline-inside-is-refused", "sk\nor"),
+	keyed("normal-a-space-inside-is-refused", " fake or "),
+	keyed("normal-a-newline-inside-is-refused", "fake\nor"),
 ];
 
 const scrubs: CaseSource[] = [

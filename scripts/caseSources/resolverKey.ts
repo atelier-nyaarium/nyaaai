@@ -6,8 +6,8 @@ import { caseOf } from "./catalogKit";
 ////////////////////////////////
 //  Fixtures
 
-const KEY = { kind: "key", key: "key-0123456789abcdef" };
-const OTHER_KEY = { kind: "key", key: "key-fedcba9876543210" };
+const KEY = { kind: "key", key: "fake-key-one" };
+const OTHER_KEY = { kind: "key", key: "fake-key-two" };
 
 const LAB = { id: "lab", kind: "ollama", label: "Lab", url: "http://lab.local:11434" };
 const MOVED = { ...LAB, url: "http://lab.local:9999" };
@@ -122,7 +122,7 @@ export const resolverKeyCases: CaseSource[] = [
 	key("key-the-key-text-is-given-as-it-is", {
 		entry: FIRST,
 		list: [FIRST],
-		answers: { a: { kind: "key", key: "  key-with-blanks  " } },
+		answers: { a: { kind: "key", key: "  fake-with-blanks  " } },
 		steps: [get],
 	}),
 	key("key-an-empty-key-is-a-key", {

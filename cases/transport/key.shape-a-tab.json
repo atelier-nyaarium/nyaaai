@@ -4,7 +4,7 @@
 	"kind": "transport.key",
 	"name": "shape-a-tab",
 	"input": {
-		"text": "sk\tor"
+		"text": "fake\tor"
 	},
 	"expected": {
 		"shape": false,

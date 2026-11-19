@@ -15,7 +15,7 @@
 		"answers": {
 			"go": {
 				"kind": "key",
-				"key": "key-0123456789abcdef"
+				"key": "fake-key-one"
 			}
 		},
 		"failing": [],
@@ -104,7 +104,7 @@
 					"kind": "sent",
 					"zdrOnly": true,
 					"url": "https://opencode.ai/inference/go/openai/v1/chat/completions",
-					"authorization": "Bearer key-0123456789abcdef",
+					"authorization": "Bearer fake-key-one",
 					"failure": null,
 					"thrown": null
 				},
@@ -155,7 +155,7 @@
 					"kind": "sent",
 					"zdrOnly": true,
 					"url": "https://opencode.ai/inference/openai/v1/chat/completions",
-					"authorization": "Bearer key-0123456789abcdef",
+					"authorization": "Bearer fake-key-one",
 					"failure": null,
 					"thrown": null
 				},

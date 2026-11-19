@@ -25,7 +25,7 @@
 				"op": "set",
 				"id": "e1",
 				"answer": "key",
-				"key": "key-one"
+				"key": "fake-one"
 			},
 			{
 				"op": "get",
@@ -122,7 +122,7 @@
 				"heard": [],
 				"got": {
 					"kind": "key",
-					"key": "key-one"
+					"key": "fake-one"
 				},
 				"reads": 2
 			},

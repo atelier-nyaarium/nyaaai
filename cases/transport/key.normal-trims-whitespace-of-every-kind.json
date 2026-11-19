@@ -4,10 +4,10 @@
 	"kind": "transport.key",
 	"name": "normal-trims-whitespace-of-every-kind",
 	"input": {
-		"text": " \t\n key-or  \ufeff"
+		"text": " \t\n fake-or  \ufeff"
 	},
 	"expected": {
 		"shape": false,
-		"normalized": "key-or"
+		"normalized": "fake-or"
 	}
 }

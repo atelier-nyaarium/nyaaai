@@ -12,7 +12,7 @@
 		"label": "OpenRouter",
 		"userAgent": "lab-app/1.0",
 		"keys": [
-			"sk+or/v1=="
+			"fake+key/v1=="
 		],
 		"startMs": 1800000000000,
 		"script": {
@@ -29,7 +29,7 @@
 					"chunks": [
 						{
 							"kind": "text",
-							"text": "{\"error\":{\"code\":401,\"message\":\"Bad key sk+or/v1== sk%2Bor%2Fv1%3D%3D c2srb3IvdjE9PQ end\"}}"
+							"text": "{\"error\":{\"code\":401,\"message\":\"Bad key fake+key/v1== fake%2Bkey%2Fv1%3D%3D ZmFrZStrZXkvdjE9PQ end\"}}"
 						}
 					]
 				}
@@ -87,7 +87,7 @@
 					],
 					[
 						"Authorization",
-						"Bearer sk+or/v1=="
+						"Bearer fake+key/v1=="
 					],
 					[
 						"User-Agent",

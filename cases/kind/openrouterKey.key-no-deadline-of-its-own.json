@@ -5,7 +5,7 @@
 	"name": "key-no-deadline-of-its-own",
 	"input": {
 		"startMs": 1790337600000,
-		"stored": "key-0123456789abcdef",
+		"stored": "fake-key-one",
 		"exchanges": [
 			{
 				"status": 200,
@@ -37,7 +37,7 @@
 		"requests": [
 			{
 				"path": "/key",
-				"authorization": "Bearer key-0123456789abcdef"
+				"authorization": "Bearer fake-key-one"
 			}
 		],
 		"waiting": []

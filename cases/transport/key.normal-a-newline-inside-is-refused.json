@@ -4,7 +4,7 @@
 	"kind": "transport.key",
 	"name": "normal-a-newline-inside-is-refused",
 	"input": {
-		"text": "sk\nor"
+		"text": "fake\nor"
 	},
 	"expected": {
 		"shape": false,

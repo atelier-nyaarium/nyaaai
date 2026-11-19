@@ -29,7 +29,7 @@
 				"exchanges": [],
 				"stored": {
 					"kind": "key",
-					"key": "key-0123456789abcdef"
+					"key": "fake-key-one"
 				}
 			},
 			{
@@ -97,7 +97,7 @@
 				"exchanges": [],
 				"stored": {
 					"kind": "key",
-					"key": "key-0123456789abcdef"
+					"key": "fake-key-one"
 				}
 			},
 			{
@@ -176,7 +176,7 @@
 				"answers": [
 					{
 						"kind": "key",
-						"key": "key-0123456789abcdef"
+						"key": "fake-key-one"
 					}
 				],
 				"statusAfter": {

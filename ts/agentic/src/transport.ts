@@ -41,7 +41,7 @@ export interface TransportDeps {
 	userAgent: string;
 	/** Decodes failed reads. */
 	errors: Pick<Codec, "failure">;
-	/** `optional`: bearer when a key exists. */
+	/** `optional`: key auth only when a key exists. */
 	auth?: "bearer" | "none" | "optional";
 	idleMs?: number;
 	/** Cap on one reply, or on a stream's bytes between items. Default 16 MiB. */

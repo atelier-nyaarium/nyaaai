@@ -21,9 +21,9 @@ export const OPUS = "anthropic/claude-opus-5.5";
 
 export const LOCAL_ROW = "local:box/qwen";
 
-export const KEY = { kind: "key", key: "key-0123456789abcdef" };
+export const KEY = { kind: "key", key: "fake-key-one" };
 
-export const NEW_KEY = { kind: "key", key: "key-fedcba9876543210" };
+export const NEW_KEY = { kind: "key", key: "fake-key-two" };
 
 export const A = { id: "a", kind: "openrouter", label: "Alpha" };
 

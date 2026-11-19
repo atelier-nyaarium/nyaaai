@@ -12,7 +12,7 @@
 		"label": "OpenRouter",
 		"userAgent": "lab-app/1.0",
 		"keys": [
-			"key-0123456789abcdef"
+			"fake-key-one"
 		],
 		"startMs": 1800000000000,
 		"script": {
@@ -29,7 +29,7 @@
 					"chunks": [
 						{
 							"kind": "text",
-							"text": "{\"error\":{\"code\":429,\"message\":\"Slow\",\"metadata\":{\"reasons\":[\"QmVhcmVyIGtleS0wMTIzNDU2Nzg5YWJjZGVm\",\"x%2f\"]}}}"
+							"text": "{\"error\":{\"code\":429,\"message\":\"Slow\",\"metadata\":{\"reasons\":[\"QmVhcmVyIGZha2Uta2V5LW9uZQ\",\"x%2f\"]}}}"
 						}
 					]
 				},
@@ -44,7 +44,7 @@
 					"chunks": [
 						{
 							"kind": "text",
-							"text": "data: {\"id\":\"gen-aWQ6a2V5LTAxMjM0NTY3ODlhYmNkZWY\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Hi\"}}]}\n\n"
+							"text": "data: {\"id\":\"gen-aWQ6ZmFrZS1rZXktb25l\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Hi\"}}]}\n\n"
 						},
 						{
 							"kind": "text",
@@ -163,7 +163,7 @@
 					],
 					[
 						"Authorization",
-						"Bearer key-0123456789abcdef"
+						"Bearer fake-key-one"
 					],
 					[
 						"User-Agent",
@@ -186,7 +186,7 @@
 					],
 					[
 						"Authorization",
-						"Bearer key-0123456789abcdef"
+						"Bearer fake-key-one"
 					],
 					[
 						"User-Agent",

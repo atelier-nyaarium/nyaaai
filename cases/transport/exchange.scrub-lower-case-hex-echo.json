@@ -12,7 +12,7 @@
 		"label": "OpenRouter",
 		"userAgent": "lab-app/1.0",
 		"keys": [
-			"ab/cd+ef=gh"
+			"fake/cd+ef=gh"
 		],
 		"startMs": 1800000000000,
 		"script": {
@@ -29,7 +29,7 @@
 					"chunks": [
 						{
 							"kind": "text",
-							"text": "{\"error\":{\"code\":401,\"message\":\"Bad ab%2fcd%2bef%3dgh end\"}}"
+							"text": "{\"error\":{\"code\":401,\"message\":\"Bad fake%2fcd%2bef%3dgh end\"}}"
 						}
 					]
 				}
@@ -87,7 +87,7 @@
 					],
 					[
 						"Authorization",
-						"Bearer ab/cd+ef=gh"
+						"Bearer fake/cd+ef=gh"
 					],
 					[
 						"User-Agent",

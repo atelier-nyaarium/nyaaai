@@ -12,7 +12,7 @@
 		"label": "OpenRouter",
 		"userAgent": "lab-app/1.0",
 		"keys": [
-			"key-0123456789abcdef"
+			"fake-key-one"
 		],
 		"startMs": 1800000000000,
 		"script": {
@@ -27,15 +27,15 @@
 						],
 						[
 							"x-echo",
-							"key-0123456789abcdef"
+							"fake-key-one"
 						],
 						[
 							"retry-after",
-							"key-0123456789abcdef"
+							"fake-key-one"
 						],
 						[
 							"x-request-id",
-							"key-0123456789abcdef"
+							"fake-key-one"
 						]
 					],
 					"chunks": [
@@ -99,7 +99,7 @@
 					],
 					[
 						"Authorization",
-						"Bearer key-0123456789abcdef"
+						"Bearer fake-key-one"
 					],
 					[
 						"User-Agent",

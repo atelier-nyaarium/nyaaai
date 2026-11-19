@@ -19,7 +19,7 @@
 		"answers": {
 			"a": {
 				"kind": "key",
-				"key": "key-0123456789abcdef"
+				"key": "fake-key-one"
 			}
 		},
 		"steps": [
@@ -31,7 +31,7 @@
 				"id": "a",
 				"answer": {
 					"kind": "key",
-					"key": "key-fedcba9876543210"
+					"key": "fake-key-two"
 				}
 			},
 			{
@@ -52,7 +52,7 @@
 				"id": "a",
 				"answer": {
 					"kind": "key",
-					"key": "key-0123456789abcdef"
+					"key": "fake-key-one"
 				}
 			},
 			{
@@ -62,10 +62,10 @@
 	},
 	"expected": {
 		"gets": [
-			"key-0123456789abcdef",
-			"key-fedcba9876543210",
+			"fake-key-one",
+			"fake-key-two",
 			null,
-			"key-0123456789abcdef"
+			"fake-key-one"
 		]
 	}
 }

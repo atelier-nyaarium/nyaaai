@@ -4,10 +4,10 @@
 	"kind": "transport.key",
 	"name": "normal-trims-spaces",
 	"input": {
-		"text": "  key-v1-abc  "
+		"text": "  fake-v1-abc  "
 	},
 	"expected": {
 		"shape": false,
-		"normalized": "key-v1-abc"
+		"normalized": "fake-v1-abc"
 	}
 }

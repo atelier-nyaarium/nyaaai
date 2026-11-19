@@ -12,7 +12,7 @@
 		"label": "OpenRouter",
 		"userAgent": "lab-app/1.0",
 		"keys": [
-			"key-0123456789abcdef"
+			"fake-key-one"
 		],
 		"startMs": 1800000000000,
 		"script": {
@@ -56,7 +56,7 @@
 				"path": "/models",
 				"keyAuth": {
 					"kind": "key",
-					"key": "key-explicit-123"
+					"key": "fake-explicit-1"
 				}
 			},
 			{
@@ -67,7 +67,7 @@
 				},
 				"keyAuth": {
 					"kind": "key",
-					"key": "key-explicit-456"
+					"key": "fake-explicit-2"
 				}
 			}
 		]
@@ -108,7 +108,7 @@
 					],
 					[
 						"Authorization",
-						"Bearer key-explicit-123"
+						"Bearer fake-explicit-1"
 					]
 				],
 				"body": null
@@ -127,7 +127,7 @@
 					],
 					[
 						"Authorization",
-						"Bearer key-explicit-456"
+						"Bearer fake-explicit-2"
 					],
 					[
 						"Content-Type",

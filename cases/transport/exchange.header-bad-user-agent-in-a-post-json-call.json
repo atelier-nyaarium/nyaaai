@@ -12,7 +12,7 @@
 		"label": "OpenRouter",
 		"userAgent": "lab\r\napp",
 		"keys": [
-			"key-0123456789abcdef"
+			"fake-key-one"
 		],
 		"startMs": 1800000000000,
 		"script": {

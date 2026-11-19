@@ -20,11 +20,11 @@
 		"keys": {
 			"main": {
 				"kind": "key",
-				"key": "key-0123456789abcdef"
+				"key": "fake-key-one"
 			},
 			"gone": {
 				"kind": "key",
-				"key": "key-0123456789abcdef"
+				"key": "fake-key-one"
 			}
 		},
 		"exchanges": [
@@ -59,7 +59,7 @@
 				"id": "main",
 				"answer": {
 					"kind": "key",
-					"key": "key-0123456789abcdef"
+					"key": "fake-key-one"
 				}
 			},
 			{

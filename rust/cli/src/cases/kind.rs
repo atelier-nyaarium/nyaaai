@@ -404,7 +404,7 @@ pub fn route(input: KindRouteInput) -> Outcome<KindRouteResult> {
     deps.fetch = net.played.clone();
     deps.scheduler = net.scheduler.clone();
     deps.base_url = Some(BASE_URL.to_owned());
-    let key = keys_of(&Some("key-0123456789abcdef".to_owned()))?;
+    let key = keys_of(&Some("fake-key-one".to_owned()))?;
     let transport = named.transport(&fields, key, &deps)?;
     let registry = Arc::new(ScriptedModelRegistry::empty());
     registry.set_rows(rows_of_keys(&input.rows)?);

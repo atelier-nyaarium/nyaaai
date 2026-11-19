@@ -4,7 +4,7 @@
 	"kind": "transport.key",
 	"name": "shape-a-lone-surrogate",
 	"input": {
-		"text": "key-\ud800"
+		"text": "fake-\ud800"
 	},
 	"expected": {
 		"shape": false,

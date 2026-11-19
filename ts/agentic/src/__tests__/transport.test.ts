@@ -24,7 +24,7 @@ function transportOver(fetch: Fetch): Transport {
 	return new Transport({
 		fetch,
 		scheduler: fakeScheduler(),
-		key: staticKey("key-test-123"),
+		key: staticKey("fake-test-123"),
 		log: () => {},
 		baseUrl: "https://lab.example.test/v1",
 		label: "Lab",
@@ -99,7 +99,7 @@ describe("the transport", () => {
 		const throwing = new Transport({
 			fetch: ok(),
 			scheduler: fakeScheduler(),
-			key: staticKey("sk-test-123"),
+			key: staticKey("fake-test-456"),
 			log: () => {
 				throw new Error("log boom");
 			},
@@ -120,7 +120,7 @@ describe("the transport", () => {
 		const failing = new Transport({
 			fetch: async () => ({ status: 500, headers: [], chunks: (async function* () {})() }),
 			scheduler: fakeScheduler(),
-			key: staticKey("sk-test-123"),
+			key: staticKey("fake-test-456"),
 			log: () => {
 				throw new Error("log boom");
 			},

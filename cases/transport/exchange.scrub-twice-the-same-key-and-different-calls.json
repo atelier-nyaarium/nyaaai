@@ -12,7 +12,7 @@
 		"label": "OpenRouter",
 		"userAgent": "lab-app/1.0",
 		"keys": [
-			"key-0123456789abcdef"
+			"fake-key-one"
 		],
 		"startMs": 1800000000000,
 		"script": {
@@ -29,7 +29,7 @@
 					"chunks": [
 						{
 							"kind": "text",
-							"text": "{\"error\":{\"code\":401,\"message\":\"Bad key-0123456789abcdef\"}}"
+							"text": "{\"error\":{\"code\":401,\"message\":\"Bad fake-key-one\"}}"
 						}
 					]
 				},
@@ -44,7 +44,7 @@
 					"chunks": [
 						{
 							"kind": "text",
-							"text": "{\"error\":{\"code\":401,\"message\":\"Bad key-0123456789abcdef\"}}"
+							"text": "{\"error\":{\"code\":401,\"message\":\"Bad fake-key-one\"}}"
 						}
 					]
 				}
@@ -133,7 +133,7 @@
 					],
 					[
 						"Authorization",
-						"Bearer key-0123456789abcdef"
+						"Bearer fake-key-one"
 					],
 					[
 						"User-Agent",
@@ -156,7 +156,7 @@
 					],
 					[
 						"Authorization",
-						"Bearer key-0123456789abcdef"
+						"Bearer fake-key-one"
 					],
 					[
 						"User-Agent",

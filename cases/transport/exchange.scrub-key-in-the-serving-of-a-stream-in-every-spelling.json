@@ -12,7 +12,7 @@
 		"label": "OpenRouter",
 		"userAgent": "lab-app/1.0",
 		"keys": [
-			"sk+or/v1=="
+			"fake+key/v1=="
 		],
 		"startMs": 1800000000000,
 		"script": {
@@ -29,7 +29,7 @@
 					"chunks": [
 						{
 							"kind": "text",
-							"text": "data: {\"id\":\"gen-sk%2Bor%2Fv1%3D%3D\",\"provider\":\"c2srb3IvdjE9PQ\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Hi\"}}]}\n\n"
+							"text": "data: {\"id\":\"gen-fake%2Bkey%2Fv1%3D%3D\",\"provider\":\"ZmFrZStrZXkvdjE9PQ\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Hi\"}}]}\n\n"
 						},
 						{
 							"kind": "text",
@@ -113,7 +113,7 @@
 					],
 					[
 						"Authorization",
-						"Bearer sk+or/v1=="
+						"Bearer fake+key/v1=="
 					],
 					[
 						"User-Agent",

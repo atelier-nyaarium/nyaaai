@@ -12,7 +12,7 @@
 		"label": "OpenRouter",
 		"userAgent": "lab-app/1.0",
 		"keys": [
-			"key-0123456789abcdef"
+			"fake-key-one"
 		],
 		"startMs": 1800000000000,
 		"script": {
@@ -29,7 +29,7 @@
 					"chunks": [
 						{
 							"kind": "text",
-							"text": "data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"The key is key-0123456789abcdef\"}}]}\n\n"
+							"text": "data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"The key is fake-key-one\"}}]}\n\n"
 						},
 						{
 							"kind": "text",
@@ -77,7 +77,7 @@
 					},
 					{
 						"kind": "text",
-						"text": "The key is key-0123456789abcdef"
+						"text": "The key is fake-key-one"
 					},
 					{
 						"kind": "serving",
@@ -113,7 +113,7 @@
 					],
 					[
 						"Authorization",
-						"Bearer key-0123456789abcdef"
+						"Bearer fake-key-one"
 					],
 					[
 						"User-Agent",

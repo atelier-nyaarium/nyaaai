@@ -9,7 +9,7 @@
 			"label": "Zen",
 			"plan": "go"
 		},
-		"secret": "key-0123456789abcdef",
+		"secret": "fake-key-one",
 		"startMs": 1790337600000,
 		"exchanges": [
 			{
@@ -33,7 +33,7 @@
 			{
 				"method": "GET",
 				"url": "https://opencode.ai/inference/go/v1/models",
-				"authorization": "Bearer key-0123456789abcdef",
+				"authorization": "Bearer fake-key-one",
 				"userAgent": "cases/1.0"
 			}
 		],

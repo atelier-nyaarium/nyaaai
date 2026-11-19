@@ -4,10 +4,10 @@
 	"kind": "transport.key",
 	"name": "shape-a-newline",
 	"input": {
-		"text": "key-or\n"
+		"text": "fake-or\n"
 	},
 	"expected": {
 		"shape": false,
-		"normalized": "key-or"
+		"normalized": "fake-or"
 	}
 }

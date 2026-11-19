@@ -12,7 +12,7 @@
 		"label": "OpenRouter",
 		"userAgent": "lab-app/1.0",
 		"keys": [
-			"key-0123456789abcdef"
+			"fake-key-one"
 		],
 		"startMs": 1800000000000,
 		"script": {
@@ -29,7 +29,7 @@
 					"chunks": [
 						{
 							"kind": "text",
-							"text": "{\"error\":{\"code\":401,\"message\":\"Dump dXNlcjprZXktMDEyMzQ1Njc4OWFiY2RlZjp4 end\"}}"
+							"text": "{\"error\":{\"code\":401,\"message\":\"Dump dXNlcjpmYWtlLWtleS1vbmU6eA end\"}}"
 						}
 					]
 				}
@@ -65,7 +65,7 @@
 				"failure": {
 					"category": "keyRejected",
 					"status": 401,
-					"message": "Dump dXNlcjp[key]jp4 end"
+					"message": "Dump dXNlcjp[key]6eA end"
 				},
 				"thrown": null,
 				"aborted": false,
@@ -87,7 +87,7 @@
 					],
 					[
 						"Authorization",
-						"Bearer key-0123456789abcdef"
+						"Bearer fake-key-one"
 					],
 					[
 						"User-Agent",

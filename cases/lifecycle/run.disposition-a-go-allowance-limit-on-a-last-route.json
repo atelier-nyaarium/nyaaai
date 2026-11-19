@@ -16,7 +16,7 @@
 		"keys": {
 			"go": {
 				"kind": "key",
-				"key": "key-0123456789abcdef"
+				"key": "fake-key-one"
 			}
 		},
 		"rows": [
@@ -218,7 +218,7 @@
 		"requests": [
 			{
 				"url": "https://opencode.ai/inference/go/openai/v1/chat/completions",
-				"authorization": "Bearer key-0123456789abcdef",
+				"authorization": "Bearer fake-key-one",
 				"accept": "text/event-stream"
 			}
 		],

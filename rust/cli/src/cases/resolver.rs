@@ -43,7 +43,7 @@ use super::catalog::{convert, row_of_key};
 use super::local::local_row_of;
 use super::shapes::*;
 
-const KEY: &str = "key-0123456789abcdef";
+const KEY: &str = "fake-key-one";
 
 ////////////////////////////////
 //  Shared pieces

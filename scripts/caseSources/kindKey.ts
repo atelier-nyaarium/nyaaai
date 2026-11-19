@@ -6,7 +6,7 @@ import { failing, NOW, reply } from "./catalogKit";
 ////////////////////////////////
 //  Functions & Helpers
 
-const KEY = "key-0123456789abcdef";
+const KEY = "fake-key-one";
 
 const check = (name: string, input: Record<string, unknown>): CaseSource => ({
 	kind: "kind.openrouterKey",
@@ -33,7 +33,7 @@ export const kindKeyCases: CaseSource[] = [
 	}),
 	check("key-given-and-sent", {
 		exchanges: [body({ usage: 1 })],
-		checks: [{ auth: "key", key: "key-fedcba9876543210" }],
+		checks: [{ auth: "key", key: "fake-key-two" }],
 	}),
 	check("key-stored-and-missing-is-rejected-without-a-request", {
 		stored: null,

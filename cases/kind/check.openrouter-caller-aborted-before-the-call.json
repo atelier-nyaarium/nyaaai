@@ -8,7 +8,7 @@
 		"entry": {
 			"label": "Zen"
 		},
-		"secret": "key-0123456789abcdef",
+		"secret": "fake-key-one",
 		"startMs": 1790337600000,
 		"exchanges": [
 			{

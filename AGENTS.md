@@ -441,6 +441,7 @@ Same in both languages. `parseJson` and `parse_json` apply them.
 ## Public repository
 
 - No key, account id, real transcript or personal content. Test data is synthetic.
+- A made-up key contains `fake` and looks like no vendor's; `scripts/__tests__/residue.test.ts` holds every `Bearer` value to it, but the one-character key `k`.
 - No license file.
 - Scan fixtures, cases and prompts before a push.
 - `scripts/convertTrace.ts` replaces generation ids and every id found under a `session_id` key, wherever that id recurs. It sees no other secret. Read a converted trace before committing it.

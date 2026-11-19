@@ -48,10 +48,10 @@ const spellings: CaseSource[] = [
 	echoed("scrub-base64-of-a-bearer-echo", `Dump ${b64(`Bearer ${KEY}`)}`),
 	echoed("scrub-base64-of-a-bearer-echo-with-a-tail", `Dump ${b64(`Bearer ${KEY}\r\n`)} end`),
 	echoed("scrub-base64-of-user-and-key", `Dump ${b64(`user:${KEY}:x`)} end`),
-	echoed("scrub-lower-case-hex-echo", `Bad ${encodeURIComponent("ab/cd+ef=gh").toLowerCase()} end`, {
-		keys: ["ab/cd+ef=gh"],
+	echoed("scrub-lower-case-hex-echo", `Bad ${encodeURIComponent("fake/cd+ef=gh").toLowerCase()} end`, {
+		keys: ["fake/cd+ef=gh"],
 	}),
-	echoed("scrub-mixed-case-hex-echo", "Bad ab%2fcd%2Bef%3dgh end", { keys: ["ab/cd+ef=gh"] }),
+	echoed("scrub-mixed-case-hex-echo", "Bad fake%2fcd%2Bef%3dgh end", { keys: ["fake/cd+ef=gh"] }),
 	echoed("scrub-one-character-key-does-not-reread-the-marker", "key is e here", { keys: ["k"] }),
 	exchange(
 		"scrub-spellings-in-reasons-and-serving",

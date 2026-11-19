@@ -4,7 +4,7 @@
 	"kind": "transport.key",
 	"name": "shape-wide-text",
 	"input": {
-		"text": "キー"
+		"text": "fakeキー"
 	},
 	"expected": {
 		"shape": false,

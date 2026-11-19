@@ -8,7 +8,7 @@
 		"entry": {
 			"label": "Zen"
 		},
-		"stored": "key-0123456789abcdef",
+		"stored": "fake-key-one",
 		"startMs": 1790337600000,
 		"exchanges": [
 			{
@@ -29,7 +29,7 @@
 			{
 				"method": "GET",
 				"url": "https://openrouter.ai/api/v1/key",
-				"authorization": "Bearer key-0123456789abcdef",
+				"authorization": "Bearer fake-key-one",
 				"userAgent": "cases/1.0"
 			}
 		],

@@ -7,10 +7,10 @@ import { comment, data, finish, type Json, NOW, OPENROUTER, request, text } from
 //  Constants
 
 /** A key-shaped made-up constant. */
-export const KEY = "key-0123456789abcdef";
+export const KEY = "fake-key-one";
 
 /** Base64 of this has `+` and `/`, and its path encoding changes every symbol. */
-export const ODD_KEY = "sk+or/v1==";
+export const ODD_KEY = "fake+key/v1==";
 
 export const BASE_URL = "https://openrouter.ai/api/v1";
 

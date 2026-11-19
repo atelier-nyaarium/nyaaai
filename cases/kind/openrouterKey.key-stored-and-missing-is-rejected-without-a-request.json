@@ -36,7 +36,7 @@
 		"requests": [
 			{
 				"path": "/key",
-				"authorization": "Bearer key-0123456789abcdef"
+				"authorization": "Bearer fake-key-one"
 			}
 		],
 		"waiting": []

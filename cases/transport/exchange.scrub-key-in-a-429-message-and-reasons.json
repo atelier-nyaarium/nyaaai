@@ -12,7 +12,7 @@
 		"label": "OpenRouter",
 		"userAgent": "lab-app/1.0",
 		"keys": [
-			"key-0123456789abcdef"
+			"fake-key-one"
 		],
 		"startMs": 1800000000000,
 		"script": {
@@ -33,7 +33,7 @@
 					"chunks": [
 						{
 							"kind": "text",
-							"text": "{\"error\":{\"code\":429,\"message\":\"Slow down key-0123456789abcdef\",\"metadata\":{\"reasons\":[\"key-0123456789abcdef\"]}}}"
+							"text": "{\"error\":{\"code\":429,\"message\":\"Slow down fake-key-one\",\"metadata\":{\"reasons\":[\"fake-key-one\"]}}}"
 						}
 					]
 				}
@@ -95,7 +95,7 @@
 					],
 					[
 						"Authorization",
-						"Bearer key-0123456789abcdef"
+						"Bearer fake-key-one"
 					],
 					[
 						"User-Agent",

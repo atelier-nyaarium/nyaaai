@@ -4,10 +4,10 @@
 	"kind": "transport.key",
 	"name": "shape-a-carriage-return",
 	"input": {
-		"text": "key-or\r"
+		"text": "fake-or\r"
 	},
 	"expected": {
 		"shape": false,
-		"normalized": "key-or"
+		"normalized": "fake-or"
 	}
 }

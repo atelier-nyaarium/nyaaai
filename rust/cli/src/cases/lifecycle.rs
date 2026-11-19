@@ -1256,7 +1256,7 @@ mod tests {
         };
         let keys = Arc::new(ScriptedEntryKeys::new());
         for id in ids {
-            keys.set(id, KeyAnswer::Key("key-0123456789abcdef".to_owned()));
+            keys.set(id, KeyAnswer::Key("fake-key-one".to_owned()));
         }
         let registry = Arc::new(ScriptedModelRegistry::empty());
         registry.set_rows(vec![row_of_key(ROW).expect("a curated row")]);

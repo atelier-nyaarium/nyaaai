@@ -12,7 +12,7 @@
 		"label": "OpenRouter",
 		"userAgent": "lab-app/1.0",
 		"keys": [
-			"bad key"
+			"fake bad key"
 		],
 		"startMs": 1800000000000,
 		"script": {

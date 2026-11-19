@@ -4,10 +4,10 @@
 	"kind": "transport.key",
 	"name": "shape-a-trailing-space",
 	"input": {
-		"text": "key-or "
+		"text": "fake-or "
 	},
 	"expected": {
 		"shape": false,
-		"normalized": "key-or"
+		"normalized": "fake-or"
 	}
 }

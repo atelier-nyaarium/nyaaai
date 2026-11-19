@@ -9,7 +9,7 @@
 			"label": "Lab",
 			"url": "http://lab.local:8000"
 		},
-		"secret": "key-0123456789abcdef",
+		"secret": "fake-key-one",
 		"startMs": 1790337600000,
 		"exchanges": [
 			{
@@ -40,7 +40,7 @@
 			{
 				"method": "GET",
 				"url": "http://lab.local:8000/v1/models",
-				"authorization": "Bearer key-0123456789abcdef",
+				"authorization": "Bearer fake-key-one",
 				"body": null
 			}
 		],

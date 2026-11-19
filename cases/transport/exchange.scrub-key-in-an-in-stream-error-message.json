@@ -12,7 +12,7 @@
 		"label": "OpenRouter",
 		"userAgent": "lab-app/1.0",
 		"keys": [
-			"key-0123456789abcdef"
+			"fake-key-one"
 		],
 		"startMs": 1800000000000,
 		"script": {
@@ -29,7 +29,7 @@
 					"chunks": [
 						{
 							"kind": "text",
-							"text": "data: {\"id\":\"gen-1\",\"error\":{\"code\":502,\"message\":\"Down key-0123456789abcdef a2V5LTAxMjM0NTY3ODlhYmNkZWY\"}}\n\n"
+							"text": "data: {\"id\":\"gen-1\",\"error\":{\"code\":502,\"message\":\"Down fake-key-one ZmFrZS1rZXktb25l\"}}\n\n"
 						},
 						{
 							"kind": "text",
@@ -94,7 +94,7 @@
 					],
 					[
 						"Authorization",
-						"Bearer key-0123456789abcdef"
+						"Bearer fake-key-one"
 					],
 					[
 						"User-Agent",

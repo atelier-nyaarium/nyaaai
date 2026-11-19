@@ -24,11 +24,11 @@
 		"answers": {
 			"a": {
 				"kind": "key",
-				"key": "key-0123456789abcdef"
+				"key": "fake-key-one"
 			},
 			"b": {
 				"kind": "key",
-				"key": "key-fedcba9876543210"
+				"key": "fake-key-two"
 			}
 		},
 		"steps": [
@@ -39,7 +39,7 @@
 	},
 	"expected": {
 		"gets": [
-			"key-0123456789abcdef"
+			"fake-key-one"
 		]
 	}
 }

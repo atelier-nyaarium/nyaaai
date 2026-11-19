@@ -14,7 +14,7 @@
 		"keys": [
 			null,
 			"",
-			"key-v1-abc\ndef"
+			"fake-v1-abc\ndef"
 		],
 		"startMs": 1800000000000,
 		"script": {

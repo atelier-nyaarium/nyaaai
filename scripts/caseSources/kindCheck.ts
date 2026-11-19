@@ -6,7 +6,7 @@ import { caseOf, failing, NOW, reply } from "./catalogKit";
 ////////////////////////////////
 //  Fixtures
 
-const KEY = "key-0123456789abcdef";
+const KEY = "fake-key-one";
 
 const STATUSES = [400, 401, 402, 403, 404, 408, 422, 429, 500, 502, 503, 529];
 
@@ -58,7 +58,7 @@ export const kindCheckCases: CaseSource[] = [
 	OR("openrouter-a-dropped-connection-is-unreachable", { exchanges: [{ status: 200, text: "{", end: "dropped" }] }),
 	OR("openrouter-a-refused-connection-is-unreachable", { exchanges: [{ status: 200, text: "", end: "refused" }] }),
 	OR("openrouter-a-reply-that-is-no-json-is-unreachable", { exchanges: [{ status: 200, text: "<html>" }] }),
-	OR("openrouter-a-malformed-key-is-rejected-without-a-request", { secret: "key bad", exchanges: [KEY_BODY] }),
+	OR("openrouter-a-malformed-key-is-rejected-without-a-request", { secret: "fake bad", exchanges: [KEY_BODY] }),
 	OR("openrouter-caller-aborts-after-the-read-starts", {
 		exchanges: [{ ...KEY_BODY, headMs: 100 }],
 		abortAfterMs: 50,
@@ -80,7 +80,7 @@ export const kindCheckCases: CaseSource[] = [
 	),
 	OC("opencode-a-dropped-connection-is-unreachable", { exchanges: [{ status: 200, text: "{", end: "dropped" }] }),
 	OC("opencode-a-refused-connection-is-unreachable", { exchanges: [{ status: 200, text: "", end: "refused" }] }),
-	OC("opencode-a-malformed-key-is-rejected-without-a-request", { secret: "key bad", exchanges: [MODELS_BODY] }),
+	OC("opencode-a-malformed-key-is-rejected-without-a-request", { secret: "fake bad", exchanges: [MODELS_BODY] }),
 	OC("opencode-caller-aborts-after-the-read-starts", {
 		exchanges: [{ ...MODELS_BODY, headMs: 100 }],
 		abortAfterMs: 50,

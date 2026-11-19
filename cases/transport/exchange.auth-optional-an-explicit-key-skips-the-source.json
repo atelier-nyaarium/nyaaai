@@ -41,7 +41,7 @@
 				"path": "/models",
 				"keyAuth": {
 					"kind": "key",
-					"key": "key-0123456789abcdef"
+					"key": "fake-key-one"
 				}
 			}
 		],
@@ -74,7 +74,7 @@
 					],
 					[
 						"Authorization",
-						"Bearer key-0123456789abcdef"
+						"Bearer fake-key-one"
 					]
 				],
 				"body": null

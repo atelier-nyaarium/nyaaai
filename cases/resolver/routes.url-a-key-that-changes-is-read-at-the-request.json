@@ -19,11 +19,11 @@
 		"answers": {
 			"a": {
 				"kind": "key",
-				"key": "key-0123456789abcdef"
+				"key": "fake-key-one"
 			},
 			"b": {
 				"kind": "key",
-				"key": "key-0123456789abcdef"
+				"key": "fake-key-one"
 			}
 		},
 		"failing": [],
@@ -62,7 +62,7 @@
 				"id": "a",
 				"answer": {
 					"kind": "key",
-					"key": "key-fedcba9876543210"
+					"key": "fake-key-two"
 				}
 			},
 			{
@@ -118,7 +118,7 @@
 					"kind": "sent",
 					"zdrOnly": true,
 					"url": "https://openrouter.ai/api/v1/chat/completions",
-					"authorization": "Bearer key-0123456789abcdef",
+					"authorization": "Bearer fake-key-one",
 					"failure": null,
 					"thrown": null
 				},
@@ -137,7 +137,7 @@
 					"kind": "sent",
 					"zdrOnly": true,
 					"url": "https://openrouter.ai/api/v1/chat/completions",
-					"authorization": "Bearer key-fedcba9876543210",
+					"authorization": "Bearer fake-key-two",
 					"failure": null,
 					"thrown": null
 				},

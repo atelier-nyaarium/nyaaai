@@ -4,7 +4,7 @@
 	"kind": "transport.key",
 	"name": "normal-a-space-inside-is-refused",
 	"input": {
-		"text": " sk or "
+		"text": " fake or "
 	},
 	"expected": {
 		"shape": false,

@@ -81,12 +81,15 @@ mod tests {
             url: "http://host/".to_owned(),
             headers: vec![
                 ("Accept".to_owned(), "x".to_owned()),
-                ("authorization".to_owned(), "Bearer secret-value".to_owned()),
+                (
+                    "authorization".to_owned(),
+                    "Bearer fake-secret-value".to_owned(),
+                ),
             ],
             body: None,
         };
         let shown = format!("{request:?}");
-        assert!(!shown.contains("secret-value"));
+        assert!(!shown.contains("fake-secret-value"));
         assert!(shown.contains("[key]"));
         assert!(shown.contains("Accept"));
     }

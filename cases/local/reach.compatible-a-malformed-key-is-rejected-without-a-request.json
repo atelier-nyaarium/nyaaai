@@ -9,7 +9,7 @@
 			"label": "Lab",
 			"url": "https://host.lab.example/api/v2"
 		},
-		"secret": "key bad",
+		"secret": "fake bad",
 		"startMs": 1790337600000,
 		"exchanges": [
 			{

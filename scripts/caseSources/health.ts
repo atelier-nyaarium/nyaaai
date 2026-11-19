@@ -11,8 +11,8 @@ const START = 2_000_000;
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
 
-const KEY = "key-0123456789abcdef";
-const OTHER = "key-fedcba9876543210";
+const KEY = "fake-key-one";
+const OTHER = "fake-key-two";
 
 const MAIN = { id: "main", kind: "openrouter", label: "Main" };
 const GONE = { id: "gone", kind: "openrouter", label: "Gone" };

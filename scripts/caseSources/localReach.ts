@@ -6,7 +6,7 @@ import { failing, NOW, refused, reply } from "./catalogKit";
 ////////////////////////////////
 //  Fixtures
 
-const KEY = "key-0123456789abcdef";
+const KEY = "fake-key-one";
 
 const A = "local-a:27b";
 const B = "local-b:9b";
@@ -148,7 +148,7 @@ export const localReachCases: CaseSource[] = [
 	}),
 	check("compatible-a-malformed-key-is-rejected-without-a-request", "compatible", {
 		...at("https://host.lab.example/api/v2"),
-		secret: "key bad",
+		secret: "fake bad",
 		exchanges: [COMPAT_LIST],
 	}),
 	check("compatible-an-empty-key-is-no-key", "compatible", {

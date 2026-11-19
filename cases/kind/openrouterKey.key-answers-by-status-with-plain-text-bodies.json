@@ -5,7 +5,7 @@
 	"name": "key-answers-by-status-with-plain-text-bodies",
 	"input": {
 		"startMs": 1790337600000,
-		"stored": "key-0123456789abcdef",
+		"stored": "fake-key-one",
 		"exchanges": [
 			{
 				"status": 401,
@@ -77,19 +77,19 @@
 		"requests": [
 			{
 				"path": "/key",
-				"authorization": "Bearer key-0123456789abcdef"
+				"authorization": "Bearer fake-key-one"
 			},
 			{
 				"path": "/key",
-				"authorization": "Bearer key-0123456789abcdef"
+				"authorization": "Bearer fake-key-one"
 			},
 			{
 				"path": "/key",
-				"authorization": "Bearer key-0123456789abcdef"
+				"authorization": "Bearer fake-key-one"
 			},
 			{
 				"path": "/key",
-				"authorization": "Bearer key-0123456789abcdef"
+				"authorization": "Bearer fake-key-one"
 			}
 		],
 		"waiting": []

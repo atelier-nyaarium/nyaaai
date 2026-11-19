@@ -4,10 +4,10 @@
 	"kind": "transport.key",
 	"name": "shape-a-byte-order-mark",
 	"input": {
-		"text": "\ufeffkey-or"
+		"text": "\ufefffake-or"
 	},
 	"expected": {
 		"shape": false,
-		"normalized": "key-or"
+		"normalized": "fake-or"
 	}
 }

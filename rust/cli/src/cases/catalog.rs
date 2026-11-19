@@ -177,10 +177,8 @@ pub(super) fn network_of(
     ));
     let scheduler = Arc::new(FakeScheduler::new(Arc::clone(&wheel)));
     let keys = Arc::new(
-        FakeKeys::new(vec![Some(
-            stored.unwrap_or("key-0123456789abcdef").to_owned(),
-        )])
-        .ok_or_else(|| "fakeKeys needs a value".to_owned())?,
+        FakeKeys::new(vec![Some(stored.unwrap_or("fake-key-one").to_owned())])
+            .ok_or_else(|| "fakeKeys needs a value".to_owned())?,
     );
     let transport = Arc::new(Transport::new(TransportDeps {
         fetch: played.clone(),

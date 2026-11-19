@@ -10,7 +10,7 @@
 			"label": "Lab",
 			"url": "https://host.lab.example/api/v2"
 		},
-		"stored": "key-0123456789abcdef",
+		"stored": "fake-key-one",
 		"startMs": 1790337600000,
 		"exchanges": [
 			{
@@ -158,7 +158,7 @@
 			{
 				"method": "GET",
 				"url": "https://host.lab.example/api/v2/models",
-				"authorization": "Bearer key-0123456789abcdef",
+				"authorization": "Bearer fake-key-one",
 				"body": null
 			}
 		],

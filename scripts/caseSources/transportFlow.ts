@@ -85,11 +85,11 @@ const requests: CaseSource[] = [
 		codecHeaders: { "X-Session": "root-1", "X-Trace": "t-1" },
 	}),
 	exchange("stream-codec-claims-authorization-and-agent", [streamCall()], [sseReply(HI_PIECES)], {
-		codecHeaders: { Authorization: "Bearer other", "User-Agent": "other", "X-Session": "root-1" },
+		codecHeaders: { Authorization: "Bearer fake-other", "User-Agent": "other", "X-Session": "root-1" },
 	}),
 	exchange("stream-codec-cannot-override-owned-headers", [streamCall()], [sseReply(HI_PIECES)], {
 		codecHeaders: {
-			Authorization: "Bearer other",
+			Authorization: "Bearer fake-other",
 			"User-Agent": "other",
 			accept: "text/plain",
 			"CONTENT-TYPE": "text/plain",
@@ -98,7 +98,7 @@ const requests: CaseSource[] = [
 	}),
 	exchange("stream-codec-cannot-set-authorization-without-a-key", [streamCall()], [sseReply(HI_PIECES)], {
 		auth: "none",
-		codecHeaders: { authorization: "Bearer other", "X-Session": "root-1" },
+		codecHeaders: { authorization: "Bearer fake-other", "X-Session": "root-1" },
 	}),
 	exchange("stream-without-a-done-is-truncated", [streamCall()], [sseReply([piece(frame(text("Hi")))])]),
 	exchange(

@@ -19,7 +19,7 @@
 		"answers": {
 			"a": {
 				"kind": "key",
-				"key": "  key-with-blanks  "
+				"key": "  fake-with-blanks  "
 			}
 		},
 		"steps": [
@@ -30,7 +30,7 @@
 	},
 	"expected": {
 		"gets": [
-			"  key-with-blanks  "
+			"  fake-with-blanks  "
 		]
 	}
 }

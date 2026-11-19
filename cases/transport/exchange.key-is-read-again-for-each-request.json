@@ -12,8 +12,8 @@
 		"label": "OpenRouter",
 		"userAgent": "lab-app/1.0",
 		"keys": [
-			"key-v1-first",
-			"key-v1-second",
+			"fake-v1-first",
+			"fake-v1-second",
 			null
 		],
 		"startMs": 1800000000000,
@@ -217,7 +217,7 @@
 					],
 					[
 						"Authorization",
-						"Bearer key-v1-first"
+						"Bearer fake-v1-first"
 					],
 					[
 						"User-Agent",
@@ -240,7 +240,7 @@
 					],
 					[
 						"Authorization",
-						"Bearer key-v1-second"
+						"Bearer fake-v1-second"
 					],
 					[
 						"User-Agent",

@@ -107,7 +107,7 @@ function exchangeOf(held: z.infer<typeof NetExchange>): ScriptedExchange {
 export function networkOf(
 	startMs: number,
 	exchanges: readonly z.infer<typeof NetExchange>[],
-	stored: string | undefined = "key-0123456789abcdef",
+	stored: string | undefined = "fake-key-one",
 ) {
 	const wheel = new TimerWheel(startMs);
 	const played = scriptedFetch(exchanges.map(exchangeOf), wheel);
