@@ -104,13 +104,11 @@ it("the host test reads each host as the platform's pattern does", () => {
 		"http://12345",
 		"http://1.2",
 	];
-	const platform = urls.map((url) => !PRIVATE_HOST.test(new URL(url).hostname));
 	const changed = new Set(["http://labhost.", "http://labhost.local."]);
 	const asked = urls.filter((url) => !changed.has(url));
 	expect(asked.map((url) => remote({ kind: "compatible", label: "Host", url }))).toEqual(
 		asked.map((url) => !PRIVATE_HOST.test(new URL(url).hostname)),
 	);
-	expect(platform.length).toBe(urls.length);
 	// A trailing dot is the same host.
 	expect(
 		["http://labhost.", "http://labhost.local.", "http://8.8.8.8."].map((url) =>

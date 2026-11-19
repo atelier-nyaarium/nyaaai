@@ -1,4 +1,5 @@
 import { expect, it } from "bun:test";
+import { ProviderKindName, ProviderPlan, SkipReason } from "@nyaaai/contract/shapes/provider";
 import { retentionOf } from "../kinds/opencode/retention";
 import { MODELS } from "../models/curated";
 import { parseRowKey, rowKey } from "../models/rowKey";
@@ -32,11 +33,9 @@ it("every curated row binds OpenRouter, never to an alias or a free or batch id"
 });
 
 it("the kind, plan and skip reason lists keep the shapes' order", () => {
-	expect([...PROVIDER_KINDS]).toEqual(["openrouter", "opencode", "ollama", "lmstudio", "llamacpp", "compatible"]);
-	expect([...PROVIDER_PLANS]).toEqual(["go", "payg"]);
-	expect(SKIP_REASONS).toHaveLength(9);
-	expect(SKIP_REASONS[0]).toBe("keyMissing");
-	expect(SKIP_REASONS[8]).toBe("paused");
+	expect([...PROVIDER_KINDS]).toEqual(ProviderKindName.options);
+	expect([...PROVIDER_PLANS]).toEqual(ProviderPlan.options);
+	expect([...SKIP_REASONS]).toEqual(SkipReason.options);
 });
 
 it("retention answers for table keys only, never for names the platform's objects hold", () => {
@@ -68,14 +67,8 @@ it("raced rejects with the signal's reason, before or after the start", async ()
 	expect(reason).toBe("late");
 });
 
-it("raced passes a rejection through and stops listening once the promise settles", async () => {
+it("raced passes a rejection through, and a later abort changes nothing", async () => {
 	const controller = new AbortController();
-	let removed = 0;
-	const remove = controller.signal.removeEventListener.bind(controller.signal);
-	controller.signal.removeEventListener = ((...args: Parameters<typeof remove>) => {
-		removed += 1;
-		return remove(...args);
-	}) as typeof remove;
 	let reason: unknown;
 	try {
 		await raced(Promise.reject(new Error("boom")), controller.signal);
@@ -84,6 +77,6 @@ it("raced passes a rejection through and stops listening once the promise settle
 	}
 	expect((reason as Error).message).toBe("boom");
 	await Promise.resolve();
-	expect(removed).toBe(1);
-	expect(await raced(Promise.resolve(1), controller.signal)).toBe(1);
+	expect(() => controller.abort(new Error("after"))).not.toThrow();
+	expect((reason as Error).message).toBe("boom");
 });

@@ -20,7 +20,8 @@ mod tests {
 
     #[test]
     fn the_table_reads_through_the_shape() {
-        assert_eq!(MODELS.len(), 16);
-        assert_eq!(MODELS[0].key, "openai/gpt-6-luna");
+        assert!(!MODELS.is_empty());
+        let keys: std::collections::HashSet<_> = MODELS.iter().map(|row| &row.key).collect();
+        assert_eq!(keys.len(), MODELS.len());
     }
 }

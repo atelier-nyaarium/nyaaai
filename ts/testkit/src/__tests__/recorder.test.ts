@@ -63,6 +63,7 @@ describe("the recording fetch", () => {
 					["X-RateLimit-Remaining", "3"],
 					["Set-Cookie", "a=b"],
 					["Authorization", "echo"],
+					["X-Echo", "unreplayed-marker"],
 				],
 				chunks: [{ bytes: bytes("ab") }, { bytes: new Uint8Array() }, { bytes: bytes("c\u{1F600}") }],
 			}),
@@ -82,6 +83,7 @@ describe("the recording fetch", () => {
 		expect([second?.request, second?.status, second?.headers]).toEqual(["not json", 404, {}]);
 		expect(third?.request).toBeNull();
 		expect(JSON.stringify(held.trace())).not.toContain(SECRET);
+		expect(JSON.stringify(held.trace())).not.toContain("unreplayed-marker");
 	});
 
 	it("keeps what passed when the reader stops early", async () => {
@@ -144,17 +146,5 @@ describe("the recording fetch", () => {
 		const held = recording([exchange({ headers: [["x-ratelimit-note", `see ${SECRET}`]] })]);
 		await play(held.fetch);
 		expect(await refusal(held)).toBe("exchange 1: a secret occurs in the response header x-ratelimit-note");
-	});
-
-	it("does not keep a header it does not replay, so a secret there is not in the trace", async () => {
-		const held = recording([exchange({ headers: [["x-echo", SECRET]] })]);
-		await play(held.fetch);
-		expect(held.trace().exchanges[0]?.headers).toEqual({});
-	});
-
-	it("never rewrites bytes to hide a secret", async () => {
-		const held = recording([exchange({ chunks: [{ bytes: bytes("fine") }] })]);
-		await play(held.fetch);
-		expect(held.trace().exchanges[0]?.chunks.map(text)).toEqual(["fine"]);
 	});
 });

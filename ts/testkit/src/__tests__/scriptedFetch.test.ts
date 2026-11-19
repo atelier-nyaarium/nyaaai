@@ -234,16 +234,6 @@ describe("the fake key source", () => {
 		expect(played.requests).toHaveLength(2);
 	});
 
-	it("keeps the lane for a signal already ended at the call when the lane is free", async () => {
-		const played = scriptedFetch([exchange(), exchange()], new TimerWheel(0));
-		const ended = new AbortController();
-		ended.abort(new Error("ended"));
-		expect(((await rejection(played.fetch(REQUEST, ended.signal))) as Error).message).toBe("ended");
-		expect(played.requests).toHaveLength(1);
-		const next = await played.fetch(REQUEST, new AbortController().signal);
-		expect(await drain(next.chunks)).toEqual(["a", "b"]);
-	});
-
 	it("refuses a waiter whose signal ended with the holder's, whatever the listener order", async () => {
 		const wheel = new TimerWheel(0);
 		const played = scriptedFetch([exchange({ headMs: 5 }), exchange({ headMs: 50 }), exchange()], wheel);

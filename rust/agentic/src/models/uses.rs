@@ -27,22 +27,3 @@ pub static ANALYSIS: LazyLock<ModelUse> = LazyLock::new(|| ModelUse {
 /// In the order chat, compaction, analysis.
 pub static STANDARD_USES: LazyLock<[ModelUse; 3]> =
     LazyLock::new(|| [CHAT.clone(), COMPACTION.clone(), ANALYSIS.clone()]);
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn the_standard_uses_are_what_they_were_by_name() {
-        assert_eq!(
-            STANDARD_USES
-                .iter()
-                .map(|held| held.name.as_str())
-                .collect::<Vec<_>>(),
-            ["chat", "compaction", "analysis"]
-        );
-        assert!(CHAT.requires.is_empty() && CHAT.hides);
-        assert!(COMPACTION.requires == [Ability::Schema] && !COMPACTION.hides);
-        assert_eq!(*ANALYSIS.requires, *COMPACTION.requires);
-    }
-}

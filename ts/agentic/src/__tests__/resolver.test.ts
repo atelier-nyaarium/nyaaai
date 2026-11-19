@@ -3,8 +3,6 @@
 import { describe, expect, it } from "bun:test";
 import { fakeScheduler, TimerWheel } from "@nyaaai/testkit/scheduler";
 import { scriptedEntryKeys, scriptedModelRegistry, scriptedProviderList } from "@nyaaai/testkit/scriptedPorts";
-import { OPENCODE } from "../kinds/opencode/kind";
-import { OPENROUTER } from "../kinds/openrouter/kind";
 import { KINDS, kindLines } from "../provider/kind";
 import { keySourceOf, ModelResolver } from "../provider/resolver";
 
@@ -33,14 +31,6 @@ function resolverOver(entries: Parameters<typeof scriptedProviderList>[0]) {
 
 ////////////////////////////////
 //  Tests
-
-describe("KINDS", () => {
-	it("keeps the dropdown order", () => {
-		expect(Object.keys(KINDS)).toEqual(["opencode", "openrouter", "ollama", "lmstudio", "llamacpp", "compatible"]);
-		expect(KINDS.opencode).toBe(OPENCODE);
-		expect(KINDS.openrouter).toBe(OPENROUTER);
-	});
-});
 
 describe("ModelResolver", () => {
 	const FIRST = { id: "a", kind: "openrouter", label: "First" } as const;

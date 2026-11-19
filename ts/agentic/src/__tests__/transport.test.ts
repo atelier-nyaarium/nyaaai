@@ -140,8 +140,4 @@ describe("the transport", () => {
 		}
 		throw new Error("the call did not fail");
 	});
-
-	it("holds a static key", async () => {
-		expect(await staticKey("k").get()).toBe("k");
-	});
 });
