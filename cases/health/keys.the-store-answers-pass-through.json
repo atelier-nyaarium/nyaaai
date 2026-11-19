@@ -97,7 +97,7 @@
 				},
 				"answers": [
 					{
-						"kind": "unready"
+						"kind": "none"
 					}
 				],
 				"statusAfter": {

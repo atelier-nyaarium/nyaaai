@@ -183,6 +183,9 @@
 						},
 						"usage": {
 							"$ref": "step.input.json#/$defs/NormalizedUsage"
+						},
+						"dropped": {
+							"type": "boolean"
 						}
 					},
 					"required": [
@@ -269,6 +272,9 @@
 							"$ref": "step.input.json#/$defs/Failure"
 						},
 						"onward": {
+							"type": "boolean"
+						},
+						"dropped": {
 							"type": "boolean"
 						}
 					},

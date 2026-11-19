@@ -20,7 +20,12 @@ fn locked<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
 struct Noting(Arc<Mutex<Option<MeterBilled>>>);
 
 impl Bills for Noting {
-    fn billed(&self, id: &str, reply: &Billing) {
+    fn billed(
+        &self,
+        id: &str,
+        reply: &Billing,
+        _ticket: Option<&nyaaai_contract::shapes::health::Ticket>,
+    ) {
         *locked(&self.0) = Some(MeterBilled {
             entry: id.to_owned(),
             source: reply.source.clone(),
@@ -51,7 +56,7 @@ pub fn called(input: MeterCalledInput) -> Outcome<MeterCalledResult> {
         sink.set_ids(each.id.iter().cloned().collect());
         *locked(&billed) = None;
         *locked(&stats) = None;
-        meter.called(&each.call);
+        meter.called(&each.call, None);
         let recorded = sink
             .recorded()
             .last()

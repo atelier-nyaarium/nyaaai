@@ -128,6 +128,31 @@ export function bump(submodule: string): string[] {
 	return [`nyaaai: ${before.slice(0, 7)} -> ${after.slice(0, 7)}`];
 }
 
+/** The commit the consumer's HEAD or index records for the submodule path, from `ls-tree` or `ls-files` text. */
+function recordedCommit(listing: string | null, shaAt: number): string | undefined {
+	const [fields] = (listing ?? "").split("\t");
+	return fields === undefined || fields === "" ? undefined : fields.split(" ")[shaAt];
+}
+
+/** Failures when the submodule is not at the commit the consumer records, in its HEAD and its index. */
+function recordedFailures(root: string, submodule: string): string[] {
+	const at = submoduleRelative(root, submodule);
+	const head = git(submodule, ["rev-parse", "HEAD"]);
+	const held = recordedCommit(gitOrNull(root, ["ls-tree", "HEAD", "--", at]), 2);
+	const staged = recordedCommit(gitOrNull(root, ["ls-files", "--stage", "--", at]), 1);
+	if (held === undefined) return [`the consumer's HEAD records no commit for ${at}`];
+	const failures: string[] = [];
+	if (held !== head)
+		failures.push(
+			`submodule HEAD ${head.slice(0, 7)} is not the commit the consumer's HEAD records (${held.slice(0, 7)})`,
+		);
+	if (staged !== head)
+		failures.push(
+			`submodule HEAD ${head.slice(0, 7)} is not the commit the consumer's index records (${staged?.slice(0, 7) ?? "none"})`,
+		);
+	return failures;
+}
+
 /** Manifests of the consumer's workspace packages, the root's aside. */
 function workspaceManifests(root: string, submodule: string): string[] {
 	const skipped = submoduleRelative(root, submodule);
@@ -264,6 +289,7 @@ export function assertConsumer(root: string, submodule: string, packageMode: boo
 			failures.push("submodule HEAD is not on origin/main as last fetched");
 		}
 		if (git(submodule, ["status", "--porcelain"]) !== "") failures.push("submodule working tree is dirty");
+		failures.push(...recordedFailures(root, submodule));
 	}
 
 	if (failures.length > 0) throw new Error(`nyaaai assert failed: ${failures.join("; ")}`);

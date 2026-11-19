@@ -153,6 +153,10 @@ export const localFlowCases: CaseSource[] = [
 		exchanges: [TAGS, reply("text"), SHOW_B, SHOW_C, SHOW_EMBED],
 		steps: [models(known(A))],
 	}),
+	server("ollama-a-tag-listed-twice-is-shown-once", "ollama", {
+		exchanges: [reply({ models: [{ name: A }, { name: B }, { name: A }] }), SHOW_A, SHOW_B],
+		steps: [models()],
+	}),
 	server("ollama-a-prior-model-not-in-the-tags-is-gone", "ollama", {
 		exchanges: [reply({ models: [{ name: B }] }), SHOW_B],
 		steps: [models(known(A), known(C))],
@@ -246,6 +250,14 @@ export const localFlowCases: CaseSource[] = [
 	// llama.cpp's server.
 	server("llamacpp-models-read-props-for-each-model-at-once", "llamacpp", {
 		exchanges: [LLAMA_LIST, PROPS_A, PROPS_B],
+		steps: [models()],
+	}),
+	server("llamacpp-an-id-listed-twice-reads-props-once", "llamacpp", {
+		exchanges: [
+			reply({ object: "list", data: [{ id: "local-a.gguf" }, { id: "local-b.gguf" }, { id: "local-a.gguf" }] }),
+			PROPS_A,
+			PROPS_B,
+		],
 		steps: [models()],
 	}),
 	server("llamacpp-a-sleeping-model-carries-the-known-facts", "llamacpp", {
@@ -607,6 +619,32 @@ export const localFlowCases: CaseSource[] = [
 	flow("llamacpp-browse-lists-models-with-their-context", "llamacpp", {
 		exchanges: [LLAMA_LIST, PROPS_A, PROPS_B, LLAMA_LIST, PROPS_A, PROPS_B],
 		steps: [{ kind: "list" }, { kind: "list", fresh: true }],
+	}),
+
+	// A public host on a kind that needs no key keeps data and has no known price.
+	flow("ollama-a-public-host-keeps-data-and-has-no-known-price", "ollama", {
+		entry: { id: "lab", label: "Lab", url: "https://gpu.host.example:11434" },
+		rows: [row(A)],
+		exchanges: [TAGS, ...SHOWS],
+		steps: [views({ zdrOnly: true }), views({ zdrOnly: false }), { kind: "list" }],
+	}),
+	flow("ollama-a-private-host-is-still-home", "ollama", {
+		entry: { id: "lab", label: "Lab", url: "http://192.168.1.20:11434" },
+		rows: [row(A)],
+		exchanges: [TAGS, ...SHOWS],
+		steps: [views({ zdrOnly: true }), { kind: "list" }],
+	}),
+	flow("lmstudio-a-public-host-keeps-data-and-has-no-known-price", "lmstudio", {
+		entry: { id: "lab", label: "Lab", url: "https://gpu.host.example:1234" },
+		rows: [row("local-a")],
+		exchanges: [LM_LIST()],
+		steps: [views({ zdrOnly: true }), views({ zdrOnly: false }), { kind: "list" }],
+	}),
+	flow("llamacpp-a-public-host-keeps-data-and-has-no-known-price", "llamacpp", {
+		entry: { id: "lab", label: "Lab", url: "https://gpu.host.example:8080" },
+		rows: [row("local-a.gguf")],
+		exchanges: [LLAMA_LIST, PROPS_A, SLEEPING],
+		steps: [views({ zdrOnly: true }), views({ zdrOnly: false }), { kind: "list" }],
 	}),
 
 	// The OpenAI-compatible kind through a catalog.

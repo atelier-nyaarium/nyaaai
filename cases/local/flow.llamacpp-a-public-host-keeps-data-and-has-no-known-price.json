@@ -1,0 +1,195 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.flow",
+	"name": "llamacpp-a-public-host-keeps-data-and-has-no-known-price",
+	"input": {
+		"kind": "llamacpp",
+		"entry": {
+			"id": "lab",
+			"label": "Lab",
+			"url": "https://gpu.host.example:8080"
+		},
+		"stored": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"object": "list",
+					"data": [
+						{
+							"id": "local-a.gguf",
+							"meta": {
+								"n_ctx_train": 131072
+							}
+						},
+						{
+							"id": "local-b.gguf",
+							"meta": null
+						},
+						{}
+					]
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"default_generation_settings": {
+						"n_ctx": 262144
+					},
+					"chat_template_caps": {
+						"reasoning_effort_levels": [
+							"low",
+							"high",
+							"bogus"
+						]
+					}
+				}
+			},
+			{
+				"status": 400,
+				"json": {
+					"error": {
+						"message": "model is not loaded"
+					}
+				}
+			}
+		],
+		"rows": [
+			"local:lab/local-a.gguf"
+		],
+		"steps": [
+			{
+				"kind": "views",
+				"zdrOnly": true
+			},
+			{
+				"kind": "views",
+				"zdrOnly": false
+			},
+			{
+				"kind": "list"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "views",
+					"views": [
+						{
+							"key": "local:lab/local-a.gguf",
+							"status": "noZdrHost",
+							"efforts": [
+								"low",
+								"high"
+							],
+							"price": "unknown",
+							"hosts": []
+						}
+					]
+				}
+			},
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "views",
+					"views": [
+						{
+							"key": "local:lab/local-a.gguf",
+							"status": "ok",
+							"efforts": [
+								"low",
+								"high"
+							],
+							"promptLimit": 131072,
+							"price": "unknown",
+							"hosts": [],
+							"dataKept": true,
+							"api": {
+								"family": "chat-completions",
+								"structured": true,
+								"choice": [],
+								"strict": false,
+								"reasoning": "reasoning"
+							},
+							"cache": "implicit"
+						}
+					]
+				}
+			},
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "list",
+					"models": [
+						{
+							"id": "local:lab/local-a.gguf",
+							"display": "lab/local-a.gguf",
+							"label": "local-a.gguf",
+							"curated": false,
+							"description": "",
+							"context": 131072,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools",
+								"reasoning"
+							],
+							"price": "unknown",
+							"tools": "ok",
+							"retestable": true,
+							"family": "chat-completions"
+						},
+						{
+							"id": "local:lab/local-b.gguf",
+							"display": "lab/local-b.gguf",
+							"label": "local-b.gguf",
+							"curated": false,
+							"description": "",
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools"
+							],
+							"price": "unknown",
+							"tools": "ok",
+							"retestable": true,
+							"family": "chat-completions"
+						}
+					]
+				}
+			}
+		],
+		"requests": [
+			{
+				"method": "GET",
+				"url": "https://gpu.host.example:8080/v1/models",
+				"authorization": null,
+				"body": null
+			},
+			{
+				"method": "GET",
+				"url": "https://gpu.host.example:8080/props?model=local-a.gguf&autoload=false",
+				"authorization": null,
+				"body": null
+			},
+			{
+				"method": "GET",
+				"url": "https://gpu.host.example:8080/props?model=local-b.gguf&autoload=false",
+				"authorization": null,
+				"body": null
+			}
+		],
+		"read": [
+			1,
+			1,
+			1
+		],
+		"waiting": [],
+		"refreshed": 1
+	}
+}

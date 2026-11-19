@@ -1,0 +1,186 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.flow",
+	"name": "lmstudio-a-public-host-keeps-data-and-has-no-known-price",
+	"input": {
+		"kind": "lmstudio",
+		"entry": {
+			"id": "lab",
+			"label": "Lab",
+			"url": "https://gpu.host.example:1234"
+		},
+		"stored": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"models": [
+						{
+							"key": "local-a",
+							"type": "llm",
+							"max_context_length": 262144,
+							"loaded_instances": [
+								{
+									"id": "local-a",
+									"config": {
+										"context_length": 8192
+									}
+								}
+							],
+							"capabilities": {
+								"reasoning": {
+									"allowed_options": [
+										"off",
+										"on"
+									],
+									"default": "on"
+								}
+							}
+						},
+						{
+							"key": "local-b",
+							"type": "llm",
+							"max_context_length": 4096,
+							"loaded_instances": []
+						},
+						{
+							"key": "embed-a",
+							"type": "embedding",
+							"loaded_instances": []
+						},
+						{
+							"type": "llm"
+						}
+					]
+				}
+			}
+		],
+		"rows": [
+			"local:lab/local-a"
+		],
+		"steps": [
+			{
+				"kind": "views",
+				"zdrOnly": true
+			},
+			{
+				"kind": "views",
+				"zdrOnly": false
+			},
+			{
+				"kind": "list"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "views",
+					"views": [
+						{
+							"key": "local:lab/local-a",
+							"status": "noZdrHost",
+							"efforts": [
+								"none",
+								"low",
+								"medium",
+								"high"
+							],
+							"price": "unknown",
+							"hosts": []
+						}
+					]
+				}
+			},
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "views",
+					"views": [
+						{
+							"key": "local:lab/local-a",
+							"status": "ok",
+							"efforts": [
+								"none",
+								"low",
+								"medium",
+								"high"
+							],
+							"promptLimit": 8192,
+							"price": "unknown",
+							"hosts": [],
+							"dataKept": true,
+							"api": {
+								"family": "chat-completions",
+								"structured": true,
+								"choice": [],
+								"strict": false,
+								"reasoning": "reasoning"
+							},
+							"cache": "implicit"
+						}
+					]
+				}
+			},
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "list",
+					"models": [
+						{
+							"id": "local:lab/local-a",
+							"display": "lab/local-a",
+							"label": "local-a",
+							"curated": false,
+							"description": "",
+							"context": 8192,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools",
+								"reasoning"
+							],
+							"price": "unknown",
+							"tools": "ok",
+							"retestable": true,
+							"family": "chat-completions"
+						},
+						{
+							"id": "local:lab/local-b",
+							"display": "lab/local-b",
+							"label": "local-b",
+							"curated": false,
+							"description": "",
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools"
+							],
+							"price": "unknown",
+							"tools": "ok",
+							"retestable": true,
+							"family": "chat-completions"
+						}
+					]
+				}
+			}
+		],
+		"requests": [
+			{
+				"method": "GET",
+				"url": "https://gpu.host.example:1234/api/v1/models",
+				"authorization": null,
+				"body": null
+			}
+		],
+		"read": [
+			1
+		],
+		"waiting": [],
+		"refreshed": 1
+	}
+}

@@ -45,9 +45,10 @@ export interface Gate {
 	deferred(route: Resolved, keep?: ReadonlySet<string>): SkipReason | undefined;
 	/** Last-route refusal. */
 	blocked(route: Resolved, keep?: ReadonlySet<string>): Blocked | undefined;
-	failed(route: Resolved, failure: Failure, onward: boolean): void;
-	/** Balance replies join `run`. */
-	served(route: Resolved, usage: NormalizedUsage | undefined, run?: Set<string>): void;
+	/** The ticket the request held; true when the report was dropped, its request began before the entry changed. */
+	failed(route: Resolved, failure: Failure, onward: boolean, ticket?: Ticket): boolean;
+	/** Balance replies join `run`; true when the report was dropped as `failed` says. */
+	served(route: Resolved, usage: NormalizedUsage | undefined, run?: Set<string>, ticket?: Ticket): boolean;
 }
 
 /** One reply's billing. */
@@ -151,6 +152,10 @@ export class ProviderHealth implements Gate {
 	private readonly pools = new Map<string, PoolState>();
 	/** Admitted tickets' entries, by the ticket's data. */
 	private readonly probes = new Map<string, string>();
+	/** The newest serial a ticket has had. */
+	private lastSerial = 0;
+	/** Per entry, the serial at its last invalidation; a ticket up to it began before. */
+	private readonly floors = new Map<string, number>();
 	private readonly statuses = new Map<string, Status>();
 	/** Readers dropped while a check ran. */
 	private retired: KeyReader[] = [];
@@ -183,7 +188,9 @@ export class ProviderHealth implements Gate {
 					if (entry === undefined) return { kind: "none" };
 					const standing = this.standing(entry);
 					if (standing !== undefined) return { kind: standing };
-					return await d.keys.get(id);
+					const answer = await d.keys.get(id);
+					// A URL kind needs no key, so an unreadable store is no key.
+					return answer.kind === "unready" && this.byUrl(entry) ? { kind: "none" } : answer;
 				} catch {
 					return { kind: "unready" };
 				}
@@ -236,8 +243,8 @@ export class ProviderHealth implements Gate {
 	}
 
 	/** Accumulates reply billing. */
-	billed(id: string, reply: Billing): void {
-		if (!this.listed(id)) return;
+	billed(id: string, reply: Billing, ticket?: Ticket): void {
+		if (!this.listed(id) || this.began(id, ticket)) return;
 		const was = this.bills.get(id);
 		const next = billedWith(was, reply);
 		if (was?.billing === next.billing && was.allowance === next.allowance && was.cost === next.cost) return;
@@ -318,22 +325,26 @@ export class ProviderHealth implements Gate {
 	}
 
 	/** Balance replies extend `run`. */
-	served(route: Resolved, usage: NormalizedUsage | undefined, run?: Set<string>): void {
+	served(route: Resolved, usage: NormalizedUsage | undefined, run?: Set<string>, ticket?: Ticket): boolean {
 		const source = usage?.billingSource;
-		if (source === undefined) return;
+		const dropped = this.began(route.entry.id, ticket);
+		if (source === undefined) return dropped;
 		// Settings may change mid-request.
 		const entry = this.entryOf(route.entry.id) ?? route.entry;
-		this.apply(entry.id, {
-			kind: "billed",
-			source,
-			...(entry.plan === undefined ? {} : { plan: entry.plan }),
-			extraUsage: entry.extraUsage === true,
-		});
+		if (!dropped)
+			this.apply(entry.id, {
+				kind: "billed",
+				source,
+				...(entry.plan === undefined ? {} : { plan: entry.plan }),
+				extraUsage: entry.extraUsage === true,
+			});
 		if (source === "balance") run?.add(entry.id);
+		return dropped;
 	}
 
-	failed(route: Resolved, failure: Failure, onward: boolean): void {
+	failed(route: Resolved, failure: Failure, onward: boolean, ticket?: Ticket): boolean {
 		const { entry } = route;
+		if (this.began(entry.id, ticket)) return true;
 		this.batch(() => {
 			switch (failure.category) {
 				case "keyRejected":
@@ -364,6 +375,7 @@ export class ProviderHealth implements Gate {
 					if (onward) this.gate.cool(keyOf(route), failure.retryAfterMs);
 			}
 		});
+		return false;
 	}
 
 	dispose(): void {
@@ -374,6 +386,7 @@ export class ProviderHealth implements Gate {
 		this.bills.clear();
 		this.pools.clear();
 		this.probes.clear();
+		this.floors.clear();
 		this.listeners.clear();
 		this.gate.dispose();
 	}
@@ -413,11 +426,17 @@ export class ProviderHealth implements Gate {
 	}
 
 	private admitted(id: string, ticket: Ticket): void {
+		this.lastSerial = Math.max(this.lastSerial, ticket.serial);
 		if (!this.listed(id)) return;
 		this.batch(() => {
 			this.probes.set(ticketKey(ticket), id);
 			this.apply(id, { kind: "admitted", ticket });
 		});
+	}
+
+	/** A request whose ticket came before the entry's last invalidation reports nothing. */
+	private began(id: string, ticket: Ticket | undefined): boolean {
+		return ticket !== undefined && ticket.serial <= (this.floors.get(id) ?? 0);
 	}
 
 	/** Extra usage or `keep` exempts balance. */
@@ -464,7 +483,7 @@ export class ProviderHealth implements Gate {
 		if (stale()) return undefined;
 		let state: KeyState;
 		if (answer.kind === "refused") state = { kind: "rejected" };
-		else if (answer.kind === "unready") state = { kind: "unreachable" };
+		else if (answer.kind === "unready" && kind.field === "key") state = { kind: "unreachable" };
 		else {
 			const secret = answer.kind === "key" ? answer.key : undefined;
 			state =
@@ -483,6 +502,7 @@ export class ProviderHealth implements Gate {
 	}
 
 	private invalidate(id: string, unbill: boolean, identity = false): void {
+		this.floors.set(id, this.lastSerial);
 		this.batch(() => {
 			const status = this.statuses.get(id);
 			if (status !== undefined) {

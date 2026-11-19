@@ -1,0 +1,105 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.openrouterJoin",
+	"name": "join-zdr-off-leaves-data-kept-unset-when-every-usable-host-is-zdr",
+	"input": {
+		"rows": [
+			"openai/gpt-6-luna"
+		],
+		"models": {
+			"data": [
+				{
+					"id": "openai/gpt-6-luna",
+					"context_length": 500000,
+					"supported_parameters": []
+				}
+			]
+		},
+		"zdr": {
+			"data": [
+				{
+					"model_id": "openai/gpt-6-luna",
+					"supported_parameters": [
+						"tools",
+						"reasoning",
+						"response_format",
+						"structured_outputs"
+					],
+					"tag": "alpha",
+					"pricing": {
+						"prompt": "0.000001",
+						"completion": "0.000002"
+					}
+				}
+			]
+		},
+		"nowMs": 1790337600000,
+		"passes": [
+			{
+				"use": {
+					"name": "chat",
+					"requires": [],
+					"hides": true
+				},
+				"zdrOnly": true
+			},
+			{
+				"use": {
+					"name": "chat",
+					"requires": [],
+					"hides": true
+				},
+				"zdrOnly": false
+			}
+		]
+	},
+	"expected": {
+		"passes": [
+			[
+				{
+					"key": "openai/gpt-6-luna",
+					"status": "ok",
+					"efforts": [],
+					"promptLimit": 500000,
+					"price": {
+						"prompt": [
+							1,
+							1
+						],
+						"completion": [
+							2,
+							2
+						],
+						"tiers": []
+					},
+					"hosts": [
+						"alpha"
+					]
+				}
+			],
+			[
+				{
+					"key": "openai/gpt-6-luna",
+					"status": "ok",
+					"efforts": [],
+					"promptLimit": 500000,
+					"price": {
+						"prompt": [
+							1,
+							1
+						],
+						"completion": [
+							2,
+							2
+						],
+						"tiers": []
+					},
+					"hosts": [
+						"alpha"
+					]
+				}
+			]
+		]
+	}
+}

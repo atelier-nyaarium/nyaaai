@@ -307,6 +307,7 @@ pub struct TraceEntryBilling {
     pub entry: String,
     pub reply: TraceEntryBillingReply,
     pub usage: Option<crate::shapes::step::NormalizedUsage>,
+    pub dropped: Option<bool>,
 }
 
 impl Shape for TraceEntryBilling {
@@ -323,10 +324,12 @@ impl Shape for TraceEntryBilling {
             at,
             crate::shapes::step::NormalizedUsage::decode_at,
         )?;
+        let dropped = shape::optional(object, "dropped", at, shape::flag)?;
         Ok(Self {
             entry,
             reply,
             usage,
+            dropped,
         })
     }
 
@@ -337,6 +340,9 @@ impl Shape for TraceEntryBilling {
         object.insert("reply", self.reply.encode());
         if let Some(held) = &self.usage {
             object.insert("usage", held.encode());
+        }
+        if let Some(held) = &self.dropped {
+            object.insert("dropped", Value::Bool(*held));
         }
         Value::Object(object)
     }
@@ -453,6 +459,7 @@ pub struct TraceEntryGateFailed {
     pub entry: String,
     pub failure: crate::shapes::step::Failure,
     pub onward: bool,
+    pub dropped: Option<bool>,
 }
 
 impl Shape for TraceEntryGateFailed {
@@ -469,10 +476,12 @@ impl Shape for TraceEntryGateFailed {
             crate::shapes::step::Failure::decode_at,
         )?;
         let onward = shape::required(object, "onward", at, shape::flag)?;
+        let dropped = shape::optional(object, "dropped", at, shape::flag)?;
         Ok(Self {
             entry,
             failure,
             onward,
+            dropped,
         })
     }
 
@@ -482,6 +491,9 @@ impl Shape for TraceEntryGateFailed {
         object.insert("entry", Value::from(self.entry.as_str()));
         object.insert("failure", self.failure.encode());
         object.insert("onward", Value::Bool(self.onward));
+        if let Some(held) = &self.dropped {
+            object.insert("dropped", Value::Bool(*held));
+        }
         Value::Object(object)
     }
 }

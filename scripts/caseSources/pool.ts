@@ -186,6 +186,10 @@ export const poolCases: CaseSource[] = [
 		[refused("allowance", { resetsAt: at(40), retryAfterMs: 5 * MINUTE }), NOW],
 		[refused("allowance", { resetsAt: 0, retryAfterMs: 5 * MINUTE }), NOW],
 	]),
+	chain("reset-ten-years-away-ends-in-thirty-one-days", CLEAR, [
+		[refused("allowance", { resetsAt: NOW + 3650 * 24 * HOUR }), NOW],
+		[refused("allowance", { retryAfterMs: 3650 * 24 * HOUR }), NOW + 32 * 24 * HOUR],
+	]),
 	chain("credit-ignores-a-reset", CLEAR, [
 		[refused("credit", { resetsAt: at(40) }), NOW],
 		[refused("credit", { resetsAt: at(40), retryAfterMs: 2 * MINUTE }), NOW],

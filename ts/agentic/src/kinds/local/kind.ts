@@ -1,6 +1,8 @@
 // A provider kind for a server named by URL.
 
+import { Pattern } from "@nyaaai/contract/pattern";
 import type { EntryFields, KeyState, ProviderKindName } from "@nyaaai/contract/shapes/provider";
+import { parseUrl } from "@nyaaai/contract/url";
 import { type LocalDialect, localChat } from "../../dialects/local";
 import { failureOf } from "../../failure";
 import { codecFactsOf } from "../../models/view";
@@ -26,7 +28,7 @@ export interface LocalKindSpec extends LocalDialect {
 	url?: string;
 	/** Request root from the URL. */
 	base?(url: string): string;
-	/** Defaults to `HOME`. */
+	/** Defaults to `termsOf`, over the entry's URL or this kind's own. */
 	terms?(entry: EntryFields): Terms;
 	/** Model count; undefined when foreign. */
 	reach(transport: LocalTransport, signal: AbortSignal): Promise<number | undefined>;
@@ -38,6 +40,12 @@ export interface LocalKindSpec extends LocalDialect {
 
 /** Data stays home; calls bill nothing. */
 export const HOME: Terms = { kept: false, price: "free" };
+
+/** Loopback, private ranges and LAN names, trailing dot cut. */
+const PRIVATE_HOST = Pattern.compile(
+	"^(localhost|0\\.0\\.0\\.0|(127|10)\\.[\\d.]+|192\\.168\\.[\\d.]+|172\\.(1[6-9]|2\\d|3[01])\\.[\\d.]+|169\\.254\\.[\\d.]+|100\\.(6[4-9]|[7-9]\\d|1[01]\\d|12[0-7])\\.[\\d.]+|\\[(::1?|f[cd][0-9a-f]{2}:[0-9a-f:]*|fe[89ab][0-9a-f]:[0-9a-f:]*)\\]|[^.[]+|.+\\.(localhost|local|lan|internal|home\\.arpa))$",
+	"i",
+);
 
 const DOT = " \u{b7} ";
 
@@ -58,6 +66,20 @@ function withoutSlashes(text: string): string {
 	let end = text.length;
 	while (end > 0 && text[end - 1] === "/") end -= 1;
 	return text.slice(0, end);
+}
+
+/** No URL, an unreadable one, or a non-private host. */
+export function remote(entry: EntryFields): boolean {
+	if (entry.url === undefined) return true;
+	const parts = parseUrl(entry.url);
+	if (parts === undefined) return true;
+	const host = parts.host.endsWith(".") ? parts.host.slice(0, -1) : parts.host;
+	return !PRIVATE_HOST.test(host);
+}
+
+/** A remote host may keep data and bill. */
+export function termsOf(entry: EntryFields): Terms {
+	return remote(entry) ? { kept: true, price: "unknown" } : HOME;
 }
 
 /** A server named by URL. */
@@ -108,7 +130,9 @@ export function localKind(spec: LocalKindSpec): ProviderKind {
 			const catalog = new LocalCatalog({
 				entry: entry.id,
 				server: spec.server(transport),
-				terms: spec.terms?.(entry) ?? HOME,
+				terms: (spec.terms ?? termsOf)(
+					entry.url === undefined && spec.url !== undefined ? { ...entry, url: spec.url } : entry,
+				),
 				scheduler: deps.scheduler,
 				rows: deps.rows,
 				refreshed: deps.refreshed,

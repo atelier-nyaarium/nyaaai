@@ -8,7 +8,7 @@ use nyaaai_contract::json::Value;
 use nyaaai_contract::shapes::provider::ProviderKindName;
 use nyaaai_contract::text::encode_path_segment;
 
-use super::join::join_all;
+use super::join::{MAX_LISTED, READS_AT_ONCE, first_distinct, join_limited, ok};
 use super::local::catalog::{Loaded, LocalModel, LocalServer, efforts_of_texts};
 use super::local::kind::{LocalKind, LocalKindSpec, local_kind};
 use super::readers::{data_list, fields_of, object_field, positive_field, text_field, texts_field};
@@ -132,6 +132,7 @@ async fn one(
 
 struct LlamaCppServer {
     transport: Arc<Transport>,
+    max_listed: usize,
 }
 
 impl LocalServer for LlamaCppServer {
@@ -150,12 +151,12 @@ impl LocalServer for LlamaCppServer {
                     "The model list did not parse.".to_owned(),
                 ));
             };
-            Ok(join_all(
-                models
-                    .iter()
-                    .map(|model| one(&self.transport, model, known, cancel)),
-            )
-            .await)
+            let models = first_distinct(models, |model| model.id.clone(), self.max_listed);
+            let reads: Vec<_> = models
+                .iter()
+                .map(|model| ok(one(&self.transport, model, known, cancel)))
+                .collect();
+            Ok(join_limited(reads, READS_AT_ONCE).await.unwrap_or_default())
         })
     }
 
@@ -193,7 +194,15 @@ impl LocalServer for LlamaCppServer {
 }
 
 pub fn server(transport: Arc<Transport>) -> Arc<dyn LocalServer> {
-    Arc::new(LlamaCppServer { transport })
+    server_limited(transport, MAX_LISTED)
+}
+
+/// A server that reads at most `max_listed` distinct ids of a listing.
+pub fn server_limited(transport: Arc<Transport>, max_listed: usize) -> Arc<dyn LocalServer> {
+    Arc::new(LlamaCppServer {
+        transport,
+        max_listed,
+    })
 }
 
 pub static LLAMACPP: LazyLock<Arc<LocalKind>> = LazyLock::new(|| {

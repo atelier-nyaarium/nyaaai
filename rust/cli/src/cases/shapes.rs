@@ -26646,6 +26646,7 @@ pub struct ResolverRoutesInput {
     pub rows: Vec<String>,
     pub kinds: Vec<nyaaai_contract::shapes::provider::ProviderKindName>,
     pub listings: Record<Record<ResolverRoutesInputListingsValueValue>>,
+    pub cold: Option<Vec<String>>,
     pub dispose_fails: Option<Vec<String>>,
     pub start_ms: Option<i64>,
     pub zdr_only: bool,
@@ -26683,6 +26684,9 @@ impl Shape for ResolverRoutesInput {
                 shape::record(value, at, ResolverRoutesInputListingsValueValue::decode_at)
             })
         })?;
+        let cold = shape::optional(object, "cold", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
         let dispose_fails = shape::optional(object, "disposeFails", at, |value, at| {
             shape::list(value, at, shape::text)
         })?;
@@ -26704,6 +26708,7 @@ impl Shape for ResolverRoutesInput {
             rows,
             kinds,
             listings,
+            cold,
             dispose_fails,
             start_ms,
             zdr_only,
@@ -26749,6 +26754,12 @@ impl Shape for ResolverRoutesInput {
                 shape::record_value(held, |held| held.encode())
             }),
         );
+        if let Some(held) = &self.cold {
+            object.insert(
+                "cold",
+                Value::Array(held.iter().map(|held| Value::from(held.as_str())).collect()),
+            );
+        }
         if let Some(held) = &self.dispose_fails {
             object.insert(
                 "disposeFails",
@@ -26850,6 +26861,8 @@ pub enum ResolverRoutesInputStepsItem {
     Candidates(ResolverRoutesInputStepsItemCandidates),
     Send(ResolverRoutesInputStepsItemSend),
     Refreshed(ResolverRoutesInputStepsItemRefreshed),
+    Warm(ResolverRoutesInputStepsItemWarm),
+    After(ResolverRoutesInputStepsItemAfter),
     Route(ResolverRoutesInputStepsItemRoute),
     Dispose(ResolverRoutesInputStepsItemDispose),
     During(ResolverRoutesInputStepsItemDuring),
@@ -26877,6 +26890,8 @@ impl Shape for ResolverRoutesInputStepsItem {
             "refreshed" => {
                 ResolverRoutesInputStepsItemRefreshed::decode_at(value, at).map(Self::Refreshed)
             }
+            "warm" => ResolverRoutesInputStepsItemWarm::decode_at(value, at).map(Self::Warm),
+            "after" => ResolverRoutesInputStepsItemAfter::decode_at(value, at).map(Self::After),
             "route" => ResolverRoutesInputStepsItemRoute::decode_at(value, at).map(Self::Route),
             "dispose" => {
                 ResolverRoutesInputStepsItemDispose::decode_at(value, at).map(Self::Dispose)
@@ -26898,6 +26913,8 @@ impl Shape for ResolverRoutesInputStepsItem {
             Self::Candidates(held) => held.encode(),
             Self::Send(held) => held.encode(),
             Self::Refreshed(held) => held.encode(),
+            Self::Warm(held) => held.encode(),
+            Self::After(held) => held.encode(),
             Self::Route(held) => held.encode(),
             Self::Dispose(held) => held.encode(),
             Self::During(held) => held.encode(),
@@ -27344,6 +27361,83 @@ impl Shape for ResolverRoutesInputStepsItemRefreshed {
         let mut object = Object::new();
         object.insert("kind", Value::from("refreshed"));
         object.insert("entry", Value::from(self.entry.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesInputStepsItemWarm {
+    pub entry: String,
+}
+
+impl Shape for ResolverRoutesInputStepsItemWarm {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "warm")
+        })?;
+        let entry = shape::required(object, "entry", at, shape::text)?;
+        Ok(Self { entry })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("warm"));
+        object.insert("entry", Value::from(self.entry.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesInputStepsItemAfter {
+    pub ms: u64,
+    pub model: String,
+    pub use_: nyaaai_contract::shapes::model::ModelUse,
+    pub warmed: Vec<String>,
+}
+
+impl Shape for ResolverRoutesInputStepsItemAfter {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "after")
+        })?;
+        let ms = shape::required(object, "ms", at, |value, at| {
+            shape::natural(value, at).and_then(|held| shape::at_least(held, 1, at))
+        })?;
+        let model = shape::required(object, "model", at, shape::text)?;
+        let use_ = shape::required(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        let warmed = shape::required(object, "warmed", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self {
+            ms,
+            model,
+            use_,
+            warmed,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("after"));
+        object.insert("ms", Value::Number(self.ms as f64));
+        object.insert("model", Value::from(self.model.as_str()));
+        object.insert("use", self.use_.encode());
+        object.insert(
+            "warmed",
+            Value::Array(
+                self.warmed
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
         Value::Object(object)
     }
 }
@@ -28350,6 +28444,7 @@ impl Shape for ResolverRoutesResultStepsItem {
 #[derive(Debug, Clone, PartialEq)]
 pub enum ResolverRoutesResultStepsItemAnswer {
     Routes(ResolverRoutesResultStepsItemAnswerRoutes),
+    Waited(ResolverRoutesResultStepsItemAnswerWaited),
     Resolve(ResolverRoutesResultStepsItemAnswerResolve),
     Rows(ResolverRoutesResultStepsItemAnswerRows),
     Candidates(ResolverRoutesResultStepsItemAnswerCandidates),
@@ -28365,6 +28460,9 @@ impl Shape for ResolverRoutesResultStepsItemAnswer {
         match shape::tag(object, "kind", at)? {
             "routes" => {
                 ResolverRoutesResultStepsItemAnswerRoutes::decode_at(value, at).map(Self::Routes)
+            }
+            "waited" => {
+                ResolverRoutesResultStepsItemAnswerWaited::decode_at(value, at).map(Self::Waited)
             }
             "resolve" => {
                 ResolverRoutesResultStepsItemAnswerResolve::decode_at(value, at).map(Self::Resolve)
@@ -28387,6 +28485,7 @@ impl Shape for ResolverRoutesResultStepsItemAnswer {
     fn encode(&self) -> Value {
         match self {
             Self::Routes(held) => held.encode(),
+            Self::Waited(held) => held.encode(),
             Self::Resolve(held) => held.encode(),
             Self::Rows(held) => held.encode(),
             Self::Candidates(held) => held.encode(),
@@ -28456,6 +28555,37 @@ impl Shape for ResolverRoutesResultStepsItemAnswerRoutes {
             "passed",
             Value::Array(self.passed.iter().map(|held| held.encode()).collect()),
         );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesResultStepsItemAnswerWaited {
+    pub timers: i64,
+    pub routes: ResolverRoutesResultStepsItemAnswerWaitedRoutes,
+}
+
+impl Shape for ResolverRoutesResultStepsItemAnswerWaited {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "waited")
+        })?;
+        let timers = shape::required(object, "timers", at, shape::integer)?;
+        let routes = shape::required(
+            object,
+            "routes",
+            at,
+            ResolverRoutesResultStepsItemAnswerWaitedRoutes::decode_at,
+        )?;
+        Ok(Self { timers, routes })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("waited"));
+        object.insert("timers", Value::Number(self.timers as f64));
+        object.insert("routes", self.routes.encode());
         Value::Object(object)
     }
 }
@@ -28771,6 +28901,68 @@ impl Shape for ResolverRoutesResultStepsItemAnswerRoutesCandidatesItem {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesResultStepsItemAnswerWaitedRoutes {
+    pub unresolved: Option<nyaaai_contract::shapes::model::Unresolved>,
+    pub candidates: Vec<ResolverRoutesResultStepsItemAnswerWaitedRoutesCandidatesItem>,
+    pub passed: Vec<nyaaai_contract::shapes::provider::Passed>,
+}
+
+impl Shape for ResolverRoutesResultStepsItemAnswerWaitedRoutes {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "routes")
+        })?;
+        let unresolved = shape::required(object, "unresolved", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                nyaaai_contract::shapes::model::Unresolved::decode_at,
+            )
+        })?;
+        let candidates = shape::required(object, "candidates", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                ResolverRoutesResultStepsItemAnswerWaitedRoutesCandidatesItem::decode_at,
+            )
+        })?;
+        let passed = shape::required(object, "passed", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::Passed::decode_at,
+            )
+        })?;
+        Ok(Self {
+            unresolved,
+            candidates,
+            passed,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("routes"));
+        object.insert(
+            "unresolved",
+            self.unresolved
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert(
+            "candidates",
+            Value::Array(self.candidates.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "passed",
+            Value::Array(self.passed.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct ResolverRoutesResultStepsItemAnswerResolveCandidate {
     pub entry: String,
     pub kind: nyaaai_contract::shapes::provider::ProviderKindName,
@@ -28937,6 +29129,57 @@ impl Shape for ResolverRoutesResultStepsItemAnswerRoutesCandidatesItemStatus {
     }
 }
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesResultStepsItemAnswerWaitedRoutesCandidatesItem {
+    pub entry: String,
+    pub kind: nyaaai_contract::shapes::provider::ProviderKindName,
+    pub binding: String,
+    pub status: ResolverRoutesResultStepsItemAnswerWaitedRoutesCandidatesItemStatus,
+    pub zdr_only: bool,
+    pub path: String,
+}
+
+impl Shape for ResolverRoutesResultStepsItemAnswerWaitedRoutesCandidatesItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let entry = shape::required(object, "entry", at, shape::text)?;
+        let kind = shape::required(
+            object,
+            "kind",
+            at,
+            nyaaai_contract::shapes::provider::ProviderKindName::decode_at,
+        )?;
+        let binding = shape::required(object, "binding", at, shape::text)?;
+        let status = shape::required(
+            object,
+            "status",
+            at,
+            ResolverRoutesResultStepsItemAnswerWaitedRoutesCandidatesItemStatus::decode_at,
+        )?;
+        let zdr_only = shape::required(object, "zdrOnly", at, shape::flag)?;
+        let path = shape::required(object, "path", at, shape::text)?;
+        Ok(Self {
+            entry,
+            kind,
+            binding,
+            status,
+            zdr_only,
+            path,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("entry", Value::from(self.entry.as_str()));
+        object.insert("kind", self.kind.encode());
+        object.insert("binding", Value::from(self.binding.as_str()));
+        object.insert("status", self.status.encode());
+        object.insert("zdrOnly", Value::Bool(self.zdr_only));
+        object.insert("path", Value::from(self.path.as_str()));
+        Value::Object(object)
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ResolverRoutesResultStepsItemAnswerResolveCandidateStatus {
     Ok,
@@ -29063,6 +29306,52 @@ impl ResolverRoutesResultStepsItemAnswerCandidatesServedItemStatus {
 }
 
 impl Shape for ResolverRoutesResultStepsItemAnswerCandidatesServedItemStatus {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ResolverRoutesResultStepsItemAnswerWaitedRoutesCandidatesItemStatus {
+    Ok,
+    Retired,
+    NoZdrHost,
+    NoTools,
+    Unknown,
+}
+
+impl ResolverRoutesResultStepsItemAnswerWaitedRoutesCandidatesItemStatus {
+    pub const ALL: [Self; 5] = [
+        Self::Ok,
+        Self::Retired,
+        Self::NoZdrHost,
+        Self::NoTools,
+        Self::Unknown,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Ok => "ok",
+            Self::Retired => "retired",
+            Self::NoZdrHost => "noZdrHost",
+            Self::NoTools => "noTools",
+            Self::Unknown => "unknown",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for ResolverRoutesResultStepsItemAnswerWaitedRoutesCandidatesItemStatus {
     fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
         value
             .as_str()
@@ -33770,8 +34059,91 @@ impl Shape for LifeListingPrice {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+pub enum LifeChange {
+    List(LifeChangeList),
+    Key(LifeChangeKey),
+}
+
+impl Shape for LifeChange {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "list" => LifeChangeList::decode_at(value, at).map(Self::List),
+            "key" => LifeChangeKey::decode_at(value, at).map(Self::Key),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::List(held) => held.encode(),
+            Self::Key(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeChangeList {
+    pub entries: Vec<nyaaai_contract::shapes::provider::ProviderEntry>,
+}
+
+impl Shape for LifeChangeList {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "list")
+        })?;
+        let entries = shape::required(object, "entries", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::ProviderEntry::decode_at,
+            )
+        })?;
+        Ok(Self { entries })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("list"));
+        object.insert(
+            "entries",
+            Value::Array(self.entries.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeChangeKey {
+    pub id: String,
+    pub answer: LifeKeyAnswer,
+}
+
+impl Shape for LifeChangeKey {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "key")
+        })?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let answer = shape::required(object, "answer", at, LifeKeyAnswer::decode_at)?;
+        Ok(Self { id, answer })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("key"));
+        object.insert("id", Value::from(self.id.as_str()));
+        object.insert("answer", self.answer.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub enum LifeStep {
     Send(LifeStepSend),
+    Later(LifeStepLater),
     Plan(LifeStepPlan),
     Begin(LifeStepBegin),
     Sizing(LifeStepSizing),
@@ -33789,6 +34161,7 @@ impl Shape for LifeStep {
         let object = shape::object(value, at)?;
         match shape::tag(object, "kind", at)? {
             "send" => LifeStepSend::decode_at(value, at).map(Self::Send),
+            "later" => LifeStepLater::decode_at(value, at).map(Self::Later),
             "plan" => LifeStepPlan::decode_at(value, at).map(Self::Plan),
             "begin" => LifeStepBegin::decode_at(value, at).map(Self::Begin),
             "sizing" => LifeStepSizing::decode_at(value, at).map(Self::Sizing),
@@ -33806,6 +34179,7 @@ impl Shape for LifeStep {
     fn encode(&self) -> Value {
         match self {
             Self::Send(held) => held.encode(),
+            Self::Later(held) => held.encode(),
             Self::Plan(held) => held.encode(),
             Self::Begin(held) => held.encode(),
             Self::Sizing(held) => held.encode(),
@@ -33913,6 +34287,32 @@ impl Shape for LifeStepSend {
         if let Some(held) = &self.aborted_before {
             object.insert("abortedBefore", Value::Bool(*held));
         }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeStepLater {
+    pub ms: u64,
+    pub change: LifeChange,
+}
+
+impl Shape for LifeStepLater {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "later")
+        })?;
+        let ms = shape::required(object, "ms", at, shape::natural)?;
+        let change = shape::required(object, "change", at, LifeChange::decode_at)?;
+        Ok(Self { ms, change })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("later"));
+        object.insert("ms", Value::Number(self.ms as f64));
+        object.insert("change", self.change.encode());
         Value::Object(object)
     }
 }

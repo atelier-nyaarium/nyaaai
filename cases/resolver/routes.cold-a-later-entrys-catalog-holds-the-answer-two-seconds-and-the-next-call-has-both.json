@@ -1,0 +1,139 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routes",
+	"name": "cold-a-later-entrys-catalog-holds-the-answer-two-seconds-and-the-next-call-has-both",
+	"input": {
+		"entries": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "First"
+			},
+			{
+				"id": "b",
+				"kind": "openrouter",
+				"label": "Second"
+			}
+		],
+		"answers": {
+			"a": {
+				"kind": "key",
+				"key": "fake-key-one"
+			},
+			"b": {
+				"kind": "key",
+				"key": "fake-key-one"
+			}
+		},
+		"failing": [],
+		"rows": [
+			"openai/gpt-6-luna"
+		],
+		"kinds": [
+			"openrouter"
+		],
+		"listings": {},
+		"zdrOnly": true,
+		"cold": [
+			"b"
+		],
+		"steps": [
+			{
+				"kind": "after",
+				"ms": 2000,
+				"model": "openai/gpt-6-luna",
+				"use": {
+					"name": "chat",
+					"requires": [],
+					"hides": true
+				},
+				"warmed": []
+			},
+			{
+				"kind": "warm",
+				"entry": "b"
+			},
+			{
+				"kind": "routes",
+				"model": "openai/gpt-6-luna",
+				"use": {
+					"name": "chat",
+					"requires": [],
+					"hides": true
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answer": {
+					"kind": "waited",
+					"timers": 1,
+					"routes": {
+						"kind": "routes",
+						"unresolved": null,
+						"candidates": [
+							{
+								"entry": "a",
+								"kind": "openrouter",
+								"binding": "openai/gpt-6-luna",
+								"status": "ok",
+								"zdrOnly": true,
+								"path": "/chat/completions"
+							}
+						],
+						"passed": []
+					}
+				},
+				"built": 2,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "changed"
+				},
+				"built": 2,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "routes",
+					"unresolved": null,
+					"candidates": [
+						{
+							"entry": "a",
+							"kind": "openrouter",
+							"binding": "openai/gpt-6-luna",
+							"status": "ok",
+							"zdrOnly": true,
+							"path": "/chat/completions"
+						},
+						{
+							"entry": "b",
+							"kind": "openrouter",
+							"binding": "openai/gpt-6-luna",
+							"status": "ok",
+							"zdrOnly": true,
+							"path": "/chat/completions"
+						}
+					],
+					"passed": []
+				},
+				"built": 2,
+				"disposed": 0
+			}
+		],
+		"transports": [
+			"First",
+			"Second"
+		],
+		"stopped": [
+			"First",
+			"Second"
+		],
+		"refreshed": [],
+		"keyReads": 4
+	}
+}

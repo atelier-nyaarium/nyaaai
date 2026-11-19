@@ -1,0 +1,50 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "reset-ten-years-away-ends-in-thirty-one-days",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance",
+							"resetsAt": 315420000000
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance",
+							"retryAfterMs": 315360000000
+						},
+						"nowMs": 2824800000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "reset",
+						"at": 2738400000
+					},
+					{
+						"kind": "reset",
+						"at": 5503200000
+					}
+				]
+			}
+		]
+	}
+}

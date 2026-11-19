@@ -2,6 +2,7 @@
 
 use std::sync::Arc;
 
+use nyaaai_contract::shapes::health::Ticket;
 use nyaaai_contract::shapes::usage::{CallTag, MeteredCall};
 use nyaaai_contract::usage_sink::UsageSink;
 
@@ -15,18 +16,19 @@ pub const KNOWN_FEATURES: [&str; 4] = ["chat", "analysis", "wand", "tester"];
 
 /// Where the health is told a reply's billing.
 pub trait Bills: Send + Sync {
-    fn billed(&self, id: &str, reply: &Billing);
+    fn billed(&self, id: &str, reply: &Billing, ticket: Option<&Ticket>);
 }
 
 impl Bills for ProviderHealth {
-    fn billed(&self, id: &str, reply: &Billing) {
-        ProviderHealth::billed(self, id, reply);
+    fn billed(&self, id: &str, reply: &Billing, ticket: Option<&Ticket>) {
+        ProviderHealth::billed(self, id, reply, ticket);
     }
 }
 
 /// Told each call a request made.
 pub trait Meter: Send + Sync {
-    fn called(&self, call: &MeteredCall);
+    /// The ticket the request held, if the gate gave one.
+    fn called(&self, call: &MeteredCall, ticket: Option<&Ticket>);
 }
 
 /// Queues delayed stats for a record: its id, the generation id and the call.
@@ -53,7 +55,7 @@ struct ProviderMeter {
 }
 
 impl Meter for ProviderMeter {
-    fn called(&self, call: &MeteredCall) {
+    fn called(&self, call: &MeteredCall, ticket: Option<&Ticket>) {
         let id = self.d.usage.record(call);
         if let (Some(id), Some(generation_id)) = (&id, &call.generation_id) {
             (self.d.stats)(id, generation_id, call);
@@ -68,6 +70,7 @@ impl Meter for ProviderMeter {
                     allowance: reply.and_then(|held| held.allowance),
                     cost: reply.and_then(|held| held.cost),
                 },
+                ticket,
             );
         }
     }

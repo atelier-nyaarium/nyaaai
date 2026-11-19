@@ -5,12 +5,12 @@ use std::sync::{Arc, LazyLock};
 use nyaaai_contract::cancel::CancelToken;
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::json::Value;
-use nyaaai_contract::pattern::Pattern;
-use nyaaai_contract::shapes::provider::{EntryFields, ProviderKindName};
+use nyaaai_contract::shapes::provider::ProviderKindName;
 use nyaaai_contract::url::parse_url;
 
 use super::local::catalog::{LocalModel, LocalServer};
-use super::local::kind::{HOME, LocalKind, LocalKindSpec, Terms, TermsPrice, local_kind};
+use super::local::kind::{LocalKind, LocalKindSpec, local_kind};
+pub use super::local::kind::{remote, terms_of};
 use super::readers::{data_list, fields_of, positive_field, text_field};
 use crate::provider::kind::KindError;
 use crate::transport::{KeyAuth, Transport};
@@ -23,15 +23,6 @@ pub struct ListedModel {
 }
 
 const LIST: &str = "/models";
-
-/// Loopback, private ranges, LAN names; a host as the URL parser wrote it.
-static PRIVATE_HOST: LazyLock<Pattern> = LazyLock::new(|| {
-    Pattern::compile(
-        "^(localhost|0\\.0\\.0\\.0|(127|10)\\.[\\d.]+|192\\.168\\.[\\d.]+|172\\.(1[6-9]|2\\d|3[01])\\.[\\d.]+|169\\.254\\.[\\d.]+|100\\.(6[4-9]|[7-9]\\d|1[01]\\d|12[0-7])\\.[\\d.]+|\\[(::1?|f[cd][0-9a-f]{2}:[0-9a-f:]*|fe[89ab][0-9a-f]:[0-9a-f:]*)\\]|[^.[]+|.+\\.(localhost|local|lan|internal|home\\.arpa))$",
-        "i",
-    )
-    .expect("a fixed pattern")
-});
 
 /// Models with an id.
 pub fn listed(raw: &Value) -> Option<Vec<ListedModel>> {
@@ -96,32 +87,6 @@ pub fn server(transport: Arc<Transport>) -> Arc<dyn LocalServer> {
     Arc::new(CompatibleServer { transport })
 }
 
-/// Off this network: no URL, an unreadable one, or a host that is not private.
-pub fn remote(entry: &EntryFields) -> bool {
-    let Some(url) = &entry.url else {
-        return true;
-    };
-    match parse_url(url) {
-        None => true,
-        Some(parts) => {
-            let host = parts.host.strip_suffix('.').unwrap_or(&parts.host);
-            !PRIVATE_HOST.test(host)
-        }
-    }
-}
-
-/// A remote host may keep data and bill.
-pub fn terms_of(entry: &EntryFields) -> Terms {
-    if remote(entry) {
-        Terms {
-            kept: true,
-            price: TermsPrice::Unknown,
-        }
-    } else {
-        HOME
-    }
-}
-
 /// A bare origin means `/v1`; a query, fragment or credentials refuse.
 pub fn base_of(url: &str) -> Result<String, String> {
     let plain = parse_url(url).filter(|parts| {
@@ -151,7 +116,7 @@ pub static COMPATIBLE: LazyLock<Arc<LocalKind>> = LazyLock::new(|| {
         replay: None,
         chat_path: Some("/chat/completions"),
         base: Some(base_of),
-        terms: Some(terms_of),
+        terms: None,
         reach: |transport, cancel| {
             Box::pin(async move {
                 let raw = transport.get_json(LIST, &cancel, &KeyAuth::Stored).await?;

@@ -1,5 +1,6 @@
 //! The one way a catalog joins reads that run at once.
 
+use std::collections::HashSet;
 use std::future::Future;
 use std::pin::Pin;
 use std::task::Poll;
@@ -24,6 +25,76 @@ pub async fn join_all<F: Future>(reads: impl IntoIterator<Item = F>) -> Vec<F::O
     })
     .await;
     done.into_iter().flatten().collect()
+}
+
+/// A listing's rows read at most this many.
+pub const MAX_LISTED: usize = 2000;
+
+/// Reads in flight at once, for a read per listed row.
+pub const READS_AT_ONCE: usize = 8;
+
+/// Starts reads in list order, at most `limit` in flight; answers in list order. The first failure
+/// fails and starts no more.
+pub async fn join_limited<T, E, F: Future<Output = Result<T, E>>>(
+    reads: impl IntoIterator<Item = F>,
+    limit: usize,
+) -> Result<Vec<T>, E> {
+    let limit = limit.max(1);
+    let mut upcoming = reads.into_iter().enumerate();
+    let mut flying: Vec<(usize, Pin<Box<F>>)> = Vec::new();
+    let mut done: Vec<Option<T>> = Vec::new();
+    let answers = std::future::poll_fn(|context| {
+        loop {
+            while flying.len() < limit {
+                let Some((at, read)) = upcoming.next() else {
+                    break;
+                };
+                done.push(None);
+                flying.push((at, Box::pin(read)));
+            }
+            if flying.is_empty() {
+                return Poll::Ready(Ok(()));
+            }
+            let mut finished = false;
+            let mut at = 0;
+            while at < flying.len() {
+                match flying[at].1.as_mut().poll(context) {
+                    Poll::Ready(Ok(held)) => {
+                        let (place, _) = flying.remove(at);
+                        done[place] = Some(held);
+                        finished = true;
+                    }
+                    Poll::Ready(Err(error)) => return Poll::Ready(Err(error)),
+                    Poll::Pending => at += 1,
+                }
+            }
+            if !finished {
+                return Poll::Pending;
+            }
+        }
+    })
+    .await;
+    answers.map(|()| done.into_iter().flatten().collect())
+}
+
+/// A read that cannot fail, as one a limited join takes.
+pub async fn ok<T>(read: impl Future<Output = T>) -> Result<T, std::convert::Infallible> {
+    Ok(read.await)
+}
+
+/// The first `max` items with distinct keys, in order.
+pub fn first_distinct<T>(items: Vec<T>, key_of: impl Fn(&T) -> String, max: usize) -> Vec<T> {
+    let mut seen = HashSet::new();
+    let mut kept = Vec::new();
+    for item in items {
+        if kept.len() >= max {
+            break;
+        }
+        if seen.insert(key_of(&item)) {
+            kept.push(item);
+        }
+    }
+    kept
 }
 
 /// Waits for every read; answers values in list order, or the first failure.
@@ -88,6 +159,33 @@ mod tests {
             assert_eq!(*finished.lock().expect("held"), [2, 3, 1]);
             let values = join_settled([each(4, 1, false), each(5, 0, false)]).await;
             assert_eq!(values, Ok(vec![4, 5]));
+        });
+    }
+
+    #[test]
+    fn a_limited_join_never_has_more_reads_in_flight_than_its_limit() {
+        runtime().block_on(async {
+            let flying = Arc::new(Mutex::new((0usize, 0usize)));
+            let reads: Vec<_> = (0..20)
+                .map(|name| {
+                    let flying = Arc::clone(&flying);
+                    async move {
+                        {
+                            let mut held = flying.lock().expect("held");
+                            held.0 += 1;
+                            held.1 = held.1.max(held.0);
+                        }
+                        for _ in 0..3 {
+                            tokio::task::yield_now().await;
+                        }
+                        flying.lock().expect("held").0 -= 1;
+                        Ok::<_, ()>(name)
+                    }
+                })
+                .collect();
+            let answers = join_limited(reads, 3).await.expect("no failure");
+            assert_eq!(answers, (0..20).collect::<Vec<_>>());
+            assert_eq!(flying.lock().expect("held").1, 3);
         });
     }
 }

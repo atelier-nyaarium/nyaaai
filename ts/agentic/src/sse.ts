@@ -1,7 +1,7 @@
 // Server-sent event decoding.
 
 import type { SseItem } from "@nyaaai/contract/shapes/step";
-import { Utf8Decoder } from "@nyaaai/contract/text";
+import { Utf8Decoder, utf8Length } from "@nyaaai/contract/text";
 
 ////////////////////////////////
 //  Classes
@@ -14,9 +14,19 @@ export class SseDecoder {
 	private scanned = 0;
 	private data: string[] = [];
 	private event: string | undefined;
+	private pendingBytes = 0;
+	private dataBytes = 0;
+	private eventBytes = 0;
+
+	/** UTF-8 bytes held: the pending line, and the gathered data and event lines. */
+	held(): number {
+		return this.pendingBytes + this.dataBytes + this.eventBytes;
+	}
 
 	push(bytes: Uint8Array): SseItem[] {
-		this.pending += this.decoder.push(bytes);
+		const text = this.decoder.push(bytes);
+		this.pending += text;
+		this.pendingBytes += utf8Length(text);
 		const items: SseItem[] = [];
 		let from = 0;
 		for (let at = this.pending.indexOf("\n", this.scanned); at !== -1; at = this.pending.indexOf("\n", from)) {
@@ -24,7 +34,10 @@ export class SseDecoder {
 			from = at + 1;
 			this.line(line.endsWith("\r") ? line.slice(0, -1) : line, items);
 		}
-		this.pending = this.pending.slice(from);
+		if (from > 0) {
+			this.pending = this.pending.slice(from);
+			this.pendingBytes = utf8Length(this.pending);
+		}
 		this.scanned = this.pending.length;
 		return items;
 	}
@@ -36,6 +49,7 @@ export class SseDecoder {
 		if (this.pending.length > 0)
 			this.line(this.pending.endsWith("\r") ? this.pending.slice(0, -1) : this.pending, items);
 		this.pending = "";
+		this.pendingBytes = 0;
 		this.scanned = 0;
 		this.dispatch(items);
 		return items;
@@ -54,16 +68,24 @@ export class SseDecoder {
 		const field = colon === -1 ? line : line.slice(0, colon);
 		const raw = colon === -1 ? "" : line.slice(colon + 1);
 		const value = raw.startsWith(" ") ? raw.slice(1) : raw;
-		if (field === "event") this.event = value;
-		if (field === "data") this.data.push(value);
+		if (field === "event") {
+			this.event = value;
+			this.eventBytes = utf8Length(line) + 1;
+		}
+		if (field === "data") {
+			this.data.push(value);
+			this.dataBytes += utf8Length(line) + 1;
+		}
 	}
 
 	private dispatch(items: SseItem[]): void {
 		const event = this.event;
 		this.event = undefined;
+		this.eventBytes = 0;
 		if (this.data.length === 0) return;
 		const data = this.data.join("\n");
 		this.data = [];
+		this.dataBytes = 0;
 		if (data === "[DONE]") items.push({ kind: "done" });
 		else items.push(event === undefined ? { kind: "data", data } : { kind: "data", data, event });
 	}

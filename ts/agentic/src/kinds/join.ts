@@ -1,11 +1,56 @@
 // The one way a catalog joins reads that run at once.
 
 ////////////////////////////////
+//  Constants
+
+/** A listing's rows read at most this many. */
+export const MAX_LISTED = 2000;
+
+/** Reads in flight at once, for a read per listed row. */
+export const READS_AT_ONCE = 8;
+
+////////////////////////////////
 //  Functions & Helpers
 
 /** Runs all reads at once; answers in list order, the first failure fails. */
 export function joinAll<T>(reads: ReadonlyArray<() => Promise<T>>): Promise<T[]> {
 	return Promise.all(reads.map((read) => read()));
+}
+
+/** Starts reads in list order, at most `limit` in flight; answers in list order, the first failure fails and starts no more. */
+export async function joinLimited<T>(reads: ReadonlyArray<() => Promise<T>>, limit = READS_AT_ONCE): Promise<T[]> {
+	const answers: T[] = [];
+	let next = 0;
+	let failed = false;
+	const lane = async (): Promise<void> => {
+		while (!failed && next < reads.length) {
+			const at = next++;
+			const read = reads[at];
+			if (read === undefined) return;
+			try {
+				answers[at] = await read();
+			} catch (error) {
+				failed = true;
+				throw error;
+			}
+		}
+	};
+	await Promise.all(Array.from({ length: Math.min(Math.max(limit, 1), reads.length) }, lane));
+	return answers;
+}
+
+/** The first `max` items with distinct keys, in order. */
+export function firstDistinct<T>(items: ReadonlyArray<T>, keyOf: (item: T) => string, max = MAX_LISTED): T[] {
+	const seen = new Set<string>();
+	const kept: T[] = [];
+	for (const item of items) {
+		if (kept.length >= max) break;
+		const key = keyOf(item);
+		if (seen.has(key)) continue;
+		seen.add(key);
+		kept.push(item);
+	}
+	return kept;
 }
 
 /** Runs all reads at once, waits for all; answers in list order, or the first failure. */

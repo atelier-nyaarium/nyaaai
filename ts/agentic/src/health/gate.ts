@@ -54,6 +54,9 @@ const PAUSE_MS = 60_000;
 
 const MAX_PAUSES = 10;
 
+/** A server's asked wait stops here. */
+const MAX_PAUSE_MS = 60 * 60_000;
+
 ////////////////////////////////
 //  Functions & Helpers
 
@@ -272,7 +275,7 @@ export class ProviderGate {
 	}
 
 	private pause(model: string, gate: ModelGate, retryAfterMs?: number): void {
-		const waitMs = Math.max(this.pauseMs, retryAfterMs ?? 0);
+		const waitMs = Math.max(this.pauseMs, Math.min(retryAfterMs ?? 0, MAX_PAUSE_MS));
 		gate.phase = "paused";
 		gate.resumeAt = this.d.scheduler.nowMs() + waitMs;
 		gate.cancel?.();

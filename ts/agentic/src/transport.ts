@@ -212,12 +212,11 @@ export class Transport {
 	/** Re-arms the idle abort. */
 	private async *items(chunks: AsyncIterable<Uint8Array>, cut: Cut): AsyncGenerator<SseItem> {
 		const decoder = new SseDecoder();
-		let since = 0;
 		for await (const chunk of chunks) {
 			cut.arm();
 			const items = decoder.push(chunk);
-			since = items.length > 0 ? 0 : since + chunk.byteLength;
-			if (since > this.maxBytes) throw failed("stream", `A stream event is larger than ${this.maxBytes} bytes.`);
+			if (decoder.held() > this.maxBytes)
+				throw failed("stream", `A stream event is larger than ${this.maxBytes} bytes.`);
 			yield* items;
 		}
 		cut.arm();

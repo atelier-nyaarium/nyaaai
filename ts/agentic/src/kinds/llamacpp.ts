@@ -1,7 +1,7 @@
 // llama.cpp: the model list and each model's props, read by hand.
 
 import { encodePathSegment } from "@nyaaai/contract/text";
-import { joinAll } from "./join";
+import { firstDistinct, joinLimited, MAX_LISTED } from "./join";
 import { effortsOf, type LocalModel, type LocalServer, type LocalTransport } from "./local/catalog";
 import { localKind } from "./local/kind";
 import { dataList, fieldsOf, objectField, positiveField, textField, textsField } from "./readers";
@@ -87,12 +87,13 @@ export function modelOf(
 	};
 }
 
-export function server(transport: LocalTransport): LocalServer {
+export function server(transport: LocalTransport, maxListed = MAX_LISTED): LocalServer {
 	return {
 		models: async (known, signal) => {
-			const models = listed(await transport.getJson(LIST, signal, "none"));
-			if (models === undefined) throw new Error("The model list did not parse.");
-			return joinAll(
+			const listing = listed(await transport.getJson(LIST, signal, "none"));
+			if (listing === undefined) throw new Error("The model list did not parse.");
+			const models = firstDistinct(listing, (model) => model.id, maxListed);
+			return joinLimited(
 				models.map(
 					(model) => async () =>
 						modelOf(

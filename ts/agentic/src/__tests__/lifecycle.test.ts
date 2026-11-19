@@ -163,8 +163,8 @@ describe("the lifecycle's trace", () => {
 			settle: () => "done" as const,
 			deferred: () => undefined,
 			blocked: () => undefined,
-			failed: () => {},
-			served: () => {},
+			failed: () => false,
+			served: () => false,
 		};
 		const lifecycle = new RequestLifecycle({ scheduler, gate });
 		const result = await lifecycle.run(

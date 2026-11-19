@@ -366,7 +366,7 @@ function joinParsed(
 				: { price: { prompt, completion, tiers: tiersOf(entry.pricing) } }),
 			...(perMillion(entry.pricing?.input_cache_write_1h) === undefined ? {} : { cacheWrite1h: true as const }),
 			hosts: hosts.map((host) => host.tag ?? host.provider_name ?? "").filter((tag) => tag.length > 0),
-			...(hosts.some((host) => zdr.includes(host)) ? {} : { dataKept: true as const }),
+			...(hosts.length > 0 && hosts.every((host) => zdr.includes(host)) ? {} : { dataKept: true as const }),
 		};
 	});
 }

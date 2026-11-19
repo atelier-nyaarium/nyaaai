@@ -45,35 +45,22 @@ function copiedPart<T extends ReplyPart>(part: T): T {
 	return { ...part, segments: part.segments.map((segment) => ({ ...segment })) };
 }
 
-/** Joins matching seam segments unless split. */
-function joinedSegments<T extends { kind: string; text: string }>(
-	left: readonly T[],
-	right: readonly T[],
-	split: boolean,
-): T[] {
-	const last = left.at(-1);
-	const first = right[0];
-	if (split || last === undefined || first === undefined || last.kind !== first.kind)
-		return [...left, ...right.map((segment) => ({ ...segment }))];
-	return [
-		...left.slice(0, -1),
-		{ ...last, text: last.text + first.text },
-		...right.slice(1).map((segment) => ({ ...segment })),
-	];
-}
-
-/** Text appends; fields replace. */
-function mergedThought(into: ThoughtPart, part: ThoughtPart, split: boolean): ThoughtPart {
-	const segments = joinedSegments(into.segments ?? [], part.segments ?? [], split);
-	return {
-		...into,
-		...(segments.length === 0 ? {} : { segments }),
-		...(part.opaque === undefined ? {} : { opaque: part.opaque }),
-		...(part.id === undefined ? {} : { id: part.id }),
-		...(part.format === undefined ? {} : { format: part.format }),
-		...(part.index === undefined ? {} : { index: part.index }),
-		...(part.anchor === undefined ? {} : { anchor: part.anchor }),
-	};
+/** Adds the delta's segments to the thought, joining at the seam unless split. */
+function mergeThought(into: ThoughtPart, part: ThoughtPart, split: boolean): void {
+	const [first, ...rest] = part.segments ?? [];
+	if (first !== undefined) {
+		const segments = into.segments ?? [];
+		into.segments = segments;
+		const last = segments.at(-1);
+		if (split || last === undefined || last.kind !== first.kind) segments.push({ ...first });
+		else last.text += first.text;
+		for (const segment of rest) segments.push({ ...segment });
+	}
+	if (part.opaque !== undefined) into.opaque = part.opaque;
+	if (part.id !== undefined) into.id = part.id;
+	if (part.format !== undefined) into.format = part.format;
+	if (part.index !== undefined) into.index = part.index;
+	if (part.anchor !== undefined) into.anchor = part.anchor;
 }
 
 ////////////////////////////////
@@ -163,8 +150,7 @@ export class StepAssembler {
 	private addText(text: string, phase: string | undefined): void {
 		this.seen = true;
 		const last = this.parts.at(-1);
-		if (last?.kind === "text" && last.phase === phase)
-			this.parts[this.parts.length - 1] = { ...last, text: last.text + text };
+		if (last?.kind === "text" && last.phase === phase) last.text += text;
 		else this.parts.push(phase === undefined ? { kind: "text", text } : { kind: "text", text, phase });
 	}
 
@@ -174,7 +160,7 @@ export class StepAssembler {
 		const at = block === undefined ? this.continued(part) : this.keyed(block, part);
 		const known = at === undefined ? undefined : this.parts[at];
 		if (at !== undefined && known?.kind === "thought") {
-			this.parts[at] = mergedThought(known, part, split === true);
+			mergeThought(known, part, split === true);
 			return;
 		}
 		if (block === undefined) this.loose = this.parts.length;
@@ -225,11 +211,8 @@ export class StepAssembler {
 		}
 		if (known.wireId.length > 0 && event.wireId.length > 0 && known.wireId !== event.wireId)
 			throw failed("stream", "Two tool calls shared an index.");
-		this.parts[at] = {
-			...known,
-			wireId: known.wireId.length > 0 ? known.wireId : event.wireId,
-			name: known.name.length > 0 ? known.name : event.name,
-			argumentsText: known.argumentsText + event.argumentsText,
-		};
+		if (known.wireId.length === 0) known.wireId = event.wireId;
+		if (known.name.length === 0) known.name = event.name;
+		known.argumentsText += event.argumentsText;
 	}
 }

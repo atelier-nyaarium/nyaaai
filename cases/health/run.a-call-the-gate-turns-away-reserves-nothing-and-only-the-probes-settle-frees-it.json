@@ -30,6 +30,10 @@
 				"billingSource": "balance"
 			},
 			{
+				"kind": "advance",
+				"ms": 6000000
+			},
+			{
 				"kind": "failed",
 				"route": {
 					"entry": {
@@ -44,13 +48,13 @@
 					"category": "unavailable",
 					"status": "unavailable",
 					"message": "unavailable",
-					"retryAfterMs": 36000000
+					"retryAfterMs": 3600000
 				},
 				"onward": true
 			},
 			{
 				"kind": "advance",
-				"ms": 9000000
+				"ms": 3000000
 			},
 			{
 				"kind": "tryAdmit",
@@ -174,7 +178,32 @@
 				"parked": []
 			},
 			{
-				"nowMs": 2000000,
+				"nowMs": 8000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 20000000,
+							"next": 11000000,
+							"probe": null
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0,
+				"parked": []
+			},
+			{
+				"nowMs": 8000000,
 				"answer": {
 					"kind": "none"
 				},

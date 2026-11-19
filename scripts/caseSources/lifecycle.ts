@@ -40,6 +40,7 @@ import {
 	USAGE,
 	zdr,
 } from "./lifecycleKit";
+import { staleCases } from "./lifecycleStale";
 import { DONE_TEXT, frame } from "./transportKit";
 
 ////////////////////////////////
@@ -706,4 +707,5 @@ export const lifecycleCases: CaseSource[] = [
 	...metering,
 	...notices,
 	...sinks,
+	...staleCases,
 ];

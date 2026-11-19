@@ -92,7 +92,7 @@ interface RouteDeps {
 }
 
 /** Fall-through failure. */
-type Onward = { onward: Failure };
+type Onward = { onward: Failure; ticket?: Ticket | undefined };
 
 /** Deferred by ZDR. */
 type Kept = { kept: true };
@@ -249,7 +249,7 @@ export class RequestLifecycle {
 			const tried = await this.tries(route, call, o, keep, true);
 			if ("kept" in tried) continue;
 			if (!("onward" in tried)) return tried;
-			this.failed(route, tried.onward, true, o);
+			this.failed(route, tried.onward, true, o, tried.ticket);
 			skip(route, skipReasonOf(tried.onward), "fellThrough");
 		}
 		ahead(candidates.length - 1);
@@ -297,7 +297,10 @@ export class RequestLifecycle {
 		// Backoff consumes budget.
 		let waited = 0;
 		let again = false;
+		// The last failure, once a retry is due.
+		let last: Onward | undefined;
 		for (let attempt = 1; ; ) {
+			if (onward && last !== undefined && this.refusal(route, false, run) !== undefined) return last;
 			const readmitted = again;
 			const admission =
 				call.live === true ? this.admitLive(route, call.signal, o) : await this.admit(route, call, o, again);
@@ -324,9 +327,9 @@ export class RequestLifecycle {
 				again: readmitted,
 			}));
 			try {
-				const value = await this.metered(route, call, o);
+				const value = await this.metered(route, call, o, ticket);
 				this.settle(route, ticket, "ok", undefined, o);
-				this.served(route, value.usage, run, "ok", o);
+				this.served(route, value.usage, run, "ok", o, ticket);
 				return { ok: true, value, route };
 			} catch (error) {
 				if (call.signal.aborted) {
@@ -343,7 +346,7 @@ export class RequestLifecycle {
 					}));
 					throw error;
 				}
-				this.served(route, call.billed?.()?.usage ?? failure.billed?.usage, run, "failed", o);
+				this.served(route, call.billed?.()?.usage ?? failure.billed?.usage, run, "failed", o, ticket);
 				// Empty replies stay fresh.
 				const fresh = failure.category === "empty" || o.fresh === undefined || o.fresh();
 				const failedAt = (disposition: ReturnType<typeof route.kind.failure> | undefined) =>
@@ -359,34 +362,36 @@ export class RequestLifecycle {
 				if (failure.category === "overloaded") {
 					const settled = this.settle(route, ticket, "overloaded", failure.retryAfterMs, o);
 					failedAt(undefined);
-					if (onward) return { onward: failure };
+					if (onward) return { onward: failure, ticket };
 					if (call.live === true || settled === undefined || settled === "gaveUp")
 						return { ok: false, outcome: overloaded(route), failure };
 					if (!fresh) return { ok: false, outcome: notice("streamFailed", failure), failure };
 					again = true;
+					last = { onward: failure, ticket };
 					continue;
 				}
 				this.settle(route, ticket, "failed", undefined, o);
 				const disposition = route.kind.failure(failure, route.view);
 				failedAt(disposition);
 				if (!fresh) {
-					if (onward && disposition.act !== "stop") return { onward: failure };
-					return this.ended(route, failure, notice("streamFailed", failure), o);
+					if (onward && disposition.act !== "stop") return { onward: failure, ticket };
+					return this.ended(route, failure, notice("streamFailed", failure), o, ticket);
 				}
 				if (disposition.act !== "retry") {
-					if (onward && disposition.act === "fallThrough") return { onward: failure };
+					if (onward && disposition.act === "fallThrough") return { onward: failure, ticket };
 					return this.ended(
 						route,
 						failure,
 						await this.noticeFor(disposition.notice, failure, route, call.signal, o),
 						o,
+						ticket,
 					);
 				}
 				const waitMs =
 					call.live === true && attempt >= LIVE_TRIES ? undefined : this.retry.wait(failure, attempt, waited);
 				if (waitMs === undefined) {
-					if (onward) return { onward: failure };
-					return this.ended(route, failure, notice("retriesExhausted", failure), o);
+					if (onward) return { onward: failure, ticket };
+					return this.ended(route, failure, notice("retriesExhausted", failure), o, ticket);
 				}
 				trace(o, () => ({
 					kind: "retry",
@@ -399,6 +404,7 @@ export class RequestLifecycle {
 				o.onRetry?.(attempt, waitMs, failure.status);
 				attempt++;
 				waited += waitMs;
+				last = { onward: failure, ticket };
 				try {
 					await this.d.scheduler.sleep(waitMs, call.signal);
 				} catch (sleepError) {
@@ -409,17 +415,29 @@ export class RequestLifecycle {
 		}
 	}
 
-	private ended(route: Resolved, failure: Failure, outcome: Ended, o: Observer): Attempt<never> {
-		this.failed(route, failure, false, o);
+	private ended(
+		route: Resolved,
+		failure: Failure,
+		outcome: Ended,
+		o: Observer,
+		ticket: Ticket | undefined,
+	): Attempt<never> {
+		this.failed(route, failure, false, o, ticket);
 		return { ok: false, outcome, failure };
 	}
 
 	/** Tells the gate a route failed. */
-	private failed(route: Resolved, failure: Failure, onward: boolean, o: Observer): void {
+	private failed(route: Resolved, failure: Failure, onward: boolean, o: Observer, ticket: Ticket | undefined): void {
 		const { gate } = this.d;
 		if (gate === undefined) return;
-		gate.failed(route, failure, onward);
-		trace(o, () => ({ kind: "gateFailed", entry: route.entry.id, failure, onward }));
+		const dropped = gate.failed(route, failure, onward, ticket);
+		trace(o, () => ({
+			kind: "gateFailed",
+			entry: route.entry.id,
+			failure,
+			onward,
+			...(dropped ? { dropped: true } : {}),
+		}));
 	}
 
 	/** Tells the gate a reply's billing. */
@@ -429,19 +447,21 @@ export class RequestLifecycle {
 		run: Set<string> | undefined,
 		reply: "ok" | "failed",
 		o: Observer,
+		ticket: Ticket | undefined,
 	): void {
 		const { gate } = this.d;
 		if (gate === undefined) return;
-		gate.served(route, usage, run);
+		const dropped = gate.served(route, usage, run, ticket);
 		trace(o, () => ({
 			kind: "billing",
 			entry: route.entry.id,
 			reply,
 			...(usage === undefined ? {} : { usage }),
+			...(dropped ? { dropped: true } : {}),
 		}));
 	}
 
-	private async metered<T>(route: Resolved, call: Call<T>, o: Observer): Promise<T> {
+	private async metered<T>(route: Resolved, call: Call<T>, o: Observer, ticket: Ticket | undefined): Promise<T> {
 		const { meter, scheduler } = this.d;
 		if (meter === undefined) return call.send(route, () => {});
 		const { view } = route;
@@ -462,7 +482,7 @@ export class RequestLifecycle {
 					...defined(fields),
 				};
 				trace(o, () => ({ kind: "metered", call: metered }));
-				meter.called(metered);
+				meter.called(metered, ticket);
 			} catch {
 				// Metering cannot alter outcomes.
 			}

@@ -82,7 +82,8 @@
 					},
 					"hosts": [
 						"alpha"
-					]
+					],
+					"dataKept": true
 				}
 			]
 		]

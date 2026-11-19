@@ -372,6 +372,19 @@ export const gateCases: CaseSource[] = [
 	// Cooling.
 	run("cool-pauses-an-open-gate", [cool(), admit("w"), advance(MINUTE), settle("w", "ok")]),
 	run("cool-with-a-retry-after", [cool(LUNA, 3 * MINUTE), admit("w"), advance(2 * MINUTE), advance(MINUTE)]),
+	run("cool-with-a-retry-after-of-a-thousand-days", [
+		cool(LUNA, 1000 * 24 * 60 * MINUTE),
+		admit("w"),
+		advance(60 * MINUTE - 1),
+		advance(1),
+	]),
+	run("overload-with-a-retry-after-of-a-thousand-days", [
+		admit("trigger"),
+		settle("trigger", "overloaded", 1000 * 24 * 60 * MINUTE),
+		admit("w"),
+		advance(60 * MINUTE - 1),
+		advance(1),
+	]),
 	run("cool-leaves-a-paused-gate-alone", [
 		...overloaded(),
 		advance(30_000),

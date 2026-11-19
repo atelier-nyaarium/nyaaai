@@ -192,6 +192,26 @@ export const catalogJoinCases: CaseSource[] = [
 		[pass("chat", false)],
 	),
 	join(
+		"join-zdr-off-marks-data-kept-when-a-host-is-not-zdr-and-zdr-on-does-not",
+		[LUNA],
+		listing(
+			one({
+				context_length: 500_000,
+				pricing: { prompt: "0.0000002", completion: "0.000001" },
+				supported_parameters: PARAMS,
+			}),
+		),
+		listing(host({ tag: "alpha", supported_parameters: PARAMS, pricing: PRICES })),
+		[pass("chat", true), pass("chat", false)],
+	),
+	join(
+		"join-zdr-off-leaves-data-kept-unset-when-every-usable-host-is-zdr",
+		[LUNA],
+		listing(one({ context_length: 500_000, supported_parameters: [] })),
+		listing(host({ tag: "alpha", supported_parameters: PARAMS, pricing: PRICES })),
+		[pass("chat", true), pass("chat", false)],
+	),
+	join(
 		"join-drift-in-optional-fields-reads-as-absent",
 		[LUNA],
 		listing(

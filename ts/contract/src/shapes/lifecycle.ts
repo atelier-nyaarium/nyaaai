@@ -44,6 +44,8 @@ export const TraceEntry = z.discriminatedUnion("kind", [
 		entry: z.string(),
 		reply: z.enum(["ok", "failed"]),
 		usage: NormalizedUsage.exactOptional(),
+		/** The request began before its entry changed, so the gate did nothing with it. */
+		dropped: z.boolean().exactOptional(),
 	}),
 	/** A send failed. `disposition` is absent for an overload; `fresh` is false after streamed output. */
 	z.object({
@@ -64,7 +66,14 @@ export const TraceEntry = z.discriminatedUnion("kind", [
 		answer: GateSettled,
 	}),
 	/** The gate was told a route failed. */
-	z.object({ kind: z.literal("gateFailed"), entry: z.string(), failure: Failure, onward: z.boolean() }),
+	z.object({
+		kind: z.literal("gateFailed"),
+		entry: z.string(),
+		failure: Failure,
+		onward: z.boolean(),
+		/** The request began before its entry changed, so the gate did nothing with it. */
+		dropped: z.boolean().exactOptional(),
+	}),
 	/** A wait before the next try, and why it is that long. */
 	z.object({
 		kind: z.literal("retry"),

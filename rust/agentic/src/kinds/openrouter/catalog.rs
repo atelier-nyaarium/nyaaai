@@ -603,7 +603,7 @@ fn join_row(
         })
         .filter(|tag| !tag.is_empty())
         .collect();
-    if !hosts.iter().any(|at| *at < zdr.len()) {
+    if hosts.is_empty() || !hosts.iter().all(|at| *at < zdr.len()) {
         view.data_kept = Some(());
     }
     view

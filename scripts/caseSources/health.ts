@@ -171,6 +171,17 @@ export const healthCases: CaseSource[] = [
 		keys: { main: { kind: "unready" } },
 		steps: [check("main")],
 	}),
+	run("a-store-that-cannot-be-read-leaves-a-url-kind-checked-without-a-key", {
+		entries: [BOX],
+		keys: { box: { kind: "unready" } },
+		exchanges: [BOX_OK],
+		steps: [check("box"), keysOf("box")],
+	}),
+	run("a-store-that-cannot-be-read-still-holds-a-key-kind-out", {
+		entries: [MAIN],
+		keys: { main: { kind: "unready" } },
+		steps: [check("main"), keysOf("main")],
+	}),
 	run("a-store-that-refuses-the-key-shows-rejected", {
 		entries: [MAIN],
 		keys: { main: { kind: "refused" } },
@@ -435,8 +446,9 @@ export const healthCases: CaseSource[] = [
 		entries: [GO],
 		steps: [
 			balance(),
-			failed(GO, failure("unavailable", { retryAfterMs: 10 * HOUR }), true, "x/held"),
-			advance(150 * MINUTE),
+			advance(100 * MINUTE),
+			failed(GO, failure("unavailable", { retryAfterMs: HOUR }), true, "x/held"),
+			advance(50 * MINUTE),
 			tryAdmit("refused", GO, "x/held"),
 			deferred(GO),
 			tryAdmit("probe", GO),

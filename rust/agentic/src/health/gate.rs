@@ -29,6 +29,9 @@ const PAUSE_MS: i64 = 60_000;
 
 const MAX_PAUSES: u64 = 10;
 
+/// A server's asked wait stops here.
+const MAX_PAUSE_MS: i64 = 60 * 60_000;
+
 /// Where a model's gate stands.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Phase {
@@ -236,7 +239,10 @@ impl Machine<'_> {
     }
 
     fn pause(&mut self, at: usize, retry_after_ms: Option<i64>) {
-        let wait = self.core.pause_ms.max(retry_after_ms.unwrap_or(0));
+        let wait = self
+            .core
+            .pause_ms
+            .max(retry_after_ms.unwrap_or(0).min(MAX_PAUSE_MS));
         self.state.epoch += 1;
         let epoch = self.state.epoch;
         let model = &mut self.state.models[at];

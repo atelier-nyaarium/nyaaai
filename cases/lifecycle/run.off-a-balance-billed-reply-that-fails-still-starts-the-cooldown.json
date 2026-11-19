@@ -171,7 +171,9 @@
 							"next": 1794061800000,
 							"probe": null
 						},
-						"waiting": []
+						"waiting": [
+							"openai/gpt-6-luna"
+						]
 					},
 					{
 						"entry": "b",
@@ -211,7 +213,9 @@
 							"next": 1794061800000,
 							"probe": null
 						},
-						"waiting": []
+						"waiting": [
+							"openai/gpt-6-luna"
+						]
 					},
 					{
 						"entry": "b",
@@ -232,7 +236,7 @@
 				"call": "first",
 				"result": {
 					"kind": "served",
-					"entry": "go",
+					"entry": "b",
 					"reply": {
 						"parts": [
 							{
@@ -247,6 +251,7 @@
 							"cost": 0.001
 						},
 						"serving": {
+							"host": "Azure",
 							"generationId": "gen-1"
 						}
 					}
@@ -347,13 +352,38 @@
 						"status": "stream"
 					},
 					{
-						"kind": "admitted",
+						"kind": "gateFailed",
 						"entry": "go",
+						"failure": {
+							"category": "unavailable",
+							"status": "stream",
+							"message": "Down",
+							"billed": {
+								"usage": {
+									"input": 100,
+									"output": 10,
+									"cost": 0.001,
+									"billingSource": "balance"
+								}
+							}
+						},
+						"onward": true
+					},
+					{
+						"kind": "skip",
+						"cause": "fellThrough",
+						"entry": "go",
+						"label": "Go",
+						"reason": "unavailable"
+					},
+					{
+						"kind": "admitted",
+						"entry": "b",
 						"admission": {
 							"kind": "go",
 							"ticket": {
 								"gate": "gate-1",
-								"model": "go\nopenai/gpt-6-luna",
+								"model": "b\nopenai/gpt-6-luna",
 								"generation": 0,
 								"probe": false,
 								"serial": 2
@@ -362,9 +392,9 @@
 					},
 					{
 						"kind": "attempt",
-						"entry": "go",
+						"entry": "b",
 						"model": "openai/gpt-6-luna",
-						"attempt": 2,
+						"attempt": 1,
 						"live": false,
 						"again": false
 					},
@@ -375,8 +405,8 @@
 								"feature": "chat"
 							},
 							"model": "openai/gpt-6-luna",
-							"entry": "go",
-							"label": "Go",
+							"entry": "b",
+							"label": "Beta",
 							"at": 1794052801000,
 							"ms": 0,
 							"firstTokenMs": 0,
@@ -389,19 +419,20 @@
 								"usd": 0.001,
 								"estimated": false
 							},
+							"provider": "Azure",
 							"generationId": "gen-1",
 							"finishReason": "stop"
 						}
 					},
 					{
 						"kind": "settled",
-						"entry": "go",
+						"entry": "b",
 						"outcome": "ok",
 						"answer": "done"
 					},
 					{
 						"kind": "billing",
-						"entry": "go",
+						"entry": "b",
 						"reply": "ok",
 						"usage": {
 							"input": 100,
@@ -411,8 +442,8 @@
 					},
 					{
 						"kind": "served",
-						"entry": "go",
-						"label": "Go",
+						"entry": "b",
+						"label": "Beta",
 						"model": "openai/gpt-6-luna"
 					}
 				],
@@ -422,6 +453,12 @@
 						"attempt": 1,
 						"waitMs": 1000,
 						"status": "stream"
+					},
+					{
+						"kind": "skip",
+						"entry": "go",
+						"label": "Go",
+						"reason": "unavailable"
 					}
 				],
 				"attempts": [
@@ -430,11 +467,12 @@
 						"events": []
 					},
 					{
-						"entry": "go",
+						"entry": "b",
 						"events": [
 							{
 								"kind": "serving",
 								"serving": {
+									"host": "Azure",
 									"generationId": "gen-1"
 								}
 							},
@@ -620,7 +658,7 @@
 				"accept": "text/event-stream"
 			},
 			{
-				"url": "https://opencode.ai/inference/go/openai/v1/chat/completions",
+				"url": "https://openrouter.ai/api/v1/chat/completions",
 				"authorization": "Bearer fake-key-one",
 				"accept": "text/event-stream"
 			},
@@ -657,8 +695,8 @@
 					"feature": "chat"
 				},
 				"model": "openai/gpt-6-luna",
-				"entry": "go",
-				"label": "Go",
+				"entry": "b",
+				"label": "Beta",
 				"at": 1794052801000,
 				"ms": 0,
 				"firstTokenMs": 0,
@@ -671,6 +709,7 @@
 					"usd": 0.001,
 					"estimated": false
 				},
+				"provider": "Azure",
 				"generationId": "gen-1",
 				"finishReason": "stop"
 			},

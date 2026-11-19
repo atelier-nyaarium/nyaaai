@@ -104,6 +104,9 @@ const RANK: Record<Refusal, number> = {
 	keyMissing: 6,
 };
 
+/** A later entry's view is waited for this long. */
+const LATER_VIEW_MS = 2000;
+
 ////////////////////////////////
 //  Functions & Helpers
 
@@ -387,7 +390,9 @@ export class ModelResolver {
 				worst = raised(worst, "unreachable", undefined, entry.label);
 				continue;
 			}
-			const view = await this.viewOf(held.route, row, use, zdrOnly);
+			const asked = this.viewOf(held.route, row, use, zdrOnly);
+			// A later entry's cold catalog does not hold the answer.
+			const view = found.length > 0 && all ? await this.within(asked, held.deps) : await asked;
 			if (view === undefined || !usable(view)) {
 				worst = raised(worst, refusalOf(view), view, entry.label);
 				continue;
@@ -423,6 +428,20 @@ export class ModelResolver {
 			return this.held(entry);
 		} catch {
 			return undefined;
+		}
+	}
+
+	/** The view, or none once the wait ends; the read goes on. */
+	private async within(read: Promise<ModelView | undefined>, deps: KindDeps): Promise<ModelView | undefined> {
+		let cancel = () => {};
+		const late = new Promise<undefined>((resolve) => {
+			cancel = deps.scheduler.schedule(LATER_VIEW_MS, () => resolve(undefined));
+		});
+		read.catch(() => undefined);
+		try {
+			return await Promise.race([read, late]);
+		} finally {
+			cancel();
 		}
 	}
 

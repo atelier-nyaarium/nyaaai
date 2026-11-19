@@ -1,0 +1,141 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.exchange",
+	"name": "cap-a-stream-with-a-comment-after-each-data-line",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"baseUrl": "https://openrouter.ai/api/v1",
+		"label": "OpenRouter",
+		"userAgent": "lab-app/1.0",
+		"keys": [
+			"fake-key-one"
+		],
+		"startMs": 1800000000000,
+		"script": {
+			"kind": "inline",
+			"exchanges": [
+				{
+					"status": 200,
+					"headers": [
+						[
+							"content-type",
+							"text/event-stream"
+						]
+					],
+					"chunks": [
+						{
+							"kind": "text",
+							"text": "data: aaaaaaaaaaaaaa\n:k\n"
+						},
+						{
+							"kind": "text",
+							"text": "data: aaaaaaaaaaaaaa\n:k\n"
+						},
+						{
+							"kind": "text",
+							"text": "data: aaaaaaaaaaaaaa\n:k\n"
+						},
+						{
+							"kind": "text",
+							"text": "data: aaaaaaaaaaaaaa\n:k\n"
+						},
+						{
+							"kind": "text",
+							"text": "data: aaaaaaaaaaaaaa\n:k\n"
+						},
+						{
+							"kind": "text",
+							"text": "data: aaaaaaaaaaaaaa\n:k\n"
+						},
+						{
+							"kind": "text",
+							"text": "data: aaaaaaaaaaaaaa\n:k\n"
+						},
+						{
+							"kind": "text",
+							"text": "data: aaaaaaaaaaaaaa\n:k\n"
+						}
+					]
+				}
+			]
+		},
+		"calls": [
+			{
+				"kind": "stream",
+				"request": {
+					"model": "openai/gpt-6-luna",
+					"system": [],
+					"history": [
+						{
+							"role": "user",
+							"text": "Hi"
+						}
+					],
+					"cache": {
+						"kind": "none"
+					},
+					"session": "root-1",
+					"zdrOnly": true
+				}
+			}
+		],
+		"maxBytes": 100
+	},
+	"expected": {
+		"calls": [
+			{
+				"events": [],
+				"result": null,
+				"answer": null,
+				"failure": {
+					"category": "stream",
+					"status": "stream",
+					"message": "A stream event is larger than 100 bytes."
+				},
+				"thrown": null,
+				"aborted": false,
+				"nowMs": 1800000000000
+			}
+		],
+		"requests": [
+			{
+				"method": "POST",
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"headers": [
+					[
+						"Content-Type",
+						"application/json"
+					],
+					[
+						"Accept",
+						"text/event-stream"
+					],
+					[
+						"Authorization",
+						"Bearer fake-key-one"
+					],
+					[
+						"User-Agent",
+						"lab-app/1.0"
+					]
+				],
+				"body": "{\"model\":\"openai/gpt-6-luna\",\"messages\":[{\"role\":\"user\",\"content\":\"Hi\"}],\"stream\":true,\"session_id\":\"root-1\",\"provider\":{\"zdr\":true,\"data_collection\":\"deny\",\"require_parameters\":true}}"
+			}
+		],
+		"log": [
+			"OpenRouter 200 - -"
+		],
+		"settled": [
+			"openai/gpt-6-luna"
+		],
+		"keyReads": 1,
+		"read": [
+			5
+		],
+		"waiting": []
+	}
+}

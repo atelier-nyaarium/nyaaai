@@ -1,0 +1,117 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.run",
+	"name": "a-store-that-cannot-be-read-leaves-a-url-kind-checked-without-a-key",
+	"input": {
+		"startMs": 2000000,
+		"entries": [
+			{
+				"id": "box",
+				"kind": "ollama",
+				"label": "Box",
+				"url": "http://lab.local:11434"
+			}
+		],
+		"keys": {
+			"box": {
+				"kind": "unready"
+			}
+		},
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"models": [
+						{
+							"name": "local-a:27b"
+						},
+						{
+							"name": "local-b:9b"
+						}
+					]
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "check",
+				"id": "box"
+			},
+			{
+				"kind": "keys",
+				"id": "box"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "box",
+						"changed": [
+							"key"
+						]
+					},
+					{
+						"entry": "box",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "box",
+						"key": {
+							"kind": "ok",
+							"models": 2
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 1,
+				"parked": []
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "keys",
+					"answer": {
+						"kind": "none"
+					}
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "box",
+						"key": {
+							"kind": "ok",
+							"models": 2
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 1,
+				"parked": []
+			}
+		],
+		"requests": [
+			"http://lab.local:11434/api/tags"
+		],
+		"waiting": []
+	}
+}

@@ -87,15 +87,24 @@ pub trait Gate: Send + Sync {
     /// Last-route refusal.
     fn blocked(&self, route: RouteRef<'_>, keep: Option<&HashSet<String>>) -> Option<Blocked>;
 
-    fn failed(&self, route: RouteRef<'_>, failure: &Failure, onward: bool);
+    /// The ticket the request held; true when the report was dropped, its request began before
+    /// the entry changed.
+    fn failed(
+        &self,
+        route: RouteRef<'_>,
+        failure: &Failure,
+        onward: bool,
+        ticket: Option<&Ticket>,
+    ) -> bool;
 
-    /// Balance replies join `run`.
+    /// Balance replies join `run`; true when the report was dropped as `failed` says.
     fn served(
         &self,
         route: RouteRef<'_>,
         usage: Option<&NormalizedUsage>,
         run: Option<&mut HashSet<String>>,
-    );
+        ticket: Option<&Ticket>,
+    ) -> bool;
 }
 
 /// One reply's billing.
@@ -151,6 +160,10 @@ struct State {
     /// Admitted tickets' entries, by the ticket's data.
     probes: HashMap<TicketKey, String>,
     identities: Vec<(String, Identity)>,
+    /// The newest serial a ticket has had.
+    last_serial: u64,
+    /// Per entry, the serial at its last invalidation; a ticket up to it began before.
+    floors: HashMap<String, u64>,
     /// Depth of the running changes whose telling waits for their end.
     batching: usize,
     pending: Vec<(String, Vec<Part>)>,
@@ -438,6 +451,10 @@ impl Core {
     }
 
     fn admitted(&self, id: &str, ticket: Ticket) {
+        {
+            let mut state = locked(&self.state);
+            state.last_serial = state.last_serial.max(ticket.serial);
+        }
         if !self.listed(id) {
             return;
         }
@@ -446,6 +463,14 @@ impl Core {
             .probes
             .insert(ticket_key(&ticket), id.to_owned());
         self.apply(id, PoolEvent::Admitted(PoolEventAdmitted { ticket }));
+    }
+
+    /// A request whose ticket came before the entry's last invalidation reports nothing.
+    fn began(&self, id: &str, ticket: Option<&Ticket>) -> bool {
+        let Some(ticket) = ticket else {
+            return false;
+        };
+        ticket.serial <= locked(&self.state).floors.get(id).copied().unwrap_or(0)
     }
 
     /// Extra usage or `keep` exempts balance.
@@ -548,7 +573,9 @@ impl Core {
         }
         let state = match answer {
             KeyAnswer::Refused => KeyState::Rejected(KeyStateRejected {}),
-            KeyAnswer::Unready => KeyState::Unreachable(KeyStateUnreachable {}),
+            KeyAnswer::Unready if kind.field() == KindField::Key => {
+                KeyState::Unreachable(KeyStateUnreachable {})
+            }
             held => {
                 let secret = match held {
                     KeyAnswer::Key(key) => Some(key),
@@ -592,6 +619,11 @@ impl Core {
     }
 
     fn invalidate(&self, id: &str, unbill: bool, identity: bool) {
+        {
+            let mut state = locked(&self.state);
+            let floor = state.last_serial;
+            state.floors.insert(id.to_owned(), floor);
+        }
         let _batch = self.batch();
         let status = {
             let mut state = locked(&self.state);
@@ -696,7 +728,12 @@ impl EntryKeys for HealthKeys {
             if let Some(standing) = core.standing(&entry) {
                 return standing;
             }
-            core.keys.get(&id).await
+            let answer = core.keys.get(&id).await;
+            // A URL kind needs no key, so an unreadable store is no key.
+            if answer == KeyAnswer::Unready && core.by_url(&entry) {
+                return KeyAnswer::None;
+            }
+            answer
         })));
         Box::pin(async move { work.await.unwrap_or(KeyAnswer::Unready) })
     }
@@ -821,8 +858,8 @@ impl ProviderHealth {
     }
 
     /// Accumulates reply billing.
-    pub fn billed(&self, id: &str, reply: &Billing) {
-        if !self.core.listed(id) {
+    pub fn billed(&self, id: &str, reply: &Billing, ticket: Option<&Ticket>) {
+        if !self.core.listed(id) || self.core.began(id, ticket) {
             return;
         }
         {
@@ -901,6 +938,7 @@ impl ProviderHealth {
             state.bills.clear();
             state.pools.clear();
             state.probes.clear();
+            state.floors.clear();
             held
         };
         for status in statuses {
@@ -975,33 +1013,47 @@ impl Gate for ProviderHealth {
         route: RouteRef<'_>,
         usage: Option<&NormalizedUsage>,
         run: Option<&mut HashSet<String>>,
-    ) {
+        ticket: Option<&Ticket>,
+    ) -> bool {
+        let dropped = self.core.began(&route.entry.id, ticket);
         let Some(source) = usage.and_then(|held| held.billing_source.clone()) else {
-            return;
+            return dropped;
         };
         // Settings may change mid-request.
         let entry = self
             .core
             .entry_of(&route.entry.id)
             .unwrap_or_else(|| route.entry.clone());
-        self.core.apply(
-            &entry.id,
-            PoolEvent::Billed(PoolEventBilled {
-                source: source.clone(),
-                plan: entry.plan.map(|plan| plan.as_str().to_owned()),
-                extra_usage: entry.extra_usage == Some(true),
-            }),
-        );
+        if !dropped {
+            self.core.apply(
+                &entry.id,
+                PoolEvent::Billed(PoolEventBilled {
+                    source: source.clone(),
+                    plan: entry.plan.map(|plan| plan.as_str().to_owned()),
+                    extra_usage: entry.extra_usage == Some(true),
+                }),
+            );
+        }
         if source == "balance"
             && let Some(run) = run
         {
             run.insert(entry.id);
         }
+        dropped
     }
 
-    fn failed(&self, route: RouteRef<'_>, failure: &Failure, onward: bool) {
+    fn failed(
+        &self,
+        route: RouteRef<'_>,
+        failure: &Failure,
+        onward: bool,
+        ticket: Option<&Ticket>,
+    ) -> bool {
         let core = &self.core;
         let entry = route.entry;
+        if core.began(&entry.id, ticket) {
+            return true;
+        }
         let _batch = core.batch();
         match failure.category {
             FailureCategory::KeyRejected => {
@@ -1039,5 +1091,6 @@ impl Gate for ProviderHealth {
                 }
             }
         }
+        false
     }
 }

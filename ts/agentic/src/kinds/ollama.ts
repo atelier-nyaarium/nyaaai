@@ -2,7 +2,7 @@
 
 import { numberOfText } from "@nyaaai/contract/number";
 import { isSpace } from "@nyaaai/contract/text";
-import { joinAll } from "./join";
+import { firstDistinct, joinLimited, MAX_LISTED } from "./join";
 import { effortsOf, itemsOf, type LocalModel, type LocalServer, type LocalTransport } from "./local/catalog";
 import { localKind } from "./local/kind";
 import { fieldOf, fieldsOf, objectField, positiveField, textField, textsField } from "./readers";
@@ -115,13 +115,14 @@ export function runningOf(raw: unknown): Map<string, number> {
 	return contexts;
 }
 
-export function server(transport: LocalTransport): LocalServer {
+export function server(transport: LocalTransport, maxListed = MAX_LISTED): LocalServer {
 	return {
 		models: async (known, signal) => {
-			const tags = localTags(await transport.getJson("/api/tags", signal, "none"));
-			if (tags === undefined) throw new Error("The model list did not parse.");
+			const listing = localTags(await transport.getJson("/api/tags", signal, "none"));
+			if (listing === undefined) throw new Error("The model list did not parse.");
+			const tags = firstDistinct(listing, (tag) => tag, maxListed);
 			const last = new Map(known.map((model) => [model.tag, model]));
-			const shown = await joinAll(
+			const shown = await joinLimited(
 				tags.map(
 					(tag) => () =>
 						transport.postJson("/api/show", { model: tag }, signal, "none").then(

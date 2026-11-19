@@ -98,8 +98,18 @@ const LifeSend = z.object({
 	abortedBefore: z.boolean().exactOptional(),
 });
 
+/** A change of the entries or their keys. */
+const LifeChange = z.discriminatedUnion("kind", [
+	/** The list changes, and tells. */
+	z.object({ kind: z.literal("list"), entries: z.array(ProviderEntry) }),
+	/** The store's key changes, and tells. */
+	z.object({ kind: z.literal("key"), id: z.string(), answer: LifeKeyAnswer }),
+]);
+
 const LifeStep = z.discriminatedUnion("kind", [
 	LifeSend,
+	/** A change made when the wheel reaches this much time from now, so it can land inside a request. */
+	z.object({ kind: z.literal("later"), ms: z.int().min(0), change: LifeChange }),
 	/** Resolves a model and holds the routes under a name. */
 	z.object({ kind: z.literal("plan"), name: z.string(), model: z.string(), use: ModelUse.exactOptional() }),
 	/** Begins a `RunRoute`. */
@@ -234,7 +244,18 @@ interface Slot {
 //  Group
 
 export const lifecycle = caseGroup("lifecycle", {
-	shapes: { LifeKeyAnswer, LifeReply, LifeListing, LifeStep, LifeAnswer, LifeResult, LifeTold, LifeCall, LifeSeen },
+	shapes: {
+		LifeKeyAnswer,
+		LifeReply,
+		LifeListing,
+		LifeChange,
+		LifeStep,
+		LifeAnswer,
+		LifeResult,
+		LifeTold,
+		LifeCall,
+		LifeSeen,
+	},
 	kinds: {
 		/** A request lifecycle over real health and gate, scripted ports and network; each step runs calls until ended or parked. */
 		run: kind(
@@ -420,8 +441,8 @@ export const lifecycle = caseGroup("lifecycle", {
 					settle: (ticket, outcome, retryAfterMs) => health.settle(ticket, outcome, retryAfterMs),
 					deferred: (route, keep) => health.deferred(route, keep),
 					blocked: (route, keep) => health.blocked(route, keep),
-					failed: (route, failure, onward) => health.failed(route, failure, onward),
-					served: (route, billed, run) => health.served(route, billed, run),
+					failed: (route, failure, onward, ticket) => health.failed(route, failure, onward, ticket),
+					served: (route, billed, run, ticket) => health.served(route, billed, run, ticket),
 				};
 
 				const stats: Array<{ id: string; generationId: string; call: z.infer<typeof MeteredCall> }> = [];
@@ -575,6 +596,16 @@ export const lifecycle = caseGroup("lifecycle", {
 					})();
 				};
 
+				let later = 0;
+				const relist = (entries: Array<z.infer<typeof ProviderEntry>>) => {
+					for (const entry of entries) name(entry.id);
+					list.set(entries);
+				};
+				const rekey = (id: string, answer: z.infer<typeof LifeKeyAnswer>) => {
+					name(id);
+					scriptedKeys.set(id, answer);
+				};
+
 				const stepOuts: Array<{
 					nowMs: number;
 					answer: z.infer<typeof LifeAnswer>;
@@ -615,12 +646,16 @@ export const lifecycle = caseGroup("lifecycle", {
 						wheel.advance(step.ms);
 					} else if (step.kind === "abort") {
 						slots.get(step.call)?.controller.abort(new Error(CALLER_REASON));
+					} else if (step.kind === "later") {
+						later += 1;
+						const change = step.change;
+						wheel.after(step.ms, `later-${later}`, () =>
+							change.kind === "list" ? relist(change.entries) : rekey(change.id, change.answer),
+						);
 					} else if (step.kind === "list") {
-						for (const entry of step.entries) name(entry.id);
-						list.set(step.entries);
+						relist(step.entries);
 					} else if (step.kind === "key") {
-						name(step.id);
-						scriptedKeys.set(step.id, step.answer);
+						rekey(step.id, step.answer);
 					} else if (step.kind === "zdr") {
 						zdr = step.on;
 					} else if (step.kind === "check") {

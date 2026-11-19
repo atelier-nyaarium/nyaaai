@@ -9,7 +9,7 @@ use nyaaai_contract::number::number_of_text;
 use nyaaai_contract::shapes::provider::ProviderKindName;
 use nyaaai_contract::text::is_space;
 
-use super::join::join_all;
+use super::join::{MAX_LISTED, READS_AT_ONCE, first_distinct, join_limited, ok};
 use super::local::catalog::{
     Loaded, LocalModel, LocalServer, Think, body_of, efforts_of, items_of, put_loaded,
 };
@@ -188,6 +188,7 @@ async fn show(
 
 struct OllamaServer {
     transport: Arc<Transport>,
+    max_listed: usize,
 }
 
 impl LocalServer for OllamaServer {
@@ -206,11 +207,12 @@ impl LocalServer for OllamaServer {
                     "The model list did not parse.".to_owned(),
                 ));
             };
-            let shown = join_all(
-                tags.iter()
-                    .map(|tag| show(&self.transport, tag, known, cancel)),
-            )
-            .await;
+            let tags = first_distinct(tags, Clone::clone, self.max_listed);
+            let reads: Vec<_> = tags
+                .iter()
+                .map(|tag| ok(show(&self.transport, tag, known, cancel)))
+                .collect();
+            let shown = join_limited(reads, READS_AT_ONCE).await.unwrap_or_default();
             Ok(shown.into_iter().flatten().collect())
         })
     }
@@ -235,7 +237,15 @@ impl LocalServer for OllamaServer {
 }
 
 pub fn server(transport: Arc<Transport>) -> Arc<dyn LocalServer> {
-    Arc::new(OllamaServer { transport })
+    server_limited(transport, MAX_LISTED)
+}
+
+/// A server that reads at most `max_listed` distinct tags of a listing.
+pub fn server_limited(transport: Arc<Transport>, max_listed: usize) -> Arc<dyn LocalServer> {
+    Arc::new(OllamaServer {
+        transport,
+        max_listed,
+    })
 }
 
 pub static OLLAMA: LazyLock<Arc<LocalKind>> = LazyLock::new(|| {

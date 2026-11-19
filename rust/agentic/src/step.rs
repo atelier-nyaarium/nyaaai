@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use nyaaai_contract::json::number_to_string;
 use nyaaai_contract::shapes::step::{
     FailureBilled, FailureCategory, FinishReason, NormalizedUsage, ReplyPart, ReplyPartCall,
-    Serving, StepEvent, StepEventCall, StepResult, TextPart, ThoughtPart, ThoughtPartSegmentsItem,
+    Serving, StepEvent, StepEventCall, StepResult, TextPart, ThoughtPart,
 };
 use nyaaai_contract::text::trim_text;
 
@@ -52,53 +52,35 @@ pub fn reply_thoughts(result: &StepResult) -> Vec<ThoughtPart> {
         .collect()
 }
 
-/// Joins matching seam segments unless split.
-fn joined_segments(
-    left: &[ThoughtPartSegmentsItem],
-    right: &[ThoughtPartSegmentsItem],
-    split: bool,
-) -> Vec<ThoughtPartSegmentsItem> {
-    let mut out = left.to_vec();
-    if !split
-        && let (Some(last), Some(first)) = (left.last(), right.first())
-        && last.kind == first.kind
+/// Adds the delta's segments to the thought, joining at the seam unless split; fields replace.
+fn merge_thought(into: &mut ThoughtPart, part: &ThoughtPart, split: bool) {
+    if let Some((first, rest)) = part
+        .segments
+        .as_deref()
+        .and_then(|segments| segments.split_first())
     {
-        let seam = out.len() - 1;
-        out[seam].text.push_str(&first.text);
-        out.extend_from_slice(&right[1..]);
-        return out;
-    }
-    out.extend_from_slice(right);
-    out
-}
-
-/// Text appends; fields replace.
-fn merged_thought(into: &ThoughtPart, part: &ThoughtPart, split: bool) -> ThoughtPart {
-    let segments = joined_segments(
-        into.segments.as_deref().unwrap_or(&[]),
-        part.segments.as_deref().unwrap_or(&[]),
-        split,
-    );
-    let mut out = into.clone();
-    if !segments.is_empty() {
-        out.segments = Some(segments);
+        let held = into.segments.get_or_insert_with(Vec::new);
+        match held.last_mut() {
+            Some(last) if !split && last.kind == first.kind => last.text.push_str(&first.text),
+            _ => held.push(first.clone()),
+        }
+        held.extend_from_slice(rest);
     }
     if part.opaque.is_some() {
-        out.opaque.clone_from(&part.opaque);
+        into.opaque.clone_from(&part.opaque);
     }
     if part.id.is_some() {
-        out.id.clone_from(&part.id);
+        into.id.clone_from(&part.id);
     }
     if part.format.is_some() {
-        out.format.clone_from(&part.format);
+        into.format.clone_from(&part.format);
     }
     if part.index.is_some() {
-        out.index = part.index;
+        into.index = part.index;
     }
     if part.anchor.is_some() {
-        out.anchor.clone_from(&part.anchor);
+        into.anchor.clone_from(&part.anchor);
     }
-    out
 }
 
 /// Map key: zero has one spelling.
@@ -258,10 +240,9 @@ impl StepAssembler {
             Some(block) => self.keyed(block, part),
         };
         if let Some(at) = at
-            && let Some(ReplyPart::Thought(known)) = self.parts.get(at)
+            && let Some(ReplyPart::Thought(known)) = self.parts.get_mut(at)
         {
-            let merged = merged_thought(known, part, split == Some(true));
-            self.parts[at] = ReplyPart::Thought(merged);
+            merge_thought(known, part, split == Some(true));
             return;
         }
         match block {
@@ -315,43 +296,36 @@ impl StepAssembler {
         }
         self.seen = true;
         let key = index_key(event.index);
-        let known = match self.calls.get(&key).map(|at| (*at, &self.parts[*at])) {
-            Some((at, ReplyPart::Call(known))) => Some((at, known)),
-            _ => None,
-        };
-        let Some((at, known)) = known else {
-            self.calls.insert(key, self.parts.len());
-            self.parts.push(ReplyPart::Call(ReplyPartCall {
-                index: event.index,
-                wire_id: event.wire_id.clone(),
-                name: event.name.clone(),
-                arguments_text: event.arguments_text.clone(),
-            }));
-            return Ok(());
-        };
-        if !known.wire_id.is_empty() && !event.wire_id.is_empty() && known.wire_id != event.wire_id
+        let at = self.calls.get(&key).copied();
+        if let Some(at) = at
+            && let Some(ReplyPart::Call(known)) = self.parts.get_mut(at)
         {
-            return Err(failed(
-                FailureCategory::Stream,
-                "Two tool calls shared an index.",
-                FailureExtra::default(),
-            ));
+            if !known.wire_id.is_empty()
+                && !event.wire_id.is_empty()
+                && known.wire_id != event.wire_id
+            {
+                return Err(failed(
+                    FailureCategory::Stream,
+                    "Two tool calls shared an index.",
+                    FailureExtra::default(),
+                ));
+            }
+            if known.wire_id.is_empty() {
+                known.wire_id.clone_from(&event.wire_id);
+            }
+            if known.name.is_empty() {
+                known.name.clone_from(&event.name);
+            }
+            known.arguments_text.push_str(&event.arguments_text);
+            return Ok(());
         }
-        let merged = ReplyPartCall {
-            index: known.index,
-            wire_id: if known.wire_id.is_empty() {
-                event.wire_id.clone()
-            } else {
-                known.wire_id.clone()
-            },
-            name: if known.name.is_empty() {
-                event.name.clone()
-            } else {
-                known.name.clone()
-            },
-            arguments_text: format!("{}{}", known.arguments_text, event.arguments_text),
-        };
-        self.parts[at] = ReplyPart::Call(merged);
+        self.calls.insert(key, self.parts.len());
+        self.parts.push(ReplyPart::Call(ReplyPartCall {
+            index: event.index,
+            wire_id: event.wire_id.clone(),
+            name: event.name.clone(),
+            arguments_text: event.arguments_text.clone(),
+        }));
         Ok(())
     }
 }

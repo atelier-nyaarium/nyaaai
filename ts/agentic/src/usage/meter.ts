@@ -1,5 +1,6 @@
 // Model request metering: where a call's record, bill and stats go.
 
+import type { Ticket } from "@nyaaai/contract/shapes/health";
 import type { CallTag, MeteredCall } from "@nyaaai/contract/shapes/usage";
 import type { UsageSink } from "@nyaaai/contract/usageSink";
 import type { Billing, ProviderHealth } from "../health/health";
@@ -11,7 +12,8 @@ import type { Billing, ProviderHealth } from "../health/health";
 export type Feature = string;
 
 export interface Meter {
-	called(call: MeteredCall): void;
+	/** The ticket the request held, if the gate gave one. */
+	called(call: MeteredCall, ticket?: Ticket): void;
 }
 
 export interface MeterDeps {
@@ -37,7 +39,7 @@ export function onBehalfOf(tag: CallTag, lane: "title" | "summary"): CallTag {
 /** Records calls and billing. */
 export function providerMeter(d: MeterDeps): Meter {
 	return {
-		called: (call) => {
+		called: (call, ticket) => {
 			const id = d.usage.record(call);
 			if (id !== undefined && call.generationId !== undefined) d.stats(id, call.generationId, call);
 			const reply = call.usage;
@@ -46,7 +48,7 @@ export function providerMeter(d: MeterDeps): Meter {
 				const billing: Billing = { source };
 				if (reply?.allowance !== undefined) billing.allowance = reply.allowance;
 				if (reply?.cost !== undefined) billing.cost = reply.cost;
-				d.health.billed(call.entry, billing);
+				d.health.billed(call.entry, billing, ticket);
 			}
 		},
 	};

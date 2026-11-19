@@ -200,7 +200,38 @@ describe("consumer", () => {
 			bump(world.submodule);
 			expect(git(world.submodule, ["rev-parse", "HEAD"])).toBe(pushed);
 			link(world.consumer, world.submodule);
+			commitAll(world.consumer, "Move the pin");
 			expect(assertConsumer(world.consumer, world.submodule, true)).toEqual([]);
+		},
+		TIMEOUT,
+	);
+
+	it(
+		"package holds the submodule to the commit the consumer records",
+		() => {
+			const world = makeWorld();
+			link(world.consumer, world.submodule);
+			const recorded = git(world.submodule, ["rev-parse", "HEAD"]);
+			writeFileSync(path.join(world.local, "README.md"), "moved\n");
+			commitAll(world.local, "Move");
+			git(world.local, ["push", "origin", "main"]);
+			bump(world.submodule);
+
+			expect(failure(() => assertConsumer(world.consumer, world.submodule, true))).toContain("HEAD records");
+			expect(assertConsumer(world.consumer, world.submodule, false)).toEqual([]);
+
+			git(world.consumer, ["add", "nyaaai"]);
+			expect(failure(() => assertConsumer(world.consumer, world.submodule, true))).toContain("HEAD records");
+			git(world.consumer, ["commit", "-m", "Pin"]);
+			expect(assertConsumer(world.consumer, world.submodule, true)).toEqual([]);
+
+			git(world.submodule, ["checkout", "--detach", recorded]);
+			expect(failure(() => assertConsumer(world.consumer, world.submodule, true))).toContain("HEAD records");
+			git(world.submodule, ["checkout", "--detach", "origin/main"]);
+			git(world.consumer, ["update-index", "--cacheinfo", `160000,${recorded},nyaaai`]);
+			const refused = failure(() => assertConsumer(world.consumer, world.submodule, true));
+			expect(refused).toContain("index records");
+			expect(refused).not.toContain("HEAD records");
 		},
 		TIMEOUT,
 	);

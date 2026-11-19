@@ -394,11 +394,11 @@ async fn play(input: HealthRunInput) -> Outcome<HealthRunResult> {
                     allowance: None,
                 };
                 let keep = (held.keep == Some(true)).then_some(&mut run);
-                health.served(route_of(&held.route), Some(&usage), keep);
+                health.served(route_of(&held.route), Some(&usage), keep, None);
             }
             HealthRunInputStepsItem::Failed(held) => {
                 name(&named, &held.route.entry.id);
-                health.failed(route_of(&held.route), &held.failure, held.onward);
+                health.failed(route_of(&held.route), &held.failure, held.onward, None);
             }
             HealthRunInputStepsItem::Billed(held) => {
                 name(&named, &held.id);
@@ -409,6 +409,7 @@ async fn play(input: HealthRunInput) -> Outcome<HealthRunResult> {
                         allowance: held.reply.allowance,
                         cost: held.reply.cost,
                     },
+                    None,
                 );
             }
             HealthRunInputStepsItem::Deferred(held) => {
@@ -625,24 +626,30 @@ async fn ask(input: HealthKeysInput) -> Outcome<HealthKeysResult> {
                 health.check(id);
                 health.idle().await;
             }
-            HealthKeysInputRowsItemPrepare::Rejected => health.failed(
-                route,
-                &failure(
-                    FailureCategory::KeyRejected,
-                    FailureStatus::Number(401.0),
-                    "no",
-                ),
-                false,
-            ),
-            HealthKeysInputRowsItemPrepare::Unreachable => health.failed(
-                route,
-                &failure(
-                    FailureCategory::Network,
-                    FailureStatus::Text("network".to_owned()),
-                    "down",
-                ),
-                false,
-            ),
+            HealthKeysInputRowsItemPrepare::Rejected => {
+                health.failed(
+                    route,
+                    &failure(
+                        FailureCategory::KeyRejected,
+                        FailureStatus::Number(401.0),
+                        "no",
+                    ),
+                    false,
+                    None,
+                );
+            }
+            HealthKeysInputRowsItemPrepare::Unreachable => {
+                health.failed(
+                    route,
+                    &failure(
+                        FailureCategory::Network,
+                        FailureStatus::Text("network".to_owned()),
+                        "down",
+                    ),
+                    false,
+                    None,
+                );
+            }
         }
         if let Some(then) = &row.stored_then {
             *locked(&store.current) = answer_of(then);

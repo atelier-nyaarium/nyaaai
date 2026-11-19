@@ -23,6 +23,7 @@ import { caseGroup, casesFor, kind } from "@nyaaai/testkit/caseGroup";
 import { fakeScheduler, TimerWheel } from "@nyaaai/testkit/scheduler";
 import { scriptedEntryKeys, scriptedModelRegistry, scriptedProviderList } from "@nyaaai/testkit/scriptedPorts";
 import { resolverCases, resolverServedCases, resolverUseCases } from "../caseSources/resolver";
+import { resolverColdCases } from "../caseSources/resolverCold";
 import { resolverKeyCases } from "../caseSources/resolverKey";
 import { withUses } from "../caseSources/uses";
 import { rowOfKey } from "./catalogKit";
@@ -94,6 +95,17 @@ const RouteStep = () =>
 		...CALLS,
 		/** The catalog of an entry's route says it refreshed. */
 		z.object({ kind: z.literal("refreshed"), entry: z.string() }),
+		/** A cold catalog answers from now on, and the views waiting on it. */
+		z.object({ kind: z.literal("warm"), entry: z.string() }),
+		/** A `routes` call that meets a cold catalog, then the wheel runs this long. */
+		z.object({
+			kind: z.literal("after"),
+			ms: z.int().min(1),
+			model: z.string(),
+			use: ModelUse,
+			/** Entries whose catalogs answer once the wait is over, before the call is awaited. */
+			warmed: z.array(z.string()),
+		}),
 		/** The route of an entry is asked for directly. */
 		z.object({ kind: z.literal("route"), entry: ProviderEntry }),
 		z.object({ kind: z.literal("dispose") }),
@@ -105,14 +117,19 @@ const RouteStep = () =>
 		}),
 	]);
 
+const RoutesAnswer = () =>
+	z.object({
+		kind: z.literal("routes"),
+		unresolved: Unresolved.nullable(),
+		candidates: z.array(Candidate),
+		passed: z.array(Passed),
+	});
+
 const StepAnswer = () =>
 	z.discriminatedUnion("kind", [
-		z.object({
-			kind: z.literal("routes"),
-			unresolved: Unresolved.nullable(),
-			candidates: z.array(Candidate),
-			passed: z.array(Passed),
-		}),
+		RoutesAnswer(),
+		/** A `routes` call that met a cold catalog: the timers waiting one millisecond before its wait ended. */
+		z.object({ kind: z.literal("waited"), timers: z.int(), routes: RoutesAnswer() }),
 		z.object({ kind: z.literal("resolve"), unresolved: Unresolved.nullable(), candidate: Candidate.nullable() }),
 		z.object({
 			kind: z.literal("rows"),
@@ -458,6 +475,8 @@ export const resolver = caseGroup("resolver", {
 				kinds: z.array(ProviderKindName),
 				/** Each entry's catalog listing by row key; an unnamed row is `ok`. */
 				listings: z.record(z.string(), z.record(z.string(), Listing)),
+				/** Entries whose catalog answers no view until a `warm` step. */
+				cold: z.array(z.string()).exactOptional(),
 				/** Entries whose catalog fails when stopped. */
 				disposeFails: z.array(z.string()).exactOptional(),
 				/** The scheduler's first instant. */
@@ -508,6 +527,9 @@ export const resolver = caseGroup("resolver", {
 				const stopped: string[] = [];
 				const refreshed: Array<z.infer<typeof Via>> = [];
 				const refreshes = new Map<string, () => void>();
+				const cold = new Set(input.cold ?? []);
+				const waiting: Array<() => void> = [];
+				let asked = () => {};
 				const seen: Seen[] = [];
 				const host = echoHost(seen);
 				let zdr = input.zdrOnly;
@@ -525,8 +547,12 @@ export const resolver = caseGroup("resolver", {
 						catalog: (entry, _transport, deps) => {
 							refreshes.set(entry.id, deps.refreshed);
 							const catalog: EntryCatalog = {
-								views: async (_use, zdrOnly) =>
-									deps.rows.rows().flatMap((row): ModelView[] => {
+								views: async (_use, zdrOnly) => {
+									if (cold.has(entry.id)) {
+										asked();
+										await new Promise<void>((resolve) => waiting.push(resolve));
+									}
+									return deps.rows.rows().flatMap((row): ModelView[] => {
 										const bound = row.bindings[name] !== undefined;
 										const elsewhere =
 											row.identity.kind === "local" && row.identity.entry !== entry.id;
@@ -535,7 +561,8 @@ export const resolver = caseGroup("resolver", {
 										const status = zdrOnly ? held?.status : (held?.whenZdrOff ?? held?.status);
 										if (status === "unlisted") return [];
 										return [{ row, status: status ?? "ok", efforts: [], hosts: [] }];
-									}),
+									});
+								},
 								idle: async () => {},
 								dispose: () => {
 									stopped.push(labelOf(entry));
@@ -629,6 +656,27 @@ export const resolver = caseGroup("resolver", {
 						case "refreshed":
 							refreshes.get(step.entry)?.();
 							return { kind: "changed" };
+						case "warm":
+							cold.delete(step.entry);
+							for (const release of waiting.splice(0)) release();
+							await Promise.resolve();
+							return { kind: "changed" };
+						case "after": {
+							const arrived = new Promise<void>((resolve) => {
+								asked = resolve;
+							});
+							const call = called({ kind: "routes", model: step.model, use: step.use });
+							await Promise.race([arrived, call]);
+							wheel.advance(step.ms - 1);
+							const timers = wheel.waiting().length;
+							wheel.advance(1);
+							for (const entry of step.warmed) cold.delete(entry);
+							if (step.warmed.length > 0) for (const release of waiting.splice(0)) release();
+							const routes = await call;
+							asked = () => {};
+							if (routes.kind !== "routes") throw new Error("A routes call answers routes.");
+							return { kind: "waited", timers, routes };
+						}
 						case "route":
 							try {
 								resolver.route(step.entry);
@@ -694,5 +742,7 @@ export const resolver = caseGroup("resolver", {
 			},
 		),
 	},
-	sources: withUses(casesFor("resolver", resolverCases, resolverServedCases, resolverKeyCases, resolverUseCases)),
+	sources: withUses(
+		casesFor("resolver", resolverCases, resolverServedCases, resolverKeyCases, resolverUseCases, resolverColdCases),
+	),
 });

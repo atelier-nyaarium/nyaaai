@@ -1,15 +1,17 @@
 //! A provider kind for a server named by URL.
 
-use std::sync::Arc;
+use std::sync::{Arc, LazyLock};
 
 use nyaaai_contract::cancel::CancelToken;
 use nyaaai_contract::future::BoxFuture;
+use nyaaai_contract::pattern::Pattern;
 use nyaaai_contract::shapes::model::{ModelView, ModelViewPrice};
 use nyaaai_contract::shapes::provider::{
     Billed, Disposition, DispositionFallThrough, EntryFields, KeyState, KeyStateOk,
     KeyStateRejected, KeyStateUnreachable, NoticeKind, ProviderEntry, ProviderKindName,
 };
 use nyaaai_contract::shapes::step::{Failure, FailureCategory};
+use nyaaai_contract::url::parse_url;
 
 use super::catalog::{LocalCatalog, LocalCatalogDeps, LocalServer, local_browser, local_tester};
 use crate::codec::Codec;
@@ -51,6 +53,41 @@ pub const HOME: Terms = Terms {
     price: TermsPrice::Free,
 };
 
+/// Loopback, private ranges, LAN names; a host as the URL parser wrote it.
+static PRIVATE_HOST: LazyLock<Pattern> = LazyLock::new(|| {
+    Pattern::compile(
+        "^(localhost|0\\.0\\.0\\.0|(127|10)\\.[\\d.]+|192\\.168\\.[\\d.]+|172\\.(1[6-9]|2\\d|3[01])\\.[\\d.]+|169\\.254\\.[\\d.]+|100\\.(6[4-9]|[7-9]\\d|1[01]\\d|12[0-7])\\.[\\d.]+|\\[(::1?|f[cd][0-9a-f]{2}:[0-9a-f:]*|fe[89ab][0-9a-f]:[0-9a-f:]*)\\]|[^.[]+|.+\\.(localhost|local|lan|internal|home\\.arpa))$",
+        "i",
+    )
+    .expect("a fixed pattern")
+});
+
+/// Off this network: no URL, an unreadable one, or a host that is not private.
+pub fn remote(entry: &EntryFields) -> bool {
+    let Some(url) = &entry.url else {
+        return true;
+    };
+    match parse_url(url) {
+        None => true,
+        Some(parts) => {
+            let host = parts.host.strip_suffix('.').unwrap_or(&parts.host);
+            !PRIVATE_HOST.test(host)
+        }
+    }
+}
+
+/// A remote host may keep data and bill.
+pub fn terms_of(entry: &EntryFields) -> Terms {
+    if remote(entry) {
+        Terms {
+            kept: true,
+            price: TermsPrice::Unknown,
+        }
+    } else {
+        HOME
+    }
+}
+
 /// The count of models a check reads; none when the server is foreign.
 pub type Reach =
     fn(Arc<Transport>, CancelToken) -> BoxFuture<'static, Result<Option<usize>, KindError>>;
@@ -71,7 +108,7 @@ pub struct LocalKindSpec {
     pub chat_path: Option<&'static str>,
     /// Request root from the URL; refuses a URL it cannot read.
     pub base: Option<Base>,
-    /// Defaults to `HOME`.
+    /// Defaults to `terms_of`, over the entry's URL or this kind's own.
     pub terms: Option<fn(&EntryFields) -> Terms>,
     pub reach: Reach,
     pub server: fn(Arc<Transport>) -> Arc<dyn LocalServer>,
@@ -269,10 +306,14 @@ impl ProviderKind for LocalKind {
         transport: Arc<Transport>,
         deps: CatalogDeps,
     ) -> Arc<dyn EntryCatalog> {
+        let mut fields = entry_fields(entry);
+        if fields.url.is_none() {
+            fields.url = self.spec.url.map(str::to_owned);
+        }
         let terms = self
             .spec
             .terms
-            .map_or(HOME, |terms| terms(&entry_fields(entry)));
+            .map_or_else(|| terms_of(&fields), |terms| terms(&fields));
         let catalog = LocalCatalog::new(LocalCatalogDeps {
             runtime: deps.runtime,
             entry: entry.id.clone(),

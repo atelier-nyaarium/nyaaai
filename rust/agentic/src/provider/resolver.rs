@@ -3,8 +3,10 @@
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::panic::{AssertUnwindSafe, catch_unwind};
+use std::pin::Pin;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, MutexGuard};
+use std::task::{Context, Poll, Waker};
 
 use nyaaai_contract::cancel::{CancelToken, Unsubscribe};
 use nyaaai_contract::entry_keys::{EntryKeys, KeyAnswer};
@@ -20,7 +22,7 @@ use nyaaai_contract::shapes::provider::{
     EntryFields, KeyReach, Passed, ProviderEntry, ProviderKindName, SkipReason,
 };
 use nyaaai_contract::shapes::step::{CanonicalRequest, StepResult};
-use tokio::sync::OnceCell;
+use tokio::sync::{OnceCell, oneshot};
 
 use super::kind::{EntryCatalog, KindDeps, KindField, ProviderKind, Route};
 use crate::codec::Codec;
@@ -390,6 +392,9 @@ pub async fn served_by(d: &ServedByDeps, key: &str, use_: &ModelUse) -> Routes {
 }
 
 /// A route with the deps it was made with.
+/// A later entry's view is waited for this long.
+const LATER_VIEW_MS: i64 = 2000;
+
 #[derive(Clone)]
 struct Held {
     route: Route,
@@ -742,7 +747,12 @@ impl ModelResolver {
                 worst = raised(worst, Refusal::Unreachable, None, &entry.label);
                 continue;
             };
-            let view = self.view_of(&held.route, row, use_, zdr_only).await;
+            let later = !found.is_empty() && all;
+            let view = if later {
+                self.within(&held, row, use_, zdr_only).await
+            } else {
+                self.view_of(&held.route, row, use_, zdr_only).await
+            };
             let view = match view {
                 Some(held) if usable(&held) => held,
                 other => {
@@ -777,6 +787,52 @@ impl ModelResolver {
                 entry: None,
             }
         }))
+    }
+
+    /// The view, or none once a later entry's wait ends; its read goes on.
+    async fn within(
+        &self,
+        held: &Held,
+        row: &ModelRow,
+        use_: &ModelUse,
+        zdr_only: bool,
+    ) -> Option<ModelView> {
+        let catalog = Arc::clone(&held.route.catalog);
+        let (use_, key) = (use_.clone(), row.key.clone());
+        let mut read: BoxFuture<'static, Option<ModelView>> = Box::pin(async move {
+            let views = catalog
+                .views(use_, zdr_only, None)
+                .await
+                .unwrap_or_default();
+            views.into_iter().find(|each| each.row.key == key)
+        });
+        // The read starts at the call, as an `async` function would.
+        let started = read.as_mut().poll(&mut Context::from_waker(Waker::noop()));
+        let (late, mut timed_out) = oneshot::channel::<()>();
+        let timer = held.deps.scheduler.schedule(
+            LATER_VIEW_MS,
+            Box::new(move || {
+                let _ = late.send(());
+            }),
+        );
+        let answer = match started {
+            Poll::Ready(view) => view,
+            Poll::Pending => {
+                let mut running = held.deps.runtime.spawn(read);
+                std::future::poll_fn(|context| {
+                    if let Poll::Ready(done) = Pin::new(&mut running).poll(context) {
+                        return Poll::Ready(done.unwrap_or(None));
+                    }
+                    match Pin::new(&mut timed_out).poll(context) {
+                        Poll::Ready(_) => Poll::Ready(None),
+                        Poll::Pending => Poll::Pending,
+                    }
+                })
+                .await
+            }
+        };
+        timer.cancel();
+        answer
     }
 
     async fn view_of(

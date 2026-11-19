@@ -231,8 +231,6 @@ struct Open<'a> {
     seen: Seen,
     body: Option<Box<dyn Chunks>>,
     body_done: bool,
-    /// Bytes read since an item last finished.
-    since: usize,
     sse: SseDecoder,
     decoder: Box<dyn StreamDecoder + 'a>,
     events: VecDeque<StepEvent>,
@@ -739,7 +737,6 @@ impl Transport {
                     seen: std::mem::take(seen),
                     body: Some(response.chunks),
                     body_done: false,
-                    since: 0,
                     sse: SseDecoder::new(),
                     decoder: codec.stream(),
                     events: VecDeque::new(),
@@ -770,12 +767,7 @@ impl Transport {
             Ok(Some(bytes)) => {
                 open.cut.arm();
                 let items = open.sse.push(&bytes);
-                open.since = if items.is_empty() {
-                    open.since + bytes.len()
-                } else {
-                    0
-                };
-                if open.since > self.max_bytes {
+                if open.sse.held() > self.max_bytes {
                     open.failed = Some(Fault::Provider(failed(
                         FailureCategory::Stream,
                         &format!("A stream event is larger than {} bytes.", self.max_bytes),

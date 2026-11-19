@@ -1,6 +1,6 @@
 //! Resolver cases.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::future::Future;
 use std::pin::Pin;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -322,6 +322,12 @@ struct Hub {
     refreshes: Mutex<HashMap<String, Arc<dyn Fn() + Send + Sync>>>,
     listings: HashMap<String, HashMap<String, Listing>>,
     dispose_fails: Vec<String>,
+    /// Entries whose catalog answers no view until a `warm` step.
+    cold: Mutex<HashSet<String>>,
+    /// The views waiting on a cold catalog.
+    waiting: Mutex<Vec<oneshot::Sender<()>>>,
+    /// Told when a cold catalog is first asked.
+    asked: Mutex<Option<oneshot::Sender<()>>>,
 }
 
 struct StubCatalog {
@@ -339,6 +345,14 @@ impl EntryCatalog for StubCatalog {
         _cancel: Option<&CancelToken>,
     ) -> BoxFuture<'_, Result<Vec<ModelView>, Aborted>> {
         Box::pin(async move {
+            if locked(&self.hub.cold).contains(&self.entry.id) {
+                if let Some(told) = locked(&self.hub.asked).take() {
+                    let _ = told.send(());
+                }
+                let (release, wait) = oneshot::channel();
+                locked(&self.hub.waiting).push(release);
+                let _ = wait.await;
+            }
             let mut views = Vec::new();
             for row in self.rows.rows() {
                 let bound = row.bindings.get(self.name.as_str()).is_some();
@@ -679,6 +693,44 @@ fn candidate_line(
     })
 }
 
+/// A routes answer as the answer of a call that waited.
+fn waited_of(
+    held: ResolverRoutesResultStepsItemAnswerRoutes,
+) -> ResolverRoutesResultStepsItemAnswerWaitedRoutes {
+    ResolverRoutesResultStepsItemAnswerWaitedRoutes {
+        unresolved: held.unresolved,
+        candidates: held
+            .candidates
+            .into_iter()
+            .map(|each| ResolverRoutesResultStepsItemAnswerWaitedRoutesCandidatesItem {
+                entry: each.entry,
+                kind: each.kind,
+                binding: each.binding,
+                status: match each.status {
+                    ResolverRoutesResultStepsItemAnswerRoutesCandidatesItemStatus::Ok => {
+                        ResolverRoutesResultStepsItemAnswerWaitedRoutesCandidatesItemStatus::Ok
+                    }
+                    ResolverRoutesResultStepsItemAnswerRoutesCandidatesItemStatus::Retired => {
+                        ResolverRoutesResultStepsItemAnswerWaitedRoutesCandidatesItemStatus::Retired
+                    }
+                    ResolverRoutesResultStepsItemAnswerRoutesCandidatesItemStatus::NoZdrHost => {
+                        ResolverRoutesResultStepsItemAnswerWaitedRoutesCandidatesItemStatus::NoZdrHost
+                    }
+                    ResolverRoutesResultStepsItemAnswerRoutesCandidatesItemStatus::NoTools => {
+                        ResolverRoutesResultStepsItemAnswerWaitedRoutesCandidatesItemStatus::NoTools
+                    }
+                    ResolverRoutesResultStepsItemAnswerRoutesCandidatesItemStatus::Unknown => {
+                        ResolverRoutesResultStepsItemAnswerWaitedRoutesCandidatesItemStatus::Unknown
+                    }
+                },
+                zdr_only: each.zdr_only,
+                path: each.path,
+            })
+            .collect(),
+        passed: held.passed,
+    }
+}
+
 fn resolve_line(held: &Candidate) -> Outcome<ResolverRoutesResultStepsItemAnswerResolveCandidate> {
     Ok(ResolverRoutesResultStepsItemAnswerResolveCandidate {
         entry: held.entry.clone(),
@@ -706,9 +758,17 @@ struct Rig {
     resolver: ModelResolver,
     refreshed: Arc<Mutex<Vec<Via>>>,
     gate: Arc<Keys>,
+    wheel: Arc<TimerWheel>,
 }
 
 impl Rig {
+    /// Lets the views waiting on a cold catalog go on.
+    fn release(&self) {
+        for release in std::mem::take(&mut *locked(&self.hub.waiting)) {
+            let _ = release.send(());
+        }
+    }
+
     fn change(&self, step: &ResolverRoutesInputStepsItem) -> Outcome<()> {
         match step {
             ResolverRoutesInputStepsItem::List(each) => self.list.set(each.entries.clone()),
@@ -842,6 +902,54 @@ impl Rig {
                 }
                 Ok(changed())
             }
+            ResolverRoutesInputStepsItem::Warm(each) => {
+                locked(&self.hub.cold).remove(&each.entry);
+                self.release();
+                Ok(changed())
+            }
+            ResolverRoutesInputStepsItem::After(each) => {
+                let (told, arrived) = oneshot::channel();
+                *locked(&self.hub.asked) = Some(told);
+                let step =
+                    ResolverRoutesInputStepsItem::Routes(ResolverRoutesInputStepsItemRoutes {
+                        model: each.model.clone(),
+                        use_: each.use_.clone(),
+                    });
+                let mut call = Box::pin(self.called(held, &step));
+                let mut arrived = arrived;
+                // The call runs until a cold catalog is asked, or ends.
+                let first = std::future::poll_fn(|context| {
+                    if let Poll::Ready(done) = call.as_mut().poll(context) {
+                        return Poll::Ready(Some(done));
+                    }
+                    if Pin::new(&mut arrived).poll(context).is_ready() {
+                        return Poll::Ready(None);
+                    }
+                    Poll::Pending
+                })
+                .await;
+                self.wheel.advance(each.ms as i64 - 1);
+                let timers = self.wheel.waiting().len() as i64;
+                self.wheel.advance(1);
+                for entry in &each.warmed {
+                    locked(&self.hub.cold).remove(entry);
+                }
+                if !each.warmed.is_empty() {
+                    self.release();
+                }
+                let answered = match first {
+                    Some(done) => done?,
+                    None => call.await?,
+                };
+                *locked(&self.hub.asked) = None;
+                let Answer::Routes(routes) = answered else {
+                    return Err("A routes call answers routes.".to_owned());
+                };
+                Ok(Answer::Waited(ResolverRoutesResultStepsItemAnswerWaited {
+                    timers,
+                    routes: waited_of(routes),
+                }))
+            }
             ResolverRoutesInputStepsItem::Route(each) => {
                 let thrown = self.resolver.route(&each.entry).err().map(|error| error.0);
                 Ok(Answer::Routed(ResolverRoutesResultStepsItemAnswerRouted {
@@ -925,6 +1033,7 @@ pub fn routes(input: ResolverRoutesInput) -> Outcome<ResolverRoutesResult> {
         listings.insert(entry.to_owned(), held);
     }
     let hub = Arc::new(Hub {
+        cold: Mutex::new(input.cold.clone().unwrap_or_default().into_iter().collect()),
         listings,
         dispose_fails: input.dispose_fails.clone().unwrap_or_default(),
         ..Hub::default()
@@ -962,6 +1071,7 @@ pub fn routes(input: ResolverRoutesInput) -> Outcome<ResolverRoutesResult> {
         resolver,
         refreshed: Arc::clone(&refreshed),
         gate,
+        wheel: Arc::clone(&wheel),
     };
     let mut held: Vec<Vec<Resolved>> = Vec::new();
     let mut steps = Vec::new();

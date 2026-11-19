@@ -13786,6 +13786,12 @@
 						}
 					}
 				},
+				"cold": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
 				"disposeFails": {
 					"type": "array",
 					"items": {
@@ -14065,6 +14071,55 @@
 								"required": [
 									"kind",
 									"entry"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "warm"
+									},
+									"entry": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"kind",
+									"entry"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "after"
+									},
+									"ms": {
+										"type": "integer",
+										"minimum": 1,
+										"maximum": 9007199254740991
+									},
+									"model": {
+										"type": "string"
+									},
+									"use": {
+										"$ref": "model.input.json#/$defs/ModelUse"
+									},
+									"warmed": {
+										"type": "array",
+										"items": {
+											"type": "string"
+										}
+									}
+								},
+								"required": [
+									"kind",
+									"ms",
+									"model",
+									"use",
+									"warmed"
 								]
 							},
 							{
@@ -14464,6 +14519,97 @@
 											"unresolved",
 											"candidates",
 											"passed"
+										]
+									},
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "waited"
+											},
+											"timers": {
+												"type": "integer",
+												"minimum": -9007199254740991,
+												"maximum": 9007199254740991
+											},
+											"routes": {
+												"type": "object",
+												"properties": {
+													"kind": {
+														"type": "string",
+														"const": "routes"
+													},
+													"unresolved": {
+														"anyOf": [
+															{
+																"$ref": "model.input.json#/$defs/Unresolved"
+															},
+															{
+																"type": "null"
+															}
+														]
+													},
+													"candidates": {
+														"type": "array",
+														"items": {
+															"type": "object",
+															"properties": {
+																"entry": {
+																	"type": "string"
+																},
+																"kind": {
+																	"$ref": "provider.input.json#/$defs/ProviderKindName"
+																},
+																"binding": {
+																	"type": "string"
+																},
+																"status": {
+																	"type": "string",
+																	"enum": [
+																		"ok",
+																		"retired",
+																		"noZdrHost",
+																		"noTools",
+																		"unknown"
+																	]
+																},
+																"zdrOnly": {
+																	"type": "boolean"
+																},
+																"path": {
+																	"type": "string"
+																}
+															},
+															"required": [
+																"entry",
+																"kind",
+																"binding",
+																"status",
+																"zdrOnly",
+																"path"
+															]
+														}
+													},
+													"passed": {
+														"type": "array",
+														"items": {
+															"$ref": "provider.input.json#/$defs/Passed"
+														}
+													}
+												},
+												"required": [
+													"kind",
+													"unresolved",
+													"candidates",
+													"passed"
+												]
+											}
+										},
+										"required": [
+											"kind",
+											"timers",
+											"routes"
 										]
 									},
 									{
@@ -17237,6 +17383,50 @@
 				}
 			}
 		},
+		"LifeChange": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "list"
+						},
+						"entries": {
+							"type": "array",
+							"items": {
+								"$ref": "provider.input.json#/$defs/ProviderEntry"
+							}
+						}
+					},
+					"required": [
+						"kind",
+						"entries"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "key"
+						},
+						"id": {
+							"type": "string"
+						},
+						"answer": {
+							"$ref": "#/$defs/LifeKeyAnswer"
+						}
+					},
+					"required": [
+						"kind",
+						"id",
+						"answer"
+					]
+				}
+			],
+			"x-tag": "kind"
+		},
 		"LifeStep": {
 			"oneOf": [
 				{
@@ -17296,6 +17486,28 @@
 						"call",
 						"model",
 						"tag"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "later"
+						},
+						"ms": {
+							"type": "integer",
+							"minimum": 0,
+							"maximum": 9007199254740991
+						},
+						"change": {
+							"$ref": "#/$defs/LifeChange"
+						}
+					},
+					"required": [
+						"kind",
+						"ms",
+						"change"
 					]
 				},
 				{

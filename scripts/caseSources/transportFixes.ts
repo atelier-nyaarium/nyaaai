@@ -164,6 +164,12 @@ const caps: CaseSource[] = [
 		{ maxBytes: 100 },
 	),
 	exchange(
+		"cap-a-stream-with-a-comment-after-each-data-line",
+		[streamCall()],
+		[sseReply(Array.from({ length: 8 }, () => piece("data: aaaaaaaaaaaaaa\n:k\n")))],
+		{ maxBytes: 100 },
+	),
+	exchange(
 		"cap-a-stream-with-many-small-items-is-not-capped",
 		[streamCall()],
 		[sseReply([...Array.from({ length: 30 }, () => piece(commentFrame("ping"))), piece(HI_FRAMES)])],

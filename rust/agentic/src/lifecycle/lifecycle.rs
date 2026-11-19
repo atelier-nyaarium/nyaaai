@@ -159,7 +159,7 @@ enum Refusal {
 enum Tried<'a, T> {
     Done(Attempt<'a, T>),
     /// The failure to fall through on.
-    Onward(Failure),
+    Onward(Failure, Option<Ticket>),
     /// Deferred by ZDR.
     Kept,
 }
@@ -494,8 +494,8 @@ impl Inner {
             match self.tries(route, call, o, keep, true).await? {
                 Tried::Kept => continue,
                 Tried::Done(done) => return Ok(done),
-                Tried::Onward(failure) => {
-                    self.failed(route, &failure, true, o);
+                Tried::Onward(failure, ticket) => {
+                    self.failed(route, &failure, true, o, ticket.as_ref());
                     self.skip(
                         o,
                         route,
@@ -529,7 +529,7 @@ impl Inner {
                 failure: None,
             },
             Tried::Done(done) => done,
-            Tried::Onward(_) => {
+            Tried::Onward(..) => {
                 return Err("The last route never falls through.".into());
             }
         })
@@ -566,7 +566,15 @@ impl Inner {
         let mut waited = 0.0_f64;
         let mut again = false;
         let mut attempt: i64 = 1;
+        // The last failure, once a retry is due.
+        let mut last: Option<(Failure, Option<Ticket>)> = None;
         loop {
+            if onward
+                && let Some((failure, ticket)) = &last
+                && self.refusal(route, false, run).is_some()
+            {
+                return Ok(Tried::Onward(failure.clone(), ticket.clone()));
+            }
             let readmitted = again;
             let admission = if call.live() {
                 self.admit_live(route, call, o)
@@ -584,7 +592,7 @@ impl Inner {
                 Gated::GaveUp => {
                     // A give-up ends a route that is not the last, not the request.
                     if onward {
-                        return Ok(Tried::Onward(gave_up_on(route)));
+                        return Ok(Tried::Onward(gave_up_on(route), None));
                     }
                     return Ok(Tried::Done(Attempt::Failed {
                         outcome: overloaded(route),
@@ -593,6 +601,7 @@ impl Inner {
                 }
                 Gated::Go(ticket) => ticket,
             };
+            let held_ticket = ticket.clone();
             let mut holding = Holding {
                 gate: self.gate.clone(),
                 ticket,
@@ -623,10 +632,17 @@ impl Inner {
                     again: readmitted,
                 })
             });
-            let error = match self.metered(route, call, o).await {
+            let error = match self.metered(route, call, o, held_ticket.as_ref()).await {
                 Ok(value) => {
                     self.settle(route, holding.take().as_ref(), GateOutcome::Ok, None, o);
-                    self.served(route, C::usage(&value), run, TraceEntryBillingReply::Ok, o);
+                    self.served(
+                        route,
+                        C::usage(&value),
+                        run,
+                        TraceEntryBillingReply::Ok,
+                        o,
+                        held_ticket.as_ref(),
+                    );
                     return Ok(Tried::Done(Attempt::Served { value, route }));
                 }
                 Err(error) => error,
@@ -658,7 +674,14 @@ impl Inner {
                 .billed()
                 .and_then(|held| held.usage)
                 .or_else(|| failure.billed.as_ref().and_then(|held| held.usage.clone()));
-            self.served(route, owed.as_ref(), run, TraceEntryBillingReply::Failed, o);
+            self.served(
+                route,
+                owed.as_ref(),
+                run,
+                TraceEntryBillingReply::Failed,
+                o,
+                held_ticket.as_ref(),
+            );
             // Empty replies stay fresh.
             let fresh = failure.category == FailureCategory::Empty || o.fresh();
             let failed_at = |disposition: Option<Disposition>| {
@@ -683,7 +706,7 @@ impl Inner {
                 );
                 failed_at(None);
                 if onward {
-                    return Ok(Tried::Onward(failure));
+                    return Ok(Tried::Onward(failure, held_ticket));
                 }
                 if call.live() || settled.is_none() || settled == Some(GateSettled::GaveUp) {
                     return Ok(Tried::Done(Attempt::Failed {
@@ -698,6 +721,7 @@ impl Inner {
                     }));
                 }
                 again = true;
+                last = Some((failure, held_ticket));
                 continue;
             }
             self.settle(route, holding.take().as_ref(), GateOutcome::Failed, None, o);
@@ -705,13 +729,14 @@ impl Inner {
             failed_at(Some(disposition.clone()));
             if !fresh {
                 if onward && !matches!(disposition, Disposition::Stop(_)) {
-                    return Ok(Tried::Onward(failure));
+                    return Ok(Tried::Onward(failure, held_ticket));
                 }
                 return Ok(Tried::Done(self.ended(
                     route,
                     failure.clone(),
                     notice(NoticeKind::StreamFailed, Some(&failure), None),
                     o,
+                    held_ticket.as_ref(),
                 )));
             }
             let (falls, kind) = match &disposition {
@@ -721,12 +746,18 @@ impl Inner {
             };
             if let Some(kind) = kind {
                 if onward && falls {
-                    return Ok(Tried::Onward(failure));
+                    return Ok(Tried::Onward(failure, held_ticket));
                 }
                 let outcome = self
                     .notice_for(kind, &failure, route, call.cancel(), o)
                     .await;
-                return Ok(Tried::Done(self.ended(route, failure, outcome, o)));
+                return Ok(Tried::Done(self.ended(
+                    route,
+                    failure,
+                    outcome,
+                    o,
+                    held_ticket.as_ref(),
+                )));
             }
             let wait_ms = if call.live() && attempt >= LIVE_TRIES {
                 None
@@ -735,10 +766,16 @@ impl Inner {
             };
             let Some(wait_ms) = wait_ms else {
                 if onward {
-                    return Ok(Tried::Onward(failure));
+                    return Ok(Tried::Onward(failure, held_ticket));
                 }
                 let outcome = notice(NoticeKind::RetriesExhausted, Some(&failure), None);
-                return Ok(Tried::Done(self.ended(route, failure, outcome, o)));
+                return Ok(Tried::Done(self.ended(
+                    route,
+                    failure,
+                    outcome,
+                    o,
+                    held_ticket.as_ref(),
+                )));
             };
             trace(o, || {
                 TraceEntry::Retry(TraceEntryRetry {
@@ -756,6 +793,7 @@ impl Inner {
             o.on_retry(attempt, wait_ms, &status_of(&failure.status));
             attempt += 1;
             waited += wait_ms;
+            last = Some((failure, held_ticket));
             let slept = self.scheduler.sleep(wait_ms as i64, call.cancel()).await;
             if slept == Slept::Cancelled {
                 return Ok(Tried::Done(Attempt::Failed {
@@ -772,8 +810,9 @@ impl Inner {
         failure: Failure,
         outcome: Ended,
         o: &Arc<dyn Observer>,
+        ticket: Option<&Ticket>,
     ) -> Attempt<'a, T> {
-        self.failed(route, &failure, false, o);
+        self.failed(route, &failure, false, o, ticket);
         Attempt::Failed {
             outcome,
             failure: Some(failure),
@@ -781,16 +820,24 @@ impl Inner {
     }
 
     /// Tells the gate a route failed.
-    fn failed(&self, route: &Resolved, failure: &Failure, onward: bool, o: &Arc<dyn Observer>) {
+    fn failed(
+        &self,
+        route: &Resolved,
+        failure: &Failure,
+        onward: bool,
+        o: &Arc<dyn Observer>,
+        ticket: Option<&Ticket>,
+    ) {
         let Some(gate) = &self.gate else {
             return;
         };
-        gate.failed(RouteRef::from(route), failure, onward);
+        let dropped = gate.failed(RouteRef::from(route), failure, onward, ticket);
         trace(o, || {
             TraceEntry::GateFailed(TraceEntryGateFailed {
                 entry: route.entry.id.clone(),
                 failure: failure.clone(),
                 onward,
+                dropped: dropped.then_some(true),
             })
         });
     }
@@ -803,19 +850,21 @@ impl Inner {
         run: Option<&Mutex<HashSet<String>>>,
         reply: TraceEntryBillingReply,
         o: &Arc<dyn Observer>,
+        ticket: Option<&Ticket>,
     ) {
         let Some(gate) = &self.gate else {
             return;
         };
-        {
+        let dropped = {
             let mut held = run.map(locked);
-            gate.served(RouteRef::from(route), usage, held.as_deref_mut());
-        }
+            gate.served(RouteRef::from(route), usage, held.as_deref_mut(), ticket)
+        };
         trace(o, || {
             TraceEntry::Billing(TraceEntryBilling {
                 entry: route.entry.id.clone(),
                 reply,
                 usage: usage.cloned(),
+                dropped: dropped.then_some(true),
             })
         });
     }
@@ -825,6 +874,7 @@ impl Inner {
         route: &Resolved,
         call: &C,
         o: &Arc<dyn Observer>,
+        ticket: Option<&Ticket>,
     ) -> Result<C::Value, SendError> {
         let Some(meter) = &self.meter else {
             return call.send(route, &|| {}).await;
@@ -861,7 +911,7 @@ impl Inner {
                         call: metered.clone(),
                     })
                 });
-                meter.called(&metered);
+                meter.called(&metered, ticket);
             }));
         };
         let first_token = || {

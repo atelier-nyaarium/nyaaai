@@ -78,6 +78,14 @@ fn row_for(key: &str) -> Outcome<ModelRow> {
     }
 }
 
+/// Remembers an entry the script named, in the order first named.
+fn remember(named: &Mutex<Vec<String>>, id: &str) {
+    let mut named = locked(named);
+    if !named.iter().any(|held| held == id) {
+        named.push(id.to_owned());
+    }
+}
+
 fn key_answer(held: &LifeKeyAnswer) -> KeyAnswer {
     match held {
         LifeKeyAnswer::Key(held) => KeyAnswer::Key(held.key.clone()),
@@ -682,6 +690,7 @@ async fn play(input: LifecycleRunInput) -> Outcome<LifecycleRunResult> {
         name(&entry.id);
     }
     let woken: Woken = Arc::default();
+    let mut laters = 0;
     let mut slots: Vec<Slot> = Vec::new();
     let mut steps = Vec::new();
     let health_of = |named: &Arc<Mutex<Vec<String>>>| -> Vec<String> { locked(named).clone() };
@@ -813,6 +822,31 @@ async fn play(input: LifecycleRunInput) -> Outcome<LifecycleRunResult> {
                 });
                 locked(&woken).push_back(index);
             }
+            LifeStep::Later(held) => {
+                laters += 1;
+                let (list, scripted, named, change) = (
+                    Arc::clone(&list),
+                    Arc::clone(&scripted),
+                    Arc::clone(&named),
+                    held.change.clone(),
+                );
+                wheel.after_run(
+                    held.ms as i64,
+                    &format!("later-{laters}"),
+                    Box::new(move || match &change {
+                        LifeChange::List(held) => {
+                            for entry in &held.entries {
+                                remember(&named, &entry.id);
+                            }
+                            list.set(held.entries.clone());
+                        }
+                        LifeChange::Key(held) => {
+                            remember(&named, &held.id);
+                            scripted.set(&held.id, key_answer(&held.answer));
+                        }
+                    }),
+                );
+            }
             LifeStep::Plan(held) => {
                 answer = match resolver
                     .routes(&held.model, held.use_.as_ref().unwrap_or(&CHAT))
@@ -887,6 +921,7 @@ async fn play(input: LifecycleRunInput) -> Outcome<LifecycleRunResult> {
                         allowance: None,
                         cost: held.cost,
                     },
+                    None,
                 );
             }
         }
@@ -1123,8 +1158,10 @@ mod tests {
             route: nyaaai_agentic::health::health::RouteRef<'_>,
             failure: &Failure,
             onward: bool,
-        ) {
+            _ticket: Option<&Ticket>,
+        ) -> bool {
             locked(&self.failed).push((route.entry.id.clone(), failure.clone(), onward));
+            false
         }
 
         fn served(
@@ -1132,7 +1169,9 @@ mod tests {
             _route: nyaaai_agentic::health::health::RouteRef<'_>,
             _usage: Option<&NormalizedUsage>,
             _run: Option<&mut std::collections::HashSet<String>>,
-        ) {
+            _ticket: Option<&Ticket>,
+        ) -> bool {
+            false
         }
     }
 
@@ -1140,7 +1179,7 @@ mod tests {
     struct Records(Mutex<Vec<MeteredCall>>);
 
     impl Meter for Records {
-        fn called(&self, call: &MeteredCall) {
+        fn called(&self, call: &MeteredCall, _ticket: Option<&Ticket>) {
             locked(&self.0).push(call.clone());
         }
     }
