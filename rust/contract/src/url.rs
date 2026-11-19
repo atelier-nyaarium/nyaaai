@@ -202,7 +202,7 @@ fn ipv6_text(pieces: &[u64]) -> String {
     )
 }
 
-/// The host as URLs write it, or `None`.
+/// The host as URLs write it, or `None`; an `xn--` label is kept unchecked.
 fn host_of(raw: &str) -> Option<String> {
     if raw.starts_with('[') {
         let inner = raw.strip_prefix('[')?.strip_suffix(']')?;

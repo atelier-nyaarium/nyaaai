@@ -95,7 +95,7 @@ function verdictOf(value: unknown): Verdict | undefined {
 	return VERDICTS.find((each) => each === value);
 }
 
-/** A stored test record; undefined for anything that does not fit. */
+/** A stored test record, or undefined; the label counts code points. */
 export function parseTestRecord(value: unknown): TestRecord | undefined {
 	const raw = plain(value);
 	if (raw === undefined) return undefined;

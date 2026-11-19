@@ -59,6 +59,8 @@ export const portKinds = {
 					id: z.string().exactOptional(),
 					answer: z.enum(["key", "none", "refused", "unready"]).exactOptional(),
 					key: z.string().exactOptional(),
+					/** A listener that, once told, stops the named one. */
+					unlistens: z.string().exactOptional(),
 				}),
 			),
 		}),
@@ -83,7 +85,10 @@ export const portKinds = {
 				if (step.op === "listen") {
 					stops.set(
 						name,
-						keys.onChange((changed) => heard.push({ name, id: changed })),
+						keys.onChange((changed) => {
+							heard.push({ name, id: changed });
+							if (step.unlistens !== undefined) stops.get(step.unlistens)?.();
+						}),
 					);
 				} else if (step.op === "unlisten") {
 					stops.get(name)?.();
@@ -108,6 +113,7 @@ export const portKinds = {
 					op: z.enum(["listen", "unlisten", "set", "read"]),
 					name: z.string().exactOptional(),
 					ids: z.array(z.string()).exactOptional(),
+					unlistens: z.string().exactOptional(),
 				}),
 			),
 		}),
@@ -131,7 +137,10 @@ export const portKinds = {
 				if (step.op === "listen")
 					stops.set(
 						name,
-						list.onChange(() => heard.push(name)),
+						list.onChange(() => {
+							heard.push(name);
+							if (step.unlistens !== undefined) stops.get(step.unlistens)?.();
+						}),
 					);
 				else if (step.op === "unlisten") stops.get(name)?.();
 				else if (step.op === "set") list.set((step.ids ?? []).map(entryOf));
@@ -154,6 +163,7 @@ export const portKinds = {
 					id: z.string().exactOptional(),
 					label: z.string().exactOptional(),
 					why: z.string().exactOptional(),
+					unlistens: z.string().exactOptional(),
 				}),
 			),
 		}),
@@ -184,7 +194,10 @@ export const portKinds = {
 				if (step.op === "listen")
 					stops.set(
 						name,
-						registry.onChange(() => heard.push(name)),
+						registry.onChange(() => {
+							heard.push(name);
+							if (step.unlistens !== undefined) stops.get(step.unlistens)?.();
+						}),
 					);
 				else if (step.op === "unlisten") stops.get(name)?.();
 				else if (step.op === "setRows") registry.setRows((step.keys ?? []).map(rowOf));

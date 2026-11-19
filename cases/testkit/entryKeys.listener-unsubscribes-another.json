@@ -1,0 +1,124 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.entryKeys",
+	"name": "listener-unsubscribes-another",
+	"input": {
+		"steps": [
+			{
+				"op": "listen",
+				"name": "a",
+				"unlistens": "b"
+			},
+			{
+				"op": "listen",
+				"name": "b"
+			},
+			{
+				"op": "listen",
+				"name": "c"
+			},
+			{
+				"op": "set",
+				"id": "e1",
+				"answer": "none"
+			},
+			{
+				"op": "set",
+				"id": "e1",
+				"answer": "refused"
+			},
+			{
+				"op": "listen",
+				"name": "d",
+				"unlistens": "a"
+			},
+			{
+				"op": "set",
+				"id": "e1",
+				"answer": "unready"
+			},
+			{
+				"op": "set",
+				"id": "e1",
+				"answer": "none"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"heard": [],
+				"reads": 0
+			},
+			{
+				"heard": [],
+				"reads": 0
+			},
+			{
+				"heard": [],
+				"reads": 0
+			},
+			{
+				"heard": [
+					{
+						"name": "a",
+						"id": "e1"
+					},
+					{
+						"name": "c",
+						"id": "e1"
+					}
+				],
+				"reads": 0
+			},
+			{
+				"heard": [
+					{
+						"name": "a",
+						"id": "e1"
+					},
+					{
+						"name": "c",
+						"id": "e1"
+					}
+				],
+				"reads": 0
+			},
+			{
+				"heard": [],
+				"reads": 0
+			},
+			{
+				"heard": [
+					{
+						"name": "a",
+						"id": "e1"
+					},
+					{
+						"name": "c",
+						"id": "e1"
+					},
+					{
+						"name": "d",
+						"id": "e1"
+					}
+				],
+				"reads": 0
+			},
+			{
+				"heard": [
+					{
+						"name": "c",
+						"id": "e1"
+					},
+					{
+						"name": "d",
+						"id": "e1"
+					}
+				],
+				"reads": 0
+			}
+		]
+	}
+}

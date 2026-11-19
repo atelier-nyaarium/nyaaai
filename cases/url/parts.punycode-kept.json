@@ -1,0 +1,74 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "url.parts",
+	"name": "punycode-kept",
+	"input": {
+		"urls": [
+			"http://xn--/",
+			"http://xn--a/x",
+			"ftp://u@xn--a:8080/",
+			"http://ok.xn--a./",
+			"http://xn--/?q#f"
+		]
+	},
+	"expected": {
+		"parts": [
+			{
+				"scheme": "http",
+				"username": "",
+				"password": "",
+				"host": "xn--",
+				"port": "",
+				"origin": "http://xn--",
+				"path": "/",
+				"query": "",
+				"fragment": ""
+			},
+			{
+				"scheme": "http",
+				"username": "",
+				"password": "",
+				"host": "xn--a",
+				"port": "",
+				"origin": "http://xn--a",
+				"path": "/x",
+				"query": "",
+				"fragment": ""
+			},
+			{
+				"scheme": "ftp",
+				"username": "u",
+				"password": "",
+				"host": "xn--a",
+				"port": "8080",
+				"origin": "ftp://xn--a:8080",
+				"path": "/",
+				"query": "",
+				"fragment": ""
+			},
+			{
+				"scheme": "http",
+				"username": "",
+				"password": "",
+				"host": "ok.xn--a.",
+				"port": "",
+				"origin": "http://ok.xn--a.",
+				"path": "/",
+				"query": "",
+				"fragment": ""
+			},
+			{
+				"scheme": "http",
+				"username": "",
+				"password": "",
+				"host": "xn--",
+				"port": "",
+				"origin": "http://xn--",
+				"path": "/",
+				"query": "q",
+				"fragment": "f"
+			}
+		]
+	}
+}

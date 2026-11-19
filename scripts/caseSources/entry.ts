@@ -101,6 +101,9 @@ export const entryCases: CaseSource[] = [
 	parse("id-space", { ...BASE, id: "a b" }),
 	parse("id-trailing-newline", { ...BASE, id: "abc\n" }),
 	parse("id-padded", { ...BASE, id: " abc " }),
+	parse("id-proto", { ...BASE, id: "__proto__" }),
+	parse("id-proto-like", { ...BASE, id: "__proto" }),
+	parse("id-constructor", { ...BASE, id: "constructor" }),
 	parse("id-uuid", { ...BASE, id: "3f2a1b4c-5d6e-4f70-8a9b-0c1d2e3f4a5b" }),
 	parse("id-non-ascii", { ...BASE, id: "\u{e9}" }),
 	parse("kind-missing", { id: "or1", label: "Lab" }),
@@ -237,6 +240,7 @@ export const entryCases: CaseSource[] = [
 		{ id: "a", kind: "openrouter", label: " One " },
 		{ id: "a", kind: "openrouter", label: "One" },
 	]),
+	list("list-proto-id-dropped", [{ id: "__proto__", kind: "openrouter", label: "x" }, BASE]),
 	list("list-ids-are-case-sensitive", [
 		{ id: "a", kind: "openrouter", label: "x" },
 		{ id: "A", kind: "openrouter", label: "x" },

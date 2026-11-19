@@ -411,6 +411,10 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
             input,
             super::view::codec_facts,
         ),
+        "view.outputLimit" => run::<shapes::ViewOutputLimitInput, shapes::ViewOutputLimitResult>(
+            input,
+            super::view::output_limit,
+        ),
         "view.runEffort" => run::<shapes::ViewRunEffortInput, shapes::ViewRunEffortResult>(
             input,
             super::view::run_effort,

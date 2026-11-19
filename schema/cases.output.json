@@ -2308,6 +2308,9 @@
 							},
 							"key": {
 								"type": "string"
+							},
+							"unlistens": {
+								"type": "string"
 							}
 						},
 						"required": [
@@ -2408,6 +2411,9 @@
 								"items": {
 									"type": "string"
 								}
+							},
+							"unlistens": {
+								"type": "string"
 							}
 						},
 						"required": [
@@ -2501,6 +2507,9 @@
 								"type": "string"
 							},
 							"why": {
+								"type": "string"
+							},
+							"unlistens": {
 								"type": "string"
 							}
 						},
@@ -6229,6 +6238,45 @@
 			},
 			"required": [
 				"facts"
+			],
+			"additionalProperties": false
+		},
+		"ViewOutputLimitInput": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			],
+			"additionalProperties": false
+		},
+		"ViewOutputLimitResult": {
+			"type": "object",
+			"properties": {
+				"limits": {
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				}
+			},
+			"required": [
+				"limits"
 			],
 			"additionalProperties": false
 		},

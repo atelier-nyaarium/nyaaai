@@ -175,4 +175,122 @@ export const testkitPortCases: CaseSource[] = [
 			],
 		},
 	},
+	{
+		kind: "testkit.deadline",
+		name: "clear-then-caller-aborts",
+		input: {
+			startMs: 0,
+			steps: [
+				{ op: "caller", id: "c" },
+				{ op: "deadline", id: "d", ms: 50, caller: "c" },
+				{ op: "clear", id: "d" },
+				{ op: "abortCaller", id: "c" },
+				{ op: "advance", ms: 100 },
+			],
+		},
+	},
+	{
+		kind: "testkit.deadline",
+		name: "caller-aborts-then-clear",
+		input: {
+			startMs: 0,
+			steps: [
+				{ op: "caller", id: "c" },
+				{ op: "deadline", id: "d", ms: 50, caller: "c" },
+				{ op: "abortCaller", id: "c" },
+				{ op: "clear", id: "d" },
+				{ op: "advance", ms: 100 },
+			],
+		},
+	},
+	{
+		kind: "testkit.deadline",
+		name: "deadline-fires-then-caller-aborts",
+		input: {
+			startMs: 0,
+			steps: [
+				{ op: "caller", id: "c" },
+				{ op: "deadline", id: "d", ms: 50, caller: "c" },
+				{ op: "advance", ms: 50 },
+				{ op: "abortCaller", id: "c" },
+				{ op: "clear", id: "d" },
+				{ op: "advance", ms: 100 },
+			],
+		},
+	},
+	{
+		kind: "testkit.deadline",
+		name: "clear-twice",
+		input: {
+			startMs: 0,
+			steps: [
+				{ op: "caller", id: "c" },
+				{ op: "deadline", id: "d", ms: 50, caller: "c" },
+				{ op: "clear", id: "d" },
+				{ op: "clear", id: "d" },
+				{ op: "abortCaller", id: "c" },
+				{ op: "clear", id: "d" },
+				{ op: "advance", ms: 100 },
+			],
+		},
+	},
+	{
+		kind: "testkit.deadline",
+		name: "clear-after-caller-abort-twice",
+		input: {
+			startMs: 0,
+			steps: [
+				{ op: "caller", id: "c" },
+				{ op: "deadline", id: "d", ms: 50, caller: "c" },
+				{ op: "abortCaller", id: "c" },
+				{ op: "clear", id: "d" },
+				{ op: "clear", id: "d" },
+			],
+		},
+	},
+	{
+		kind: "testkit.entryKeys",
+		name: "listener-unsubscribes-another",
+		input: {
+			steps: [
+				{ op: "listen", name: "a", unlistens: "b" },
+				{ op: "listen", name: "b" },
+				{ op: "listen", name: "c" },
+				{ op: "set", id: "e1", answer: "none" },
+				{ op: "set", id: "e1", answer: "refused" },
+				{ op: "listen", name: "d", unlistens: "a" },
+				{ op: "set", id: "e1", answer: "unready" },
+				{ op: "set", id: "e1", answer: "none" },
+			],
+		},
+	},
+	{
+		kind: "testkit.providerList",
+		name: "listener-unsubscribes-another",
+		input: {
+			steps: [
+				{ op: "listen", name: "a", unlistens: "b" },
+				{ op: "listen", name: "b" },
+				{ op: "listen", name: "c", unlistens: "c" },
+				{ op: "listen", name: "d" },
+				{ op: "set", ids: ["x"] },
+				{ op: "set", ids: ["x", "y"] },
+				{ op: "unlisten", name: "b" },
+			],
+		},
+	},
+	{
+		kind: "testkit.modelRegistry",
+		name: "listener-unsubscribes-another",
+		input: {
+			steps: [
+				{ op: "listen", name: "a", unlistens: "b" },
+				{ op: "listen", name: "b" },
+				{ op: "listen", name: "c" },
+				{ op: "setRows", keys: ["r1"] },
+				{ op: "setRows", keys: ["r1", "r2"] },
+				{ op: "record", entry: "e1", id: "openrouter:a/b", label: "L" },
+			],
+		},
+	},
 ];

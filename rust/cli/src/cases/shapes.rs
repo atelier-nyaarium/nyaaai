@@ -4029,6 +4029,7 @@ pub struct TestkitEntryKeysInputStepsItem {
     pub id: Option<String>,
     pub answer: Option<TestkitEntryKeysInputStepsItemAnswer>,
     pub key: Option<String>,
+    pub unlistens: Option<String>,
 }
 
 impl Shape for TestkitEntryKeysInputStepsItem {
@@ -4049,12 +4050,14 @@ impl Shape for TestkitEntryKeysInputStepsItem {
             TestkitEntryKeysInputStepsItemAnswer::decode_at,
         )?;
         let key = shape::optional(object, "key", at, shape::text)?;
+        let unlistens = shape::optional(object, "unlistens", at, shape::text)?;
         Ok(Self {
             op,
             name,
             id,
             answer,
             key,
+            unlistens,
         })
     }
 
@@ -4072,6 +4075,9 @@ impl Shape for TestkitEntryKeysInputStepsItem {
         }
         if let Some(held) = &self.key {
             object.insert("key", Value::from(held.as_str()));
+        }
+        if let Some(held) = &self.unlistens {
+            object.insert("unlistens", Value::from(held.as_str()));
         }
         Value::Object(object)
     }
@@ -4293,6 +4299,7 @@ pub struct TestkitProviderListInputStepsItem {
     pub op: TestkitProviderListInputStepsItemOp,
     pub name: Option<String>,
     pub ids: Option<Vec<String>>,
+    pub unlistens: Option<String>,
 }
 
 impl Shape for TestkitProviderListInputStepsItem {
@@ -4308,7 +4315,13 @@ impl Shape for TestkitProviderListInputStepsItem {
         let ids = shape::optional(object, "ids", at, |value, at| {
             shape::list(value, at, shape::text)
         })?;
-        Ok(Self { op, name, ids })
+        let unlistens = shape::optional(object, "unlistens", at, shape::text)?;
+        Ok(Self {
+            op,
+            name,
+            ids,
+            unlistens,
+        })
     }
 
     fn encode(&self) -> Value {
@@ -4322,6 +4335,9 @@ impl Shape for TestkitProviderListInputStepsItem {
                 "ids",
                 Value::Array(held.iter().map(|held| Value::from(held.as_str())).collect()),
             );
+        }
+        if let Some(held) = &self.unlistens {
+            object.insert("unlistens", Value::from(held.as_str()));
         }
         Value::Object(object)
     }
@@ -4464,6 +4480,7 @@ pub struct TestkitModelRegistryInputStepsItem {
     pub id: Option<String>,
     pub label: Option<String>,
     pub why: Option<String>,
+    pub unlistens: Option<String>,
 }
 
 impl Shape for TestkitModelRegistryInputStepsItem {
@@ -4483,6 +4500,7 @@ impl Shape for TestkitModelRegistryInputStepsItem {
         let id = shape::optional(object, "id", at, shape::text)?;
         let label = shape::optional(object, "label", at, shape::text)?;
         let why = shape::optional(object, "why", at, shape::text)?;
+        let unlistens = shape::optional(object, "unlistens", at, shape::text)?;
         Ok(Self {
             op,
             name,
@@ -4491,6 +4509,7 @@ impl Shape for TestkitModelRegistryInputStepsItem {
             id,
             label,
             why,
+            unlistens,
         })
     }
 
@@ -4517,6 +4536,9 @@ impl Shape for TestkitModelRegistryInputStepsItem {
         }
         if let Some(held) = &self.why {
             object.insert("why", Value::from(held.as_str()));
+        }
+        if let Some(held) = &self.unlistens {
+            object.insert("unlistens", Value::from(held.as_str()));
         }
         Value::Object(object)
     }
@@ -11546,6 +11568,69 @@ impl Shape for ViewCodecFactsResult {
                 self.facts
                     .iter()
                     .map(|held| held.as_ref().map_or(Value::Null, |held| held.encode()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ViewOutputLimitInput {
+    pub texts: Vec<String>,
+}
+
+impl Shape for ViewOutputLimitInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let texts = shape::required(object, "texts", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { texts })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "texts",
+            Value::Array(
+                self.texts
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ViewOutputLimitResult {
+    pub limits: Vec<Option<i64>>,
+}
+
+impl Shape for ViewOutputLimitResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let limits = shape::required(object, "limits", at, |value, at| {
+            shape::list(value, at, |value, at| {
+                shape::nullable(value, at, shape::integer)
+            })
+        })?;
+        Ok(Self { limits })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "limits",
+            Value::Array(
+                self.limits
+                    .iter()
+                    .map(|held| {
+                        held.as_ref()
+                            .map_or(Value::Null, |held| Value::Number(*held as f64))
+                    })
                     .collect(),
             ),
         );

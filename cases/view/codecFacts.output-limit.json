@@ -36,8 +36,7 @@
 					"choice": [],
 					"strict": false
 				},
-				"efforts": [],
-				"outputLimit": 0
+				"efforts": []
 			},
 			{
 				"api": {

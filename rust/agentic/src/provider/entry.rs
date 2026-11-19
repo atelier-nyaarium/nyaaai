@@ -23,8 +23,9 @@ static ENTRY_ID: LazyLock<Pattern> =
 
 const LABEL_CHARS: usize = 120;
 
+/// A word-character id; `__proto__` is no id.
 pub fn is_entry_id(value: &str) -> bool {
-    ENTRY_ID.test(value)
+    value != "__proto__" && ENTRY_ID.test(value)
 }
 
 /// The entry's secret key under the consumer's namespace.
@@ -63,7 +64,7 @@ pub fn same_origin(left: Option<&str>, right: Option<&str>) -> bool {
     held.is_some() && held == origin(right)
 }
 
-/// Parse a provider entry.
+/// Parse a provider entry; the label counts UTF-16 units.
 pub fn parse_entry(value: &Value) -> Option<ProviderEntry> {
     let raw = value.as_object()?;
     let kind = raw

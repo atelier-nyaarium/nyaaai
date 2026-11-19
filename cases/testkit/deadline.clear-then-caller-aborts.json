@@ -1,0 +1,88 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.deadline",
+	"name": "clear-then-caller-aborts",
+	"input": {
+		"startMs": 0,
+		"steps": [
+			{
+				"op": "caller",
+				"id": "c"
+			},
+			{
+				"op": "deadline",
+				"id": "d",
+				"ms": 50,
+				"caller": "c"
+			},
+			{
+				"op": "clear",
+				"id": "d"
+			},
+			{
+				"op": "abortCaller",
+				"id": "c"
+			},
+			{
+				"op": "advance",
+				"ms": 100
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 0,
+				"waiting": [],
+				"deadlines": []
+			},
+			{
+				"nowMs": 0,
+				"waiting": [
+					"schedule-1"
+				],
+				"deadlines": [
+					{
+						"id": "d",
+						"aborted": false,
+						"ended": null
+					}
+				]
+			},
+			{
+				"nowMs": 0,
+				"waiting": [],
+				"deadlines": [
+					{
+						"id": "d",
+						"aborted": false,
+						"ended": null
+					}
+				]
+			},
+			{
+				"nowMs": 0,
+				"waiting": [],
+				"deadlines": [
+					{
+						"id": "d",
+						"aborted": false,
+						"ended": null
+					}
+				]
+			},
+			{
+				"nowMs": 100,
+				"waiting": [],
+				"deadlines": [
+					{
+						"id": "d",
+						"aborted": false,
+						"ended": null
+					}
+				]
+			}
+		]
+	}
+}

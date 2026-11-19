@@ -3,6 +3,26 @@
 import type { CaseSource } from "../caseAdapter";
 
 /** Hosts the primitive leaves to the platform's IDNA and percent decoding. */
+/** Hosts the platform refuses for invalid punycode; the primitive keeps a label as written. */
+export const PUNYCODE_URLS = [
+	"http://xn--/",
+	"http://xn--a/x",
+	"ftp://u@xn--a:8080/",
+	"http://ok.xn--a./",
+	"http://xn--/?q#f",
+];
+
+/** Schemes named like members of `Object.prototype`: no special scheme. */
+export const PROTOTYPE_URLS = [
+	"constructor://h/x",
+	"CONSTRUCTOR://h:81/x",
+	"constructor:h",
+	"valueOf://h/x",
+	"toString://h/x",
+	"hasOwnProperty://h/",
+	"isPrototypeOf://h/",
+];
+
 export const UNREAD_URLS = ["http://\u{e9}xample.com/", "http://ex%41mple.com/"];
 
 export const ORIGIN_URLS = [
@@ -311,6 +331,10 @@ export const FUZZED_PATHS = fuzzedPaths(1500);
 export const urlCases: CaseSource[] = [
 	{ kind: "url.origin", name: "origins", input: { urls: ORIGIN_URLS } },
 	{ kind: "url.origin", name: "fuzzed", input: { urls: FUZZED_URLS } },
+	{ kind: "url.origin", name: "prototype-schemes", input: { urls: PROTOTYPE_URLS } },
+	{ kind: "url.parts", name: "prototype-schemes", input: { urls: PROTOTYPE_URLS } },
+	{ kind: "url.origin", name: "punycode-kept", input: { urls: PUNYCODE_URLS } },
+	{ kind: "url.parts", name: "punycode-kept", input: { urls: PUNYCODE_URLS } },
 	{ kind: "url.parts", name: "parts", input: { urls: PART_URLS } },
 	{ kind: "url.parts", name: "origins", input: { urls: ORIGIN_URLS } },
 	{ kind: "url.parts", name: "fuzzed-paths", input: { urls: FUZZED_PATHS } },

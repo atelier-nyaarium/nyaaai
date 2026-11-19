@@ -163,7 +163,7 @@ function ipv6Text(pieces: number[]): string {
 		.join(":")}`;
 }
 
-/** The host as URLs write it, or undefined. */
+/** The host as URLs write it, or undefined; an `xn--` label is kept unchecked. */
 function hostOf(raw: string): string | undefined {
 	if (raw.startsWith("[")) {
 		if (!raw.endsWith("]")) return undefined;
@@ -298,7 +298,7 @@ export function parseUrl(text: string): UrlParts | undefined {
 		if (!isAlpha(unit) && !isDigit(unit) && scheme[at] !== "+" && scheme[at] !== "-" && scheme[at] !== ".")
 			return undefined;
 	}
-	const defaultPort = SPECIAL_PORTS[scheme];
+	const defaultPort = Object.hasOwn(SPECIAL_PORTS, scheme) ? SPECIAL_PORTS[scheme] : undefined;
 	if (defaultPort === undefined) return undefined;
 	let at = colon + 1;
 	while (at < url.length && isSlash(url[at] as string)) at += 1;

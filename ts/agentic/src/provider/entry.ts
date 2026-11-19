@@ -21,8 +21,9 @@ const LABEL_CHARS = 120;
 ////////////////////////////////
 //  Functions & Helpers
 
+/** A word-character id; `__proto__` is no id. */
 export function isEntryId(value: unknown): value is string {
-	return typeof value === "string" && ENTRY_ID.test(value);
+	return typeof value === "string" && value !== "__proto__" && ENTRY_ID.test(value);
 }
 
 /** The entry's secret key under the consumer's namespace. */
@@ -61,7 +62,7 @@ export function sameOrigin(left: string | undefined, right: string | undefined):
 	return origin(left) !== undefined && origin(left) === origin(right);
 }
 
-/** Parse a provider entry. */
+/** Parse a provider entry; the label counts UTF-16 units. */
 export function parseEntry(value: unknown): ProviderEntry | undefined {
 	if (typeof value !== "object" || value === null || Array.isArray(value)) return undefined;
 	const raw = value as Record<string, unknown>;

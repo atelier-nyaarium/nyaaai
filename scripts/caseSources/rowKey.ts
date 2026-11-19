@@ -168,6 +168,14 @@ export const rowKeyCases: CaseSource[] = [
 		},
 	},
 	parses("values", VALUES),
+	parses("local-entry-proto", ["local:__proto__/t", "local:__proto/t", "local:constructor/t"]),
+	parses("curated-lookalike-with-colon-first", [
+		"anthropic:claude-opus-5.5",
+		"openai:gpt-6-luna",
+		"deepseek:deepseek-v4.1-flash",
+		"openai/gpt-6-luna:extended",
+		"moonshotai:kimi-k3/x",
+	]),
 	parses(
 		"local-tags",
 		TAGS.map(([, tag]) => labTag(tag)),

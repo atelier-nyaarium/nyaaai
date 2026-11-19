@@ -1,0 +1,86 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.modelRegistry",
+	"name": "listener-unsubscribes-another",
+	"input": {
+		"steps": [
+			{
+				"op": "listen",
+				"name": "a",
+				"unlistens": "b"
+			},
+			{
+				"op": "listen",
+				"name": "b"
+			},
+			{
+				"op": "listen",
+				"name": "c"
+			},
+			{
+				"op": "setRows",
+				"keys": [
+					"r1"
+				]
+			},
+			{
+				"op": "setRows",
+				"keys": [
+					"r1",
+					"r2"
+				]
+			},
+			{
+				"op": "record",
+				"entry": "e1",
+				"id": "openrouter:a/b",
+				"label": "L"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"heard": [],
+				"reads": 0,
+				"written": 0
+			},
+			{
+				"heard": [],
+				"reads": 0,
+				"written": 0
+			},
+			{
+				"heard": [],
+				"reads": 0,
+				"written": 0
+			},
+			{
+				"heard": [
+					"a",
+					"c"
+				],
+				"reads": 0,
+				"written": 0
+			},
+			{
+				"heard": [
+					"a",
+					"c"
+				],
+				"reads": 0,
+				"written": 0
+			},
+			{
+				"heard": [
+					"a",
+					"c"
+				],
+				"outcome": null,
+				"reads": 0,
+				"written": 1
+			}
+		]
+	}
+}

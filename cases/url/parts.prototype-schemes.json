@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "url.parts",
+	"name": "prototype-schemes",
+	"input": {
+		"urls": [
+			"constructor://h/x",
+			"CONSTRUCTOR://h:81/x",
+			"constructor:h",
+			"valueOf://h/x",
+			"toString://h/x",
+			"hasOwnProperty://h/",
+			"isPrototypeOf://h/"
+		]
+	},
+	"expected": {
+		"parts": [
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null
+		]
+	}
+}

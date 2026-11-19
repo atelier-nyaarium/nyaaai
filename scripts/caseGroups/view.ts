@@ -1,5 +1,6 @@
 import { MODELS } from "@nyaaai/agentic/models/curated";
 import { codecFactsOf, runEffort, tiersOf, unknownView } from "@nyaaai/agentic/models/view";
+import { parseJson } from "@nyaaai/contract/json";
 import { z } from "@nyaaai/contract/shape";
 import { ModelView, Price, PriceTier } from "@nyaaai/contract/shapes/model";
 import { ApiFacts, CodecFacts, Effort } from "@nyaaai/contract/shapes/step";
@@ -86,6 +87,19 @@ export const view = caseGroup("view", {
 			z.object({ facts: z.array(CodecFacts.nullable()) }),
 			(input) => ({
 				facts: input.views.map((spec) => codecFactsOf(spec === null ? undefined : viewOf(spec)) ?? null),
+			}),
+		),
+		/** Each text is a JSON number, so an overflow can be cased; null: no limit is sent. */
+		outputLimit: kind(
+			z.object({ texts: z.array(z.string()) }),
+			z.object({ limits: z.array(z.int().nullable()) }),
+			(input) => ({
+				limits: input.texts.map((text) => {
+					const limit = parseJson(text);
+					if (typeof limit !== "number") throw new Error(`${text} is not a number.`);
+					const view = viewOf({ reasoning: false, status: "ok", efforts: [], outputLimit: limit });
+					return codecFactsOf(view)?.outputLimit ?? null;
+				}),
 			}),
 		),
 		/** Null stands for an absent view or an absent wish, and for a result of none. */

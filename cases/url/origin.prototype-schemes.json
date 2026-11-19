@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "url.origin",
+	"name": "prototype-schemes",
+	"input": {
+		"urls": [
+			"constructor://h/x",
+			"CONSTRUCTOR://h:81/x",
+			"constructor:h",
+			"valueOf://h/x",
+			"toString://h/x",
+			"hasOwnProperty://h/",
+			"isPrototypeOf://h/"
+		]
+	},
+	"expected": {
+		"origins": [
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null
+		]
+	}
+}

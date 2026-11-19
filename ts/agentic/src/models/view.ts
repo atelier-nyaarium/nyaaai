@@ -22,13 +22,20 @@ export function tiersOf(view: Pick<ModelView, "price"> | undefined): readonly Pr
 	return typeof view?.price === "object" ? view.price.tiers : undefined;
 }
 
+/** A whole limit; none when not finite or below one, capped at the largest safe integer. */
+function usableLimit(limit: number | undefined): number | undefined {
+	if (limit === undefined || !Number.isFinite(limit) || limit < 1) return undefined;
+	return Math.min(Math.floor(limit), Number.MAX_SAFE_INTEGER);
+}
+
 /** What a Chat codec reads of a view. */
 export function codecFactsOf(view: ModelView | undefined): CodecFacts | undefined {
 	if (view === undefined) return undefined;
+	const outputLimit = usableLimit(view.outputLimit);
 	return {
 		api: view.api ?? NO_API,
 		efforts: view.efforts,
-		...(view.outputLimit === undefined ? {} : { outputLimit: view.outputLimit }),
+		...(outputLimit === undefined ? {} : { outputLimit }),
 		...(view.price === "free" ? { free: true } : {}),
 	};
 }

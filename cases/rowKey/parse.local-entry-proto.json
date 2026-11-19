@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "rowKey.parse",
+	"name": "local-entry-proto",
+	"input": {
+		"values": [
+			"local:__proto__/t",
+			"local:__proto/t",
+			"local:constructor/t"
+		]
+	},
+	"expected": {
+		"identities": [
+			null,
+			{
+				"kind": "local",
+				"entry": "__proto",
+				"tag": "t"
+			},
+			{
+				"kind": "local",
+				"entry": "constructor",
+				"tag": "t"
+			}
+		]
+	}
+}

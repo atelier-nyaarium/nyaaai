@@ -73,17 +73,24 @@ pub fn retention_of(plan: ProviderPlan, id: &str) -> Option<Retention> {
         ProviderPlan::Go => &GO,
         ProviderPlan::Payg => &PAYG,
     };
+    longest(table, id)
+}
+
+/// Exact key first; of two prefixes of one length the first listed wins.
+fn longest(table: &[(&str, Retention)], id: &str) -> Option<Retention> {
     if let Some((_, held)) = table.iter().find(|(key, _)| *key == id) {
         return Some(*held);
     }
-    table
-        .iter()
-        .filter(|(key, _)| {
-            key.strip_suffix('*')
-                .is_some_and(|prefix| id.starts_with(prefix))
-        })
-        .max_by_key(|(key, _)| key.len())
-        .map(|(_, held)| *held)
+    let mut best: Option<(usize, Retention)> = None;
+    for (key, held) in table {
+        let matches = key
+            .strip_suffix('*')
+            .is_some_and(|prefix| id.starts_with(prefix));
+        if matches && best.is_none_or(|(length, _)| key.len() > length) {
+            best = Some((key.len(), *held));
+        }
+    }
+    best.map(|(_, held)| held)
 }
 
 pub fn is_zdr(plan: ProviderPlan, id: &str, now: i64) -> bool {
@@ -95,5 +102,20 @@ pub fn is_zdr(plan: ProviderPlan, id: &str, now: i64) -> bool {
         Some(until) => {
             parse_iso_time(&format!("{until}T00:00:00Z")).is_some_and(|end| now < end + DAY_MS)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn the_first_of_two_equal_prefixes_wins() {
+        let table = [("ab*", ZERO), ("a*", KEPT), ("ac*", KEPT), ("ab*", KEPT)];
+        assert_eq!(longest(&table, "abc"), Some(ZERO));
+        assert_eq!(longest(&table, "acd"), Some(KEPT));
+        assert_eq!(longest(&table, "ad"), Some(KEPT));
+        assert_eq!(longest(&table, "b"), None);
+        assert_eq!(longest(&table, "ab*"), Some(ZERO));
     }
 }

@@ -1,0 +1,20 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parse",
+	"name": "id-proto-like",
+	"input": {
+		"value": {
+			"id": "__proto",
+			"kind": "openrouter",
+			"label": "OpenRouter"
+		}
+	},
+	"expected": {
+		"entry": {
+			"id": "__proto",
+			"kind": "openrouter",
+			"label": "OpenRouter"
+		}
+	}
+}

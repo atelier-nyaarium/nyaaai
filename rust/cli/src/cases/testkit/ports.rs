@@ -30,6 +30,17 @@ fn locked<T>(mutex: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
         .unwrap_or_else(|poisoned| poisoned.into_inner())
 }
 
+type Stops = Arc<Mutex<HashMap<String, Unsubscribe>>>;
+
+/// Stops the named listener, when there is one.
+fn stop_named(stops: &Stops, name: &Option<String>) {
+    let Some(name) = name else { return };
+    let taken = locked(stops).remove(name);
+    if let Some(stop) = taken {
+        stop();
+    }
+}
+
 fn drained<T>(held: &Mutex<Vec<T>>) -> Vec<T> {
     std::mem::take(&mut *locked(held))
 }
@@ -98,7 +109,7 @@ fn entry_of(id: &str) -> ProviderEntry {
 pub fn entry_keys(input: TestkitEntryKeysInput) -> Outcome<TestkitEntryKeysResult> {
     block_on(async move {
         let keys = ScriptedEntryKeys::new();
-        let mut stops: HashMap<String, Unsubscribe> = HashMap::new();
+        let stops: Stops = Arc::new(Mutex::new(HashMap::new()));
         let heard = Arc::new(Mutex::new(Vec::<(String, String)>::new()));
         let mut steps = Vec::new();
         for step in &input.steps {
@@ -109,17 +120,15 @@ pub fn entry_keys(input: TestkitEntryKeysInput) -> Outcome<TestkitEntryKeysResul
                 TestkitEntryKeysInputStepsItemOp::Listen => {
                     let heard = Arc::clone(&heard);
                     let held = name.clone();
-                    stops.insert(
-                        name,
-                        keys.on_change(Box::new(move |changed| {
-                            locked(&heard).push((held.clone(), changed.to_owned()));
-                        })),
-                    );
+                    let (others, unlistens) = (Arc::clone(&stops), step.unlistens.clone());
+                    let stop = keys.on_change(Box::new(move |changed| {
+                        locked(&heard).push((held.clone(), changed.to_owned()));
+                        stop_named(&others, &unlistens);
+                    }));
+                    locked(&stops).insert(name, stop);
                 }
                 TestkitEntryKeysInputStepsItemOp::Unlisten => {
-                    if let Some(stop) = stops.remove(&name) {
-                        stop();
-                    }
+                    stop_named(&stops, &Some(name.clone()));
                 }
                 TestkitEntryKeysInputStepsItemOp::Set => {
                     let answer = match step.answer {
@@ -160,7 +169,7 @@ pub fn entry_keys(input: TestkitEntryKeysInput) -> Outcome<TestkitEntryKeysResul
 
 pub fn provider_list(input: TestkitProviderListInput) -> Outcome<TestkitProviderListResult> {
     let list = ScriptedProviderList::new(Vec::new());
-    let mut stops: HashMap<String, Unsubscribe> = HashMap::new();
+    let stops: Stops = Arc::new(Mutex::new(HashMap::new()));
     let heard = Arc::new(Mutex::new(Vec::<String>::new()));
     let mut steps = Vec::new();
     for step in &input.steps {
@@ -170,15 +179,15 @@ pub fn provider_list(input: TestkitProviderListInput) -> Outcome<TestkitProvider
             TestkitProviderListInputStepsItemOp::Listen => {
                 let heard = Arc::clone(&heard);
                 let held = name.clone();
-                stops.insert(
-                    name,
-                    list.on_change(Box::new(move || locked(&heard).push(held.clone()))),
-                );
+                let (others, unlistens) = (Arc::clone(&stops), step.unlistens.clone());
+                let stop = list.on_change(Box::new(move || {
+                    locked(&heard).push(held.clone());
+                    stop_named(&others, &unlistens);
+                }));
+                locked(&stops).insert(name, stop);
             }
             TestkitProviderListInputStepsItemOp::Unlisten => {
-                if let Some(stop) = stops.remove(&name) {
-                    stop();
-                }
+                stop_named(&stops, &Some(name.clone()));
             }
             TestkitProviderListInputStepsItemOp::Set => {
                 let held = step.ids.clone().unwrap_or_default();
@@ -200,7 +209,7 @@ pub fn provider_list(input: TestkitProviderListInput) -> Outcome<TestkitProvider
 pub fn model_registry(input: TestkitModelRegistryInput) -> Outcome<TestkitModelRegistryResult> {
     block_on(async move {
         let registry = ScriptedModelRegistry::empty();
-        let mut stops: HashMap<String, Unsubscribe> = HashMap::new();
+        let stops: Stops = Arc::new(Mutex::new(HashMap::new()));
         let heard = Arc::new(Mutex::new(Vec::<String>::new()));
         let mut steps = Vec::new();
         for step in &input.steps {
@@ -212,15 +221,15 @@ pub fn model_registry(input: TestkitModelRegistryInput) -> Outcome<TestkitModelR
                 TestkitModelRegistryInputStepsItemOp::Listen => {
                     let heard = Arc::clone(&heard);
                     let held = name.clone();
-                    stops.insert(
-                        name,
-                        registry.on_change(Box::new(move || locked(&heard).push(held.clone()))),
-                    );
+                    let (others, unlistens) = (Arc::clone(&stops), step.unlistens.clone());
+                    let stop = registry.on_change(Box::new(move || {
+                        locked(&heard).push(held.clone());
+                        stop_named(&others, &unlistens);
+                    }));
+                    locked(&stops).insert(name, stop);
                 }
                 TestkitModelRegistryInputStepsItemOp::Unlisten => {
-                    if let Some(stop) = stops.remove(&name) {
-                        stop();
-                    }
+                    stop_named(&stops, &Some(name.clone()));
                 }
                 TestkitModelRegistryInputStepsItemOp::SetRows => {
                     registry.set_rows(keys.iter().map(|key| row_of(key)).collect());

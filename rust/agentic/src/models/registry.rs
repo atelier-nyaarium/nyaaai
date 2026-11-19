@@ -110,7 +110,7 @@ fn is_curated(key: &str) -> bool {
     MODELS.iter().any(|row| row.key == key)
 }
 
-/// A stored test record; `None` for anything that does not fit.
+/// A stored test record, or `None`; the label counts code points.
 pub fn parse_test_record(value: &Value) -> Option<TestRecord> {
     let raw = value.as_object()?;
     let label = raw

@@ -1,7 +1,7 @@
 //! Millisecond and ISO times.
 
-use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, AtomicI64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicI64, AtomicU8, Ordering};
+use std::sync::{Arc, Mutex};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use crate::cancel::CancelToken;
@@ -109,31 +109,44 @@ pub enum Ended {
 /// Ends at a deadline or with the caller's token. Clear it, or drop it, when done.
 pub struct Deadline {
     token: CancelToken,
+    /// A child of the caller's token; only the caller cancels it.
+    link: Mutex<Option<CancelToken>>,
     timed_out: Arc<AtomicBool>,
+    /// What `ended` answered at the clear: 0 none, 1 deadline, 2 caller.
+    frozen: AtomicU8,
     timer: Option<Scheduled>,
 }
 
 impl Deadline {
-    /// A child of the caller's token.
+    /// Cancelled by the deadline or the caller, until cleared.
     pub fn token(&self) -> &CancelToken {
         &self.token
     }
 
-    /// Which came first; `None` while neither has.
+    /// Which came first; `None` while neither has. A clear keeps the answer it holds.
     pub fn ended(&self) -> Option<Ended> {
         if self.timed_out.load(Ordering::SeqCst) {
-            Some(Ended::Deadline)
-        } else if self.token.is_cancelled() {
-            Some(Ended::Caller)
-        } else {
-            None
+            return Some(Ended::Deadline);
+        }
+        let link = self.link.lock().unwrap_or_else(|held| held.into_inner());
+        match &*link {
+            Some(link) => link.is_cancelled().then_some(Ended::Caller),
+            None => match self.frozen.load(Ordering::SeqCst) {
+                2 => Some(Ended::Caller),
+                _ => None,
+            },
         }
     }
 
-    /// Drops the timer.
+    /// Drops the timer and the caller: a later cancel of the caller does not reach the token.
     pub fn clear(&self) {
         if let Some(timer) = &self.timer {
             timer.cancel();
+        }
+        let ended = self.ended();
+        let mut link = self.link.lock().unwrap_or_else(|held| held.into_inner());
+        if link.take().is_some() && ended == Some(Ended::Caller) {
+            self.frozen.store(2, Ordering::SeqCst);
         }
     }
 }
@@ -146,29 +159,29 @@ impl Drop for Deadline {
 
 /// The first of `ms` and the caller's cancel wins; ties go by schedule order.
 pub fn deadline(scheduler: &dyn Scheduler, ms: i64, caller: &CancelToken) -> Deadline {
-    let token = caller.child();
+    let link = caller.child();
+    let token = link.child();
     let timed_out = Arc::new(AtomicBool::new(false));
-    if token.is_cancelled() {
-        return Deadline {
-            token,
-            timed_out,
-            timer: None,
-        };
-    }
-    let (held, flag) = (token.clone(), Arc::clone(&timed_out));
-    let timer = scheduler.schedule(
-        ms,
-        Box::new(move || {
-            if !held.is_cancelled() {
-                flag.store(true, Ordering::SeqCst);
-                held.cancel();
-            }
-        }),
-    );
+    let timer = if token.is_cancelled() {
+        None
+    } else {
+        let (held, flag) = (token.clone(), Arc::clone(&timed_out));
+        Some(scheduler.schedule(
+            ms,
+            Box::new(move || {
+                if !held.is_cancelled() {
+                    flag.store(true, Ordering::SeqCst);
+                    held.cancel();
+                }
+            }),
+        ))
+    };
     Deadline {
         token,
+        link: Mutex::new(Some(link)),
         timed_out,
-        timer: Some(timer),
+        frozen: AtomicU8::new(0),
+        timer,
     }
 }
 

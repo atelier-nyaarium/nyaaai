@@ -1,0 +1,84 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "testkit.providerList",
+	"name": "listener-unsubscribes-another",
+	"input": {
+		"steps": [
+			{
+				"op": "listen",
+				"name": "a",
+				"unlistens": "b"
+			},
+			{
+				"op": "listen",
+				"name": "b"
+			},
+			{
+				"op": "listen",
+				"name": "c",
+				"unlistens": "c"
+			},
+			{
+				"op": "listen",
+				"name": "d"
+			},
+			{
+				"op": "set",
+				"ids": [
+					"x"
+				]
+			},
+			{
+				"op": "set",
+				"ids": [
+					"x",
+					"y"
+				]
+			},
+			{
+				"op": "unlisten",
+				"name": "b"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"heard": [],
+				"reads": 0
+			},
+			{
+				"heard": [],
+				"reads": 0
+			},
+			{
+				"heard": [],
+				"reads": 0
+			},
+			{
+				"heard": [],
+				"reads": 0
+			},
+			{
+				"heard": [
+					"a",
+					"c",
+					"d"
+				],
+				"reads": 0
+			},
+			{
+				"heard": [
+					"a",
+					"d"
+				],
+				"reads": 0
+			},
+			{
+				"heard": [],
+				"reads": 0
+			}
+		]
+	}
+}

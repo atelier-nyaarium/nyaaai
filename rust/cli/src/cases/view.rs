@@ -4,6 +4,7 @@ use nyaaai_agentic::models::curated::MODELS;
 use nyaaai_agentic::models::view::{
     codec_facts_of, run_effort as effort_of, tiers_of, unknown_view,
 };
+use nyaaai_contract::json::{Value, parse_json};
 use nyaaai_contract::shape::Shape;
 use nyaaai_contract::shapes::model::{ModelView, ModelViewPrice, ModelViewStatus};
 use nyaaai_contract::shapes::step::{ApiFacts, Effort};
@@ -99,6 +100,28 @@ pub fn codec_facts(input: ViewCodecFactsInput) -> Outcome<ViewCodecFactsResult> 
         })
         .collect::<Outcome<Vec<_>>>()?;
     Ok(ViewCodecFactsResult { facts })
+}
+
+pub fn output_limit(input: ViewOutputLimitInput) -> Outcome<ViewOutputLimitResult> {
+    let limits = input
+        .texts
+        .iter()
+        .map(|text| match parse_json(text) {
+            Some(Value::Number(limit)) => {
+                let view = view_of(Spec {
+                    reasoning: false,
+                    status: ModelViewStatus::Ok,
+                    efforts: Vec::new(),
+                    output_limit: Some(limit),
+                    price: None,
+                    api: None,
+                });
+                Ok(codec_facts_of(Some(&view)).and_then(|facts| facts.output_limit))
+            }
+            _ => Err(format!("{text} is not a number.")),
+        })
+        .collect::<Outcome<Vec<_>>>()?;
+    Ok(ViewOutputLimitResult { limits })
 }
 
 pub fn run_effort(input: ViewRunEffortInput) -> Outcome<ViewRunEffortResult> {

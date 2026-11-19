@@ -1,7 +1,15 @@
 import { expect, it } from "bun:test";
 import { hasControl } from "@nyaaai/contract/text";
 import { originOf, parseUrl } from "@nyaaai/contract/url";
-import { FUZZED_PATHS, FUZZED_URLS, ORIGIN_URLS, PART_URLS, UNREAD_URLS } from "../caseSources/url";
+import {
+	FUZZED_PATHS,
+	FUZZED_URLS,
+	ORIGIN_URLS,
+	PART_URLS,
+	PROTOTYPE_URLS,
+	PUNYCODE_URLS,
+	UNREAD_URLS,
+} from "../caseSources/url";
 
 /** The platform's origin, or undefined when it has none. */
 function platformOrigin(text: string): string | undefined {
@@ -59,7 +67,7 @@ function ownParts(text: string): Record<string, unknown> | undefined {
 }
 
 it("parts read as the platform's URL reads them", () => {
-	const wrong = [...PART_URLS, ...ORIGIN_URLS, ...FUZZED_URLS, ...FUZZED_PATHS]
+	const wrong = [...PART_URLS, ...PROTOTYPE_URLS, ...ORIGIN_URLS, ...FUZZED_URLS, ...FUZZED_PATHS]
 		.filter((text) => !UNREAD_URLS.includes(text))
 		.filter((text) => JSON.stringify(ownParts(text)) !== JSON.stringify(platformParts(text)));
 	expect(wrong).toEqual([]);
@@ -76,4 +84,11 @@ it("a lone surrogate is not a control character", () => {
 	expect(hasControl("\u{D800}")).toBe(false);
 	expect(hasControl("a\u{DC00}")).toBe(false);
 	expect(hasControl("a\u{D800}\u{80}")).toBe(true);
+});
+
+it("keeps an xn-- label the platform refuses, as written", () => {
+	for (const text of PUNYCODE_URLS) {
+		expect(platformParts(text), text).toBeUndefined();
+		expect(parseUrl(text), text).toBeDefined();
+	}
 });

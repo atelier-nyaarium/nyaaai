@@ -1,0 +1,29 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.parseList",
+	"name": "list-proto-id-dropped",
+	"input": {
+		"value": [
+			{
+				"id": "__proto__",
+				"kind": "openrouter",
+				"label": "x"
+			},
+			{
+				"id": "or1",
+				"kind": "openrouter",
+				"label": "OpenRouter"
+			}
+		]
+	},
+	"expected": {
+		"entries": [
+			{
+				"id": "or1",
+				"kind": "openrouter",
+				"label": "OpenRouter"
+			}
+		]
+	}
+}

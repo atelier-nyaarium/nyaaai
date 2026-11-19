@@ -1,0 +1,16 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "view.outputLimit",
+	"name": "fraction",
+	"input": {
+		"texts": [
+			"4096.7"
+		]
+	},
+	"expected": {
+		"limits": [
+			4096
+		]
+	}
+}
