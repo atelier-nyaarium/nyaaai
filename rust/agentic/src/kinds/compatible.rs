@@ -122,8 +122,7 @@ pub fn terms_of(entry: &EntryFields) -> Terms {
     }
 }
 
-/// A bare origin means `/v1`; built from the parsed origin and path. A URL that does not read, or
-/// carries a query, a fragment or credentials, is refused.
+/// A bare origin means `/v1`; a query, fragment or credentials refuse.
 pub fn base_of(url: &str) -> Result<String, String> {
     let plain = parse_url(url).filter(|parts| {
         parts.query.is_empty()

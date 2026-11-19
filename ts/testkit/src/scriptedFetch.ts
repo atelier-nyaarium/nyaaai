@@ -40,13 +40,7 @@ export interface ScriptedFetch {
 ////////////////////////////////
 //  Functions & Helpers
 
-/**
- * Plays exchanges in order, spending wheel time, on one lane: a request holds it from its turn
- * until its body ends, fails or is cancelled (the iterator's `return`, or the signal's abort).
- * Later requests wait in arrival order and are seen (recorded, timed) at their turn; a request
- * whose signal has ended when its turn comes, or ends while it waits, is refused with its reason,
- * unrecorded and with no time spent. A body neither read to its end nor cancelled holds the lane.
- */
+/** Plays exchanges in order on one lane; a body neither read nor cancelled holds it. */
 export function scriptedFetch(exchanges: readonly ScriptedExchange[], wheel: TimerWheel): ScriptedFetch {
 	const requests: FetchRequest[] = [];
 	const served = exchanges.map(() => 0);
@@ -55,7 +49,7 @@ export function scriptedFetch(exchanges: readonly ScriptedExchange[], wheel: Tim
 	let waits = 0;
 	const line: Array<{ signal: AbortSignal; go: () => void; refuse: () => void }> = [];
 
-	/** The lane goes to the first waiter whose signal has not ended; the others are refused unseen. */
+	/** The lane goes to the first live waiter; the others are refused unseen. */
 	const hand = () => {
 		for (;;) {
 			const waiter = line.shift();

@@ -1,4 +1,4 @@
-// Readers of loose catalog JSON: a field of the wrong type is missing.
+// Readers of loose catalog JSON.
 
 ////////////////////////////////
 //  Interfaces & Types

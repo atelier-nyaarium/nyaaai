@@ -100,7 +100,7 @@ export function nullableOptionals(schema: Schema): Schema {
 	return out;
 }
 
-/** Drops each null `nullableOptionals` allowed in a tool call; a union node passes as sent. */
+/** Drops nulls `nullableOptionals` allowed; a union node passes as sent. */
 export function withoutNulls(schema: Schema, value: unknown): unknown {
 	if (Array.isArray(value)) {
 		const { items } = schema;
@@ -151,7 +151,7 @@ function closed(schema: Schema): Schema {
 	return out;
 }
 
-/** What a strict `json_schema` sends. An empty field is `.nullable()`, as the model answers it. */
+/** What a strict `json_schema` sends; an empty field is `.nullable()`. */
 export function strictSchema(schema: Schema): Schema {
 	return closed(cleanSchema(schema));
 }

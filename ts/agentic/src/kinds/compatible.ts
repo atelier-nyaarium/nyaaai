@@ -1,4 +1,4 @@
-// OpenAI-compatible servers: the model list, the network a host sits on, the request root.
+// OpenAI-compatible model list, network and base URL.
 
 import { Pattern } from "@nyaaai/contract/pattern";
 import type { EntryFields } from "@nyaaai/contract/shapes/provider";
@@ -10,7 +10,7 @@ import { dataList, fieldsOf, positiveField, textField } from "./readers";
 ////////////////////////////////
 //  Interfaces & Types
 
-/** A model of the list; the widest of the three context fields the servers use. */
+/** A listed model; context is the widest of the servers' fields. */
 export interface ListedModel {
 	id: string;
 	context: number | null;
@@ -21,7 +21,7 @@ export interface ListedModel {
 
 const LIST = "/models";
 
-/** Loopback, private ranges, LAN names; a host as the URL parser wrote it, trailing dot cut. */
+/** Loopback, private ranges and LAN names, trailing dot cut. */
 const PRIVATE_HOST = Pattern.compile(
 	"^(localhost|0\\.0\\.0\\.0|(127|10)\\.[\\d.]+|192\\.168\\.[\\d.]+|172\\.(1[6-9]|2\\d|3[01])\\.[\\d.]+|169\\.254\\.[\\d.]+|100\\.(6[4-9]|[7-9]\\d|1[01]\\d|12[0-7])\\.[\\d.]+|\\[(::1?|f[cd][0-9a-f]{2}:[0-9a-f:]*|fe[89ab][0-9a-f]:[0-9a-f:]*)\\]|[^.[]+|.+\\.(localhost|local|lan|internal|home\\.arpa))$",
 	"i",
@@ -67,7 +67,7 @@ export function server(transport: LocalTransport): LocalServer {
 	};
 }
 
-/** Off this network: no URL, an unreadable one, or a host that is not private. */
+/** No URL, an unreadable one, or a non-private host. */
 export function remote(entry: EntryFields): boolean {
 	if (entry.url === undefined) return true;
 	const parts = parseUrl(entry.url);
@@ -88,7 +88,7 @@ function withoutSlashes(text: string): string {
 	return text.slice(0, end);
 }
 
-/** A bare origin means `/v1`; built from the parsed origin and path, and a URL that does not read, or carries a query, a fragment or credentials, throws. */
+/** A bare origin means `/v1`; an unreadable URL, or one with a query, fragment or credentials, throws. */
 export function baseOf(url: string): string {
 	const parts = parseUrl(url);
 	const plain = parts !== undefined && parts.query === "" && parts.fragment === "";

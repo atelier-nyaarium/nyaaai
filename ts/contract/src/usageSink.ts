@@ -7,7 +7,7 @@ import type { GenerationStats, MeteredCall, UnfilledRecord } from "./shapes/usag
 
 /** Where metered calls and their later stats are written. */
 export interface UsageSink {
-	/** The new record's id; undefined when it was not kept. */
+	/** The record's id; undefined when not kept. */
 	record: (call: MeteredCall) => string | undefined;
 	/** Joins stats to a record by its id. */
 	fill: (id: string, stats: GenerationStats) => void;

@@ -263,7 +263,7 @@ export const kindGroup = caseGroup("kind", {
 				return { facts: input.rows.map((row) => named.facts?.(row.state, entry, row.bill) ?? null) };
 			},
 		),
-		/** A kind's check of its key on a scripted network: the state and the requests. */
+		/** A kind's key check: the state and the requests. */
 		check: kind(
 			z.object({
 				kind: HostedKindName,
@@ -339,7 +339,7 @@ export const kindGroup = caseGroup("kind", {
 				};
 			},
 		),
-		/** What a kind's codec sends for a view, and how it reads failures. */
+		/** A kind's codec: what it sends, how it reads failures. */
 		codec: kind(
 			z.object({
 				kind: HostedKindName,
@@ -437,7 +437,7 @@ export const kindGroup = caseGroup("kind", {
 				};
 			},
 		),
-		/** A kind's route on a scripted network: its catalog, browser and tester as the kind wires them. */
+		/** A kind's route: its catalog, browser and tester. */
 		route: kind(
 			z.object({
 				kind: HostedKindName,

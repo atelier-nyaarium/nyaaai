@@ -19,7 +19,7 @@ pub const KEY_CHECK_MS: i64 = 30_000;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Failed;
 
-/// One check: it ends with the deadline's token. `Ok(None)` is a check that ended without effect.
+/// One check, ended by the deadline's token; `Ok(None)` ended without effect.
 pub type Check = Arc<
     dyn Fn(Arc<Deadline>) -> BoxFuture<'static, Result<Option<KeyState>, Failed>> + Send + Sync,
 >;
@@ -85,10 +85,7 @@ impl KeyReader {
         }
     }
 
-    /// Shows `checking`, then the check's state unless a newer read or a dispose came first; a
-    /// check that fails or outlives its deadline shows `unreachable`. The answer settles when the
-    /// check has ended and been shown or dropped. The check runs on a `tokio` runtime; with none,
-    /// the read shows `unreachable`.
+    /// Shows `checking`, then the state unless a newer read or dispose won; failure, deadline or no runtime shows `unreachable`.
     pub fn read(&self) -> BoxFuture<'static, ()> {
         let abort = CancelToken::new();
         let previous = locked(&self.inner.last).replace(abort.clone());
@@ -145,7 +142,7 @@ impl KeyReader {
         })
     }
 
-    /// A check is running: one a newer read or a dispose dropped counts until it ends.
+    /// Running, counting a dropped check until it ends.
     pub fn busy(&self) -> bool {
         *self.inner.running.borrow() > 0
     }

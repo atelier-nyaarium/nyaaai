@@ -18,8 +18,7 @@ const DAY_MS: i64 = 86_400_000;
 pub trait Clock {
     fn now_ms(&self) -> i64;
 
-    /// Whole minutes east of UTC at that instant; 0 when the zone is unknown. The system clocks
-    /// read the zone once, at first use: a change of the machine's zone is seen after a restart.
+    /// Minutes east of UTC at that instant; 0 when unknown. System clocks read the zone once.
     fn utc_offset_minutes(&self, at_ms: i64) -> i64;
 }
 
@@ -30,7 +29,7 @@ pub struct OffsetFrom {
     pub minutes: i64,
 }
 
-/// The offset of the latest entry at or before `at_ms` (a later entry wins a tie); 0 before the first.
+/// The latest entry's offset at or before `at_ms`; a later entry wins a tie; 0 before the first.
 pub fn scripted_offset(offsets: &[OffsetFrom], at_ms: i64) -> i64 {
     let mut held: Option<&OffsetFrom> = None;
     for offset in offsets {
@@ -41,10 +40,7 @@ pub fn scripted_offset(offsets: &[OffsetFrom], at_ms: i64) -> i64 {
     held.map_or(0, |offset| offset.minutes)
 }
 
-/// The system's time. Its offsets are the process's zone: `TZ`, else `/etc/localtime`, read as the
-/// C library does, once at first use and kept for the life of the process, so a change of the
-/// machine's zone is seen after a restart. A zone that cannot be read, and a platform without TZif
-/// data, are UTC.
+/// The system's time; offsets use `TZ`, else `/etc/localtime`, read once; unreadable is UTC.
 pub struct SystemClock;
 
 fn system_now_ms() -> i64 {
@@ -96,8 +92,7 @@ pub trait Scheduler: Clock + Send + Sync {
     fn schedule(&self, ms: i64, run: Box<dyn FnOnce() + Send>) -> Scheduled;
 }
 
-/// Needs a `tokio` runtime with time enabled; deadlines start at the call. The zone is the
-/// system clock's.
+/// Needs a `tokio` runtime with time enabled; deadlines start at the call.
 pub struct SystemScheduler;
 
 fn wait(ms: i64) -> tokio::time::Sleep {
@@ -146,7 +141,7 @@ pub enum Ended {
     Caller,
 }
 
-/// Ends at a deadline or with the caller's token. Clear it, or drop it, when done.
+/// Ends at a deadline or the caller's cancel; clear or drop it when done.
 pub struct Deadline {
     token: CancelToken,
     /// A child of the caller's token; only the caller cancels it.
@@ -163,7 +158,7 @@ impl Deadline {
         &self.token
     }
 
-    /// Which came first; `None` while neither has. A clear keeps the answer it holds.
+    /// Which came first; `None` while neither has; a clear keeps it.
     pub fn ended(&self) -> Option<Ended> {
         if self.timed_out.load(Ordering::SeqCst) {
             return Some(Ended::Deadline);
@@ -178,7 +173,7 @@ impl Deadline {
         }
     }
 
-    /// Drops the timer and the caller: a later cancel of the caller does not reach the token.
+    /// Drops the timer and the caller; a later caller cancel does not reach the token.
     pub fn clear(&self) {
         if let Some(timer) = &self.timer {
             timer.cancel();
@@ -197,7 +192,7 @@ impl Drop for Deadline {
     }
 }
 
-/// The first of `ms` and the caller's cancel wins; ties go by schedule order.
+/// `ms` or the caller's cancel, first wins; ties go by schedule order.
 pub fn deadline(scheduler: &dyn Scheduler, ms: i64, caller: &CancelToken) -> Deadline {
     let link = caller.child();
     let token = link.child();

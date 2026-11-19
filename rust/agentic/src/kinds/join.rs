@@ -26,8 +26,7 @@ pub async fn join_all<F: Future>(reads: impl IntoIterator<Item = F>) -> Vec<F::O
     done.into_iter().flatten().collect()
 }
 
-/// Starts every read at once, waits for every one to settle, ends none early. Answers the values
-/// in list order, or the first failure in list order.
+/// Waits for every read; answers values in list order, or the first failure.
 pub async fn join_settled<T, E, F: Future<Output = Result<T, E>>>(
     reads: impl IntoIterator<Item = F>,
 ) -> Result<Vec<T>, E> {

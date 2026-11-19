@@ -1,5 +1,4 @@
-// Scrubs recorded traces.
-// Run: bun scripts/convertTrace.ts <trace.jsonl> <out.json>
+// Scrubs recorded traces. Run: bun scripts/convertTrace.ts <trace.jsonl> <out.json>
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { base64Encode } from "@nyaaai/contract/base64";

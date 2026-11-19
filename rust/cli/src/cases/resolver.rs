@@ -1,8 +1,4 @@
 //! Resolver cases.
-//!
-//! The resolver runs over the real kinds, each with a wrapped catalog that lists what the script
-//! says and records when it is stopped. The kinds' own transports talk to a host that answers
-//! every request and records its URL and `Authorization`, so a key's shape and the asked URL show.
 
 use std::collections::HashMap;
 use std::future::Future;
@@ -136,8 +132,7 @@ impl Chunks for Body {
     }
 }
 
-/// A host that answers every request with success, or with the failure it was told to, and
-/// records the URL and `Authorization` of each.
+/// A host that answers success or the told failure, recording each URL and `Authorization`.
 #[derive(Default)]
 struct Host {
     seen: Mutex<Vec<(String, Option<String>)>>,
@@ -214,7 +209,7 @@ impl StreamDecoder for Silent {
     }
 }
 
-/// A candidate's codec, noting the switch it is given; its reads carry nothing.
+/// A candidate's codec, noting its switch; its reads carry nothing.
 struct Probe<'a> {
     inner: &'a dyn Codec,
     zdr_only: Mutex<Option<bool>>,
@@ -253,7 +248,7 @@ impl Codec for Probe<'_> {
 
 type Sent = ResolverRoutesResultStepsItemAnswerSent;
 
-/// A request through a route: what its codec was given and what the host saw.
+/// A request through a route: its codec's input and what the host saw.
 async fn send_through(
     found: &Resolved,
     host: &Host,
@@ -390,7 +385,7 @@ impl EntryCatalog for StubCatalog {
     }
 }
 
-/// The real kind with a stub catalog; its transport is the kind's own.
+/// The real kind with a stub catalog.
 struct Stub {
     real: Arc<dyn ProviderKind>,
     hub: Arc<Hub>,
@@ -487,13 +482,13 @@ fn deps_of(host: &Arc<Host>, scheduler: Arc<FakeScheduler>) -> KindDeps {
     }
 }
 
-/// A key read held at its first call until it is let go.
+/// A key read held at its first call until released.
 struct Gate {
     reached: oneshot::Sender<()>,
     release: oneshot::Receiver<()>,
 }
 
-/// The scripted keys; a failing store answers `unready`, and a read can be held.
+/// The scripted keys; a failing store answers `unready`.
 struct Keys {
     inner: Arc<ScriptedEntryKeys>,
     failing: Vec<String>,
@@ -694,7 +689,7 @@ fn resolve_line(held: &Candidate) -> Outcome<ResolverRoutesResultStepsItemAnswer
     })
 }
 
-/// A nested step (a change or a call of `during`) as a step of its own.
+/// A nested step as a step of its own.
 fn step_of<T: Shape>(held: &T) -> Outcome<ResolverRoutesInputStepsItem> {
     ResolverRoutesInputStepsItem::decode(&held.encode()).map_err(|refused| refused.to_string())
 }
@@ -728,7 +723,7 @@ impl Rig {
         Ok(())
     }
 
-    /// A call on the resolver, or a request through a candidate an earlier step gave.
+    /// A call on the resolver, or through a candidate an earlier step gave.
     async fn called(
         &self,
         held: &mut [Vec<Resolved>],
@@ -1004,7 +999,7 @@ pub fn routes(input: ResolverRoutesInput) -> Outcome<ResolverRoutesResult> {
     })
 }
 
-/// The real OpenRouter kind with a catalog that notes each use it is asked with.
+/// The real OpenRouter kind with a catalog noting each use asked.
 struct Asked {
     real: Arc<dyn ProviderKind>,
     asked: Arc<Mutex<Vec<ModelUse>>>,

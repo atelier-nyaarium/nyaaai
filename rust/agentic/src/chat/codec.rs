@@ -90,7 +90,7 @@ pub fn failure_status(status: HostStatus) -> FailureStatus {
     }
 }
 
-/// The code that picks a category: the HTTP status, else an error's number.
+/// The HTTP status, else an error's number.
 pub fn code_of(status: HostStatus, error: &WireError) -> Option<f64> {
     match status {
         HostStatus::Http(code) => Some(code as f64),
@@ -238,10 +238,7 @@ fn with_last_cached(history: Vec<Value>, mark: &dyn Fn(&str) -> Value) -> Vec<Va
     marked
 }
 
-// State stays last.
-// Implicit caching marks system.
-// Explicit caching marks history.
-// Explicit state is user-role.
+// State last; implicit caching marks system, explicit marks history; explicit state is user-role.
 fn messages_of(
     d: &dyn ChatDialect,
     request: &CanonicalRequest,

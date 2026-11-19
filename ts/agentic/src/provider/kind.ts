@@ -1,4 +1,4 @@
-// What a provider kind gives a host: catalogs, a browser and a tester.
+// What a provider kind gives a host.
 
 import type { Fetch } from "@nyaaai/contract/fetch";
 import type { ModelRegistry } from "@nyaaai/contract/modelRegistry";
@@ -45,7 +45,7 @@ export interface KindDeps {
 export interface CatalogDeps {
 	/** The time, and the deadlines of a fetch. */
 	scheduler: Scheduler;
-	/** Rows; a catalog that caches a join rejoins when this tells a change. */
+	/** Rows; a caching catalog rejoins on change. */
 	rows: Pick<ModelRegistry, "rows" | "onChange">;
 	/** Told after each successful refresh. */
 	refreshed(): void;
@@ -56,7 +56,7 @@ export interface EntryCatalog {
 	/** ZDR-scoped bound rows. */
 	views(use: ModelUse, zdrOnly: boolean, signal?: AbortSignal): Promise<ModelView[]>;
 	rediscover?(): void;
-	/** Answers when no refresh or read of this catalog is running, having waited for the one that was. */
+	/** Settles when no refresh or read is running. */
 	idle(): Promise<void>;
 	/** Stops its listening. */
 	dispose?(): void;

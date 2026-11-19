@@ -25,7 +25,7 @@ fn hex_positions(text: &str) -> Vec<usize> {
     found
 }
 
-/// Base64 after `lead` zero bytes, unpadded: the run to the end, and the characters holding only the secret's bits.
+/// Unpadded base64 after `lead` zero bytes: the full run, and the characters holding only secret bits.
 fn shifted(secret: &[u8], lead: usize) -> (String, String) {
     let mut padded = vec![0u8; lead];
     padded.extend_from_slice(secret);
@@ -38,7 +38,7 @@ fn shifted(secret: &[u8], lead: usize) -> (String, String) {
     (full.to_owned(), core.to_owned())
 }
 
-/// The secret as is, path-encoded (hex digits in either case), and its base64 at each byte alignment.
+/// Plain, path-encoded in either hex case, and base64 at each byte alignment.
 pub fn secret_spellings(secret: &str) -> Vec<Spelling> {
     if secret.is_empty() {
         return Vec::new();
@@ -119,7 +119,7 @@ pub fn leaks_spelling(text: &str, spellings: &[Spelling]) -> bool {
     (0..chars.len()).any(|at| longest_at(&chars, at, &held) > 0)
 }
 
-/// One pass: each longest match becomes `[key]`, and what was written is never read again.
+/// One pass: longest matches become `[key]`; replacements are never rescanned.
 pub fn scrub_spellings(text: &str, spellings: &[Spelling]) -> String {
     let chars: Vec<char> = text.chars().collect();
     let held = prepared(spellings);

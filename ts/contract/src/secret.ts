@@ -29,7 +29,7 @@ function hexPositions(text: string): number[] {
 	return found;
 }
 
-/** Base64 of the bytes after `lead` zero bytes, unpadded, from the first character that holds only secret bits. */
+/** Unpadded base64 after `lead` zero bytes, from the first character holding only secret bits. */
 function shifted(secret: Uint8Array, lead: number): { core: string; full: string } {
 	const padded = new Uint8Array(lead + secret.length);
 	padded.set(secret, lead);
@@ -42,10 +42,7 @@ function shifted(secret: Uint8Array, lead: number): { core: string; full: string
 	return { full: text.slice(from), core: text.slice(from, to) };
 }
 
-/**
- * The secret as is, path-encoded (hex digits in either case), and its base64 at each byte alignment:
- * the unpadded form up to the end of the text, and the characters that hold only its bits.
- */
+/** Plain, path-encoded in either hex case, and base64 at each byte alignment. */
 export function secretSpellings(secret: string): Spelling[] {
 	if (secret.length === 0) return [];
 	const bytes = UTF8.encode(secret);
@@ -93,7 +90,7 @@ export function leaksSpelling(text: string, spellings: readonly Spelling[]): boo
 	return false;
 }
 
-/** One pass: each longest match becomes `[key]`, and what was written is never read again. */
+/** One pass: longest matches become `[key]`; replacements are never rescanned. */
 export function scrubSpellings(text: string, spellings: readonly Spelling[]): string {
 	let out = "";
 	let from = 0;

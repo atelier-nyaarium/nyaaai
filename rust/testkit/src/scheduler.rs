@@ -218,7 +218,7 @@ impl Scheduler for FakeScheduler {
         Box::pin(async move {
             let mut woken = woken;
             let mut cancelled = pin!(cancel.cancelled());
-            // A timer taken off the wheel by its tag leaves the sleep pending.
+            // A timer removed by tag leaves the sleep pending.
             let mut gone = false;
             poll_fn(|context| {
                 if !gone {

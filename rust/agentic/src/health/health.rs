@@ -240,7 +240,7 @@ impl<T> Future for Caught<T> {
     }
 }
 
-/// Runs the future up to its first wait now, as the start of an `async` function does.
+/// Runs the future to its first wait immediately.
 fn eager<F>(future: F) -> BoxFuture<'static, F::Output>
 where
     F: Future + Send + 'static,
@@ -296,8 +296,7 @@ impl Core {
         }
     }
 
-    /// Tells each entry's parts once, in the shape's order, in the order the changes were made: a
-    /// change a listener makes is told behind those already waiting.
+    /// Tells parts in shape order, then change order; a listener's change queues behind.
     fn flush(&self) {
         let held = std::mem::take(&mut locked(&self.state).pending);
         if self.disposed.load(Ordering::SeqCst) {

@@ -24,7 +24,7 @@ fn path_text(refused: &Refused) -> String {
         .join(".")
 }
 
-/// A copy of `value` with `to` set where the path says; a dot goes one level in.
+/// A copy of `value` with `to` at the path; a dot goes one level in.
 fn set_at(value: &Value, path: &[&str], to: f64) -> Value {
     let Some((first, rest)) = path.split_first() else {
         return Value::Number(to);

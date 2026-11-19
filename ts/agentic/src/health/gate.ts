@@ -175,10 +175,7 @@ export class ProviderGate {
 		});
 	}
 
-	/**
-	 * Every admitted ticket settles once. A success of a request admitted earlier resets the give-up
-	 * count even while the gate is paused or probing. A ticket of another gate does nothing.
-	 */
+	/** Settles each ticket once; an earlier request's success resets the give-up count even while paused. */
 	settle(ticket: Ticket, outcome: GateOutcome, retryAfterMs?: number): GateSettled {
 		if (this.disposed || ticket.gate !== this.id) return "done";
 		const gate = this.models.get(ticket.model);
@@ -222,7 +219,7 @@ export class ProviderGate {
 		return sortedTexts(held);
 	}
 
-	/** Told a model whose gate turned ready or not ready; the result unsubscribes. */
+	/** Told when a model's gate turns ready or not; returns unsubscribe. */
 	onChange(listener: (model: string) => void): () => void {
 		this.listeners.add(listener);
 		return () => {
@@ -331,7 +328,7 @@ export class ProviderGate {
 		};
 	}
 
-	/** Runs a change of one gate and tells when it turned ready or not. */
+	/** Runs a gate change and tells if readiness flipped. */
 	private shifting<T>(model: string, gate: ModelGate, run: () => T): T {
 		const was = readyOf(gate);
 		const result = run();
@@ -351,7 +348,7 @@ export class ProviderGate {
 		}
 	}
 
-	/** Runs a change, then the callbacks it made, in order; a callback's own calls queue behind them. */
+	/** Runs a change, then its callbacks in order; nested calls queue behind. */
 	private act<T>(run: () => T): T {
 		this.depth += 1;
 		let result: T;

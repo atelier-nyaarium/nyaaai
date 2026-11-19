@@ -7,7 +7,7 @@ import { usageCases } from "../caseSources/usage";
 
 const Offsets = z.array(z.object({ fromMs: z.int(), minutes: z.int() }));
 
-/** Values a text cannot carry, put where a path says before the call is used. */
+/** Non-finite values set at paths before the call is used. */
 const NonFinite = z.array(z.object({ path: z.string(), is: z.enum(["notANumber", "plusInfinity", "minusInfinity"]) }));
 
 const FLOATS = {
@@ -16,7 +16,7 @@ const FLOATS = {
 	minusInfinity: Number.NEGATIVE_INFINITY,
 };
 
-/** A copy of `value` with each path set to its non-finite number; a dot goes one level in. */
+/** `value` copied with each path set to its non-finite number; a dot goes one level in. */
 function withNonFinite(value: unknown, set: z.output<typeof NonFinite>): unknown {
 	const held = structuredClone(value) as Record<string, unknown>;
 	for (const { path, is } of set) {
@@ -32,11 +32,7 @@ const pathText = (path: ReadonlyArray<string | number>): string => path.join("."
 
 export const usage = caseGroup("usage", {
 	kinds: {
-		/**
-		 * `call` is a metered call as the meter hands it, which may hold nulls and, through `nonFinite`, numbers a
-		 * text cannot carry. `refusedAt` is the path of the first field the shape refuses, joined by dots; the
-		 * record, its line and the day are then null. `day` is the day `nowMs` falls on under `offsets`.
-		 */
+		/** `call` is a metered call, with nulls and `nonFinite` numbers. `refusedAt` is the dotted path of the first refused field; record, line and day are then null. `day` is the day `nowMs` falls on under `offsets`. */
 		record: kind(
 			z.object({
 				call: z.unknown(),
@@ -80,7 +76,7 @@ export const usage = caseGroup("usage", {
 				return { line: built.value, refusedAt: null, text: lineText(built.value) };
 			},
 		),
-		/** A day file's text read: what fits, and how many lines with text were dropped. */
+		/** A day file read: what fits, and lines dropped. */
 		lines: kind(
 			z.object({ text: z.string() }),
 			z.object({ lines: z.array(UsageLine), dropped: z.int() }),

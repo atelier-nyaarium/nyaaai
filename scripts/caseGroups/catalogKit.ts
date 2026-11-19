@@ -1,4 +1,4 @@
-// What the catalog, browse and kind groups share: rows by key, a scripted network and a view line.
+// Shared by the catalog, browse and kind groups: rows, a scripted network, a view line.
 
 import { OPENROUTER_CHAT } from "@nyaaai/agentic/dialects/openrouter";
 import { MODELS } from "@nyaaai/agentic/models/curated";
@@ -17,7 +17,7 @@ import { type ScriptedExchange, scriptedFetch } from "@nyaaai/testkit/scriptedFe
 ////////////////////////////////
 //  Shapes
 
-/** One reply of the scripted network. `json` is the body, `text` raw text instead. */
+/** A scripted reply; `json` is the body, `text` raw instead. */
 export const NetExchange = z.object({
 	status: z.int(),
 	json: z.unknown().exactOptional(),

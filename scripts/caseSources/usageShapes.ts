@@ -21,7 +21,7 @@ export const CALL_LINES: string[] = [
 	'{"call":{"id":"call-3","at":1794528003000,"feature":"analysis","lane":"summary","model":"vendor/model-b","entry":"e2","ms":15,"cost":0,"estimated":true}}',
 ];
 
-/** A text cut mid-pair: the contract reads a lone surrogate as U+FFFD, which the old reader kept. */
+/** A text cut mid-pair: the contract reads a lone surrogate as U+FFFD. */
 export const SURROGATE_LINE = '{"call":{"id":"call-9","at":1,"feature":"\\ud800","model":"m\\udc00x","ms":1,"cost":0}}';
 
 export const STATS_LINES: string[] = [

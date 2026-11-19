@@ -1,4 +1,4 @@
-// What a request's lifecycle tells while it runs: one entry per effect, in the order it happened.
+// Lifecycle entries: one per effect, in order.
 
 import { shapeSet, z } from "../shape";
 import { Admission, ErrorStatus, GateOutcome, GateSettled, GateWaiting, Notice } from "./health";
@@ -9,13 +9,9 @@ import { MeteredCall } from "./usage";
 ////////////////////////////////
 //  Shapes
 
-/**
- * One effect of a run. A run tells its entries to the sink it was given, one at a time, in the
- * order the effects happened; with no sink none is built. An entry holds data only. `entry` is
- * an entry id and `model` a model key.
- */
+/** One effect of a run, told to the sink in order; `entry` is an entry id, `model` a model key. */
 export const TraceEntry = z.discriminatedUnion("kind", [
-	/** A route passed over before it was tried: dropped by the resolver, deferred by the gate, or failed onward. */
+	/** A route passed over untried: dropped, deferred by the gate, or failed onward. */
 	z.object({
 		kind: z.literal("skip"),
 		cause: z.enum(["passed", "deferred", "fellThrough"]),
@@ -29,9 +25,9 @@ export const TraceEntry = z.discriminatedUnion("kind", [
 	z.object({ kind: z.literal("released"), entry: z.string() }),
 	/** What the gate answered an admission. */
 	z.object({ kind: z.literal("admitted"), entry: z.string(), admission: Admission }),
-	/** Zero retention came on after admission and the route keeps data: the route is not sent to. */
+	/** Zero retention began after admission and the route keeps data; it is not sent to. */
 	z.object({ kind: z.literal("kept"), entry: z.string(), model: z.string() }),
-	/** A send begins. `attempt` counts the route's tries; `again` is an admission after an overload; the count does not move when an overload is tried again. */
+	/** A send begins. `attempt` counts the route's tries, not repeats after an overload; `again` marks that admission. */
 	z.object({
 		kind: z.literal("attempt"),
 		entry: z.string(),
@@ -49,10 +45,7 @@ export const TraceEntry = z.discriminatedUnion("kind", [
 		reply: z.enum(["ok", "failed"]),
 		usage: NormalizedUsage.exactOptional(),
 	}),
-	/**
-	 * A send failed. `disposition` is absent for an overload, which the lifecycle handles before it
-	 * asks the kind; `fresh` is false after streamed output; `onward` says a route follows.
-	 */
+	/** A send failed. `disposition` is absent for an overload; `fresh` is false after streamed output. */
 	z.object({
 		kind: z.literal("failure"),
 		entry: z.string(),

@@ -21,11 +21,11 @@ fn locked<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
         .unwrap_or_else(|poisoned| poisoned.into_inner())
 }
 
-/// What the script knows of its requests: who waits in each model's queue, and who just stopped.
+/// What the script knows of its requests: queues and who just stopped.
 #[derive(Default)]
 struct Mirror {
     tokens: HashMap<String, CancelToken>,
-    /// Each model's waiting requests in the gate's queue order, models in the order first queued.
+    /// Each model's waiting requests in queue order, models in first-queued order.
     queues: Vec<(String, Vec<String>)>,
     /// Requests whose abort just resolved them.
     stopped: Vec<String>,
@@ -84,7 +84,7 @@ fn gate_of(state: GateState) -> GateRunResultStepsItemGatesItemGate {
     }
 }
 
-/// Takes the answer of a request the gate has settled; the request ends here.
+/// Takes a settled request's answer; the request ends here.
 fn resolve(
     pending: &mut HashMap<String, BoxFuture<'static, Admission>>,
     request: &str,
@@ -262,7 +262,7 @@ async fn play(input: GateRunInput) -> Outcome<GateRunResult> {
                 disposed = true;
             }
         }
-        // Whatever the gate released left its queue from the front; its promises are resolved.
+        // Released requests left their queue front; their promises are resolved.
         let held: Vec<String> = {
             let names: Vec<String> = locked(&mirror)
                 .queues

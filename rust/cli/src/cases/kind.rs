@@ -150,7 +150,7 @@ fn hosted_entry(name: ProviderKindName, label: &str, plan: Option<ProviderPlan>)
     }
 }
 
-/// The kinds of a table, in the order given; none given reads `KINDS`.
+/// The kinds of a table; none given reads `KINDS`.
 fn table_of(names: &Option<Vec<ProviderKindName>>) -> Vec<Arc<dyn ProviderKind>> {
     let Some(names) = names else {
         return KINDS.clone();

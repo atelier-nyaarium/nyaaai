@@ -73,7 +73,7 @@ fn empty_registry() -> Arc<ScriptedModelRegistry> {
     Arc::new(ScriptedModelRegistry::empty())
 }
 
-/// Plays the steps on a browser and its tester, over the network of `net`.
+/// Plays the steps on a browser and tester over `net`.
 async fn drive(
     net: &Net,
     browser: &dyn Browser,

@@ -1,5 +1,4 @@
-// What a local kind builds and says: its Settings line, its codec, how it reads a failure.
-// Every value is made up.
+// What a local kind builds and says.
 
 import type { CaseSource } from "../caseAdapter";
 import { caseOf } from "./catalogKit";

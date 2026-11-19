@@ -265,7 +265,7 @@ struct SinkState {
     unfilled_asks: Vec<i64>,
 }
 
-/// A usage sink the test scripts: it keeps what it is given, in order.
+/// A scripted usage sink; it keeps what it is given.
 #[derive(Default)]
 pub struct ScriptedUsageSink {
     state: Mutex<SinkState>,
@@ -276,7 +276,7 @@ impl ScriptedUsageSink {
         Self::default()
     }
 
-    /// The ids `record` answers, in order, replacing what is left; none once they run out.
+    /// Ids `record` answers, in order; none once they run out.
     pub fn set_ids(&self, ids: Vec<String>) {
         locked(&self.state).ids = ids.into();
     }
@@ -286,13 +286,12 @@ impl ScriptedUsageSink {
         locked(&self.state).none = none;
     }
 
-    /// Ids that count as filled, like those `fill` was given; only a recorded id whose call is not
-    /// before the ask answers true.
+    /// Ids that count as filled, plus recorded ids whose call is not before the ask.
     pub fn set_filled(&self, ids: Vec<String>) {
         locked(&self.state).named.extend(ids);
     }
 
-    /// What `unfilled` lists, less the rows before its `since` and the ids filled by the same rule.
+    /// What `unfilled` lists, less rows before its `since` and ids filled likewise.
     pub fn set_unfilled(&self, rows: Vec<UnfilledRecord>) {
         locked(&self.state).rows = rows;
     }
@@ -329,7 +328,7 @@ impl ScriptedUsageSink {
 }
 
 impl SinkState {
-    /// As a log answers: a recorded id, named, whose call is not before `at`.
+    /// A log's answer: a recorded id whose call is not before `at`.
     fn is_filled(&self, id: &str, at: f64) -> bool {
         self.named.contains(id) && self.kept.get(id).is_some_and(|call| call.at >= at)
     }

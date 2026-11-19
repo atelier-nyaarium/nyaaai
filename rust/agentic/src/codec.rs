@@ -16,12 +16,11 @@ pub enum Mode {
     Complete,
 }
 
-/// Pushed one SSE item at a time. Events an item completes are appended
-/// to `events`, kept when the item then fails.
+/// Fed one SSE item at a time; events from a failing item are kept.
 pub trait StreamDecoder: Send {
     fn push(&mut self, item: &SseItem, events: &mut Vec<StepEvent>) -> Result<(), ProviderError>;
 
-    /// Whether the decoder reads no further item: after an end marker or a failure.
+    /// True after an end marker or a failure.
     fn over(&self) -> bool;
 
     /// The input ended: an early end throws `ProviderError`.

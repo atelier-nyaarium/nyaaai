@@ -8,10 +8,7 @@ import { costCases } from "../caseSources/cost";
 
 export const cost = caseGroup("cost", {
 	kinds: {
-		/**
-		 * `price` is the model's listing: absent when the model is not listed, else a price, `free` or
-		 * `unknown`. `longCache` is the call's ask for one-hour cache writes.
-		 */
+		/** `price`: absent when unlisted, else a price, `free` or `unknown`. `longCache` asks for one-hour cache writes. */
 		step: kind(
 			z.object({
 				rows: z.array(
@@ -49,7 +46,7 @@ export const cost = caseGroup("cost", {
 			z.object({ values: z.array(z.number().nullable()) }),
 			(input) => ({ values: input.rows.map((row) => reportedCost(row) ?? null) }),
 		),
-		/** `view`: null for no view, else what the listing says of one-hour cache writes. */
+		/** `view`: null for none, else the listing's word on one-hour cache writes. */
 		longCache: kind(
 			z.object({
 				rows: z.array(

@@ -37,7 +37,7 @@ import { isZdr, retentionOf } from "./retention";
 ////////////////////////////////
 //  Interfaces & Types
 
-/** One API a model is served on. A missing, null or mistyped field is null. */
+/** One API a model is served on; bad fields are null. */
 export interface OpenCodeApi {
 	family: ApiFamily;
 	/** The thought text field. */
@@ -53,7 +53,7 @@ export interface OpenCodeCache {
 	explicit: boolean;
 }
 
-/** What a plan's list says of one model; a missing, null or mistyped field is null. */
+/** One model of a plan's list; bad fields are null. */
 export interface OpenCodeModel {
 	id: string;
 	name: string | null;
@@ -170,7 +170,7 @@ export function parseOpenCodeModel(item: unknown): OpenCodeModel | undefined {
 	};
 }
 
-/** Undefined when the body holds no list; a later model of an id replaces the earlier in its place. */
+/** Undefined without a list; a repeated id replaces the earlier in place. */
 export function parseOpenCode(raw: unknown): Map<string, OpenCodeModel> | undefined {
 	const list = dataList(raw);
 	if (list === undefined) return undefined;
@@ -425,7 +425,7 @@ export class OpenCodeCatalog implements EntryCatalog {
 		return this.good?.models;
 	}
 
-	/** Answers when no refresh is running, having waited for the one that was. */
+	/** Settles when no refresh is running. */
 	async idle(): Promise<void> {
 		while (this.inflight !== undefined) await this.inflight;
 	}

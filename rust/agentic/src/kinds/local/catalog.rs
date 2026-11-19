@@ -391,7 +391,7 @@ fn discovering(shared: &Arc<Shared>) -> Waiter<Models> {
     shared.fetcher.refresh_now(|| refresh(shared, known))
 }
 
-/// A reply was seen for a tag: reread an unprobed model, or learn its loaded context.
+/// A reply for a tag: reread an unprobed model, or learn its loaded context.
 fn settled(shared: &Arc<Shared>, tag: &str) {
     let model = shared
         .fetcher

@@ -90,7 +90,7 @@ struct State {
 
 /// What an operation did, done in order once no lock is held.
 enum Effect {
-    /// An answer to a waiter; a ticket in it is told once the waiter has it.
+    /// Answers a waiter; a ticket in it is told once the waiter has it.
     Hand(oneshot::Sender<Admission>, Admission),
     /// A ticket an admission returns at once.
     Made(Ticket),
@@ -319,7 +319,7 @@ fn sweep(state: &mut State, effects: &mut Vec<Effect>) {
 }
 
 impl Core {
-    /// Runs one operation, then the effects it made, in order; an effect's own calls queue behind.
+    /// Runs an operation, then its effects in order; effect calls queue behind.
     fn act<T>(self: &Arc<Self>, run: impl FnOnce(&mut Machine<'_>) -> T) -> T {
         let mut effects = Vec::new();
         let result = {
@@ -548,9 +548,7 @@ impl ProviderGate {
         }
     }
 
-    /// Retries get front priority. The turn in the queue is taken at the call; the answer comes
-    /// later. A cancelled waiter is released at the next gate call, or at once when a runtime is
-    /// current; one whose future was dropped leaves the queue the same way and takes no turn.
+    /// Retries go first; a cancelled or dropped waiter leaves the queue and takes no turn.
     pub fn admit(
         &self,
         model: &str,
@@ -620,7 +618,7 @@ impl ProviderGate {
         let weak: Weak<Core> = Arc::downgrade(&self.core);
         let cancel = cancel.clone();
         runtime.spawn(async move {
-            // The waiter ending first drops its mark, and the cancel is no longer watched.
+            // The waiter ending first ends the cancel watch.
             if cancel.run_until(watched).await.is_none()
                 && let Some(core) = weak.upgrade()
             {
@@ -706,9 +704,7 @@ impl ProviderGate {
         });
     }
 
-    /// Every admitted ticket settles once. A success of a request admitted earlier resets the
-    /// give-up count even while the gate is paused or probing. A ticket of another gate does
-    /// nothing, and a settle never makes a model's gate.
+    /// An earlier request's success resets the give-up count even while paused; another gate's ticket does nothing.
     pub fn settle(
         &self,
         ticket: &Ticket,

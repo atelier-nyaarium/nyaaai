@@ -1,5 +1,4 @@
-// Records a real provider exchange as a trace. Paid: run by hand.
-// Run: bun scripts/record.ts openrouter [tool-loop|title|no-zdr]   (the key on standard input)
+// Records a real provider exchange as a trace. Paid: run by hand, key on stdin.
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";

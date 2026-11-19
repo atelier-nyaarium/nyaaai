@@ -1,7 +1,4 @@
-// Server and flow cases: a kind's own requests, and its catalog, browser and tester on a scripted network.
-// Every value is made up.
-//
-// A network script lists the replies in the order the requests go out, whatever they ask.
+// Local kind server and flow cases on a scripted network.
 
 import type { CaseSource } from "../caseAdapter";
 import { failing, NOW, refused, reply } from "./catalogKit";

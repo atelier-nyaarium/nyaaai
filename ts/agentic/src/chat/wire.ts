@@ -152,7 +152,7 @@ function stringAt(raw: Json, key: string): string | undefined {
 	return typeof value === "string" ? value : undefined;
 }
 
-/** A count or an amount: negative reads as mistyped, negative zero as zero. */
+/** A count or amount; negative is mistyped. */
 function amountAt(raw: Json, key: string): number | undefined {
 	const value = numberOf(raw[key]);
 	return value === undefined || value < 0 ? undefined : value + 0;
@@ -167,7 +167,7 @@ function objectAt(raw: Json, key: string): Json | undefined {
 	return isJson(value) ? value : undefined;
 }
 
-/** Absent, null, false, zero and empty text are no error; a text is the message; other non-objects have none. */
+/** Empty values are no error; a text is the message. */
 function readReplyError(raw: unknown): WireError | undefined {
 	if (raw === undefined || raw === null || raw === false || raw === 0 || raw === "") return undefined;
 	return isJson(raw) || typeof raw === "string" ? readError(raw) : {};

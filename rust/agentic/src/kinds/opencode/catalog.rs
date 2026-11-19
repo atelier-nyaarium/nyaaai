@@ -49,7 +49,7 @@ pub struct OpenCodeCache {
     pub explicit: bool,
 }
 
-/// What a plan's list says of one model; a missing, null or mistyped field is none.
+/// One model of a plan's list; a bad field is none.
 #[derive(Debug, Clone, PartialEq)]
 pub struct OpenCodeModel {
     pub id: String,
@@ -159,7 +159,7 @@ pub fn parse_open_code_model(item: &Value) -> Option<OpenCodeModel> {
     })
 }
 
-/// None when the body holds no list; a later model of an id replaces the earlier in its place.
+/// None without a list; a repeated id replaces in place.
 pub fn parse_open_code(raw: &Value) -> Option<Ordered<OpenCodeModel>> {
     let mut models = Ordered::new();
     for item in data_list(raw)? {

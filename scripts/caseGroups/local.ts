@@ -92,7 +92,7 @@ const Discovered = () =>
 		context: z.number().exactOptional(),
 	});
 
-/** A reply of the scripted server: after `delayMs` of the wheel, it answers or fails. */
+/** A scripted server reply after `delayMs`: answers or fails. */
 const ModelsReply = () =>
 	z.object({
 		models: z.array(ServedModel),
@@ -216,7 +216,7 @@ export function factsOf(
 export const contextsOf = (contexts: ReadonlyMap<string, number>) =>
 	[...contexts].map(([tag, context]) => ({ tag, context }));
 
-/** A view of a made-up row that reads as the codec's facts say. */
+/** A made-up row's view, per the codec's facts. */
 export function viewOfFacts(held: z.infer<ReturnType<typeof CodecView>> | null): ModelView | undefined {
 	if (held === null) return undefined;
 	const row = MODELS[0];
@@ -374,7 +374,7 @@ export const local = caseGroup("local", {
 			z.object({ models: z.array(ServedModel).nullable() }),
 			(input) => ({ models: chatModels(input.body)?.map(lmstudioModel) ?? null }),
 		),
-		/** The loaded contexts of the same list, by key; none when it does not read. */
+		/** The same list's loaded contexts by key; none when unread. */
 		lmstudioLoaded: kind(
 			z.object({ body: z.unknown() }),
 			z.object({ contexts: z.array(LoadedContext) }),
@@ -397,7 +397,7 @@ export const local = caseGroup("local", {
 				};
 			},
 		),
-		/** A listed model with its props, and what the catalog knew of it. */
+		/** A listed model with its props and catalog knowledge. */
 		llamacppModel: kind(
 			z.object({
 				id: z.string(),
@@ -416,7 +416,7 @@ export const local = caseGroup("local", {
 			z.object({ models: z.array(ServedModel).nullable() }),
 			(input) => ({ models: compatibleListed(input.body)?.map(compatibleModel) ?? null }),
 		),
-		/** Whether a URL's host is off this network, and what that means for the entry. */
+		/** Whether a URL's host is off this network. */
 		compatibleTerms: kind(
 			z.object({ urls: z.array(z.string().nullable()) }),
 			z.object({
@@ -431,7 +431,7 @@ export const local = caseGroup("local", {
 				}),
 			}),
 		),
-		/** A kind's check of its server: the state, and the requests it made. */
+		/** A kind's server check: state and requests. */
 		reach: kind(
 			z.object({
 				kind: LocalKindName,
@@ -575,7 +575,7 @@ export const local = caseGroup("local", {
 					}),
 				),
 				waiting: z.array(z.string()),
-				/** What each `refreshed` callback read of the catalog: the tags it saw, or `none`. */
+				/** What each `refreshed` callback read: the tags, or `none`. */
 				saw: z.array(z.string()),
 			}),
 			async (input) => {
@@ -779,7 +779,7 @@ export const local = caseGroup("local", {
 				return { facts: input.states.map((state) => named.facts?.(state, entry, undefined) ?? null) };
 			},
 		),
-		/** What a kind's codec sends for a view, and how it reads failures. */
+		/** A kind's codec: what it sends, how it reads failures. */
 		kindCodec: kind(
 			z.object({
 				kind: LocalKindName,

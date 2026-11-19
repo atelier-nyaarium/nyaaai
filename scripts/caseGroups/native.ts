@@ -130,7 +130,7 @@ export const native = caseGroup("native", {
 			z.object({ errors: z.array(WireError) }),
 			(input) => ({ errors: input.rows.map((row) => wireError(row.status, jsonOf(row.body))) }),
 		),
-		/** The host answers a stream failure with its error's message; billing rides along. */
+		/** The host answers a stream failure with its message and billing. */
 		streamFailure: kind(
 			z.object({ error: WireError, usage: NormalizedUsage.nullable(), serving: Serving }),
 			z.object({ failure: Failure }),

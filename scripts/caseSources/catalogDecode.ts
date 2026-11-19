@@ -52,7 +52,7 @@ type Site = {
 	holds: "text" | "number" | "object" | "list";
 };
 
-/** Every field that falls back, as the old schema had it. */
+/** Every field that falls back. */
 const MODEL_SITES: Site[] = [
 	{ path: ["name"], holds: "text" },
 	{ path: ["created"], holds: "number" },

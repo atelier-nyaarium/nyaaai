@@ -1,5 +1,4 @@
-//! Host time zones, read by hand from TZif files and POSIX rules. The leap seconds of `right/`
-//! zone files are not applied: their transitions read up to 27 seconds off.
+//! Host time zones from TZif files and POSIX rules; `right/` leap seconds are not applied.
 
 use std::fs::File;
 use std::io::Read;
@@ -433,8 +432,7 @@ impl Zone {
         }
     }
 
-    /// Reads a TZif file, version 1 from its one block and 2 or later from its 64-bit block and
-    /// footer. Anything malformed, truncated or over `MAX_ZONE_BYTES` is `None`.
+    /// Reads TZif v1 from its block, v2+ from the 64-bit block and footer; bad or oversized is `None`.
     pub fn from_tzif(bytes: &[u8]) -> Option<Self> {
         if bytes.len() as u64 > MAX_ZONE_BYTES {
             return None;
@@ -492,8 +490,7 @@ impl Zone {
     }
 }
 
-/// Reads a zone file; `None` when it is missing, not a regular file, unreadable, over
-/// `MAX_ZONE_BYTES` or not TZif.
+/// Reads a zone file; `None` when missing, irregular, unreadable, oversized or not TZif.
 fn read_zone(path: &Path) -> Option<Zone> {
     // A stat does not block on a pipe or a device, an open can.
     if !std::fs::metadata(path).ok()?.is_file() {
@@ -527,9 +524,7 @@ fn named_zone(name: &str, zone_dir: &Path) -> Option<Zone> {
     read_zone(&found)
 }
 
-/// Finds a zone as the C library does. `tz` is the `TZ` value, if set: empty is UTC, `:name` a zone
-/// file (a path, or a name under `zone_dir`; a bare `:` reads `local_time`), else a name tried as a
-/// file and then read as a POSIX rule. Unset reads the file at `local_time`. A zone that cannot be found or read is UTC.
+/// Finds a zone as the C library does from `TZ`: empty is UTC, `:name` a file, else a file then a rule; unset reads `local_time`; unreadable is UTC.
 pub fn find_zone(tz: Option<&str>, zone_dir: &Path, local_time: &Path) -> Zone {
     let found = match tz {
         None => read_zone(local_time),
@@ -543,9 +538,7 @@ pub fn find_zone(tz: Option<&str>, zone_dir: &Path, local_time: &Path) -> Zone {
     found.unwrap_or_else(Zone::utc)
 }
 
-/// The zone the process runs in: `TZ`, `TZDIR` and `/etc/localtime` as the C library reads them.
-/// Read once, at first use, and kept for the life of the process: a change of the machine's zone is
-/// seen after a restart. A platform without TZif data is UTC.
+/// The process's zone from `TZ`, `TZDIR` and `/etc/localtime`, read once; without TZif data it is UTC.
 pub fn system_zone() -> &'static Zone {
     static ZONE: OnceLock<Zone> = OnceLock::new();
     ZONE.get_or_init(read_system_zone)
@@ -749,7 +742,7 @@ mod tests {
             .footer("EST5EDT,M3.2.0,M11.1.0")
             .zone();
         let at = |text: &str| minutes(&zone, crate::time::parse_iso_time(text).unwrap() / 1000);
-        // The table ends on a standard type; only the footer knows of 2030's summer.
+        // Only the footer knows of 2030's summer.
         assert_eq!(at("2030-07-01T12:00:00Z"), -240);
         assert_eq!(at("2030-01-01T12:00:00Z"), -300);
         assert_eq!(at("2025-07-01T12:00:00Z"), -300);
@@ -815,7 +808,7 @@ mod tests {
         let cut = Zone::from_tzif(&bytes[..bytes.len() - 1]).unwrap();
         let summer = NEW_YEAR + 200 * DAY;
         assert_eq!(minutes(&whole, summer), -240);
-        // No footer: the last transition's type holds, wrong for a zone that still changes.
+        // No footer: the last transition's type holds.
         assert_eq!(minutes(&cut, summer), -300);
         assert_eq!(minutes(&cut, NEW_YEAR - 1), -300);
     }
@@ -921,7 +914,7 @@ mod tests {
         assert_eq!(at_time(&zone, "2026-10-25T00:59:59Z"), -60);
         assert_eq!(at_time(&zone, "2026-10-25T01:00:00Z"), -120);
         let late = rule_zone("EST5EDT,M3.2.0/26,M11.1.0/25");
-        // 26:00 on Sunday March 8 is 02:00 on the Monday; 25:00 EDT on November 1 is 05:00Z the next day.
+        // 26:00 Sunday March 8 is 02:00 Monday; 25:00 EDT November 1 is 05:00Z next day.
         assert_eq!(at_time(&late, "2026-03-09T06:59:59Z"), -300);
         assert_eq!(at_time(&late, "2026-03-09T07:00:00Z"), -240);
         assert_eq!(at_time(&late, "2026-11-02T04:59:59Z"), -240);

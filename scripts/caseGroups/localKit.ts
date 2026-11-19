@@ -1,4 +1,4 @@
-// What the local group shares: shapes, rows, a scripted network over a kind, a scripted server.
+// Shared by the local group: shapes, rows, a scripted network and server.
 
 import { COMPATIBLE, server as compatibleServer } from "@nyaaai/agentic/kinds/compatible";
 import { LLAMACPP, server as llamacppServer } from "@nyaaai/agentic/kinds/llamacpp";

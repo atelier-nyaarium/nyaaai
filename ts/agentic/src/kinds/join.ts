@@ -3,15 +3,12 @@
 ////////////////////////////////
 //  Functions & Helpers
 
-/** Starts every read at once, in list order, and answers in list order; the first failure fails the join. */
+/** Runs all reads at once; answers in list order, the first failure fails. */
 export function joinAll<T>(reads: ReadonlyArray<() => Promise<T>>): Promise<T[]> {
 	return Promise.all(reads.map((read) => read()));
 }
 
-/**
- * Starts every read at once, in list order and waits for every one to settle, ending none early.
- * Answers the values in list order, or the first failure in list order.
- */
+/** Runs all reads at once, waits for all; answers in list order, or the first failure. */
 export async function joinSettled<T>(reads: ReadonlyArray<() => Promise<T>>): Promise<T[]> {
 	const settled = await Promise.allSettled(reads.map((read) => read()));
 	const failed = settled.find((each): each is PromiseRejectedResult => each.status === "rejected");

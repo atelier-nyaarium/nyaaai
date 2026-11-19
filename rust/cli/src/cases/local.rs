@@ -1257,7 +1257,7 @@ pub fn kind_facts(input: LocalKindFactsInput) -> Outcome<LocalKindFactsResult> {
     })
 }
 
-/// A view of a made-up row that reads as the codec's facts say.
+/// A view of a made-up row as the codec's facts say.
 fn view_of_facts(held: &Option<LocalKindCodecInputView>) -> Outcome<Option<ModelView>> {
     let Some(held) = held else {
         return Ok(None);

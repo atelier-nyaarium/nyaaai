@@ -8,7 +8,7 @@ import { keyReaderCases } from "../caseSources/keyReader";
 ////////////////////////////////
 //  Shapes
 
-/** A check is held open by the script: only a step, an abort or the deadline ends it. */
+/** A check ends only by a step, an abort or the deadline. */
 const Step = () =>
 	z.discriminatedUnion("kind", [
 		/** Starts a read, and with it check number `n`, counting from 1. */
@@ -31,7 +31,7 @@ const Outcome = () =>
 		signalled: z.array(z.object({ check: z.int(), by: z.enum(["deadline", "caller"]) })),
 		/** Checks still open: no answer, no failure and no signal yet. */
 		open: z.array(z.int()),
-		/** A check is still running: one that was dropped counts until it ends. */
+		/** Checks still running; a dropped one counts until it ends. */
 		busy: z.boolean(),
 	});
 
@@ -44,7 +44,7 @@ export const keyReader = caseGroup("keyReader", {
 		run: kind(
 			z.object({
 				startMs: z.int(),
-				/** How the checks treat their signal: end on it (default), ignore it, or throw at once. */
+				/** How checks treat their signal: end on it (default), ignore it, or throw. */
 				checks: z.enum(["endOnSignal", "ignoreSignal", "throwAtOnce"]).exactOptional(),
 				steps: z.array(Step()).min(1),
 			}),

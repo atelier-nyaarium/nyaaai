@@ -149,7 +149,7 @@ fn number_at(raw: &Object, key: &str) -> Option<f64> {
     raw.get(key).and_then(number_of)
 }
 
-/// A count or an amount: negative reads as mistyped, negative zero as zero.
+/// Negative reads as mistyped, negative zero as zero.
 fn amount_at(raw: &Object, key: &str) -> Option<f64> {
     number_at(raw, key)
         .filter(|value| *value >= 0.0)
@@ -160,7 +160,7 @@ fn object_at<'a>(raw: &'a Object, key: &str) -> Option<&'a Object> {
     raw.get(key).and_then(Value::as_object)
 }
 
-/// Absent, null, false, zero and empty text are no error; a text is the message; other non-objects have none.
+/// Falsy values are no error; a text is the message; other non-objects have none.
 fn read_reply_error(raw: Option<&Value>) -> Option<WireError> {
     match raw {
         None | Some(Value::Null | Value::Bool(false)) => None,

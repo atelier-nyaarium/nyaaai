@@ -1,4 +1,4 @@
-// Usage record shapes: a call, its stats, and the lines a day file holds.
+// Usage record shapes.
 
 import { shapeSet, z } from "../shape";
 import { NormalizedUsage } from "./step";
@@ -18,7 +18,7 @@ export type Cost = z.infer<typeof Cost>;
 
 /** Who a model request is for. */
 export const CallTag = z.object({
-	/** Any text; the page labels the known ones. An empty one is refused when the call is recorded. */
+	/** Any text; an empty one is refused at recording. */
 	feature: z.string(),
 	/** The Analysis purpose or the tester check. */
 	lane: z.string().exactOptional(),

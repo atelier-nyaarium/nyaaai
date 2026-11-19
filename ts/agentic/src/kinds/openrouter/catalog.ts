@@ -253,7 +253,7 @@ export function parseEndpoint(item: unknown): Endpoint | undefined {
 	};
 }
 
-/** Undefined when the body holds no list; a later entry of an id replaces the earlier in its place. */
+/** Undefined without a list; a repeated id replaces the earlier in place. */
 export function parseModels(raw: unknown): Map<string, ModelEntry> | undefined {
 	const list = dataList(raw);
 	if (list === undefined) return undefined;
@@ -403,7 +403,7 @@ export class ModelCatalog {
 		this.unsubscribe();
 	}
 
-	/** Answers when no refresh is running, having waited for the one that was. */
+	/** Settles when no refresh is running. */
 	async idle(): Promise<void> {
 		while (this.inflight !== undefined) await this.inflight;
 	}
@@ -451,7 +451,7 @@ export class ModelCatalog {
 		return this.inflight;
 	}
 
-	/** Reuses the views until the rows, the data, the flag or a removal date changes. */
+	/** Reuses views until rows, data, flag or a removal date change. */
 	private join(data: Fetched | undefined, use: ModelUse, zdrOnly: boolean): ModelView[] {
 		const now = this.d.scheduler.nowMs();
 		const known = this.joined.get(canonicalJson(use));

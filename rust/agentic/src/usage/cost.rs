@@ -17,8 +17,7 @@ fn count(value: f64) -> f64 {
     if value >= 0.0 { value } else { 0.0 }
 }
 
-/// None when the provider's own charge is missing for a BYOK reply, or the sum passes the largest
-/// number.
+/// None for a BYOK reply missing its charge, or a sum past the largest number.
 pub fn reported_cost(usage: &NormalizedUsage) -> Option<f64> {
     let account = price(usage.cost);
     if account.is_none() || usage.byok != Some(true) {

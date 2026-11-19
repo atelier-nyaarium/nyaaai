@@ -17,7 +17,7 @@ fn convert<From: Shape, To: Shape>(held: &From) -> Outcome<To> {
     To::decode(&held.encode()).map_err(|refused| refused.to_string())
 }
 
-/// The parts of a view the helpers read; its row is made up.
+/// What the helpers read of a view; its row is made up.
 struct Spec {
     reasoning: bool,
     status: ModelViewStatus,

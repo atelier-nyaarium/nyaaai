@@ -51,7 +51,7 @@ const LifeKeyAnswer = z.discriminatedUnion("kind", [
 	z.object({ kind: z.literal("unready") }),
 ]);
 
-/** What the network does for one request: its head, its body in chunks of text, and how it ends. */
+/** One request's reply: head, body chunks, ending. */
 const LifeReply = z.object({
 	status: z.int(),
 	headers: HeaderList,
@@ -65,17 +65,17 @@ const LifeReply = z.object({
 	error: z.string().exactOptional(),
 });
 
-/** What a catalog lists of a row for an entry; a row not named is listed `ok`. */
+/** What a catalog lists of a row; an unnamed row is `ok`. */
 const LifeListing = z.object({
 	/** The catalog has no view of the row. */
 	unlisted: z.literal(true).exactOptional(),
-	/** Only hosts that keep data serve it: `noZdrHost` while the switch is on, `dataKept` while off. */
+	/** Only data-keeping hosts serve it: `noZdrHost` with the switch on, `dataKept` off. */
 	keeps: z.literal(true).exactOptional(),
 	price: z.union([Price, z.literal("free"), z.literal("unknown")]).exactOptional(),
 	cacheWrite1h: z.literal(true).exactOptional(),
 });
 
-/** A request through the lifecycle. A call is named so a later step can abort it. */
+/** A request, named so a later step can abort it. */
 const LifeSend = z.object({
 	kind: z.literal("send"),
 	call: z.string(),
@@ -91,7 +91,7 @@ const LifeSend = z.object({
 	tag: CallTag,
 	/** A deadline of the call's own, from the call's start. */
 	deadlineMs: z.int().min(0).exactOptional(),
-	/** The send throws this message as a plain error, before it asks the network. */
+	/** The send throws this as a plain error before the network. */
 	throws: z.string().exactOptional(),
 	/** The caller's abort, after this much wheel time. */
 	abortAfterMs: z.int().min(0).exactOptional(),
@@ -189,7 +189,7 @@ const REQUEST: CanonicalRequest = {
 
 const UTF8 = new TextEncoder();
 
-/** Key checks always pass: the lifecycle cases are not about reaching a server. */
+/** Key checks always pass. */
 const checked = (named: ProviderKind): ProviderKind => ({ ...named, check: async () => ({ kind: "ok" }) });
 
 ////////////////////////////////
@@ -236,12 +236,7 @@ interface Slot {
 export const lifecycle = caseGroup("lifecycle", {
 	shapes: { LifeKeyAnswer, LifeReply, LifeListing, LifeStep, LifeAnswer, LifeResult, LifeTold, LifeCall, LifeSeen },
 	kinds: {
-		/**
-		 * A request lifecycle over a real health and gate, a resolver on scripted ports and the real kinds'
-		 * transports, a meter over a scripted usage sink, and one scripted network on the wheel. Each step
-		 * runs the calls it set going until each has ended or is parked: sleeping on the scheduler or held
-		 * by the gate.
-		 */
+		/** A request lifecycle over real health and gate, scripted ports and network; each step runs calls until ended or parked. */
 		run: kind(
 			z.object({
 				startMs: z.int(),
@@ -259,7 +254,7 @@ export const lifecycle = caseGroup("lifecycle", {
 				/** What each entry's catalog lists, by entry id, then row key. */
 				listings: z.record(z.string(), z.record(z.string(), LifeListing)),
 				zdrOnly: z.boolean(),
-				/** The ids the usage sink answers, in order; none once they run out. */
+				/** Usage sink ids in order; none after they run out. */
 				usageIds: z.array(z.string()).exactOptional(),
 				/** What the network answers, in the order requests reach it. */
 				exchanges: z.array(LifeReply),
@@ -389,7 +384,7 @@ export const lifecycle = caseGroup("lifecycle", {
 					zdrOnly: () => zdr,
 				});
 
-				// What each gate's queue holds, front first, to see which call a change released.
+				// Queues front first, to see what a change released.
 				const queues = new Map<string, { route: Resolved; slots: Slot[] }>();
 				const unqueue = (slot: Slot) => {
 					for (const held of queues.values()) held.slots = held.slots.filter((each) => each !== slot);

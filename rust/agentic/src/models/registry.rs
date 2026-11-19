@@ -1,4 +1,4 @@
-//! The stored model registry: test records, added rows, hidden families and the lists a pick reads.
+//! Stored model registry: test records, added rows, hidden families, pick lists.
 
 use std::collections::HashSet;
 use std::sync::LazyLock;

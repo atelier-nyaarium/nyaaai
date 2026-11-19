@@ -72,13 +72,13 @@ const CHANGES = [
 	z.object({ kind: z.literal("zdr"), on: z.boolean() }),
 ] as const;
 
-/** A call on the resolver, or a request through a route it gave. */
+/** A resolver call, or a request through one of its routes. */
 const CALLS = [
 	z.object({ kind: z.literal("routes"), model: z.string(), use: ModelUse }),
 	z.object({ kind: z.literal("resolve"), model: z.string(), use: ModelUse }),
 	z.object({ kind: z.literal("rows"), use: ModelUse }),
 	z.object({ kind: z.literal("candidates"), use: ModelUse }),
-	/** A request through a candidate an earlier `routes` or `resolve` step answered; `fail` is what the host answers it. */
+	/** A request through an earlier candidate; `fail` is the host's answer. */
 	z.object({
 		kind: z.literal("send"),
 		from: z.int().min(0),
@@ -97,7 +97,7 @@ const RouteStep = () =>
 		/** The route of an entry is asked for directly. */
 		z.object({ kind: z.literal("route"), entry: ProviderEntry }),
 		z.object({ kind: z.literal("dispose") }),
-		/** A call whose first key read is held while the changes are made, then let go. */
+		/** A call whose first key read is held during the changes. */
 		z.object({
 			kind: z.literal("during"),
 			changes: z.array(z.discriminatedUnion("kind", CHANGES)),
@@ -123,7 +123,7 @@ const StepAnswer = () =>
 			served: z.array(z.object({ key: z.string(), status: ViewStatus, via: Via })),
 		}),
 		z.object({ kind: z.literal("changed") }),
-		/** What the host saw of a request: the switch the codec was given, the URL and the key sent. */
+		/** What the host saw: the switch, URL and key. */
 		z.object({
 			kind: z.literal("sent"),
 			zdrOnly: z.boolean().nullable(),
@@ -170,7 +170,7 @@ interface Seen {
 
 const UTF8 = new TextEncoder();
 
-/** A host that answers every request with success, or with the failure it was told to. */
+/** A host answering success, or the failure it was told to. */
 function echoHost(seen: Seen[], failing: { status: number; body: unknown } | undefined = undefined) {
 	const holder = { next: failing };
 	const fetch: Fetch = async (request: FetchRequest) => {
@@ -202,7 +202,7 @@ function echoHost(seen: Seen[], failing: { status: number; body: unknown } | und
 
 const NOTHING: StepResult = { parts: [], finish: "stop", serving: {} };
 
-/** A request through a route: what its codec was given and what the host saw. */
+/** A request through a route: the codec's input and the host's view. */
 async function sendThrough(
 	found: Resolved,
 	seen: Seen[],
@@ -268,7 +268,7 @@ const candidateOf = (resolved: Resolved): z.infer<typeof Candidate> => ({
 
 export const resolver = caseGroup("resolver", {
 	kinds: {
-		/** What a key answer says of an entry, for a key kind and a URL kind. */
+		/** What a key answer says of an entry, per key kind and URL kind. */
 		reach: kind(
 			z.object({
 				rows: z.array(z.object({ field: z.enum(["key", "url"]), answer: KeyAnswerIn })),
@@ -282,7 +282,7 @@ export const resolver = caseGroup("resolver", {
 			z.object({ keys: z.array(z.string()) }),
 			(input) => ({ keys: input.entries.map(routeKey) }),
 		),
-		/** One route's key: it answers only while the list holds the entry at the URL the route was made for. */
+		/** A route's key; answers only while the list holds the entry at its URL. */
 		keySource: kind(
 			z.object({
 				/** The entry the route was made for. */
@@ -381,7 +381,7 @@ export const resolver = caseGroup("resolver", {
 				};
 			},
 		),
-		/** The uses a catalog is asked with when each call of the resolver takes one: the value, never a name. */
+		/** The uses catalogs were asked with: the value, never a name. */
 		uses: kind(
 			z.object({ rows: z.array(z.string()), uses: z.array(ModelUse) }),
 			z.object({
@@ -444,7 +444,7 @@ export const resolver = caseGroup("resolver", {
 				return { calls };
 			},
 		),
-		/** A resolver over scripted ports and kinds with stub catalogs, driven by a script. */
+		/** A resolver over scripted ports, kinds and stub catalogs. */
 		routes: kind(
 			z.object({
 				entries: z.array(ProviderEntry),
@@ -456,7 +456,7 @@ export const resolver = caseGroup("resolver", {
 				rows: z.array(z.string()),
 				/** The kinds the resolver holds. */
 				kinds: z.array(ProviderKindName),
-				/** What each entry's catalog lists, per row key; a row not named is listed `ok`. */
+				/** Each entry's catalog listing by row key; an unnamed row is `ok`. */
 				listings: z.record(z.string(), z.record(z.string(), Listing)),
 				/** Entries whose catalog fails when stopped. */
 				disposeFails: z.array(z.string()).exactOptional(),
@@ -475,7 +475,7 @@ export const resolver = caseGroup("resolver", {
 						disposed: z.int(),
 					}),
 				),
-				/** The transports made, by label; those of one step in the list's order. */
+				/** Transports made, by label; one step's in list order. */
 				transports: z.array(z.string()),
 				/** The catalogs stopped, in order, by label. */
 				stopped: z.array(z.string()),

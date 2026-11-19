@@ -22,7 +22,7 @@ export function price(value: unknown): number | undefined {
 /** A count below zero, or no number, is zero. */
 const count = (value: number): number => (value >= 0 ? value : 0);
 
-/** None when the provider's own charge is missing for a BYOK reply, or the sum passes the largest number. */
+/** None when a BYOK reply lacks the provider's charge, or the sum overflows. */
 export function reportedCost(usage: Pick<NormalizedUsage, "cost" | "byok" | "upstreamCost">): number | undefined {
 	const account = price(usage.cost);
 	if (account === undefined || usage.byok !== true) return account;
@@ -58,7 +58,7 @@ export function stepCost(usage: NormalizedUsage | undefined, view?: Pick<ModelVi
 	return { usd: Number.isFinite(total) ? total : fee, estimated: true };
 }
 
-/** Only user chat pays for 1-hour writes; other features keep the default TTL. */
+/** Only user chat pays for 1-hour writes. */
 export function wantsLongCache(tag: CallTag, view: Pick<ModelView, "cacheWrite1h"> | undefined): boolean {
 	return tag.feature === "chat" && view?.cacheWrite1h === true;
 }

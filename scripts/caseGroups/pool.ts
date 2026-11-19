@@ -13,7 +13,7 @@ import { poolCases } from "../caseSources/pool";
 
 export const pool = caseGroup("pool", {
 	kinds: {
-		/** Each run folds its steps over its start state; `states` holds the state after each step. */
+		/** Steps fold over the start state; `states` holds each result. */
 		step: kind(
 			z.object({
 				pauseMs: z.number(),
@@ -43,10 +43,7 @@ export const pool = caseGroup("pool", {
 			z.object({ verdicts: z.array(PoolVerdict.nullable()) }),
 			(input) => ({ verdicts: input.rows.map((row) => verdict(row.state, row.exempt, row.nowMs) ?? null) }),
 		),
-		/**
-		 * `verdict` and an `admitted` event, both at `nowMs` of the same state. `admitted` is the state after
-		 * the ticket is announced.
-		 */
+		/** `verdict` and an `admitted` event at the same `nowMs`; `admitted` is the state after the ticket is announced. */
 		instant: kind(
 			z.object({
 				rows: z.array(z.object({ state: PoolState, exempt: z.boolean(), nowMs: z.number(), ticket: Ticket })),
@@ -59,7 +56,7 @@ export const pool = caseGroup("pool", {
 				})),
 			}),
 		),
-		/** The probe time that halves the remaining wait, and the constants it stands on. */
+		/** The probe time halving the remaining wait, with its constants. */
 		probeAt: kind(
 			z.object({ rows: z.array(z.object({ nowMs: z.number(), eta: z.number() })) }),
 			z.object({

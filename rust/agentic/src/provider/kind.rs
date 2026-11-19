@@ -223,7 +223,7 @@ pub trait ProviderKind: Send + Sync {
         None
     }
 
-    /// Key or URL check; an error is the caller's cancel, or a refusal that is no state.
+    /// Key or URL check; `Err` is the caller's cancel or a refusal, not a state.
     fn check<'a>(
         &'a self,
         entry: &'a EntryFields,

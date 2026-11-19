@@ -142,7 +142,7 @@ export const registry = caseGroup("registry", {
 				return { keys: modelList(views, input.use, settings).map((view) => view.row.key) };
 			},
 		),
-		/** Each listed row has the verified completion price given; `price` is the catalog's. */
+		/** Each listed row has the verified completion price; `price` is the catalog's. */
 		select: kind(
 			z.object({
 				wanted: z.string(),

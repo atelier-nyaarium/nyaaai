@@ -1,4 +1,4 @@
-// What a catalog says of one model, and what a run reads of it.
+// A catalog's view of one model.
 
 import type { ModelRow, ModelView, PriceTier } from "@nyaaai/contract/shapes/model";
 import type { ApiFacts, CodecFacts, Effort } from "@nyaaai/contract/shapes/step";
@@ -22,7 +22,7 @@ export function tiersOf(view: Pick<ModelView, "price"> | undefined): readonly Pr
 	return typeof view?.price === "object" ? view.price.tiers : undefined;
 }
 
-/** A whole limit; none when not finite or below one, capped at the largest safe integer. */
+/** A whole limit; none if not finite or below one, capped at the safe maximum. */
 function usableLimit(limit: number | undefined): number | undefined {
 	if (limit === undefined || !Number.isFinite(limit) || limit < 1) return undefined;
 	return Math.min(Math.floor(limit), Number.MAX_SAFE_INTEGER);
@@ -40,7 +40,7 @@ export function codecFactsOf(view: ModelView | undefined): CodecFacts | undefine
 	};
 }
 
-/** Missing inputs send none; unknown rows send wishes only for reasoning models; other rows resolve offers. */
+/** None for missing inputs; unknown rows send the wish for reasoning models only. */
 export function runEffort(view: ModelView | undefined, wanted: Effort | undefined): Effort | undefined {
 	if (view === undefined || wanted === undefined) return undefined;
 	if (view.status === "unknown") return view.row.reasoning ? wanted : undefined;

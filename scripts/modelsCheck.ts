@@ -1,5 +1,4 @@
-// Holds the curated list against OpenRouter's live catalog. Reads live catalogs, run by hand.
-// Run: bun scripts/modelsCheck.ts   (no key; exits 1 when a curated model is retired or has no zero-retention host)
+// Holds the curated list against the live catalog. Run by hand; exits 1 on a retired or non-zero-retention model.
 
 import { platformFetch } from "@nyaaai/agentic/fetch";
 import {

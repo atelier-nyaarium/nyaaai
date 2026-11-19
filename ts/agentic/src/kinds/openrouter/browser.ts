@@ -18,12 +18,12 @@ const DETAIL_MS = 30_000;
 ////////////////////////////////
 //  Functions & Helpers
 
-/** Provider filter tag, the one rule for a tag and a host name. */
+/** Provider filter tag; one rule for tags and host names. */
 function slugOf(tag: string): string {
 	return asciiLower(trimText(tag.split("/")[0] ?? tag));
 }
 
-/** A path segment; the dot segments are written out so none climbs a path. */
+/** A path segment; dot segments are escaped so none climbs. */
 function segmentOf(part: string): string {
 	if (part === ".") return "%2E";
 	return part === ".." ? "%2E%2E" : encodePathSegment(part);

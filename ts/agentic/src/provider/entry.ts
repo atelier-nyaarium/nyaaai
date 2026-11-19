@@ -1,4 +1,4 @@
-// Provider entries: the ids, the URL rules and the lenient reader of a stored list.
+// Provider entries and the reader of a stored list.
 
 import { Pattern } from "@nyaaai/contract/pattern";
 import { type ProviderEntry, ProviderKindName, ProviderPlan } from "@nyaaai/contract/shapes/provider";

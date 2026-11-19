@@ -163,7 +163,7 @@ function ipv6Text(pieces: number[]): string {
 		.join(":")}`;
 }
 
-/** The host as URLs write it, or undefined; an `xn--` label is kept unchecked. */
+/** The host as URLs write it; an `xn--` label is kept unchecked. */
 function hostOf(raw: string): string | undefined {
 	if (raw.startsWith("[")) {
 		if (!raw.endsWith("]")) return undefined;
@@ -274,11 +274,7 @@ function pathOf(raw: string): string {
 	return `/${segments.join("/")}`;
 }
 
-/**
- * The parts of an http, https, ws, wss or ftp URL as the WHATWG parser reads them:
- * lowercase scheme and host, default port dropped, dot segments resolved.
- * Undefined for any other scheme, a malformed URL, or a host with non-ASCII text or escapes.
- */
+/** WHATWG parts of an http, https, ws, wss or ftp URL; undefined for other schemes or non-ASCII hosts. */
 export function parseUrl(text: string): UrlParts | undefined {
 	let start = 0;
 	let end = text.length;
@@ -354,11 +350,7 @@ export function parseUrl(text: string): UrlParts | undefined {
 	};
 }
 
-/**
- * The origin of an http, https, ws, wss or ftp URL as the WHATWG parser writes it:
- * lowercase scheme and host, default port dropped, credentials ignored.
- * Undefined for any other scheme, a malformed URL, or a host with non-ASCII text.
- */
+/** The WHATWG origin of an http, https, ws, wss or ftp URL; undefined for other schemes or non-ASCII hosts. */
 export function originOf(text: string): string | undefined {
 	return parseUrl(text)?.origin;
 }

@@ -9,10 +9,7 @@ import { trimText } from "./text";
 /** Time in milliseconds. */
 export interface Clock {
 	nowMs: () => number;
-	/**
-	 * Whole minutes east of UTC at that instant; 0 when the zone is unknown. The system clock asks
-	 * the platform at each call; Rust's reads the zone once and keeps it until a restart.
-	 */
+	/** Minutes east of UTC at that instant; 0 when unknown. The system clock asks at each call. */
 	utcOffsetMinutes: (atMs: number) => number;
 }
 
@@ -248,7 +245,7 @@ function platformOffset(atMs: number): number {
 
 export const systemClock: Clock = { nowMs: () => Date.now(), utcOffsetMinutes: platformOffset };
 
-/** The offset of the latest entry at or before `atMs` (a later entry wins a tie); 0 before the first. */
+/** The latest entry's offset at or before `atMs`; a later entry wins a tie; 0 before the first. */
 export function scriptedOffset(offsets: readonly OffsetFrom[], atMs: number): number {
 	let held: OffsetFrom | undefined;
 	for (const offset of offsets)
@@ -299,7 +296,7 @@ export interface Deadline {
 	clear: () => void;
 }
 
-/** The first of `ms` and the caller's abort wins; ties go by schedule order. Clear it when done. */
+/** `ms` or the caller's abort, first wins; ties go by schedule order. Clear it when done. */
 export function deadline(scheduler: Scheduler, ms: number, caller?: AbortSignal): Deadline {
 	const controller = new AbortController();
 	let first: "deadline" | "caller" | undefined;

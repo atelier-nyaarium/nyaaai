@@ -23,12 +23,7 @@ export class KeyReader {
 		private readonly shown: (state: KeyState) => void,
 	) {}
 
-	/**
-	 * Shows `checking`, then the check's state unless a newer read or a dispose came first. The check
-	 * is raced against its deadline: a check that fails, throws or misses the deadline shows
-	 * `unreachable`, and its later answer is dropped. The answer settles when the check has ended and
-	 * been shown or dropped.
-	 */
+	/** Shows `checking`, then the state; a failed or late check shows `unreachable`. */
 	read(): Promise<void> {
 		this.abort?.abort();
 		const abort = new AbortController();
@@ -61,7 +56,7 @@ export class KeyReader {
 		return running;
 	}
 
-	/** A check is running: one a newer read or a dispose dropped counts until it ends. */
+	/** A check is running, including dropped ones until they end. */
 	busy(): boolean {
 		return this.running.size > 0;
 	}

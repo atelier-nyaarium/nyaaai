@@ -10,7 +10,7 @@ export interface Fired {
 	atMs: number;
 }
 
-/** Told when a sleep begins and when it ends, by its time or its signal. */
+/** Told when a sleep begins and ends. */
 export interface SleepWatch {
 	slept(signal: AbortSignal | undefined): void;
 	woke(signal: AbortSignal | undefined): void;
@@ -82,7 +82,7 @@ export class TimerWheel {
 ////////////////////////////////
 //  Functions & Helpers
 
-/** Virtual-time scheduler. `watch` hears every sleep begin and end, as the wheel runs it. */
+/** Virtual-time scheduler; `watch` hears every sleep begin and end. */
 export function fakeScheduler(
 	wheel: TimerWheel = new TimerWheel(),
 	watch?: SleepWatch,

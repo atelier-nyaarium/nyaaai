@@ -202,7 +202,7 @@ fn ipv6_text(pieces: &[u64]) -> String {
     )
 }
 
-/// The host as URLs write it, or `None`; an `xn--` label is kept unchecked.
+/// The host as URLs write it; an `xn--` label is kept unchecked.
 fn host_of(raw: &str) -> Option<String> {
     if raw.starts_with('[') {
         let inner = raw.strip_prefix('[')?.strip_suffix(']')?;
@@ -293,9 +293,7 @@ fn path_of(raw: &str) -> String {
     format!("/{}", segments.join("/"))
 }
 
-/// The parts of an http, https, ws, wss or ftp URL as the WHATWG parser reads them:
-/// lowercase scheme and host, default port dropped, dot segments resolved.
-/// `None` for any other scheme, a malformed URL, or a host with non-ASCII text or escapes.
+/// WHATWG parts of an http, https, ws, wss or ftp URL; `None` for other schemes or non-ASCII hosts.
 pub fn parse_url(text: &str) -> Option<UrlParts> {
     let url: String = text
         .trim_matches(|char: char| char <= ' ')
@@ -374,9 +372,7 @@ pub fn parse_url(text: &str) -> Option<UrlParts> {
     })
 }
 
-/// The origin of an http, https, ws, wss or ftp URL as the WHATWG parser writes it:
-/// lowercase scheme and host, default port dropped, credentials ignored.
-/// `None` for any other scheme, a malformed URL, or a host with non-ASCII text.
+/// The WHATWG origin of an http, https, ws, wss or ftp URL; `None` for other schemes or non-ASCII hosts.
 pub fn origin_of(text: &str) -> Option<String> {
     parse_url(text).map(|parts| parts.origin)
 }

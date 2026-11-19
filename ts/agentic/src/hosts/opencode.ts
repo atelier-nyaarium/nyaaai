@@ -26,7 +26,7 @@ function untilReset(at: string | number | undefined, nowMs: number): number | un
 	return ms === undefined ? undefined : Math.max(0, ms - nowMs);
 }
 
-/** A count or an amount read from a field; negative reads as mistyped. */
+/** A count or amount; negative is mistyped. */
 export function amountAt(raw: Record<string, unknown>, key: string): number | undefined {
 	return amountOf(raw[key]);
 }

@@ -133,10 +133,7 @@ function withLastCached(history: readonly ChatMessage[], mark: (text: string) =>
 	return marked;
 }
 
-// State stays last.
-// Implicit caching marks system.
-// Explicit caching marks history.
-// Explicit state is user-role.
+// State goes last; explicit caching marks history and sends state as user-role.
 function messagesOf(d: ChatDialect, request: CanonicalRequest, prompted: string | undefined): ChatMessage[] {
 	const explicit = request.cache.kind === "explicit";
 	const mark = (text: string): string | TextPart[] =>

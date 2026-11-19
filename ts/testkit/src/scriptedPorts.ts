@@ -36,13 +36,13 @@ export interface ScriptedModelRegistry extends ModelRegistry {
 }
 
 export interface ScriptedUsageSink extends UsageSink {
-	/** The ids `record` answers, in order, replacing what is left; none once they run out. */
+	/** Ids `record` answers, in order; none once they run out. */
 	setIds: (ids: readonly string[]) => void;
 	/** While true, `record` answers none; it still keeps the call. */
 	answerNone: (none: boolean) => void;
-	/** Ids that count as filled, like those `fill` was given; only a recorded id whose call is not before the ask answers true. */
+	/** Ids that count as filled, plus recorded ids whose call is not before the ask. */
 	setFilled: (ids: readonly string[]) => void;
-	/** What `unfilled` lists, less the rows before its `since` and the ids filled by the same rule. */
+	/** What `unfilled` lists, less rows before its `since` and ids filled likewise. */
 	setUnfilled: (rows: readonly UnfilledRecord[]) => void;
 	/** Calls `record` was given, in order. */
 	recorded: () => MeteredCall[];
@@ -170,7 +170,7 @@ export function scriptedUsageSink(): ScriptedUsageSink {
 	const fills: Array<{ id: string; stats: GenerationStats }> = [];
 	const filledAsks: Array<{ id: string; at: number }> = [];
 	const unfilledAsks: number[] = [];
-	/** As a log answers: a recorded id, named, whose call is not before `at`. */
+	/** A log's answer: a recorded id whose call is not before `at`. */
 	const isFilled = (id: string, at: number): boolean => {
 		const call = kept.get(id);
 		return named.has(id) && call !== undefined && call.at >= at;

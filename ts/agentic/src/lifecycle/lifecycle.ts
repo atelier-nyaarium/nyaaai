@@ -1,4 +1,4 @@
-// One request over its candidate routes: admission, retries, fall-through, metering and a trace.
+// One request over its candidate routes.
 
 import { numberText } from "@nyaaai/contract/number";
 import type {
@@ -41,11 +41,11 @@ export interface Observer {
 	onRetry?(attempt: number, waitMs: number, status: ErrorStatus): void;
 	onWait?(waiting: GateWaiting | null): void;
 	onSkip?(skip: Skip): void;
-	/** Told one entry per effect, in order. With none given no entry is built. */
+	/** Told each effect in order; no entries are built without it. */
 	onTrace?(entry: TraceEntry): void;
 }
 
-/** What a reply adds to the meter's call; a field may be undefined. */
+/** What a reply adds to the meter's call. */
 export interface Metered {
 	usage?: NormalizedUsage | undefined;
 	provider?: string | undefined;
@@ -58,7 +58,7 @@ export interface Metered {
 export interface Call<T> {
 	tag: CallTag;
 	signal: AbortSignal;
-	/** Which ended the signal, when it ended: the caller's deadline or a cancel. */
+	/** What ended the signal: the caller's deadline or a cancel. */
 	ended?(): "deadline" | "caller" | undefined;
 	/** Two nonblocking tries. */
 	live?: boolean;
@@ -129,12 +129,12 @@ function overloaded(route: Resolved): Ended {
 	return { kind: "notice", notice: { kind: "providerOverloaded", model, message: overloadedText(model) } };
 }
 
-/** The failure a gate's give-up stands for, so the route falls through as an overload does. */
+/** A gate's give-up as an overload, so the route falls through. */
 function gaveUpOn(route: Resolved): Failure {
 	return { category: "overloaded", status: "overloaded", message: overloadedText(route.view.row.label) };
 }
 
-/** Tells the sink one entry; nothing is built without a sink, and a throwing sink changes nothing. */
+/** Tells the sink an entry; none is built without one, and a throwing sink changes nothing. */
 function trace(o: Observer, entry: () => TraceEntry): void {
 	const sink = o.onTrace;
 	if (sink === undefined) return;
@@ -197,7 +197,7 @@ export class RequestLifecycle {
 		});
 	}
 
-	/** Entries that serve a step join `keep`; the run's end is the last entry told. */
+	/** Entries serving a step join `keep`; the run's end is told last. */
 	private async attempt<T extends Billing>(
 		candidates: Candidates,
 		passed: readonly Passed[],
@@ -304,7 +304,7 @@ export class RequestLifecycle {
 			again = false;
 			if (admission.kind === "stopped") return { ok: false, outcome: STOPPED };
 			if (admission.kind === "gaveUp") {
-				// A give-up ends a route that is not the last, not the request.
+				// A give-up ends a non-last route, not the request.
 				if (onward) return { onward: gaveUpOn(route) };
 				return { ok: false, outcome: overloaded(route) };
 			}
@@ -590,7 +590,7 @@ export class RequestLifecycle {
 	}
 }
 
-/** Tracks per-run route state: `keep` holds every entry that served a step of the run, whatever it billed. */
+/** Per-run route state; `keep` holds every entry that served a step. */
 export class RunRoute {
 	private readonly keep = new Set<string>();
 	private readonly skipped = new Set<string>();

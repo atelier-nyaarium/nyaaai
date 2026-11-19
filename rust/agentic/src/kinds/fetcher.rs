@@ -1,5 +1,4 @@
-//! One shared, cached refresh with a wait after a failure. A refresh runs on a `tokio` runtime;
-//! with none, a call answers that it has no data.
+//! One shared, cached refresh with a wait after a failure; needs a `tokio` runtime.
 
 use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::sync::{Arc, Mutex, MutexGuard};
@@ -61,7 +60,7 @@ impl<T: Clone> Waiter<T> {
         }
     }
 
-    /// The answer, or `Aborted` once the caller's token is cancelled (at once when it already is).
+    /// The answer, or `Aborted` when the caller's token cancels.
     pub async fn raced(self, cancel: Option<&CancelToken>) -> Result<Option<T>, Aborted> {
         match cancel {
             None => Ok(self.wait().await),
@@ -146,8 +145,7 @@ impl<T: Clone + Send + Sync + 'static> Fetcher<T> {
         }
     }
 
-    /// Serves the good data while it is fresh, or while a failure is recent; else one shared refresh.
-    /// `start` runs at the call and answers the refresh, which runs on its own.
+    /// Serves fresh or recently failed data; else one shared refresh. `start` runs at the call.
     pub fn fetched(
         &self,
         now: i64,
@@ -196,7 +194,7 @@ impl<T: Clone + Send + Sync + 'static> Fetcher<T> {
             send: Some(send),
         };
         let shared = Arc::clone(&self.state);
-        // The mark below is set only once the task exists; the task waits for this lock.
+        // The mark is set once the task exists; the task waits for this lock.
         runtime.spawn(async move {
             let outcome = refresh.await;
             let (result, told) = {

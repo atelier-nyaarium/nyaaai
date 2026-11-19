@@ -157,7 +157,7 @@ export const transport = caseGroup("transport", {
 		TransportOutcome,
 	},
 	kinds: {
-		/** Calls in order on one transport, over a scripted network and a scripted key source. */
+		/** Calls in order on one transport over a scripted network and key source. */
 		exchange: kind(
 			z.object({
 				codec: CodecName,

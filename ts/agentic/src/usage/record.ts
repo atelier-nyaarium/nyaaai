@@ -1,4 +1,4 @@
-// A day file's lines: building, writing, reading, and the day a line belongs to.
+// A day file's lines and their day.
 
 import { stringifyJson } from "@nyaaai/contract/json";
 import { type Decoded, decode, decodeText } from "@nyaaai/contract/shape";
@@ -25,7 +25,7 @@ export interface LinesRead {
 ////////////////////////////////
 //  Functions & Helpers
 
-/** Wire fields are cast, not checked, so a null or NaN may arrive. */
+/** Wire fields are cast, so null or NaN may arrive. */
 function present<T extends Record<string, unknown>>(fields: T): Partial<T> {
 	return Object.fromEntries(
 		Object.entries(fields).filter(
@@ -40,7 +40,7 @@ function withoutSeparators(text: string): string {
 	return text.slice(0, end);
 }
 
-/** The local calendar day of `atMs` in the clock's zone; none outside years 0000 to 9999. */
+/** The local day of `atMs`; none outside years 0000 to 9999. */
 export function dayOf(atMs: number, clock: Pick<Clock, "utcOffsetMinutes">): string | undefined {
 	return dayKey(atMs, clock.utcOffsetMinutes(atMs));
 }
@@ -91,7 +91,7 @@ function resolved(text: string): string {
 
 const plainPath = (text: string): string => withoutSeparators(resolved(withoutSeparators(text)));
 
-/** A folder path with home as `~` and a closing separator; none for a blank folder. */
+/** A folder with home as `~` and a closing separator; none if blank. */
 export function appOf(folder: string, home: string): string | undefined {
 	if (trimText(folder) === "") return undefined;
 	const separator = folder.includes("\\") && !folder.includes("/") ? "\\" : "/";
@@ -107,7 +107,7 @@ export function appOf(folder: string, home: string): string | undefined {
 	return `${shown}${separator}`;
 }
 
-/** A call as its day file keeps it; a refusal when the shape does not fit. */
+/** A call as its day file keeps it; refused if the shape does not fit. */
 export function callRecordOf(call: MeteredCall, id: string, home: string): Decoded<CallRecord> {
 	const { usage, cost, tag } = call;
 	const priced = Number.isFinite(cost?.usd);
@@ -145,7 +145,7 @@ export function callRecordOf(call: MeteredCall, id: string, home: string): Decod
 	);
 }
 
-/** A generation's stats as its day file keeps them; a refusal when the shape does not fit. */
+/** A generation's stats as its day file keeps them; refused if the shape does not fit. */
 export function statsLineOf(id: string, stats: GenerationStats): Decoded<StatsLine> {
 	const of = decode(GenerationStats, present({ ...stats }));
 	return of.ok ? { ok: true, value: { stats: { id, of: of.value } } } : of;
@@ -156,7 +156,7 @@ export function lineText(line: UsageLine): string {
 	return `${stringifyJson(line)}\n`;
 }
 
-/** A day file's lines in order; text that does not parse or fit is dropped, blank lines are not counted. */
+/** A day file's lines in order; bad text is dropped, blank lines uncounted. */
 export function linesOf(text: string): LinesRead {
 	const lines: UsageLine[] = [];
 	let dropped = 0;

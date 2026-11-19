@@ -536,7 +536,7 @@ pub fn standing(input: CatalogStandingInput) -> Outcome<CatalogStandingResult> {
     Ok(CatalogStandingResult { rows })
 }
 
-/// A call on a catalog, in the one spelling both kinds' scripts convert to.
+/// A call on a catalog, in the spelling both kinds' scripts convert to.
 #[derive(Clone)]
 enum Call {
     Views {
@@ -709,7 +709,7 @@ fn thrown(message: &str) -> Value {
 
 type Answered<'a> = Pin<Box<dyn Future<Output = Outcome<Value>> + 'a>>;
 
-/// What a script run gives back for each step: the time, the answers, the reads of the rows.
+/// What a script run gives: time, answers and row reads per step.
 type Played = Vec<(i64, Vec<Value>, i64)>;
 
 /// Plays a script on a catalog; `answer` runs one call.
@@ -775,7 +775,7 @@ fn use_of(held: Option<ModelUse>) -> ModelUse {
     held.unwrap_or_else(|| CHAT.clone())
 }
 
-/// What the script's `refreshed` does: counts, and may read its catalog and throw.
+/// The script's `refreshed`: counts, may read its catalog and throw.
 pub(super) struct Told {
     count: Arc<AtomicI64>,
     saw: Arc<Mutex<Vec<BoxFuture<'static, String>>>>,

@@ -9,10 +9,10 @@ import { gateCases } from "../caseSources/gate";
 ////////////////////////////////
 //  Shapes
 
-/** A step of the script. A request is named by the case; its admission is what a later step settles. */
+/** A script step; a request is named by the case. */
 const Step = () =>
 	z.discriminatedUnion("kind", [
-		/** Starts an admission: it resolves now, or waits in the gate's queue. */
+		/** Starts an admission: it resolves at once or queues. */
 		z.object({
 			kind: z.literal("admit"),
 			request: z.string(),
@@ -22,7 +22,7 @@ const Step = () =>
 			/** The caller's abort, this long after the step. */
 			abortAfterMs: z.int().min(0).exactOptional(),
 			abortedBefore: z.boolean().exactOptional(),
-			/** What the waiter's callback does inside the gate, after it records the gate it sees. */
+			/** What the waiter's callback does after it records the gate it sees. */
 			inside: z.enum(["cool", "tryAdmit", "settleTrigger"]).exactOptional(),
 		}),
 		z.object({ kind: z.literal("tryAdmit"), request: z.string(), model: z.string() }),
@@ -33,7 +33,7 @@ const Step = () =>
 			outcome: GateOutcome,
 			retryAfterMs: z.int().min(0).exactOptional(),
 		}),
-		/** Settles a ticket given as data: another gate's, or one made before a dispose. */
+		/** Settles a ticket given as data, such as another gate's. */
 		z.object({ kind: z.literal("settleTicket"), ticket: Ticket, outcome: GateOutcome }),
 		z.object({ kind: z.literal("cool"), model: z.string(), retryAfterMs: z.int().min(0).exactOptional() }),
 		/** Reopens every non-open gate whose model starts with the prefix. */
@@ -215,7 +215,7 @@ export const gate = caseGroup("gate", {
 						gate.dispose();
 						disposed = true;
 					}
-					// Whatever the gate released left its queue from the front; its promises are resolved.
+					// Released calls left the queue from the front.
 					const released: Request[] = [];
 					for (const [model, queue] of queues)
 						released.push(...queue.splice(0, queue.length - queuedOf(model)));

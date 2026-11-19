@@ -22,7 +22,7 @@ export const JSON_HEAD: Array<[string, string]> = [["content-type", "application
 
 export const DONE_TEXT = "data: [DONE]\n\n";
 
-/** The request the old transport tests sent. */
+/** The standard request. */
 export const REQUEST = request({ system: [], cache: { kind: "none" } });
 
 ////////////////////////////////

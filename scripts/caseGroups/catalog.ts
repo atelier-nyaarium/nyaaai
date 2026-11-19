@@ -111,10 +111,10 @@ const OcModel = () =>
 		api: z.array(OcApi()),
 	});
 
-/** One pass of a join: the use, and whether only zero-retention hosts count. */
+/** One join pass: the use and the zero-retention switch. */
 const Pass = () => z.object({ use: ModelUse, zdrOnly: z.boolean() });
 
-/** One call on a catalog; a view or a listing, with a cancel of the caller's. */
+/** One call on a catalog, with an optional caller cancel. */
 const OrCall = () =>
 	z.discriminatedUnion("kind", [
 		z.object({
@@ -147,7 +147,7 @@ const OcCall = () =>
 		z.object({ kind: z.literal("models"), fresh: z.boolean().exactOptional(), ...abortOptions }),
 	]);
 
-/** A step of a script: calls, time, or a change of the registry's rows. */
+/** A script step. */
 const Step = <Call extends z.ZodType>(call: () => Call) =>
 	z.discriminatedUnion("kind", [
 		/** One call. */
@@ -241,7 +241,7 @@ const messageOf = (error: unknown): string => (error instanceof Error ? error.me
 export const catalog = caseGroup("catalog", {
 	shapes: { NetExchange, ViewLine },
 	kinds: {
-		/** Null: the body holds no list. A later model of an id replaces the earlier in its place. */
+		/** Null: the body holds no list. A later model of an id replaces the earlier. */
 		openrouterModels: kind(
 			z.object({ body: z.unknown() }),
 			z.object({ models: z.array(OrModel()).nullable() }),
@@ -322,7 +322,7 @@ export const catalog = caseGroup("catalog", {
 			z.object({ prices: z.array(z.number().nullable()) }),
 			(input) => ({ prices: input.values.map((value) => perMillion(value) ?? null) }),
 		),
-		/** A removal date in milliseconds; null when it is read as no date. */
+		/** Removal date in ms; null for none. */
 		expiry: kind(
 			z.object({ texts: z.array(z.string()) }),
 			z.object({ ms: z.array(z.int().nullable()) }),
@@ -395,7 +395,7 @@ export const catalog = caseGroup("catalog", {
 				waiting: z.array(z.string()),
 				/** Times the catalog said it refreshed. */
 				refreshed: z.int(),
-				/** What each `refreshed` callback read of the catalog: the data it saw, or `none`. */
+				/** What each `refreshed` callback read: the data, or `none`. */
 				saw: z.array(z.string()),
 			}),
 			async (input) => {

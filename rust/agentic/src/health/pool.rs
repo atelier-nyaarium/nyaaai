@@ -45,7 +45,7 @@ fn billed(state: &PoolState, source: &str, extra_usage: bool, now_ms: f64) -> Po
     {
         return state.clone();
     }
-    // A renewed window starts without the old probe.
+    // A renewed window starts without a probe.
     let open = match state {
         PoolState::Balance(held) if now_ms < held.eta => Some(held),
         _ => None,

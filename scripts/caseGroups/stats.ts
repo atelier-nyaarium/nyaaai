@@ -9,7 +9,7 @@ import { NetExchange, networkOf } from "./catalogKit";
 ////////////////////////////////
 //  Shapes
 
-/** A record handed to the queue. A missing time is the wheel's now. */
+/** A record for the queue; a missing time is the wheel's current time. */
 const Added = z.object({
 	id: z.string(),
 	generationId: z.string(),
@@ -17,7 +17,7 @@ const Added = z.object({
 	entry: z.string().exactOptional(),
 });
 
-/** What happens at a wheel time inside a step, whether or not a read is running then. */
+/** An action at a wheel time within a step, read running or not. */
 const Action = z.discriminatedUnion("kind", [
 	z.object({ kind: z.literal("add"), ...Added.shape }),
 	z.object({
@@ -39,7 +39,7 @@ const Step = z.discriminatedUnion("kind", [
 		at: z.int().exactOptional(),
 		entry: z.string().exactOptional(),
 	}),
-	/** Time passes, a read at a time; each `during` action runs at its wheel time from the step's start. */
+	/** Time passes a read at a time; `during` actions run at their wheel time. */
 	z.object({
 		kind: z.literal("advance"),
 		ms: z.int().min(0),
@@ -89,11 +89,7 @@ export const stats = caseGroup("stats", {
 			z.object({ stats: z.array(GenerationStats.nullable()) }),
 			(input) => ({ stats: input.bodies.map((body) => statsOf(body) ?? null) }),
 		),
-		/**
-		 * One queue on the timer wheel, over a scripted sink and a scripted network that answers each
-		 * read in order. `known` are ids another window filled, with their request time; `unfilled`
-		 * what the sink lists; `fails` makes `filled` or `fill` fail for the ids named, or `unfilled`.
-		 */
+		/** One queue on the wheel, over a scripted sink and network. `known`: ids another window filled, with request time; `unfilled`: what the sink lists; `fails`: ids for which `filled`, `fill` or `unfilled` fails. */
 		run: kind(
 			z.object({
 				startMs: z.int(),
@@ -107,9 +103,9 @@ export const stats = caseGroup("stats", {
 						unfilled: z.boolean().exactOptional(),
 					})
 					.exactOptional(),
-				/** The sink's `filled` answers for these ids only after `ms` on the wheel, or never. */
+				/** The sink's `filled` answers these ids after `ms`, or never. */
 				holdFilled: z.array(z.object({ id: z.string(), ms: z.int().min(0).exactOptional() })).exactOptional(),
-				/** A read of this generation ignores its signal and answers `body` after `ms`; the network is not asked. */
+				/** A read of this generation ignores its signal and answers `body` after `ms`. */
 				late: z
 					.array(z.object({ generationId: z.string(), ms: z.int().min(0), body: z.unknown() }))
 					.exactOptional(),
@@ -180,7 +176,7 @@ export const stats = caseGroup("stats", {
 					},
 				};
 				let wake = () => {};
-				/** A port's answer is held: the queue waits on the wheel, which only the script moves. */
+				/** A held port answer; only the script moves the wheel. */
 				const park = async (held: Promise<void>) => {
 					wake();
 					await held;
@@ -245,7 +241,7 @@ export const stats = caseGroup("stats", {
 					else if (held.kind === "addMany") many(held.count, held.at, held.entry);
 					else queue.dispose();
 				};
-				/** A read at a time: stops at each instant the queue or an action is set for. */
+				/** One read at a time, stopping at each queue or action instant. */
 				const advance = async (
 					ms: number,
 					during: NonNullable<Extract<StepOf, { kind: "advance" }>["during"]>,

@@ -130,7 +130,7 @@ export function reachOf(kind: Pick<ProviderKind, "field">, answer: KeyAnswer): K
 	}
 }
 
-/** One route's key: read first, then given only while the list holds the same id, kind, plan and URL. */
+/** One route's key, given only while the list holds the same id, kind, plan and URL. */
 export function keySourceOf(keys: EntryKeys, list: ProviderList, entry: ProviderEntry): KeySource {
 	return {
 		get: async () => {
@@ -322,7 +322,7 @@ export class ModelResolver {
 		return (await this.rows(use)).filter((option): option is Served => option.via !== undefined);
 	}
 
-	/** Routes of entries the list no longer holds go. */
+	/** Drops routes of unlisted entries. */
 	private drop(): void {
 		const listed = new Set(this.d.list.entries().map(routeKey));
 		for (const [at, held] of this.made) {

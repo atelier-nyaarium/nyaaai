@@ -95,7 +95,7 @@ function cleanId(wireId: string): string {
 	return id.length === 0 ? "call" : id;
 }
 
-/** One block id for each wire id of the request; ids that need no change keep theirs. */
+/** A block id per wire id; ids needing no change keep theirs. */
 function blockIds(history: readonly Turn[]): Map<string, string> {
 	const wireIds = history.flatMap((turn) =>
 		turn.role === "step" ? turn.parts.flatMap((part) => (part.kind === "call" ? [part.wireId] : [])) : [],
@@ -353,7 +353,7 @@ class Decoder {
 		);
 	}
 
-	/** Decode a complete message. */
+	/** A complete message. */
 	*whole(message: Json): Generator<StepEvent> {
 		yield* this.started({ id: message["id"] });
 		const content = Array.isArray(message["content"]) ? message["content"] : [];

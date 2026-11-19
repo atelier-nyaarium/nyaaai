@@ -1,7 +1,4 @@
-// Catalog cases on a scripted network and the timer wheel. Every value is made up.
-//
-// A script lists exchanges (what the network answers, in the order a catalog asks)
-// and steps (calls, time passing, the registry's rows changing).
+// Catalog cases on a scripted network and the timer wheel.
 
 import type { CaseSource } from "../caseAdapter";
 import { failing, HOUR, type Json, NOW, refused, reply } from "./catalogKit";

@@ -48,7 +48,7 @@ impl CancelToken {
         }
     }
 
-    /// A token cancelled by this one, or by itself; its own cancel leaves this one alone.
+    /// A child: cancelled by this token or itself, never cancelling this one.
     pub fn child(&self) -> Self {
         let child = Self::new();
         let mut children = self

@@ -398,7 +398,7 @@ function isFieldValue(value: string): boolean {
 	return true;
 }
 
-/** Refuses a header the adapter must not see; names the header, never its value. */
+/** Refuses a forbidden header, naming it but never its value. */
 function checkedHeaders(headers: ReadonlyArray<readonly [string, string]>): void {
 	for (const [name, value] of headers) {
 		if (!isToken(name))

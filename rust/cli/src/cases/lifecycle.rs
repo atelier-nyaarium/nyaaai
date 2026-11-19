@@ -1,9 +1,4 @@
 //! Request lifecycle cases.
-//!
-//! One composition: the real resolver, health and gate over scripted ports, a meter over a scripted
-//! usage sink, and one scripted network on the wheel. The handler holds each call's future and
-//! polls it itself: a call that answers pending is parked, and the wake of its waker says when it
-//! may move again.
 
 use std::collections::{HashMap, VecDeque};
 use std::future::Future;
@@ -530,7 +525,7 @@ struct Slot {
     waker: Waker,
 }
 
-/// Polls the calls that were woken, in the order they were, until none is.
+/// Polls woken calls in order until none is.
 fn drive(slots: &mut [Slot], woken: &Woken) {
     loop {
         let Some(index) = locked(woken).pop_front() else {

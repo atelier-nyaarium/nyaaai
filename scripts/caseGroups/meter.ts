@@ -22,7 +22,7 @@ const MeterBilled = z.object({
 export const meter = caseGroup("meter", {
 	shapes: { MeterBilled },
 	kinds: {
-		/** Calls in order into a meter over a scripted usage sink, a health that records and a stats hook. */
+		/** Calls in order into a meter over a scripted sink, health and stats hook. */
 		called: kind(
 			z.object({
 				calls: z.array(
@@ -38,9 +38,9 @@ export const meter = caseGroup("meter", {
 					z.object({
 						/** What the usage sink was given. */
 						recorded: MeteredCall,
-						/** What the health's `billed` was given, or null when it was not called. */
+						/** What `billed` was given; null if uncalled. */
 						billed: MeterBilled.nullable(),
-						/** What the stats hook was given, or null when it was not called. */
+						/** What the stats hook was given; null if uncalled. */
 						stats: z.object({ id: z.string(), generationId: z.string(), call: MeteredCall }).nullable(),
 					}),
 				),

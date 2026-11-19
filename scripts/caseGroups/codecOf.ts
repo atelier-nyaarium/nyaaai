@@ -67,7 +67,7 @@ function localOf(name: CodecName): Codec {
 ////////////////////////////////
 //  Builders
 
-/** A later family registers one row here, and the same arm in `rust/cli/src/cases/codec.rs`. */
+/** Each family has a row here and in `rust/cli/src/cases/codec.rs`. */
 const BUILDERS = new Map<string, Builder>([
 	["chat-completions/openrouter", () => OPENROUTER_CHAT],
 	["chat-completions/opencode", (name) => opencodeChat(name.facts, steppedClock(name.nowMs ?? 0))],

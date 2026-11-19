@@ -1,4 +1,4 @@
-// The stored model registry: test records, added rows, hidden families and the lists a pick reads.
+// The stored model registry and the lists a pick reads.
 
 import { Pattern } from "@nyaaai/contract/pattern";
 import type {

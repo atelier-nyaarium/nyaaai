@@ -44,7 +44,7 @@ fn without_separators(text: &str) -> &str {
     text.trim_end_matches(['/', '\\'])
 }
 
-/// The local calendar day of `at_ms` in the clock's zone; none outside years 0000 to 9999.
+/// The local day of `at_ms`; none outside years 0000 to 9999.
 pub fn day_of(at_ms: i64, clock: &dyn Clock) -> Option<String> {
     day_key(at_ms, clock.utc_offset_minutes(at_ms))
 }
@@ -119,7 +119,7 @@ fn plain_path(text: &str) -> String {
     without_separators(&resolved(without_separators(text))).to_owned()
 }
 
-/// A folder path with home as `~` and a closing separator; none for a blank folder.
+/// A folder path with home as `~` and a trailing separator; none if blank.
 pub fn app_of(folder: &str, home: &str) -> Option<String> {
     if trim_text(folder).is_empty() {
         return None;
@@ -157,8 +157,7 @@ fn same(object: Option<&Object>, key: &str) -> Option<Value> {
     field(object, key).cloned()
 }
 
-/// A call as its day file keeps it; a refusal when the shape does not fit. The call is read as
-/// the meter may hand it: a field may be missing, null or of another type.
+/// A call as its day file keeps it; fields may be missing, null or mistyped, else refused.
 pub fn call_record_of(call: &Value, id: &str, home: &str) -> Result<CallRecord, Refused> {
     let call = call.as_object();
     let tag = field(call, "tag").and_then(Value::as_object);
@@ -217,7 +216,7 @@ pub fn call_record_for(call: &MeteredCall, id: &str, home: &str) -> Result<CallR
     call_record_of(&call.encode(), id, home)
 }
 
-/// A generation's stats as its day file keeps them; a refusal when the shape does not fit.
+/// A generation's stats as its day file keeps them; refused when the shape misfits.
 pub fn stats_line_of(id: &str, stats: &Value) -> Result<StatsLine, Refused> {
     let fields = stats
         .as_object()
@@ -241,8 +240,7 @@ pub fn line_text(line: &UsageLine) -> String {
     format!("{}\n", stringify_json(&line.encode()))
 }
 
-/// A day file's lines in order; text that does not parse or fit is dropped, blank lines are not
-/// counted.
+/// A day file's lines in order; unparseable text is dropped, blank lines not counted.
 pub fn lines_of(text: &str) -> LinesRead {
     let mut lines = Vec::new();
     let mut dropped = 0;

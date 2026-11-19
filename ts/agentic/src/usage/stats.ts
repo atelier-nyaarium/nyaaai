@@ -13,11 +13,7 @@ export interface StatsQueueDeps {
 	scheduler: Scheduler;
 	/** Where stats are written, and where unfilled records are listed. */
 	usage: Pick<UsageSink, "fill" | "filled" | "unfilled">;
-	/**
-	 * Reads a generation through the entry that served it, or none for a record that has none. A host
-	 * backs it with that entry's transport and never reads through another entry's key. It should end
-	 * on its signal; an answer after the deadline is not used.
-	 */
+	/** Reads through the serving entry's transport only, never another's key; should end on its signal. */
 	read: (entry: string | undefined, path: `/generation?id=${string}`, signal: AbortSignal) => Promise<unknown>;
 }
 
@@ -60,7 +56,7 @@ const GENERATION_PREFIX = "gen-";
 /** The part after the prefix is 1 to 124 characters. */
 const GENERATION_REST_MAX = 124;
 
-/** The body's fields; each may be missing or null, and one of another type makes it no stats. */
+/** Body fields; missing or null is fine, a wrong type means no stats. */
 const FIELDS: ReadonlyArray<readonly [string, FieldKind]> = [
 	["provider_name", "text"],
 	["latency", "number"],
@@ -136,7 +132,7 @@ export function statsOf(body: unknown): GenerationStats | undefined {
 ////////////////////////////////
 //  Classes
 
-/** One read at a time: at 7, 15, 30 and 60 minutes after the request, each at least 250 ms after the last. */
+/** One read at a time, at 7, 15, 30 and 60 minutes, 250 ms apart at least. */
 export class StatsQueue {
 	private readonly waiting: WaitingRead[] = [];
 	private timer: { cancel: () => void; at: number } | undefined;
@@ -149,7 +145,7 @@ export class StatsQueue {
 
 	constructor(private readonly d: StatsQueueDeps) {}
 
-	/** Schedules valid stats reads; a time past some delays starts at once. A record waits once, at its earlier due. */
+	/** Schedules stats reads; delays already past start at once; a record waits once. */
 	add(id: string, generationId: string, at = this.d.scheduler.nowMs(), entry?: string): void {
 		if (this.disposed || this.current === id || !isGenerationId(generationId)) return;
 		const now = this.d.scheduler.nowMs();
@@ -169,10 +165,7 @@ export class StatsQueue {
 		this.arm();
 	}
 
-	/**
-	 * Adds the recent records that still lack stats, as of their own request time. `keep` is where a
-	 * host leaves out entries that are gone.
-	 */
+	/** Adds recent records lacking stats; `keep` leaves out gone entries. */
 	async restore(keep: (entry: string | undefined) => boolean = () => true): Promise<void> {
 		let records: Awaited<ReturnType<UsageSink["unfilled"]>>;
 		try {
@@ -184,7 +177,7 @@ export class StatsQueue {
 			if (keep(record.entry)) this.add(record.id, record.generationId, record.at, record.entry);
 	}
 
-	/** Drops what waits, and ends a read or an ask running; their results are not used. */
+	/** Drops waiting reads and ends running ones; results are unused. */
 	dispose(): void {
 		this.disposed = true;
 		this.stop.abort();
@@ -193,7 +186,7 @@ export class StatsQueue {
 		this.waiting.length = 0;
 	}
 
-	/** Answers when no read is running, having waited for the one that was. */
+	/** Settles when no read is running. */
 	async idle(): Promise<void> {
 		while (this.running !== undefined) await this.running;
 	}
@@ -228,7 +221,7 @@ export class StatsQueue {
 		});
 	}
 
-	/** A port's answer, or none when the deadline or a dispose ends first, or the port fails. */
+	/** A port's answer; none on deadline, dispose or failure. */
 	private async within<T>(call: (signal: AbortSignal) => Promise<T>): Promise<T | undefined> {
 		const limit = deadline(this.d.scheduler, READ_MS, this.stop.signal);
 		try {

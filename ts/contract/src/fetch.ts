@@ -17,9 +17,9 @@ export interface FetchResponse {
 	status: number;
 	/** In the `responseHeaders` form. */
 	headers: HeaderList;
-	/** Read to the end; a read may reject. The connection is released at the end, at the iterator's `return`, or at the abort. */
+	/** A read may reject; the connection frees at end, `return` or abort. */
 	chunks: AsyncIterable<Uint8Array>;
 }
 
-/** No redirect is followed: a 3xx is answered as the status it is. The signal covers the whole exchange: a pending or later chunk read rejects with its reason. */
+/** Redirects are not followed; the signal covers chunk reads, which reject with its reason. */
 export type Fetch = (request: FetchRequest, signal: AbortSignal) => Promise<FetchResponse>;

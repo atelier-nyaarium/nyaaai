@@ -5,7 +5,7 @@ use crate::shapes::usage::{GenerationStats, MeteredCall, UnfilledRecord};
 
 /// Where metered calls and their later stats are written.
 pub trait UsageSink: Send + Sync {
-    /// The new record's id; `None` when it was not kept.
+    /// The record's id; `None` when not kept.
     fn record(&self, call: &MeteredCall) -> Option<String>;
 
     /// Joins stats to a record by its id.

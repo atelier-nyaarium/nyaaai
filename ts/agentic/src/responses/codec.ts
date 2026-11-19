@@ -213,7 +213,7 @@ function segmentsOf(item: Json): NonNullable<ThoughtPart["segments"]> {
 ////////////////////////////////
 //  Classes
 
-/** Where an item sits: its id, its call id, its place in the output. */
+/** An item's id, call id and output place. */
 function keysOf(id: string, callId: string, place: number | undefined): string[] {
 	return [
 		...(id.length === 0 ? [] : [`id:${id}`]),
@@ -303,7 +303,7 @@ class Decoder {
 		}
 	}
 
-	/** Decode a complete response. */
+	/** A complete response. */
 	*whole(response: Json): Generator<StepEvent> {
 		yield* this.served(response);
 		const output = Array.isArray(response["output"]) ? response["output"] : [];

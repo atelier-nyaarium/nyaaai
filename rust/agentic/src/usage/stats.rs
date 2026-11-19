@@ -21,10 +21,7 @@ use crate::kinds::readers::{
     boolean_field, field_of, fields_of, number_field, object_field, text_field,
 };
 
-/// Reads a generation through the entry that served it (none for a record that has none), which a
-/// host backs with that entry's transport, and never through another entry's key. It should end on
-/// its token: the queue stops waiting at the deadline or a dispose, and a late answer is not used.
-/// A failure is an `Err`; a panic in it counts as one.
+/// Reads a generation through its serving entry's transport, never another entry's key; should end on its token; a failure or panic is `Err`.
 pub type ReadStats = Arc<
     dyn Fn(Option<String>, String, CancelToken) -> BoxFuture<'static, Result<Value, String>>
         + Send
@@ -81,7 +78,7 @@ const GENERATION_PREFIX: &str = "gen-";
 /// The part after the prefix is 1 to 124 characters.
 const GENERATION_REST_MAX: usize = 124;
 
-/// The body's fields; each may be missing or null, and one of another type makes it no stats.
+/// Each field may be missing or null; one of another type makes it no stats.
 const FIELDS: [(&str, FieldKind); 11] = [
     ("provider_name", FieldKind::Text),
     ("latency", FieldKind::Number),
@@ -182,7 +179,7 @@ impl std::fmt::Display for NoRuntime {
 
 impl std::error::Error for NoRuntime {}
 
-/// The timer the queue holds; its callback acts only while the queue still holds this one.
+/// A queue timer; its callback acts only while the queue holds it.
 struct Timer {
     id: u64,
     at: i64,
@@ -243,9 +240,7 @@ impl Future for Turn {
     }
 }
 
-/// One read at a time: at 7, 15, 30 and 60 minutes after the request, each at least 250 ms after
-/// the last. A record waits once, at its earlier due. Reads run on the runtime that was current
-/// when the queue was built, wherever a timer fires.
+/// One read at a time at 7, 15, 30, 60 min, 250 ms apart; a record waits once, at its earlier due.
 #[derive(Clone)]
 pub struct StatsQueue {
     shared: Arc<Shared>,
@@ -273,8 +268,7 @@ impl StatsQueue {
         })
     }
 
-    /// Schedules valid stats reads; a time past some delays starts at once. A record waits once, at
-    /// its earlier due; one being read is not added.
+    /// Schedules stats reads; a past time starts at once; a record waits once, at its earlier due.
     pub fn add(&self, id: &str, generation_id: &str, at: Option<i64>, entry: Option<&str>) {
         let shared = &self.shared;
         if !is_generation_id(generation_id) {
@@ -318,8 +312,7 @@ impl StatsQueue {
         arm(shared, 0);
     }
 
-    /// Adds the recent records that still lack stats, as of their own request time. `keep` is where
-    /// a host leaves out entries that are gone.
+    /// Adds recent records lacking stats; `keep` drops entries that are gone.
     pub async fn restore(&self, keep: impl Fn(Option<&str>) -> bool) {
         let usage = &self.shared.d.usage;
         let since = self.shared.d.scheduler.now_ms() - UNFILLED_MS;
@@ -342,7 +335,7 @@ impl StatsQueue {
         }
     }
 
-    /// Drops what waits, and ends a read or an ask running; their results are not used.
+    /// Drops waits and ends running reads; their results are unused.
     pub fn dispose(&self) {
         let timer = {
             let mut state = self.shared.locked();
@@ -439,8 +432,7 @@ fn arm(shared: &Arc<Shared>, spacing: i64) {
     }
 }
 
-/// The part of a read that runs as its timer fires: the record taken, the mark set and the ask
-/// begun. The rest runs on the queue's runtime.
+/// The timer's part: take the record, set the mark, begin the ask.
 fn start(shared: &Arc<Shared>) {
     let _entered = shared.runtime.enter();
     let Some(each) = begin(shared) else {
@@ -483,7 +475,7 @@ fn begin(shared: &Arc<Shared>) -> Option<WaitingRead> {
     each
 }
 
-/// A port's answer, or none when the deadline or a dispose ends first, or the port fails.
+/// A port's answer, or none on deadline, dispose or failure.
 async fn within<'a, T>(
     shared: &Shared,
     call: impl FnOnce(CancelToken) -> BoxFuture<'a, T>,

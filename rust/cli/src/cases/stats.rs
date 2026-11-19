@@ -67,7 +67,7 @@ struct Live {
     on: bool,
 }
 
-/// A timer of the script: an action, a held answer, a late read.
+/// A script timer: an action, a held answer, a late read.
 struct Wait {
     at: i64,
     done: bool,
@@ -149,8 +149,7 @@ impl Script {
     }
 }
 
-/// The scripted sink, failing and holding where the case says: the call is kept, then it panics
-/// (the queue treats a panic of the port as a failure).
+/// The scripted sink, failing and holding as told: the call is kept, then it panics.
 struct Failing {
     inner: Arc<ScriptedUsageSink>,
     fill: Vec<String>,
@@ -269,7 +268,7 @@ enum Settled {
     Parked,
 }
 
-/// Waits for the queue to end its read, or to wait on a held answer.
+/// Waits for the queue to end its read or wait on a held answer.
 async fn settle(queue: &StatsQueue, script: &Script) -> Settled {
     let mut parked = script.parked.subscribe();
     parked.borrow_and_update();
@@ -351,7 +350,7 @@ async fn play(input: StatsRunInput, net: super::catalog::Net) -> Outcome<StatsRu
                 Box::pin(async move {
                     let at_ms = wheel.now_ms();
                     if let Some(held) = held {
-                        // The line is written as the read ends, though the queue stopped waiting.
+                        // Written as the read ends, though the queue stopped waiting.
                         let (send, wait) = oneshot::channel::<Value>();
                         let (ended, line) = (Arc::clone(&wheel), Arc::clone(&lines));
                         let body = held.body.clone();
@@ -439,7 +438,7 @@ async fn play(input: StatsRunInput, net: super::catalog::Net) -> Outcome<StatsRu
                 },
             ),
             StatsRunInputStepsItem::Advance(held) => {
-                // A read at a time: stops at each instant the queue or an action is set for.
+                // Stops at each instant the queue or an action is set for.
                 let target = net.wheel.now_ms() + held.ms as i64;
                 for each in held.during.iter().flatten() {
                     if each.after_ms > held.ms {

@@ -1,5 +1,4 @@
-// Contract generator.
-// Run: bun scripts/contract.ts [--refresh]
+// Contract generator. Run: bun scripts/contract.ts [--refresh]
 
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";

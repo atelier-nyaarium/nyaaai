@@ -8,8 +8,7 @@ use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::headers::response_headers;
 use reqwest::header::{HeaderName, HeaderValue};
 
-/// A request client with no proxy from the environment, no redirect followed
-/// and no timeout of its own.
+/// No environment proxy, no redirects, no timeout.
 pub struct ReqwestFetch {
     client: reqwest::Client,
 }
@@ -30,7 +29,7 @@ impl ReqwestFetch {
     }
 }
 
-/// The error and what caused it. `reqwest` writes the URL into its own text, so it is cut first.
+/// The error and its causes, with the URL cut.
 fn described(error: reqwest::Error) -> String {
     let error = error.without_url();
     let mut text = error.to_string();
@@ -43,7 +42,7 @@ fn described(error: reqwest::Error) -> String {
     text
 }
 
-/// A header the adapter can carry; the key is marked sensitive, and no text of a refused one is kept.
+/// The key is marked sensitive; a refused header keeps no text.
 fn header_of(name: &str, value: &str) -> Result<(HeaderName, HeaderValue), FetchError> {
     let refused = || FetchError::Failed("a request header is not valid".to_owned());
     let name = HeaderName::from_bytes(name.as_bytes()).map_err(|_| refused())?;

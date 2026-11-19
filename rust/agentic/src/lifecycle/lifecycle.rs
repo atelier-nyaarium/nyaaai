@@ -221,7 +221,7 @@ fn overloaded(route: &Resolved) -> Ended {
     })
 }
 
-/// The failure a gate's give-up stands for, so the route falls through as an overload does.
+/// The failure a gate give-up stands for: an overload.
 fn gave_up_on(route: &Resolved) -> Failure {
     Failure {
         category: FailureCategory::Overloaded,
@@ -266,7 +266,7 @@ impl<F: Future> Future for Caught<F> {
     }
 }
 
-/// A ticket a call holds: dropped unsettled, the call was cancelled, and the gate is told so.
+/// A held ticket; dropped unsettled means the call was cancelled.
 struct Holding {
     gate: Option<Arc<dyn Gate>>,
     ticket: Option<Ticket>,
@@ -304,7 +304,7 @@ fn empty_notice(kind: NoticeKind) -> Notice {
     }
 }
 
-/// Tells the sink one entry; nothing is built without a sink, and a throwing sink changes nothing.
+/// Tells the sink an entry; builds nothing without one, and a throwing sink is ignored.
 fn trace(o: &Arc<dyn Observer>, entry: impl FnOnce() -> TraceEntry) {
     if o.traces() {
         let _ = catch_unwind(AssertUnwindSafe(|| o.on_trace(entry())));
@@ -382,8 +382,7 @@ impl RequestLifecycle {
         }
     }
 
-    /// A caller may end a call by its token or by dropping the future: a dropped call is a call
-    /// that was cancelled, its ticket is settled `cancelled` and the meter gets its record.
+    /// A dropped call counts as cancelled: its ticket settles `cancelled` and the meter records it.
     pub async fn run<'a, C: Call>(
         &self,
         candidates: &'a [Resolved],
@@ -979,7 +978,7 @@ impl Inner {
                 o.on_wait(Some(&waiting));
             })
         };
-        // A call dropped while it waits leaves the queue: its own token ends, the caller's stays.
+        // A dropped waiting call leaves the queue: its own token ends, the caller's stays.
         let waiting = cancel.child();
         let mut stop = OnDrop(Some({
             let waiting = waiting.clone();
@@ -1119,8 +1118,7 @@ impl Inner {
     }
 }
 
-/// Tracks per-run route state: `keep` holds every entry that served a step of the run, whatever it
-/// billed.
+/// Per-run route state; `keep` holds each entry that served a step.
 pub struct RunRoute {
     d: Arc<Inner>,
     keep: Mutex<HashSet<String>>,

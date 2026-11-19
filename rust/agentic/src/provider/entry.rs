@@ -1,4 +1,4 @@
-//! Provider entries: the ids, the URL rules and the lenient reader of a stored list.
+//! Provider entry ids, URL rules and the lenient stored-list reader.
 
 use std::sync::LazyLock;
 

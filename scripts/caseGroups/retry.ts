@@ -9,10 +9,7 @@ import { retryCases } from "../caseSources/retry";
 
 export const retry = caseGroup("retry", {
 	kinds: {
-		/**
-		 * One policy over the rows in order, its draws taken from `draws` in turn. `waitMs` is none when the
-		 * request stops; `draws` counts what the row took.
-		 */
+		/** One policy over the rows, drawing from `draws`. `waitMs` is none when the request stops. */
 		wait: kind(
 			z.object({
 				options: RetryOptions,

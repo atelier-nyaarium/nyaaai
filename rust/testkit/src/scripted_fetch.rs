@@ -77,7 +77,7 @@ fn lane_locked(lane: &Lane) -> MutexGuard<'_, LaneState> {
 }
 
 impl Lane {
-    /// The lane goes to the first waiter whose token has not ended; the others are refused unseen.
+    /// The lane goes to the first live waiter; the others are refused unseen.
     fn hand(&self) {
         let mut state = lane_locked(self);
         loop {
@@ -107,7 +107,7 @@ impl Drop for Held {
     }
 }
 
-/// A place in line; dropped unanswered, it leaves, or hands on a lane it was given.
+/// A place in line; dropped unanswered, it leaves or hands on its lane.
 struct Waiting {
     lane: Arc<Lane>,
     id: u64,
@@ -133,7 +133,7 @@ impl Drop for Waiting {
     }
 }
 
-/// Takes the lane now, or waits in arrival order; a token that ends while waiting leaves unseen.
+/// Takes the lane, or waits in arrival order; an ended token leaves unseen.
 async fn enter(lane: &Arc<Lane>, cancel: &CancelToken) -> Result<Held, FetchError> {
     let mut waiting = {
         let mut state = lane_locked(lane);
@@ -177,11 +177,7 @@ async fn enter(lane: &Arc<Lane>, cancel: &CancelToken) -> Result<Held, FetchErro
     }
 }
 
-/// Plays exchanges in order, spending wheel time, on one lane: a request holds it from its turn
-/// until its body ends, fails, is cancelled or is dropped. Later requests wait in arrival order and
-/// are seen (recorded, timed) at their turn; a request whose token has ended when its turn comes,
-/// or ends while it waits, is refused unrecorded with no time spent. A body neither read to its
-/// end nor dropped holds the lane.
+/// Plays exchanges in order on one lane; a body neither read nor dropped holds it.
 pub struct ScriptedFetch {
     exchanges: Vec<ScriptedExchange>,
     wheel: Arc<TimerWheel>,
@@ -426,7 +422,7 @@ mod tests {
                 })
             };
             assert_eq!(first.await.expect("joined"), 1);
-            // The second head waits for the first body: 10 + 5, then its own 3.
+            // Second head waits for the first body: 10 + 5, then 3.
             assert_eq!(second.await.expect("joined"), (18, 1));
             assert_eq!(urls(&played), ["a", "b"]);
             assert_eq!(wheel.now_ms(), 20);

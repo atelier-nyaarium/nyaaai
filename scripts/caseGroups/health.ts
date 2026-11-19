@@ -35,19 +35,14 @@ const HealthKeyAnswer = z.discriminatedUnion("kind", [
 /** The fields health reads of a resolved route. */
 const HealthRoute = z.object({ entry: ProviderEntry, key: z.string() });
 
-/** A step of the script. A step that starts a check waits for it to end before it reports. */
+/** A script step; a step that starts a check waits for it to end. */
 const NoIdle = { idle: z.literal(false).exactOptional() };
 
 const Step = () =>
 	z.discriminatedUnion("kind", [
-		/**
-		 * Arms a hold: the next check to reach it parks there until a `release`. `store` is the read of
-		 * the store's key; `check` is the kind's check, after the store answered. Holds count from 1 in the
-		 * order they are armed. A step that arms a hold waits for the hold to be reached and does not wait
-		 * for `idle`; so does a step with `idle: false`.
-		 */
+		/** Arms a hold the next check parks at; holds count from 1. `store` is the key read, `check` the kind's check. Does not wait for `idle`, as with `idle: false`. */
 		z.object({ kind: z.literal("hold"), at: z.enum(["store", "check"]) }),
-		/** Lets a parked hold go on: a store answers `answer` (the store's own when absent); a check answers `state` at once (the kind's check runs when absent). */
+		/** Releases a hold: a store answers `answer`, a check answers `state`; each defaults to the real one. */
 		z.object({
 			kind: z.literal("release"),
 			hold: z.int().min(1),
@@ -55,7 +50,7 @@ const Step = () =>
 			answer: HealthKeyAnswer.exactOptional(),
 			...NoIdle,
 		}),
-		/** The first time this entry's change is told, a listener starts a check on it. */
+		/** On this entry's first change told, a listener starts a check. */
 		z.object({ kind: z.literal("listenAndCheck"), id: z.string() }),
 		/** The list changes, and tells. */
 		z.object({ kind: z.literal("list"), entries: z.array(ProviderEntry), ...NoIdle }),
@@ -65,7 +60,7 @@ const Step = () =>
 		z.object({ kind: z.literal("checkUnread") }),
 		/** What a resolver would read for the entry. */
 		z.object({ kind: z.literal("keys"), id: z.string() }),
-		/** `served` with a reply billed under this source; `keep` passes the run's exemption set. */
+		/** `served` bills a reply under this source; `keep` passes the exemption set. */
 		z.object({
 			kind: z.literal("served"),
 			route: HealthRoute,
@@ -90,7 +85,7 @@ const Step = () =>
 		z.object({ kind: z.literal("deferred"), route: HealthRoute, keep: z.boolean().exactOptional() }),
 		z.object({ kind: z.literal("blocked"), route: HealthRoute, keep: z.boolean().exactOptional() }),
 		z.object({ kind: z.literal("tryAdmit"), request: z.string(), route: HealthRoute }),
-		/** An admission that comes at once; the script never asks a gate that would make it wait. */
+		/** Admits at once; never makes a request wait. */
 		z.object({ kind: z.literal("admit"), request: z.string(), route: HealthRoute }),
 		/** Settles the ticket the named request was given. */
 		z.object({
@@ -121,7 +116,7 @@ const Outcome = () =>
 		answer: Answer(),
 		/** What `onChange` told during the step, in order. */
 		changes: z.array(HealthChange),
-		/** Every entry the script has named so far, in the order first named. */
+		/** Entries named so far, in first-named order. */
 		entries: z.array(EntryHealth),
 		/** The entries the run's exemption set holds, in code unit order. */
 		run: z.array(z.string()),
@@ -142,7 +137,7 @@ const PREPARED = z.enum(["none", "checking", "ok", "rejected", "unreachable"]);
 export const health = caseGroup("health", {
 	shapes: { HealthKeyAnswer, HealthRoute },
 	kinds: {
-		/** One health over scripted ports, the real kinds' checks on a scripted network, and the wheel. */
+		/** One health over scripted ports, real kinds' checks and the wheel. */
 		run: kind(
 			z.object({
 				startMs: z.int(),
@@ -179,7 +174,7 @@ export const health = caseGroup("health", {
 					released: Promise<{ state?: z.infer<typeof KeyState>; answer?: z.infer<typeof HealthKeyAnswer> }>;
 				}
 				const holds: Hold[] = [];
-				/** Armed holds of each place, in order, not yet taken by a check. */
+				/** Armed holds per place, not yet taken. */
 				const armed: Record<"store" | "check", Hold[]> = { store: [], check: [] };
 				const arm = (at: "store" | "check"): Hold => {
 					let arrive = () => {};
@@ -338,7 +333,7 @@ export const health = caseGroup("health", {
 					} else {
 						health.dispose();
 					}
-					// A step that starts a check meets the holds armed before it, and leaves them parked.
+					// A check meets earlier-armed holds and parks.
 					const starts = ["list", "key", "check", "checkUnread", "keys"].includes(step.kind);
 					let met = false;
 					if (starts)
@@ -371,7 +366,7 @@ export const health = caseGroup("health", {
 				};
 			},
 		),
-		/** What a resolver reads for an entry: the store's answer, unless health holds the entry out. */
+		/** The store's answer, unless health holds the entry out. */
 		keys: kind(
 			z.object({
 				rows: z.array(

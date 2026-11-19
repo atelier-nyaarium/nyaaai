@@ -20,7 +20,7 @@ fn locked<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
 
 type Answer = Result<KeyState, ()>;
 
-/// A check the script holds open: only a step, an abort or the deadline ends it.
+/// A check held open until a step, abort or the deadline.
 struct Held {
     settle: Option<oneshot::Sender<Answer>>,
     closed: bool,
@@ -31,7 +31,7 @@ struct Held {
     limit: Arc<Deadline>,
 }
 
-/// Notes the checks whose signal ended, and ends those that end on it.
+/// Notes checks whose signal ended and ends them.
 fn signals(
     checks: &Mutex<Vec<Held>>,
     ignore: bool,

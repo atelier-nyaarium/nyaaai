@@ -34,7 +34,7 @@ interface Site {
 	holds: Holds;
 }
 
-/** Every field that falls back, as the old schema had it. */
+/** Every field that falls back. */
 const SITES: Site[] = [
 	{ path: ["name"], holds: "text" },
 	{ path: ["description"], holds: "text" },

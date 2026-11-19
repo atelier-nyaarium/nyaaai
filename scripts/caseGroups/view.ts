@@ -10,7 +10,7 @@ import { viewCases } from "../caseSources/view";
 ////////////////////////////////
 //  Shapes
 
-/** The parts of a view the helpers read; its row is made up. */
+/** The view parts helpers read; the row is made up. */
 const ViewSpec = () =>
 	z.object({
 		reasoning: z.boolean(),

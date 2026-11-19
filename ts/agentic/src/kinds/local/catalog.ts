@@ -84,7 +84,7 @@ const LABEL_UNITS = 200;
 ////////////////////////////////
 //  Functions & Helpers
 
-/** The items of `{ [key]: [...] }`; none unless it is a list. */
+/** The list at `key`; none unless a list. */
 export function itemsOf(raw: unknown, key: string): readonly unknown[] | undefined {
 	const fields = fieldsOf(raw);
 	const list = fields === undefined ? undefined : fieldOf(fields, key);
@@ -319,7 +319,7 @@ export class LocalCatalog implements EntryCatalog {
 		this.work.add(reading);
 	}
 
-	/** Answers when no discovery or read is running, having waited for whatever was. */
+	/** Settles when no discovery or read is running. */
 	async idle(): Promise<void> {
 		while (this.work.size > 0) await Promise.allSettled([...this.work]);
 	}

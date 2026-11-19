@@ -1,4 +1,4 @@
-// Provider health on scripted ports, the real kinds' checks on a scripted network, and the wheel. Every value is made up.
+// Provider health on scripted ports, kind checks on a scripted network, and the wheel. Every value is made up.
 
 import type { CaseSource } from "../caseAdapter";
 import { caseOf, failing, reply } from "./catalogKit";
@@ -98,7 +98,7 @@ const run = (name: string, input: Fields): CaseSource =>
 /** The balance cooldown of Go: a reply billed from the balance, then waiting for the next probe. */
 const balance = (entry: Fields = GO): Step => served(entry, "balance");
 
-/** Waits in minutes until the entry's route is no longer skipped, one minute short, then the last. */
+/** Waits until the route is unskipped, one minute short then the last. */
 function until(entry: Fields, minutes: number): Step[] {
 	return [advance((minutes - 1) * MINUTE), deferred(entry), advance(MINUTE), deferred(entry)];
 }

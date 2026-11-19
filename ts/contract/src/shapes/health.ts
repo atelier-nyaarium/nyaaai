@@ -6,11 +6,7 @@ import { Billed, KeyState, NoticeKind, SkipReason } from "./provider";
 ////////////////////////////////
 //  Shapes
 
-/**
- * Identifies a gate pass and probe. Two tickets are the same ticket when every field is equal. A
- * gate is given its `gate` text once, when it is built, and counts `serial` from there, so the
- * two name one ticket in a process.
- */
+/** Identifies a gate pass and probe; tickets with equal fields are the same ticket. */
 export const Ticket = z.object({
 	/** The issuing gate's name. */
 	gate: z.string(),
@@ -59,10 +55,7 @@ export const PoolState = z.discriminatedUnion("kind", [
 		eta: z.number(),
 		/** Next probe window. */
 		next: z.number(),
-		/**
-		 * The first ticket admitted inside the window, whatever its `probe` mark. A probe whose settlement
-		 * never comes holds the entry until `eta` and no longer; a renewed window starts with none.
-		 */
+		/** The first ticket admitted in the window, whatever its `probe` mark; it holds the entry until `eta`. */
 		probe: z.object({ ticket: Ticket, at: z.number() }).nullable(),
 	}),
 ]);
@@ -82,11 +75,7 @@ export const PoolEvent = z.discriminatedUnion("kind", [
 		retryAfterMs: z.number().exactOptional(),
 	}),
 	z.object({ kind: z.literal("extraUsage"), on: z.boolean(), lastBill: z.string().exactOptional() }),
-	/**
-	 * The pool takes the first ticket admitted inside its window as its probe, whatever `Ticket.probe`
-	 * says: that mark is the gate's own, for its recovery probe after an overload (pinned by
-	 * `pool.step` `admitted-ticket-is-kept-whole` and `a-ticket-not-marked-probe-is-the-probe`).
-	 */
+	/** The pool takes the first ticket admitted in its window as its probe; `Ticket.probe` is the gate's own mark. */
 	z.object({ kind: z.literal("admitted"), ticket: Ticket }),
 	z.object({ kind: z.literal("settled"), ticket: Ticket }),
 ]);
@@ -116,18 +105,12 @@ export const EntryHealth = z.object({
 	key: KeyState,
 	billed: Billed.exactOptional(),
 	pool: PoolState,
-	/**
-	 * Models of its gates that are waiting. Order and repeats carry no meaning: read it as a set.
-	 * Whoever writes it writes each model once.
-	 */
+	/** Models of its gates that are waiting; read as a set, each written once. */
 	waiting: z.array(z.string()),
 });
 export type EntryHealth = z.infer<typeof EntryHealth>;
 
-/**
- * Which parts of an entry's health changed. Order and repeats in `changed` carry no meaning: read
- * it as a set. Whoever writes it writes each part once, in the order the shape declares.
- */
+/** Which parts of an entry's health changed; `changed` is read as a set, written once each in shape order. */
 export const HealthChange = z.object({
 	entry: z.string(),
 	changed: z.array(z.enum(["key", "billed", "pool", "waiting"])).min(1),

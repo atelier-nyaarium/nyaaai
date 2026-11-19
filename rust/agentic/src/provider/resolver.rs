@@ -64,7 +64,7 @@ impl RouteTransport {
         self.transport.complete(codec, &stamped, cancel).await
     }
 
-    /// A stream over the request, stamped with the switch as it stands; the stream owns it.
+    /// A stream over the request, stamped with the current switch.
     pub fn stream<'a>(
         &'a self,
         codec: &'a dyn Codec,
@@ -256,7 +256,7 @@ pub fn key_source_of(
 }
 
 impl KeySource for EntryKeySource {
-    /// The key is read first; it is given only while the list holds the same id, kind, plan and URL.
+    /// Gives the key only while the list holds the same id, kind, plan and URL.
     fn get(&self) -> BoxFuture<'_, Option<String>> {
         Box::pin(async move {
             let answer = self.keys.get(&self.entry.id).await;
@@ -838,7 +838,7 @@ mod tests {
         }
     }
 
-    /// A kind whose catalogs wait for each other, so two routes are built before either is kept.
+    /// Catalogs wait for each other, so two routes build before either is kept.
     struct Meeting {
         barrier: Barrier,
         built: AtomicUsize,

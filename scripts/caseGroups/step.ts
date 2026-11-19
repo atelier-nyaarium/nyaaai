@@ -26,7 +26,7 @@ export const step = caseGroup("step", {
 		assemble: kind(
 			z.object({
 				events: z.array(StepEvent),
-				/** JSON texts of events that follow, for numbers a JSON writer cannot carry. */
+				/** JSON texts of following events, for numbers a writer cannot carry. */
 				more: z.array(z.string()).exactOptional(),
 			}),
 			z.object({

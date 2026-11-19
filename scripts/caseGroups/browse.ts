@@ -62,7 +62,7 @@ type BrowserAnswerOf = z.infer<ReturnType<typeof BrowserAnswer>>;
 
 const messageOf = (error: unknown): string => (error instanceof Error ? error.message : jsString(error));
 
-/** Plays the steps on a browser and its tester, over the network of `net`. */
+/** Plays steps on a browser and its tester. */
 async function drive(
 	net: ReturnType<typeof networkOf>,
 	browser: Browser,
@@ -106,7 +106,7 @@ async function drive(
 export const browse = caseGroup("browse", {
 	shapes: { NetExchange, ViewLine },
 	kinds: {
-		/** The listing of a fetch: raw items and the zero-retention hosts, at a time. */
+		/** A fetch's listing at a time. */
 		openrouterModels: kind(
 			z.object({ raw: z.array(z.unknown()), zdr: z.unknown(), nowMs: z.int() }),
 			z.object({ models: z.array(BrowseModel) }),
@@ -117,7 +117,7 @@ export const browse = caseGroup("browse", {
 				),
 			}),
 		),
-		/** The providers of one model; `zdr` holds the hosts that keep no data, all of them read. */
+		/** One model's providers; `zdr` holds hosts keeping no data. */
 		openrouterProviders: kind(
 			z.object({ raw: z.unknown(), zdr: z.unknown() }),
 			z.object({ providers: z.array(ProviderRow).nullable() }),
@@ -126,7 +126,7 @@ export const browse = caseGroup("browse", {
 				return { providers: parseProviders(input.raw, zdr) ?? null };
 			},
 		),
-		/** The browser and the tester of OpenRouter over a catalog on a scripted network. */
+		/** OpenRouter's browser and tester on a scripted network. */
 		openrouterBrowser: kind(
 			z.object({
 				startMs: z.int(),
@@ -146,7 +146,7 @@ export const browse = caseGroup("browse", {
 				return drive(net, browser, tester, input.steps);
 			},
 		),
-		/** The two hosts a test pins: the first two serving hosts that are also in the view. */
+		/** Two pinned hosts: the first serving hosts also in the view. */
 		openrouterHop: kind(
 			z.object({
 				startMs: z.int(),
@@ -190,7 +190,7 @@ export const browse = caseGroup("browse", {
 				return { hosts, thrown, requests: net.asked(), waiting: net.wheel.waiting(), nowMs: net.wheel.nowMs() };
 			},
 		),
-		/** Host pins on the Chat codec: each call pins hosts, encodes a request, or asks about resent reasoning. */
+		/** Host pins on the Chat codec. */
 		openrouterPins: kind(
 			z.object({
 				calls: z.array(
@@ -254,7 +254,7 @@ export const browse = caseGroup("browse", {
 				return { answers };
 			},
 		),
-		/** The browser and the tester of an OpenCode plan over a catalog on a scripted network. */
+		/** An OpenCode plan's browser and tester on a scripted network. */
 		opencodeBrowser: kind(
 			z.object({
 				startMs: z.int(),

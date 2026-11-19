@@ -29,8 +29,7 @@ pub trait Meter: Send + Sync {
     fn called(&self, call: &MeteredCall);
 }
 
-/// Queues delayed stats for a record that names a generation: the record's id, the generation id
-/// and the call.
+/// Queues delayed stats for a record: its id, the generation id and the call.
 pub type StatsHook = Arc<dyn Fn(&str, &str, &MeteredCall) + Send + Sync>;
 
 pub struct MeterDeps {

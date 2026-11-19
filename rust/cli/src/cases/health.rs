@@ -473,7 +473,7 @@ async fn play(input: HealthRunInput) -> Outcome<HealthRunResult> {
             }
             HealthRunInputStepsItem::Dispose(_) => health.dispose(),
         }
-        // A step that starts a check meets the holds armed before it, and leaves them parked.
+        // A check-starting step meets earlier armed holds and leaves them parked.
         let starts = matches!(
             step,
             HealthRunInputStepsItem::List(_)
@@ -542,7 +542,7 @@ async fn play(input: HealthRunInput) -> Outcome<HealthRunResult> {
 
 type KeyListener = Arc<dyn Fn(&str) + Send + Sync>;
 
-/// A store whose answer the row sets, and whose changes the row tells.
+/// A store whose answer and changes the row sets.
 struct Store {
     current: Mutex<KeyAnswer>,
     listeners: Mutex<Vec<(u64, KeyListener)>>,

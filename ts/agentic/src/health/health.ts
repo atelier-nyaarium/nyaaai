@@ -144,7 +144,7 @@ function identityOf(entry: ProviderEntry): Identity {
 
 /** Entry health and routing. */
 export class ProviderHealth implements Gate {
-	/** The keys a resolver reads: the store's, unless health holds the entry out. */
+	/** Store keys, unless health holds the entry out. */
 	readonly entryKeys: EntryKeys;
 	private readonly gate: ProviderGate;
 	/** Absent pool means clear. */
@@ -257,7 +257,7 @@ export class ProviderHealth implements Gate {
 		for (const { id } of this.d.list.entries()) if (!this.statuses.has(id)) this.check(id);
 	}
 
-	/** Answers when no key check is running, having waited for those that were. */
+	/** Settles when no key check is running. */
 	async idle(): Promise<void> {
 		for (;;) {
 			const busy = [...[...this.statuses.values()].map((status) => status.reader), ...this.retired].filter(
@@ -271,7 +271,7 @@ export class ProviderHealth implements Gate {
 		}
 	}
 
-	/** Told each change once, with its parts in the shape's order; the result unsubscribes. */
+	/** Told each change once; returns unsubscribe. */
 	onChange(listener: (change: HealthChange) => void): () => void {
 		this.listeners.add(listener);
 		return () => {
@@ -552,7 +552,7 @@ export class ProviderHealth implements Gate {
 		if (this.batching === 0) this.flush();
 	}
 
-	/** Delivers in the order made: a change a listener makes is told behind those already waiting. */
+	/** Delivers in order made; a listener's change queues behind. */
 	private flush(): void {
 		const held = [...this.pending];
 		this.pending.clear();

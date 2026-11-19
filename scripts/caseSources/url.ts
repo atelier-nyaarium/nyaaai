@@ -2,7 +2,6 @@
 
 import type { CaseSource } from "../caseAdapter";
 
-/** Hosts the primitive leaves to the platform's IDNA and percent decoding. */
 /** Hosts the platform refuses for invalid punycode; the primitive keeps a label as written. */
 export const PUNYCODE_URLS = [
 	"http://xn--/",

@@ -6,7 +6,7 @@ import { Utf8Decoder } from "@nyaaai/contract/text";
 ////////////////////////////////
 //  Classes
 
-/** Decodes split UTF-8. A line ends at LF; a lone CR is data. */
+/** Decodes split UTF-8; a line ends at LF, a lone CR is data. */
 export class SseDecoder {
 	private readonly decoder = new Utf8Decoder();
 	private pending = "";

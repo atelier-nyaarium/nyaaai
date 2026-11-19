@@ -167,7 +167,7 @@ impl Mailbox {
         }
     }
 
-    /// The first held message that `wanted` takes; `None` once interrupted and none is held.
+    /// The first held message `wanted` takes; `None` once interrupted with none held.
     fn take(
         &self,
         waker: &Context<'_>,

@@ -82,7 +82,7 @@ pub struct Endpoint {
     pub pricing: Option<Pricing>,
 }
 
-/// Values by text key in the order the keys first came; a later one replaces in place.
+/// Values by key in first-seen order; a repeat replaces in place.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Ordered<T> {
     items: Vec<(String, T)>,
@@ -306,14 +306,13 @@ fn tiers_of(pricing: Option<&Pricing>) -> Vec<PriceTier> {
     tiers
 }
 
-/// What identifies a use in the cache: its name, its abilities in order and its flag. A name holds
-/// no control character, so its line feed ends it, and no ability text holds a comma.
+/// A use's cache key; names hold no line feed, abilities no comma.
 fn use_key(use_: &ModelUse) -> String {
     let abilities: Vec<&str> = use_.requires.iter().map(|each| each.as_str()).collect();
     format!("{}\n{}\n{}", use_.name, abilities.join(","), use_.hides)
 }
 
-/// What a host must support for the use: the structured-output parameters when it needs a schema.
+/// What a host must support: structured-output params when a schema is needed.
 pub fn sent_params(row: &ModelRow, use_: &ModelUse) -> Vec<ParamNeed> {
     let mut params = vec![ParamNeed::One("tools".to_owned())];
     if row.reasoning {
@@ -363,7 +362,7 @@ pub fn parse_endpoint(item: &Value) -> Option<Endpoint> {
     })
 }
 
-/// None when the body holds no list; a later entry of an id replaces the earlier in its place.
+/// None without a list; a repeated id replaces in place.
 pub fn parse_models(raw: &Value) -> Option<Ordered<ModelEntry>> {
     let mut models = Ordered::new();
     for item in data_list(raw)? {
@@ -679,8 +678,7 @@ impl ModelCatalog {
         self.shared.fetcher.idle()
     }
 
-    /// Rows bound under OpenRouter; off `zdr_only`, hosts that keep data count. A refresh it needs
-    /// starts at the call.
+    /// Rows under OpenRouter; off `zdr_only`, data-keeping hosts count. Refreshes as needed.
     pub fn views(
         &self,
         use_: ModelUse,

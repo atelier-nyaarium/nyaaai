@@ -44,7 +44,7 @@ pub fn tiers_of(view: Option<&ModelView>) -> Option<&[PriceTier]> {
     }
 }
 
-/// A whole limit; none when not finite or below one, capped at the largest safe integer.
+/// A whole limit, capped at the largest safe integer; none if not finite or below one.
 fn usable_limit(limit: f64) -> Option<i64> {
     (limit.is_finite() && limit >= 1.0).then(|| limit.floor().min(9_007_199_254_740_991.0) as i64)
 }
@@ -60,7 +60,7 @@ pub fn codec_facts_of(view: Option<&ModelView>) -> Option<CodecFacts> {
     })
 }
 
-/// Missing inputs send none; unknown rows send wishes only for reasoning models; other rows resolve offers.
+/// None for missing inputs; unknown rows pass the wish only if reasoning; others resolve offers.
 pub fn run_effort(view: Option<&ModelView>, wanted: Option<Effort>) -> Option<Effort> {
     let (view, wanted) = (view?, wanted?);
     if view.status == ModelViewStatus::Unknown {

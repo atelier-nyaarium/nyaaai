@@ -110,7 +110,7 @@ fn provider_for(zdr_only: bool) -> Object {
     held
 }
 
-/// The host of the newest step whose thought blocks go back; `None` when unknown.
+/// Host of the newest step whose thought blocks go back; `None` when unknown.
 fn affinity_of(request: &CanonicalRequest) -> Option<String> {
     for turn in request.history.iter().rev() {
         if let Turn::Step(step) = turn

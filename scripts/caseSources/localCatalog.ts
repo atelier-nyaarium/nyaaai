@@ -1,8 +1,4 @@
-// `LocalCatalog` cases on a scripted server and the timer wheel. Every value is made up.
-//
-// A script gives the server's replies, one list per call a catalog can make, in the order they are asked.
-// A reply spends `delayMs` of the wheel before it answers; a reply with `fails` throws instead.
-// A step is a call, calls at once, a reply seen for a tag, a rediscovery, time passing or new rows.
+// `LocalCatalog` cases on a scripted server and the timer wheel.
 
 import type { CaseSource } from "../caseAdapter";
 import { caseOf, NOW } from "./catalogKit";

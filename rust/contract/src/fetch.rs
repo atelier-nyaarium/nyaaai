@@ -48,8 +48,7 @@ pub enum FetchError {
     Failed(String),
 }
 
-/// A pending or later read ends `Cancelled` at the cancel given to `fetch`.
-/// The connection is released at the end, on drop, or at the cancel.
+/// A read after the cancel ends `Cancelled`; the connection frees at end, drop or cancel.
 pub trait Chunks: Send {
     /// `None` ends the body.
     fn next(&mut self) -> BoxFuture<'_, Result<Option<Vec<u8>>, FetchError>>;
@@ -62,8 +61,7 @@ pub struct FetchResponse {
     pub chunks: Box<dyn Chunks>,
 }
 
-/// No redirect is followed: a 3xx is answered as the status it is.
-/// The cancel covers the whole exchange, body reads included.
+/// Redirects are not followed; the cancel covers body reads.
 pub trait Fetch: Send + Sync {
     fn fetch(
         &self,

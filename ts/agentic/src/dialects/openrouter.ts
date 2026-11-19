@@ -80,7 +80,7 @@ function providerFor(zdrOnly: boolean): Provider {
 	return zdrOnly ? PROVIDER : { require_parameters: true };
 }
 
-/** The host of the newest step whose thought blocks go back; undefined when unknown. */
+/** Host of the newest step with thought blocks. */
 function affinityOf(request: CanonicalRequest): string | undefined {
 	for (const turn of [...request.history].reverse()) {
 		if (turn.role === "step" && turn.producer?.model === request.model && detailsOf(turn.parts).length > 0)

@@ -18,7 +18,7 @@ export type StepTurn = Extract<Turn, { role: "step" }>;
 
 export interface Codec {
 	encode(request: CanonicalRequest, mode: "stream" | "complete"): Encoded;
-	/** Ends at the API's end marker; in-stream errors and early ends throw `ProviderError`. */
+	/** Ends at the end marker; stream errors and early ends throw `ProviderError`. */
 	stream(items: AsyncIterable<SseItem>): AsyncIterable<StepEvent>;
 	/** A non-streaming reply, as the stream would have assembled it. */
 	complete(body: unknown): StepResult;

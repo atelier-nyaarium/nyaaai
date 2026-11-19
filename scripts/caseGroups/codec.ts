@@ -21,7 +21,7 @@ async function* each(items: readonly SseItem[]): AsyncGenerator<SseItem> {
 	yield* items;
 }
 
-/** A refusal is a failure the codec decoded; anything else is a bug. */
+/** A refusal is a decoded failure; anything else is a bug. */
 function failureOfThrown(error: unknown): Failure {
 	const held = failureOf(error);
 	if (held === undefined) throw error;
@@ -45,7 +45,7 @@ export const codec = caseGroup("codec", {
 				}
 			},
 		),
-		/** The events up to the end or the failure; the step they assemble to, or the failure. */
+		/** Events up to the end or failure, and the assembled step. */
 		stream: kind(
 			z.object({ codec: CodecName, items: z.array(SseItem) }),
 			z.object({ events: z.array(StepEvent), result: StepResult.nullable(), failure: Failure.nullable() }),

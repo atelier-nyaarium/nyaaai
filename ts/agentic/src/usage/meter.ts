@@ -7,7 +7,7 @@ import type { Billing, ProviderHealth } from "../health/health";
 ////////////////////////////////
 //  Interfaces & Types
 
-/** The features the page labels; any other string is kept and shown by its id. */
+/** A feature id; unlabeled ones show by id. */
 export type Feature = string;
 
 export interface Meter {

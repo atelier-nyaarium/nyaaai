@@ -39,7 +39,7 @@ function billed(state: PoolState, source: string, extraUsage: boolean, nowMs: nu
 		return state;
 	const open = state.kind === "balance" && nowMs < state.eta;
 	const eta = open ? state.eta : nowMs + BALANCE_COOL_MS;
-	// A renewed window starts without the old probe.
+	// A renewed window starts without a probe.
 	return { kind: "balance", eta, next: probeAt(nowMs, eta), probe: open ? state.probe : null };
 }
 

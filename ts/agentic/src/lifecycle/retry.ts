@@ -48,7 +48,7 @@ export class RetryPolicy {
 		this.baseMs = options.baseMs ?? 1000;
 	}
 
-	/** One draw past the tries, even under `retryAfterMs`. A wait is at least 0 or none. */
+	/** None past the tries, even under `retryAfterMs`; else a wait of at least 0. */
 	wait(failure: Pick<Failure, "retryAfterMs">, attempt: number, waitedMs: number): number | undefined {
 		if (attempt >= this.tries) return undefined;
 		const base = this.baseMs === 0 ? 0 : Math.min(this.capMs, this.baseMs * 2 ** (attempt - 1));

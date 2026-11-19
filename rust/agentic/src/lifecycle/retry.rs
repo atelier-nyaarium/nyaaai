@@ -57,8 +57,7 @@ impl RetryPolicy {
         }
     }
 
-    /// One draw per call that gets past the tries, even when `retry_after_ms` replaces the backoff.
-    /// A `base_ms` of 0 backs off 0 at any attempt. A wait is at least 0 or none.
+    /// One draw per call past the tries, even when `retry_after_ms` replaces backoff; a wait is at least 0 or none.
     pub fn wait(&self, retry_after_ms: Option<i64>, attempt: i64, waited_ms: f64) -> Option<f64> {
         if attempt as f64 >= self.tries {
             return None;

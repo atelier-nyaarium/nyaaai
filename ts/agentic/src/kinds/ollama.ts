@@ -19,7 +19,7 @@ const isLineEnd = (unit: number) => unit === 0x0a || unit === 0x0d || unit === 0
 
 const isDigit = (unit: number) => unit >= 0x30 && unit <= 0x39;
 
-/** The context of the first line reading `num_ctx` and a number; none unless above zero. */
+/** The first `num_ctx` number; none unless above zero. */
 export function numCtxOf(text: string): number | undefined {
 	let from = 0;
 	while (from <= text.length) {
@@ -38,7 +38,7 @@ export function numCtxOf(text: string): number | undefined {
 	return undefined;
 }
 
-/** The digits after blanks, when blanks then the end of the line follow. */
+/** The digits after blanks, when they end the line. */
 function digitsAfter(text: string, start: number): string | undefined {
 	let at = start;
 	while (at < text.length && isSpace(text.charCodeAt(at))) at += 1;
@@ -102,7 +102,7 @@ export function modelOf(tag: string, raw: unknown): LocalModel | undefined {
 	};
 }
 
-/** Loaded context by name, from `/api/ps`; a list that does not read is empty. */
+/** Loaded context by name, from `/api/ps`. */
 export function runningOf(raw: unknown): Map<string, number> {
 	const contexts = new Map<string, number>();
 	for (const item of itemsOf(raw, "models") ?? []) {

@@ -86,7 +86,7 @@ fn clean_id(wire_id: &str) -> String {
     if id.is_empty() { "call".to_owned() } else { id }
 }
 
-/// One block id for each wire id of the request; ids that need no change keep theirs.
+/// A block id for each wire id; ids needing no change keep theirs.
 fn block_ids(history: &[Turn]) -> HashMap<String, String> {
     let wire_ids: Vec<&str> = history
         .iter()

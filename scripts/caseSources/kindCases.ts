@@ -1,5 +1,4 @@
-// What the kinds say and build: dropdown lines, the provider list, Settings lines, codecs, failures.
-// Every value is made up.
+// What the kinds say and build.
 
 import type { CaseSource } from "../caseAdapter";
 import { caseOf } from "./catalogKit";
