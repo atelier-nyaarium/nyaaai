@@ -35,9 +35,12 @@ export function probeAt(nowMs: number, eta: number): number {
 /** A known reset wins. */
 function billed(state: PoolState, source: string, extraUsage: boolean, nowMs: number): PoolState {
 	if (source !== "balance") return ALLOWANCE_SOURCES.has(source) && state.kind === "balance" ? CLEAR : state;
-	if (extraUsage || (state.kind === "reset" && nowMs < state.at)) return state;
-	const eta = state.kind === "balance" && nowMs < state.eta ? state.eta : nowMs + BALANCE_COOL_MS;
-	return { kind: "balance", eta, next: probeAt(nowMs, eta), probe: state.kind === "balance" ? state.probe : null };
+	if (extraUsage || (state.kind === "reset" && nowMs < state.at) || (state.kind === "paused" && nowMs < state.until))
+		return state;
+	const open = state.kind === "balance" && nowMs < state.eta;
+	const eta = open ? state.eta : nowMs + BALANCE_COOL_MS;
+	// A renewed window starts without the old probe.
+	return { kind: "balance", eta, next: probeAt(nowMs, eta), probe: open ? state.probe : null };
 }
 
 /** The only transition. */
@@ -52,7 +55,11 @@ export function step(state: PoolState, event: PoolEvent, nowMs: number, pauseMs:
 			// Pauses never shorten windows.
 			if (reset === undefined && state.kind === "balance" && nowMs < Math.max(state.eta, state.next))
 				return { ...state, next: Math.max(state.next, until) };
-			return reset === undefined ? { kind: "paused", reason: event.reason, until } : { kind: "reset", at: reset };
+			const refused: PoolState =
+				reset === undefined ? { kind: "paused", reason: event.reason, until } : { kind: "reset", at: reset };
+			// A refusal never ends a running pause or reset earlier.
+			const ends = state.kind === "paused" ? state.until : state.kind === "reset" ? state.at : undefined;
+			return ends !== undefined && nowMs < ends && until < ends ? state : refused;
 		}
 		case "extraUsage":
 			if (event.on) return state.kind === "balance" ? CLEAR : state;

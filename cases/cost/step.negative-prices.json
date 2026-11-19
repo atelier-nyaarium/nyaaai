@@ -1,0 +1,260 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "cost.step",
+	"name": "negative-prices",
+	"input": {
+		"rows": [
+			{
+				"usage": {
+					"input": 1000,
+					"output": 100
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 0,
+							"prompt": -1,
+							"completion": -1
+						}
+					]
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 1000,
+					"output": 100
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 0,
+							"prompt": -1,
+							"completion": 1
+						}
+					]
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 1000,
+					"output": 100
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 0,
+							"prompt": 1,
+							"completion": -1
+						}
+					]
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 1000,
+					"output": 100
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 0,
+							"prompt": 0,
+							"completion": 0
+						}
+					]
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 1000,
+					"output": 100,
+					"byok": true,
+					"cost": 0.5
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 0,
+							"prompt": -1,
+							"completion": -1
+						}
+					]
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 1000,
+					"output": 100
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 0,
+							"prompt": 1,
+							"completion": 2
+						},
+						{
+							"minPromptTokens": 500,
+							"prompt": -1,
+							"completion": -1
+						}
+					]
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 1000,
+					"output": 100
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 0,
+							"prompt": 1,
+							"completion": 2
+						},
+						{
+							"minPromptTokens": 500,
+							"prompt": 3,
+							"completion": -1
+						},
+						{
+							"minPromptTokens": 900,
+							"prompt": 4,
+							"completion": 4
+						}
+					]
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 1000,
+					"output": 100
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 0,
+							"prompt": -1,
+							"completion": 2
+						},
+						{
+							"minPromptTokens": 2000,
+							"prompt": 1,
+							"completion": 1
+						}
+					]
+				},
+				"longCache": false
+			}
+		]
+	},
+	"expected": {
+		"costs": [
+			{
+				"usd": 0,
+				"estimated": true
+			},
+			{
+				"usd": 0,
+				"estimated": true
+			},
+			{
+				"usd": 0,
+				"estimated": true
+			},
+			{
+				"usd": 0,
+				"estimated": true
+			},
+			{
+				"usd": 0.5,
+				"estimated": true
+			},
+			{
+				"usd": 0.0012,
+				"estimated": true
+			},
+			{
+				"usd": 0.0044,
+				"estimated": true
+			},
+			{
+				"usd": 0,
+				"estimated": true
+			}
+		]
+	}
+}

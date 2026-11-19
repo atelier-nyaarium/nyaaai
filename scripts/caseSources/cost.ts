@@ -38,6 +38,8 @@ const step = (name: string, rows: Row[]): CaseSource => ({
 /** A listing of two tiers. */
 const TIERS = priced(tier(0, 0.1, 0.5, { cacheRead: 0.01 }), tier(272_000, 0.2, 0.75, { cacheRead: 0.02 }));
 
+const MAX = 1.7976931348623157e308;
+
 const USAGE: Usage = { input: 100_000, output: 10_000 };
 
 /** A call at one tier whose sum changes with the order of its operations. */
@@ -393,6 +395,89 @@ export const costCases: CaseSource[] = [
 		{ input: 282_065, output: 6_419, cached: 129_581, cacheWrite: 59_542 },
 		{ p: 0.0375, cr: 0.0375, cw: 0.0375, c: 0.6 },
 	),
+	// A cost is a finite number at or above zero.
+	step("byok-sum-overflows", [
+		{ usage: { input: 3_000, output: 75, cost: MAX, upstreamCost: MAX, byok: true }, price: TIERS },
+		{ usage: { input: 3_000, output: 75, cost: MAX, upstreamCost: MAX, byok: true } },
+		{ usage: { input: 3_000, output: 75, cost: 1e308, upstreamCost: 1e308, byok: true }, price: TIERS },
+		{ usage: { input: 3_000, output: 75, cost: 1e308, upstreamCost: 7e307, byok: true }, price: TIERS },
+		{ usage: { input: 3_000, output: 75, cost: MAX, upstreamCost: 0, byok: true }, price: TIERS },
+	]),
+	step("estimate-overflows", [
+		{ usage: { input: 1e10, output: 1 }, price: priced(tier(0, 1e300, 1)) },
+		{ usage: { input: 1e300, output: 1e300 }, price: priced(tier(0, 1e300, 1e300)) },
+		{ usage: { input: 1e10, output: 1, byok: true, cost: 0.5 }, price: priced(tier(0, 1e300, 1)) },
+		{ usage: { input: 10, output: 1 }, price: priced(tier(0, MAX, MAX)) },
+		{ usage: { input: 1, output: 1, byok: true, cost: MAX }, price: priced(tier(0, MAX, MAX)) },
+		{ usage: { input: 1, output: 0, byok: true, cost: MAX }, price: priced(tier(0, 1, 1)) },
+	]),
+	step("negative-prices", [
+		{ usage: { input: 1_000, output: 100 }, price: priced(tier(0, -1, -1)) },
+		{ usage: { input: 1_000, output: 100 }, price: priced(tier(0, -1, 1)) },
+		{ usage: { input: 1_000, output: 100 }, price: priced(tier(0, 1, -1)) },
+		{ usage: { input: 1_000, output: 100 }, price: priced(tier(0, 0, 0)) },
+		{ usage: { input: 1_000, output: 100, byok: true, cost: 0.5 }, price: priced(tier(0, -1, -1)) },
+		{ usage: { input: 1_000, output: 100 }, price: priced(tier(0, 1, 2), tier(500, -1, -1)) },
+		{ usage: { input: 1_000, output: 100 }, price: priced(tier(0, 1, 2), tier(500, 3, -1), tier(900, 4, 4)) },
+		{ usage: { input: 1_000, output: 100 }, price: priced(tier(0, -1, 2), tier(2_000, 1, 1)) },
+	]),
+	step("negative-cache-prices-read-as-missing", [
+		{
+			usage: { input: 1_000, output: 100, cached: 400, cacheWrite: 300 },
+			price: priced(tier(0, 1, 2, { cacheRead: -0.1 })),
+		},
+		{
+			usage: { input: 1_000, output: 100, cached: 400, cacheWrite: 300 },
+			price: priced(tier(0, 1, 2, { cacheWrite: -1 })),
+		},
+		{
+			usage: { input: 1_000, output: 100, cached: 400, cacheWrite: 300 },
+			price: priced(tier(0, 1, 2, { cacheWrite: 1.25, cacheWrite1h: -2 })),
+			longCache: true,
+		},
+		{
+			usage: { input: 1_000, output: 100, cached: 400, cacheWrite: 300 },
+			price: priced(tier(0, 1, 2, { cacheWrite: -1, cacheWrite1h: 2 })),
+			longCache: true,
+		},
+		{
+			usage: { input: 1_000, output: 100, cached: 400, cacheWrite: 300 },
+			price: priced(tier(0, 1, 2, { cacheRead: 1e308 })),
+		},
+	]),
+	step("negative-counts-read-as-zero", [
+		{ usage: { input: -5, output: 100 }, price: TIERS },
+		{ usage: { input: 1_000, output: -100 }, price: TIERS },
+		{ usage: { input: -1_000, output: -100 }, price: TIERS },
+		{ usage: { input: 1_000, output: 100, cached: -200 }, price: TIERS },
+		{ usage: { input: 1_000, output: 100, cacheWrite: -200 }, price: TIERS },
+		{ usage: { input: -5, output: 100, byok: true, cost: 0.5 }, price: TIERS },
+		{ usage: { input: -5, output: 100 }, price: priced(tier(-10, 1, 1)) },
+		{ usage: { input: -5, output: 100 }, price: priced(tier(-3, 1, 1)) },
+		{ usage: { input: -5, output: 0 }, price: priced(tier(0, 1, 1)) },
+	]),
+	step("cached-and-written-above-the-prompt", [
+		{
+			usage: { input: 1_000, output: 100, cached: 1_000, cacheWrite: 1_000 },
+			price: priced(tier(0, 1, 2, { cacheRead: 0.1, cacheWrite: 1.25 })),
+		},
+		{
+			usage: { input: 1_000, output: 100, cached: 800, cacheWrite: 800 },
+			price: priced(tier(0, 1, 2, { cacheRead: 0.1, cacheWrite: 1.25 })),
+		},
+		{
+			usage: { input: 1_000, output: 100, cached: 500, cacheWrite: 500 },
+			price: priced(tier(0, 1, 2, { cacheRead: 0.1, cacheWrite: 1.25 })),
+		},
+		{
+			usage: { input: 1_000, output: 100, cached: 1_001, cacheWrite: 1 },
+			price: priced(tier(0, 1, 2, { cacheRead: 0.1, cacheWrite: 1.25 })),
+		},
+		{
+			usage: { input: 1_000, output: 100, cached: 0, cacheWrite: 1_001 },
+			price: priced(tier(0, 1, 2, { cacheRead: 0.1, cacheWrite: 1.25 })),
+		},
+	]),
 	// Rows of the kinds below.
 	{
 		kind: "cost.price",
@@ -432,6 +517,10 @@ export const costCases: CaseSource[] = [
 				{ byok: true, cost: 0.1, upstreamCost: 0.2 },
 				{ byok: true, cost: 0.1, upstreamCost: 0.7 },
 				{ byok: true, cost: 1e308, upstreamCost: 1e308 },
+				{ byok: true, cost: MAX, upstreamCost: MAX },
+				{ byok: true, cost: MAX, upstreamCost: 0 },
+				{ byok: true, cost: 1e308, upstreamCost: 7e307 },
+				{ byok: true, cost: 1e308, upstreamCost: 8e307 },
 			],
 		},
 	},

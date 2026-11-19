@@ -1,0 +1,47 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "a-wait-too-large-to-be-a-number",
+	"input": {
+		"options": {
+			"capMs": 1e+308,
+			"budgetMs": 1e+308,
+			"tries": 3
+		},
+		"draws": [
+			1e+308,
+			0.5
+		],
+		"rows": [
+			{
+				"attempt": 2,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 2,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 2,
+				"waitedMs": 0
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": null,
+				"draws": 1
+			},
+			{
+				"waitMs": 1500,
+				"draws": 1
+			},
+			{
+				"waitMs": null,
+				"draws": 1
+			}
+		]
+	}
+}

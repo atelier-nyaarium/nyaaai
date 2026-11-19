@@ -69,8 +69,9 @@
 						"until": 72000000
 					},
 					{
-						"kind": "reset",
-						"at": 60000001
+						"kind": "paused",
+						"reason": "credit",
+						"until": 72000000
 					}
 				]
 			}

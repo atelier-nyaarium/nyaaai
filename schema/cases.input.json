@@ -15004,6 +15004,73 @@
 				"verdicts"
 			]
 		},
+		"PoolInstantInput": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"state": {
+								"$ref": "health.input.json#/$defs/PoolState"
+							},
+							"exempt": {
+								"type": "boolean"
+							},
+							"nowMs": {
+								"type": "number"
+							},
+							"ticket": {
+								"$ref": "health.input.json#/$defs/Ticket"
+							}
+						},
+						"required": [
+							"state",
+							"exempt",
+							"nowMs",
+							"ticket"
+						]
+					}
+				}
+			},
+			"required": [
+				"rows"
+			]
+		},
+		"PoolInstantResult": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"verdict": {
+								"anyOf": [
+									{
+										"$ref": "health.input.json#/$defs/PoolVerdict"
+									},
+									{
+										"type": "null"
+									}
+								]
+							},
+							"admitted": {
+								"$ref": "health.input.json#/$defs/PoolState"
+							}
+						},
+						"required": [
+							"verdict",
+							"admitted"
+						]
+					}
+				}
+			},
+			"required": [
+				"rows"
+			]
+		},
 		"PoolProbeAtInput": {
 			"type": "object",
 			"properties": {
@@ -15478,7 +15545,10 @@
 				"apps": {
 					"type": "array",
 					"items": {
-						"type": "string"
+						"type": [
+							"string",
+							"null"
+						]
 					}
 				}
 			},

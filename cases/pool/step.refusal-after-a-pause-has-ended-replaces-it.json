@@ -1,0 +1,76 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "refusal-after-a-pause-has-ended-replaces-it",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "credit",
+							"retryAfterMs": 3600000
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance"
+						},
+						"nowMs": 63600000
+					},
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "credit",
+							"retryAfterMs": 3600000
+						},
+						"nowMs": 70800000
+					},
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "credit"
+						},
+						"nowMs": 70800001
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 63600000
+					},
+					{
+						"kind": "paused",
+						"reason": "allowance",
+						"until": 63660000
+					},
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 74400000
+					},
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 74400000
+					}
+				]
+			}
+		]
+	}
+}

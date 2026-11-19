@@ -29,12 +29,11 @@
 			"at": 1794528001000,
 			"feature": "chat",
 			"model": "vendor/model-a",
-			"app": "/",
 			"ms": 1200,
 			"cost": 0.25
 		},
 		"refusedAt": null,
-		"line": "{\"call\":{\"id\":\"call-1\",\"at\":1794528001000,\"feature\":\"chat\",\"model\":\"vendor/model-a\",\"app\":\"/\",\"ms\":1200,\"cost\":0.25}}\n",
+		"line": "{\"call\":{\"id\":\"call-1\",\"at\":1794528001000,\"feature\":\"chat\",\"model\":\"vendor/model-a\",\"ms\":1200,\"cost\":0.25}}\n",
 		"day": "2026-10-08"
 	}
 }

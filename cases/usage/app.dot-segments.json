@@ -1,0 +1,144 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.app",
+	"name": "dot-segments",
+	"input": {
+		"rows": [
+			{
+				"folder": "/home/user/../other",
+				"home": "/home/user"
+			},
+			{
+				"folder": "/home/user/app/..",
+				"home": "/home/user"
+			},
+			{
+				"folder": "/home/user/app/../..",
+				"home": "/home/user"
+			},
+			{
+				"folder": "/home/user/./app",
+				"home": "/home/user"
+			},
+			{
+				"folder": "/home/user/app/.",
+				"home": "/home/user"
+			},
+			{
+				"folder": "/home/user/../user/app",
+				"home": "/home/user"
+			},
+			{
+				"folder": "/home/user/app/../../other/app",
+				"home": "/home/user"
+			},
+			{
+				"folder": "/home/user/..",
+				"home": "/home/user"
+			},
+			{
+				"folder": "/home/./user/app",
+				"home": "/home/user"
+			},
+			{
+				"folder": "/../home/user/app",
+				"home": "/home/user"
+			},
+			{
+				"folder": "/../../..",
+				"home": "/home/user"
+			},
+			{
+				"folder": "/home/user/app",
+				"home": "/home/./user/../user"
+			},
+			{
+				"folder": "/home/user/app",
+				"home": "/home/user/.."
+			},
+			{
+				"folder": "/a/b/c/../../..",
+				"home": "/"
+			},
+			{
+				"folder": "/a/b/../../../..",
+				"home": "/"
+			},
+			{
+				"folder": "/home/user/app/...",
+				"home": "/home/user"
+			},
+			{
+				"folder": "/home/user/.hidden",
+				"home": "/home/user"
+			},
+			{
+				"folder": "/home/user/..hidden",
+				"home": "/home/user"
+			},
+			{
+				"folder": "/home/user/app../x",
+				"home": "/home/user"
+			},
+			{
+				"folder": "/home/user/app/../",
+				"home": "/home/user"
+			},
+			{
+				"folder": "/home/user/app//..",
+				"home": "/home/user"
+			},
+			{
+				"folder": "/home/user//..",
+				"home": "/home/user"
+			},
+			{
+				"folder": "./app",
+				"home": "/home/user"
+			},
+			{
+				"folder": "../app",
+				"home": "/home/user"
+			},
+			{
+				"folder": ".",
+				"home": "/home/user"
+			},
+			{
+				"folder": "..",
+				"home": "/home/user"
+			}
+		]
+	},
+	"expected": {
+		"apps": [
+			"/home/other/",
+			"~/",
+			"/home/",
+			"~/app/",
+			"~/app/",
+			"~/app/",
+			"/home/other/app/",
+			"/home/",
+			"~/app/",
+			"~/app/",
+			"/",
+			"~/app/",
+			"~/user/app/",
+			"/",
+			"/",
+			"~/app/.../",
+			"~/.hidden/",
+			"~/..hidden/",
+			"~/app../x/",
+			"~/",
+			"~/app/",
+			"~/",
+			"app/",
+			"app/",
+			"/",
+			"/"
+		]
+	}
+}

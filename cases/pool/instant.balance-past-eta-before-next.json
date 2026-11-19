@@ -1,0 +1,182 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.instant",
+	"name": "balance-past-eta-before-next",
+	"input": {
+		"rows": [
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 60600000,
+					"probe": null
+				},
+				"exempt": false,
+				"nowMs": 60000000,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 60600000,
+					"probe": null
+				},
+				"exempt": true,
+				"nowMs": 60000000,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 60600000,
+					"probe": null
+				},
+				"exempt": false,
+				"nowMs": 60599999,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 60600000,
+					"probe": null
+				},
+				"exempt": true,
+				"nowMs": 60599999,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 60600000,
+					"probe": null
+				},
+				"exempt": false,
+				"nowMs": 60600000,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 60600000,
+					"probe": null
+				},
+				"exempt": true,
+				"nowMs": 60600000,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"verdict": {
+					"skip": "allowance",
+					"blocked": {
+						"kind": "spendLimit",
+						"nextTryAt": 60600000
+					}
+				},
+				"admitted": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 60600000,
+					"probe": null
+				}
+			},
+			{
+				"verdict": null,
+				"admitted": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 60600000,
+					"probe": null
+				}
+			},
+			{
+				"verdict": {
+					"skip": "allowance",
+					"blocked": {
+						"kind": "spendLimit",
+						"nextTryAt": 60600000
+					}
+				},
+				"admitted": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 60600000,
+					"probe": null
+				}
+			},
+			{
+				"verdict": null,
+				"admitted": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 60600000,
+					"probe": null
+				}
+			},
+			{
+				"verdict": null,
+				"admitted": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 60600000,
+					"probe": null
+				}
+			},
+			{
+				"verdict": null,
+				"admitted": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 60600000,
+					"probe": null
+				}
+			}
+		]
+	}
+}

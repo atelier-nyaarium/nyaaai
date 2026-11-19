@@ -1,0 +1,158 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.instant",
+	"name": "reset-thresholds",
+	"input": {
+		"rows": [
+			{
+				"state": {
+					"kind": "reset",
+					"at": 63600000
+				},
+				"exempt": false,
+				"nowMs": 63599999,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "reset",
+					"at": 63600000
+				},
+				"exempt": true,
+				"nowMs": 63599999,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "reset",
+					"at": 63600000
+				},
+				"exempt": false,
+				"nowMs": 63600000,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "reset",
+					"at": 63600000
+				},
+				"exempt": true,
+				"nowMs": 63600000,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "reset",
+					"at": 63600000
+				},
+				"exempt": false,
+				"nowMs": 63600001,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "reset",
+					"at": 63600000
+				},
+				"exempt": true,
+				"nowMs": 63600001,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"verdict": {
+					"skip": "allowance",
+					"blocked": {
+						"kind": "spendLimit",
+						"resetsAt": 63600000
+					}
+				},
+				"admitted": {
+					"kind": "reset",
+					"at": 63600000
+				}
+			},
+			{
+				"verdict": {
+					"skip": "allowance",
+					"blocked": {
+						"kind": "spendLimit",
+						"resetsAt": 63600000
+					}
+				},
+				"admitted": {
+					"kind": "reset",
+					"at": 63600000
+				}
+			},
+			{
+				"verdict": null,
+				"admitted": {
+					"kind": "reset",
+					"at": 63600000
+				}
+			},
+			{
+				"verdict": null,
+				"admitted": {
+					"kind": "reset",
+					"at": 63600000
+				}
+			},
+			{
+				"verdict": null,
+				"admitted": {
+					"kind": "reset",
+					"at": 63600000
+				}
+			},
+			{
+				"verdict": null,
+				"admitted": {
+					"kind": "reset",
+					"at": 63600000
+				}
+			}
+		]
+	}
+}

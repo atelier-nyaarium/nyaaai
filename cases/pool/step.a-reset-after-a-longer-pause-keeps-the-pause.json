@@ -1,0 +1,64 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "a-reset-after-a-longer-pause-keeps-the-pause",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "credit",
+							"retryAfterMs": 18000000
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance",
+							"resetsAt": 67200000
+						},
+						"nowMs": 60001000
+					},
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance",
+							"resetsAt": 84000000
+						},
+						"nowMs": 60002000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 78000000
+					},
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 78000000
+					},
+					{
+						"kind": "reset",
+						"at": 84000000
+					}
+				]
+			}
+		]
+	}
+}

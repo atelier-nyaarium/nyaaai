@@ -2250,16 +2250,7 @@
 						"kind": "balance",
 						"eta": 164400000,
 						"next": 155400000,
-						"probe": {
-							"ticket": {
-								"gate": "go",
-								"model": "go\nm",
-								"generation": 0,
-								"probe": false,
-								"serial": 1
-							},
-							"at": 59940000
-						}
+						"probe": null
 					}
 				]
 			},
@@ -2338,16 +2329,7 @@
 						"kind": "balance",
 						"eta": 164400000,
 						"next": 155400000,
-						"probe": {
-							"ticket": {
-								"gate": "go",
-								"model": "go\nm",
-								"generation": 0,
-								"probe": false,
-								"serial": 1
-							},
-							"at": 59940000
-						}
+						"probe": null
 					}
 				]
 			},

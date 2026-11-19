@@ -1,0 +1,89 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "second-refusal-keeps-the-longer-pause",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "credit",
+							"retryAfterMs": 7200000
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "credit"
+						},
+						"nowMs": 60001000
+					},
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance"
+						},
+						"nowMs": 60002000
+					},
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "credit",
+							"retryAfterMs": 10800000
+						},
+						"nowMs": 60003000
+					},
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "credit",
+							"retryAfterMs": 3600000
+						},
+						"nowMs": 60004000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 67200000
+					},
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 67200000
+					},
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 67200000
+					},
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 70803000
+					},
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 70803000
+					}
+				]
+			}
+		]
+	}
+}

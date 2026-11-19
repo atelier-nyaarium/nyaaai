@@ -1,0 +1,59 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.app",
+	"name": "dot-segments-windows",
+	"input": {
+		"rows": [
+			{
+				"folder": "C:\\Users\\user\\..\\other",
+				"home": "C:\\Users\\user"
+			},
+			{
+				"folder": "C:\\Users\\user\\app\\..",
+				"home": "C:\\Users\\user"
+			},
+			{
+				"folder": "C:\\Users\\user\\.\\app",
+				"home": "C:\\Users\\user"
+			},
+			{
+				"folder": "C:\\..\\Users\\user\\app",
+				"home": "C:\\Users\\user"
+			},
+			{
+				"folder": "C:\\..\\..",
+				"home": "C:\\Users\\user"
+			},
+			{
+				"folder": "C:\\Users\\..\\..\\..",
+				"home": "C:\\"
+			},
+			{
+				"folder": "C:\\Users\\user\\app",
+				"home": "C:\\Users\\user\\.."
+			},
+			{
+				"folder": "C:\\Users/user/../app",
+				"home": "C:\\Users\\user"
+			},
+			{
+				"folder": "\\\\server\\share\\..\\x",
+				"home": "\\\\server\\share"
+			}
+		]
+	},
+	"expected": {
+		"apps": [
+			"C:\\Users\\other\\",
+			"~\\",
+			"~\\app\\",
+			"~\\app\\",
+			"C:\\",
+			"~\\",
+			"~\\user\\app\\",
+			"C:\\Users/app/",
+			"\\\\server\\x\\"
+		]
+	}
+}

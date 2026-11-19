@@ -1,0 +1,82 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "balance-bill-leaves-a-running-pause",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "credit",
+							"retryAfterMs": 14400000
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 60001000
+					},
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 74399999
+					},
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 74400000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 74400000
+					},
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 74400000
+					},
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 74400000
+					},
+					{
+						"kind": "balance",
+						"eta": 92400000,
+						"next": 83400000,
+						"probe": null
+					}
+				]
+			}
+		]
+	}
+}

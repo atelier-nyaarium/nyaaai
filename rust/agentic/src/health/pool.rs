@@ -39,20 +39,22 @@ fn billed(state: &PoolState, source: &str, extra_usage: bool, now_ms: f64) -> Po
             state.clone()
         };
     }
-    if extra_usage || matches!(state, PoolState::Reset(held) if now_ms < held.at) {
+    if extra_usage
+        || matches!(state, PoolState::Reset(held) if now_ms < held.at)
+        || matches!(state, PoolState::Paused(held) if now_ms < held.until)
+    {
         return state.clone();
     }
-    let eta = match state {
-        PoolState::Balance(held) if now_ms < held.eta => held.eta,
-        _ => now_ms + BALANCE_COOL_MS,
+    // A renewed window starts without the old probe.
+    let open = match state {
+        PoolState::Balance(held) if now_ms < held.eta => Some(held),
+        _ => None,
     };
+    let eta = open.map_or(now_ms + BALANCE_COOL_MS, |held| held.eta);
     PoolState::Balance(PoolStateBalance {
         eta,
         next: probe_at(now_ms, eta),
-        probe: match state {
-            PoolState::Balance(held) => held.probe.clone(),
-            _ => None,
-        },
+        probe: open.and_then(|held| held.probe.clone()),
     })
 }
 
@@ -91,12 +93,22 @@ pub fn step(state: &PoolState, event: &PoolEvent, now_ms: f64, pause_ms: f64) ->
                     ..balance.clone()
                 });
             }
-            match reset {
+            let refused = match reset {
                 None => PoolState::Paused(PoolStatePaused {
                     reason: paused_reason(held.reason),
                     until,
                 }),
                 Some(at) => PoolState::Reset(PoolStateReset { at }),
+            };
+            // A refusal never ends a running pause or reset earlier.
+            let ends = match state {
+                PoolState::Paused(running) => Some(running.until),
+                PoolState::Reset(running) => Some(running.at),
+                _ => None,
+            };
+            match ends {
+                Some(ends) if now_ms < ends && until < ends => state.clone(),
+                _ => refused,
             }
         }
         PoolEvent::ExtraUsage(held) => {
@@ -113,6 +125,7 @@ pub fn step(state: &PoolState, event: &PoolEvent, now_ms: f64, pause_ms: f64) ->
                 state.clone()
             }
         }
+        // The first ticket admitted in the window is its probe, whatever its `probe` mark says.
         PoolEvent::Admitted(held) => match state {
             PoolState::Balance(balance)
                 if balance.probe.is_none() && now_ms >= balance.next && now_ms < balance.eta =>

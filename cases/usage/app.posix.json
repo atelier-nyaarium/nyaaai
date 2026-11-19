@@ -66,8 +66,8 @@
 			"/home/me/app/",
 			"/home/me/app/",
 			"/",
-			"/",
-			"/",
+			null,
+			null,
 			"/home/Me/app/"
 		]
 	}

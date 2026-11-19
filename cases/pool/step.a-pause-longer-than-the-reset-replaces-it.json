@@ -1,0 +1,51 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "a-pause-longer-than-the-reset-replaces-it",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance",
+							"resetsAt": 63600000
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "credit",
+							"retryAfterMs": 7200000
+						},
+						"nowMs": 60001000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "reset",
+						"at": 63600000
+					},
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 67201000
+					}
+				]
+			}
+		]
+	}
+}

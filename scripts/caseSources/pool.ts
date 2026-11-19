@@ -89,6 +89,14 @@ const refused = (reason: "allowance" | "credit", extra: Record<string, number> =
 	...extra,
 });
 
+const instant = (name: string, state: State, times: number[]): CaseSource => ({
+	kind: "pool.instant",
+	name,
+	input: {
+		rows: times.flatMap((nowMs) => [false, true].map((exempt) => ({ state, exempt, nowMs, ticket: TWO }))),
+	},
+});
+
 const verdicts = (name: string, rows: Array<[State, boolean, number]>): CaseSource => ({
 	kind: "pool.verdict",
 	name,
@@ -344,8 +352,86 @@ export const poolCases: CaseSource[] = [
 		[{ kind: "settled", ticket: ONE }, at(2)],
 		[billed("balance"), at(3)],
 	]),
-	chain("bill-past-eta-keeps-the-probe", balance(at(10), at(-1), { ticket: ONE, at: at(-1) }), [
+	chain("bill-past-eta-drops-the-probe", balance(at(10), at(-1), { ticket: ONE, at: at(-1) }), [
 		[billed("balance"), at(20)],
+	]),
+	chain("bill-at-eta-drops-the-probe", balance(at(10), at(-1), { ticket: ONE, at: at(-1) }), [
+		[billed("balance"), at(10)],
+	]),
+	chain("bill-one-before-eta-keeps-the-probe", balance(at(10), at(-1), { ticket: ONE, at: at(-1) }), [
+		[billed("balance"), at(10) - 1],
+	]),
+	// A settlement that never comes holds the entry until eta and no longer.
+	chain("lost-settlement-then-a-new-window", balance(at(100), at(-1)), [
+		[{ kind: "admitted", ticket: ONE }, NOW],
+		[billed("balance"), at(50)],
+		[{ kind: "admitted", ticket: TWO }, at(100) - 1],
+		[billed("balance"), at(101)],
+		[{ kind: "admitted", ticket: TWO }, at(101)],
+		[{ kind: "admitted", ticket: TWO }, at(101) + 150 * MINUTE],
+		[{ kind: "settled", ticket: ONE }, at(101) + 151 * MINUTE],
+		[{ kind: "settled", ticket: TWO }, at(101) + 152 * MINUTE],
+	]),
+	// The pool takes any ticket admitted inside its window as the probe, marked or not.
+	chain("a-ticket-not-marked-probe-is-the-probe", balance(at(100), at(-1)), [
+		[{ kind: "admitted", ticket: ticket(9, { probe: false }) }, NOW],
+		[{ kind: "settled", ticket: ticket(9, { probe: true }) }, at(1)],
+		[{ kind: "settled", ticket: ticket(9, { probe: false }) }, at(2)],
+	]),
+	chain("a-ticket-marked-probe-is-the-probe", balance(at(100), at(-1)), [
+		[{ kind: "admitted", ticket: ticket(9, { probe: true }) }, NOW],
+		[{ kind: "settled", ticket: ticket(9, { probe: true }) }, at(1)],
+	]),
+	// A refusal never ends a running pause or reset earlier.
+	chain("second-refusal-keeps-the-longer-pause", CLEAR, [
+		[refused("credit", { retryAfterMs: 2 * HOUR }), NOW],
+		[refused("credit"), NOW + 1000],
+		[refused("allowance"), NOW + 2000],
+		[refused("credit", { retryAfterMs: 3 * HOUR }), NOW + 3000],
+		[refused("credit", { retryAfterMs: HOUR }), NOW + 4000],
+	]),
+	chain("second-refusal-ending-at-the-same-instant-is-the-newer", CLEAR, [
+		[refused("credit", { retryAfterMs: HOUR }), NOW],
+		[refused("allowance", { retryAfterMs: HOUR - 1000 }), NOW + 1000],
+		[refused("allowance", { resetsAt: NOW + HOUR }), NOW + 2000],
+	]),
+	chain("refusal-after-a-pause-has-ended-replaces-it", CLEAR, [
+		[refused("credit", { retryAfterMs: HOUR }), NOW],
+		[refused("allowance"), NOW + HOUR],
+		[refused("credit", { retryAfterMs: HOUR }), NOW + 3 * HOUR],
+		[refused("credit"), NOW + 3 * HOUR + 1],
+	]),
+	chain("refusal-keeps-the-later-known-reset", CLEAR, [
+		[refused("allowance", { resetsAt: at(180) }), NOW],
+		[refused("allowance"), NOW + 1000],
+		[refused("credit", { retryAfterMs: HOUR }), NOW + 2000],
+		[refused("allowance", { resetsAt: at(120) }), NOW + 3000],
+		[refused("allowance", { resetsAt: at(180) }), NOW + 4000],
+		[refused("allowance", { resetsAt: at(200) }), NOW + 5000],
+	]),
+	chain("a-reset-after-a-longer-pause-keeps-the-pause", CLEAR, [
+		[refused("credit", { retryAfterMs: 5 * HOUR }), NOW],
+		[refused("allowance", { resetsAt: at(120) }), NOW + 1000],
+		[refused("allowance", { resetsAt: at(400) }), NOW + 2000],
+	]),
+	chain("a-pause-longer-than-the-reset-replaces-it", CLEAR, [
+		[refused("allowance", { resetsAt: at(60) }), NOW],
+		[refused("credit", { retryAfterMs: 2 * HOUR }), NOW + 1000],
+	]),
+	// A balance bill leaves a running pause or reset.
+	chain("balance-bill-leaves-a-running-pause", CLEAR, [
+		[refused("credit", { retryAfterMs: 4 * HOUR }), NOW],
+		[billed("balance"), NOW + 1000],
+		[billed("balance"), NOW + 4 * HOUR - 1],
+		[billed("balance"), NOW + 4 * HOUR],
+	]),
+	chain("balance-bill-over-a-running-pause-and-extra-usage-off", CLEAR, [
+		[refused("allowance", { retryAfterMs: HOUR }), NOW],
+		[{ kind: "extraUsage", on: false, lastBill: "balance" }, NOW + 1000],
+	]),
+	chain("balance-bill-over-a-reset-that-has-passed", CLEAR, [
+		[refused("allowance", { resetsAt: at(10) }), NOW],
+		[billed("balance"), at(10)],
 	]),
 	// Verdicts.
 	verdicts("clear", [
@@ -401,4 +487,30 @@ export const poolCases: CaseSource[] = [
 		[balance(at(-1), at(10), { ticket: ONE, at: at(-5) }), false, NOW],
 		[balance(at(-1), at(-10), { ticket: ONE, at: at(-5) }), false, NOW],
 	]),
+	// Verdict and admission at the same instant, on each side of every threshold.
+	instant("balance-thresholds", balance(at(100), at(10)), [
+		at(10) - 1,
+		at(10),
+		at(10) + 1,
+		at(100) - 1,
+		at(100),
+		at(100) + 1,
+	]),
+	instant("balance-open-window", balance(at(100), at(-1)), [NOW - 1, NOW, NOW + 1, at(100) - 1, at(100)]),
+	instant("balance-with-a-probe", balance(at(100), at(10), { ticket: ONE, at: at(10) }), [
+		at(10) - 1,
+		at(10),
+		at(55),
+		at(100) - 1,
+		at(100),
+	]),
+	instant("balance-with-an-old-probe", balance(at(100), at(10), { ticket: ONE, at: at(-60) }), [
+		at(10),
+		at(50),
+		at(99),
+		at(100),
+	]),
+	instant("balance-past-eta-before-next", balance(at(-1), at(10)), [NOW, at(10) - 1, at(10)]),
+	instant("paused-thresholds", { kind: "paused", reason: "credit", until: at(10) }, [at(10) - 1, at(10), at(10) + 1]),
+	instant("reset-thresholds", { kind: "reset", at: at(60) }, [at(60) - 1, at(60), at(60) + 1]),
 ];

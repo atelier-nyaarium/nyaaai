@@ -86,11 +86,11 @@ export const usage = caseGroup("usage", {
 			z.object({ lines: z.array(UsageLine), dropped: z.int() }),
 			(input) => linesOf(input.text),
 		),
-		/** A folder shown with home as `~`. */
+		/** A folder shown with home as `~`; null for a blank folder, which records no `app`. */
 		app: kind(
 			z.object({ rows: z.array(z.object({ folder: z.string(), home: z.string() })) }),
-			z.object({ apps: z.array(z.string()) }),
-			(input) => ({ apps: input.rows.map((row) => appOf(row.folder, row.home)) }),
+			z.object({ apps: z.array(z.string().nullable()) }),
+			(input) => ({ apps: input.rows.map((row) => appOf(row.folder, row.home) ?? null) }),
 		),
 		/** The local day of each instant under the zone `offsets` script; null outside years 0000 to 9999. */
 		day: kind(

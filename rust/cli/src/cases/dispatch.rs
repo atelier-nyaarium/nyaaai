@@ -664,6 +664,9 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
         "pool.verdict" => {
             run::<shapes::PoolVerdictInput, shapes::PoolVerdictResult>(input, super::pool::verdict)
         }
+        "pool.instant" => {
+            run::<shapes::PoolInstantInput, shapes::PoolInstantResult>(input, super::pool::instant)
+        }
         "pool.probeAt" => {
             run::<shapes::PoolProbeAtInput, shapes::PoolProbeAtResult>(input, super::pool::probe_at)
         }

@@ -1,0 +1,386 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.instant",
+	"name": "balance-thresholds",
+	"input": {
+		"rows": [
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"exempt": false,
+				"nowMs": 60599999,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"exempt": true,
+				"nowMs": 60599999,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"exempt": false,
+				"nowMs": 60600000,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"exempt": true,
+				"nowMs": 60600000,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"exempt": false,
+				"nowMs": 60600001,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"exempt": true,
+				"nowMs": 60600001,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"exempt": false,
+				"nowMs": 65999999,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"exempt": true,
+				"nowMs": 65999999,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"exempt": false,
+				"nowMs": 66000000,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"exempt": true,
+				"nowMs": 66000000,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"exempt": false,
+				"nowMs": 66000001,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"exempt": true,
+				"nowMs": 66000001,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"verdict": {
+					"skip": "allowance",
+					"blocked": {
+						"kind": "spendLimit",
+						"nextTryAt": 60600000
+					}
+				},
+				"admitted": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				}
+			},
+			{
+				"verdict": null,
+				"admitted": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				}
+			},
+			{
+				"verdict": null,
+				"admitted": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 1,
+							"probe": false,
+							"serial": 2
+						},
+						"at": 60600000
+					}
+				}
+			},
+			{
+				"verdict": null,
+				"admitted": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 1,
+							"probe": false,
+							"serial": 2
+						},
+						"at": 60600000
+					}
+				}
+			},
+			{
+				"verdict": null,
+				"admitted": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 1,
+							"probe": false,
+							"serial": 2
+						},
+						"at": 60600001
+					}
+				}
+			},
+			{
+				"verdict": null,
+				"admitted": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 1,
+							"probe": false,
+							"serial": 2
+						},
+						"at": 60600001
+					}
+				}
+			},
+			{
+				"verdict": null,
+				"admitted": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 1,
+							"probe": false,
+							"serial": 2
+						},
+						"at": 65999999
+					}
+				}
+			},
+			{
+				"verdict": null,
+				"admitted": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 1,
+							"probe": false,
+							"serial": 2
+						},
+						"at": 65999999
+					}
+				}
+			},
+			{
+				"verdict": null,
+				"admitted": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				}
+			},
+			{
+				"verdict": null,
+				"admitted": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				}
+			},
+			{
+				"verdict": null,
+				"admitted": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				}
+			},
+			{
+				"verdict": null,
+				"admitted": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				}
+			}
+		]
+	}
+}

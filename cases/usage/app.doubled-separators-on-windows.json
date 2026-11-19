@@ -1,0 +1,44 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.app",
+	"name": "doubled-separators-on-windows",
+	"input": {
+		"rows": [
+			{
+				"folder": "C:\\Users\\\\user",
+				"home": "C:\\Users\\user"
+			},
+			{
+				"folder": "C:\\Users\\user\\\\app",
+				"home": "C:\\Users\\user"
+			},
+			{
+				"folder": "C:\\Users\\user\\\\",
+				"home": "C:\\Users\\user"
+			},
+			{
+				"folder": "C:\\\\Users\\user",
+				"home": "C:\\Users\\user"
+			},
+			{
+				"folder": "C:\\Users\\\\user",
+				"home": "C:\\Users\\\\user"
+			},
+			{
+				"folder": "C:\\Users\\\\\\user\\app",
+				"home": "C:\\Users\\user\\"
+			}
+		]
+	},
+	"expected": {
+		"apps": [
+			"C:\\Users\\\\user\\",
+			"~\\\\app\\",
+			"~\\",
+			"C:\\\\Users\\user\\",
+			"~\\",
+			"C:\\Users\\\\\\user\\app\\"
+		]
+	}
+}

@@ -1,0 +1,99 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.app",
+	"name": "drive-letters",
+	"input": {
+		"rows": [
+			{
+				"folder": "c:\\Users\\user\\app",
+				"home": "C:\\Users\\user"
+			},
+			{
+				"folder": "C:\\Users\\user\\app",
+				"home": "c:\\Users\\user"
+			},
+			{
+				"folder": "c:\\users\\USER\\app",
+				"home": "C:\\Users\\user"
+			},
+			{
+				"folder": "C:\\USERS\\user",
+				"home": "c:\\users\\USER"
+			},
+			{
+				"folder": "d:\\Users\\user\\app",
+				"home": "C:\\Users\\user"
+			},
+			{
+				"folder": "c:\\Users\\username\\app",
+				"home": "C:\\Users\\user"
+			},
+			{
+				"folder": "c:\\Users\\user",
+				"home": "C:\\Users\\user\\"
+			},
+			{
+				"folder": "c:\\",
+				"home": "C:\\"
+			},
+			{
+				"folder": "c:",
+				"home": "C:"
+			},
+			{
+				"folder": "C:/Users/user/app",
+				"home": "c:/Users/user"
+			},
+			{
+				"folder": "c:/Users/user/app",
+				"home": "C:\\Users\\user"
+			},
+			{
+				"folder": "c:\\Users\\user\\app",
+				"home": "/home/user"
+			},
+			{
+				"folder": "/home/user/app",
+				"home": "C:\\Users\\user"
+			},
+			{
+				"folder": "/Home/User/app",
+				"home": "/home/user"
+			},
+			{
+				"folder": "1:\\Users\\user\\app",
+				"home": "1:\\users\\user"
+			},
+			{
+				"folder": "é:\\Users\\user\\app",
+				"home": "É:\\Users\\user"
+			},
+			{
+				"folder": "c:\\Users\\É\\app",
+				"home": "C:\\Users\\é"
+			}
+		]
+	},
+	"expected": {
+		"apps": [
+			"~\\app\\",
+			"~\\app\\",
+			"~\\app\\",
+			"~\\",
+			"d:\\Users\\user\\app\\",
+			"c:\\Users\\username\\app\\",
+			"~\\",
+			"~\\",
+			"~/",
+			"~/app/",
+			"c:/Users/user/app/",
+			"c:\\Users\\user\\app\\",
+			"/home/user/app/",
+			"/Home/User/app/",
+			"1:\\Users\\user\\app\\",
+			"é:\\Users\\user\\app\\",
+			"c:\\Users\\É\\app\\"
+		]
+	}
+}

@@ -1,0 +1,188 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "cost.step",
+	"name": "estimate-overflows",
+	"input": {
+		"rows": [
+			{
+				"usage": {
+					"input": 10000000000,
+					"output": 1
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 0,
+							"prompt": 1e+300,
+							"completion": 1
+						}
+					]
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 1e+300,
+					"output": 1e+300
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 0,
+							"prompt": 1e+300,
+							"completion": 1e+300
+						}
+					]
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 10000000000,
+					"output": 1,
+					"byok": true,
+					"cost": 0.5
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 0,
+							"prompt": 1e+300,
+							"completion": 1
+						}
+					]
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 10,
+					"output": 1
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 0,
+							"prompt": 1.7976931348623157e+308,
+							"completion": 1.7976931348623157e+308
+						}
+					]
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 1,
+					"output": 1,
+					"byok": true,
+					"cost": 1.7976931348623157e+308
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 0,
+							"prompt": 1.7976931348623157e+308,
+							"completion": 1.7976931348623157e+308
+						}
+					]
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 1,
+					"output": 0,
+					"byok": true,
+					"cost": 1.7976931348623157e+308
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 0,
+							"prompt": 1,
+							"completion": 1
+						}
+					]
+				},
+				"longCache": false
+			}
+		]
+	},
+	"expected": {
+		"costs": [
+			{
+				"usd": 0,
+				"estimated": true
+			},
+			{
+				"usd": 0,
+				"estimated": true
+			},
+			{
+				"usd": 0.5,
+				"estimated": true
+			},
+			{
+				"usd": 0,
+				"estimated": true
+			},
+			{
+				"usd": 1.7976931348623157e+308,
+				"estimated": true
+			},
+			{
+				"usd": 1.7976931348623157e+308,
+				"estimated": true
+			}
+		]
+	}
+}

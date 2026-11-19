@@ -9,7 +9,7 @@ import {
 	type StatsLine,
 	UsageLine,
 } from "@nyaaai/contract/shapes/usage";
-import { trimText } from "@nyaaai/contract/text";
+import { asciiLower, trimText } from "@nyaaai/contract/text";
 import { type Clock, dayKey } from "@nyaaai/contract/time";
 
 ////////////////////////////////
@@ -45,13 +45,63 @@ export function dayOf(atMs: number, clock: Pick<Clock, "utcOffsetMinutes">): str
 	return dayKey(atMs, clock.utcOffsetMinutes(atMs));
 }
 
-/** A folder path with home as `~` and a closing separator. */
-export function appOf(folder: string, home: string): string {
+interface Segment {
+	/** The separator before it; none for the first. */
+	sep: string;
+	seg: string;
+}
+
+function segmentsOf(text: string): Segment[] {
+	const out: Segment[] = [];
+	let sep = "";
+	let start = 0;
+	for (let at = 0; at <= text.length; at += 1) {
+		const unit = text[at];
+		if (unit !== undefined && unit !== "/" && unit !== "\\") continue;
+		out.push({ sep, seg: text.slice(start, at) });
+		sep = unit ?? "";
+		start = at + 1;
+	}
+	return out;
+}
+
+/** A letter and a colon first. */
+function hasDrive(text: string): boolean {
+	const code = text.charCodeAt(0) | 0x20;
+	return code >= 0x61 && code <= 0x7a && text[1] === ":";
+}
+
+/** `.` and `..` segments resolved, never past the root or the drive. */
+function resolved(text: string): string {
+	const parts = segmentsOf(text);
+	if (!parts.some((part) => part.seg === "." || part.seg === "..")) return text;
+	const first = parts[0]?.seg ?? "";
+	const kept = first === "" || (first.length === 2 && hasDrive(first)) ? 1 : 0;
+	const out: Segment[] = [];
+	for (const part of parts) {
+		if (part.seg === ".") continue;
+		if (part.seg === "..") {
+			if (out.length > kept) out.pop();
+			continue;
+		}
+		out.push(out.length === 0 ? { sep: "", seg: part.seg } : part);
+	}
+	return out.map((part) => `${part.sep}${part.seg}`).join("");
+}
+
+const plainPath = (text: string): string => withoutSeparators(resolved(withoutSeparators(text)));
+
+/** A folder path with home as `~` and a closing separator; none for a blank folder. */
+export function appOf(folder: string, home: string): string | undefined {
+	if (trimText(folder) === "") return undefined;
 	const separator = folder.includes("\\") && !folder.includes("/") ? "\\" : "/";
-	const trimmed = withoutSeparators(folder);
-	const homeTrimmed = withoutSeparators(home);
+	const trimmed = plainPath(folder);
+	const homeTrimmed = plainPath(home);
+	const fold = hasDrive(trimmed) && hasDrive(homeTrimmed) ? asciiLower : (text: string) => text;
+	const held = fold(trimmed);
+	const heldHome = fold(homeTrimmed);
 	const shown =
-		homeTrimmed !== "" && (trimmed === homeTrimmed || trimmed.startsWith(`${homeTrimmed}${separator}`))
+		homeTrimmed !== "" && (held === heldHome || held.startsWith(`${heldHome}${separator}`))
 			? `~${trimmed.slice(homeTrimmed.length)}`
 			: trimmed;
 	return `${shown}${separator}`;
@@ -59,19 +109,19 @@ export function appOf(folder: string, home: string): string {
 
 /** A call as its day file keeps it; a refusal when the shape does not fit. */
 export function callRecordOf(call: MeteredCall, id: string, home: string): Decoded<CallRecord> {
-	const { usage } = call;
-	const priced = Number.isFinite(call.cost.usd);
+	const { usage, cost, tag } = call;
+	const priced = Number.isFinite(cost?.usd);
 	return decode(
 		CallRecord,
 		present({
 			id,
 			at: call.at,
-			feature: call.tag.feature,
-			lane: call.tag.lane,
+			feature: tag?.feature,
+			lane: tag?.lane,
 			model: call.model,
 			entry: call.entry,
 			label: call.label,
-			app: typeof call.tag.folder === "string" ? appOf(call.tag.folder, home) : undefined,
+			app: typeof tag?.folder === "string" ? appOf(tag.folder, home) : undefined,
 			ms: call.ms,
 			first: call.firstTokenMs,
 			in: usage?.input,
@@ -79,13 +129,13 @@ export function callRecordOf(call: MeteredCall, id: string, home: string): Decod
 			cached: usage?.cached,
 			cacheWrite: usage?.cacheWrite,
 			reasoning: usage?.reasoning,
-			cost: priced ? call.cost.usd : 0,
+			cost: cost === undefined || cost === null ? undefined : priced ? cost.usd : 0,
 			accountCost: usage?.cost,
 			upstreamCost: usage?.upstreamCost,
 			byok: usage?.byok,
 			billingSource: usage?.billingSource,
-			estimated: call.cost.estimated || !priced ? true : undefined,
-			unpriced: call.cost.unpriced,
+			estimated: cost === undefined || cost === null ? undefined : cost.estimated || !priced ? true : undefined,
+			unpriced: cost?.unpriced,
 			provider: call.provider,
 			gen: call.generationId,
 			finish: call.finishReason,

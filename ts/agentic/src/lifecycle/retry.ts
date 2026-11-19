@@ -48,12 +48,14 @@ export class RetryPolicy {
 		this.baseMs = options.baseMs ?? 1000;
 	}
 
-	/** One draw per call that gets past the tries, even when `retryAfterMs` replaces the backoff. A `baseMs` of 0 backs off 0 at any attempt. */
+	/** One draw past the tries, even under `retryAfterMs`. A wait is at least 0 or none. */
 	wait(failure: Pick<Failure, "retryAfterMs">, attempt: number, waitedMs: number): number | undefined {
 		if (attempt >= this.tries) return undefined;
 		const base = this.baseMs === 0 ? 0 : Math.min(this.capMs, this.baseMs * 2 ** (attempt - 1));
 		const backoff = base * (0.5 + this.random.next() / 2);
-		const waitMs = roundHalfUp(failure.retryAfterMs ?? backoff);
+		const rounded = roundHalfUp(failure.retryAfterMs ?? backoff);
+		if (!Number.isFinite(rounded)) return undefined;
+		const waitMs = rounded > 0 ? rounded : 0;
 		return waitedMs + waitMs > this.budgetMs ? undefined : waitMs;
 	}
 }

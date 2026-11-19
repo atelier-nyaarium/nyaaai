@@ -159,6 +159,26 @@ export const retryCases: CaseSource[] = [
 	wait("no-cap", { capMs: 0, tries: 4 }, [1], attempts(1, 2, 3)),
 	wait("no-base", { baseMs: 0, tries: 4 }, [1], attempts(1, 2, 3)),
 	wait("no-base-huge-attempt", { baseMs: 0, tries: 5000, budgetMs: 10 }, [0, 1], attempts(1, 60, 1100, 4999)),
+	// A wait is a finite number at or above zero, or none.
+	wait(
+		"negative-retry-after",
+		{},
+		[1],
+		[
+			{ attempt: 1, retryAfterMs: -5 },
+			{ attempt: 1, retryAfterMs: -1, waitedMs: 90_000 },
+			{ attempt: 1, retryAfterMs: -90_000, waitedMs: 90_001 },
+			{ attempt: 4, retryAfterMs: -5 },
+		],
+	),
+	wait("negative-wait-from-a-draw-below-zero", {}, [-1e300, -1e308, 1e308, 0.5], attempts(1, 1, 1, 1)),
+	wait(
+		"a-wait-too-large-to-be-a-number",
+		{ capMs: 1e308, budgetMs: 1e308, tries: 3 },
+		[1e308, 0.5],
+		attempts(2, 2, 2),
+	),
+	wait("negative-zero-wait", { baseMs: 1 }, [-1], attempts(1)),
 	wait("all-zero", { tries: 0, budgetMs: 0, capMs: 0, baseMs: 0 }, [0], attempts(0, 1)),
 	wait("no-rows", {}, [0], []),
 ];

@@ -1,0 +1,174 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "cost.step",
+	"name": "cached-and-written-above-the-prompt",
+	"input": {
+		"rows": [
+			{
+				"usage": {
+					"input": 1000,
+					"output": 100,
+					"cached": 1000,
+					"cacheWrite": 1000
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 0,
+							"prompt": 1,
+							"completion": 2,
+							"cacheRead": 0.1,
+							"cacheWrite": 1.25
+						}
+					]
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 1000,
+					"output": 100,
+					"cached": 800,
+					"cacheWrite": 800
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 0,
+							"prompt": 1,
+							"completion": 2,
+							"cacheRead": 0.1,
+							"cacheWrite": 1.25
+						}
+					]
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 1000,
+					"output": 100,
+					"cached": 500,
+					"cacheWrite": 500
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 0,
+							"prompt": 1,
+							"completion": 2,
+							"cacheRead": 0.1,
+							"cacheWrite": 1.25
+						}
+					]
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 1000,
+					"output": 100,
+					"cached": 1001,
+					"cacheWrite": 1
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 0,
+							"prompt": 1,
+							"completion": 2,
+							"cacheRead": 0.1,
+							"cacheWrite": 1.25
+						}
+					]
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 1000,
+					"output": 100,
+					"cached": 0,
+					"cacheWrite": 1001
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 0,
+							"prompt": 1,
+							"completion": 2,
+							"cacheRead": 0.1,
+							"cacheWrite": 1.25
+						}
+					]
+				},
+				"longCache": false
+			}
+		]
+	},
+	"expected": {
+		"costs": [
+			{
+				"usd": 0.0003,
+				"estimated": true
+			},
+			{
+				"usd": 0.00053,
+				"estimated": true
+			},
+			{
+				"usd": 0.000875,
+				"estimated": true
+			},
+			{
+				"usd": 0.0003,
+				"estimated": true
+			},
+			{
+				"usd": 0.00145,
+				"estimated": true
+			}
+		]
+	}
+}

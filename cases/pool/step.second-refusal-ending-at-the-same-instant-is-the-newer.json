@@ -1,0 +1,63 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "second-refusal-ending-at-the-same-instant-is-the-newer",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "credit",
+							"retryAfterMs": 3600000
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance",
+							"retryAfterMs": 3599000
+						},
+						"nowMs": 60001000
+					},
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance",
+							"resetsAt": 63600000
+						},
+						"nowMs": 60002000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 63600000
+					},
+					{
+						"kind": "reset",
+						"at": 63600000
+					},
+					{
+						"kind": "reset",
+						"at": 63600000
+					}
+				]
+			}
+		]
+	}
+}

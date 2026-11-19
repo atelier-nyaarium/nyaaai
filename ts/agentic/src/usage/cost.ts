@@ -19,12 +19,15 @@ export function price(value: unknown): number | undefined {
 	return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : undefined;
 }
 
-/** None when the provider's own charge is missing for a BYOK reply. */
+/** A count below zero, or no number, is zero. */
+const count = (value: number): number => (value >= 0 ? value : 0);
+
+/** None when the provider's own charge is missing for a BYOK reply, or the sum passes the largest number. */
 export function reportedCost(usage: Pick<NormalizedUsage, "cost" | "byok" | "upstreamCost">): number | undefined {
 	const account = price(usage.cost);
 	if (account === undefined || usage.byok !== true) return account;
 	const upstream = price(usage.upstreamCost);
-	return upstream === undefined ? undefined : account + upstream;
+	return upstream === undefined ? undefined : price(account + upstream);
 }
 
 /** BYOK adds provider charges. Free, or unknown unreported, is unpriced. */
@@ -36,18 +39,23 @@ export function stepCost(usage: NormalizedUsage | undefined, view?: Pick<ModelVi
 	if (usage === undefined) return { usd: 0, estimated: true };
 	if (usage.billingSource !== undefined && UNBILLED.has(usage.billingSource)) return { usd: 0, estimated: false };
 	const fee = usage.byok === true ? (price(usage.cost) ?? 0) : 0;
-	const tier = [...(tiersOf(view) ?? [])].reverse().find((candidate) => candidate.minPromptTokens <= usage.input);
+	const input = count(usage.input);
+	const priced = (tiersOf(view) ?? []).filter(
+		(candidate) => price(candidate.prompt) !== undefined && price(candidate.completion) !== undefined,
+	);
+	const tier = [...priced].reverse().find((candidate) => candidate.minPromptTokens <= input);
 	if (tier === undefined) return { usd: fee, estimated: true };
-	const cached = Math.min(usage.input, usage.cached ?? 0);
-	const written = Math.min(usage.input - cached, usage.cacheWrite ?? 0);
-	const writePrice = (longCache ? tier.cacheWrite1h : tier.cacheWrite) ?? tier.prompt;
+	const cached = Math.min(input, count(usage.cached ?? 0));
+	const written = Math.min(input - cached, count(usage.cacheWrite ?? 0));
+	const writePrice = price(longCache ? tier.cacheWrite1h : tier.cacheWrite) ?? tier.prompt;
 	const usd =
-		((usage.input - cached - written) * tier.prompt +
-			cached * (tier.cacheRead ?? tier.prompt) +
+		((input - cached - written) * tier.prompt +
+			cached * (price(tier.cacheRead) ?? tier.prompt) +
 			written * writePrice +
-			usage.output * tier.completion) /
+			count(usage.output) * tier.completion) /
 		1_000_000;
-	return { usd: usd + fee, estimated: true };
+	const total = usd + fee;
+	return { usd: Number.isFinite(total) ? total : fee, estimated: true };
 }
 
 /** Only user chat pays for 1-hour writes; other features keep the default TTL. */

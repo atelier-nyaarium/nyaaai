@@ -42,7 +42,6 @@ pub fn reported(input: CostReportedInput) -> Outcome<CostReportedResult> {
             .rows
             .iter()
             .map(|row| {
-                // A sum past the largest number is written as null, as the other side's text does.
                 reported_cost(&NormalizedUsage {
                     input: 0.0,
                     output: 0.0,
@@ -56,7 +55,6 @@ pub fn reported(input: CostReportedInput) -> Outcome<CostReportedResult> {
                     list_cost: None,
                     allowance: None,
                 })
-                .filter(|held| held.is_finite())
             })
             .collect(),
     })

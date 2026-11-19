@@ -1,0 +1,54 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "negative-retry-after",
+	"input": {
+		"options": {},
+		"draws": [
+			1
+		],
+		"rows": [
+			{
+				"attempt": 1,
+				"waitedMs": 0,
+				"retryAfterMs": -5
+			},
+			{
+				"attempt": 1,
+				"waitedMs": 90000,
+				"retryAfterMs": -1
+			},
+			{
+				"attempt": 1,
+				"waitedMs": 90001,
+				"retryAfterMs": -90000
+			},
+			{
+				"attempt": 4,
+				"waitedMs": 0,
+				"retryAfterMs": -5
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": 0,
+				"draws": 1
+			},
+			{
+				"waitMs": 0,
+				"draws": 1
+			},
+			{
+				"waitMs": null,
+				"draws": 1
+			},
+			{
+				"waitMs": null,
+				"draws": 0
+			}
+		]
+	}
+}

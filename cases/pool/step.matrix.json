@@ -1852,16 +1852,6 @@
 			{
 				"states": [
 					{
-						"kind": "balance",
-						"eta": 78000000,
-						"next": 69000000,
-						"probe": null
-					}
-				]
-			},
-			{
-				"states": [
-					{
 						"kind": "paused",
 						"reason": "credit",
 						"until": 60600000
@@ -1890,8 +1880,17 @@
 				"states": [
 					{
 						"kind": "paused",
-						"reason": "allowance",
-						"until": 60060000
+						"reason": "credit",
+						"until": 60600000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 60600000
 					}
 				]
 			},
@@ -1915,16 +1914,6 @@
 			{
 				"states": [
 					{
-						"kind": "balance",
-						"eta": 78000000,
-						"next": 69000000,
-						"probe": null
-					}
-				]
-			},
-			{
-				"states": [
-					{
 						"kind": "paused",
 						"reason": "credit",
 						"until": 60600000
@@ -1952,41 +1941,9 @@
 			{
 				"states": [
 					{
-						"kind": "reset",
-						"at": 63600000
-					}
-				]
-			},
-			{
-				"states": [
-					{
-						"kind": "reset",
-						"at": 63600000
-					}
-				]
-			},
-			{
-				"states": [
-					{
-						"kind": "reset",
-						"at": 63600000
-					}
-				]
-			},
-			{
-				"states": [
-					{
-						"kind": "reset",
-						"at": 63600000
-					}
-				]
-			},
-			{
-				"states": [
-					{
 						"kind": "paused",
-						"reason": "allowance",
-						"until": 60060000
+						"reason": "credit",
+						"until": 60600000
 					}
 				]
 			},
@@ -1994,7 +1951,47 @@
 				"states": [
 					{
 						"kind": "reset",
-						"at": 61800000
+						"at": 63600000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "reset",
+						"at": 63600000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "reset",
+						"at": 63600000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "reset",
+						"at": 63600000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "reset",
+						"at": 63600000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "reset",
+						"at": 63600000
 					}
 				]
 			},

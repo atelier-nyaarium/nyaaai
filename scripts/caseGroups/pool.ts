@@ -7,7 +7,7 @@ import {
 	verdict,
 } from "@nyaaai/agentic/health/pool";
 import { z } from "@nyaaai/contract/shape";
-import { PoolEvent, PoolState, PoolVerdict } from "@nyaaai/contract/shapes/health";
+import { PoolEvent, PoolState, PoolVerdict, Ticket } from "@nyaaai/contract/shapes/health";
 import { caseGroup, casesFor, kind } from "@nyaaai/testkit/caseGroup";
 import { poolCases } from "../caseSources/pool";
 
@@ -42,6 +42,22 @@ export const pool = caseGroup("pool", {
 			z.object({ rows: z.array(z.object({ state: PoolState, exempt: z.boolean(), nowMs: z.number() })) }),
 			z.object({ verdicts: z.array(PoolVerdict.nullable()) }),
 			(input) => ({ verdicts: input.rows.map((row) => verdict(row.state, row.exempt, row.nowMs) ?? null) }),
+		),
+		/**
+		 * `verdict` and an `admitted` event, both at `nowMs` of the same state. `admitted` is the state after
+		 * the ticket is announced.
+		 */
+		instant: kind(
+			z.object({
+				rows: z.array(z.object({ state: PoolState, exempt: z.boolean(), nowMs: z.number(), ticket: Ticket })),
+			}),
+			z.object({ rows: z.array(z.object({ verdict: PoolVerdict.nullable(), admitted: PoolState })) }),
+			(input) => ({
+				rows: input.rows.map((row) => ({
+					verdict: verdict(row.state, row.exempt, row.nowMs) ?? null,
+					admitted: step(row.state, { kind: "admitted", ticket: row.ticket }, row.nowMs, 0),
+				})),
+			}),
 		),
 		/** The probe time that halves the remaining wait, and the constants it stands on. */
 		probeAt: kind(

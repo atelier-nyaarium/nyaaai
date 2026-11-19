@@ -1,0 +1,53 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "balance-bill-over-a-reset-that-has-passed",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance",
+							"resetsAt": 60600000
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 60600000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "reset",
+						"at": 60600000
+					},
+					{
+						"kind": "balance",
+						"eta": 78600000,
+						"next": 69600000,
+						"probe": null
+					}
+				]
+			}
+		]
+	}
+}

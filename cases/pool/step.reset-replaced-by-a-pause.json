@@ -46,14 +46,12 @@
 						"at": 61800000
 					},
 					{
-						"kind": "paused",
-						"reason": "credit",
-						"until": 60120000
+						"kind": "reset",
+						"at": 61800000
 					},
 					{
-						"kind": "paused",
-						"reason": "allowance",
-						"until": 60180000
+						"kind": "reset",
+						"at": 61800000
 					}
 				]
 			}

@@ -1,0 +1,53 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "negative-wait-from-a-draw-below-zero",
+	"input": {
+		"options": {},
+		"draws": [
+			-1e+300,
+			-1e+308,
+			1e+308,
+			0.5
+		],
+		"rows": [
+			{
+				"attempt": 1,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 1,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 1,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 1,
+				"waitedMs": 0
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": 0,
+				"draws": 1
+			},
+			{
+				"waitMs": null,
+				"draws": 1
+			},
+			{
+				"waitMs": null,
+				"draws": 1
+			},
+			{
+				"waitMs": 750,
+				"draws": 1
+			}
+		]
+	}
+}

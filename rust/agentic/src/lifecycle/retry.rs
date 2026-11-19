@@ -58,7 +58,7 @@ impl RetryPolicy {
     }
 
     /// One draw per call that gets past the tries, even when `retry_after_ms` replaces the backoff.
-    /// A `base_ms` of 0 backs off 0 at any attempt.
+    /// A `base_ms` of 0 backs off 0 at any attempt. A wait is at least 0 or none.
     pub fn wait(&self, retry_after_ms: Option<i64>, attempt: i64, waited_ms: f64) -> Option<f64> {
         if attempt as f64 >= self.tries {
             return None;
@@ -70,7 +70,11 @@ impl RetryPolicy {
                 .min(self.base_ms * 2f64.powf((attempt - 1) as f64))
         };
         let backoff = base * (0.5 + self.random.next() / 2.0);
-        let wait_ms = round_half_up(retry_after_ms.map_or(backoff, |held| held as f64));
+        let rounded = round_half_up(retry_after_ms.map_or(backoff, |held| held as f64));
+        if !rounded.is_finite() {
+            return None;
+        }
+        let wait_ms = if rounded > 0.0 { rounded } else { 0.0 };
         if waited_ms + wait_ms > self.budget_ms {
             None
         } else {

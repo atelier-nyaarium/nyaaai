@@ -1,0 +1,54 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.app",
+	"name": "blank-folders",
+	"input": {
+		"rows": [
+			{
+				"folder": "",
+				"home": "/home/user"
+			},
+			{
+				"folder": "",
+				"home": ""
+			},
+			{
+				"folder": " ",
+				"home": "/home/user"
+			},
+			{
+				"folder": "   ",
+				"home": "C:\\Users\\user"
+			},
+			{
+				"folder": "\t",
+				"home": "/home/user"
+			},
+			{
+				"folder": "  ",
+				"home": "/"
+			},
+			{
+				"folder": "/",
+				"home": "/home/user"
+			},
+			{
+				"folder": " /",
+				"home": "/home/user"
+			}
+		]
+	},
+	"expected": {
+		"apps": [
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			"/",
+			" /"
+		]
+	}
+}

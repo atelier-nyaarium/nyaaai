@@ -74,6 +74,26 @@
 				"byok": true,
 				"cost": 1e+308,
 				"upstreamCost": 1e+308
+			},
+			{
+				"byok": true,
+				"cost": 1.7976931348623157e+308,
+				"upstreamCost": 1.7976931348623157e+308
+			},
+			{
+				"byok": true,
+				"cost": 1.7976931348623157e+308,
+				"upstreamCost": 0
+			},
+			{
+				"byok": true,
+				"cost": 1e+308,
+				"upstreamCost": 7e+307
+			},
+			{
+				"byok": true,
+				"cost": 1e+308,
+				"upstreamCost": 8e+307
 			}
 		]
 	},
@@ -95,6 +115,10 @@
 			0.01,
 			0.30000000000000004,
 			0.7999999999999999,
+			null,
+			null,
+			1.7976931348623157e+308,
+			1.7e+308,
 			null
 		]
 	}

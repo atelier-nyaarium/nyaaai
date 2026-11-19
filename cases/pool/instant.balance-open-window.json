@@ -1,0 +1,346 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.instant",
+	"name": "balance-open-window",
+	"input": {
+		"rows": [
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": null
+				},
+				"exempt": false,
+				"nowMs": 59999999,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": null
+				},
+				"exempt": true,
+				"nowMs": 59999999,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": null
+				},
+				"exempt": false,
+				"nowMs": 60000000,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": null
+				},
+				"exempt": true,
+				"nowMs": 60000000,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": null
+				},
+				"exempt": false,
+				"nowMs": 60000001,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": null
+				},
+				"exempt": true,
+				"nowMs": 60000001,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": null
+				},
+				"exempt": false,
+				"nowMs": 65999999,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": null
+				},
+				"exempt": true,
+				"nowMs": 65999999,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": null
+				},
+				"exempt": false,
+				"nowMs": 66000000,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": null
+				},
+				"exempt": true,
+				"nowMs": 66000000,
+				"ticket": {
+					"gate": "go",
+					"model": "go\nm",
+					"generation": 1,
+					"probe": false,
+					"serial": 2
+				}
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"verdict": null,
+				"admitted": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 1,
+							"probe": false,
+							"serial": 2
+						},
+						"at": 59999999
+					}
+				}
+			},
+			{
+				"verdict": null,
+				"admitted": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 1,
+							"probe": false,
+							"serial": 2
+						},
+						"at": 59999999
+					}
+				}
+			},
+			{
+				"verdict": null,
+				"admitted": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 1,
+							"probe": false,
+							"serial": 2
+						},
+						"at": 60000000
+					}
+				}
+			},
+			{
+				"verdict": null,
+				"admitted": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 1,
+							"probe": false,
+							"serial": 2
+						},
+						"at": 60000000
+					}
+				}
+			},
+			{
+				"verdict": null,
+				"admitted": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 1,
+							"probe": false,
+							"serial": 2
+						},
+						"at": 60000001
+					}
+				}
+			},
+			{
+				"verdict": null,
+				"admitted": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 1,
+							"probe": false,
+							"serial": 2
+						},
+						"at": 60000001
+					}
+				}
+			},
+			{
+				"verdict": null,
+				"admitted": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 1,
+							"probe": false,
+							"serial": 2
+						},
+						"at": 65999999
+					}
+				}
+			},
+			{
+				"verdict": null,
+				"admitted": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 1,
+							"probe": false,
+							"serial": 2
+						},
+						"at": 65999999
+					}
+				}
+			},
+			{
+				"verdict": null,
+				"admitted": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": null
+				}
+			},
+			{
+				"verdict": null,
+				"admitted": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": null
+				}
+			}
+		]
+	}
+}

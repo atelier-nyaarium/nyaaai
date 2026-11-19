@@ -12,14 +12,20 @@ pub fn price(value: Option<f64>) -> Option<f64> {
     value.filter(|held| held.is_finite() && *held >= 0.0)
 }
 
-/// None when the provider's own charge is missing for a BYOK reply.
+/// A count below zero, or no number, is zero.
+fn count(value: f64) -> f64 {
+    if value >= 0.0 { value } else { 0.0 }
+}
+
+/// None when the provider's own charge is missing for a BYOK reply, or the sum passes the largest
+/// number.
 pub fn reported_cost(usage: &NormalizedUsage) -> Option<f64> {
     let account = price(usage.cost);
     if account.is_none() || usage.byok != Some(true) {
         return account;
     }
     let upstream = price(usage.upstream_cost)?;
-    account.map(|held| held + upstream)
+    price(Some(account? + upstream))
 }
 
 fn unpriced() -> Cost {
@@ -72,14 +78,18 @@ pub fn step_cost(
     } else {
         0.0
     };
+    let input = count(usage.input);
     let tiers = match view_price {
         Some(ModelViewPrice::Price(held)) => held.tiers.as_slice(),
         _ => &[],
     };
     let Some(tier) = tiers
         .iter()
+        .filter(|candidate| {
+            price(Some(candidate.prompt)).is_some() && price(Some(candidate.completion)).is_some()
+        })
         .rev()
-        .find(|candidate| candidate.min_prompt_tokens <= usage.input)
+        .find(|candidate| candidate.min_prompt_tokens <= input)
     else {
         return Cost {
             usd: fee,
@@ -87,22 +97,23 @@ pub fn step_cost(
             unpriced: None,
         };
     };
-    let cached = usage.input.min(usage.cached.unwrap_or(0.0));
-    let written = (usage.input - cached).min(usage.cache_write.unwrap_or(0.0));
-    let write_price = if long_cache {
+    let cached = input.min(count(usage.cached.unwrap_or(0.0)));
+    let written = (input - cached).min(count(usage.cache_write.unwrap_or(0.0)));
+    let write_price = price(if long_cache {
         tier.cache_write1h
     } else {
         tier.cache_write
-    }
+    })
     .unwrap_or(tier.prompt);
     // The four products are added left to right, then divided once, then the fee.
-    let usd = ((usage.input - cached - written) * tier.prompt
-        + cached * tier.cache_read.unwrap_or(tier.prompt)
+    let usd = ((input - cached - written) * tier.prompt
+        + cached * price(tier.cache_read).unwrap_or(tier.prompt)
         + written * write_price
-        + usage.output * tier.completion)
+        + count(usage.output) * tier.completion)
         / 1_000_000.0;
+    let total = usd + fee;
     Cost {
-        usd: usd + fee,
+        usd: if total.is_finite() { total } else { fee },
         estimated: true,
         unpriced: None,
     }

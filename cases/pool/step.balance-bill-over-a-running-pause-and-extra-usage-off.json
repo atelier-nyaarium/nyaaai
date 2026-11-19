@@ -1,0 +1,50 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "balance-bill-over-a-running-pause-and-extra-usage-off",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance",
+							"retryAfterMs": 3600000
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "extraUsage",
+							"on": false,
+							"lastBill": "balance"
+						},
+						"nowMs": 60001000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "reset",
+						"at": 63600000
+					},
+					{
+						"kind": "reset",
+						"at": 63600000
+					}
+				]
+			}
+		]
+	}
+}

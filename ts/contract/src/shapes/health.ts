@@ -59,6 +59,10 @@ export const PoolState = z.discriminatedUnion("kind", [
 		eta: z.number(),
 		/** Next probe window. */
 		next: z.number(),
+		/**
+		 * The first ticket admitted inside the window, whatever its `probe` mark. A probe whose settlement
+		 * never comes holds the entry until `eta` and no longer; a renewed window starts with none.
+		 */
 		probe: z.object({ ticket: Ticket, at: z.number() }).nullable(),
 	}),
 ]);
@@ -78,6 +82,11 @@ export const PoolEvent = z.discriminatedUnion("kind", [
 		retryAfterMs: z.number().exactOptional(),
 	}),
 	z.object({ kind: z.literal("extraUsage"), on: z.boolean(), lastBill: z.string().exactOptional() }),
+	/**
+	 * The pool takes the first ticket admitted inside its window as its probe, whatever `Ticket.probe`
+	 * says: that mark is the gate's own, for its recovery probe after an overload (pinned by
+	 * `pool.step` `admitted-ticket-is-kept-whole` and `a-ticket-not-marked-probe-is-the-probe`).
+	 */
 	z.object({ kind: z.literal("admitted"), ticket: Ticket }),
 	z.object({ kind: z.literal("settled"), ticket: Ticket }),
 ]);
