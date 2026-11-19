@@ -16905,6 +16905,1045 @@
 			"required": [
 				"rows"
 			]
+		},
+		"LifeKeyAnswer": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "key"
+						},
+						"key": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"kind",
+						"key"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "none"
+						}
+					},
+					"required": [
+						"kind"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "refused"
+						}
+					},
+					"required": [
+						"kind"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "unready"
+						}
+					},
+					"required": [
+						"kind"
+					]
+				}
+			],
+			"x-tag": "kind"
+		},
+		"LifeReply": {
+			"type": "object",
+			"properties": {
+				"status": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"headers": {
+					"$ref": "step.input.json#/$defs/HeaderList"
+				},
+				"chunks": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"headMs": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				},
+				"chunkMs": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				},
+				"end": {
+					"type": "string",
+					"enum": [
+						"closed",
+						"dropped",
+						"refused"
+					]
+				},
+				"error": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"status",
+				"headers",
+				"chunks"
+			]
+		},
+		"LifeListing": {
+			"type": "object",
+			"properties": {
+				"unlisted": {
+					"type": "boolean",
+					"const": true
+				},
+				"keeps": {
+					"type": "boolean",
+					"const": true
+				},
+				"price": {
+					"anyOf": [
+						{
+							"$ref": "model.input.json#/$defs/Price"
+						},
+						{
+							"type": "string",
+							"const": "free"
+						},
+						{
+							"type": "string",
+							"const": "unknown"
+						}
+					]
+				},
+				"cacheWrite1h": {
+					"type": "boolean",
+					"const": true
+				}
+			}
+		},
+		"LifeStep": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "send"
+						},
+						"call": {
+							"type": "string"
+						},
+						"model": {
+							"type": "string"
+						},
+						"use": {
+							"$ref": "model.input.json#/$defs/ModelUse"
+						},
+						"plan": {
+							"type": "string"
+						},
+						"run": {
+							"type": "string"
+						},
+						"mode": {
+							"type": "string",
+							"enum": [
+								"stream",
+								"complete"
+							]
+						},
+						"live": {
+							"type": "boolean"
+						},
+						"tag": {
+							"$ref": "usage.input.json#/$defs/CallTag"
+						},
+						"deadlineMs": {
+							"type": "integer",
+							"minimum": 0,
+							"maximum": 9007199254740991
+						},
+						"throws": {
+							"type": "string"
+						},
+						"abortAfterMs": {
+							"type": "integer",
+							"minimum": 0,
+							"maximum": 9007199254740991
+						},
+						"abortedBefore": {
+							"type": "boolean"
+						}
+					},
+					"required": [
+						"kind",
+						"call",
+						"model",
+						"tag"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "plan"
+						},
+						"name": {
+							"type": "string"
+						},
+						"model": {
+							"type": "string"
+						},
+						"use": {
+							"$ref": "model.input.json#/$defs/ModelUse"
+						}
+					},
+					"required": [
+						"kind",
+						"name",
+						"model"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "begin"
+						},
+						"run": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"kind",
+						"run"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "sizing"
+						},
+						"run": {
+							"type": "string"
+						},
+						"plan": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"kind",
+						"run",
+						"plan"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "advance"
+						},
+						"ms": {
+							"type": "integer",
+							"minimum": 0,
+							"maximum": 9007199254740991
+						}
+					},
+					"required": [
+						"kind",
+						"ms"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "abort"
+						},
+						"call": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"kind",
+						"call"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "list"
+						},
+						"entries": {
+							"type": "array",
+							"items": {
+								"$ref": "provider.input.json#/$defs/ProviderEntry"
+							}
+						}
+					},
+					"required": [
+						"kind",
+						"entries"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "key"
+						},
+						"id": {
+							"type": "string"
+						},
+						"answer": {
+							"$ref": "#/$defs/LifeKeyAnswer"
+						}
+					},
+					"required": [
+						"kind",
+						"id",
+						"answer"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "zdr"
+						},
+						"on": {
+							"type": "boolean"
+						}
+					},
+					"required": [
+						"kind",
+						"on"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "check"
+						},
+						"id": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"kind",
+						"id"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "billed"
+						},
+						"id": {
+							"type": "string"
+						},
+						"source": {
+							"type": "string"
+						},
+						"cost": {
+							"type": "number"
+						}
+					},
+					"required": [
+						"kind",
+						"id",
+						"source"
+					]
+				}
+			],
+			"x-tag": "kind"
+		},
+		"LifeAnswer": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "none"
+						}
+					},
+					"required": [
+						"kind"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "plan"
+						},
+						"unresolved": {
+							"anyOf": [
+								{
+									"$ref": "model.input.json#/$defs/Unresolved"
+								},
+								{
+									"type": "null"
+								}
+							]
+						},
+						"candidates": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						},
+						"passed": {
+							"type": "array",
+							"items": {
+								"$ref": "provider.input.json#/$defs/Passed"
+							}
+						}
+					},
+					"required": [
+						"kind",
+						"unresolved",
+						"candidates",
+						"passed"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "sizing"
+						},
+						"entries": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						}
+					},
+					"required": [
+						"kind",
+						"entries"
+					]
+				}
+			],
+			"x-tag": "kind"
+		},
+		"LifeResult": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "served"
+						},
+						"entry": {
+							"type": "string"
+						},
+						"reply": {
+							"$ref": "step.input.json#/$defs/StepResult"
+						}
+					},
+					"required": [
+						"kind",
+						"entry",
+						"reply"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "stopped"
+						}
+					},
+					"required": [
+						"kind"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "notice"
+						},
+						"notice": {
+							"$ref": "health.input.json#/$defs/Notice"
+						},
+						"failure": {
+							"anyOf": [
+								{
+									"$ref": "step.input.json#/$defs/Failure"
+								},
+								{
+									"type": "null"
+								}
+							]
+						}
+					},
+					"required": [
+						"kind",
+						"notice",
+						"failure"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "thrown"
+						},
+						"message": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"kind",
+						"message"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "open"
+						}
+					},
+					"required": [
+						"kind"
+					]
+				}
+			],
+			"x-tag": "kind"
+		},
+		"LifeTold": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "retry"
+						},
+						"attempt": {
+							"type": "integer",
+							"minimum": -9007199254740991,
+							"maximum": 9007199254740991
+						},
+						"waitMs": {
+							"type": "integer",
+							"minimum": -9007199254740991,
+							"maximum": 9007199254740991
+						},
+						"status": {
+							"type": [
+								"number",
+								"string"
+							]
+						}
+					},
+					"required": [
+						"kind",
+						"attempt",
+						"waitMs",
+						"status"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "wait"
+						},
+						"waiting": {
+							"anyOf": [
+								{
+									"$ref": "health.input.json#/$defs/GateWaiting"
+								},
+								{
+									"type": "null"
+								}
+							]
+						}
+					},
+					"required": [
+						"kind",
+						"waiting"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "skip"
+						},
+						"entry": {
+							"type": "string"
+						},
+						"label": {
+							"type": "string"
+						},
+						"reason": {
+							"$ref": "provider.input.json#/$defs/SkipReason"
+						}
+					},
+					"required": [
+						"kind",
+						"entry",
+						"label",
+						"reason"
+					]
+				}
+			],
+			"x-tag": "kind"
+		},
+		"LifeCall": {
+			"type": "object",
+			"properties": {
+				"call": {
+					"type": "string"
+				},
+				"result": {
+					"$ref": "#/$defs/LifeResult"
+				},
+				"trace": {
+					"anyOf": [
+						{
+							"type": "array",
+							"items": {
+								"$ref": "lifecycle.input.json#/$defs/TraceEntry"
+							}
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"told": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/LifeTold"
+					}
+				},
+				"attempts": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"entry": {
+								"type": "string"
+							},
+							"events": {
+								"type": "array",
+								"items": {
+									"$ref": "step.input.json#/$defs/StepEvent"
+								}
+							}
+						},
+						"required": [
+							"entry",
+							"events"
+						]
+					}
+				}
+			},
+			"required": [
+				"call",
+				"result",
+				"trace",
+				"told",
+				"attempts"
+			]
+		},
+		"LifeSeen": {
+			"type": "object",
+			"properties": {
+				"url": {
+					"type": "string"
+				},
+				"authorization": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"accept": {
+					"type": [
+						"string",
+						"null"
+					]
+				}
+			},
+			"required": [
+				"url",
+				"authorization",
+				"accept"
+			]
+		},
+		"LifecycleRunInput": {
+			"type": "object",
+			"properties": {
+				"startMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"pauseMs": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				},
+				"maxPauses": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				},
+				"retry": {
+					"$ref": "health.input.json#/$defs/RetryOptions"
+				},
+				"draws": {
+					"type": "array",
+					"items": {
+						"type": "number"
+					}
+				},
+				"entries": {
+					"type": "array",
+					"items": {
+						"$ref": "provider.input.json#/$defs/ProviderEntry"
+					}
+				},
+				"keys": {
+					"type": "object",
+					"propertyNames": {
+						"type": "string"
+					},
+					"additionalProperties": {
+						"$ref": "#/$defs/LifeKeyAnswer"
+					}
+				},
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"kinds": {
+					"type": "array",
+					"items": {
+						"$ref": "provider.input.json#/$defs/ProviderKindName"
+					}
+				},
+				"listings": {
+					"type": "object",
+					"propertyNames": {
+						"type": "string"
+					},
+					"additionalProperties": {
+						"type": "object",
+						"propertyNames": {
+							"type": "string"
+						},
+						"additionalProperties": {
+							"$ref": "#/$defs/LifeListing"
+						}
+					}
+				},
+				"zdrOnly": {
+					"type": "boolean"
+				},
+				"usageIds": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"exchanges": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/LifeReply"
+					}
+				},
+				"trace": {
+					"type": "boolean"
+				},
+				"steps": {
+					"minItems": 1,
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/LifeStep"
+					}
+				}
+			},
+			"required": [
+				"startMs",
+				"entries",
+				"keys",
+				"rows",
+				"kinds",
+				"listings",
+				"zdrOnly",
+				"exchanges",
+				"steps"
+			]
+		},
+		"LifecycleRunResult": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"nowMs": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"answer": {
+								"$ref": "#/$defs/LifeAnswer"
+							},
+							"ended": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"parked": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"entries": {
+								"type": "array",
+								"items": {
+									"$ref": "health.input.json#/$defs/EntryHealth"
+								}
+							},
+							"requests": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							}
+						},
+						"required": [
+							"nowMs",
+							"answer",
+							"ended",
+							"parked",
+							"entries",
+							"requests"
+						]
+					}
+				},
+				"calls": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/LifeCall"
+					}
+				},
+				"requests": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/LifeSeen"
+					}
+				},
+				"recorded": {
+					"type": "array",
+					"items": {
+						"$ref": "usage.input.json#/$defs/MeteredCall"
+					}
+				},
+				"stats": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"id": {
+								"type": "string"
+							},
+							"generationId": {
+								"type": "string"
+							},
+							"call": {
+								"$ref": "usage.input.json#/$defs/MeteredCall"
+							}
+						},
+						"required": [
+							"id",
+							"generationId",
+							"call"
+						]
+					}
+				},
+				"waiting": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"steps",
+				"calls",
+				"requests",
+				"recorded",
+				"stats",
+				"waiting"
+			]
+		},
+		"MeterBilled": {
+			"type": "object",
+			"properties": {
+				"entry": {
+					"type": "string"
+				},
+				"source": {
+					"type": "string"
+				},
+				"allowance": {
+					"type": "number"
+				},
+				"cost": {
+					"type": "number"
+				}
+			},
+			"required": [
+				"entry",
+				"source"
+			]
+		},
+		"MeterCalledInput": {
+			"type": "object",
+			"properties": {
+				"calls": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"call": {
+								"$ref": "usage.input.json#/$defs/MeteredCall"
+							},
+							"id": {
+								"type": [
+									"string",
+									"null"
+								]
+							}
+						},
+						"required": [
+							"call",
+							"id"
+						]
+					}
+				}
+			},
+			"required": [
+				"calls"
+			]
+		},
+		"MeterCalledResult": {
+			"type": "object",
+			"properties": {
+				"calls": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"recorded": {
+								"$ref": "usage.input.json#/$defs/MeteredCall"
+							},
+							"billed": {
+								"anyOf": [
+									{
+										"$ref": "#/$defs/MeterBilled"
+									},
+									{
+										"type": "null"
+									}
+								]
+							},
+							"stats": {
+								"anyOf": [
+									{
+										"type": "object",
+										"properties": {
+											"id": {
+												"type": "string"
+											},
+											"generationId": {
+												"type": "string"
+											},
+											"call": {
+												"$ref": "usage.input.json#/$defs/MeteredCall"
+											}
+										},
+										"required": [
+											"id",
+											"generationId",
+											"call"
+										]
+									},
+									{
+										"type": "null"
+									}
+								]
+							}
+						},
+						"required": [
+							"recorded",
+							"billed",
+							"stats"
+						]
+					}
+				}
+			},
+			"required": [
+				"calls"
+			]
 		}
 	}
 }

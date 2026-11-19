@@ -39,6 +39,7 @@
 		"./kinds/openrouter/key": "./src/kinds/openrouter/key.ts",
 		"./kinds/openrouter/kind": "./src/kinds/openrouter/kind.ts",
 		"./kinds/readers": "./src/kinds/readers.ts",
+		"./lifecycle/lifecycle": "./src/lifecycle/lifecycle.ts",
 		"./lifecycle/retry": "./src/lifecycle/retry.ts",
 		"./messages/codec": "./src/messages/codec.ts",
 		"./messages/wire": "./src/messages/wire.ts",
@@ -60,6 +61,7 @@
 		"./step": "./src/step.ts",
 		"./transport": "./src/transport.ts",
 		"./usage/cost": "./src/usage/cost.ts",
+		"./usage/meter": "./src/usage/meter.ts",
 		"./usage/record": "./src/usage/record.ts"
 	}
 }

@@ -710,6 +710,13 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
         "health.keys" => {
             run::<shapes::HealthKeysInput, shapes::HealthKeysResult>(input, super::health::keys)
         }
+        "lifecycle.run" => run::<shapes::LifecycleRunInput, shapes::LifecycleRunResult>(
+            input,
+            super::lifecycle::run,
+        ),
+        "meter.called" => {
+            run::<shapes::MeterCalledInput, shapes::MeterCalledResult>(input, super::meter::called)
+        }
         _ => return None,
     })
 }

@@ -2,6 +2,7 @@
 
 pub mod frames;
 pub mod health;
+pub mod lifecycle;
 pub mod model;
 pub mod model_hooks;
 pub mod provider;

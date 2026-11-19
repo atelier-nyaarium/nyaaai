@@ -1,0 +1,945 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "lifecycle.run",
+	"name": "long-cache-pricing-is-asked-for-by-chat-and-by-no-other-feature",
+	"input": {
+		"startMs": 1794052800000,
+		"entries": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "Alpha"
+			}
+		],
+		"keys": {
+			"a": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"rows": [
+			"openai/gpt-6-luna",
+			"anthropic/claude-opus-5.5"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama"
+		],
+		"listings": {
+			"a": {
+				"openai/gpt-6-luna": {
+					"price": {
+						"prompt": [
+							0,
+							0
+						],
+						"completion": [
+							0,
+							0
+						],
+						"tiers": [
+							{
+								"minPromptTokens": 0,
+								"prompt": 1,
+								"completion": 2,
+								"cacheRead": 0.1,
+								"cacheWrite": 1.25,
+								"cacheWrite1h": 2
+							}
+						]
+					},
+					"cacheWrite1h": true
+				},
+				"anthropic/claude-opus-5.5": {
+					"price": {
+						"prompt": [
+							0,
+							0
+						],
+						"completion": [
+							0,
+							0
+						],
+						"tiers": [
+							{
+								"minPromptTokens": 0,
+								"prompt": 1,
+								"completion": 2,
+								"cacheRead": 0.1,
+								"cacheWrite": 1.25,
+								"cacheWrite1h": 2
+							}
+						]
+					}
+				}
+			}
+		},
+		"zdrOnly": false,
+		"exchanges": [
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"A\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":1000,\"completion_tokens\":100,\"prompt_tokens_details\":{\"cached_tokens\":200,\"cache_write_tokens\":300}}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			},
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"A\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":1000,\"completion_tokens\":100,\"prompt_tokens_details\":{\"cached_tokens\":200,\"cache_write_tokens\":300}}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			},
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"A\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":1000,\"completion_tokens\":100,\"prompt_tokens_details\":{\"cached_tokens\":200,\"cache_write_tokens\":300}}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			},
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"A\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":1000,\"completion_tokens\":100,\"prompt_tokens_details\":{\"cached_tokens\":200,\"cache_write_tokens\":300}}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			}
+		],
+		"steps": [
+			{
+				"kind": "send",
+				"call": "chat",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "chat"
+				}
+			},
+			{
+				"kind": "send",
+				"call": "analysis",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "analysis"
+				}
+			},
+			{
+				"kind": "send",
+				"call": "wand",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "wand"
+				}
+			},
+			{
+				"kind": "send",
+				"call": "without-listing",
+				"model": "anthropic/claude-opus-5.5",
+				"tag": {
+					"feature": "chat"
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1794052800000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"chat"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "a",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 1
+			},
+			{
+				"nowMs": 1794052800000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"analysis"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "a",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 2
+			},
+			{
+				"nowMs": 1794052800000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"wand"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "a",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 3
+			},
+			{
+				"nowMs": 1794052800000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"without-listing"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "a",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 4
+			}
+		],
+		"calls": [
+			{
+				"call": "chat",
+				"result": {
+					"kind": "served",
+					"entry": "a",
+					"reply": {
+						"parts": [
+							{
+								"kind": "text",
+								"text": "A"
+							}
+						],
+						"finish": "stop",
+						"usage": {
+							"input": 1000,
+							"output": 100,
+							"cached": 200,
+							"cacheWrite": 300
+						},
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-1"
+						}
+					}
+				},
+				"trace": [
+					{
+						"kind": "admitted",
+						"entry": "a",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "a\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "a",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "a",
+							"label": "Alpha",
+							"at": 1794052800000,
+							"ms": 0,
+							"firstTokenMs": 0,
+							"usage": {
+								"input": 1000,
+								"output": 100,
+								"cached": 200,
+								"cacheWrite": 300
+							},
+							"cost": {
+								"usd": 0.00132,
+								"estimated": true
+							},
+							"provider": "Azure",
+							"generationId": "gen-1",
+							"finishReason": "stop"
+						}
+					},
+					{
+						"kind": "settled",
+						"entry": "a",
+						"outcome": "ok",
+						"answer": "done"
+					},
+					{
+						"kind": "billing",
+						"entry": "a",
+						"reply": "ok",
+						"usage": {
+							"input": 1000,
+							"output": 100,
+							"cached": 200,
+							"cacheWrite": 300
+						}
+					},
+					{
+						"kind": "served",
+						"entry": "a",
+						"label": "Alpha",
+						"model": "openai/gpt-6-luna"
+					}
+				],
+				"told": [],
+				"attempts": [
+					{
+						"entry": "a",
+						"events": [
+							{
+								"kind": "serving",
+								"serving": {
+									"host": "Azure",
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "text",
+								"text": "A"
+							},
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "finish",
+								"reason": "stop"
+							},
+							{
+								"kind": "usage",
+								"usage": {
+									"input": 1000,
+									"output": 100,
+									"cached": 200,
+									"cacheWrite": 300
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"call": "analysis",
+				"result": {
+					"kind": "served",
+					"entry": "a",
+					"reply": {
+						"parts": [
+							{
+								"kind": "text",
+								"text": "A"
+							}
+						],
+						"finish": "stop",
+						"usage": {
+							"input": 1000,
+							"output": 100,
+							"cached": 200,
+							"cacheWrite": 300
+						},
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-1"
+						}
+					}
+				},
+				"trace": [
+					{
+						"kind": "admitted",
+						"entry": "a",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "a\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 2
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "a",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "analysis"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "a",
+							"label": "Alpha",
+							"at": 1794052800000,
+							"ms": 0,
+							"firstTokenMs": 0,
+							"usage": {
+								"input": 1000,
+								"output": 100,
+								"cached": 200,
+								"cacheWrite": 300
+							},
+							"cost": {
+								"usd": 0.001095,
+								"estimated": true
+							},
+							"provider": "Azure",
+							"generationId": "gen-1",
+							"finishReason": "stop"
+						}
+					},
+					{
+						"kind": "settled",
+						"entry": "a",
+						"outcome": "ok",
+						"answer": "done"
+					},
+					{
+						"kind": "billing",
+						"entry": "a",
+						"reply": "ok",
+						"usage": {
+							"input": 1000,
+							"output": 100,
+							"cached": 200,
+							"cacheWrite": 300
+						}
+					},
+					{
+						"kind": "served",
+						"entry": "a",
+						"label": "Alpha",
+						"model": "openai/gpt-6-luna"
+					}
+				],
+				"told": [],
+				"attempts": [
+					{
+						"entry": "a",
+						"events": [
+							{
+								"kind": "serving",
+								"serving": {
+									"host": "Azure",
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "text",
+								"text": "A"
+							},
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "finish",
+								"reason": "stop"
+							},
+							{
+								"kind": "usage",
+								"usage": {
+									"input": 1000,
+									"output": 100,
+									"cached": 200,
+									"cacheWrite": 300
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"call": "wand",
+				"result": {
+					"kind": "served",
+					"entry": "a",
+					"reply": {
+						"parts": [
+							{
+								"kind": "text",
+								"text": "A"
+							}
+						],
+						"finish": "stop",
+						"usage": {
+							"input": 1000,
+							"output": 100,
+							"cached": 200,
+							"cacheWrite": 300
+						},
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-1"
+						}
+					}
+				},
+				"trace": [
+					{
+						"kind": "admitted",
+						"entry": "a",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "a\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 3
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "a",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "wand"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "a",
+							"label": "Alpha",
+							"at": 1794052800000,
+							"ms": 0,
+							"firstTokenMs": 0,
+							"usage": {
+								"input": 1000,
+								"output": 100,
+								"cached": 200,
+								"cacheWrite": 300
+							},
+							"cost": {
+								"usd": 0.001095,
+								"estimated": true
+							},
+							"provider": "Azure",
+							"generationId": "gen-1",
+							"finishReason": "stop"
+						}
+					},
+					{
+						"kind": "settled",
+						"entry": "a",
+						"outcome": "ok",
+						"answer": "done"
+					},
+					{
+						"kind": "billing",
+						"entry": "a",
+						"reply": "ok",
+						"usage": {
+							"input": 1000,
+							"output": 100,
+							"cached": 200,
+							"cacheWrite": 300
+						}
+					},
+					{
+						"kind": "served",
+						"entry": "a",
+						"label": "Alpha",
+						"model": "openai/gpt-6-luna"
+					}
+				],
+				"told": [],
+				"attempts": [
+					{
+						"entry": "a",
+						"events": [
+							{
+								"kind": "serving",
+								"serving": {
+									"host": "Azure",
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "text",
+								"text": "A"
+							},
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "finish",
+								"reason": "stop"
+							},
+							{
+								"kind": "usage",
+								"usage": {
+									"input": 1000,
+									"output": 100,
+									"cached": 200,
+									"cacheWrite": 300
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"call": "without-listing",
+				"result": {
+					"kind": "served",
+					"entry": "a",
+					"reply": {
+						"parts": [
+							{
+								"kind": "text",
+								"text": "A"
+							}
+						],
+						"finish": "stop",
+						"usage": {
+							"input": 1000,
+							"output": 100,
+							"cached": 200,
+							"cacheWrite": 300
+						},
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-1"
+						}
+					}
+				},
+				"trace": [
+					{
+						"kind": "admitted",
+						"entry": "a",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "a\nanthropic/claude-opus-5.5",
+								"generation": 0,
+								"probe": false,
+								"serial": 4
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "a",
+						"model": "anthropic/claude-opus-5.5",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "anthropic/claude-opus-5.5",
+							"entry": "a",
+							"label": "Alpha",
+							"at": 1794052800000,
+							"ms": 0,
+							"firstTokenMs": 0,
+							"usage": {
+								"input": 1000,
+								"output": 100,
+								"cached": 200,
+								"cacheWrite": 300
+							},
+							"cost": {
+								"usd": 0.001095,
+								"estimated": true
+							},
+							"provider": "Azure",
+							"generationId": "gen-1",
+							"finishReason": "stop"
+						}
+					},
+					{
+						"kind": "settled",
+						"entry": "a",
+						"outcome": "ok",
+						"answer": "done"
+					},
+					{
+						"kind": "billing",
+						"entry": "a",
+						"reply": "ok",
+						"usage": {
+							"input": 1000,
+							"output": 100,
+							"cached": 200,
+							"cacheWrite": 300
+						}
+					},
+					{
+						"kind": "served",
+						"entry": "a",
+						"label": "Alpha",
+						"model": "anthropic/claude-opus-5.5"
+					}
+				],
+				"told": [],
+				"attempts": [
+					{
+						"entry": "a",
+						"events": [
+							{
+								"kind": "serving",
+								"serving": {
+									"host": "Azure",
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "text",
+								"text": "A"
+							},
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "finish",
+								"reason": "stop"
+							},
+							{
+								"kind": "usage",
+								"usage": {
+									"input": 1000,
+									"output": 100,
+									"cached": 200,
+									"cacheWrite": 300
+								}
+							}
+						]
+					}
+				]
+			}
+		],
+		"requests": [
+			{
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			},
+			{
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			},
+			{
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			},
+			{
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			}
+		],
+		"recorded": [
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "a",
+				"label": "Alpha",
+				"at": 1794052800000,
+				"ms": 0,
+				"firstTokenMs": 0,
+				"usage": {
+					"input": 1000,
+					"output": 100,
+					"cached": 200,
+					"cacheWrite": 300
+				},
+				"cost": {
+					"usd": 0.00132,
+					"estimated": true
+				},
+				"provider": "Azure",
+				"generationId": "gen-1",
+				"finishReason": "stop"
+			},
+			{
+				"tag": {
+					"feature": "analysis"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "a",
+				"label": "Alpha",
+				"at": 1794052800000,
+				"ms": 0,
+				"firstTokenMs": 0,
+				"usage": {
+					"input": 1000,
+					"output": 100,
+					"cached": 200,
+					"cacheWrite": 300
+				},
+				"cost": {
+					"usd": 0.001095,
+					"estimated": true
+				},
+				"provider": "Azure",
+				"generationId": "gen-1",
+				"finishReason": "stop"
+			},
+			{
+				"tag": {
+					"feature": "wand"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "a",
+				"label": "Alpha",
+				"at": 1794052800000,
+				"ms": 0,
+				"firstTokenMs": 0,
+				"usage": {
+					"input": 1000,
+					"output": 100,
+					"cached": 200,
+					"cacheWrite": 300
+				},
+				"cost": {
+					"usd": 0.001095,
+					"estimated": true
+				},
+				"provider": "Azure",
+				"generationId": "gen-1",
+				"finishReason": "stop"
+			},
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "anthropic/claude-opus-5.5",
+				"entry": "a",
+				"label": "Alpha",
+				"at": 1794052800000,
+				"ms": 0,
+				"firstTokenMs": 0,
+				"usage": {
+					"input": 1000,
+					"output": 100,
+					"cached": 200,
+					"cacheWrite": 300
+				},
+				"cost": {
+					"usd": 0.001095,
+					"estimated": true
+				},
+				"provider": "Azure",
+				"generationId": "gen-1",
+				"finishReason": "stop"
+			}
+		],
+		"stats": [],
+		"waiting": []
+	}
+}

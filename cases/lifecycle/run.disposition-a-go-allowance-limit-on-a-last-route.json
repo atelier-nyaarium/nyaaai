@@ -1,0 +1,245 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "lifecycle.run",
+	"name": "disposition-a-go-allowance-limit-on-a-last-route",
+	"input": {
+		"startMs": 1794052800000,
+		"entries": [
+			{
+				"id": "go",
+				"kind": "opencode",
+				"plan": "go",
+				"label": "Go"
+			}
+		],
+		"keys": {
+			"go": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"rows": [
+			"openai/gpt-6-luna",
+			"anthropic/claude-opus-5.5"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama"
+		],
+		"listings": {},
+		"zdrOnly": false,
+		"exchanges": [
+			{
+				"status": 429,
+				"headers": [
+					[
+						"content-type",
+						"application/json"
+					]
+				],
+				"chunks": [
+					"{\"error\":{\"type\":\"GoUsageLimitError\",\"message\":\"Limit.\",\"resetsAt\":\"2026-11-07T17:00:00Z\"}}"
+				]
+			},
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Go\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":100,\"completion_tokens\":10,\"cost\":0.001}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			}
+		],
+		"steps": [
+			{
+				"kind": "send",
+				"call": "first",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "chat"
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1794052800000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"first"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "reset",
+							"at": 1794070800000
+						},
+						"waiting": []
+					}
+				],
+				"requests": 1
+			}
+		],
+		"calls": [
+			{
+				"call": "first",
+				"result": {
+					"kind": "notice",
+					"notice": {
+						"kind": "spendLimit",
+						"status": 429,
+						"message": "Limit.",
+						"resetsAt": 1794070800000,
+						"entry": "Go"
+					},
+					"failure": {
+						"category": "allowance",
+						"status": 429,
+						"resetsAt": 1794070800000,
+						"message": "Limit."
+					}
+				},
+				"trace": [
+					{
+						"kind": "admitted",
+						"entry": "go",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "go\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "go",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "go",
+							"label": "Go",
+							"at": 1794052800000,
+							"ms": 0,
+							"cost": {
+								"usd": 0,
+								"estimated": true
+							},
+							"failure": "spendLimit"
+						}
+					},
+					{
+						"kind": "billing",
+						"entry": "go",
+						"reply": "failed"
+					},
+					{
+						"kind": "settled",
+						"entry": "go",
+						"outcome": "failed",
+						"answer": "done"
+					},
+					{
+						"kind": "failure",
+						"entry": "go",
+						"model": "openai/gpt-6-luna",
+						"failure": {
+							"category": "allowance",
+							"status": 429,
+							"resetsAt": 1794070800000,
+							"message": "Limit."
+						},
+						"disposition": {
+							"act": "fallThrough",
+							"notice": "spendLimit"
+						},
+						"fresh": true,
+						"onward": false
+					},
+					{
+						"kind": "gateFailed",
+						"entry": "go",
+						"failure": {
+							"category": "allowance",
+							"status": 429,
+							"resetsAt": 1794070800000,
+							"message": "Limit."
+						},
+						"onward": false
+					},
+					{
+						"kind": "notice",
+						"notice": {
+							"kind": "spendLimit",
+							"status": 429,
+							"message": "Limit.",
+							"resetsAt": 1794070800000,
+							"entry": "Go"
+						}
+					}
+				],
+				"told": [],
+				"attempts": [
+					{
+						"entry": "go",
+						"events": []
+					}
+				]
+			}
+		],
+		"requests": [
+			{
+				"url": "https://opencode.ai/inference/go/openai/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			}
+		],
+		"recorded": [
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "go",
+				"label": "Go",
+				"at": 1794052800000,
+				"ms": 0,
+				"cost": {
+					"usd": 0,
+					"estimated": true
+				},
+				"failure": "spendLimit"
+			}
+		],
+		"stats": [],
+		"waiting": []
+	}
+}

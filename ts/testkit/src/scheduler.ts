@@ -10,6 +10,12 @@ export interface Fired {
 	atMs: number;
 }
 
+/** Told when a sleep begins and when it ends, by its time or its signal. */
+export interface SleepWatch {
+	slept(signal: AbortSignal | undefined): void;
+	woke(signal: AbortSignal | undefined): void;
+}
+
 interface Timer {
 	tag: string;
 	atMs: number;
@@ -76,8 +82,11 @@ export class TimerWheel {
 ////////////////////////////////
 //  Functions & Helpers
 
-/** Virtual-time scheduler. */
-export function fakeScheduler(wheel: TimerWheel = new TimerWheel()): Scheduler & { wheel: TimerWheel } {
+/** Virtual-time scheduler. `watch` hears every sleep begin and end, as the wheel runs it. */
+export function fakeScheduler(
+	wheel: TimerWheel = new TimerWheel(),
+	watch?: SleepWatch,
+): Scheduler & { wheel: TimerWheel } {
 	let sleeps = 0;
 	let schedules = 0;
 	return {
@@ -91,13 +100,16 @@ export function fakeScheduler(wheel: TimerWheel = new TimerWheel()): Scheduler &
 				const tag = `sleep-${sleeps}`;
 				const stop = () => {
 					wheel.cancel(tag);
+					watch?.woke(signal);
 					reject(signal?.reason);
 				};
 				wheel.after(ms, tag, () => {
 					signal?.removeEventListener("abort", stop);
+					watch?.woke(signal);
 					resolve();
 				});
 				signal?.addEventListener("abort", stop, { once: true });
+				watch?.slept(signal);
 			}),
 		schedule: (ms, run) => {
 			schedules += 1;

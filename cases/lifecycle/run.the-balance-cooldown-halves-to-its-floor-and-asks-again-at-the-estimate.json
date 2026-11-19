@@ -1,0 +1,4660 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "lifecycle.run",
+	"name": "the-balance-cooldown-halves-to-its-floor-and-asks-again-at-the-estimate",
+	"input": {
+		"startMs": 1794052800000,
+		"entries": [
+			{
+				"id": "go",
+				"kind": "opencode",
+				"plan": "go",
+				"label": "Go"
+			},
+			{
+				"id": "b",
+				"kind": "openrouter",
+				"label": "Beta"
+			}
+		],
+		"keys": {
+			"go": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			},
+			"b": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"rows": [
+			"openai/gpt-6-luna",
+			"anthropic/claude-opus-5.5"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama"
+		],
+		"listings": {},
+		"zdrOnly": false,
+		"exchanges": [
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Go\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":100,\"completion_tokens\":10,\"cost\":0.001,\"opencode\":{\"billing_source\":\"balance\"}}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			},
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"B\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":100,\"completion_tokens\":10,\"cost\":0.001}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			},
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Go\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":100,\"completion_tokens\":10,\"cost\":0.001,\"opencode\":{\"billing_source\":\"balance\"}}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			},
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"B\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":100,\"completion_tokens\":10,\"cost\":0.001}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			},
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Go\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":100,\"completion_tokens\":10,\"cost\":0.001,\"opencode\":{\"billing_source\":\"balance\"}}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			},
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"B\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":100,\"completion_tokens\":10,\"cost\":0.001}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			},
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Go\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":100,\"completion_tokens\":10,\"cost\":0.001,\"opencode\":{\"billing_source\":\"balance\"}}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			},
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"B\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":100,\"completion_tokens\":10,\"cost\":0.001}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			},
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Go\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":100,\"completion_tokens\":10,\"cost\":0.001,\"opencode\":{\"billing_source\":\"balance\"}}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			},
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"B\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":100,\"completion_tokens\":10,\"cost\":0.001}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			},
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Go\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":100,\"completion_tokens\":10,\"cost\":0.001,\"opencode\":{\"billing_source\":\"balance\"}}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			},
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"B\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":100,\"completion_tokens\":10,\"cost\":0.001}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			},
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Go\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":100,\"completion_tokens\":10,\"cost\":0.001,\"opencode\":{\"billing_source\":\"balance\"}}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			},
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"B\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":100,\"completion_tokens\":10,\"cost\":0.001}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			},
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Go\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":100,\"completion_tokens\":10,\"cost\":0.001,\"opencode\":{\"billing_source\":\"balance\"}}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			},
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"B\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":100,\"completion_tokens\":10,\"cost\":0.001}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			},
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Go\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":100,\"completion_tokens\":10,\"cost\":0.001,\"opencode\":{\"billing_source\":\"balance\"}}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			}
+		],
+		"steps": [
+			{
+				"kind": "send",
+				"call": "bill",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "chat"
+				}
+			},
+			{
+				"kind": "advance",
+				"ms": 8999999
+			},
+			{
+				"kind": "send",
+				"call": "early-1",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "chat"
+				}
+			},
+			{
+				"kind": "advance",
+				"ms": 1
+			},
+			{
+				"kind": "send",
+				"call": "probe-1",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "chat"
+				}
+			},
+			{
+				"kind": "advance",
+				"ms": 4499999
+			},
+			{
+				"kind": "send",
+				"call": "early-2",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "chat"
+				}
+			},
+			{
+				"kind": "advance",
+				"ms": 1
+			},
+			{
+				"kind": "send",
+				"call": "probe-2",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "chat"
+				}
+			},
+			{
+				"kind": "advance",
+				"ms": 2249999
+			},
+			{
+				"kind": "send",
+				"call": "early-3",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "chat"
+				}
+			},
+			{
+				"kind": "advance",
+				"ms": 1
+			},
+			{
+				"kind": "send",
+				"call": "probe-3",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "chat"
+				}
+			},
+			{
+				"kind": "advance",
+				"ms": 1124999
+			},
+			{
+				"kind": "send",
+				"call": "early-4",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "chat"
+				}
+			},
+			{
+				"kind": "advance",
+				"ms": 1
+			},
+			{
+				"kind": "send",
+				"call": "probe-4",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "chat"
+				}
+			},
+			{
+				"kind": "advance",
+				"ms": 562499
+			},
+			{
+				"kind": "send",
+				"call": "early-5",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "chat"
+				}
+			},
+			{
+				"kind": "advance",
+				"ms": 1
+			},
+			{
+				"kind": "send",
+				"call": "probe-5",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "chat"
+				}
+			},
+			{
+				"kind": "advance",
+				"ms": 299999
+			},
+			{
+				"kind": "send",
+				"call": "early-6",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "chat"
+				}
+			},
+			{
+				"kind": "advance",
+				"ms": 1
+			},
+			{
+				"kind": "send",
+				"call": "probe-6",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "chat"
+				}
+			},
+			{
+				"kind": "advance",
+				"ms": 299999
+			},
+			{
+				"kind": "send",
+				"call": "early-7",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "chat"
+				}
+			},
+			{
+				"kind": "advance",
+				"ms": 1
+			},
+			{
+				"kind": "send",
+				"call": "probe-7",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "chat"
+				}
+			},
+			{
+				"kind": "advance",
+				"ms": 8999999
+			},
+			{
+				"kind": "send",
+				"call": "early-8",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "chat"
+				}
+			},
+			{
+				"kind": "advance",
+				"ms": 1
+			},
+			{
+				"kind": "send",
+				"call": "probe-8",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "chat"
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1794052800000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"bill"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.001
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794070800000,
+							"next": 1794061800000,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 1
+			},
+			{
+				"nowMs": 1794061799999,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.001
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794070800000,
+							"next": 1794061800000,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 1
+			},
+			{
+				"nowMs": 1794061799999,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"early-1"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.001
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794070800000,
+							"next": 1794061800000,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 2
+			},
+			{
+				"nowMs": 1794061800000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.001
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794070800000,
+							"next": 1794061800000,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 2
+			},
+			{
+				"nowMs": 1794061800000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"probe-1"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.002
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794070800000,
+							"next": 1794066300000,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 3
+			},
+			{
+				"nowMs": 1794066299999,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.002
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794070800000,
+							"next": 1794066300000,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 3
+			},
+			{
+				"nowMs": 1794066299999,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"early-2"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.002
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794070800000,
+							"next": 1794066300000,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 4
+			},
+			{
+				"nowMs": 1794066300000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.002
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794070800000,
+							"next": 1794066300000,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 4
+			},
+			{
+				"nowMs": 1794066300000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"probe-2"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.003
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794070800000,
+							"next": 1794068550000,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 5
+			},
+			{
+				"nowMs": 1794068549999,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.003
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794070800000,
+							"next": 1794068550000,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 5
+			},
+			{
+				"nowMs": 1794068549999,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"early-3"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.003
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794070800000,
+							"next": 1794068550000,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 6
+			},
+			{
+				"nowMs": 1794068550000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.003
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794070800000,
+							"next": 1794068550000,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 6
+			},
+			{
+				"nowMs": 1794068550000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"probe-3"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.004
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794070800000,
+							"next": 1794069675000,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 7
+			},
+			{
+				"nowMs": 1794069674999,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.004
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794070800000,
+							"next": 1794069675000,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 7
+			},
+			{
+				"nowMs": 1794069674999,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"early-4"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.004
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794070800000,
+							"next": 1794069675000,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 8
+			},
+			{
+				"nowMs": 1794069675000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.004
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794070800000,
+							"next": 1794069675000,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 8
+			},
+			{
+				"nowMs": 1794069675000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"probe-4"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.005
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794070800000,
+							"next": 1794070237500,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 9
+			},
+			{
+				"nowMs": 1794070237499,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.005
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794070800000,
+							"next": 1794070237500,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 9
+			},
+			{
+				"nowMs": 1794070237499,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"early-5"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.005
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794070800000,
+							"next": 1794070237500,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 10
+			},
+			{
+				"nowMs": 1794070237500,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.005
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794070800000,
+							"next": 1794070237500,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 10
+			},
+			{
+				"nowMs": 1794070237500,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"probe-5"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.006
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794070800000,
+							"next": 1794070537500,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 11
+			},
+			{
+				"nowMs": 1794070537499,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.006
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794070800000,
+							"next": 1794070537500,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 11
+			},
+			{
+				"nowMs": 1794070537499,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"early-6"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.006
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794070800000,
+							"next": 1794070537500,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 12
+			},
+			{
+				"nowMs": 1794070537500,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.006
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794070800000,
+							"next": 1794070537500,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 12
+			},
+			{
+				"nowMs": 1794070537500,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"probe-6"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.007
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794070800000,
+							"next": 1794070837500,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 13
+			},
+			{
+				"nowMs": 1794070837499,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.007
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794070800000,
+							"next": 1794070837500,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 13
+			},
+			{
+				"nowMs": 1794070837499,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"early-7"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.007
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794070800000,
+							"next": 1794070837500,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 14
+			},
+			{
+				"nowMs": 1794070837500,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.007
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794070800000,
+							"next": 1794070837500,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 14
+			},
+			{
+				"nowMs": 1794070837500,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"probe-7"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.008
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794088837500,
+							"next": 1794079837500,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 15
+			},
+			{
+				"nowMs": 1794079837499,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.008
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794088837500,
+							"next": 1794079837500,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 15
+			},
+			{
+				"nowMs": 1794079837499,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"early-8"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.008
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794088837500,
+							"next": 1794079837500,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 16
+			},
+			{
+				"nowMs": 1794079837500,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.008
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794088837500,
+							"next": 1794079837500,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 16
+			},
+			{
+				"nowMs": 1794079837500,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"probe-8"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"cost": 0.009000000000000001
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 1794088837500,
+							"next": 1794084337500,
+							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 17
+			}
+		],
+		"calls": [
+			{
+				"call": "bill",
+				"result": {
+					"kind": "served",
+					"entry": "go",
+					"reply": {
+						"parts": [
+							{
+								"kind": "text",
+								"text": "Go"
+							}
+						],
+						"finish": "stop",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001,
+							"billingSource": "balance"
+						},
+						"serving": {
+							"generationId": "gen-1"
+						}
+					}
+				},
+				"trace": [
+					{
+						"kind": "admitted",
+						"entry": "go",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "go\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "go",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "go",
+							"label": "Go",
+							"at": 1794052800000,
+							"ms": 0,
+							"firstTokenMs": 0,
+							"usage": {
+								"input": 100,
+								"output": 10,
+								"cost": 0.001,
+								"billingSource": "balance"
+							},
+							"cost": {
+								"usd": 0.001,
+								"estimated": false
+							},
+							"generationId": "gen-1",
+							"finishReason": "stop"
+						}
+					},
+					{
+						"kind": "settled",
+						"entry": "go",
+						"outcome": "ok",
+						"answer": "done"
+					},
+					{
+						"kind": "billing",
+						"entry": "go",
+						"reply": "ok",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001,
+							"billingSource": "balance"
+						}
+					},
+					{
+						"kind": "served",
+						"entry": "go",
+						"label": "Go",
+						"model": "openai/gpt-6-luna"
+					}
+				],
+				"told": [],
+				"attempts": [
+					{
+						"entry": "go",
+						"events": [
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "text",
+								"text": "Go"
+							},
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "finish",
+								"reason": "stop"
+							},
+							{
+								"kind": "usage",
+								"usage": {
+									"input": 100,
+									"output": 10,
+									"cost": 0.001,
+									"billingSource": "balance"
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"call": "early-1",
+				"result": {
+					"kind": "served",
+					"entry": "b",
+					"reply": {
+						"parts": [
+							{
+								"kind": "text",
+								"text": "B"
+							}
+						],
+						"finish": "stop",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001
+						},
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-1"
+						}
+					}
+				},
+				"trace": [
+					{
+						"kind": "skip",
+						"cause": "deferred",
+						"entry": "go",
+						"label": "Go",
+						"reason": "allowance"
+					},
+					{
+						"kind": "admitted",
+						"entry": "b",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "b\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 2
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "b",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "b",
+							"label": "Beta",
+							"at": 1794061799999,
+							"ms": 0,
+							"firstTokenMs": 0,
+							"usage": {
+								"input": 100,
+								"output": 10,
+								"cost": 0.001
+							},
+							"cost": {
+								"usd": 0.001,
+								"estimated": false
+							},
+							"provider": "Azure",
+							"generationId": "gen-1",
+							"finishReason": "stop"
+						}
+					},
+					{
+						"kind": "settled",
+						"entry": "b",
+						"outcome": "ok",
+						"answer": "done"
+					},
+					{
+						"kind": "billing",
+						"entry": "b",
+						"reply": "ok",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001
+						}
+					},
+					{
+						"kind": "served",
+						"entry": "b",
+						"label": "Beta",
+						"model": "openai/gpt-6-luna"
+					}
+				],
+				"told": [
+					{
+						"kind": "skip",
+						"entry": "go",
+						"label": "Go",
+						"reason": "allowance"
+					}
+				],
+				"attempts": [
+					{
+						"entry": "b",
+						"events": [
+							{
+								"kind": "serving",
+								"serving": {
+									"host": "Azure",
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "text",
+								"text": "B"
+							},
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "finish",
+								"reason": "stop"
+							},
+							{
+								"kind": "usage",
+								"usage": {
+									"input": 100,
+									"output": 10,
+									"cost": 0.001
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"call": "probe-1",
+				"result": {
+					"kind": "served",
+					"entry": "go",
+					"reply": {
+						"parts": [
+							{
+								"kind": "text",
+								"text": "Go"
+							}
+						],
+						"finish": "stop",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001,
+							"billingSource": "balance"
+						},
+						"serving": {
+							"generationId": "gen-1"
+						}
+					}
+				},
+				"trace": [
+					{
+						"kind": "admitted",
+						"entry": "go",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "go\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 3
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "go",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "go",
+							"label": "Go",
+							"at": 1794061800000,
+							"ms": 0,
+							"firstTokenMs": 0,
+							"usage": {
+								"input": 100,
+								"output": 10,
+								"cost": 0.001,
+								"billingSource": "balance"
+							},
+							"cost": {
+								"usd": 0.001,
+								"estimated": false
+							},
+							"generationId": "gen-1",
+							"finishReason": "stop"
+						}
+					},
+					{
+						"kind": "settled",
+						"entry": "go",
+						"outcome": "ok",
+						"answer": "done"
+					},
+					{
+						"kind": "billing",
+						"entry": "go",
+						"reply": "ok",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001,
+							"billingSource": "balance"
+						}
+					},
+					{
+						"kind": "served",
+						"entry": "go",
+						"label": "Go",
+						"model": "openai/gpt-6-luna"
+					}
+				],
+				"told": [],
+				"attempts": [
+					{
+						"entry": "go",
+						"events": [
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "text",
+								"text": "Go"
+							},
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "finish",
+								"reason": "stop"
+							},
+							{
+								"kind": "usage",
+								"usage": {
+									"input": 100,
+									"output": 10,
+									"cost": 0.001,
+									"billingSource": "balance"
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"call": "early-2",
+				"result": {
+					"kind": "served",
+					"entry": "b",
+					"reply": {
+						"parts": [
+							{
+								"kind": "text",
+								"text": "B"
+							}
+						],
+						"finish": "stop",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001
+						},
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-1"
+						}
+					}
+				},
+				"trace": [
+					{
+						"kind": "skip",
+						"cause": "deferred",
+						"entry": "go",
+						"label": "Go",
+						"reason": "allowance"
+					},
+					{
+						"kind": "admitted",
+						"entry": "b",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "b\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 4
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "b",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "b",
+							"label": "Beta",
+							"at": 1794066299999,
+							"ms": 0,
+							"firstTokenMs": 0,
+							"usage": {
+								"input": 100,
+								"output": 10,
+								"cost": 0.001
+							},
+							"cost": {
+								"usd": 0.001,
+								"estimated": false
+							},
+							"provider": "Azure",
+							"generationId": "gen-1",
+							"finishReason": "stop"
+						}
+					},
+					{
+						"kind": "settled",
+						"entry": "b",
+						"outcome": "ok",
+						"answer": "done"
+					},
+					{
+						"kind": "billing",
+						"entry": "b",
+						"reply": "ok",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001
+						}
+					},
+					{
+						"kind": "served",
+						"entry": "b",
+						"label": "Beta",
+						"model": "openai/gpt-6-luna"
+					}
+				],
+				"told": [
+					{
+						"kind": "skip",
+						"entry": "go",
+						"label": "Go",
+						"reason": "allowance"
+					}
+				],
+				"attempts": [
+					{
+						"entry": "b",
+						"events": [
+							{
+								"kind": "serving",
+								"serving": {
+									"host": "Azure",
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "text",
+								"text": "B"
+							},
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "finish",
+								"reason": "stop"
+							},
+							{
+								"kind": "usage",
+								"usage": {
+									"input": 100,
+									"output": 10,
+									"cost": 0.001
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"call": "probe-2",
+				"result": {
+					"kind": "served",
+					"entry": "go",
+					"reply": {
+						"parts": [
+							{
+								"kind": "text",
+								"text": "Go"
+							}
+						],
+						"finish": "stop",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001,
+							"billingSource": "balance"
+						},
+						"serving": {
+							"generationId": "gen-1"
+						}
+					}
+				},
+				"trace": [
+					{
+						"kind": "admitted",
+						"entry": "go",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "go\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 5
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "go",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "go",
+							"label": "Go",
+							"at": 1794066300000,
+							"ms": 0,
+							"firstTokenMs": 0,
+							"usage": {
+								"input": 100,
+								"output": 10,
+								"cost": 0.001,
+								"billingSource": "balance"
+							},
+							"cost": {
+								"usd": 0.001,
+								"estimated": false
+							},
+							"generationId": "gen-1",
+							"finishReason": "stop"
+						}
+					},
+					{
+						"kind": "settled",
+						"entry": "go",
+						"outcome": "ok",
+						"answer": "done"
+					},
+					{
+						"kind": "billing",
+						"entry": "go",
+						"reply": "ok",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001,
+							"billingSource": "balance"
+						}
+					},
+					{
+						"kind": "served",
+						"entry": "go",
+						"label": "Go",
+						"model": "openai/gpt-6-luna"
+					}
+				],
+				"told": [],
+				"attempts": [
+					{
+						"entry": "go",
+						"events": [
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "text",
+								"text": "Go"
+							},
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "finish",
+								"reason": "stop"
+							},
+							{
+								"kind": "usage",
+								"usage": {
+									"input": 100,
+									"output": 10,
+									"cost": 0.001,
+									"billingSource": "balance"
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"call": "early-3",
+				"result": {
+					"kind": "served",
+					"entry": "b",
+					"reply": {
+						"parts": [
+							{
+								"kind": "text",
+								"text": "B"
+							}
+						],
+						"finish": "stop",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001
+						},
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-1"
+						}
+					}
+				},
+				"trace": [
+					{
+						"kind": "skip",
+						"cause": "deferred",
+						"entry": "go",
+						"label": "Go",
+						"reason": "allowance"
+					},
+					{
+						"kind": "admitted",
+						"entry": "b",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "b\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 6
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "b",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "b",
+							"label": "Beta",
+							"at": 1794068549999,
+							"ms": 0,
+							"firstTokenMs": 0,
+							"usage": {
+								"input": 100,
+								"output": 10,
+								"cost": 0.001
+							},
+							"cost": {
+								"usd": 0.001,
+								"estimated": false
+							},
+							"provider": "Azure",
+							"generationId": "gen-1",
+							"finishReason": "stop"
+						}
+					},
+					{
+						"kind": "settled",
+						"entry": "b",
+						"outcome": "ok",
+						"answer": "done"
+					},
+					{
+						"kind": "billing",
+						"entry": "b",
+						"reply": "ok",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001
+						}
+					},
+					{
+						"kind": "served",
+						"entry": "b",
+						"label": "Beta",
+						"model": "openai/gpt-6-luna"
+					}
+				],
+				"told": [
+					{
+						"kind": "skip",
+						"entry": "go",
+						"label": "Go",
+						"reason": "allowance"
+					}
+				],
+				"attempts": [
+					{
+						"entry": "b",
+						"events": [
+							{
+								"kind": "serving",
+								"serving": {
+									"host": "Azure",
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "text",
+								"text": "B"
+							},
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "finish",
+								"reason": "stop"
+							},
+							{
+								"kind": "usage",
+								"usage": {
+									"input": 100,
+									"output": 10,
+									"cost": 0.001
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"call": "probe-3",
+				"result": {
+					"kind": "served",
+					"entry": "go",
+					"reply": {
+						"parts": [
+							{
+								"kind": "text",
+								"text": "Go"
+							}
+						],
+						"finish": "stop",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001,
+							"billingSource": "balance"
+						},
+						"serving": {
+							"generationId": "gen-1"
+						}
+					}
+				},
+				"trace": [
+					{
+						"kind": "admitted",
+						"entry": "go",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "go\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 7
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "go",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "go",
+							"label": "Go",
+							"at": 1794068550000,
+							"ms": 0,
+							"firstTokenMs": 0,
+							"usage": {
+								"input": 100,
+								"output": 10,
+								"cost": 0.001,
+								"billingSource": "balance"
+							},
+							"cost": {
+								"usd": 0.001,
+								"estimated": false
+							},
+							"generationId": "gen-1",
+							"finishReason": "stop"
+						}
+					},
+					{
+						"kind": "settled",
+						"entry": "go",
+						"outcome": "ok",
+						"answer": "done"
+					},
+					{
+						"kind": "billing",
+						"entry": "go",
+						"reply": "ok",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001,
+							"billingSource": "balance"
+						}
+					},
+					{
+						"kind": "served",
+						"entry": "go",
+						"label": "Go",
+						"model": "openai/gpt-6-luna"
+					}
+				],
+				"told": [],
+				"attempts": [
+					{
+						"entry": "go",
+						"events": [
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "text",
+								"text": "Go"
+							},
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "finish",
+								"reason": "stop"
+							},
+							{
+								"kind": "usage",
+								"usage": {
+									"input": 100,
+									"output": 10,
+									"cost": 0.001,
+									"billingSource": "balance"
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"call": "early-4",
+				"result": {
+					"kind": "served",
+					"entry": "b",
+					"reply": {
+						"parts": [
+							{
+								"kind": "text",
+								"text": "B"
+							}
+						],
+						"finish": "stop",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001
+						},
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-1"
+						}
+					}
+				},
+				"trace": [
+					{
+						"kind": "skip",
+						"cause": "deferred",
+						"entry": "go",
+						"label": "Go",
+						"reason": "allowance"
+					},
+					{
+						"kind": "admitted",
+						"entry": "b",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "b\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 8
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "b",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "b",
+							"label": "Beta",
+							"at": 1794069674999,
+							"ms": 0,
+							"firstTokenMs": 0,
+							"usage": {
+								"input": 100,
+								"output": 10,
+								"cost": 0.001
+							},
+							"cost": {
+								"usd": 0.001,
+								"estimated": false
+							},
+							"provider": "Azure",
+							"generationId": "gen-1",
+							"finishReason": "stop"
+						}
+					},
+					{
+						"kind": "settled",
+						"entry": "b",
+						"outcome": "ok",
+						"answer": "done"
+					},
+					{
+						"kind": "billing",
+						"entry": "b",
+						"reply": "ok",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001
+						}
+					},
+					{
+						"kind": "served",
+						"entry": "b",
+						"label": "Beta",
+						"model": "openai/gpt-6-luna"
+					}
+				],
+				"told": [
+					{
+						"kind": "skip",
+						"entry": "go",
+						"label": "Go",
+						"reason": "allowance"
+					}
+				],
+				"attempts": [
+					{
+						"entry": "b",
+						"events": [
+							{
+								"kind": "serving",
+								"serving": {
+									"host": "Azure",
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "text",
+								"text": "B"
+							},
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "finish",
+								"reason": "stop"
+							},
+							{
+								"kind": "usage",
+								"usage": {
+									"input": 100,
+									"output": 10,
+									"cost": 0.001
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"call": "probe-4",
+				"result": {
+					"kind": "served",
+					"entry": "go",
+					"reply": {
+						"parts": [
+							{
+								"kind": "text",
+								"text": "Go"
+							}
+						],
+						"finish": "stop",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001,
+							"billingSource": "balance"
+						},
+						"serving": {
+							"generationId": "gen-1"
+						}
+					}
+				},
+				"trace": [
+					{
+						"kind": "admitted",
+						"entry": "go",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "go\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 9
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "go",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "go",
+							"label": "Go",
+							"at": 1794069675000,
+							"ms": 0,
+							"firstTokenMs": 0,
+							"usage": {
+								"input": 100,
+								"output": 10,
+								"cost": 0.001,
+								"billingSource": "balance"
+							},
+							"cost": {
+								"usd": 0.001,
+								"estimated": false
+							},
+							"generationId": "gen-1",
+							"finishReason": "stop"
+						}
+					},
+					{
+						"kind": "settled",
+						"entry": "go",
+						"outcome": "ok",
+						"answer": "done"
+					},
+					{
+						"kind": "billing",
+						"entry": "go",
+						"reply": "ok",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001,
+							"billingSource": "balance"
+						}
+					},
+					{
+						"kind": "served",
+						"entry": "go",
+						"label": "Go",
+						"model": "openai/gpt-6-luna"
+					}
+				],
+				"told": [],
+				"attempts": [
+					{
+						"entry": "go",
+						"events": [
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "text",
+								"text": "Go"
+							},
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "finish",
+								"reason": "stop"
+							},
+							{
+								"kind": "usage",
+								"usage": {
+									"input": 100,
+									"output": 10,
+									"cost": 0.001,
+									"billingSource": "balance"
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"call": "early-5",
+				"result": {
+					"kind": "served",
+					"entry": "b",
+					"reply": {
+						"parts": [
+							{
+								"kind": "text",
+								"text": "B"
+							}
+						],
+						"finish": "stop",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001
+						},
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-1"
+						}
+					}
+				},
+				"trace": [
+					{
+						"kind": "skip",
+						"cause": "deferred",
+						"entry": "go",
+						"label": "Go",
+						"reason": "allowance"
+					},
+					{
+						"kind": "admitted",
+						"entry": "b",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "b\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 10
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "b",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "b",
+							"label": "Beta",
+							"at": 1794070237499,
+							"ms": 0,
+							"firstTokenMs": 0,
+							"usage": {
+								"input": 100,
+								"output": 10,
+								"cost": 0.001
+							},
+							"cost": {
+								"usd": 0.001,
+								"estimated": false
+							},
+							"provider": "Azure",
+							"generationId": "gen-1",
+							"finishReason": "stop"
+						}
+					},
+					{
+						"kind": "settled",
+						"entry": "b",
+						"outcome": "ok",
+						"answer": "done"
+					},
+					{
+						"kind": "billing",
+						"entry": "b",
+						"reply": "ok",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001
+						}
+					},
+					{
+						"kind": "served",
+						"entry": "b",
+						"label": "Beta",
+						"model": "openai/gpt-6-luna"
+					}
+				],
+				"told": [
+					{
+						"kind": "skip",
+						"entry": "go",
+						"label": "Go",
+						"reason": "allowance"
+					}
+				],
+				"attempts": [
+					{
+						"entry": "b",
+						"events": [
+							{
+								"kind": "serving",
+								"serving": {
+									"host": "Azure",
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "text",
+								"text": "B"
+							},
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "finish",
+								"reason": "stop"
+							},
+							{
+								"kind": "usage",
+								"usage": {
+									"input": 100,
+									"output": 10,
+									"cost": 0.001
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"call": "probe-5",
+				"result": {
+					"kind": "served",
+					"entry": "go",
+					"reply": {
+						"parts": [
+							{
+								"kind": "text",
+								"text": "Go"
+							}
+						],
+						"finish": "stop",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001,
+							"billingSource": "balance"
+						},
+						"serving": {
+							"generationId": "gen-1"
+						}
+					}
+				},
+				"trace": [
+					{
+						"kind": "admitted",
+						"entry": "go",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "go\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 11
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "go",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "go",
+							"label": "Go",
+							"at": 1794070237500,
+							"ms": 0,
+							"firstTokenMs": 0,
+							"usage": {
+								"input": 100,
+								"output": 10,
+								"cost": 0.001,
+								"billingSource": "balance"
+							},
+							"cost": {
+								"usd": 0.001,
+								"estimated": false
+							},
+							"generationId": "gen-1",
+							"finishReason": "stop"
+						}
+					},
+					{
+						"kind": "settled",
+						"entry": "go",
+						"outcome": "ok",
+						"answer": "done"
+					},
+					{
+						"kind": "billing",
+						"entry": "go",
+						"reply": "ok",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001,
+							"billingSource": "balance"
+						}
+					},
+					{
+						"kind": "served",
+						"entry": "go",
+						"label": "Go",
+						"model": "openai/gpt-6-luna"
+					}
+				],
+				"told": [],
+				"attempts": [
+					{
+						"entry": "go",
+						"events": [
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "text",
+								"text": "Go"
+							},
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "finish",
+								"reason": "stop"
+							},
+							{
+								"kind": "usage",
+								"usage": {
+									"input": 100,
+									"output": 10,
+									"cost": 0.001,
+									"billingSource": "balance"
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"call": "early-6",
+				"result": {
+					"kind": "served",
+					"entry": "b",
+					"reply": {
+						"parts": [
+							{
+								"kind": "text",
+								"text": "B"
+							}
+						],
+						"finish": "stop",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001
+						},
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-1"
+						}
+					}
+				},
+				"trace": [
+					{
+						"kind": "skip",
+						"cause": "deferred",
+						"entry": "go",
+						"label": "Go",
+						"reason": "allowance"
+					},
+					{
+						"kind": "admitted",
+						"entry": "b",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "b\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 12
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "b",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "b",
+							"label": "Beta",
+							"at": 1794070537499,
+							"ms": 0,
+							"firstTokenMs": 0,
+							"usage": {
+								"input": 100,
+								"output": 10,
+								"cost": 0.001
+							},
+							"cost": {
+								"usd": 0.001,
+								"estimated": false
+							},
+							"provider": "Azure",
+							"generationId": "gen-1",
+							"finishReason": "stop"
+						}
+					},
+					{
+						"kind": "settled",
+						"entry": "b",
+						"outcome": "ok",
+						"answer": "done"
+					},
+					{
+						"kind": "billing",
+						"entry": "b",
+						"reply": "ok",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001
+						}
+					},
+					{
+						"kind": "served",
+						"entry": "b",
+						"label": "Beta",
+						"model": "openai/gpt-6-luna"
+					}
+				],
+				"told": [
+					{
+						"kind": "skip",
+						"entry": "go",
+						"label": "Go",
+						"reason": "allowance"
+					}
+				],
+				"attempts": [
+					{
+						"entry": "b",
+						"events": [
+							{
+								"kind": "serving",
+								"serving": {
+									"host": "Azure",
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "text",
+								"text": "B"
+							},
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "finish",
+								"reason": "stop"
+							},
+							{
+								"kind": "usage",
+								"usage": {
+									"input": 100,
+									"output": 10,
+									"cost": 0.001
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"call": "probe-6",
+				"result": {
+					"kind": "served",
+					"entry": "go",
+					"reply": {
+						"parts": [
+							{
+								"kind": "text",
+								"text": "Go"
+							}
+						],
+						"finish": "stop",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001,
+							"billingSource": "balance"
+						},
+						"serving": {
+							"generationId": "gen-1"
+						}
+					}
+				},
+				"trace": [
+					{
+						"kind": "admitted",
+						"entry": "go",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "go\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 13
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "go",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "go",
+							"label": "Go",
+							"at": 1794070537500,
+							"ms": 0,
+							"firstTokenMs": 0,
+							"usage": {
+								"input": 100,
+								"output": 10,
+								"cost": 0.001,
+								"billingSource": "balance"
+							},
+							"cost": {
+								"usd": 0.001,
+								"estimated": false
+							},
+							"generationId": "gen-1",
+							"finishReason": "stop"
+						}
+					},
+					{
+						"kind": "settled",
+						"entry": "go",
+						"outcome": "ok",
+						"answer": "done"
+					},
+					{
+						"kind": "billing",
+						"entry": "go",
+						"reply": "ok",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001,
+							"billingSource": "balance"
+						}
+					},
+					{
+						"kind": "served",
+						"entry": "go",
+						"label": "Go",
+						"model": "openai/gpt-6-luna"
+					}
+				],
+				"told": [],
+				"attempts": [
+					{
+						"entry": "go",
+						"events": [
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "text",
+								"text": "Go"
+							},
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "finish",
+								"reason": "stop"
+							},
+							{
+								"kind": "usage",
+								"usage": {
+									"input": 100,
+									"output": 10,
+									"cost": 0.001,
+									"billingSource": "balance"
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"call": "early-7",
+				"result": {
+					"kind": "served",
+					"entry": "b",
+					"reply": {
+						"parts": [
+							{
+								"kind": "text",
+								"text": "B"
+							}
+						],
+						"finish": "stop",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001
+						},
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-1"
+						}
+					}
+				},
+				"trace": [
+					{
+						"kind": "skip",
+						"cause": "deferred",
+						"entry": "go",
+						"label": "Go",
+						"reason": "allowance"
+					},
+					{
+						"kind": "admitted",
+						"entry": "b",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "b\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 14
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "b",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "b",
+							"label": "Beta",
+							"at": 1794070837499,
+							"ms": 0,
+							"firstTokenMs": 0,
+							"usage": {
+								"input": 100,
+								"output": 10,
+								"cost": 0.001
+							},
+							"cost": {
+								"usd": 0.001,
+								"estimated": false
+							},
+							"provider": "Azure",
+							"generationId": "gen-1",
+							"finishReason": "stop"
+						}
+					},
+					{
+						"kind": "settled",
+						"entry": "b",
+						"outcome": "ok",
+						"answer": "done"
+					},
+					{
+						"kind": "billing",
+						"entry": "b",
+						"reply": "ok",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001
+						}
+					},
+					{
+						"kind": "served",
+						"entry": "b",
+						"label": "Beta",
+						"model": "openai/gpt-6-luna"
+					}
+				],
+				"told": [
+					{
+						"kind": "skip",
+						"entry": "go",
+						"label": "Go",
+						"reason": "allowance"
+					}
+				],
+				"attempts": [
+					{
+						"entry": "b",
+						"events": [
+							{
+								"kind": "serving",
+								"serving": {
+									"host": "Azure",
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "text",
+								"text": "B"
+							},
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "finish",
+								"reason": "stop"
+							},
+							{
+								"kind": "usage",
+								"usage": {
+									"input": 100,
+									"output": 10,
+									"cost": 0.001
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"call": "probe-7",
+				"result": {
+					"kind": "served",
+					"entry": "go",
+					"reply": {
+						"parts": [
+							{
+								"kind": "text",
+								"text": "Go"
+							}
+						],
+						"finish": "stop",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001,
+							"billingSource": "balance"
+						},
+						"serving": {
+							"generationId": "gen-1"
+						}
+					}
+				},
+				"trace": [
+					{
+						"kind": "admitted",
+						"entry": "go",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "go\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 15
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "go",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "go",
+							"label": "Go",
+							"at": 1794070837500,
+							"ms": 0,
+							"firstTokenMs": 0,
+							"usage": {
+								"input": 100,
+								"output": 10,
+								"cost": 0.001,
+								"billingSource": "balance"
+							},
+							"cost": {
+								"usd": 0.001,
+								"estimated": false
+							},
+							"generationId": "gen-1",
+							"finishReason": "stop"
+						}
+					},
+					{
+						"kind": "settled",
+						"entry": "go",
+						"outcome": "ok",
+						"answer": "done"
+					},
+					{
+						"kind": "billing",
+						"entry": "go",
+						"reply": "ok",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001,
+							"billingSource": "balance"
+						}
+					},
+					{
+						"kind": "served",
+						"entry": "go",
+						"label": "Go",
+						"model": "openai/gpt-6-luna"
+					}
+				],
+				"told": [],
+				"attempts": [
+					{
+						"entry": "go",
+						"events": [
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "text",
+								"text": "Go"
+							},
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "finish",
+								"reason": "stop"
+							},
+							{
+								"kind": "usage",
+								"usage": {
+									"input": 100,
+									"output": 10,
+									"cost": 0.001,
+									"billingSource": "balance"
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"call": "early-8",
+				"result": {
+					"kind": "served",
+					"entry": "b",
+					"reply": {
+						"parts": [
+							{
+								"kind": "text",
+								"text": "B"
+							}
+						],
+						"finish": "stop",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001
+						},
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-1"
+						}
+					}
+				},
+				"trace": [
+					{
+						"kind": "skip",
+						"cause": "deferred",
+						"entry": "go",
+						"label": "Go",
+						"reason": "allowance"
+					},
+					{
+						"kind": "admitted",
+						"entry": "b",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "b\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 16
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "b",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "b",
+							"label": "Beta",
+							"at": 1794079837499,
+							"ms": 0,
+							"firstTokenMs": 0,
+							"usage": {
+								"input": 100,
+								"output": 10,
+								"cost": 0.001
+							},
+							"cost": {
+								"usd": 0.001,
+								"estimated": false
+							},
+							"provider": "Azure",
+							"generationId": "gen-1",
+							"finishReason": "stop"
+						}
+					},
+					{
+						"kind": "settled",
+						"entry": "b",
+						"outcome": "ok",
+						"answer": "done"
+					},
+					{
+						"kind": "billing",
+						"entry": "b",
+						"reply": "ok",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001
+						}
+					},
+					{
+						"kind": "served",
+						"entry": "b",
+						"label": "Beta",
+						"model": "openai/gpt-6-luna"
+					}
+				],
+				"told": [
+					{
+						"kind": "skip",
+						"entry": "go",
+						"label": "Go",
+						"reason": "allowance"
+					}
+				],
+				"attempts": [
+					{
+						"entry": "b",
+						"events": [
+							{
+								"kind": "serving",
+								"serving": {
+									"host": "Azure",
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "text",
+								"text": "B"
+							},
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "finish",
+								"reason": "stop"
+							},
+							{
+								"kind": "usage",
+								"usage": {
+									"input": 100,
+									"output": 10,
+									"cost": 0.001
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"call": "probe-8",
+				"result": {
+					"kind": "served",
+					"entry": "go",
+					"reply": {
+						"parts": [
+							{
+								"kind": "text",
+								"text": "Go"
+							}
+						],
+						"finish": "stop",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001,
+							"billingSource": "balance"
+						},
+						"serving": {
+							"generationId": "gen-1"
+						}
+					}
+				},
+				"trace": [
+					{
+						"kind": "admitted",
+						"entry": "go",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "go\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 17
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "go",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "go",
+							"label": "Go",
+							"at": 1794079837500,
+							"ms": 0,
+							"firstTokenMs": 0,
+							"usage": {
+								"input": 100,
+								"output": 10,
+								"cost": 0.001,
+								"billingSource": "balance"
+							},
+							"cost": {
+								"usd": 0.001,
+								"estimated": false
+							},
+							"generationId": "gen-1",
+							"finishReason": "stop"
+						}
+					},
+					{
+						"kind": "settled",
+						"entry": "go",
+						"outcome": "ok",
+						"answer": "done"
+					},
+					{
+						"kind": "billing",
+						"entry": "go",
+						"reply": "ok",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001,
+							"billingSource": "balance"
+						}
+					},
+					{
+						"kind": "served",
+						"entry": "go",
+						"label": "Go",
+						"model": "openai/gpt-6-luna"
+					}
+				],
+				"told": [],
+				"attempts": [
+					{
+						"entry": "go",
+						"events": [
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "text",
+								"text": "Go"
+							},
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "finish",
+								"reason": "stop"
+							},
+							{
+								"kind": "usage",
+								"usage": {
+									"input": 100,
+									"output": 10,
+									"cost": 0.001,
+									"billingSource": "balance"
+								}
+							}
+						]
+					}
+				]
+			}
+		],
+		"requests": [
+			{
+				"url": "https://opencode.ai/inference/go/openai/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			},
+			{
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			},
+			{
+				"url": "https://opencode.ai/inference/go/openai/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			},
+			{
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			},
+			{
+				"url": "https://opencode.ai/inference/go/openai/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			},
+			{
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			},
+			{
+				"url": "https://opencode.ai/inference/go/openai/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			},
+			{
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			},
+			{
+				"url": "https://opencode.ai/inference/go/openai/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			},
+			{
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			},
+			{
+				"url": "https://opencode.ai/inference/go/openai/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			},
+			{
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			},
+			{
+				"url": "https://opencode.ai/inference/go/openai/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			},
+			{
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			},
+			{
+				"url": "https://opencode.ai/inference/go/openai/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			},
+			{
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			},
+			{
+				"url": "https://opencode.ai/inference/go/openai/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			}
+		],
+		"recorded": [
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "go",
+				"label": "Go",
+				"at": 1794052800000,
+				"ms": 0,
+				"firstTokenMs": 0,
+				"usage": {
+					"input": 100,
+					"output": 10,
+					"cost": 0.001,
+					"billingSource": "balance"
+				},
+				"cost": {
+					"usd": 0.001,
+					"estimated": false
+				},
+				"generationId": "gen-1",
+				"finishReason": "stop"
+			},
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "b",
+				"label": "Beta",
+				"at": 1794061799999,
+				"ms": 0,
+				"firstTokenMs": 0,
+				"usage": {
+					"input": 100,
+					"output": 10,
+					"cost": 0.001
+				},
+				"cost": {
+					"usd": 0.001,
+					"estimated": false
+				},
+				"provider": "Azure",
+				"generationId": "gen-1",
+				"finishReason": "stop"
+			},
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "go",
+				"label": "Go",
+				"at": 1794061800000,
+				"ms": 0,
+				"firstTokenMs": 0,
+				"usage": {
+					"input": 100,
+					"output": 10,
+					"cost": 0.001,
+					"billingSource": "balance"
+				},
+				"cost": {
+					"usd": 0.001,
+					"estimated": false
+				},
+				"generationId": "gen-1",
+				"finishReason": "stop"
+			},
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "b",
+				"label": "Beta",
+				"at": 1794066299999,
+				"ms": 0,
+				"firstTokenMs": 0,
+				"usage": {
+					"input": 100,
+					"output": 10,
+					"cost": 0.001
+				},
+				"cost": {
+					"usd": 0.001,
+					"estimated": false
+				},
+				"provider": "Azure",
+				"generationId": "gen-1",
+				"finishReason": "stop"
+			},
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "go",
+				"label": "Go",
+				"at": 1794066300000,
+				"ms": 0,
+				"firstTokenMs": 0,
+				"usage": {
+					"input": 100,
+					"output": 10,
+					"cost": 0.001,
+					"billingSource": "balance"
+				},
+				"cost": {
+					"usd": 0.001,
+					"estimated": false
+				},
+				"generationId": "gen-1",
+				"finishReason": "stop"
+			},
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "b",
+				"label": "Beta",
+				"at": 1794068549999,
+				"ms": 0,
+				"firstTokenMs": 0,
+				"usage": {
+					"input": 100,
+					"output": 10,
+					"cost": 0.001
+				},
+				"cost": {
+					"usd": 0.001,
+					"estimated": false
+				},
+				"provider": "Azure",
+				"generationId": "gen-1",
+				"finishReason": "stop"
+			},
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "go",
+				"label": "Go",
+				"at": 1794068550000,
+				"ms": 0,
+				"firstTokenMs": 0,
+				"usage": {
+					"input": 100,
+					"output": 10,
+					"cost": 0.001,
+					"billingSource": "balance"
+				},
+				"cost": {
+					"usd": 0.001,
+					"estimated": false
+				},
+				"generationId": "gen-1",
+				"finishReason": "stop"
+			},
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "b",
+				"label": "Beta",
+				"at": 1794069674999,
+				"ms": 0,
+				"firstTokenMs": 0,
+				"usage": {
+					"input": 100,
+					"output": 10,
+					"cost": 0.001
+				},
+				"cost": {
+					"usd": 0.001,
+					"estimated": false
+				},
+				"provider": "Azure",
+				"generationId": "gen-1",
+				"finishReason": "stop"
+			},
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "go",
+				"label": "Go",
+				"at": 1794069675000,
+				"ms": 0,
+				"firstTokenMs": 0,
+				"usage": {
+					"input": 100,
+					"output": 10,
+					"cost": 0.001,
+					"billingSource": "balance"
+				},
+				"cost": {
+					"usd": 0.001,
+					"estimated": false
+				},
+				"generationId": "gen-1",
+				"finishReason": "stop"
+			},
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "b",
+				"label": "Beta",
+				"at": 1794070237499,
+				"ms": 0,
+				"firstTokenMs": 0,
+				"usage": {
+					"input": 100,
+					"output": 10,
+					"cost": 0.001
+				},
+				"cost": {
+					"usd": 0.001,
+					"estimated": false
+				},
+				"provider": "Azure",
+				"generationId": "gen-1",
+				"finishReason": "stop"
+			},
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "go",
+				"label": "Go",
+				"at": 1794070237500,
+				"ms": 0,
+				"firstTokenMs": 0,
+				"usage": {
+					"input": 100,
+					"output": 10,
+					"cost": 0.001,
+					"billingSource": "balance"
+				},
+				"cost": {
+					"usd": 0.001,
+					"estimated": false
+				},
+				"generationId": "gen-1",
+				"finishReason": "stop"
+			},
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "b",
+				"label": "Beta",
+				"at": 1794070537499,
+				"ms": 0,
+				"firstTokenMs": 0,
+				"usage": {
+					"input": 100,
+					"output": 10,
+					"cost": 0.001
+				},
+				"cost": {
+					"usd": 0.001,
+					"estimated": false
+				},
+				"provider": "Azure",
+				"generationId": "gen-1",
+				"finishReason": "stop"
+			},
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "go",
+				"label": "Go",
+				"at": 1794070537500,
+				"ms": 0,
+				"firstTokenMs": 0,
+				"usage": {
+					"input": 100,
+					"output": 10,
+					"cost": 0.001,
+					"billingSource": "balance"
+				},
+				"cost": {
+					"usd": 0.001,
+					"estimated": false
+				},
+				"generationId": "gen-1",
+				"finishReason": "stop"
+			},
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "b",
+				"label": "Beta",
+				"at": 1794070837499,
+				"ms": 0,
+				"firstTokenMs": 0,
+				"usage": {
+					"input": 100,
+					"output": 10,
+					"cost": 0.001
+				},
+				"cost": {
+					"usd": 0.001,
+					"estimated": false
+				},
+				"provider": "Azure",
+				"generationId": "gen-1",
+				"finishReason": "stop"
+			},
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "go",
+				"label": "Go",
+				"at": 1794070837500,
+				"ms": 0,
+				"firstTokenMs": 0,
+				"usage": {
+					"input": 100,
+					"output": 10,
+					"cost": 0.001,
+					"billingSource": "balance"
+				},
+				"cost": {
+					"usd": 0.001,
+					"estimated": false
+				},
+				"generationId": "gen-1",
+				"finishReason": "stop"
+			},
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "b",
+				"label": "Beta",
+				"at": 1794079837499,
+				"ms": 0,
+				"firstTokenMs": 0,
+				"usage": {
+					"input": 100,
+					"output": 10,
+					"cost": 0.001
+				},
+				"cost": {
+					"usd": 0.001,
+					"estimated": false
+				},
+				"provider": "Azure",
+				"generationId": "gen-1",
+				"finishReason": "stop"
+			},
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "go",
+				"label": "Go",
+				"at": 1794079837500,
+				"ms": 0,
+				"firstTokenMs": 0,
+				"usage": {
+					"input": 100,
+					"output": 10,
+					"cost": 0.001,
+					"billingSource": "balance"
+				},
+				"cost": {
+					"usd": 0.001,
+					"estimated": false
+				},
+				"generationId": "gen-1",
+				"finishReason": "stop"
+			}
+		],
+		"stats": [],
+		"waiting": []
+	}
+}

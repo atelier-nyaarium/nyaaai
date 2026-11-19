@@ -1,0 +1,517 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "lifecycle.run",
+	"name": "a-lone-entry-out-of-its-pool-ends-on-the-spend-notice-with-its-reset-sending-nothing-until-then",
+	"input": {
+		"startMs": 1794052800000,
+		"entries": [
+			{
+				"id": "go",
+				"kind": "opencode",
+				"plan": "go",
+				"label": "Go"
+			}
+		],
+		"keys": {
+			"go": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"rows": [
+			"openai/gpt-6-luna",
+			"anthropic/claude-opus-5.5"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama"
+		],
+		"listings": {},
+		"zdrOnly": false,
+		"exchanges": [
+			{
+				"status": 429,
+				"headers": [
+					[
+						"content-type",
+						"application/json"
+					]
+				],
+				"chunks": [
+					"{\"error\":{\"type\":\"GoUsageLimitError\",\"message\":\"Limit.\",\"resetsAt\":\"2026-11-07T17:00:00Z\"}}"
+				]
+			},
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Go\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":100,\"completion_tokens\":10,\"cost\":0.001}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			}
+		],
+		"steps": [
+			{
+				"kind": "send",
+				"call": "first",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "chat"
+				}
+			},
+			{
+				"kind": "send",
+				"call": "held",
+				"model": "anthropic/claude-opus-5.5",
+				"tag": {
+					"feature": "chat"
+				}
+			},
+			{
+				"kind": "advance",
+				"ms": 18000001
+			},
+			{
+				"kind": "send",
+				"call": "reset",
+				"model": "anthropic/claude-opus-5.5",
+				"tag": {
+					"feature": "chat"
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1794052800000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"first"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "reset",
+							"at": 1794070800000
+						},
+						"waiting": []
+					}
+				],
+				"requests": 1
+			},
+			{
+				"nowMs": 1794052800000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"held"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "reset",
+							"at": 1794070800000
+						},
+						"waiting": []
+					}
+				],
+				"requests": 1
+			},
+			{
+				"nowMs": 1794070800001,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "reset",
+							"at": 1794070800000
+						},
+						"waiting": []
+					}
+				],
+				"requests": 1
+			},
+			{
+				"nowMs": 1794070800001,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"reset"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "reset",
+							"at": 1794070800000
+						},
+						"waiting": []
+					}
+				],
+				"requests": 2
+			}
+		],
+		"calls": [
+			{
+				"call": "first",
+				"result": {
+					"kind": "notice",
+					"notice": {
+						"kind": "spendLimit",
+						"status": 429,
+						"message": "Limit.",
+						"resetsAt": 1794070800000,
+						"entry": "Go"
+					},
+					"failure": {
+						"category": "allowance",
+						"status": 429,
+						"resetsAt": 1794070800000,
+						"message": "Limit."
+					}
+				},
+				"trace": [
+					{
+						"kind": "admitted",
+						"entry": "go",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "go\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "go",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "go",
+							"label": "Go",
+							"at": 1794052800000,
+							"ms": 0,
+							"cost": {
+								"usd": 0,
+								"estimated": true
+							},
+							"failure": "spendLimit"
+						}
+					},
+					{
+						"kind": "billing",
+						"entry": "go",
+						"reply": "failed"
+					},
+					{
+						"kind": "settled",
+						"entry": "go",
+						"outcome": "failed",
+						"answer": "done"
+					},
+					{
+						"kind": "failure",
+						"entry": "go",
+						"model": "openai/gpt-6-luna",
+						"failure": {
+							"category": "allowance",
+							"status": 429,
+							"resetsAt": 1794070800000,
+							"message": "Limit."
+						},
+						"disposition": {
+							"act": "fallThrough",
+							"notice": "spendLimit"
+						},
+						"fresh": true,
+						"onward": false
+					},
+					{
+						"kind": "gateFailed",
+						"entry": "go",
+						"failure": {
+							"category": "allowance",
+							"status": 429,
+							"resetsAt": 1794070800000,
+							"message": "Limit."
+						},
+						"onward": false
+					},
+					{
+						"kind": "notice",
+						"notice": {
+							"kind": "spendLimit",
+							"status": 429,
+							"message": "Limit.",
+							"resetsAt": 1794070800000,
+							"entry": "Go"
+						}
+					}
+				],
+				"told": [],
+				"attempts": [
+					{
+						"entry": "go",
+						"events": []
+					}
+				]
+			},
+			{
+				"call": "held",
+				"result": {
+					"kind": "notice",
+					"notice": {
+						"kind": "spendLimit",
+						"resetsAt": 1794070800000,
+						"entry": "Go"
+					},
+					"failure": null
+				},
+				"trace": [
+					{
+						"kind": "notice",
+						"notice": {
+							"kind": "spendLimit",
+							"resetsAt": 1794070800000,
+							"entry": "Go"
+						}
+					}
+				],
+				"told": [],
+				"attempts": []
+			},
+			{
+				"call": "reset",
+				"result": {
+					"kind": "served",
+					"entry": "go",
+					"reply": {
+						"parts": [
+							{
+								"kind": "text",
+								"text": "Go"
+							}
+						],
+						"finish": "stop",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001
+						},
+						"serving": {
+							"generationId": "gen-1"
+						}
+					}
+				},
+				"trace": [
+					{
+						"kind": "admitted",
+						"entry": "go",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "go\nanthropic/claude-opus-5.5",
+								"generation": 0,
+								"probe": false,
+								"serial": 2
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "go",
+						"model": "anthropic/claude-opus-5.5",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "anthropic/claude-opus-5.5",
+							"entry": "go",
+							"label": "Go",
+							"at": 1794070800001,
+							"ms": 0,
+							"firstTokenMs": 0,
+							"usage": {
+								"input": 100,
+								"output": 10,
+								"cost": 0.001
+							},
+							"cost": {
+								"usd": 0.001,
+								"estimated": false
+							},
+							"generationId": "gen-1",
+							"finishReason": "stop"
+						}
+					},
+					{
+						"kind": "settled",
+						"entry": "go",
+						"outcome": "ok",
+						"answer": "done"
+					},
+					{
+						"kind": "billing",
+						"entry": "go",
+						"reply": "ok",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001
+						}
+					},
+					{
+						"kind": "served",
+						"entry": "go",
+						"label": "Go",
+						"model": "anthropic/claude-opus-5.5"
+					}
+				],
+				"told": [],
+				"attempts": [
+					{
+						"entry": "go",
+						"events": [
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "text",
+								"text": "Go"
+							},
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "finish",
+								"reason": "stop"
+							},
+							{
+								"kind": "usage",
+								"usage": {
+									"input": 100,
+									"output": 10,
+									"cost": 0.001
+								}
+							}
+						]
+					}
+				]
+			}
+		],
+		"requests": [
+			{
+				"url": "https://opencode.ai/inference/go/openai/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			},
+			{
+				"url": "https://opencode.ai/inference/go/openai/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			}
+		],
+		"recorded": [
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "go",
+				"label": "Go",
+				"at": 1794052800000,
+				"ms": 0,
+				"cost": {
+					"usd": 0,
+					"estimated": true
+				},
+				"failure": "spendLimit"
+			},
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "anthropic/claude-opus-5.5",
+				"entry": "go",
+				"label": "Go",
+				"at": 1794070800001,
+				"ms": 0,
+				"firstTokenMs": 0,
+				"usage": {
+					"input": 100,
+					"output": 10,
+					"cost": 0.001
+				},
+				"cost": {
+					"usd": 0.001,
+					"estimated": false
+				},
+				"generationId": "gen-1",
+				"finishReason": "stop"
+			}
+		],
+		"stats": [],
+		"waiting": []
+	}
+}

@@ -1,0 +1,861 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "lifecycle.run",
+	"name": "a-server-saved-again-with-another-url-is-rechecked-and-routes-again",
+	"input": {
+		"startMs": 1794052800000,
+		"entries": [
+			{
+				"id": "box",
+				"kind": "ollama",
+				"label": "Box",
+				"url": "http://box.local:11434"
+			}
+		],
+		"keys": {},
+		"rows": [
+			"local:box/qwen"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama"
+		],
+		"listings": {},
+		"zdrOnly": false,
+		"exchanges": [
+			{
+				"status": 0,
+				"headers": [],
+				"chunks": [],
+				"end": "refused",
+				"error": "fetch failed"
+			},
+			{
+				"status": 0,
+				"headers": [],
+				"chunks": [],
+				"end": "refused",
+				"error": "fetch failed"
+			},
+			{
+				"status": 0,
+				"headers": [],
+				"chunks": [],
+				"end": "refused",
+				"error": "fetch failed"
+			},
+			{
+				"status": 0,
+				"headers": [],
+				"chunks": [],
+				"end": "refused",
+				"error": "fetch failed"
+			},
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Local\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":100,\"completion_tokens\":10,\"cost\":0.001}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			}
+		],
+		"steps": [
+			{
+				"kind": "send",
+				"call": "first",
+				"model": "local:box/qwen",
+				"tag": {
+					"feature": "chat"
+				}
+			},
+			{
+				"kind": "advance",
+				"ms": 1000
+			},
+			{
+				"kind": "advance",
+				"ms": 2000
+			},
+			{
+				"kind": "advance",
+				"ms": 4000
+			},
+			{
+				"kind": "list",
+				"entries": [
+					{
+						"id": "box",
+						"kind": "ollama",
+						"label": "Box",
+						"url": "http://box.local:11435"
+					}
+				]
+			},
+			{
+				"kind": "send",
+				"call": "back",
+				"model": "local:box/qwen",
+				"tag": {
+					"feature": "chat"
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1794052800000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [
+					"first"
+				],
+				"entries": [
+					{
+						"entry": "box",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 1
+			},
+			{
+				"nowMs": 1794052801000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [
+					"first"
+				],
+				"entries": [
+					{
+						"entry": "box",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 2
+			},
+			{
+				"nowMs": 1794052803000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [
+					"first"
+				],
+				"entries": [
+					{
+						"entry": "box",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 3
+			},
+			{
+				"nowMs": 1794052807000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"first"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "box",
+						"key": {
+							"kind": "unreachable"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 4
+			},
+			{
+				"nowMs": 1794052807000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "box",
+						"key": {
+							"kind": "ok"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 4
+			},
+			{
+				"nowMs": 1794052807000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"back"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "box",
+						"key": {
+							"kind": "ok"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 5
+			}
+		],
+		"calls": [
+			{
+				"call": "first",
+				"result": {
+					"kind": "notice",
+					"notice": {
+						"kind": "retriesExhausted",
+						"status": "network",
+						"message": "fetch failed"
+					},
+					"failure": {
+						"category": "network",
+						"status": "network",
+						"message": "fetch failed"
+					}
+				},
+				"trace": [
+					{
+						"kind": "admitted",
+						"entry": "box",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "box\nlocal:box/qwen",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "box",
+						"model": "local:box/qwen",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "local:box/qwen",
+							"entry": "box",
+							"label": "Box",
+							"at": 1794052800000,
+							"ms": 0,
+							"cost": {
+								"usd": 0,
+								"estimated": true
+							},
+							"failure": "network"
+						}
+					},
+					{
+						"kind": "billing",
+						"entry": "box",
+						"reply": "failed"
+					},
+					{
+						"kind": "settled",
+						"entry": "box",
+						"outcome": "failed",
+						"answer": "done"
+					},
+					{
+						"kind": "failure",
+						"entry": "box",
+						"model": "local:box/qwen",
+						"failure": {
+							"category": "network",
+							"status": "network",
+							"message": "fetch failed"
+						},
+						"disposition": {
+							"act": "retry"
+						},
+						"fresh": true,
+						"onward": false
+					},
+					{
+						"kind": "retry",
+						"entry": "box",
+						"attempt": 1,
+						"waitMs": 1000,
+						"why": "backoff",
+						"status": "network"
+					},
+					{
+						"kind": "admitted",
+						"entry": "box",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "box\nlocal:box/qwen",
+								"generation": 0,
+								"probe": false,
+								"serial": 2
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "box",
+						"model": "local:box/qwen",
+						"attempt": 2,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "local:box/qwen",
+							"entry": "box",
+							"label": "Box",
+							"at": 1794052801000,
+							"ms": 0,
+							"cost": {
+								"usd": 0,
+								"estimated": true
+							},
+							"failure": "network"
+						}
+					},
+					{
+						"kind": "billing",
+						"entry": "box",
+						"reply": "failed"
+					},
+					{
+						"kind": "settled",
+						"entry": "box",
+						"outcome": "failed",
+						"answer": "done"
+					},
+					{
+						"kind": "failure",
+						"entry": "box",
+						"model": "local:box/qwen",
+						"failure": {
+							"category": "network",
+							"status": "network",
+							"message": "fetch failed"
+						},
+						"disposition": {
+							"act": "retry"
+						},
+						"fresh": true,
+						"onward": false
+					},
+					{
+						"kind": "retry",
+						"entry": "box",
+						"attempt": 2,
+						"waitMs": 2000,
+						"why": "backoff",
+						"status": "network"
+					},
+					{
+						"kind": "admitted",
+						"entry": "box",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "box\nlocal:box/qwen",
+								"generation": 0,
+								"probe": false,
+								"serial": 3
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "box",
+						"model": "local:box/qwen",
+						"attempt": 3,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "local:box/qwen",
+							"entry": "box",
+							"label": "Box",
+							"at": 1794052803000,
+							"ms": 0,
+							"cost": {
+								"usd": 0,
+								"estimated": true
+							},
+							"failure": "network"
+						}
+					},
+					{
+						"kind": "billing",
+						"entry": "box",
+						"reply": "failed"
+					},
+					{
+						"kind": "settled",
+						"entry": "box",
+						"outcome": "failed",
+						"answer": "done"
+					},
+					{
+						"kind": "failure",
+						"entry": "box",
+						"model": "local:box/qwen",
+						"failure": {
+							"category": "network",
+							"status": "network",
+							"message": "fetch failed"
+						},
+						"disposition": {
+							"act": "retry"
+						},
+						"fresh": true,
+						"onward": false
+					},
+					{
+						"kind": "retry",
+						"entry": "box",
+						"attempt": 3,
+						"waitMs": 4000,
+						"why": "backoff",
+						"status": "network"
+					},
+					{
+						"kind": "admitted",
+						"entry": "box",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "box\nlocal:box/qwen",
+								"generation": 0,
+								"probe": false,
+								"serial": 4
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "box",
+						"model": "local:box/qwen",
+						"attempt": 4,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "local:box/qwen",
+							"entry": "box",
+							"label": "Box",
+							"at": 1794052807000,
+							"ms": 0,
+							"cost": {
+								"usd": 0,
+								"estimated": true
+							},
+							"failure": "network"
+						}
+					},
+					{
+						"kind": "billing",
+						"entry": "box",
+						"reply": "failed"
+					},
+					{
+						"kind": "settled",
+						"entry": "box",
+						"outcome": "failed",
+						"answer": "done"
+					},
+					{
+						"kind": "failure",
+						"entry": "box",
+						"model": "local:box/qwen",
+						"failure": {
+							"category": "network",
+							"status": "network",
+							"message": "fetch failed"
+						},
+						"disposition": {
+							"act": "retry"
+						},
+						"fresh": true,
+						"onward": false
+					},
+					{
+						"kind": "gateFailed",
+						"entry": "box",
+						"failure": {
+							"category": "network",
+							"status": "network",
+							"message": "fetch failed"
+						},
+						"onward": false
+					},
+					{
+						"kind": "notice",
+						"notice": {
+							"kind": "retriesExhausted",
+							"status": "network",
+							"message": "fetch failed"
+						}
+					}
+				],
+				"told": [
+					{
+						"kind": "retry",
+						"attempt": 1,
+						"waitMs": 1000,
+						"status": "network"
+					},
+					{
+						"kind": "retry",
+						"attempt": 2,
+						"waitMs": 2000,
+						"status": "network"
+					},
+					{
+						"kind": "retry",
+						"attempt": 3,
+						"waitMs": 4000,
+						"status": "network"
+					}
+				],
+				"attempts": [
+					{
+						"entry": "box",
+						"events": []
+					},
+					{
+						"entry": "box",
+						"events": []
+					},
+					{
+						"entry": "box",
+						"events": []
+					},
+					{
+						"entry": "box",
+						"events": []
+					}
+				]
+			},
+			{
+				"call": "back",
+				"result": {
+					"kind": "served",
+					"entry": "box",
+					"reply": {
+						"parts": [
+							{
+								"kind": "text",
+								"text": "Local"
+							}
+						],
+						"finish": "stop",
+						"usage": {
+							"input": 100,
+							"output": 10
+						},
+						"serving": {
+							"host": "Box",
+							"generationId": "gen-1"
+						}
+					}
+				},
+				"trace": [
+					{
+						"kind": "admitted",
+						"entry": "box",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "box\nlocal:box/qwen",
+								"generation": 0,
+								"probe": false,
+								"serial": 5
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "box",
+						"model": "local:box/qwen",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "local:box/qwen",
+							"entry": "box",
+							"label": "Box",
+							"at": 1794052807000,
+							"ms": 0,
+							"firstTokenMs": 0,
+							"usage": {
+								"input": 100,
+								"output": 10
+							},
+							"cost": {
+								"usd": 0,
+								"estimated": true
+							},
+							"provider": "Box",
+							"generationId": "gen-1",
+							"finishReason": "stop"
+						}
+					},
+					{
+						"kind": "settled",
+						"entry": "box",
+						"outcome": "ok",
+						"answer": "done"
+					},
+					{
+						"kind": "billing",
+						"entry": "box",
+						"reply": "ok",
+						"usage": {
+							"input": 100,
+							"output": 10
+						}
+					},
+					{
+						"kind": "served",
+						"entry": "box",
+						"label": "Box",
+						"model": "local:box/qwen"
+					}
+				],
+				"told": [],
+				"attempts": [
+					{
+						"entry": "box",
+						"events": [
+							{
+								"kind": "serving",
+								"serving": {
+									"host": "Box",
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "text",
+								"text": "Local"
+							},
+							{
+								"kind": "serving",
+								"serving": {
+									"host": "Box",
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "finish",
+								"reason": "stop"
+							},
+							{
+								"kind": "usage",
+								"usage": {
+									"input": 100,
+									"output": 10
+								}
+							}
+						]
+					}
+				]
+			}
+		],
+		"requests": [
+			{
+				"url": "http://box.local:11434/v1/chat/completions",
+				"authorization": null,
+				"accept": "text/event-stream"
+			},
+			{
+				"url": "http://box.local:11434/v1/chat/completions",
+				"authorization": null,
+				"accept": "text/event-stream"
+			},
+			{
+				"url": "http://box.local:11434/v1/chat/completions",
+				"authorization": null,
+				"accept": "text/event-stream"
+			},
+			{
+				"url": "http://box.local:11434/v1/chat/completions",
+				"authorization": null,
+				"accept": "text/event-stream"
+			},
+			{
+				"url": "http://box.local:11435/v1/chat/completions",
+				"authorization": null,
+				"accept": "text/event-stream"
+			}
+		],
+		"recorded": [
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "local:box/qwen",
+				"entry": "box",
+				"label": "Box",
+				"at": 1794052800000,
+				"ms": 0,
+				"cost": {
+					"usd": 0,
+					"estimated": true
+				},
+				"failure": "network"
+			},
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "local:box/qwen",
+				"entry": "box",
+				"label": "Box",
+				"at": 1794052801000,
+				"ms": 0,
+				"cost": {
+					"usd": 0,
+					"estimated": true
+				},
+				"failure": "network"
+			},
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "local:box/qwen",
+				"entry": "box",
+				"label": "Box",
+				"at": 1794052803000,
+				"ms": 0,
+				"cost": {
+					"usd": 0,
+					"estimated": true
+				},
+				"failure": "network"
+			},
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "local:box/qwen",
+				"entry": "box",
+				"label": "Box",
+				"at": 1794052807000,
+				"ms": 0,
+				"cost": {
+					"usd": 0,
+					"estimated": true
+				},
+				"failure": "network"
+			},
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "local:box/qwen",
+				"entry": "box",
+				"label": "Box",
+				"at": 1794052807000,
+				"ms": 0,
+				"firstTokenMs": 0,
+				"usage": {
+					"input": 100,
+					"output": 10
+				},
+				"cost": {
+					"usd": 0,
+					"estimated": true
+				},
+				"provider": "Box",
+				"generationId": "gen-1",
+				"finishReason": "stop"
+			}
+		],
+		"stats": [],
+		"waiting": []
+	}
+}

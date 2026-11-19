@@ -1,0 +1,112 @@
+// Lifecycle shape round-trip cases.
+
+import type { CaseSource } from "../caseAdapter";
+
+type Text = string | object | number | boolean | null;
+
+const lifecycle = (shape: string, texts: Text[]): CaseSource => ({
+	kind: "contract.roundTrip",
+	name: `lifecycle-${shape}`,
+	input: {
+		set: "lifecycle",
+		shape,
+		texts: texts.map((text) => (typeof text === "string" ? text : JSON.stringify(text))),
+	},
+});
+
+const ticket = { gate: "g1", model: "m1", generation: 0, probe: false, serial: 1 };
+const failure = { category: "overloaded", status: 429, message: "Busy.", retryAfterMs: 5000 };
+const call = {
+	tag: { feature: "chat" },
+	model: "vendor/model-a",
+	at: 1794528001000,
+	ms: 120,
+	cost: { usd: 0.001, estimated: false },
+};
+const usage = { input: 100, output: 10, cost: 0.001 };
+
+export const lifecycleShapeCases: CaseSource[] = [
+	lifecycle("TraceEntry", [
+		{ kind: "skip", cause: "passed", entry: "a", label: "Alpha", reason: "keyMissing" },
+		{ kind: "skip", cause: "deferred", entry: "a", label: "Alpha", reason: "allowance" },
+		{ kind: "skip", cause: "fellThrough", entry: "a", label: "Alpha", reason: "unavailable", extra: 1 },
+		{ kind: "skip", cause: "other", entry: "a", label: "Alpha", reason: "paused" },
+		{ kind: "skip", cause: "passed", entry: "a", label: "Alpha", reason: "gone" },
+		{ kind: "skip", cause: "passed", entry: "a", reason: "paused" },
+		{ kind: "held", entry: "a", waiting: { model: "m", resumeAt: null, pause: 0, of: 10 } },
+		{ kind: "held", entry: "a", waiting: { model: "m", resumeAt: 1794528061000, pause: 1, of: 10 } },
+		{ kind: "held", entry: "a" },
+		{ kind: "released", entry: "a" },
+		{ kind: "released" },
+		{ kind: "admitted", entry: "a", admission: { kind: "go", ticket } },
+		{ kind: "admitted", entry: "a", admission: { kind: "gaveUp" } },
+		{ kind: "admitted", entry: "a", admission: { kind: "stopped" } },
+		{ kind: "admitted", entry: "a", admission: { kind: "wait" } },
+		{ kind: "kept", entry: "a", model: "vendor/model-a" },
+		{ kind: "kept", entry: "a" },
+		{ kind: "attempt", entry: "a", model: "m", attempt: 1, live: false, again: false },
+		{ kind: "attempt", entry: "a", model: "m", attempt: 3, live: true, again: true },
+		{ kind: "attempt", entry: "a", model: "m", attempt: 0, live: false, again: false },
+		{ kind: "attempt", entry: "a", model: "m", attempt: 1.5, live: false, again: false },
+		{ kind: "attempt", entry: "a", model: "m", attempt: 1, live: false },
+		{ kind: "metered", call },
+		{ kind: "metered", call: { ...call, usage, provider: "Lab", generationId: "gen-1", cancelled: true } },
+		{ kind: "metered" },
+		{ kind: "metered", call: { ...call, cost: undefined } },
+		{ kind: "billing", entry: "a", reply: "ok", usage },
+		{ kind: "billing", entry: "a", reply: "failed" },
+		{ kind: "billing", entry: "a", reply: "late" },
+		{ kind: "failure", entry: "a", model: "m", failure, fresh: true, onward: false },
+		{
+			kind: "failure",
+			entry: "a",
+			model: "m",
+			failure: { category: "keyRejected", status: 401, message: "No." },
+			disposition: { act: "fallThrough", notice: "keyRejected" },
+			fresh: true,
+			onward: true,
+		},
+		{
+			kind: "failure",
+			entry: "a",
+			model: "m",
+			failure,
+			disposition: { act: "retry" },
+			fresh: false,
+			onward: false,
+		},
+		{ kind: "failure", entry: "a", model: "m", failure, disposition: { act: "wait" }, fresh: true, onward: false },
+		{ kind: "failure", entry: "a", model: "m", failure, fresh: true },
+		{ kind: "settled", entry: "a", outcome: "ok", answer: "done" },
+		{ kind: "settled", entry: "a", outcome: "overloaded", retryAfterMs: 5000, answer: "again" },
+		{ kind: "settled", entry: "a", outcome: "failed", answer: "gaveUp" },
+		{ kind: "settled", entry: "a", outcome: "done", answer: "done" },
+		{ kind: "settled", entry: "a", outcome: "ok", retryAfterMs: 1.5, answer: "done" },
+		{ kind: "settled", entry: "a", outcome: "ok" },
+		{ kind: "gateFailed", entry: "a", failure, onward: true },
+		{ kind: "gateFailed", entry: "a", failure, onward: false },
+		{ kind: "gateFailed", entry: "a", failure },
+		{ kind: "retry", entry: "a", attempt: 1, waitMs: 1000, why: "backoff", status: 503 },
+		{ kind: "retry", entry: "a", attempt: 2, waitMs: 0, why: "retryAfter", status: "network" },
+		{ kind: "retry", entry: "a", attempt: 2, waitMs: -1, why: "backoff", status: 503 },
+		{ kind: "retry", entry: "a", attempt: 2, waitMs: 1, why: "luck", status: 503 },
+		{ kind: "retry", entry: "a", attempt: 2, waitMs: 1.5, why: "backoff", status: 503 },
+		{ kind: "limits", entry: "a", read: true, limit: 50, reset: "2026-11-07T17:00:00Z" },
+		{ kind: "limits", entry: "a", read: false },
+		{ kind: "limits", entry: "a", limit: 50 },
+		{ kind: "limits", entry: "a", read: true, limit: "50" },
+		{ kind: "threw", entry: "a", message: "It broke." },
+		{ kind: "threw", entry: "a" },
+		{ kind: "served", entry: "a", label: "Alpha", model: "vendor/model-a" },
+		{ kind: "served", entry: "a", label: "Alpha" },
+		{ kind: "stopped" },
+		{ kind: "stopped", entry: "a" },
+		{ kind: "notice", notice: { kind: "retriesExhausted", status: 503, message: "Busy.", entry: "Alpha" } },
+		{ kind: "notice", notice: { kind: "spendLimit", resetsAt: 1794528061000, entry: "Alpha" } },
+		{ kind: "notice", notice: { kind: "gone" } },
+		{ kind: "notice" },
+		{ kind: "mystery" },
+		{},
+		[],
+	]),
+];

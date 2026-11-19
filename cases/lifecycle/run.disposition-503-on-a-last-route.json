@@ -1,0 +1,382 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "lifecycle.run",
+	"name": "disposition-503-on-a-last-route",
+	"input": {
+		"startMs": 1794052800000,
+		"entries": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "Alpha"
+			}
+		],
+		"keys": {
+			"a": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"rows": [
+			"openai/gpt-6-luna",
+			"anthropic/claude-opus-5.5"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama"
+		],
+		"listings": {},
+		"zdrOnly": false,
+		"exchanges": [
+			{
+				"status": 503,
+				"headers": [
+					[
+						"content-type",
+						"application/json"
+					]
+				],
+				"chunks": [
+					"{\"error\":{\"code\":503,\"message\":\"Failed with 503\"}}"
+				]
+			},
+			{
+				"status": 503,
+				"headers": [
+					[
+						"content-type",
+						"application/json"
+					]
+				],
+				"chunks": [
+					"{\"error\":{\"code\":503,\"message\":\"Failed with 503\"}}"
+				]
+			},
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"A\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":100,\"completion_tokens\":10,\"cost\":0.001}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			}
+		],
+		"steps": [
+			{
+				"kind": "send",
+				"call": "first",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "chat"
+				}
+			},
+			{
+				"kind": "advance",
+				"ms": 1000
+			}
+		],
+		"retry": {
+			"tries": 2
+		}
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1794052800000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [
+					"first"
+				],
+				"entries": [
+					{
+						"entry": "a",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 1
+			},
+			{
+				"nowMs": 1794052801000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"first"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "a",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 2
+			}
+		],
+		"calls": [
+			{
+				"call": "first",
+				"result": {
+					"kind": "notice",
+					"notice": {
+						"kind": "retriesExhausted",
+						"status": 503,
+						"message": "Failed with 503"
+					},
+					"failure": {
+						"category": "unavailable",
+						"status": 503,
+						"message": "Failed with 503"
+					}
+				},
+				"trace": [
+					{
+						"kind": "admitted",
+						"entry": "a",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "a\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "a",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "a",
+							"label": "Alpha",
+							"at": 1794052800000,
+							"ms": 0,
+							"cost": {
+								"usd": 0,
+								"estimated": true
+							},
+							"failure": "503"
+						}
+					},
+					{
+						"kind": "billing",
+						"entry": "a",
+						"reply": "failed"
+					},
+					{
+						"kind": "settled",
+						"entry": "a",
+						"outcome": "failed",
+						"answer": "done"
+					},
+					{
+						"kind": "failure",
+						"entry": "a",
+						"model": "openai/gpt-6-luna",
+						"failure": {
+							"category": "unavailable",
+							"status": 503,
+							"message": "Failed with 503"
+						},
+						"disposition": {
+							"act": "retry"
+						},
+						"fresh": true,
+						"onward": false
+					},
+					{
+						"kind": "retry",
+						"entry": "a",
+						"attempt": 1,
+						"waitMs": 1000,
+						"why": "backoff",
+						"status": 503
+					},
+					{
+						"kind": "admitted",
+						"entry": "a",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "a\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 2
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "a",
+						"model": "openai/gpt-6-luna",
+						"attempt": 2,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "a",
+							"label": "Alpha",
+							"at": 1794052801000,
+							"ms": 0,
+							"cost": {
+								"usd": 0,
+								"estimated": true
+							},
+							"failure": "503"
+						}
+					},
+					{
+						"kind": "billing",
+						"entry": "a",
+						"reply": "failed"
+					},
+					{
+						"kind": "settled",
+						"entry": "a",
+						"outcome": "failed",
+						"answer": "done"
+					},
+					{
+						"kind": "failure",
+						"entry": "a",
+						"model": "openai/gpt-6-luna",
+						"failure": {
+							"category": "unavailable",
+							"status": 503,
+							"message": "Failed with 503"
+						},
+						"disposition": {
+							"act": "retry"
+						},
+						"fresh": true,
+						"onward": false
+					},
+					{
+						"kind": "gateFailed",
+						"entry": "a",
+						"failure": {
+							"category": "unavailable",
+							"status": 503,
+							"message": "Failed with 503"
+						},
+						"onward": false
+					},
+					{
+						"kind": "notice",
+						"notice": {
+							"kind": "retriesExhausted",
+							"status": 503,
+							"message": "Failed with 503"
+						}
+					}
+				],
+				"told": [
+					{
+						"kind": "retry",
+						"attempt": 1,
+						"waitMs": 1000,
+						"status": 503
+					}
+				],
+				"attempts": [
+					{
+						"entry": "a",
+						"events": []
+					},
+					{
+						"entry": "a",
+						"events": []
+					}
+				]
+			}
+		],
+		"requests": [
+			{
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			},
+			{
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			}
+		],
+		"recorded": [
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "a",
+				"label": "Alpha",
+				"at": 1794052800000,
+				"ms": 0,
+				"cost": {
+					"usd": 0,
+					"estimated": true
+				},
+				"failure": "503"
+			},
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "a",
+				"label": "Alpha",
+				"at": 1794052801000,
+				"ms": 0,
+				"cost": {
+					"usd": 0,
+					"estimated": true
+				},
+				"failure": "503"
+			}
+		],
+		"stats": [],
+		"waiting": []
+	}
+}

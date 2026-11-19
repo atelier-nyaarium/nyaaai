@@ -1,0 +1,81 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "meter.called",
+	"name": "a-call-with-no-billing-source-bills-nobody",
+	"input": {
+		"calls": [
+			{
+				"call": {
+					"tag": {
+						"feature": "chat"
+					},
+					"model": "vendor/model-a",
+					"at": 1794528001000,
+					"ms": 120,
+					"cost": {
+						"usd": 0.001,
+						"estimated": false
+					},
+					"entry": "a",
+					"usage": {
+						"input": 100,
+						"output": 10,
+						"cost": 0.001
+					},
+					"generationId": "gen-1"
+				},
+				"id": "u1"
+			}
+		]
+	},
+	"expected": {
+		"calls": [
+			{
+				"recorded": {
+					"tag": {
+						"feature": "chat"
+					},
+					"model": "vendor/model-a",
+					"entry": "a",
+					"at": 1794528001000,
+					"ms": 120,
+					"usage": {
+						"input": 100,
+						"output": 10,
+						"cost": 0.001
+					},
+					"cost": {
+						"usd": 0.001,
+						"estimated": false
+					},
+					"generationId": "gen-1"
+				},
+				"billed": null,
+				"stats": {
+					"id": "u1",
+					"generationId": "gen-1",
+					"call": {
+						"tag": {
+							"feature": "chat"
+						},
+						"model": "vendor/model-a",
+						"entry": "a",
+						"at": 1794528001000,
+						"ms": 120,
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001
+						},
+						"cost": {
+							"usd": 0.001,
+							"estimated": false
+						},
+						"generationId": "gen-1"
+					}
+				}
+			}
+		]
+	}
+}

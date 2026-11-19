@@ -1,0 +1,405 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "lifecycle-TraceEntry",
+	"input": {
+		"set": "lifecycle",
+		"shape": "TraceEntry",
+		"texts": [
+			"{\"kind\":\"skip\",\"cause\":\"passed\",\"entry\":\"a\",\"label\":\"Alpha\",\"reason\":\"keyMissing\"}",
+			"{\"kind\":\"skip\",\"cause\":\"deferred\",\"entry\":\"a\",\"label\":\"Alpha\",\"reason\":\"allowance\"}",
+			"{\"kind\":\"skip\",\"cause\":\"fellThrough\",\"entry\":\"a\",\"label\":\"Alpha\",\"reason\":\"unavailable\",\"extra\":1}",
+			"{\"kind\":\"skip\",\"cause\":\"other\",\"entry\":\"a\",\"label\":\"Alpha\",\"reason\":\"paused\"}",
+			"{\"kind\":\"skip\",\"cause\":\"passed\",\"entry\":\"a\",\"label\":\"Alpha\",\"reason\":\"gone\"}",
+			"{\"kind\":\"skip\",\"cause\":\"passed\",\"entry\":\"a\",\"reason\":\"paused\"}",
+			"{\"kind\":\"held\",\"entry\":\"a\",\"waiting\":{\"model\":\"m\",\"resumeAt\":null,\"pause\":0,\"of\":10}}",
+			"{\"kind\":\"held\",\"entry\":\"a\",\"waiting\":{\"model\":\"m\",\"resumeAt\":1794528061000,\"pause\":1,\"of\":10}}",
+			"{\"kind\":\"held\",\"entry\":\"a\"}",
+			"{\"kind\":\"released\",\"entry\":\"a\"}",
+			"{\"kind\":\"released\"}",
+			"{\"kind\":\"admitted\",\"entry\":\"a\",\"admission\":{\"kind\":\"go\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1}}}",
+			"{\"kind\":\"admitted\",\"entry\":\"a\",\"admission\":{\"kind\":\"gaveUp\"}}",
+			"{\"kind\":\"admitted\",\"entry\":\"a\",\"admission\":{\"kind\":\"stopped\"}}",
+			"{\"kind\":\"admitted\",\"entry\":\"a\",\"admission\":{\"kind\":\"wait\"}}",
+			"{\"kind\":\"kept\",\"entry\":\"a\",\"model\":\"vendor/model-a\"}",
+			"{\"kind\":\"kept\",\"entry\":\"a\"}",
+			"{\"kind\":\"attempt\",\"entry\":\"a\",\"model\":\"m\",\"attempt\":1,\"live\":false,\"again\":false}",
+			"{\"kind\":\"attempt\",\"entry\":\"a\",\"model\":\"m\",\"attempt\":3,\"live\":true,\"again\":true}",
+			"{\"kind\":\"attempt\",\"entry\":\"a\",\"model\":\"m\",\"attempt\":0,\"live\":false,\"again\":false}",
+			"{\"kind\":\"attempt\",\"entry\":\"a\",\"model\":\"m\",\"attempt\":1.5,\"live\":false,\"again\":false}",
+			"{\"kind\":\"attempt\",\"entry\":\"a\",\"model\":\"m\",\"attempt\":1,\"live\":false}",
+			"{\"kind\":\"metered\",\"call\":{\"tag\":{\"feature\":\"chat\"},\"model\":\"vendor/model-a\",\"at\":1794528001000,\"ms\":120,\"cost\":{\"usd\":0.001,\"estimated\":false}}}",
+			"{\"kind\":\"metered\",\"call\":{\"tag\":{\"feature\":\"chat\"},\"model\":\"vendor/model-a\",\"at\":1794528001000,\"ms\":120,\"cost\":{\"usd\":0.001,\"estimated\":false},\"usage\":{\"input\":100,\"output\":10,\"cost\":0.001},\"provider\":\"Lab\",\"generationId\":\"gen-1\",\"cancelled\":true}}",
+			"{\"kind\":\"metered\"}",
+			"{\"kind\":\"metered\",\"call\":{\"tag\":{\"feature\":\"chat\"},\"model\":\"vendor/model-a\",\"at\":1794528001000,\"ms\":120}}",
+			"{\"kind\":\"billing\",\"entry\":\"a\",\"reply\":\"ok\",\"usage\":{\"input\":100,\"output\":10,\"cost\":0.001}}",
+			"{\"kind\":\"billing\",\"entry\":\"a\",\"reply\":\"failed\"}",
+			"{\"kind\":\"billing\",\"entry\":\"a\",\"reply\":\"late\"}",
+			"{\"kind\":\"failure\",\"entry\":\"a\",\"model\":\"m\",\"failure\":{\"category\":\"overloaded\",\"status\":429,\"message\":\"Busy.\",\"retryAfterMs\":5000},\"fresh\":true,\"onward\":false}",
+			"{\"kind\":\"failure\",\"entry\":\"a\",\"model\":\"m\",\"failure\":{\"category\":\"keyRejected\",\"status\":401,\"message\":\"No.\"},\"disposition\":{\"act\":\"fallThrough\",\"notice\":\"keyRejected\"},\"fresh\":true,\"onward\":true}",
+			"{\"kind\":\"failure\",\"entry\":\"a\",\"model\":\"m\",\"failure\":{\"category\":\"overloaded\",\"status\":429,\"message\":\"Busy.\",\"retryAfterMs\":5000},\"disposition\":{\"act\":\"retry\"},\"fresh\":false,\"onward\":false}",
+			"{\"kind\":\"failure\",\"entry\":\"a\",\"model\":\"m\",\"failure\":{\"category\":\"overloaded\",\"status\":429,\"message\":\"Busy.\",\"retryAfterMs\":5000},\"disposition\":{\"act\":\"wait\"},\"fresh\":true,\"onward\":false}",
+			"{\"kind\":\"failure\",\"entry\":\"a\",\"model\":\"m\",\"failure\":{\"category\":\"overloaded\",\"status\":429,\"message\":\"Busy.\",\"retryAfterMs\":5000},\"fresh\":true}",
+			"{\"kind\":\"settled\",\"entry\":\"a\",\"outcome\":\"ok\",\"answer\":\"done\"}",
+			"{\"kind\":\"settled\",\"entry\":\"a\",\"outcome\":\"overloaded\",\"retryAfterMs\":5000,\"answer\":\"again\"}",
+			"{\"kind\":\"settled\",\"entry\":\"a\",\"outcome\":\"failed\",\"answer\":\"gaveUp\"}",
+			"{\"kind\":\"settled\",\"entry\":\"a\",\"outcome\":\"done\",\"answer\":\"done\"}",
+			"{\"kind\":\"settled\",\"entry\":\"a\",\"outcome\":\"ok\",\"retryAfterMs\":1.5,\"answer\":\"done\"}",
+			"{\"kind\":\"settled\",\"entry\":\"a\",\"outcome\":\"ok\"}",
+			"{\"kind\":\"gateFailed\",\"entry\":\"a\",\"failure\":{\"category\":\"overloaded\",\"status\":429,\"message\":\"Busy.\",\"retryAfterMs\":5000},\"onward\":true}",
+			"{\"kind\":\"gateFailed\",\"entry\":\"a\",\"failure\":{\"category\":\"overloaded\",\"status\":429,\"message\":\"Busy.\",\"retryAfterMs\":5000},\"onward\":false}",
+			"{\"kind\":\"gateFailed\",\"entry\":\"a\",\"failure\":{\"category\":\"overloaded\",\"status\":429,\"message\":\"Busy.\",\"retryAfterMs\":5000}}",
+			"{\"kind\":\"retry\",\"entry\":\"a\",\"attempt\":1,\"waitMs\":1000,\"why\":\"backoff\",\"status\":503}",
+			"{\"kind\":\"retry\",\"entry\":\"a\",\"attempt\":2,\"waitMs\":0,\"why\":\"retryAfter\",\"status\":\"network\"}",
+			"{\"kind\":\"retry\",\"entry\":\"a\",\"attempt\":2,\"waitMs\":-1,\"why\":\"backoff\",\"status\":503}",
+			"{\"kind\":\"retry\",\"entry\":\"a\",\"attempt\":2,\"waitMs\":1,\"why\":\"luck\",\"status\":503}",
+			"{\"kind\":\"retry\",\"entry\":\"a\",\"attempt\":2,\"waitMs\":1.5,\"why\":\"backoff\",\"status\":503}",
+			"{\"kind\":\"limits\",\"entry\":\"a\",\"read\":true,\"limit\":50,\"reset\":\"2026-11-07T17:00:00Z\"}",
+			"{\"kind\":\"limits\",\"entry\":\"a\",\"read\":false}",
+			"{\"kind\":\"limits\",\"entry\":\"a\",\"limit\":50}",
+			"{\"kind\":\"limits\",\"entry\":\"a\",\"read\":true,\"limit\":\"50\"}",
+			"{\"kind\":\"threw\",\"entry\":\"a\",\"message\":\"It broke.\"}",
+			"{\"kind\":\"threw\",\"entry\":\"a\"}",
+			"{\"kind\":\"served\",\"entry\":\"a\",\"label\":\"Alpha\",\"model\":\"vendor/model-a\"}",
+			"{\"kind\":\"served\",\"entry\":\"a\",\"label\":\"Alpha\"}",
+			"{\"kind\":\"stopped\"}",
+			"{\"kind\":\"stopped\",\"entry\":\"a\"}",
+			"{\"kind\":\"notice\",\"notice\":{\"kind\":\"retriesExhausted\",\"status\":503,\"message\":\"Busy.\",\"entry\":\"Alpha\"}}",
+			"{\"kind\":\"notice\",\"notice\":{\"kind\":\"spendLimit\",\"resetsAt\":1794528061000,\"entry\":\"Alpha\"}}",
+			"{\"kind\":\"notice\",\"notice\":{\"kind\":\"gone\"}}",
+			"{\"kind\":\"notice\"}",
+			"{\"kind\":\"mystery\"}",
+			"{}",
+			"[]"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"kind\":\"skip\",\"cause\":\"passed\",\"entry\":\"a\",\"label\":\"Alpha\",\"reason\":\"keyMissing\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"skip\",\"cause\":\"deferred\",\"entry\":\"a\",\"label\":\"Alpha\",\"reason\":\"allowance\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"skip\",\"cause\":\"fellThrough\",\"entry\":\"a\",\"label\":\"Alpha\",\"reason\":\"unavailable\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"cause"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"reason"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"label"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"held\",\"entry\":\"a\",\"waiting\":{\"model\":\"m\",\"resumeAt\":null,\"pause\":0,\"of\":10}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"held\",\"entry\":\"a\",\"waiting\":{\"model\":\"m\",\"resumeAt\":1794528061000,\"pause\":1,\"of\":10}}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"waiting"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"released\",\"entry\":\"a\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"entry"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"admitted\",\"entry\":\"a\",\"admission\":{\"kind\":\"go\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1}}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"admitted\",\"entry\":\"a\",\"admission\":{\"kind\":\"gaveUp\"}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"admitted\",\"entry\":\"a\",\"admission\":{\"kind\":\"stopped\"}}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"admission",
+					"kind"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"kept\",\"entry\":\"a\",\"model\":\"vendor/model-a\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"model"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"attempt\",\"entry\":\"a\",\"model\":\"m\",\"attempt\":1,\"live\":false,\"again\":false}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"attempt\",\"entry\":\"a\",\"model\":\"m\",\"attempt\":3,\"live\":true,\"again\":true}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"attempt"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"attempt"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"again"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"metered\",\"call\":{\"tag\":{\"feature\":\"chat\"},\"model\":\"vendor/model-a\",\"at\":1794528001000,\"ms\":120,\"cost\":{\"usd\":0.001,\"estimated\":false}}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"metered\",\"call\":{\"tag\":{\"feature\":\"chat\"},\"model\":\"vendor/model-a\",\"at\":1794528001000,\"ms\":120,\"usage\":{\"input\":100,\"output\":10,\"cost\":0.001},\"cost\":{\"usd\":0.001,\"estimated\":false},\"provider\":\"Lab\",\"generationId\":\"gen-1\",\"cancelled\":true}}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"call"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"call",
+					"cost"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"billing\",\"entry\":\"a\",\"reply\":\"ok\",\"usage\":{\"input\":100,\"output\":10,\"cost\":0.001}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"billing\",\"entry\":\"a\",\"reply\":\"failed\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"reply"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"failure\",\"entry\":\"a\",\"model\":\"m\",\"failure\":{\"category\":\"overloaded\",\"status\":429,\"retryAfterMs\":5000,\"message\":\"Busy.\"},\"fresh\":true,\"onward\":false}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"failure\",\"entry\":\"a\",\"model\":\"m\",\"failure\":{\"category\":\"keyRejected\",\"status\":401,\"message\":\"No.\"},\"disposition\":{\"act\":\"fallThrough\",\"notice\":\"keyRejected\"},\"fresh\":true,\"onward\":true}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"failure\",\"entry\":\"a\",\"model\":\"m\",\"failure\":{\"category\":\"overloaded\",\"status\":429,\"retryAfterMs\":5000,\"message\":\"Busy.\"},\"disposition\":{\"act\":\"retry\"},\"fresh\":false,\"onward\":false}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"disposition",
+					"act"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"onward"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"settled\",\"entry\":\"a\",\"outcome\":\"ok\",\"answer\":\"done\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"settled\",\"entry\":\"a\",\"outcome\":\"overloaded\",\"retryAfterMs\":5000,\"answer\":\"again\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"settled\",\"entry\":\"a\",\"outcome\":\"failed\",\"answer\":\"gaveUp\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"outcome"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"retryAfterMs"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"answer"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"gateFailed\",\"entry\":\"a\",\"failure\":{\"category\":\"overloaded\",\"status\":429,\"retryAfterMs\":5000,\"message\":\"Busy.\"},\"onward\":true}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"gateFailed\",\"entry\":\"a\",\"failure\":{\"category\":\"overloaded\",\"status\":429,\"retryAfterMs\":5000,\"message\":\"Busy.\"},\"onward\":false}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"onward"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"retry\",\"entry\":\"a\",\"attempt\":1,\"waitMs\":1000,\"why\":\"backoff\",\"status\":503}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"retry\",\"entry\":\"a\",\"attempt\":2,\"waitMs\":0,\"why\":\"retryAfter\",\"status\":\"network\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"waitMs"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"why"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"waitMs"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"limits\",\"entry\":\"a\",\"read\":true,\"limit\":50,\"reset\":\"2026-11-07T17:00:00Z\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"limits\",\"entry\":\"a\",\"read\":false}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"read"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"limit"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"threw\",\"entry\":\"a\",\"message\":\"It broke.\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"message"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"served\",\"entry\":\"a\",\"label\":\"Alpha\",\"model\":\"vendor/model-a\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"model"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"stopped\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"stopped\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"notice\",\"notice\":{\"kind\":\"retriesExhausted\",\"status\":503,\"message\":\"Busy.\",\"entry\":\"Alpha\"}}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"notice\",\"notice\":{\"kind\":\"spendLimit\",\"resetsAt\":1794528061000,\"entry\":\"Alpha\"}}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"notice",
+					"kind"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"notice"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"kind"
+				]
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

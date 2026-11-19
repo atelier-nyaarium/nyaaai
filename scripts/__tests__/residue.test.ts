@@ -313,7 +313,7 @@ function namesOperator(files: Array<[string, string]>): string[] {
 const BUNDLED_PACKAGES = ["contract", "process", "agentic", "operator", "ui"];
 
 /** What a browser bundle may take: a package, or one file under `ts`. */
-const BROWSER_ENTRIES = ["contract", "ui", "agentic/src/noticeText.ts"];
+const BROWSER_ENTRIES = ["contract", "ui", "agentic/src/noticeText.ts", "agentic/src/usage/meter.ts"];
 
 const ASSETS = [".txt", ".md", ".json", ".css", ".svg"];
 const FUNCTIONS = [

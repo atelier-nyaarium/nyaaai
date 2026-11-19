@@ -1,0 +1,224 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "lifecycle.run",
+	"name": "the-key-limits-are-not-read-for-a-failure-that-is-no-spend-limit",
+	"input": {
+		"startMs": 1794052800000,
+		"entries": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "Alpha"
+			}
+		],
+		"keys": {
+			"a": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"rows": [
+			"openai/gpt-6-luna",
+			"anthropic/claude-opus-5.5"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama"
+		],
+		"listings": {},
+		"zdrOnly": false,
+		"exchanges": [
+			{
+				"status": 403,
+				"headers": [
+					[
+						"content-type",
+						"application/json"
+					]
+				],
+				"chunks": [
+					"{\"error\":{\"code\":403,\"message\":\"Failed with 403\"}}"
+				]
+			}
+		],
+		"steps": [
+			{
+				"kind": "send",
+				"call": "first",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "chat"
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1794052800000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"first"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "a",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 1
+			}
+		],
+		"calls": [
+			{
+				"call": "first",
+				"result": {
+					"kind": "notice",
+					"notice": {
+						"kind": "refused",
+						"status": 403,
+						"message": "Failed with 403",
+						"entry": "Alpha"
+					},
+					"failure": {
+						"category": "refused",
+						"status": 403,
+						"message": "Failed with 403"
+					}
+				},
+				"trace": [
+					{
+						"kind": "admitted",
+						"entry": "a",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "a\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "a",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "a",
+							"label": "Alpha",
+							"at": 1794052800000,
+							"ms": 0,
+							"cost": {
+								"usd": 0,
+								"estimated": true
+							},
+							"failure": "refused"
+						}
+					},
+					{
+						"kind": "billing",
+						"entry": "a",
+						"reply": "failed"
+					},
+					{
+						"kind": "settled",
+						"entry": "a",
+						"outcome": "failed",
+						"answer": "done"
+					},
+					{
+						"kind": "failure",
+						"entry": "a",
+						"model": "openai/gpt-6-luna",
+						"failure": {
+							"category": "refused",
+							"status": 403,
+							"message": "Failed with 403"
+						},
+						"disposition": {
+							"act": "stop",
+							"notice": "refused"
+						},
+						"fresh": true,
+						"onward": false
+					},
+					{
+						"kind": "gateFailed",
+						"entry": "a",
+						"failure": {
+							"category": "refused",
+							"status": 403,
+							"message": "Failed with 403"
+						},
+						"onward": false
+					},
+					{
+						"kind": "notice",
+						"notice": {
+							"kind": "refused",
+							"status": 403,
+							"message": "Failed with 403",
+							"entry": "Alpha"
+						}
+					}
+				],
+				"told": [],
+				"attempts": [
+					{
+						"entry": "a",
+						"events": []
+					}
+				]
+			}
+		],
+		"requests": [
+			{
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			}
+		],
+		"recorded": [
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "a",
+				"label": "Alpha",
+				"at": 1794052800000,
+				"ms": 0,
+				"cost": {
+					"usd": 0,
+					"estimated": true
+				},
+				"failure": "refused"
+			}
+		],
+		"stats": [],
+		"waiting": []
+	}
+}

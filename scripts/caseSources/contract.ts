@@ -2,6 +2,7 @@
 
 import type { CaseSource } from "../caseAdapter";
 import { healthShapeCases } from "./healthShapes";
+import { lifecycleShapeCases } from "./lifecycleShapes";
 import { modelShapeCases } from "./modelShapes";
 import { providerShapeCases } from "./providerShapes";
 import { stepShapeCases } from "./stepShapes";
@@ -95,6 +96,7 @@ export const contractCases: CaseSource[] = [
 	...modelShapeCases,
 	...usageShapeCases,
 	...healthShapeCases,
+	...lifecycleShapeCases,
 	cut("CutRequest", [
 		{ mode: "trim" },
 		{ mode: "compact", targetUuid: "u", throughUuid: "v", endBefore: "e", summaryText: "s", liveTail: true },

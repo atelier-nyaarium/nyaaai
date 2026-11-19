@@ -1,0 +1,879 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "lifecycle.run",
+	"name": "an-overload-that-keeps-failing-gives-the-request-and-the-waiter-up-at-the-last-pause",
+	"input": {
+		"startMs": 1794052800000,
+		"entries": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "Alpha"
+			}
+		],
+		"keys": {
+			"a": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"rows": [
+			"openai/gpt-6-luna",
+			"anthropic/claude-opus-5.5"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama"
+		],
+		"listings": {},
+		"zdrOnly": false,
+		"exchanges": [
+			{
+				"status": 429,
+				"headers": [
+					[
+						"content-type",
+						"application/json"
+					]
+				],
+				"chunks": [
+					"{\"error\":{\"code\":429,\"message\":\"Failed with 429\",\"metadata\":{\"error_type\":\"rate_limit_exceeded\",\"provider_name\":\"Azure\"}}}"
+				]
+			},
+			{
+				"status": 429,
+				"headers": [
+					[
+						"content-type",
+						"application/json"
+					]
+				],
+				"chunks": [
+					"{\"error\":{\"code\":429,\"message\":\"Failed with 429\",\"metadata\":{\"error_type\":\"rate_limit_exceeded\",\"provider_name\":\"Azure\"}}}"
+				]
+			},
+			{
+				"status": 429,
+				"headers": [
+					[
+						"content-type",
+						"application/json"
+					]
+				],
+				"chunks": [
+					"{\"error\":{\"code\":429,\"message\":\"Failed with 429\",\"metadata\":{\"error_type\":\"rate_limit_exceeded\",\"provider_name\":\"Azure\"}}}"
+				]
+			},
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"A\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":100,\"completion_tokens\":10,\"cost\":0.001}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			}
+		],
+		"steps": [
+			{
+				"kind": "send",
+				"call": "first",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "chat"
+				}
+			},
+			{
+				"kind": "send",
+				"call": "second",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "chat"
+				}
+			},
+			{
+				"kind": "advance",
+				"ms": 60000
+			},
+			{
+				"kind": "advance",
+				"ms": 60000
+			},
+			{
+				"kind": "send",
+				"call": "after",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "chat"
+				}
+			}
+		],
+		"maxPauses": 2
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1794052800000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [
+					"first"
+				],
+				"entries": [
+					{
+						"entry": "a",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": [
+							"openai/gpt-6-luna"
+						]
+					}
+				],
+				"requests": 1
+			},
+			{
+				"nowMs": 1794052800000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [
+					"first",
+					"second"
+				],
+				"entries": [
+					{
+						"entry": "a",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": [
+							"openai/gpt-6-luna"
+						]
+					}
+				],
+				"requests": 1
+			},
+			{
+				"nowMs": 1794052860000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [
+					"first",
+					"second"
+				],
+				"entries": [
+					{
+						"entry": "a",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": [
+							"openai/gpt-6-luna"
+						]
+					}
+				],
+				"requests": 2
+			},
+			{
+				"nowMs": 1794052920000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"first",
+					"second"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "a",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 3
+			},
+			{
+				"nowMs": 1794052920000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"after"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "a",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 4
+			}
+		],
+		"calls": [
+			{
+				"call": "first",
+				"result": {
+					"kind": "notice",
+					"notice": {
+						"kind": "providerOverloaded",
+						"message": "GPT-6 Luna is overloaded at its provider.",
+						"model": "GPT-6 Luna"
+					},
+					"failure": {
+						"category": "overloaded",
+						"status": 429,
+						"message": "Failed with 429"
+					}
+				},
+				"trace": [
+					{
+						"kind": "admitted",
+						"entry": "a",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "a\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "a",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "a",
+							"label": "Alpha",
+							"at": 1794052800000,
+							"ms": 0,
+							"cost": {
+								"usd": 0,
+								"estimated": true
+							},
+							"failure": "overloaded"
+						}
+					},
+					{
+						"kind": "billing",
+						"entry": "a",
+						"reply": "failed"
+					},
+					{
+						"kind": "settled",
+						"entry": "a",
+						"outcome": "overloaded",
+						"answer": "again"
+					},
+					{
+						"kind": "failure",
+						"entry": "a",
+						"model": "openai/gpt-6-luna",
+						"failure": {
+							"category": "overloaded",
+							"status": 429,
+							"message": "Failed with 429"
+						},
+						"fresh": true,
+						"onward": false
+					},
+					{
+						"kind": "held",
+						"entry": "a",
+						"waiting": {
+							"model": "a\nopenai/gpt-6-luna",
+							"resumeAt": 1794052860000,
+							"pause": 1,
+							"of": 2
+						}
+					},
+					{
+						"kind": "admitted",
+						"entry": "a",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "a\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": true,
+								"serial": 2
+							}
+						}
+					},
+					{
+						"kind": "released",
+						"entry": "a"
+					},
+					{
+						"kind": "attempt",
+						"entry": "a",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": true
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "a",
+							"label": "Alpha",
+							"at": 1794052860000,
+							"ms": 0,
+							"cost": {
+								"usd": 0,
+								"estimated": true
+							},
+							"failure": "overloaded"
+						}
+					},
+					{
+						"kind": "billing",
+						"entry": "a",
+						"reply": "failed"
+					},
+					{
+						"kind": "settled",
+						"entry": "a",
+						"outcome": "overloaded",
+						"answer": "again"
+					},
+					{
+						"kind": "failure",
+						"entry": "a",
+						"model": "openai/gpt-6-luna",
+						"failure": {
+							"category": "overloaded",
+							"status": 429,
+							"message": "Failed with 429"
+						},
+						"fresh": true,
+						"onward": false
+					},
+					{
+						"kind": "held",
+						"entry": "a",
+						"waiting": {
+							"model": "a\nopenai/gpt-6-luna",
+							"resumeAt": 1794052920000,
+							"pause": 2,
+							"of": 2
+						}
+					},
+					{
+						"kind": "admitted",
+						"entry": "a",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "a\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": true,
+								"serial": 3
+							}
+						}
+					},
+					{
+						"kind": "released",
+						"entry": "a"
+					},
+					{
+						"kind": "attempt",
+						"entry": "a",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": true
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "a",
+							"label": "Alpha",
+							"at": 1794052920000,
+							"ms": 0,
+							"cost": {
+								"usd": 0,
+								"estimated": true
+							},
+							"failure": "overloaded"
+						}
+					},
+					{
+						"kind": "billing",
+						"entry": "a",
+						"reply": "failed"
+					},
+					{
+						"kind": "settled",
+						"entry": "a",
+						"outcome": "overloaded",
+						"answer": "gaveUp"
+					},
+					{
+						"kind": "failure",
+						"entry": "a",
+						"model": "openai/gpt-6-luna",
+						"failure": {
+							"category": "overloaded",
+							"status": 429,
+							"message": "Failed with 429"
+						},
+						"fresh": true,
+						"onward": false
+					},
+					{
+						"kind": "notice",
+						"notice": {
+							"kind": "providerOverloaded",
+							"message": "GPT-6 Luna is overloaded at its provider.",
+							"model": "GPT-6 Luna"
+						}
+					}
+				],
+				"told": [
+					{
+						"kind": "wait",
+						"waiting": {
+							"model": "a\nopenai/gpt-6-luna",
+							"resumeAt": 1794052860000,
+							"pause": 1,
+							"of": 2
+						}
+					},
+					{
+						"kind": "wait",
+						"waiting": null
+					},
+					{
+						"kind": "wait",
+						"waiting": {
+							"model": "a\nopenai/gpt-6-luna",
+							"resumeAt": 1794052920000,
+							"pause": 2,
+							"of": 2
+						}
+					},
+					{
+						"kind": "wait",
+						"waiting": null
+					}
+				],
+				"attempts": [
+					{
+						"entry": "a",
+						"events": []
+					},
+					{
+						"entry": "a",
+						"events": []
+					},
+					{
+						"entry": "a",
+						"events": []
+					}
+				]
+			},
+			{
+				"call": "second",
+				"result": {
+					"kind": "notice",
+					"notice": {
+						"kind": "providerOverloaded",
+						"message": "GPT-6 Luna is overloaded at its provider.",
+						"model": "GPT-6 Luna"
+					},
+					"failure": null
+				},
+				"trace": [
+					{
+						"kind": "held",
+						"entry": "a",
+						"waiting": {
+							"model": "a\nopenai/gpt-6-luna",
+							"resumeAt": 1794052860000,
+							"pause": 1,
+							"of": 2
+						}
+					},
+					{
+						"kind": "held",
+						"entry": "a",
+						"waiting": {
+							"model": "a\nopenai/gpt-6-luna",
+							"resumeAt": null,
+							"pause": 1,
+							"of": 2
+						}
+					},
+					{
+						"kind": "held",
+						"entry": "a",
+						"waiting": {
+							"model": "a\nopenai/gpt-6-luna",
+							"resumeAt": 1794052920000,
+							"pause": 2,
+							"of": 2
+						}
+					},
+					{
+						"kind": "held",
+						"entry": "a",
+						"waiting": {
+							"model": "a\nopenai/gpt-6-luna",
+							"resumeAt": null,
+							"pause": 2,
+							"of": 2
+						}
+					},
+					{
+						"kind": "admitted",
+						"entry": "a",
+						"admission": {
+							"kind": "gaveUp"
+						}
+					},
+					{
+						"kind": "released",
+						"entry": "a"
+					},
+					{
+						"kind": "notice",
+						"notice": {
+							"kind": "providerOverloaded",
+							"message": "GPT-6 Luna is overloaded at its provider.",
+							"model": "GPT-6 Luna"
+						}
+					}
+				],
+				"told": [
+					{
+						"kind": "wait",
+						"waiting": {
+							"model": "a\nopenai/gpt-6-luna",
+							"resumeAt": 1794052860000,
+							"pause": 1,
+							"of": 2
+						}
+					},
+					{
+						"kind": "wait",
+						"waiting": {
+							"model": "a\nopenai/gpt-6-luna",
+							"resumeAt": null,
+							"pause": 1,
+							"of": 2
+						}
+					},
+					{
+						"kind": "wait",
+						"waiting": {
+							"model": "a\nopenai/gpt-6-luna",
+							"resumeAt": 1794052920000,
+							"pause": 2,
+							"of": 2
+						}
+					},
+					{
+						"kind": "wait",
+						"waiting": {
+							"model": "a\nopenai/gpt-6-luna",
+							"resumeAt": null,
+							"pause": 2,
+							"of": 2
+						}
+					},
+					{
+						"kind": "wait",
+						"waiting": null
+					}
+				],
+				"attempts": []
+			},
+			{
+				"call": "after",
+				"result": {
+					"kind": "served",
+					"entry": "a",
+					"reply": {
+						"parts": [
+							{
+								"kind": "text",
+								"text": "A"
+							}
+						],
+						"finish": "stop",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001
+						},
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-1"
+						}
+					}
+				},
+				"trace": [
+					{
+						"kind": "admitted",
+						"entry": "a",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "a\nopenai/gpt-6-luna",
+								"generation": 1,
+								"probe": false,
+								"serial": 4
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "a",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "a",
+							"label": "Alpha",
+							"at": 1794052920000,
+							"ms": 0,
+							"firstTokenMs": 0,
+							"usage": {
+								"input": 100,
+								"output": 10,
+								"cost": 0.001
+							},
+							"cost": {
+								"usd": 0.001,
+								"estimated": false
+							},
+							"provider": "Azure",
+							"generationId": "gen-1",
+							"finishReason": "stop"
+						}
+					},
+					{
+						"kind": "settled",
+						"entry": "a",
+						"outcome": "ok",
+						"answer": "done"
+					},
+					{
+						"kind": "billing",
+						"entry": "a",
+						"reply": "ok",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001
+						}
+					},
+					{
+						"kind": "served",
+						"entry": "a",
+						"label": "Alpha",
+						"model": "openai/gpt-6-luna"
+					}
+				],
+				"told": [],
+				"attempts": [
+					{
+						"entry": "a",
+						"events": [
+							{
+								"kind": "serving",
+								"serving": {
+									"host": "Azure",
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "text",
+								"text": "A"
+							},
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "finish",
+								"reason": "stop"
+							},
+							{
+								"kind": "usage",
+								"usage": {
+									"input": 100,
+									"output": 10,
+									"cost": 0.001
+								}
+							}
+						]
+					}
+				]
+			}
+		],
+		"requests": [
+			{
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			},
+			{
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			},
+			{
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			},
+			{
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			}
+		],
+		"recorded": [
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "a",
+				"label": "Alpha",
+				"at": 1794052800000,
+				"ms": 0,
+				"cost": {
+					"usd": 0,
+					"estimated": true
+				},
+				"failure": "overloaded"
+			},
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "a",
+				"label": "Alpha",
+				"at": 1794052860000,
+				"ms": 0,
+				"cost": {
+					"usd": 0,
+					"estimated": true
+				},
+				"failure": "overloaded"
+			},
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "a",
+				"label": "Alpha",
+				"at": 1794052920000,
+				"ms": 0,
+				"cost": {
+					"usd": 0,
+					"estimated": true
+				},
+				"failure": "overloaded"
+			},
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "a",
+				"label": "Alpha",
+				"at": 1794052920000,
+				"ms": 0,
+				"firstTokenMs": 0,
+				"usage": {
+					"input": 100,
+					"output": 10,
+					"cost": 0.001
+				},
+				"cost": {
+					"usd": 0.001,
+					"estimated": false
+				},
+				"provider": "Azure",
+				"generationId": "gen-1",
+				"finishReason": "stop"
+			}
+		],
+		"stats": [],
+		"waiting": []
+	}
+}

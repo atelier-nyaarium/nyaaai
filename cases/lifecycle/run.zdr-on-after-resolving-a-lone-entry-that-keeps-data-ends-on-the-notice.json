@@ -1,0 +1,200 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "lifecycle.run",
+	"name": "zdr-on-after-resolving-a-lone-entry-that-keeps-data-ends-on-the-notice",
+	"input": {
+		"startMs": 1794052800000,
+		"entries": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "Alpha"
+			}
+		],
+		"keys": {
+			"a": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"rows": [
+			"openai/gpt-6-luna",
+			"anthropic/claude-opus-5.5"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama"
+		],
+		"listings": {
+			"a": {
+				"openai/gpt-6-luna": {
+					"keeps": true
+				}
+			}
+		},
+		"zdrOnly": false,
+		"exchanges": [
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"A\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":100,\"completion_tokens\":10,\"cost\":0.001}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			}
+		],
+		"steps": [
+			{
+				"kind": "plan",
+				"name": "held",
+				"model": "openai/gpt-6-luna"
+			},
+			{
+				"kind": "zdr",
+				"on": true
+			},
+			{
+				"kind": "send",
+				"call": "first",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "chat"
+				},
+				"plan": "held"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1794052800000,
+				"answer": {
+					"kind": "plan",
+					"unresolved": null,
+					"candidates": [
+						"a"
+					],
+					"passed": []
+				},
+				"ended": [],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "a",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 0
+			},
+			{
+				"nowMs": 1794052800000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "a",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 0
+			},
+			{
+				"nowMs": 1794052800000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"first"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "a",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 0
+			}
+		],
+		"calls": [
+			{
+				"call": "first",
+				"result": {
+					"kind": "notice",
+					"notice": {
+						"kind": "noZdrHost"
+					},
+					"failure": null
+				},
+				"trace": [
+					{
+						"kind": "admitted",
+						"entry": "a",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "a\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						}
+					},
+					{
+						"kind": "kept",
+						"entry": "a",
+						"model": "openai/gpt-6-luna"
+					},
+					{
+						"kind": "settled",
+						"entry": "a",
+						"outcome": "cancelled",
+						"answer": "done"
+					},
+					{
+						"kind": "notice",
+						"notice": {
+							"kind": "noZdrHost"
+						}
+					}
+				],
+				"told": [],
+				"attempts": []
+			}
+		],
+		"requests": [],
+		"recorded": [],
+		"stats": [],
+		"waiting": []
+	}
+}

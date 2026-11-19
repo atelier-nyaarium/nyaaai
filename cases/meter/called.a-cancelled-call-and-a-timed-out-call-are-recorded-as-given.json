@@ -1,0 +1,84 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "meter.called",
+	"name": "a-cancelled-call-and-a-timed-out-call-are-recorded-as-given",
+	"input": {
+		"calls": [
+			{
+				"call": {
+					"tag": {
+						"feature": "chat"
+					},
+					"model": "vendor/model-a",
+					"at": 1794528001000,
+					"ms": 120,
+					"cost": {
+						"usd": 0.001,
+						"estimated": false
+					},
+					"entry": "a",
+					"cancelled": true
+				},
+				"id": "u1"
+			},
+			{
+				"call": {
+					"tag": {
+						"feature": "chat"
+					},
+					"model": "vendor/model-a",
+					"at": 1794528001000,
+					"ms": 120,
+					"cost": {
+						"usd": 0.001,
+						"estimated": false
+					},
+					"entry": "a",
+					"failure": "timedOut"
+				},
+				"id": "u2"
+			}
+		]
+	},
+	"expected": {
+		"calls": [
+			{
+				"recorded": {
+					"tag": {
+						"feature": "chat"
+					},
+					"model": "vendor/model-a",
+					"entry": "a",
+					"at": 1794528001000,
+					"ms": 120,
+					"cost": {
+						"usd": 0.001,
+						"estimated": false
+					},
+					"cancelled": true
+				},
+				"billed": null,
+				"stats": null
+			},
+			{
+				"recorded": {
+					"tag": {
+						"feature": "chat"
+					},
+					"model": "vendor/model-a",
+					"entry": "a",
+					"at": 1794528001000,
+					"ms": 120,
+					"cost": {
+						"usd": 0.001,
+						"estimated": false
+					},
+					"failure": "timedOut"
+				},
+				"billed": null,
+				"stats": null
+			}
+		]
+	}
+}

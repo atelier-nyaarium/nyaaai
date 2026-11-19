@@ -1,0 +1,384 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "lifecycle.run",
+	"name": "zdr-on-after-resolving-skips-to-the-next-entry-that-keeps-none",
+	"input": {
+		"startMs": 1794052800000,
+		"entries": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "Alpha"
+			},
+			{
+				"id": "b",
+				"kind": "openrouter",
+				"label": "Beta"
+			}
+		],
+		"keys": {
+			"a": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			},
+			"b": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"rows": [
+			"openai/gpt-6-luna",
+			"anthropic/claude-opus-5.5"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama"
+		],
+		"listings": {
+			"a": {
+				"openai/gpt-6-luna": {
+					"keeps": true
+				}
+			}
+		},
+		"zdrOnly": false,
+		"exchanges": [
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"B\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":100,\"completion_tokens\":10,\"cost\":0.001}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			}
+		],
+		"steps": [
+			{
+				"kind": "plan",
+				"name": "held",
+				"model": "openai/gpt-6-luna"
+			},
+			{
+				"kind": "zdr",
+				"on": true
+			},
+			{
+				"kind": "send",
+				"call": "first",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "chat"
+				},
+				"plan": "held"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1794052800000,
+				"answer": {
+					"kind": "plan",
+					"unresolved": null,
+					"candidates": [
+						"a",
+						"b"
+					],
+					"passed": []
+				},
+				"ended": [],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "a",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 0
+			},
+			{
+				"nowMs": 1794052800000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "a",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 0
+			},
+			{
+				"nowMs": 1794052800000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"first"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "a",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 1
+			}
+		],
+		"calls": [
+			{
+				"call": "first",
+				"result": {
+					"kind": "served",
+					"entry": "b",
+					"reply": {
+						"parts": [
+							{
+								"kind": "text",
+								"text": "B"
+							}
+						],
+						"finish": "stop",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001
+						},
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-1"
+						}
+					}
+				},
+				"trace": [
+					{
+						"kind": "admitted",
+						"entry": "a",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "a\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						}
+					},
+					{
+						"kind": "kept",
+						"entry": "a",
+						"model": "openai/gpt-6-luna"
+					},
+					{
+						"kind": "settled",
+						"entry": "a",
+						"outcome": "cancelled",
+						"answer": "done"
+					},
+					{
+						"kind": "admitted",
+						"entry": "b",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "b\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 2
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "b",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "b",
+							"label": "Beta",
+							"at": 1794052800000,
+							"ms": 0,
+							"firstTokenMs": 0,
+							"usage": {
+								"input": 100,
+								"output": 10,
+								"cost": 0.001
+							},
+							"cost": {
+								"usd": 0.001,
+								"estimated": false
+							},
+							"provider": "Azure",
+							"generationId": "gen-1",
+							"finishReason": "stop"
+						}
+					},
+					{
+						"kind": "settled",
+						"entry": "b",
+						"outcome": "ok",
+						"answer": "done"
+					},
+					{
+						"kind": "billing",
+						"entry": "b",
+						"reply": "ok",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001
+						}
+					},
+					{
+						"kind": "served",
+						"entry": "b",
+						"label": "Beta",
+						"model": "openai/gpt-6-luna"
+					}
+				],
+				"told": [],
+				"attempts": [
+					{
+						"entry": "b",
+						"events": [
+							{
+								"kind": "serving",
+								"serving": {
+									"host": "Azure",
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "text",
+								"text": "B"
+							},
+							{
+								"kind": "serving",
+								"serving": {
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "finish",
+								"reason": "stop"
+							},
+							{
+								"kind": "usage",
+								"usage": {
+									"input": 100,
+									"output": 10,
+									"cost": 0.001
+								}
+							}
+						]
+					}
+				]
+			}
+		],
+		"requests": [
+			{
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "text/event-stream"
+			}
+		],
+		"recorded": [
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "b",
+				"label": "Beta",
+				"at": 1794052800000,
+				"ms": 0,
+				"firstTokenMs": 0,
+				"usage": {
+					"input": 100,
+					"output": 10,
+					"cost": 0.001
+				},
+				"cost": {
+					"usd": 0.001,
+					"estimated": false
+				},
+				"provider": "Azure",
+				"generationId": "gen-1",
+				"finishReason": "stop"
+			}
+		],
+		"stats": [],
+		"waiting": []
+	}
+}

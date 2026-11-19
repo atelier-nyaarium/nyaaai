@@ -1,0 +1,65 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "meter.called",
+	"name": "a-call-with-no-id-from-the-sink-is-not-queued-for-stats",
+	"input": {
+		"calls": [
+			{
+				"call": {
+					"tag": {
+						"feature": "chat"
+					},
+					"model": "vendor/model-a",
+					"at": 1794528001000,
+					"ms": 120,
+					"cost": {
+						"usd": 0.001,
+						"estimated": false
+					},
+					"entry": "go",
+					"usage": {
+						"input": 100,
+						"output": 10,
+						"cost": 0.001,
+						"billingSource": "go"
+					},
+					"generationId": "gen-1"
+				},
+				"id": null
+			}
+		]
+	},
+	"expected": {
+		"calls": [
+			{
+				"recorded": {
+					"tag": {
+						"feature": "chat"
+					},
+					"model": "vendor/model-a",
+					"entry": "go",
+					"at": 1794528001000,
+					"ms": 120,
+					"usage": {
+						"input": 100,
+						"output": 10,
+						"cost": 0.001,
+						"billingSource": "go"
+					},
+					"cost": {
+						"usd": 0.001,
+						"estimated": false
+					},
+					"generationId": "gen-1"
+				},
+				"billed": {
+					"entry": "go",
+					"source": "go",
+					"cost": 0.001
+				},
+				"stats": null
+			}
+		]
+	}
+}

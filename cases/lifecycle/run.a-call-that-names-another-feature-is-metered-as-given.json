@@ -1,0 +1,248 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "lifecycle.run",
+	"name": "a-call-that-names-another-feature-is-metered-as-given",
+	"input": {
+		"startMs": 1794052800000,
+		"entries": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "Alpha"
+			},
+			{
+				"id": "b",
+				"kind": "openrouter",
+				"label": "Beta"
+			}
+		],
+		"keys": {
+			"a": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			},
+			"b": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"rows": [
+			"openai/gpt-6-luna",
+			"anthropic/claude-opus-5.5"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama"
+		],
+		"listings": {},
+		"zdrOnly": false,
+		"exchanges": [
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"application/json"
+					]
+				],
+				"chunks": [
+					"{\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"message\":{\"content\":\"T\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":100,\"completion_tokens\":10,\"cost\":0.001}}"
+				]
+			}
+		],
+		"steps": [
+			{
+				"kind": "send",
+				"call": "title",
+				"model": "openai/gpt-6-luna",
+				"tag": {
+					"feature": "analysis",
+					"lane": "title",
+					"folder": "/work/app"
+				},
+				"mode": "complete"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1794052800000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"title"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "a",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 1
+			}
+		],
+		"calls": [
+			{
+				"call": "title",
+				"result": {
+					"kind": "served",
+					"entry": "a",
+					"reply": {
+						"parts": [
+							{
+								"kind": "text",
+								"text": "T"
+							}
+						],
+						"finish": "stop",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001
+						},
+						"serving": {
+							"host": "Azure",
+							"generationId": "gen-1"
+						}
+					}
+				},
+				"trace": [
+					{
+						"kind": "admitted",
+						"entry": "a",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "a\nopenai/gpt-6-luna",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "a",
+						"model": "openai/gpt-6-luna",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "analysis",
+								"lane": "title",
+								"folder": "/work/app"
+							},
+							"model": "openai/gpt-6-luna",
+							"entry": "a",
+							"label": "Alpha",
+							"at": 1794052800000,
+							"ms": 0,
+							"usage": {
+								"input": 100,
+								"output": 10,
+								"cost": 0.001
+							},
+							"cost": {
+								"usd": 0.001,
+								"estimated": false
+							},
+							"provider": "Azure",
+							"generationId": "gen-1",
+							"finishReason": "stop"
+						}
+					},
+					{
+						"kind": "settled",
+						"entry": "a",
+						"outcome": "ok",
+						"answer": "done"
+					},
+					{
+						"kind": "billing",
+						"entry": "a",
+						"reply": "ok",
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001
+						}
+					},
+					{
+						"kind": "served",
+						"entry": "a",
+						"label": "Alpha",
+						"model": "openai/gpt-6-luna"
+					}
+				],
+				"told": [],
+				"attempts": [
+					{
+						"entry": "a",
+						"events": []
+					}
+				]
+			}
+		],
+		"requests": [
+			{
+				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"authorization": "Bearer key-0123456789abcdef",
+				"accept": "application/json"
+			}
+		],
+		"recorded": [
+			{
+				"tag": {
+					"feature": "analysis",
+					"lane": "title",
+					"folder": "/work/app"
+				},
+				"model": "openai/gpt-6-luna",
+				"entry": "a",
+				"label": "Alpha",
+				"at": 1794052800000,
+				"ms": 0,
+				"usage": {
+					"input": 100,
+					"output": 10,
+					"cost": 0.001
+				},
+				"cost": {
+					"usd": 0.001,
+					"estimated": false
+				},
+				"provider": "Azure",
+				"generationId": "gen-1",
+				"finishReason": "stop"
+			}
+		],
+		"stats": [],
+		"waiting": []
+	}
+}

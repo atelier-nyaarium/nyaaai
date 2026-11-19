@@ -33028,3 +33028,1882 @@ impl Shape for HealthKeysResultRowsItem {
         Value::Object(object)
     }
 }
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum LifeKeyAnswer {
+    Key(LifeKeyAnswerKey),
+    None(LifeKeyAnswerNone),
+    Refused(LifeKeyAnswerRefused),
+    Unready(LifeKeyAnswerUnready),
+}
+
+impl Shape for LifeKeyAnswer {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "key" => LifeKeyAnswerKey::decode_at(value, at).map(Self::Key),
+            "none" => LifeKeyAnswerNone::decode_at(value, at).map(Self::None),
+            "refused" => LifeKeyAnswerRefused::decode_at(value, at).map(Self::Refused),
+            "unready" => LifeKeyAnswerUnready::decode_at(value, at).map(Self::Unready),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Key(held) => held.encode(),
+            Self::None(held) => held.encode(),
+            Self::Refused(held) => held.encode(),
+            Self::Unready(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeKeyAnswerKey {
+    pub key: String,
+}
+
+impl Shape for LifeKeyAnswerKey {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "key")
+        })?;
+        let key = shape::required(object, "key", at, shape::text)?;
+        Ok(Self { key })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("key"));
+        object.insert("key", Value::from(self.key.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeKeyAnswerNone {}
+
+impl Shape for LifeKeyAnswerNone {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "none")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("none"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeKeyAnswerRefused {}
+
+impl Shape for LifeKeyAnswerRefused {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "refused")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("refused"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeKeyAnswerUnready {}
+
+impl Shape for LifeKeyAnswerUnready {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "unready")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("unready"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeReply {
+    pub status: i64,
+    pub headers: nyaaai_contract::shapes::step::HeaderList,
+    pub chunks: Vec<String>,
+    pub head_ms: Option<u64>,
+    pub chunk_ms: Option<u64>,
+    pub end: Option<LifeReplyEnd>,
+    pub error: Option<String>,
+}
+
+impl Shape for LifeReply {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let status = shape::required(object, "status", at, shape::integer)?;
+        let headers = shape::required(
+            object,
+            "headers",
+            at,
+            nyaaai_contract::shapes::step::decode_header_list,
+        )?;
+        let chunks = shape::required(object, "chunks", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let head_ms = shape::optional(object, "headMs", at, shape::natural)?;
+        let chunk_ms = shape::optional(object, "chunkMs", at, shape::natural)?;
+        let end = shape::optional(object, "end", at, LifeReplyEnd::decode_at)?;
+        let error = shape::optional(object, "error", at, shape::text)?;
+        Ok(Self {
+            status,
+            headers,
+            chunks,
+            head_ms,
+            chunk_ms,
+            end,
+            error,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("status", Value::Number(self.status as f64));
+        object.insert(
+            "headers",
+            nyaaai_contract::shapes::step::encode_header_list(&self.headers),
+        );
+        object.insert(
+            "chunks",
+            Value::Array(
+                self.chunks
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        if let Some(held) = &self.head_ms {
+            object.insert("headMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.chunk_ms {
+            object.insert("chunkMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.end {
+            object.insert("end", held.encode());
+        }
+        if let Some(held) = &self.error {
+            object.insert("error", Value::from(held.as_str()));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum LifeReplyEnd {
+    Closed,
+    Dropped,
+    Refused,
+}
+
+impl LifeReplyEnd {
+    pub const ALL: [Self; 3] = [Self::Closed, Self::Dropped, Self::Refused];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Closed => "closed",
+            Self::Dropped => "dropped",
+            Self::Refused => "refused",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for LifeReplyEnd {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeListing {
+    pub unlisted: Option<()>,
+    pub keeps: Option<()>,
+    pub price: Option<LifeListingPrice>,
+    pub cache_write1h: Option<()>,
+}
+
+impl Shape for LifeListing {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let unlisted = shape::optional(object, "unlisted", at, |value, at| {
+            shape::is_flag(value, at, true)
+        })?;
+        let keeps = shape::optional(object, "keeps", at, |value, at| {
+            shape::is_flag(value, at, true)
+        })?;
+        let price = shape::optional(object, "price", at, LifeListingPrice::decode_at)?;
+        let cache_write1h = shape::optional(object, "cacheWrite1h", at, |value, at| {
+            shape::is_flag(value, at, true)
+        })?;
+        Ok(Self {
+            unlisted,
+            keeps,
+            price,
+            cache_write1h,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        if self.unlisted.is_some() {
+            object.insert("unlisted", Value::Bool(true));
+        }
+        if self.keeps.is_some() {
+            object.insert("keeps", Value::Bool(true));
+        }
+        if let Some(held) = &self.price {
+            object.insert("price", held.encode());
+        }
+        if self.cache_write1h.is_some() {
+            object.insert("cacheWrite1h", Value::Bool(true));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum LifeListingPrice {
+    Price(nyaaai_contract::shapes::model::Price),
+    Free,
+    Unknown,
+}
+
+impl Shape for LifeListingPrice {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        if let Ok(held) = nyaaai_contract::shapes::model::Price::decode_at(value, at) {
+            return Ok(Self::Price(held));
+        }
+        if shape::is_text(value, at, "free").is_ok() {
+            return Ok(Self::Free);
+        }
+        if shape::is_text(value, at, "unknown").is_ok() {
+            return Ok(Self::Unknown);
+        }
+        Err(shape::refused(at, "no branch matches"))
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Price(held) => held.encode(),
+            Self::Free => Value::from("free"),
+            Self::Unknown => Value::from("unknown"),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum LifeStep {
+    Send(LifeStepSend),
+    Plan(LifeStepPlan),
+    Begin(LifeStepBegin),
+    Sizing(LifeStepSizing),
+    Advance(LifeStepAdvance),
+    Abort(LifeStepAbort),
+    List(LifeStepList),
+    Key(LifeStepKey),
+    Zdr(LifeStepZdr),
+    Check(LifeStepCheck),
+    Billed(LifeStepBilled),
+}
+
+impl Shape for LifeStep {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "send" => LifeStepSend::decode_at(value, at).map(Self::Send),
+            "plan" => LifeStepPlan::decode_at(value, at).map(Self::Plan),
+            "begin" => LifeStepBegin::decode_at(value, at).map(Self::Begin),
+            "sizing" => LifeStepSizing::decode_at(value, at).map(Self::Sizing),
+            "advance" => LifeStepAdvance::decode_at(value, at).map(Self::Advance),
+            "abort" => LifeStepAbort::decode_at(value, at).map(Self::Abort),
+            "list" => LifeStepList::decode_at(value, at).map(Self::List),
+            "key" => LifeStepKey::decode_at(value, at).map(Self::Key),
+            "zdr" => LifeStepZdr::decode_at(value, at).map(Self::Zdr),
+            "check" => LifeStepCheck::decode_at(value, at).map(Self::Check),
+            "billed" => LifeStepBilled::decode_at(value, at).map(Self::Billed),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Send(held) => held.encode(),
+            Self::Plan(held) => held.encode(),
+            Self::Begin(held) => held.encode(),
+            Self::Sizing(held) => held.encode(),
+            Self::Advance(held) => held.encode(),
+            Self::Abort(held) => held.encode(),
+            Self::List(held) => held.encode(),
+            Self::Key(held) => held.encode(),
+            Self::Zdr(held) => held.encode(),
+            Self::Check(held) => held.encode(),
+            Self::Billed(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeStepSend {
+    pub call: String,
+    pub model: String,
+    pub use_: Option<nyaaai_contract::shapes::model::ModelUse>,
+    pub plan: Option<String>,
+    pub run: Option<String>,
+    pub mode: Option<LifeStepSendMode>,
+    pub live: Option<bool>,
+    pub tag: nyaaai_contract::shapes::usage::CallTag,
+    pub deadline_ms: Option<u64>,
+    pub throws: Option<String>,
+    pub abort_after_ms: Option<u64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for LifeStepSend {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "send")
+        })?;
+        let call = shape::required(object, "call", at, shape::text)?;
+        let model = shape::required(object, "model", at, shape::text)?;
+        let use_ = shape::optional(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        let plan = shape::optional(object, "plan", at, shape::text)?;
+        let run = shape::optional(object, "run", at, shape::text)?;
+        let mode = shape::optional(object, "mode", at, LifeStepSendMode::decode_at)?;
+        let live = shape::optional(object, "live", at, shape::flag)?;
+        let tag = shape::required(
+            object,
+            "tag",
+            at,
+            nyaaai_contract::shapes::usage::CallTag::decode_at,
+        )?;
+        let deadline_ms = shape::optional(object, "deadlineMs", at, shape::natural)?;
+        let throws = shape::optional(object, "throws", at, shape::text)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::natural)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            call,
+            model,
+            use_,
+            plan,
+            run,
+            mode,
+            live,
+            tag,
+            deadline_ms,
+            throws,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("send"));
+        object.insert("call", Value::from(self.call.as_str()));
+        object.insert("model", Value::from(self.model.as_str()));
+        if let Some(held) = &self.use_ {
+            object.insert("use", held.encode());
+        }
+        if let Some(held) = &self.plan {
+            object.insert("plan", Value::from(held.as_str()));
+        }
+        if let Some(held) = &self.run {
+            object.insert("run", Value::from(held.as_str()));
+        }
+        if let Some(held) = &self.mode {
+            object.insert("mode", held.encode());
+        }
+        if let Some(held) = &self.live {
+            object.insert("live", Value::Bool(*held));
+        }
+        object.insert("tag", self.tag.encode());
+        if let Some(held) = &self.deadline_ms {
+            object.insert("deadlineMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.throws {
+            object.insert("throws", Value::from(held.as_str()));
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeStepPlan {
+    pub name: String,
+    pub model: String,
+    pub use_: Option<nyaaai_contract::shapes::model::ModelUse>,
+}
+
+impl Shape for LifeStepPlan {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "plan")
+        })?;
+        let name = shape::required(object, "name", at, shape::text)?;
+        let model = shape::required(object, "model", at, shape::text)?;
+        let use_ = shape::optional(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        Ok(Self { name, model, use_ })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("plan"));
+        object.insert("name", Value::from(self.name.as_str()));
+        object.insert("model", Value::from(self.model.as_str()));
+        if let Some(held) = &self.use_ {
+            object.insert("use", held.encode());
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeStepBegin {
+    pub run: String,
+}
+
+impl Shape for LifeStepBegin {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "begin")
+        })?;
+        let run = shape::required(object, "run", at, shape::text)?;
+        Ok(Self { run })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("begin"));
+        object.insert("run", Value::from(self.run.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeStepSizing {
+    pub run: String,
+    pub plan: String,
+}
+
+impl Shape for LifeStepSizing {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "sizing")
+        })?;
+        let run = shape::required(object, "run", at, shape::text)?;
+        let plan = shape::required(object, "plan", at, shape::text)?;
+        Ok(Self { run, plan })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("sizing"));
+        object.insert("run", Value::from(self.run.as_str()));
+        object.insert("plan", Value::from(self.plan.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeStepAdvance {
+    pub ms: u64,
+}
+
+impl Shape for LifeStepAdvance {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "advance")
+        })?;
+        let ms = shape::required(object, "ms", at, shape::natural)?;
+        Ok(Self { ms })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("advance"));
+        object.insert("ms", Value::Number(self.ms as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeStepAbort {
+    pub call: String,
+}
+
+impl Shape for LifeStepAbort {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "abort")
+        })?;
+        let call = shape::required(object, "call", at, shape::text)?;
+        Ok(Self { call })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("abort"));
+        object.insert("call", Value::from(self.call.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeStepList {
+    pub entries: Vec<nyaaai_contract::shapes::provider::ProviderEntry>,
+}
+
+impl Shape for LifeStepList {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "list")
+        })?;
+        let entries = shape::required(object, "entries", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::ProviderEntry::decode_at,
+            )
+        })?;
+        Ok(Self { entries })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("list"));
+        object.insert(
+            "entries",
+            Value::Array(self.entries.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeStepKey {
+    pub id: String,
+    pub answer: LifeKeyAnswer,
+}
+
+impl Shape for LifeStepKey {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "key")
+        })?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let answer = shape::required(object, "answer", at, LifeKeyAnswer::decode_at)?;
+        Ok(Self { id, answer })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("key"));
+        object.insert("id", Value::from(self.id.as_str()));
+        object.insert("answer", self.answer.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeStepZdr {
+    pub on: bool,
+}
+
+impl Shape for LifeStepZdr {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "zdr")
+        })?;
+        let on = shape::required(object, "on", at, shape::flag)?;
+        Ok(Self { on })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("zdr"));
+        object.insert("on", Value::Bool(self.on));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeStepCheck {
+    pub id: String,
+}
+
+impl Shape for LifeStepCheck {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "check")
+        })?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        Ok(Self { id })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("check"));
+        object.insert("id", Value::from(self.id.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeStepBilled {
+    pub id: String,
+    pub source: String,
+    pub cost: Option<f64>,
+}
+
+impl Shape for LifeStepBilled {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "billed")
+        })?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let source = shape::required(object, "source", at, shape::text)?;
+        let cost = shape::optional(object, "cost", at, shape::number)?;
+        Ok(Self { id, source, cost })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("billed"));
+        object.insert("id", Value::from(self.id.as_str()));
+        object.insert("source", Value::from(self.source.as_str()));
+        if let Some(held) = &self.cost {
+            object.insert("cost", Value::Number(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum LifeStepSendMode {
+    Stream,
+    Complete,
+}
+
+impl LifeStepSendMode {
+    pub const ALL: [Self; 2] = [Self::Stream, Self::Complete];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Stream => "stream",
+            Self::Complete => "complete",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for LifeStepSendMode {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum LifeAnswer {
+    None(LifeAnswerNone),
+    Plan(LifeAnswerPlan),
+    Sizing(LifeAnswerSizing),
+}
+
+impl Shape for LifeAnswer {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "none" => LifeAnswerNone::decode_at(value, at).map(Self::None),
+            "plan" => LifeAnswerPlan::decode_at(value, at).map(Self::Plan),
+            "sizing" => LifeAnswerSizing::decode_at(value, at).map(Self::Sizing),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::None(held) => held.encode(),
+            Self::Plan(held) => held.encode(),
+            Self::Sizing(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeAnswerNone {}
+
+impl Shape for LifeAnswerNone {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "none")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("none"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeAnswerPlan {
+    pub unresolved: Option<nyaaai_contract::shapes::model::Unresolved>,
+    pub candidates: Vec<String>,
+    pub passed: Vec<nyaaai_contract::shapes::provider::Passed>,
+}
+
+impl Shape for LifeAnswerPlan {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "plan")
+        })?;
+        let unresolved = shape::required(object, "unresolved", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                nyaaai_contract::shapes::model::Unresolved::decode_at,
+            )
+        })?;
+        let candidates = shape::required(object, "candidates", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let passed = shape::required(object, "passed", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::Passed::decode_at,
+            )
+        })?;
+        Ok(Self {
+            unresolved,
+            candidates,
+            passed,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("plan"));
+        object.insert(
+            "unresolved",
+            self.unresolved
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert(
+            "candidates",
+            Value::Array(
+                self.candidates
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "passed",
+            Value::Array(self.passed.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeAnswerSizing {
+    pub entries: Vec<String>,
+}
+
+impl Shape for LifeAnswerSizing {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "sizing")
+        })?;
+        let entries = shape::required(object, "entries", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { entries })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("sizing"));
+        object.insert(
+            "entries",
+            Value::Array(
+                self.entries
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum LifeResult {
+    Served(LifeResultServed),
+    Stopped(LifeResultStopped),
+    Notice(LifeResultNotice),
+    Thrown(LifeResultThrown),
+    Open(LifeResultOpen),
+}
+
+impl Shape for LifeResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "served" => LifeResultServed::decode_at(value, at).map(Self::Served),
+            "stopped" => LifeResultStopped::decode_at(value, at).map(Self::Stopped),
+            "notice" => LifeResultNotice::decode_at(value, at).map(Self::Notice),
+            "thrown" => LifeResultThrown::decode_at(value, at).map(Self::Thrown),
+            "open" => LifeResultOpen::decode_at(value, at).map(Self::Open),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Served(held) => held.encode(),
+            Self::Stopped(held) => held.encode(),
+            Self::Notice(held) => held.encode(),
+            Self::Thrown(held) => held.encode(),
+            Self::Open(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeResultServed {
+    pub entry: String,
+    pub reply: nyaaai_contract::shapes::step::StepResult,
+}
+
+impl Shape for LifeResultServed {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "served")
+        })?;
+        let entry = shape::required(object, "entry", at, shape::text)?;
+        let reply = shape::required(
+            object,
+            "reply",
+            at,
+            nyaaai_contract::shapes::step::StepResult::decode_at,
+        )?;
+        Ok(Self { entry, reply })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("served"));
+        object.insert("entry", Value::from(self.entry.as_str()));
+        object.insert("reply", self.reply.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeResultStopped {}
+
+impl Shape for LifeResultStopped {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "stopped")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("stopped"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeResultNotice {
+    pub notice: nyaaai_contract::shapes::health::Notice,
+    pub failure: Option<nyaaai_contract::shapes::step::Failure>,
+}
+
+impl Shape for LifeResultNotice {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "notice")
+        })?;
+        let notice = shape::required(
+            object,
+            "notice",
+            at,
+            nyaaai_contract::shapes::health::Notice::decode_at,
+        )?;
+        let failure = shape::required(object, "failure", at, |value, at| {
+            shape::nullable(value, at, nyaaai_contract::shapes::step::Failure::decode_at)
+        })?;
+        Ok(Self { notice, failure })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("notice"));
+        object.insert("notice", self.notice.encode());
+        object.insert(
+            "failure",
+            self.failure
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeResultThrown {
+    pub message: String,
+}
+
+impl Shape for LifeResultThrown {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "thrown")
+        })?;
+        let message = shape::required(object, "message", at, shape::text)?;
+        Ok(Self { message })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("thrown"));
+        object.insert("message", Value::from(self.message.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeResultOpen {}
+
+impl Shape for LifeResultOpen {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "open")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("open"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum LifeTold {
+    Retry(LifeToldRetry),
+    Wait(LifeToldWait),
+    Skip(LifeToldSkip),
+}
+
+impl Shape for LifeTold {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "retry" => LifeToldRetry::decode_at(value, at).map(Self::Retry),
+            "wait" => LifeToldWait::decode_at(value, at).map(Self::Wait),
+            "skip" => LifeToldSkip::decode_at(value, at).map(Self::Skip),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Retry(held) => held.encode(),
+            Self::Wait(held) => held.encode(),
+            Self::Skip(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeToldRetry {
+    pub attempt: i64,
+    pub wait_ms: i64,
+    pub status: LifeToldRetryStatus,
+}
+
+impl Shape for LifeToldRetry {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "retry")
+        })?;
+        let attempt = shape::required(object, "attempt", at, shape::integer)?;
+        let wait_ms = shape::required(object, "waitMs", at, shape::integer)?;
+        let status = shape::required(object, "status", at, LifeToldRetryStatus::decode_at)?;
+        Ok(Self {
+            attempt,
+            wait_ms,
+            status,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("retry"));
+        object.insert("attempt", Value::Number(self.attempt as f64));
+        object.insert("waitMs", Value::Number(self.wait_ms as f64));
+        object.insert("status", self.status.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeToldWait {
+    pub waiting: Option<nyaaai_contract::shapes::health::GateWaiting>,
+}
+
+impl Shape for LifeToldWait {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "wait")
+        })?;
+        let waiting = shape::required(object, "waiting", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                nyaaai_contract::shapes::health::GateWaiting::decode_at,
+            )
+        })?;
+        Ok(Self { waiting })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("wait"));
+        object.insert(
+            "waiting",
+            self.waiting
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeToldSkip {
+    pub entry: String,
+    pub label: String,
+    pub reason: nyaaai_contract::shapes::provider::SkipReason,
+}
+
+impl Shape for LifeToldSkip {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "skip")
+        })?;
+        let entry = shape::required(object, "entry", at, shape::text)?;
+        let label = shape::required(object, "label", at, shape::text)?;
+        let reason = shape::required(
+            object,
+            "reason",
+            at,
+            nyaaai_contract::shapes::provider::SkipReason::decode_at,
+        )?;
+        Ok(Self {
+            entry,
+            label,
+            reason,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("skip"));
+        object.insert("entry", Value::from(self.entry.as_str()));
+        object.insert("label", Value::from(self.label.as_str()));
+        object.insert("reason", self.reason.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum LifeToldRetryStatus {
+    Number(f64),
+    Text(String),
+}
+
+impl Shape for LifeToldRetryStatus {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        if let Ok(held) = shape::number(value, at) {
+            return Ok(Self::Number(held));
+        }
+        if let Ok(held) = shape::text(value, at) {
+            return Ok(Self::Text(held));
+        }
+        Err(shape::refused(at, "no branch matches"))
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Number(held) => Value::Number(*held),
+            Self::Text(held) => Value::from(held.as_str()),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeCall {
+    pub call: String,
+    pub result: LifeResult,
+    pub trace: Option<Vec<nyaaai_contract::shapes::lifecycle::TraceEntry>>,
+    pub told: Vec<LifeTold>,
+    pub attempts: Vec<LifeCallAttemptsItem>,
+}
+
+impl Shape for LifeCall {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let call = shape::required(object, "call", at, shape::text)?;
+        let result = shape::required(object, "result", at, LifeResult::decode_at)?;
+        let trace = shape::required(object, "trace", at, |value, at| {
+            shape::nullable(value, at, |value, at| {
+                shape::list(
+                    value,
+                    at,
+                    nyaaai_contract::shapes::lifecycle::TraceEntry::decode_at,
+                )
+            })
+        })?;
+        let told = shape::required(object, "told", at, |value, at| {
+            shape::list(value, at, LifeTold::decode_at)
+        })?;
+        let attempts = shape::required(object, "attempts", at, |value, at| {
+            shape::list(value, at, LifeCallAttemptsItem::decode_at)
+        })?;
+        Ok(Self {
+            call,
+            result,
+            trace,
+            told,
+            attempts,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("call", Value::from(self.call.as_str()));
+        object.insert("result", self.result.encode());
+        object.insert(
+            "trace",
+            self.trace.as_ref().map_or(Value::Null, |held| {
+                Value::Array(held.iter().map(|held| held.encode()).collect())
+            }),
+        );
+        object.insert(
+            "told",
+            Value::Array(self.told.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "attempts",
+            Value::Array(self.attempts.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeCallAttemptsItem {
+    pub entry: String,
+    pub events: Vec<nyaaai_contract::shapes::step::StepEvent>,
+}
+
+impl Shape for LifeCallAttemptsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let entry = shape::required(object, "entry", at, shape::text)?;
+        let events = shape::required(object, "events", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::step::StepEvent::decode_at,
+            )
+        })?;
+        Ok(Self { entry, events })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("entry", Value::from(self.entry.as_str()));
+        object.insert(
+            "events",
+            Value::Array(self.events.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeSeen {
+    pub url: String,
+    pub authorization: Option<String>,
+    pub accept: Option<String>,
+}
+
+impl Shape for LifeSeen {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let url = shape::required(object, "url", at, shape::text)?;
+        let authorization = shape::required(object, "authorization", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let accept = shape::required(object, "accept", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        Ok(Self {
+            url,
+            authorization,
+            accept,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("url", Value::from(self.url.as_str()));
+        object.insert(
+            "authorization",
+            self.authorization
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "accept",
+            self.accept
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifecycleRunInput {
+    pub start_ms: i64,
+    pub pause_ms: Option<u64>,
+    pub max_pauses: Option<u64>,
+    pub retry: Option<nyaaai_contract::shapes::health::RetryOptions>,
+    pub draws: Option<Vec<f64>>,
+    pub entries: Vec<nyaaai_contract::shapes::provider::ProviderEntry>,
+    pub keys: Record<LifeKeyAnswer>,
+    pub rows: Vec<String>,
+    pub kinds: Vec<nyaaai_contract::shapes::provider::ProviderKindName>,
+    pub listings: Record<Record<LifeListing>>,
+    pub zdr_only: bool,
+    pub usage_ids: Option<Vec<String>>,
+    pub exchanges: Vec<LifeReply>,
+    pub trace: Option<bool>,
+    pub steps: Vec<LifeStep>,
+}
+
+impl Shape for LifecycleRunInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let start_ms = shape::required(object, "startMs", at, shape::integer)?;
+        let pause_ms = shape::optional(object, "pauseMs", at, shape::natural)?;
+        let max_pauses = shape::optional(object, "maxPauses", at, shape::natural)?;
+        let retry = shape::optional(
+            object,
+            "retry",
+            at,
+            nyaaai_contract::shapes::health::RetryOptions::decode_at,
+        )?;
+        let draws = shape::optional(object, "draws", at, |value, at| {
+            shape::list(value, at, shape::number)
+        })?;
+        let entries = shape::required(object, "entries", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::ProviderEntry::decode_at,
+            )
+        })?;
+        let keys = shape::required(object, "keys", at, |value, at| {
+            shape::record(value, at, LifeKeyAnswer::decode_at)
+        })?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let kinds = shape::required(object, "kinds", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::ProviderKindName::decode_at,
+            )
+        })?;
+        let listings = shape::required(object, "listings", at, |value, at| {
+            shape::record(value, at, |value, at| {
+                shape::record(value, at, LifeListing::decode_at)
+            })
+        })?;
+        let zdr_only = shape::required(object, "zdrOnly", at, shape::flag)?;
+        let usage_ids = shape::optional(object, "usageIds", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let exchanges = shape::required(object, "exchanges", at, |value, at| {
+            shape::list(value, at, LifeReply::decode_at)
+        })?;
+        let trace = shape::optional(object, "trace", at, shape::flag)?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list_within(value, at, Some(1), None, LifeStep::decode_at)
+        })?;
+        Ok(Self {
+            start_ms,
+            pause_ms,
+            max_pauses,
+            retry,
+            draws,
+            entries,
+            keys,
+            rows,
+            kinds,
+            listings,
+            zdr_only,
+            usage_ids,
+            exchanges,
+            trace,
+            steps,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("startMs", Value::Number(self.start_ms as f64));
+        if let Some(held) = &self.pause_ms {
+            object.insert("pauseMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.max_pauses {
+            object.insert("maxPauses", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.retry {
+            object.insert("retry", held.encode());
+        }
+        if let Some(held) = &self.draws {
+            object.insert(
+                "draws",
+                Value::Array(held.iter().map(|held| Value::Number(*held)).collect()),
+            );
+        }
+        object.insert(
+            "entries",
+            Value::Array(self.entries.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "keys",
+            shape::record_value(&self.keys, |held| held.encode()),
+        );
+        object.insert(
+            "rows",
+            Value::Array(
+                self.rows
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "kinds",
+            Value::Array(self.kinds.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "listings",
+            shape::record_value(&self.listings, |held| {
+                shape::record_value(held, |held| held.encode())
+            }),
+        );
+        object.insert("zdrOnly", Value::Bool(self.zdr_only));
+        if let Some(held) = &self.usage_ids {
+            object.insert(
+                "usageIds",
+                Value::Array(held.iter().map(|held| Value::from(held.as_str())).collect()),
+            );
+        }
+        object.insert(
+            "exchanges",
+            Value::Array(self.exchanges.iter().map(|held| held.encode()).collect()),
+        );
+        if let Some(held) = &self.trace {
+            object.insert("trace", Value::Bool(*held));
+        }
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifecycleRunResult {
+    pub steps: Vec<LifecycleRunResultStepsItem>,
+    pub calls: Vec<LifeCall>,
+    pub requests: Vec<LifeSeen>,
+    pub recorded: Vec<nyaaai_contract::shapes::usage::MeteredCall>,
+    pub stats: Vec<LifecycleRunResultStatsItem>,
+    pub waiting: Vec<String>,
+}
+
+impl Shape for LifecycleRunResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list(value, at, LifecycleRunResultStepsItem::decode_at)
+        })?;
+        let calls = shape::required(object, "calls", at, |value, at| {
+            shape::list(value, at, LifeCall::decode_at)
+        })?;
+        let requests = shape::required(object, "requests", at, |value, at| {
+            shape::list(value, at, LifeSeen::decode_at)
+        })?;
+        let recorded = shape::required(object, "recorded", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::usage::MeteredCall::decode_at,
+            )
+        })?;
+        let stats = shape::required(object, "stats", at, |value, at| {
+            shape::list(value, at, LifecycleRunResultStatsItem::decode_at)
+        })?;
+        let waiting = shape::required(object, "waiting", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self {
+            steps,
+            calls,
+            requests,
+            recorded,
+            stats,
+            waiting,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "calls",
+            Value::Array(self.calls.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "requests",
+            Value::Array(self.requests.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "recorded",
+            Value::Array(self.recorded.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "stats",
+            Value::Array(self.stats.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "waiting",
+            Value::Array(
+                self.waiting
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifecycleRunResultStepsItem {
+    pub now_ms: i64,
+    pub answer: LifeAnswer,
+    pub ended: Vec<String>,
+    pub parked: Vec<String>,
+    pub entries: Vec<nyaaai_contract::shapes::health::EntryHealth>,
+    pub requests: i64,
+}
+
+impl Shape for LifecycleRunResultStepsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let now_ms = shape::required(object, "nowMs", at, shape::integer)?;
+        let answer = shape::required(object, "answer", at, LifeAnswer::decode_at)?;
+        let ended = shape::required(object, "ended", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let parked = shape::required(object, "parked", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let entries = shape::required(object, "entries", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::health::EntryHealth::decode_at,
+            )
+        })?;
+        let requests = shape::required(object, "requests", at, shape::integer)?;
+        Ok(Self {
+            now_ms,
+            answer,
+            ended,
+            parked,
+            entries,
+            requests,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("nowMs", Value::Number(self.now_ms as f64));
+        object.insert("answer", self.answer.encode());
+        object.insert(
+            "ended",
+            Value::Array(
+                self.ended
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "parked",
+            Value::Array(
+                self.parked
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "entries",
+            Value::Array(self.entries.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert("requests", Value::Number(self.requests as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifecycleRunResultStatsItem {
+    pub id: String,
+    pub generation_id: String,
+    pub call: nyaaai_contract::shapes::usage::MeteredCall,
+}
+
+impl Shape for LifecycleRunResultStatsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let generation_id = shape::required(object, "generationId", at, shape::text)?;
+        let call = shape::required(
+            object,
+            "call",
+            at,
+            nyaaai_contract::shapes::usage::MeteredCall::decode_at,
+        )?;
+        Ok(Self {
+            id,
+            generation_id,
+            call,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("id", Value::from(self.id.as_str()));
+        object.insert("generationId", Value::from(self.generation_id.as_str()));
+        object.insert("call", self.call.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct MeterBilled {
+    pub entry: String,
+    pub source: String,
+    pub allowance: Option<f64>,
+    pub cost: Option<f64>,
+}
+
+impl Shape for MeterBilled {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let entry = shape::required(object, "entry", at, shape::text)?;
+        let source = shape::required(object, "source", at, shape::text)?;
+        let allowance = shape::optional(object, "allowance", at, shape::number)?;
+        let cost = shape::optional(object, "cost", at, shape::number)?;
+        Ok(Self {
+            entry,
+            source,
+            allowance,
+            cost,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("entry", Value::from(self.entry.as_str()));
+        object.insert("source", Value::from(self.source.as_str()));
+        if let Some(held) = &self.allowance {
+            object.insert("allowance", Value::Number(*held));
+        }
+        if let Some(held) = &self.cost {
+            object.insert("cost", Value::Number(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct MeterCalledInput {
+    pub calls: Vec<MeterCalledInputCallsItem>,
+}
+
+impl Shape for MeterCalledInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let calls = shape::required(object, "calls", at, |value, at| {
+            shape::list(value, at, MeterCalledInputCallsItem::decode_at)
+        })?;
+        Ok(Self { calls })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "calls",
+            Value::Array(self.calls.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct MeterCalledInputCallsItem {
+    pub call: nyaaai_contract::shapes::usage::MeteredCall,
+    pub id: Option<String>,
+}
+
+impl Shape for MeterCalledInputCallsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let call = shape::required(
+            object,
+            "call",
+            at,
+            nyaaai_contract::shapes::usage::MeteredCall::decode_at,
+        )?;
+        let id = shape::required(object, "id", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        Ok(Self { call, id })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("call", self.call.encode());
+        object.insert(
+            "id",
+            self.id
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct MeterCalledResult {
+    pub calls: Vec<MeterCalledResultCallsItem>,
+}
+
+impl Shape for MeterCalledResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let calls = shape::required(object, "calls", at, |value, at| {
+            shape::list(value, at, MeterCalledResultCallsItem::decode_at)
+        })?;
+        Ok(Self { calls })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "calls",
+            Value::Array(self.calls.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct MeterCalledResultCallsItem {
+    pub recorded: nyaaai_contract::shapes::usage::MeteredCall,
+    pub billed: Option<MeterBilled>,
+    pub stats: Option<MeterCalledResultCallsItemStats>,
+}
+
+impl Shape for MeterCalledResultCallsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let recorded = shape::required(
+            object,
+            "recorded",
+            at,
+            nyaaai_contract::shapes::usage::MeteredCall::decode_at,
+        )?;
+        let billed = shape::required(object, "billed", at, |value, at| {
+            shape::nullable(value, at, MeterBilled::decode_at)
+        })?;
+        let stats = shape::required(object, "stats", at, |value, at| {
+            shape::nullable(value, at, MeterCalledResultCallsItemStats::decode_at)
+        })?;
+        Ok(Self {
+            recorded,
+            billed,
+            stats,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("recorded", self.recorded.encode());
+        object.insert(
+            "billed",
+            self.billed
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert(
+            "stats",
+            self.stats
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct MeterCalledResultCallsItemStats {
+    pub id: String,
+    pub generation_id: String,
+    pub call: nyaaai_contract::shapes::usage::MeteredCall,
+}
+
+impl Shape for MeterCalledResultCallsItemStats {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let generation_id = shape::required(object, "generationId", at, shape::text)?;
+        let call = shape::required(
+            object,
+            "call",
+            at,
+            nyaaai_contract::shapes::usage::MeteredCall::decode_at,
+        )?;
+        Ok(Self {
+            id,
+            generation_id,
+            call,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("id", Value::from(self.id.as_str()));
+        object.insert("generationId", Value::from(self.generation_id.as_str()));
+        object.insert("call", self.call.encode());
+        Value::Object(object)
+    }
+}

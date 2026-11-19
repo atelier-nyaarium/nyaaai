@@ -7,6 +7,7 @@ import { CONTRACT_VERSION } from "@nyaaai/contract/shape";
 import * as strict from "@nyaaai/contract/strictSchema";
 import * as httpDates from "@nyaaai/contract/time";
 import "@nyaaai/contract/shapes/health";
+import "@nyaaai/contract/shapes/lifecycle";
 import "@nyaaai/contract/shapes/model";
 import "@nyaaai/contract/shapes/provider";
 import "@nyaaai/contract/shapes/sessionCut";
@@ -35,7 +36,9 @@ import { js } from "./scripts/caseGroups/js";
 import { json } from "./scripts/caseGroups/json";
 import { keyReader } from "./scripts/caseGroups/keyReader";
 import { kindGroup } from "./scripts/caseGroups/kind";
+import { lifecycle } from "./scripts/caseGroups/lifecycle";
 import { local } from "./scripts/caseGroups/local";
+import { meter } from "./scripts/caseGroups/meter";
 import { native } from "./scripts/caseGroups/native";
 import { noticeText } from "./scripts/caseGroups/noticeText";
 import { number } from "./scripts/caseGroups/number";
@@ -170,6 +173,11 @@ export default project({
 		step: { crate: "nyaaai_contract", module: "shapes::step", file: "rust/contract/src/shapes/step.rs" },
 		usage: { crate: "nyaaai_contract", module: "shapes::usage", file: "rust/contract/src/shapes/usage.rs" },
 		health: { crate: "nyaaai_contract", module: "shapes::health", file: "rust/contract/src/shapes/health.rs" },
+		lifecycle: {
+			crate: "nyaaai_contract",
+			module: "shapes::lifecycle",
+			file: "rust/contract/src/shapes/lifecycle.rs",
+		},
 		torture: { crate: "nyaaai_testkit", module: "torture_shapes", file: "rust/testkit/src/torture_shapes.rs" },
 		trace: { crate: "nyaaai_testkit", module: "trace_shapes", file: "rust/testkit/src/trace_shapes.rs" },
 	},
@@ -223,6 +231,8 @@ export default project({
 		gate,
 		keyReader,
 		health,
+		lifecycle,
+		meter,
 	],
 	runs: adapterCases,
 	cases: { crate: "nyaaai_cli", module: "cases", dir: "rust/cli/src/cases" },

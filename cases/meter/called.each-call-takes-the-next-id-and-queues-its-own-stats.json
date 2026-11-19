@@ -1,0 +1,175 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "meter.called",
+	"name": "each-call-takes-the-next-id-and-queues-its-own-stats",
+	"input": {
+		"calls": [
+			{
+				"call": {
+					"tag": {
+						"feature": "chat"
+					},
+					"model": "vendor/model-a",
+					"at": 1794528001000,
+					"ms": 120,
+					"cost": {
+						"usd": 0.001,
+						"estimated": false
+					},
+					"entry": "a",
+					"generationId": "gen-1"
+				},
+				"id": "u1"
+			},
+			{
+				"call": {
+					"tag": {
+						"feature": "chat"
+					},
+					"model": "vendor/model-a",
+					"at": 1794528001000,
+					"ms": 120,
+					"cost": {
+						"usd": 0.001,
+						"estimated": false
+					},
+					"entry": "b",
+					"generationId": "gen-2",
+					"usage": {
+						"input": 100,
+						"output": 10,
+						"cost": 0.001,
+						"billingSource": "go"
+					}
+				},
+				"id": "u2"
+			},
+			{
+				"call": {
+					"tag": {
+						"feature": "chat"
+					},
+					"model": "vendor/model-a",
+					"at": 1794528001000,
+					"ms": 120,
+					"cost": {
+						"usd": 0.001,
+						"estimated": false
+					},
+					"entry": "b",
+					"generationId": "gen-3"
+				},
+				"id": null
+			}
+		]
+	},
+	"expected": {
+		"calls": [
+			{
+				"recorded": {
+					"tag": {
+						"feature": "chat"
+					},
+					"model": "vendor/model-a",
+					"entry": "a",
+					"at": 1794528001000,
+					"ms": 120,
+					"cost": {
+						"usd": 0.001,
+						"estimated": false
+					},
+					"generationId": "gen-1"
+				},
+				"billed": null,
+				"stats": {
+					"id": "u1",
+					"generationId": "gen-1",
+					"call": {
+						"tag": {
+							"feature": "chat"
+						},
+						"model": "vendor/model-a",
+						"entry": "a",
+						"at": 1794528001000,
+						"ms": 120,
+						"cost": {
+							"usd": 0.001,
+							"estimated": false
+						},
+						"generationId": "gen-1"
+					}
+				}
+			},
+			{
+				"recorded": {
+					"tag": {
+						"feature": "chat"
+					},
+					"model": "vendor/model-a",
+					"entry": "b",
+					"at": 1794528001000,
+					"ms": 120,
+					"usage": {
+						"input": 100,
+						"output": 10,
+						"cost": 0.001,
+						"billingSource": "go"
+					},
+					"cost": {
+						"usd": 0.001,
+						"estimated": false
+					},
+					"generationId": "gen-2"
+				},
+				"billed": {
+					"entry": "b",
+					"source": "go",
+					"cost": 0.001
+				},
+				"stats": {
+					"id": "u2",
+					"generationId": "gen-2",
+					"call": {
+						"tag": {
+							"feature": "chat"
+						},
+						"model": "vendor/model-a",
+						"entry": "b",
+						"at": 1794528001000,
+						"ms": 120,
+						"usage": {
+							"input": 100,
+							"output": 10,
+							"cost": 0.001,
+							"billingSource": "go"
+						},
+						"cost": {
+							"usd": 0.001,
+							"estimated": false
+						},
+						"generationId": "gen-2"
+					}
+				}
+			},
+			{
+				"recorded": {
+					"tag": {
+						"feature": "chat"
+					},
+					"model": "vendor/model-a",
+					"entry": "b",
+					"at": 1794528001000,
+					"ms": 120,
+					"cost": {
+						"usd": 0.001,
+						"estimated": false
+					},
+					"generationId": "gen-3"
+				},
+				"billed": null,
+				"stats": null
+			}
+		]
+	}
+}
