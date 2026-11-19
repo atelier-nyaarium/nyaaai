@@ -86,42 +86,72 @@
 				"kind": "call",
 				"call": {
 					"kind": "views",
-					"use": "chat"
+					"use": {
+						"name": "chat",
+						"requires": [],
+						"hides": true
+					}
 				}
 			},
 			{
 				"kind": "call",
 				"call": {
 					"kind": "views",
-					"use": "analysis"
+					"use": {
+						"name": "analysis",
+						"requires": [
+							"schema"
+						],
+						"hides": false
+					}
 				}
 			},
 			{
 				"kind": "call",
 				"call": {
 					"kind": "views",
-					"use": "chat"
+					"use": {
+						"name": "chat",
+						"requires": [],
+						"hides": true
+					}
 				}
 			},
 			{
 				"kind": "call",
 				"call": {
 					"kind": "views",
-					"use": "analysis"
+					"use": {
+						"name": "analysis",
+						"requires": [
+							"schema"
+						],
+						"hides": false
+					}
 				}
 			},
 			{
 				"kind": "call",
 				"call": {
 					"kind": "views",
-					"use": "compaction"
+					"use": {
+						"name": "compaction",
+						"requires": [
+							"schema"
+						],
+						"hides": false
+					}
 				}
 			},
 			{
 				"kind": "call",
 				"call": {
 					"kind": "views",
-					"use": "chat"
+					"use": {
+						"name": "chat",
+						"requires": [],
+						"hides": true
+					}
 				}
 			}
 		]

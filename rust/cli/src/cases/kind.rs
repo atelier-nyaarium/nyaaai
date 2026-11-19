@@ -12,7 +12,7 @@ use nyaaai_agentic::provider::kind::{
     CatalogDeps, KINDS, ProviderKind, Route, kind_lines, provider_view as view_of,
 };
 use nyaaai_contract::model_registry::ModelRegistry;
-use nyaaai_contract::shapes::model::{ModelUse, ModelViewPrice, ModelViewStatus};
+use nyaaai_contract::shapes::model::{ModelViewPrice, ModelViewStatus};
 use nyaaai_contract::shapes::provider::{
     EntryFields, ProviderEntry, ProviderKindName, ProviderPlan,
 };
@@ -25,6 +25,8 @@ use super::catalog::{
     view_lines,
 };
 use super::local::{keys_of, message_of, net_of};
+use nyaaai_agentic::models::uses::CHAT;
+
 use super::shapes::*;
 
 macro_rules! hosted_of {
@@ -445,7 +447,7 @@ pub fn route(input: KindRouteInput) -> Outcome<KindRouteResult> {
                 KindRouteInputStepsItem::Views(held) => {
                     match catalog
                         .views(
-                            held.use_.unwrap_or(ModelUse::Chat),
+                            held.use_.clone().unwrap_or_else(|| CHAT.clone()),
                             held.zdr_only.unwrap_or(true),
                             Some(&token),
                         )
@@ -491,7 +493,11 @@ pub fn route(input: KindRouteInput) -> Outcome<KindRouteResult> {
                         .next()
                         .ok_or_else(|| "no row".to_owned())?;
                     match tester
-                        .view(&row, held.use_.unwrap_or(ModelUse::Chat), &token)
+                        .view(
+                            &row,
+                            held.use_.clone().unwrap_or_else(|| CHAT.clone()),
+                            &token,
+                        )
                         .await
                     {
                         Ok(view) => match view_line(&view) {

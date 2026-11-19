@@ -26492,6 +26492,153 @@ impl Shape for ResolverServedByResultSent {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+pub struct ResolverUsesInput {
+    pub rows: Vec<String>,
+    pub uses: Vec<nyaaai_contract::shapes::model::ModelUse>,
+}
+
+impl Shape for ResolverUsesInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let uses = shape::required(object, "uses", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::model::ModelUse::decode_at,
+            )
+        })?;
+        Ok(Self { rows, uses })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "rows",
+            Value::Array(
+                self.rows
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "uses",
+            Value::Array(self.uses.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverUsesResult {
+    pub calls: Vec<ResolverUsesResultCallsItem>,
+}
+
+impl Shape for ResolverUsesResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let calls = shape::required(object, "calls", at, |value, at| {
+            shape::list(value, at, ResolverUsesResultCallsItem::decode_at)
+        })?;
+        Ok(Self { calls })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "calls",
+            Value::Array(self.calls.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverUsesResultCallsItem {
+    pub call: ResolverUsesResultCallsItemCall,
+    pub use_: nyaaai_contract::shapes::model::ModelUse,
+    pub asked: Vec<nyaaai_contract::shapes::model::ModelUse>,
+}
+
+impl Shape for ResolverUsesResultCallsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let call = shape::required(
+            object,
+            "call",
+            at,
+            ResolverUsesResultCallsItemCall::decode_at,
+        )?;
+        let use_ = shape::required(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        let asked = shape::required(object, "asked", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::model::ModelUse::decode_at,
+            )
+        })?;
+        Ok(Self { call, use_, asked })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("call", self.call.encode());
+        object.insert("use", self.use_.encode());
+        object.insert(
+            "asked",
+            Value::Array(self.asked.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ResolverUsesResultCallsItemCall {
+    Routes,
+    Resolve,
+    Rows,
+    Candidates,
+}
+
+impl ResolverUsesResultCallsItemCall {
+    pub const ALL: [Self; 4] = [Self::Routes, Self::Resolve, Self::Rows, Self::Candidates];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Routes => "routes",
+            Self::Resolve => "resolve",
+            Self::Rows => "rows",
+            Self::Candidates => "candidates",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for ResolverUsesResultCallsItemCall {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct ResolverRoutesInput {
     pub entries: Vec<nyaaai_contract::shapes::provider::ProviderEntry>,
     pub answers: Record<ResolverRoutesInputAnswersValue>,

@@ -78,7 +78,11 @@
 			}
 		],
 		"scope": "e1",
-		"use": "chat",
+		"use": {
+			"name": "chat",
+			"requires": [],
+			"hides": true
+		},
 		"views": []
 	},
 	"expected": {

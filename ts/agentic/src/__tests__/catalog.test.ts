@@ -7,6 +7,7 @@ import { scriptedModelRegistry } from "@nyaaai/testkit/scriptedPorts";
 import { browseModels } from "../kinds/openrouter/browse";
 import { expiryOf, ModelCatalog, parseEndpoints } from "../kinds/openrouter/catalog";
 import { MODELS } from "../models/curated";
+import { ANALYSIS, CHAT } from "../models/uses";
 
 ////////////////////////////////
 //  Fixtures
@@ -44,14 +45,14 @@ it("a join is reused, not rebuilt, while rows, data, the flag and the removal da
 	const first = await catalog.views();
 	expect(await catalog.views()).toEqual(first);
 	expect(registry.reads()).toBe(1);
-	await catalog.views("chat", false);
+	await catalog.views(CHAT, false);
 	expect(registry.reads()).toBe(2);
 	registry.setRows(ROWS);
-	await catalog.views("chat", false);
+	await catalog.views(CHAT, false);
 	expect(registry.reads()).toBe(3);
-	await catalog.views("chat", false);
+	await catalog.views(CHAT, false);
 	expect(registry.reads()).toBe(3);
-	await catalog.views("analysis");
+	await catalog.views(ANALYSIS);
 	expect(registry.reads()).toBe(4);
 });
 

@@ -6,8 +6,8 @@ use std::sync::LazyLock;
 use nyaaai_contract::json::{Object, Record, Value};
 use nyaaai_contract::pattern::Pattern;
 use nyaaai_contract::shapes::model::{
-    Binding, ModelRow, ModelRowCache, ModelUse, ModelView, ModelViewPrice, ModelViewStatus,
-    RowIdentity, StoredRegistry, TestRecord, TestRecordCache, TestRecordChecks,
+    Ability, Binding, ModelRow, ModelRowCache, ModelUse, ModelView, ModelViewPrice,
+    ModelViewStatus, RowIdentity, StoredRegistry, TestRecord, TestRecordCache, TestRecordChecks,
     TestRecordChecksReasoning, TestRecordChecksRecovery, TestRecordChecksSchema,
     TestRecordChecksToolPlus, TestRecordVerifiedPrice,
 };
@@ -421,11 +421,10 @@ pub fn model_list<'a>(
     settings: &RegistrySettings,
 ) -> Vec<&'a ModelView> {
     let fits = |row: &ModelRow| {
-        if use_ == ModelUse::Chat {
-            !settings.hidden.contains(&row.family)
-        } else {
-            row.schema
-        }
+        (!use_.hides || !settings.hidden.contains(&row.family))
+            && use_.requires.iter().all(|ability| match ability {
+                Ability::Schema => row.schema,
+            })
     };
     views
         .iter()

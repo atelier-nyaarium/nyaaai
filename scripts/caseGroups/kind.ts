@@ -1,4 +1,5 @@
 import { checkKey } from "@nyaaai/agentic/kinds/openrouter/key";
+import { CHAT } from "@nyaaai/agentic/models/uses";
 import { codecFactsOf } from "@nyaaai/agentic/models/view";
 import { KINDS, kindLines, type ProviderKind, providerView } from "@nyaaai/agentic/provider/kind";
 import type { KeyAuth } from "@nyaaai/agentic/transport";
@@ -23,6 +24,7 @@ import { kindCases } from "../caseSources/kindCases";
 import { kindCheckCases } from "../caseSources/kindCheck";
 import { kindKeyCases } from "../caseSources/kindKey";
 import { kindRouteCases } from "../caseSources/kindRoute";
+import { withUses } from "../caseSources/uses";
 import {
 	abortOptions,
 	BASE_URL,
@@ -486,7 +488,7 @@ export const kindGroup = caseGroup("kind", {
 					let answer: RouteAnswerOf;
 					try {
 						if (step.kind === "views") {
-							const views = await catalog.views(step.use ?? "chat", step.zdrOnly ?? true, signal);
+							const views = await catalog.views(step.use ?? CHAT, step.zdrOnly ?? true, signal);
 							answer = { kind: "views", views: views.map(viewLine) };
 						} else if (step.kind === "list") {
 							answer = { kind: "list", models: (await browser.list(step.fresh)) ?? null };
@@ -498,7 +500,7 @@ export const kindGroup = caseGroup("kind", {
 							const row = rowsOfKeys([step.row])[0] as ModelView["row"];
 							answer = {
 								kind: "view",
-								view: viewLine(await tester.view(row, step.use ?? "chat", signal)),
+								view: viewLine(await tester.view(row, step.use ?? CHAT, signal)),
 							};
 						} else {
 							net.wheel.advance(step.ms);
@@ -519,5 +521,5 @@ export const kindGroup = caseGroup("kind", {
 			},
 		),
 	},
-	sources: casesFor("kind", kindKeyCases, kindCases, kindCheckCases, kindRouteCases),
+	sources: withUses(casesFor("kind", kindKeyCases, kindCases, kindCheckCases, kindRouteCases)),
 });

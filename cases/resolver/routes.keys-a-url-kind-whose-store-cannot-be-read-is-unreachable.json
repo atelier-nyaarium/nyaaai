@@ -38,11 +38,19 @@
 			{
 				"kind": "routes",
 				"model": "ollama:qwen",
-				"use": "chat"
+				"use": {
+					"name": "chat",
+					"requires": [],
+					"hides": true
+				}
 			},
 			{
 				"kind": "rows",
-				"use": "chat"
+				"use": {
+					"name": "chat",
+					"requires": [],
+					"hides": true
+				}
 			}
 		]
 	},

@@ -42,7 +42,11 @@
 			{
 				"kind": "routes",
 				"model": "openai/gpt-6-luna",
-				"use": "chat"
+				"use": {
+					"name": "chat",
+					"requires": [],
+					"hides": true
+				}
 			},
 			{
 				"kind": "during",

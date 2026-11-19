@@ -360,8 +360,8 @@ pub struct ServedByDeps {
 }
 
 /// Resolves through one entry.
-pub async fn served_by(d: &ServedByDeps, key: &str, use_: ModelUse) -> Routes {
-    let view = match d.catalog.view(key, use_).await {
+pub async fn served_by(d: &ServedByDeps, key: &str, use_: &ModelUse) -> Routes {
+    let view = match d.catalog.view(key, use_.clone()).await {
         Some(view) => view,
         None => unknown_view(&adhoc_row(key, d.kind.kind())),
     };
@@ -570,7 +570,7 @@ impl ModelResolver {
         reach_of(field, &self.d.keys.get(&entry.id).await)
     }
 
-    pub async fn resolve(&self, key: &str, use_: ModelUse) -> Resolution {
+    pub async fn resolve(&self, key: &str, use_: &ModelUse) -> Resolution {
         match self.routes(key, use_).await {
             Planned::Routes(mut routes) => {
                 Resolution::Resolved(Box::new(routes.candidates.swap_remove(0)))
@@ -580,7 +580,7 @@ impl ModelResolver {
     }
 
     /// Eligible entries, priority order.
-    pub async fn routes(&self, key: &str, use_: ModelUse) -> Planned {
+    pub async fn routes(&self, key: &str, use_: &ModelUse) -> Planned {
         let rows = self.d.registry.rows();
         let Some(row) = rows.iter().find(|each| each.key == key) else {
             return Planned::Unresolved(Unresolved {
@@ -607,7 +607,7 @@ impl ModelResolver {
     }
 
     /// Settings rows in order.
-    pub async fn rows(&self, use_: ModelUse) -> Vec<ResolvedOption> {
+    pub async fn rows(&self, use_: &ModelUse) -> Vec<ResolvedOption> {
         let zdr_only = (self.d.zdr_only)();
         let reach = self.reaches();
         let rows = self.d.registry.rows();
@@ -622,7 +622,7 @@ impl ModelResolver {
     async fn option_of(
         &self,
         row: &ModelRow,
-        use_: ModelUse,
+        use_: &ModelUse,
         zdr_only: bool,
         reach: &Reaches,
     ) -> ResolvedOption {
@@ -644,7 +644,7 @@ impl ModelResolver {
     }
 
     /// Resolvable keys with their serving entries.
-    pub async fn candidates(&self, use_: ModelUse) -> Vec<ResolvedOption> {
+    pub async fn candidates(&self, use_: &ModelUse) -> Vec<ResolvedOption> {
         self.rows(use_)
             .await
             .into_iter()
@@ -665,7 +665,7 @@ impl ModelResolver {
     async fn routed(
         &self,
         row: &ModelRow,
-        use_: ModelUse,
+        use_: &ModelUse,
         zdr_only: bool,
         reaches: &Reaches,
         standing: bool,
@@ -782,12 +782,12 @@ impl ModelResolver {
         &self,
         route: &Route,
         row: &ModelRow,
-        use_: ModelUse,
+        use_: &ModelUse,
         zdr_only: bool,
     ) -> Option<ModelView> {
         let views = route
             .catalog
-            .views(use_, zdr_only, None)
+            .views(use_.clone(), zdr_only, None)
             .await
             .unwrap_or_default();
         views.into_iter().find(|each| each.row.key == row.key)

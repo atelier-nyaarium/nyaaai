@@ -78,7 +78,13 @@
 		"steps": [
 			{
 				"kind": "views",
-				"use": "compaction"
+				"use": {
+					"name": "compaction",
+					"requires": [
+						"schema"
+					],
+					"hides": false
+				}
 			},
 			{
 				"kind": "views",
@@ -86,7 +92,13 @@
 			},
 			{
 				"kind": "views",
-				"use": "analysis",
+				"use": {
+					"name": "analysis",
+					"requires": [
+						"schema"
+					],
+					"hides": false
+				},
 				"zdrOnly": false
 			}
 		]

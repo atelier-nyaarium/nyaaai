@@ -23,6 +23,7 @@ import { catalogDecodeCases } from "../caseSources/catalogDecode";
 import { catalogJoinCases } from "../caseSources/catalogJoin";
 import { catalogOpenCodeCases } from "../caseSources/catalogOpenCode";
 import { catalogRunCases } from "../caseSources/catalogRun";
+import { withUses } from "../caseSources/uses";
 import {
 	abortOptions,
 	callerSignal,
@@ -570,5 +571,5 @@ export const catalog = caseGroup("catalog", {
 			},
 		),
 	},
-	sources: casesFor("catalog", catalogDecodeCases, catalogOpenCodeCases, catalogJoinCases, catalogRunCases),
+	sources: withUses(casesFor("catalog", catalogDecodeCases, catalogOpenCodeCases, catalogJoinCases, catalogRunCases)),
 });

@@ -241,7 +241,11 @@
 		"nowMs": 1796040000000,
 		"passes": [
 			{
-				"use": "chat",
+				"use": {
+					"name": "chat",
+					"requires": [],
+					"hides": true
+				},
 				"zdrOnly": true
 			}
 		]

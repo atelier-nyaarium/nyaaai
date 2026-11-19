@@ -12,7 +12,11 @@
 			"url": "http://lab.local:8000/v1"
 		},
 		"key": "compatible:qwen",
-		"use": "chat",
+		"use": {
+			"name": "chat",
+			"requires": [],
+			"hides": true
+		},
 		"view": "ok",
 		"zdrOnly": true,
 		"flippedTo": false

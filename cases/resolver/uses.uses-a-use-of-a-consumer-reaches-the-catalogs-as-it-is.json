@@ -1,0 +1,249 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.uses",
+	"name": "uses-a-use-of-a-consumer-reaches-the-catalogs-as-it-is",
+	"input": {
+		"rows": [
+			"openai/gpt-6-luna",
+			"google/gemini-3.8-flash"
+		],
+		"uses": [
+			{
+				"name": "summary",
+				"requires": [
+					"schema"
+				],
+				"hides": true
+			},
+			{
+				"name": "triage",
+				"requires": [],
+				"hides": false
+			},
+			{
+				"name": "chat",
+				"requires": [
+					"schema"
+				],
+				"hides": false
+			}
+		]
+	},
+	"expected": {
+		"calls": [
+			{
+				"call": "routes",
+				"use": {
+					"name": "summary",
+					"requires": [
+						"schema"
+					],
+					"hides": true
+				},
+				"asked": [
+					{
+						"name": "summary",
+						"requires": [
+							"schema"
+						],
+						"hides": true
+					}
+				]
+			},
+			{
+				"call": "resolve",
+				"use": {
+					"name": "summary",
+					"requires": [
+						"schema"
+					],
+					"hides": true
+				},
+				"asked": [
+					{
+						"name": "summary",
+						"requires": [
+							"schema"
+						],
+						"hides": true
+					}
+				]
+			},
+			{
+				"call": "rows",
+				"use": {
+					"name": "summary",
+					"requires": [
+						"schema"
+					],
+					"hides": true
+				},
+				"asked": [
+					{
+						"name": "summary",
+						"requires": [
+							"schema"
+						],
+						"hides": true
+					}
+				]
+			},
+			{
+				"call": "candidates",
+				"use": {
+					"name": "summary",
+					"requires": [
+						"schema"
+					],
+					"hides": true
+				},
+				"asked": [
+					{
+						"name": "summary",
+						"requires": [
+							"schema"
+						],
+						"hides": true
+					}
+				]
+			},
+			{
+				"call": "routes",
+				"use": {
+					"name": "triage",
+					"requires": [],
+					"hides": false
+				},
+				"asked": [
+					{
+						"name": "triage",
+						"requires": [],
+						"hides": false
+					}
+				]
+			},
+			{
+				"call": "resolve",
+				"use": {
+					"name": "triage",
+					"requires": [],
+					"hides": false
+				},
+				"asked": [
+					{
+						"name": "triage",
+						"requires": [],
+						"hides": false
+					}
+				]
+			},
+			{
+				"call": "rows",
+				"use": {
+					"name": "triage",
+					"requires": [],
+					"hides": false
+				},
+				"asked": [
+					{
+						"name": "triage",
+						"requires": [],
+						"hides": false
+					}
+				]
+			},
+			{
+				"call": "candidates",
+				"use": {
+					"name": "triage",
+					"requires": [],
+					"hides": false
+				},
+				"asked": [
+					{
+						"name": "triage",
+						"requires": [],
+						"hides": false
+					}
+				]
+			},
+			{
+				"call": "routes",
+				"use": {
+					"name": "chat",
+					"requires": [
+						"schema"
+					],
+					"hides": false
+				},
+				"asked": [
+					{
+						"name": "chat",
+						"requires": [
+							"schema"
+						],
+						"hides": false
+					}
+				]
+			},
+			{
+				"call": "resolve",
+				"use": {
+					"name": "chat",
+					"requires": [
+						"schema"
+					],
+					"hides": false
+				},
+				"asked": [
+					{
+						"name": "chat",
+						"requires": [
+							"schema"
+						],
+						"hides": false
+					}
+				]
+			},
+			{
+				"call": "rows",
+				"use": {
+					"name": "chat",
+					"requires": [
+						"schema"
+					],
+					"hides": false
+				},
+				"asked": [
+					{
+						"name": "chat",
+						"requires": [
+							"schema"
+						],
+						"hides": false
+					}
+				]
+			},
+			{
+				"call": "candidates",
+				"use": {
+					"name": "chat",
+					"requires": [
+						"schema"
+					],
+					"hides": false
+				},
+				"asked": [
+					{
+						"name": "chat",
+						"requires": [
+							"schema"
+						],
+						"hides": false
+					}
+				]
+			}
+		]
+	}
+}

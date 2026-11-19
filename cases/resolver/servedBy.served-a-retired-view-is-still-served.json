@@ -12,7 +12,13 @@
 			"label": "First"
 		},
 		"key": "openai/gpt-6-luna",
-		"use": "compaction",
+		"use": {
+			"name": "compaction",
+			"requires": [
+				"schema"
+			],
+			"hides": false
+		},
 		"view": "retired",
 		"zdrOnly": true,
 		"flippedTo": false

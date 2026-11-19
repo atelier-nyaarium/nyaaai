@@ -266,10 +266,9 @@ export function offered(row: ModelRow, settings: RegistrySettings): boolean {
 
 /** The models a pick can list. */
 export function modelList(views: readonly ModelView[], use: ModelUse, settings: RegistrySettings): ModelView[] {
-	const fits = (row: ModelRow) => {
-		if (use === "chat") return !settings.hidden.has(row.family);
-		return row.schema;
-	};
+	const fits = (row: ModelRow) =>
+		(!use.hides || !settings.hidden.has(row.family)) &&
+		use.requires.every((ability) => ability === "schema" && row.schema);
 	return views.filter(
 		(view) =>
 			offered(view.row, settings) && view.status !== "retired" && view.status !== "noZdrHost" && fits(view.row),

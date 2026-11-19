@@ -17,7 +17,6 @@ use nyaaai_agentic::models::view::unknown_view;
 use nyaaai_agentic::provider::kind::{Browser, CatalogDeps, KindError, Tester};
 use nyaaai_contract::json::Value;
 use nyaaai_contract::model_registry::ModelRegistry;
-use nyaaai_contract::shapes::model::ModelUse;
 use nyaaai_contract::shapes::provider::ProviderPlan;
 use nyaaai_testkit::cases::{Outcome, block_on};
 use nyaaai_testkit::scripted_ports::ScriptedModelRegistry;
@@ -25,6 +24,8 @@ use nyaaai_testkit::scripted_ports::ScriptedModelRegistry;
 use super::catalog::{
     CALLER_REASON, Net, caller_token, convert, network_of, row_of_key, view_line,
 };
+use nyaaai_agentic::models::uses::CHAT;
+
 use super::shapes::*;
 
 pub fn openrouter_models(
@@ -115,7 +116,7 @@ async fn drive(
             }),
             Step::View(held) => {
                 let row = row_of_key(&held.row)?;
-                let use_ = held.use_.unwrap_or(ModelUse::Chat);
+                let use_ = held.use_.clone().unwrap_or_else(|| CHAT.clone());
                 match tester.view(&row, use_, &token).await {
                     Ok(view) => Ok(Answer::View(
                         BrowseOpenrouterBrowserResultStepsItemAnswerView {

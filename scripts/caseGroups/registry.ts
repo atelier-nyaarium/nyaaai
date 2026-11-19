@@ -20,6 +20,7 @@ import { ModelRow, ModelUse, type ModelView, Price, StoredRegistry, TestRecord }
 import { ProviderKindName } from "@nyaaai/contract/shapes/provider";
 import { caseGroup, casesFor, kind } from "@nyaaai/testkit/caseGroup";
 import { registryCases } from "../caseSources/registry";
+import { withUses } from "../caseSources/uses";
 
 ////////////////////////////////
 //  Shapes
@@ -222,5 +223,5 @@ export const registry = caseGroup("registry", {
 			}),
 		),
 	},
-	sources: casesFor("registry", registryCases),
+	sources: withUses(casesFor("registry", registryCases)),
 });

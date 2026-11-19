@@ -273,7 +273,13 @@
 			{
 				"kind": "view",
 				"row": "opencode:minimax-m3",
-				"use": "analysis"
+				"use": {
+					"name": "analysis",
+					"requires": [
+						"schema"
+					],
+					"hides": false
+				}
 			}
 		]
 	},

@@ -56,7 +56,13 @@
 			{
 				"kind": "view",
 				"row": "openrouter:lab/other",
-				"use": "analysis"
+				"use": {
+					"name": "analysis",
+					"requires": [
+						"schema"
+					],
+					"hides": false
+				}
 			},
 			{
 				"kind": "view",

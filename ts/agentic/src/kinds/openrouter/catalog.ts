@@ -1,11 +1,12 @@
 // The OpenRouter catalog: decoders, the join to rows and the cached fetch.
 
-import { parseJson, stringifyJson } from "@nyaaai/contract/json";
+import { canonicalJson, parseJson, stringifyJson } from "@nyaaai/contract/json";
 import type { ModelRegistry } from "@nyaaai/contract/modelRegistry";
 import { numberOfText, roundHalfUp } from "@nyaaai/contract/number";
 import type { Binding, ModelRow, ModelUse, ModelView, PriceTier } from "@nyaaai/contract/shapes/model";
 import { deadline, parseIsoTime, type Scheduler } from "@nyaaai/contract/time";
 import { EFFORTS } from "../../effort";
+import { CHAT } from "../../models/uses";
 import { raced, unknownView } from "../../models/view";
 import type { Transport } from "../../transport";
 import { joinSettled, told } from "../join";
@@ -214,7 +215,7 @@ function tier(
 
 export function sentParams(row: ModelRow, use: ModelUse): ParamNeed[] {
 	const reasoning = row.reasoning ? ["reasoning"] : [];
-	if (use === "chat") return ["tools", ...reasoning];
+	if (!use.requires.includes("schema")) return ["tools", ...reasoning];
 	return ["tools", ...reasoning, ...STRUCTURED_PARAMS];
 }
 
@@ -318,7 +319,7 @@ export function joinCatalog(
 	models: unknown,
 	zdr: unknown,
 	now: number,
-	use: ModelUse = "chat",
+	use: ModelUse = CHAT,
 	zdrOnly = true,
 ): ModelView[] {
 	const entries = parseModels(models);
@@ -386,7 +387,7 @@ export class ModelCatalog {
 	private good: Fetched | undefined;
 	private failedAt: number | undefined;
 	private inflight: Promise<Fetched | undefined> | undefined;
-	private readonly joined = new Map<ModelUse, Joined>();
+	private readonly joined = new Map<string, Joined>();
 	/** Counts the registry's changes; a join taken before one is stale. */
 	private version = 0;
 	private readonly unsubscribe: () => void;
@@ -408,13 +409,13 @@ export class ModelCatalog {
 	}
 
 	/** Rows bound under OpenRouter; off `zdrOnly`, hosts that keep data count. */
-	async views(use: ModelUse = "chat", zdrOnly = true, signal?: AbortSignal): Promise<ModelView[]> {
+	async views(use: ModelUse = CHAT, zdrOnly = true, signal?: AbortSignal): Promise<ModelView[]> {
 		return this.join(await raced(this.fetched(), signal), use, zdrOnly);
 	}
 
 	async view(
 		key: string,
-		use: ModelUse = "chat",
+		use: ModelUse = CHAT,
 		zdrOnly = true,
 		signal?: AbortSignal,
 	): Promise<ModelView | undefined> {
@@ -422,7 +423,7 @@ export class ModelCatalog {
 	}
 
 	/** Joins a non-registry row on zero-retention hosts, as the tester checks it. */
-	async viewFor(row: ModelRow, use: ModelUse = "chat", signal?: AbortSignal): Promise<ModelView> {
+	async viewFor(row: ModelRow, use: ModelUse = CHAT, signal?: AbortSignal): Promise<ModelView> {
 		const data = await raced(this.fetched(), signal);
 		if (data === undefined) return unknownView(row);
 		const [view] = joinParsed([row], data.entries, data.endpoints, this.d.scheduler.nowMs(), use, true);
@@ -453,7 +454,7 @@ export class ModelCatalog {
 	/** Reuses the views until the rows, the data, the flag or a removal date changes. */
 	private join(data: Fetched | undefined, use: ModelUse, zdrOnly: boolean): ModelView[] {
 		const now = this.d.scheduler.nowMs();
-		const known = this.joined.get(use);
+		const known = this.joined.get(canonicalJson(use));
 		if (
 			known !== undefined &&
 			known.version === this.version &&
@@ -469,7 +470,13 @@ export class ModelCatalog {
 				? rows.filter(bound).map(unknownView)
 				: joinParsed(rows, data.entries, data.endpoints, now, use, zdrOnly);
 		const removals = views.map((view) => expiryOf(view.retiredOn ?? "")).filter((at) => at > now);
-		this.joined.set(use, { version, data, zdrOnly, views, until: Math.min(Number.POSITIVE_INFINITY, ...removals) });
+		this.joined.set(canonicalJson(use), {
+			version,
+			data,
+			zdrOnly,
+			views,
+			until: Math.min(Number.POSITIVE_INFINITY, ...removals),
+		});
 		return copyOf(views);
 	}
 

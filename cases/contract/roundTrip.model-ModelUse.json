@@ -7,26 +7,162 @@
 		"set": "model",
 		"shape": "ModelUse",
 		"texts": [
-			"\"chat\"",
-			"\"compaction\"",
-			"\"analysis\"",
-			"\"other\"",
-			"1"
+			"{\"name\":\"chat\",\"requires\":[],\"hides\":true}",
+			"{\"name\":\"summary\",\"requires\":[\"schema\"],\"hides\":false}",
+			"{\"name\":\"a\",\"requires\":[\"schema\"],\"hides\":true,\"extra\":1}",
+			"{\"name\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\"requires\":[],\"hides\":false}",
+			"{\"name\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\"requires\":[],\"hides\":false}",
+			"{\"name\":\"é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀\",\"requires\":[],\"hides\":false}",
+			"{\"name\":\"é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀\",\"requires\":[],\"hides\":false}",
+			"{\"name\":\"\",\"requires\":[],\"hides\":false}",
+			"{\"name\":\"has space\",\"requires\":[],\"hides\":false}",
+			"{\"name\":\"tab\\there\",\"requires\":[],\"hides\":false}",
+			"{\"name\":\"nul\\u0000\",\"requires\":[],\"hides\":false}",
+			"{\"name\":\"del\",\"requires\":[],\"hides\":false}",
+			"{\"name\":\"c1\",\"requires\":[],\"hides\":false}",
+			"{\"name\":\"ok\",\"requires\":[\"schema\",\"schema\"],\"hides\":false}",
+			"{\"name\":\"ok\",\"requires\":[\"vision\"],\"hides\":false}",
+			"{\"name\":\"ok\",\"requires\":\"schema\",\"hides\":false}",
+			"{\"name\":\"ok\",\"requires\":[],\"hides\":\"yes\"}",
+			"{\"name\":\"ok\",\"requires\":[]}",
+			"{\"name\":\"ok\",\"hides\":true}",
+			"{\"requires\":[],\"hides\":true}",
+			"{\"name\":1,\"requires\":[],\"hides\":true}",
+			"chat",
+			"compaction",
+			"analysis",
+			"1",
+			"null"
 		]
 	},
 	"expected": {
 		"results": [
 			{
 				"ok": true,
-				"text": "\"chat\""
+				"text": "{\"name\":\"chat\",\"requires\":[],\"hides\":true}"
 			},
 			{
 				"ok": true,
-				"text": "\"compaction\""
+				"text": "{\"name\":\"summary\",\"requires\":[\"schema\"],\"hides\":false}"
 			},
 			{
 				"ok": true,
-				"text": "\"analysis\""
+				"text": "{\"name\":\"a\",\"requires\":[\"schema\"],\"hides\":true}"
+			},
+			{
+				"ok": true,
+				"text": "{\"name\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\"requires\":[],\"hides\":false}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"name"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"name\":\"é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀é😀\",\"requires\":[],\"hides\":false}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"name"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"name"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"name\":\"has space\",\"requires\":[],\"hides\":false}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"name"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"name"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"name"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"name"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"requires"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"requires",
+					0
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"requires"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"hides"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"hides"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"requires"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"name"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"name"
+				]
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
 			},
 			{
 				"ok": false,

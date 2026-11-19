@@ -38,11 +38,21 @@
 		"nowMs": 1790337600000,
 		"passes": [
 			{
-				"use": "chat",
+				"use": {
+					"name": "chat",
+					"requires": [],
+					"hides": true
+				},
 				"zdrOnly": true
 			},
 			{
-				"use": "analysis",
+				"use": {
+					"name": "analysis",
+					"requires": [
+						"schema"
+					],
+					"hides": false
+				},
 				"zdrOnly": true
 			}
 		]

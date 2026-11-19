@@ -1,0 +1,249 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.uses",
+	"name": "uses-the-standard-ones",
+	"input": {
+		"rows": [
+			"openai/gpt-6-luna",
+			"google/gemini-3.8-flash"
+		],
+		"uses": [
+			{
+				"name": "chat",
+				"requires": [],
+				"hides": true
+			},
+			{
+				"name": "compaction",
+				"requires": [
+					"schema"
+				],
+				"hides": false
+			},
+			{
+				"name": "analysis",
+				"requires": [
+					"schema"
+				],
+				"hides": false
+			}
+		]
+	},
+	"expected": {
+		"calls": [
+			{
+				"call": "routes",
+				"use": {
+					"name": "chat",
+					"requires": [],
+					"hides": true
+				},
+				"asked": [
+					{
+						"name": "chat",
+						"requires": [],
+						"hides": true
+					}
+				]
+			},
+			{
+				"call": "resolve",
+				"use": {
+					"name": "chat",
+					"requires": [],
+					"hides": true
+				},
+				"asked": [
+					{
+						"name": "chat",
+						"requires": [],
+						"hides": true
+					}
+				]
+			},
+			{
+				"call": "rows",
+				"use": {
+					"name": "chat",
+					"requires": [],
+					"hides": true
+				},
+				"asked": [
+					{
+						"name": "chat",
+						"requires": [],
+						"hides": true
+					}
+				]
+			},
+			{
+				"call": "candidates",
+				"use": {
+					"name": "chat",
+					"requires": [],
+					"hides": true
+				},
+				"asked": [
+					{
+						"name": "chat",
+						"requires": [],
+						"hides": true
+					}
+				]
+			},
+			{
+				"call": "routes",
+				"use": {
+					"name": "compaction",
+					"requires": [
+						"schema"
+					],
+					"hides": false
+				},
+				"asked": [
+					{
+						"name": "compaction",
+						"requires": [
+							"schema"
+						],
+						"hides": false
+					}
+				]
+			},
+			{
+				"call": "resolve",
+				"use": {
+					"name": "compaction",
+					"requires": [
+						"schema"
+					],
+					"hides": false
+				},
+				"asked": [
+					{
+						"name": "compaction",
+						"requires": [
+							"schema"
+						],
+						"hides": false
+					}
+				]
+			},
+			{
+				"call": "rows",
+				"use": {
+					"name": "compaction",
+					"requires": [
+						"schema"
+					],
+					"hides": false
+				},
+				"asked": [
+					{
+						"name": "compaction",
+						"requires": [
+							"schema"
+						],
+						"hides": false
+					}
+				]
+			},
+			{
+				"call": "candidates",
+				"use": {
+					"name": "compaction",
+					"requires": [
+						"schema"
+					],
+					"hides": false
+				},
+				"asked": [
+					{
+						"name": "compaction",
+						"requires": [
+							"schema"
+						],
+						"hides": false
+					}
+				]
+			},
+			{
+				"call": "routes",
+				"use": {
+					"name": "analysis",
+					"requires": [
+						"schema"
+					],
+					"hides": false
+				},
+				"asked": [
+					{
+						"name": "analysis",
+						"requires": [
+							"schema"
+						],
+						"hides": false
+					}
+				]
+			},
+			{
+				"call": "resolve",
+				"use": {
+					"name": "analysis",
+					"requires": [
+						"schema"
+					],
+					"hides": false
+				},
+				"asked": [
+					{
+						"name": "analysis",
+						"requires": [
+							"schema"
+						],
+						"hides": false
+					}
+				]
+			},
+			{
+				"call": "rows",
+				"use": {
+					"name": "analysis",
+					"requires": [
+						"schema"
+					],
+					"hides": false
+				},
+				"asked": [
+					{
+						"name": "analysis",
+						"requires": [
+							"schema"
+						],
+						"hides": false
+					}
+				]
+			},
+			{
+				"call": "candidates",
+				"use": {
+					"name": "analysis",
+					"requires": [
+						"schema"
+					],
+					"hides": false
+				},
+				"asked": [
+					{
+						"name": "analysis",
+						"requires": [
+							"schema"
+						],
+						"hides": false
+					}
+				]
+			}
+		]
+	}
+}

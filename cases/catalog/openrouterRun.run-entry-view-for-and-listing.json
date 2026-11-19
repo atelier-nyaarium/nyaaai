@@ -115,7 +115,13 @@
 				"call": {
 					"kind": "viewFor",
 					"row": "mistralai/mistral-large-2512",
-					"use": "analysis"
+					"use": {
+						"name": "analysis",
+						"requires": [
+							"schema"
+						],
+						"hides": false
+					}
 				}
 			},
 			{

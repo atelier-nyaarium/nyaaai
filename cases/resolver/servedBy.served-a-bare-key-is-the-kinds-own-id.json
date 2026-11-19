@@ -12,7 +12,11 @@
 			"label": "First"
 		},
 		"key": "lab/none",
-		"use": "chat",
+		"use": {
+			"name": "chat",
+			"requires": [],
+			"hides": true
+		},
 		"view": null,
 		"zdrOnly": true,
 		"flippedTo": true

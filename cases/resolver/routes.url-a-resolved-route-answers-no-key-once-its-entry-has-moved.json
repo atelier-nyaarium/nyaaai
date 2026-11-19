@@ -36,7 +36,11 @@
 			{
 				"kind": "routes",
 				"model": "ollama:qwen",
-				"use": "chat"
+				"use": {
+					"name": "chat",
+					"requires": [],
+					"hides": true
+				}
 			},
 			{
 				"kind": "send",
@@ -62,7 +66,11 @@
 			{
 				"kind": "routes",
 				"model": "ollama:qwen",
-				"use": "chat"
+				"use": {
+					"name": "chat",
+					"requires": [],
+					"hides": true
+				}
 			},
 			{
 				"kind": "send",

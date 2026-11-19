@@ -643,6 +643,10 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
                 super::resolver::served_by,
             )
         }
+        "resolver.uses" => run::<shapes::ResolverUsesInput, shapes::ResolverUsesResult>(
+            input,
+            super::resolver::uses,
+        ),
         "resolver.routes" => run::<shapes::ResolverRoutesInput, shapes::ResolverRoutesResult>(
             input,
             super::resolver::routes,

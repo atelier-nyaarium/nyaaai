@@ -11,7 +11,11 @@
 			"label": "First"
 		},
 		"key": "openai/gpt-6-luna",
-		"use": "chat",
+		"use": {
+			"name": "chat",
+			"requires": [],
+			"hides": true
+		},
 		"view": null,
 		"zdrOnly": false,
 		"flippedTo": true

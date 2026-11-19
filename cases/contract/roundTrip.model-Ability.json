@@ -1,0 +1,41 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "model-Ability",
+	"input": {
+		"set": "model",
+		"shape": "Ability",
+		"texts": [
+			"\"schema\"",
+			"\"other\"",
+			"\"\"",
+			"1",
+			"null"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "\"schema\""
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			},
+			{
+				"ok": false,
+				"path": []
+			}
+		]
+	}
+}

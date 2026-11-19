@@ -42,7 +42,11 @@
 			}
 		],
 		"scope": "e1",
-		"use": "chat",
+		"use": {
+			"name": "chat",
+			"requires": [],
+			"hides": true
+		},
 		"views": [
 			{
 				"key": "local:e1/local-a:27b",

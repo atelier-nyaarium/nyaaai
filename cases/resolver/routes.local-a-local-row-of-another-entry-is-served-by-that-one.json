@@ -38,11 +38,19 @@
 			{
 				"kind": "routes",
 				"model": "local:lab2/local-a:27b",
-				"use": "chat"
+				"use": {
+					"name": "chat",
+					"requires": [],
+					"hides": true
+				}
 			},
 			{
 				"kind": "candidates",
-				"use": "chat"
+				"use": {
+					"name": "chat",
+					"requires": [],
+					"hides": true
+				}
 			}
 		]
 	},

@@ -16,6 +16,7 @@ import { type Clock, deadline, type Scheduler } from "@nyaaai/contract/time";
 import { EFFORTS } from "../../effort";
 import { MODELS } from "../../models/curated";
 import { rowKey, shownId } from "../../models/rowKey";
+import { CHAT } from "../../models/uses";
 import { raced, unknownView } from "../../models/view";
 import type { Browser, EntryCatalog, Tester } from "../../provider/kind";
 import type { Transport } from "../../transport";
@@ -368,7 +369,7 @@ export class OpenCodeCatalog implements EntryCatalog {
 
 	constructor(private readonly d: OpenCodeCatalogDeps) {}
 
-	async views(use: ModelUse = "chat", zdrOnly = true, signal?: AbortSignal): Promise<ModelView[]> {
+	async views(use: ModelUse = CHAT, zdrOnly = true, signal?: AbortSignal): Promise<ModelView[]> {
 		const models = await raced(this.fetched(), signal);
 		return joinOpenCode(this.d.rows.rows(), models, this.d.plan, use, zdrOnly, this.d.scheduler.nowMs());
 	}
@@ -380,7 +381,7 @@ export class OpenCodeCatalog implements EntryCatalog {
 	}
 
 	/** Tester ZDR view. */
-	async viewFor(row: ModelRow, use: ModelUse = "chat", signal?: AbortSignal): Promise<ModelView> {
+	async viewFor(row: ModelRow, use: ModelUse = CHAT, signal?: AbortSignal): Promise<ModelView> {
 		const models = await raced(this.fetched(), signal);
 		const id = row.bindings["opencode"]?.id;
 		if (models === undefined || id === undefined) return unknownView(row);

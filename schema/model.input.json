@@ -3,12 +3,47 @@
 	"$id": "model.input.json",
 	"x-contract-version": "0.1.0",
 	"$defs": {
-		"ModelUse": {
+		"Ability": {
 			"type": "string",
 			"enum": [
-				"chat",
-				"compaction",
-				"analysis"
+				"schema"
+			]
+		},
+		"ModelUse": {
+			"type": "object",
+			"properties": {
+				"name": {
+					"type": "string",
+					"minLength": 1,
+					"maxLength": 64,
+					"x-hooks": [
+						{
+							"kind": "match",
+							"source": "^[^\\u{0}-\\u{1f}\\u{7f}-\\u{9f}]+$",
+							"flags": ""
+						}
+					]
+				},
+				"requires": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/Ability"
+					},
+					"x-hooks": [
+						{
+							"kind": "refine",
+							"name": "distinctAbilities"
+						}
+					]
+				},
+				"hides": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"name",
+				"requires",
+				"hides"
 			]
 		},
 		"Binding": {

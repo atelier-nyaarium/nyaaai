@@ -78,7 +78,13 @@
 			}
 		],
 		"scope": "e1",
-		"use": "compaction",
+		"use": {
+			"name": "compaction",
+			"requires": [
+				"schema"
+			],
+			"hides": false
+		},
 		"views": [
 			{
 				"key": "openai/gpt-6-luna",

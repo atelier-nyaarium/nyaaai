@@ -1,6 +1,6 @@
 // Model row, view, registry and browse shapes.
 
-import { matching, preprocessed, shapeSet, z } from "../shape";
+import { matching, preprocessed, refined, shapeSet, z } from "../shape";
 import { trimText } from "../text";
 import { ProviderKindName } from "./provider";
 import { ApiFacts, ApiFamily, Effort } from "./step";
@@ -16,8 +16,23 @@ const range = () => z.tuple([z.number(), z.number()]);
 ////////////////////////////////
 //  Shapes
 
-/** The host capability a model must have. */
-export const ModelUse = z.enum(["chat", "compaction", "analysis"]);
+/** What a model can do beyond chat. */
+export const Ability = z.enum(["schema"]);
+export type Ability = z.infer<typeof Ability>;
+
+/** What a use requires of a model. */
+export const ModelUse = z.object({
+	/** Names the use for a host; the engine never reads it. */
+	name: matching(z.string().min(1).max(64), "^[^\\u{0}-\\u{1f}\\u{7f}-\\u{9f}]+$"),
+	/** Every ability a model must have, each once. */
+	requires: refined(
+		"distinctAbilities",
+		z.array(Ability),
+		(abilities) => new Set(abilities).size === abilities.length,
+	),
+	/** The use leaves out the families the settings hide. */
+	hides: z.boolean(),
+});
 export type ModelUse = z.infer<typeof ModelUse>;
 
 /** The kind's own model id. */
@@ -197,6 +212,7 @@ export const Unresolved = z.object({
 export type Unresolved = z.infer<typeof Unresolved>;
 
 export const modelSet = shapeSet("model", {
+	Ability,
 	ModelUse,
 	Binding,
 	RowIdentity,

@@ -13580,6 +13580,66 @@
 				"sent"
 			]
 		},
+		"ResolverUsesInput": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"uses": {
+					"type": "array",
+					"items": {
+						"$ref": "model.input.json#/$defs/ModelUse"
+					}
+				}
+			},
+			"required": [
+				"rows",
+				"uses"
+			]
+		},
+		"ResolverUsesResult": {
+			"type": "object",
+			"properties": {
+				"calls": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"call": {
+								"type": "string",
+								"enum": [
+									"routes",
+									"resolve",
+									"rows",
+									"candidates"
+								]
+							},
+							"use": {
+								"$ref": "model.input.json#/$defs/ModelUse"
+							},
+							"asked": {
+								"type": "array",
+								"items": {
+									"$ref": "model.input.json#/$defs/ModelUse"
+								}
+							}
+						},
+						"required": [
+							"call",
+							"use",
+							"asked"
+						]
+					}
+				}
+			},
+			"required": [
+				"calls"
+			]
+		},
 		"ResolverRoutesInput": {
 			"type": "object",
 			"properties": {

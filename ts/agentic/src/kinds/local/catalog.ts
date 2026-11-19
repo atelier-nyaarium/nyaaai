@@ -7,6 +7,7 @@ import { headOf, trimText } from "@nyaaai/contract/text";
 import { deadline, type Scheduler } from "@nyaaai/contract/time";
 import { EFFORTS } from "../../effort";
 import { rowKey, shownId } from "../../models/rowKey";
+import { CHAT } from "../../models/uses";
 import { raced } from "../../models/view";
 import type { Browser, EntryCatalog, Tester } from "../../provider/kind";
 import type { Transport } from "../../transport";
@@ -218,7 +219,7 @@ export class LocalCatalog implements EntryCatalog {
 	}
 
 	/** Tested local model views. */
-	async views(use: ModelUse = "chat", zdrOnly = true, signal?: AbortSignal): Promise<ModelView[]> {
+	async views(use: ModelUse = CHAT, zdrOnly = true, signal?: AbortSignal): Promise<ModelView[]> {
 		const found = await raced(this.fetched(), signal);
 		if (found === undefined) return [];
 		const tested = new Map(
@@ -253,7 +254,7 @@ export class LocalCatalog implements EntryCatalog {
 	}
 
 	/** Tester view; its prompts are synthetic. */
-	async viewFor(row: ModelRow, use: ModelUse = "chat", signal?: AbortSignal): Promise<ModelView> {
+	async viewFor(row: ModelRow, use: ModelUse = CHAT, signal?: AbortSignal): Promise<ModelView> {
 		const found = await raced(this.fetched(), signal);
 		const tag = this.tagOf(row);
 		const model = found?.find((each) => each.tag === tag);

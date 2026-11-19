@@ -12,7 +12,11 @@
 			"url": "http://lab.local:1234"
 		},
 		"key": "lmstudio:qwen",
-		"use": "chat",
+		"use": {
+			"name": "chat",
+			"requires": [],
+			"hides": true
+		},
 		"view": "ok",
 		"zdrOnly": true,
 		"flippedTo": false

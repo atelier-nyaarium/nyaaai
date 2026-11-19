@@ -3,6 +3,7 @@ import { OpenCodeCatalog, opencodeBrowser, opencodeTester } from "@nyaaai/agenti
 import { browseModels, parseProviders } from "@nyaaai/agentic/kinds/openrouter/browse";
 import { openRouterBrowser, openRouterTester } from "@nyaaai/agentic/kinds/openrouter/browser";
 import { type Endpoint, ModelCatalog, parseEndpoints } from "@nyaaai/agentic/kinds/openrouter/catalog";
+import { CHAT } from "@nyaaai/agentic/models/uses";
 import type { Browser, Tester } from "@nyaaai/agentic/provider/kind";
 import { jsString } from "@nyaaai/contract/json";
 import { z } from "@nyaaai/contract/shape";
@@ -13,6 +14,7 @@ import { caseGroup, casesFor, kind } from "@nyaaai/testkit/caseGroup";
 import { scriptedModelRegistry } from "@nyaaai/testkit/scriptedPorts";
 import { browseCases } from "../caseSources/browse";
 import { browseOpenCodeCases } from "../caseSources/browseOpenCode";
+import { withUses } from "../caseSources/uses";
 import { abortOptions, callerSignal, NetExchange, networkOf, rowOfKey, ViewLine, viewLine } from "./catalogKit";
 
 ////////////////////////////////
@@ -83,7 +85,7 @@ async function drive(
 			} else if (step.kind === "listed") {
 				answer = { kind: "listed", listed: (await tester.listed(step.id, signal)) ?? null };
 			} else if (step.kind === "view") {
-				const view = await tester.view(rowOfKey(step.row), step.use ?? "chat", signal);
+				const view = await tester.view(rowOfKey(step.row), step.use ?? CHAT, signal);
 				answer = { kind: "view", view: viewLine(view) };
 			} else {
 				net.wheel.advance(step.ms);
@@ -275,5 +277,5 @@ export const browse = caseGroup("browse", {
 			},
 		),
 	},
-	sources: casesFor("browse", browseCases, browseOpenCodeCases),
+	sources: withUses(casesFor("browse", browseCases, browseOpenCodeCases)),
 });

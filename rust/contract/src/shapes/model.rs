@@ -15,23 +15,21 @@ use crate::shape::{self, Path, Refused, Shape};
 use super::model_hooks as hooks;
 
 static PATTERN_1: LazyLock<Option<Pattern>> =
+    LazyLock::new(|| Pattern::compile("^[^\\u{0}-\\u{1f}\\u{7f}-\\u{9f}]+$", "").ok());
+static PATTERN_2: LazyLock<Option<Pattern>> =
     LazyLock::new(|| Pattern::compile("^\\d{4}-\\d{2}-\\d{2}$", "").ok());
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum ModelUse {
-    Chat,
-    Compaction,
-    Analysis,
+pub enum Ability {
+    Schema,
 }
 
-impl ModelUse {
-    pub const ALL: [Self; 3] = [Self::Chat, Self::Compaction, Self::Analysis];
+impl Ability {
+    pub const ALL: [Self; 1] = [Self::Schema];
 
     pub fn as_str(self) -> &'static str {
         match self {
-            Self::Chat => "chat",
-            Self::Compaction => "compaction",
-            Self::Analysis => "analysis",
+            Self::Schema => "schema",
         }
     }
 
@@ -40,7 +38,7 @@ impl ModelUse {
     }
 }
 
-impl Shape for ModelUse {
+impl Shape for Ability {
     fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
         value
             .as_str()
@@ -50,6 +48,44 @@ impl Shape for ModelUse {
 
     fn encode(&self) -> Value {
         Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ModelUse {
+    pub name: String,
+    pub requires: Vec<Ability>,
+    pub hides: bool,
+}
+
+impl Shape for ModelUse {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let name = shape::required(object, "name", at, |value, at| {
+            shape::text_within(value, at, Some(1), Some(64))
+                .and_then(|held| shape::matches(PATTERN_1.as_ref(), held, at, None))
+        })?;
+        let requires = shape::required(object, "requires", at, |value, at| {
+            shape::list(value, at, Ability::decode_at)
+                .and_then(|held| shape::holds(hooks::distinct_abilities(&held), held, at, None))
+        })?;
+        let hides = shape::required(object, "hides", at, shape::flag)?;
+        Ok(Self {
+            name,
+            requires,
+            hides,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("name", Value::from(self.name.as_str()));
+        object.insert(
+            "requires",
+            Value::Array(self.requires.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert("hides", Value::Bool(self.hides));
+        Value::Object(object)
     }
 }
 
@@ -640,7 +676,7 @@ impl Shape for TestRecord {
         })?;
         let date = shape::required(object, "date", at, |value, at| {
             shape::text(value, at)
-                .and_then(|held| shape::matches(PATTERN_1.as_ref(), held, at, None))
+                .and_then(|held| shape::matches(PATTERN_2.as_ref(), held, at, None))
         })?;
         let cost = shape::required(object, "cost", at, |value, at| {
             shape::number(value, at).and_then(|held| shape::at_least(held, 0.0, at))
@@ -1517,6 +1553,7 @@ impl Shape for Unresolved {
 pub fn normalize(shape: &str, value: &Value) -> Option<Result<Value, Refused>> {
     let at = &mut Path::new();
     Some(match shape {
+        "Ability" => Ability::decode_at(value, at).map(|held| held.encode()),
         "ModelUse" => ModelUse::decode_at(value, at).map(|held| held.encode()),
         "Binding" => Binding::decode_at(value, at).map(|held| held.encode()),
         "RowIdentity" => RowIdentity::decode_at(value, at).map(|held| held.encode()),

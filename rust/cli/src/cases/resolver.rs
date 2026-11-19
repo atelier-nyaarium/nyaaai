@@ -608,7 +608,7 @@ pub fn served_by(input: ResolverServedByInput) -> Outcome<ResolverServedByResult
         deps,
         zdr_only: Arc::new(move || live.load(Ordering::SeqCst)),
     };
-    let routes = block_on(plan_served(&served, &input.key, input.use_))?;
+    let routes = block_on(plan_served(&served, &input.key, &input.use_))?;
     let first = routes
         .candidates
         .first()
@@ -736,7 +736,7 @@ impl Rig {
     ) -> Outcome<Answer> {
         Ok(match step {
             ResolverRoutesInputStepsItem::Routes(each) => {
-                match self.resolver.routes(&each.model, each.use_).await {
+                match self.resolver.routes(&each.model, &each.use_).await {
                     Planned::Routes(routes) => {
                         let mut candidates = Vec::new();
                         for resolved in &routes.candidates {
@@ -762,7 +762,7 @@ impl Rig {
                 }
             }
             ResolverRoutesInputStepsItem::Resolve(each) => {
-                match self.resolver.resolve(&each.model, each.use_).await {
+                match self.resolver.resolve(&each.model, &each.use_).await {
                     Resolution::Resolved(resolved) => {
                         let line = resolve_line(&candidate_of(&resolved)?)?;
                         if let Some(last) = held.last_mut() {
@@ -783,7 +783,7 @@ impl Rig {
             }
             ResolverRoutesInputStepsItem::Rows(each) => {
                 let mut options = Vec::new();
-                for option in self.resolver.rows(each.use_).await {
+                for option in self.resolver.rows(&each.use_).await {
                     options.push(ResolverRoutesResultStepsItemAnswerRowsOptionsItem {
                         key: option.key,
                         status: convert(&option.view.status)?,
@@ -794,7 +794,7 @@ impl Rig {
             }
             ResolverRoutesInputStepsItem::Candidates(each) => {
                 let mut served = Vec::new();
-                for option in self.resolver.candidates(each.use_).await {
+                for option in self.resolver.candidates(&each.use_).await {
                     served.push(ResolverRoutesResultStepsItemAnswerCandidatesServedItem {
                         key: option.key,
                         status: convert(&option.view.status)?,
@@ -1002,4 +1002,175 @@ pub fn routes(input: ResolverRoutesInput) -> Outcome<ResolverRoutesResult> {
         refreshed,
         key_reads: scripted.reads() as i64,
     })
+}
+
+/// The real OpenRouter kind with a catalog that notes each use it is asked with.
+struct Asked {
+    real: Arc<dyn ProviderKind>,
+    asked: Arc<Mutex<Vec<ModelUse>>>,
+}
+
+struct Asking {
+    rows: Arc<dyn ModelRegistry>,
+    asked: Arc<Mutex<Vec<ModelUse>>>,
+}
+
+impl EntryCatalog for Asking {
+    fn views(
+        &self,
+        use_: ModelUse,
+        _zdr_only: bool,
+        _cancel: Option<&CancelToken>,
+    ) -> BoxFuture<'_, Result<Vec<ModelView>, Aborted>> {
+        {
+            let mut asked = locked(&self.asked);
+            if !asked.contains(&use_) {
+                asked.push(use_);
+            }
+        }
+        Box::pin(async move {
+            Ok(self
+                .rows
+                .rows()
+                .iter()
+                .map(|row| {
+                    let mut view = unknown_view(row);
+                    view.status = ModelViewStatus::Ok;
+                    view
+                })
+                .collect())
+        })
+    }
+
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+
+    fn arc_any(self: Arc<Self>) -> Arc<dyn std::any::Any + Send + Sync> {
+        self
+    }
+}
+
+impl ProviderKind for Asked {
+    fn kind(&self) -> ProviderKindName {
+        self.real.kind()
+    }
+
+    fn label(&self) -> &str {
+        self.real.label()
+    }
+
+    fn field(&self) -> KindField {
+        self.real.field()
+    }
+
+    fn check<'a>(
+        &'a self,
+        entry: &'a EntryFields,
+        secret: Option<&'a str>,
+        deps: &'a KindDeps,
+        cancel: &'a CancelToken,
+    ) -> BoxFuture<'a, Result<nyaaai_contract::shapes::provider::KeyState, KindError>> {
+        self.real.check(entry, secret, deps, cancel)
+    }
+
+    fn transport(
+        &self,
+        entry: &EntryFields,
+        key: Arc<dyn KeySource>,
+        deps: &KindDeps,
+    ) -> Result<Arc<Transport>, String> {
+        self.real.transport(entry, key, deps)
+    }
+
+    fn catalog(
+        &self,
+        _entry: &ProviderEntry,
+        _transport: Arc<Transport>,
+        deps: CatalogDeps,
+    ) -> Arc<dyn EntryCatalog> {
+        Arc::new(Asking {
+            rows: deps.rows,
+            asked: Arc::clone(&self.asked),
+        })
+    }
+
+    fn codec(
+        &self,
+        view: Option<&ModelView>,
+        entry: &EntryFields,
+        deps: &KindDeps,
+    ) -> Box<dyn Codec> {
+        self.real.codec(view, entry, deps)
+    }
+
+    fn failure(
+        &self,
+        failure: &Failure,
+        view: Option<&ModelView>,
+    ) -> nyaaai_contract::shapes::provider::Disposition {
+        self.real.failure(failure, view)
+    }
+}
+
+pub fn uses(input: ResolverUsesInput) -> Outcome<ResolverUsesResult> {
+    type Call = ResolverUsesResultCallsItemCall;
+    let asked = Arc::new(Mutex::new(Vec::<ModelUse>::new()));
+    let kind: Arc<dyn ProviderKind> = Arc::new(Asked {
+        real: real_of(ProviderKindName::Openrouter)?,
+        asked: Arc::clone(&asked),
+    });
+    let host = Arc::new(Host::default());
+    let scheduler = Arc::new(FakeScheduler::new(Arc::new(TimerWheel::new(0))));
+    let entry = ProviderEntry {
+        id: "a".to_owned(),
+        kind: ProviderKindName::Openrouter,
+        label: "First".to_owned(),
+        plan: None,
+        url: None,
+        extra_usage: None,
+    };
+    let keys = Arc::new(ScriptedEntryKeys::new());
+    keys.set("a", KeyAnswer::Key(KEY.to_owned()));
+    let registry = Arc::new(ScriptedModelRegistry::empty());
+    registry.set_rows(rows_for(&input.rows)?);
+    let resolver = ModelResolver::new(ResolverDeps {
+        list: Arc::new(ScriptedProviderList::new(vec![entry])),
+        keys,
+        registry: registry as Arc<dyn ModelRegistry>,
+        kinds: vec![kind],
+        kind_deps: Arc::new(move |_| deps_of(&host, Arc::clone(&scheduler))),
+        zdr_only: Arc::new(|| true),
+        refreshed: None,
+    });
+    let model = input.rows.first().cloned().unwrap_or_default();
+    let mut calls = Vec::new();
+    block_on(async {
+        for use_ in &input.uses {
+            for call in [Call::Routes, Call::Resolve, Call::Rows, Call::Candidates] {
+                locked(&asked).clear();
+                match call {
+                    Call::Routes => {
+                        resolver.routes(&model, use_).await;
+                    }
+                    Call::Resolve => {
+                        resolver.resolve(&model, use_).await;
+                    }
+                    Call::Rows => {
+                        resolver.rows(use_).await;
+                    }
+                    Call::Candidates => {
+                        resolver.candidates(use_).await;
+                    }
+                }
+                calls.push(ResolverUsesResultCallsItem {
+                    call,
+                    use_: use_.clone(),
+                    asked: locked(&asked).clone(),
+                });
+            }
+        }
+    })?;
+    resolver.dispose();
+    Ok(ResolverUsesResult { calls })
 }

@@ -19,6 +19,7 @@ import {
 } from "@nyaaai/agentic/kinds/local/catalog";
 import { localTags, numCtxOf, modelOf as ollamaModel, runningOf } from "@nyaaai/agentic/kinds/ollama";
 import { MODELS } from "@nyaaai/agentic/models/curated";
+import { CHAT } from "@nyaaai/agentic/models/uses";
 import { codecFactsOf } from "@nyaaai/agentic/models/view";
 import type { ProviderKind } from "@nyaaai/agentic/provider/kind";
 import { replyText } from "@nyaaai/agentic/step";
@@ -35,6 +36,7 @@ import { localDecodeCases } from "../caseSources/localDecode";
 import { localFlowCases } from "../caseSources/localFlow";
 import { localKindCases } from "../caseSources/localKind";
 import { localReachCases } from "../caseSources/localReach";
+import { withUses } from "../caseSources/uses";
 import { abortOptions, callerSignal, NetExchange, ViewLine, viewLine } from "./catalogKit";
 import {
 	LOCAL_KINDS,
@@ -718,7 +720,7 @@ export const local = caseGroup("local", {
 						if (call.kind === "views")
 							return {
 								kind: "views",
-								views: (await catalog.views(call.use ?? "chat", call.zdrOnly ?? true, signal)).map(
+								views: (await catalog.views(call.use ?? CHAT, call.zdrOnly ?? true, signal)).map(
 									viewLine,
 								),
 							};
@@ -738,7 +740,7 @@ export const local = caseGroup("local", {
 						if (call.kind === "view")
 							return {
 								kind: "view",
-								view: viewLine(await tester.view(localRowOf(call.row), call.use ?? "chat", signal)),
+								view: viewLine(await tester.view(localRowOf(call.row), call.use ?? CHAT, signal)),
 							};
 						if (call.kind === "advance") net.wheel.advance(call.ms);
 						else registry.setRows(localRowsOf(call.rows));
@@ -851,5 +853,7 @@ export const local = caseGroup("local", {
 			},
 		),
 	},
-	sources: casesFor("local", localDecodeCases, localReachCases, localCatalogCases, localFlowCases, localKindCases),
+	sources: withUses(
+		casesFor("local", localDecodeCases, localReachCases, localCatalogCases, localFlowCases, localKindCases),
+	),
 });

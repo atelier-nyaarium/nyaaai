@@ -12,7 +12,11 @@
 			"label": "Pay"
 		},
 		"key": "google/gemini-3.8-flash",
-		"use": "chat",
+		"use": {
+			"name": "chat",
+			"requires": [],
+			"hides": true
+		},
 		"view": null,
 		"zdrOnly": false,
 		"flippedTo": true

@@ -16,6 +16,7 @@ use nyaaai_agentic::kinds::openrouter::catalog::{
 use nyaaai_agentic::models::curated::MODELS;
 use nyaaai_agentic::models::registry::row_of;
 use nyaaai_agentic::models::row_key::parse_row_key_text;
+use nyaaai_agentic::models::uses::CHAT;
 use nyaaai_agentic::provider::kind::{CatalogDeps, EntryCatalog};
 use nyaaai_agentic::transport::{Auth, KeySource, Transport, TransportDeps};
 use nyaaai_contract::cancel::CancelToken;
@@ -445,7 +446,7 @@ pub fn openrouter_join(input: CatalogOpenrouterJoinInput) -> Outcome<CatalogOpen
                 &input.models,
                 &input.zdr,
                 input.now_ms,
-                pass.use_,
+                &pass.use_,
                 pass.zdr_only,
             ))
         })
@@ -464,7 +465,7 @@ pub fn opencode_join(input: CatalogOpencodeJoinInput) -> Outcome<CatalogOpencode
                 &rows,
                 models.as_ref(),
                 input.plan,
-                pass.use_,
+                &pass.use_,
                 pass.zdr_only,
                 input.now_ms,
             ))
@@ -573,7 +574,7 @@ fn placed_openrouter(call: &CatalogOpenrouterRunInputStepsItemCallCall) -> Place
     match call {
         C::Views(held) => Placed {
             call: Call::Views {
-                use_: held.use_,
+                use_: held.use_.clone(),
                 zdr_only: held.zdr_only,
             },
             after: held.abort_after_ms,
@@ -582,7 +583,7 @@ fn placed_openrouter(call: &CatalogOpenrouterRunInputStepsItemCallCall) -> Place
         C::View(held) => Placed {
             call: Call::View {
                 key: held.key.clone(),
-                use_: held.use_,
+                use_: held.use_.clone(),
                 zdr_only: held.zdr_only,
             },
             after: held.abort_after_ms,
@@ -591,7 +592,7 @@ fn placed_openrouter(call: &CatalogOpenrouterRunInputStepsItemCallCall) -> Place
         C::ViewFor(held) => Placed {
             call: Call::ViewFor {
                 row: held.row.clone(),
-                use_: held.use_,
+                use_: held.use_.clone(),
             },
             after: held.abort_after_ms,
             before: held.aborted_before,
@@ -616,7 +617,7 @@ fn placed_opencode(call: &CatalogOpencodeRunInputStepsItemCallCall) -> Placed {
     match call {
         C::Views(held) => Placed {
             call: Call::Views {
-                use_: held.use_,
+                use_: held.use_.clone(),
                 zdr_only: held.zdr_only,
             },
             after: held.abort_after_ms,
@@ -625,7 +626,7 @@ fn placed_opencode(call: &CatalogOpencodeRunInputStepsItemCallCall) -> Placed {
         C::ViewFor(held) => Placed {
             call: Call::ViewFor {
                 row: held.row.clone(),
-                use_: held.use_,
+                use_: held.use_.clone(),
             },
             after: held.abort_after_ms,
             before: held.aborted_before,
@@ -771,7 +772,7 @@ fn registry_of(keys: &[String]) -> Outcome<Arc<ScriptedModelRegistry>> {
 }
 
 fn use_of(held: Option<ModelUse>) -> ModelUse {
-    held.unwrap_or(ModelUse::Chat)
+    held.unwrap_or_else(|| CHAT.clone())
 }
 
 /// What the script's `refreshed` does: counts, and may read its catalog and throw.
@@ -883,7 +884,7 @@ pub fn openrouter_run(input: CatalogOpenrouterRunInput) -> Outcome<CatalogOpenro
                     Ok(match &call {
                         Call::Views { use_, zdr_only } => {
                             match catalog_ref
-                                .views(use_of(*use_), zdr_only.unwrap_or(true), Some(&token))
+                                .views(use_of(use_.clone()), zdr_only.unwrap_or(true), Some(&token))
                                 .await
                             {
                                 Ok(views) => {
@@ -897,7 +898,12 @@ pub fn openrouter_run(input: CatalogOpenrouterRunInput) -> Outcome<CatalogOpenro
                             use_,
                             zdr_only,
                         } => match catalog_ref
-                            .view(key, use_of(*use_), zdr_only.unwrap_or(true), Some(&token))
+                            .view(
+                                key,
+                                use_of(use_.clone()),
+                                zdr_only.unwrap_or(true),
+                                Some(&token),
+                            )
                             .await
                         {
                             Ok(view) => answer_value(
@@ -915,7 +921,7 @@ pub fn openrouter_run(input: CatalogOpenrouterRunInput) -> Outcome<CatalogOpenro
                         Call::ViewFor { row, use_ } => {
                             let row = row_of_key(row)?;
                             match catalog_ref
-                                .view_for(&row, use_of(*use_), Some(&token))
+                                .view_for(&row, use_of(use_.clone()), Some(&token))
                                 .await
                             {
                                 Ok(view) => {
@@ -1054,7 +1060,7 @@ pub fn opencode_run(input: CatalogOpencodeRunInput) -> Outcome<CatalogOpencodeRu
                 Ok(match &call {
                     Call::Views { use_, zdr_only } => {
                         match catalog_ref
-                            .views(use_of(*use_), zdr_only.unwrap_or(true), Some(&token))
+                            .views(use_of(use_.clone()), zdr_only.unwrap_or(true), Some(&token))
                             .await
                         {
                             Ok(views) => {
@@ -1066,7 +1072,7 @@ pub fn opencode_run(input: CatalogOpencodeRunInput) -> Outcome<CatalogOpencodeRu
                     Call::ViewFor { row, use_ } => {
                         let row = row_of_key(row)?;
                         match catalog_ref
-                            .view_for(&row, use_of(*use_), Some(&token))
+                            .view_for(&row, use_of(use_.clone()), Some(&token))
                             .await
                         {
                             Ok(view) => {

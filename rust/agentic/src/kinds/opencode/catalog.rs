@@ -377,7 +377,7 @@ pub fn join_open_code(
     rows: &[ModelRow],
     models: Option<&Ordered<OpenCodeModel>>,
     plan: ProviderPlan,
-    _use: ModelUse,
+    _use: &ModelUse,
     zdr_only: bool,
     now: i64,
 ) -> Vec<ModelView> {
@@ -540,7 +540,7 @@ impl EntryCatalog for OpenCodeCatalog {
                 &rows,
                 models.as_deref(),
                 self.shared.plan,
-                use_,
+                &use_,
                 zdr_only,
                 self.shared.scheduler.now_ms(),
             ))

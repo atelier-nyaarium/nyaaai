@@ -36,7 +36,11 @@
 			{
 				"kind": "routes",
 				"model": "compatible:qwen",
-				"use": "chat"
+				"use": {
+					"name": "chat",
+					"requires": [],
+					"hides": true
+				}
 			},
 			{
 				"kind": "send",

@@ -9,7 +9,7 @@ use nyaaai_contract::cancel::{CancelToken, Unsubscribe};
 use nyaaai_contract::json::{Object, Value};
 use nyaaai_contract::number::{number_of_text, round_half_up};
 use nyaaai_contract::shapes::model::{
-    ModelRow, ModelUse, ModelView, ModelViewPrice, ModelViewStatus, Price, PriceTier,
+    Ability, ModelRow, ModelUse, ModelView, ModelViewPrice, ModelViewStatus, Price, PriceTier,
 };
 use nyaaai_contract::text::text_length;
 use nyaaai_contract::time::{deadline, parse_iso_time};
@@ -306,12 +306,20 @@ fn tiers_of(pricing: Option<&Pricing>) -> Vec<PriceTier> {
     tiers
 }
 
-pub fn sent_params(row: &ModelRow, use_: ModelUse) -> Vec<ParamNeed> {
+/// What identifies a use in the cache: its name, its abilities in order and its flag. A name holds
+/// no control character, so its line feed ends it, and no ability text holds a comma.
+fn use_key(use_: &ModelUse) -> String {
+    let abilities: Vec<&str> = use_.requires.iter().map(|each| each.as_str()).collect();
+    format!("{}\n{}\n{}", use_.name, abilities.join(","), use_.hides)
+}
+
+/// What a host must support for the use: the structured-output parameters when it needs a schema.
+pub fn sent_params(row: &ModelRow, use_: &ModelUse) -> Vec<ParamNeed> {
     let mut params = vec![ParamNeed::One("tools".to_owned())];
     if row.reasoning {
         params.push(ParamNeed::One("reasoning".to_owned()));
     }
-    if use_ != ModelUse::Chat {
+    if use_.requires.contains(&Ability::Schema) {
         params.extend(
             STRUCTURED_PARAMS
                 .iter()
@@ -456,7 +464,7 @@ pub fn join_catalog(
     models: &Value,
     zdr: &Value,
     now: i64,
-    use_: ModelUse,
+    use_: &ModelUse,
     zdr_only: bool,
 ) -> Vec<ModelView> {
     let (Some(entries), Some(endpoints)) = (parse_models(models), parse_endpoints(zdr)) else {
@@ -474,7 +482,7 @@ fn join_parsed(
     entries: &Ordered<ModelEntry>,
     endpoints: &Ordered<Vec<Endpoint>>,
     now: i64,
-    use_: ModelUse,
+    use_: &ModelUse,
     zdr_only: bool,
 ) -> Vec<ModelView> {
     rows.iter()
@@ -488,7 +496,7 @@ fn join_row(
     entries: &Ordered<ModelEntry>,
     endpoints: &Ordered<Vec<Endpoint>>,
     now: i64,
-    use_: ModelUse,
+    use_: &ModelUse,
     zdr_only: bool,
 ) -> ModelView {
     let Some(binding) = row.bindings.get("openrouter") else {
@@ -615,7 +623,7 @@ struct Joined {
 struct Shared {
     deps: ModelCatalogDeps,
     fetcher: Fetcher<Arc<Fetched>>,
-    joined: Mutex<HashMap<ModelUse, Joined>>,
+    joined: Mutex<HashMap<String, Joined>>,
     /// Counts the registry's changes; a join taken before one is stale.
     version: Arc<AtomicU64>,
 }
@@ -684,7 +692,7 @@ impl ModelCatalog {
         let cancel = cancel.cloned();
         async move {
             let data = waiter.raced(cancel.as_ref()).await?;
-            Ok(join(&shared, data, use_, zdr_only))
+            Ok(join(&shared, data, &use_, zdr_only))
         }
     }
 
@@ -725,7 +733,7 @@ impl ModelCatalog {
                 &data.entries,
                 &data.endpoints,
                 now,
-                use_,
+                &use_,
                 true,
             );
             Ok(views
@@ -782,14 +790,15 @@ fn fetched(shared: &Arc<Shared>) -> Wait {
 fn join(
     shared: &Shared,
     data: Option<Arc<Fetched>>,
-    use_: ModelUse,
+    use_: &ModelUse,
     zdr_only: bool,
 ) -> Vec<ModelView> {
     let now = shared.deps.deps.scheduler.now_ms();
     let version = shared.version.load(Ordering::SeqCst);
+    let key = use_key(use_);
     {
         let held = locked(&shared.joined);
-        if let Some(known) = held.get(&use_)
+        if let Some(known) = held.get(&key)
             && known.version == version
             && same_data(&known.data, &data)
             && known.zdr_only == zdr_only
@@ -822,7 +831,7 @@ fn join(
         .map(|at| at as f64)
         .fold(f64::INFINITY, f64::min);
     locked(&shared.joined).insert(
-        use_,
+        key,
         Joined {
             version,
             data,

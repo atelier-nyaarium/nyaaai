@@ -53,11 +53,19 @@
 			{
 				"kind": "routes",
 				"model": "google/gemini-3.8-flash",
-				"use": "chat"
+				"use": {
+					"name": "chat",
+					"requires": [],
+					"hides": true
+				}
 			},
 			{
 				"kind": "candidates",
-				"use": "chat"
+				"use": {
+					"name": "chat",
+					"requires": [],
+					"hides": true
+				}
 			}
 		]
 	},

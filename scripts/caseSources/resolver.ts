@@ -770,3 +770,40 @@ export const resolverServedCases: CaseSource[] = [
 		flippedTo: true,
 	}),
 ];
+
+////////////////////////////////
+//  Uses of a consumer's own
+
+const SUMMARY = { name: "summary", requires: ["schema"], hides: true };
+const TRIAGE = { name: "triage", requires: [], hides: false };
+
+export const resolverUseCases: CaseSource[] = [
+	caseOf("resolver.uses")("uses-the-standard-ones", {
+		rows: [LUNA, GEMINI],
+		uses: [
+			{ name: "chat", requires: [], hides: true },
+			{ name: "compaction", requires: ["schema"], hides: false },
+			{ name: "analysis", requires: ["schema"], hides: false },
+		],
+	}),
+	caseOf("resolver.uses")("uses-a-use-of-a-consumer-reaches-the-catalogs-as-it-is", {
+		rows: [LUNA, GEMINI],
+		uses: [SUMMARY, TRIAGE, { name: "chat", requires: ["schema"], hides: false }],
+	}),
+	served("served-a-custom-use-reaches-the-catalog", {
+		...SERVED[0],
+		tag: undefined,
+		use: SUMMARY,
+		view: "ok",
+		zdrOnly: true,
+		flippedTo: false,
+	}),
+	served("served-a-custom-use-with-no-view", {
+		...SERVED[1],
+		tag: undefined,
+		use: TRIAGE,
+		view: null,
+		zdrOnly: true,
+		flippedTo: true,
+	}),
+];

@@ -37,9 +37,9 @@ use nyaaai_contract::json::{Value, parse_json};
 use nyaaai_contract::model_registry::ModelRegistry;
 use nyaaai_contract::shape::Shape;
 use nyaaai_contract::shapes::model::{
-    ModelRow, ModelUse, ModelView, ModelViewPrice, ModelViewStatus, RowIdentity, TestRecord,
-    TestRecordCache, TestRecordChecks, TestRecordChecksReasoning, TestRecordChecksRecovery,
-    TestRecordChecksSchema, TestRecordChecksToolPlus, TestRecordVerifiedPrice,
+    ModelRow, ModelView, ModelViewPrice, ModelViewStatus, RowIdentity, TestRecord, TestRecordCache,
+    TestRecordChecks, TestRecordChecksReasoning, TestRecordChecksRecovery, TestRecordChecksSchema,
+    TestRecordChecksToolPlus, TestRecordVerifiedPrice,
 };
 use nyaaai_contract::shapes::provider::{EntryFields, KeyState, ProviderEntry, ProviderKindName};
 use nyaaai_contract::shapes::step::CanonicalRequest;
@@ -51,6 +51,8 @@ use nyaaai_testkit::scripted_fetch::ScriptedFetch;
 use nyaaai_testkit::scripted_ports::ScriptedModelRegistry;
 
 use super::catalog::{CALLER_REASON, Told, caller_token, exchange_of, view_line, view_lines};
+use nyaaai_agentic::models::uses::CHAT;
+
 use super::shapes::*;
 use nyaaai_agentic::kinds::join::join_all;
 
@@ -1133,7 +1135,7 @@ pub fn flow(input: LocalFlowInput) -> Outcome<LocalFlowResult> {
                 LocalFlowInputStepsItem::Views(held) => {
                     match catalog
                         .views(
-                            held.use_.unwrap_or(ModelUse::Chat),
+                            held.use_.clone().unwrap_or_else(|| CHAT.clone()),
                             held.zdr_only.unwrap_or(true),
                             Some(&token),
                         )
@@ -1192,7 +1194,11 @@ pub fn flow(input: LocalFlowInput) -> Outcome<LocalFlowResult> {
                 LocalFlowInputStepsItem::View(held) => {
                     let row = local_row_of(&held.row)?;
                     match tester
-                        .view(&row, held.use_.unwrap_or(ModelUse::Chat), &token)
+                        .view(
+                            &row,
+                            held.use_.clone().unwrap_or_else(|| CHAT.clone()),
+                            &token,
+                        )
                         .await
                     {
                         Ok(view) => match view_line(&view) {

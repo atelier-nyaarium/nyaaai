@@ -12,7 +12,11 @@
 			"url": "http://lab.local:11434"
 		},
 		"key": "local:lab/local-a:27b",
-		"use": "chat",
+		"use": {
+			"name": "chat",
+			"requires": [],
+			"hides": true
+		},
 		"view": "ok",
 		"zdrOnly": true,
 		"flippedTo": false

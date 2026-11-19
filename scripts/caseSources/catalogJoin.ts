@@ -95,14 +95,14 @@ const ZDR_BODY: Json = {
 ////////////////////////////////
 //  Functions & Helpers
 
-const pass = (use: string, zdrOnly: boolean) => ({ use, zdrOnly });
+const pass = (use: string | object, zdrOnly: boolean) => ({ use, zdrOnly });
 
 const join = (
 	name: string,
 	rows: string[],
 	models: unknown,
 	zdr: unknown,
-	passes: Array<{ use: string; zdrOnly: boolean }> = [pass("chat", true)],
+	passes: Array<{ use: string | object; zdrOnly: boolean }> = [pass("chat", true)],
 	nowMs = NOW,
 ): CaseSource => ({ kind: "catalog.openrouterJoin", name, input: { rows, models, zdr, nowMs, passes } });
 
@@ -535,3 +535,35 @@ export const catalogJoinCases: CaseSource[] = [
 		{ expiration: null, hosts: [{ params: ["tools"] }], needs: [[]], nowMs: NOW },
 	]),
 ];
+
+////////////////////////////////
+//  Uses of a consumer's own
+
+const SUMMARY = { name: "summary", requires: ["schema"], hides: true };
+const TRIAGE = { name: "triage", requires: [], hides: false };
+
+const byUse = catalogJoinCases.find((each) => each.name === "join-by-use");
+
+if (byUse !== undefined) {
+	const input = byUse.input as Record<string, unknown>;
+	catalogJoinCases.push(
+		{
+			...byUse,
+			name: "join-custom-uses-by-what-they-require",
+			input: {
+				...input,
+				passes: [
+					pass(SUMMARY, true),
+					pass(TRIAGE, true),
+					pass({ name: "chat", requires: ["schema"], hides: true }, true),
+					pass({ name: "analysis", requires: [], hides: false }, true),
+				],
+			},
+		},
+		{
+			...byUse,
+			name: "join-custom-use-needs-the-structured-parameters-of-a-host",
+			input: { ...input, passes: [pass(SUMMARY, false), pass(TRIAGE, false)] },
+		},
+	);
+}

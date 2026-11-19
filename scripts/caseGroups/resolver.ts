@@ -14,6 +14,7 @@ import {
 } from "@nyaaai/agentic/provider/resolver";
 import type { KeyAnswer } from "@nyaaai/contract/entryKeys";
 import type { Fetch, FetchRequest } from "@nyaaai/contract/fetch";
+import { canonicalJson } from "@nyaaai/contract/json";
 import { z } from "@nyaaai/contract/shape";
 import { type ModelRow, ModelUse, ModelView, Unresolved, Via } from "@nyaaai/contract/shapes/model";
 import { KeyReach, Passed, ProviderEntry, ProviderKindName } from "@nyaaai/contract/shapes/provider";
@@ -21,8 +22,9 @@ import { type CanonicalRequest, Failure, type StepResult } from "@nyaaai/contrac
 import { caseGroup, casesFor, kind } from "@nyaaai/testkit/caseGroup";
 import { fakeScheduler, TimerWheel } from "@nyaaai/testkit/scheduler";
 import { scriptedEntryKeys, scriptedModelRegistry, scriptedProviderList } from "@nyaaai/testkit/scriptedPorts";
-import { resolverCases, resolverServedCases } from "../caseSources/resolver";
+import { resolverCases, resolverServedCases, resolverUseCases } from "../caseSources/resolver";
 import { resolverKeyCases } from "../caseSources/resolverKey";
+import { withUses } from "../caseSources/uses";
 import { rowOfKey } from "./catalogKit";
 import { localRowOf } from "./localKit";
 
@@ -379,6 +381,69 @@ export const resolver = caseGroup("resolver", {
 				};
 			},
 		),
+		/** The uses a catalog is asked with when each call of the resolver takes one: the value, never a name. */
+		uses: kind(
+			z.object({ rows: z.array(z.string()), uses: z.array(ModelUse) }),
+			z.object({
+				calls: z.array(
+					z.object({
+						call: z.enum(["routes", "resolve", "rows", "candidates"]),
+						use: ModelUse,
+						/** The distinct uses the catalogs were asked with, in first asked order. */
+						asked: z.array(ModelUse),
+					}),
+				),
+			}),
+			async (input) => {
+				const asked: Array<z.infer<typeof ModelUse>> = [];
+				const base = KINDS.openrouter;
+				if (base === undefined) throw new Error("No kind.");
+				const stub: ProviderKind = {
+					...base,
+					catalog: (_entry, _transport, deps) => ({
+						views: async (use) => {
+							if (!asked.some((each) => canonicalJson(each) === canonicalJson(use))) asked.push(use);
+							return deps.rows
+								.rows()
+								.flatMap((row) => [{ row, status: "ok" as const, efforts: [], hosts: [] }]);
+						},
+						idle: async () => {},
+					}),
+				};
+				const entry = { id: "a", kind: "openrouter" as const, label: "First" };
+				const resolver = new ModelResolver({
+					list: scriptedProviderList([entry]),
+					keys: scriptedEntryKeys({ a: { kind: "key", key: KEY } }),
+					registry: scriptedModelRegistry(input.rows.map(rowFor)),
+					kinds: { openrouter: stub },
+					kindDeps: () => ({
+						fetch: echoHost([]).fetch,
+						scheduler: fakeScheduler(new TimerWheel(0)),
+						log: () => {},
+						userAgent: "cases/1.0",
+					}),
+					zdrOnly: () => true,
+				});
+				const calls: Array<{
+					call: "routes" | "resolve" | "rows" | "candidates";
+					use: z.infer<typeof ModelUse>;
+					asked: Array<z.infer<typeof ModelUse>>;
+				}> = [];
+				const model = input.rows[0] ?? "";
+				for (const use of input.uses) {
+					for (const call of ["routes", "resolve", "rows", "candidates"] as const) {
+						asked.length = 0;
+						if (call === "routes") await resolver.routes(model, use);
+						else if (call === "resolve") await resolver.resolve(model, use);
+						else if (call === "rows") await resolver.rows(use);
+						else await resolver.candidates(use);
+						calls.push({ call, use, asked: [...asked] });
+					}
+				}
+				resolver.dispose();
+				return { calls };
+			},
+		),
 		/** A resolver over scripted ports and kinds with stub catalogs, driven by a script. */
 		routes: kind(
 			z.object({
@@ -629,5 +694,5 @@ export const resolver = caseGroup("resolver", {
 			},
 		),
 	},
-	sources: casesFor("resolver", resolverCases, resolverServedCases, resolverKeyCases),
+	sources: withUses(casesFor("resolver", resolverCases, resolverServedCases, resolverKeyCases, resolverUseCases)),
 });

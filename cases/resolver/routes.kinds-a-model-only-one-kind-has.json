@@ -47,11 +47,19 @@
 			{
 				"kind": "routes",
 				"model": "openai/gpt-oss-120b",
-				"use": "chat"
+				"use": {
+					"name": "chat",
+					"requires": [],
+					"hides": true
+				}
 			},
 			{
 				"kind": "candidates",
-				"use": "chat"
+				"use": {
+					"name": "chat",
+					"requires": [],
+					"hides": true
+				}
 			}
 		]
 	},

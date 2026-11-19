@@ -37,7 +37,11 @@
 			{
 				"kind": "resolve",
 				"model": "openai/gpt-6-luna",
-				"use": "chat"
+				"use": {
+					"name": "chat",
+					"requires": [],
+					"hides": true
+				}
 			},
 			{
 				"kind": "list",
@@ -57,7 +61,11 @@
 			{
 				"kind": "resolve",
 				"model": "openai/gpt-6-luna",
-				"use": "chat"
+				"use": {
+					"name": "chat",
+					"requires": [],
+					"hides": true
+				}
 			},
 			{
 				"kind": "send",

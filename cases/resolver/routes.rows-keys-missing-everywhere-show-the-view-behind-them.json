@@ -36,7 +36,11 @@
 		"steps": [
 			{
 				"kind": "rows",
-				"use": "chat"
+				"use": {
+					"name": "chat",
+					"requires": [],
+					"hides": true
+				}
 			}
 		]
 	},

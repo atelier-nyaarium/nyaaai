@@ -1,0 +1,117 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "registry.list",
+	"name": "list-custom-use-named-like-a-standard-one-requiring-nothing",
+	"input": {
+		"raw": {
+			"records": {
+				"e1": {
+					"openrouter:z-ai/glm-5.2": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					},
+					"openrouter:x/noschema": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "fail"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					},
+					"openrouter:x/removed": {
+						"label": "Test Model",
+						"date": "2026-09-28",
+						"cost": 0.03,
+						"checks": {
+							"toolPlus": "pass",
+							"recovery": "pass",
+							"reasoning": "n/a",
+							"schema": "pass"
+						},
+						"reasoning": true,
+						"cache": "none",
+						"verifiedPrice": {
+							"prompt": 0.32,
+							"completion": 4.4
+						}
+					}
+				}
+			},
+			"added": {
+				"e1": [
+					"openrouter:z-ai/glm-5.2",
+					"openrouter:x/noschema"
+				]
+			},
+			"hidden": [
+				"moonshotai/kimi-k*",
+				"openrouter:z-ai/glm-5.2"
+			]
+		},
+		"entries": [
+			{
+				"id": "e1",
+				"kind": "openrouter"
+			}
+		],
+		"scope": "e1",
+		"use": {
+			"name": "analysis",
+			"requires": [],
+			"hides": false
+		},
+		"views": [
+			{
+				"key": "openai/gpt-6-luna",
+				"status": "ok"
+			},
+			{
+				"key": "moonshotai/kimi-k3",
+				"status": "ok"
+			},
+			{
+				"key": "openrouter:z-ai/glm-5.2",
+				"status": "ok"
+			},
+			{
+				"key": "openrouter:x/noschema",
+				"status": "ok"
+			},
+			{
+				"key": "openrouter:x/removed",
+				"status": "ok"
+			}
+		]
+	},
+	"expected": {
+		"keys": [
+			"openai/gpt-6-luna",
+			"moonshotai/kimi-k3",
+			"openrouter:z-ai/glm-5.2",
+			"openrouter:x/noschema"
+		]
+	}
+}

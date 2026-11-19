@@ -46,12 +46,20 @@
 			{
 				"kind": "routes",
 				"model": "openrouter:lab/none",
-				"use": "chat"
+				"use": {
+					"name": "chat",
+					"requires": [],
+					"hides": true
+				}
 			},
 			{
 				"kind": "resolve",
 				"model": "openrouter:lab/none",
-				"use": "chat"
+				"use": {
+					"name": "chat",
+					"requires": [],
+					"hides": true
+				}
 			}
 		]
 	},

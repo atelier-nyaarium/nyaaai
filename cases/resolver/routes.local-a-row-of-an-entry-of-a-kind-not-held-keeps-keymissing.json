@@ -26,7 +26,11 @@
 			{
 				"kind": "routes",
 				"model": "local:lab/local-a:27b",
-				"use": "chat"
+				"use": {
+					"name": "chat",
+					"requires": [],
+					"hides": true
+				}
 			}
 		]
 	},

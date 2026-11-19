@@ -13,7 +13,13 @@
 			"label": "Go"
 		},
 		"key": "openai/gpt-6-luna",
-		"use": "analysis",
+		"use": {
+			"name": "analysis",
+			"requires": [
+				"schema"
+			],
+			"hides": false
+		},
 		"view": null,
 		"zdrOnly": true,
 		"flippedTo": true

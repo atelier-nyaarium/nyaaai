@@ -70,7 +70,7 @@ const offeredOf = (name: string, input: unknown, scope: string | null, keys: str
 const listOf = (
 	name: string,
 	input: unknown,
-	use: string,
+	use: string | object,
 	views: Array<[string, string]>,
 	scope: string | null = ENTRY,
 	entries = OR,
@@ -771,3 +771,42 @@ export const registryCases: CaseSource[] = [
 		},
 	},
 ];
+
+////////////////////////////////
+//  Uses of a consumer's own
+
+const SUMMARY = { name: "summary", requires: ["schema"], hides: true };
+const TRIAGE = { name: "triage", requires: [], hides: false };
+
+registryCases.push(
+	...[
+		["requires-schema-and-hides", SUMMARY],
+		["requires-nothing-and-does-not-hide", TRIAGE],
+		["requires-nothing-and-hides", { name: "triage", requires: [], hides: true }],
+		["requires-schema-and-does-not-hide", { name: "summary", requires: ["schema"], hides: false }],
+	].flatMap(([label, use]) => [
+		listOf(
+			`list-custom-use-${label}`,
+			LIST,
+			use as object,
+			ALL_KEYS.map((key) => [key, "ok"]),
+		),
+		...STATUSES.map((status) =>
+			listOf(
+				`list-custom-use-${label}-all-${status}`,
+				LIST,
+				use as object,
+				ALL_KEYS.map((key) => [key, status]),
+			),
+		),
+	]),
+	listOf("list-custom-use-is-read-by-value-not-by-name", LIST, { name: "chat", requires: ["schema"], hides: false }, [
+		...ALL_KEYS.map((key): [string, string] => [key, "ok"]),
+	]),
+	listOf(
+		"list-custom-use-named-like-a-standard-one-requiring-nothing",
+		LIST,
+		{ name: "analysis", requires: [], hides: false },
+		[...ALL_KEYS.map((key): [string, string] => [key, "ok"])],
+	),
+);

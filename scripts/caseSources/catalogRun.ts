@@ -382,3 +382,27 @@ export const catalogRunCases: CaseSource[] = [
 		steps: [views(), views(), advance(13 * HOUR), views()],
 	}),
 ];
+
+////////////////////////////////
+//  Uses of a consumer's own
+
+const SUMMARY = { name: "summary", requires: ["schema"], hides: true };
+const TRIAGE = { name: "triage", requires: [], hides: false };
+const LOOSE = { name: "summary", requires: [], hides: true };
+
+catalogRunCases.push(
+	run("run-custom-uses-keep-their-own-join", {
+		exchanges: PAIR,
+		steps: [
+			views({ use: SUMMARY }),
+			views({ use: TRIAGE }),
+			views({ use: SUMMARY }),
+			views({ use: TRIAGE }),
+			views({ use: "chat" }),
+		],
+	}),
+	run("run-two-uses-of-one-name-keep-their-own-join", {
+		exchanges: PAIR,
+		steps: [views({ use: SUMMARY }), views({ use: LOOSE }), views({ use: SUMMARY }), views({ use: LOOSE })],
+	}),
+);

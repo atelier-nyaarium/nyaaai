@@ -11,6 +11,7 @@ import {
 } from "@nyaaai/agentic/kinds/openrouter/catalog";
 import { OPENROUTER, OPENROUTER_ENTRY } from "@nyaaai/agentic/kinds/openrouter/kind";
 import { MODELS } from "@nyaaai/agentic/models/curated";
+import { CHAT } from "@nyaaai/agentic/models/uses";
 import { fixedText, numberOfText, numberText } from "@nyaaai/contract/number";
 import type { ModelRow, ModelView } from "@nyaaai/contract/shapes/model";
 import { deadline, systemScheduler } from "@nyaaai/contract/time";
@@ -97,7 +98,7 @@ export function reportOf(models: unknown, zdr: unknown, rows: readonly ModelRow[
 					!known.has(entry.id) &&
 					globMatch(row.family, entry.id) &&
 					(entry.created ?? 0) > created &&
-					usableHosts(endpoints.get(entry.id) ?? [], sentParams(row, "chat")).length > 0,
+					usableHosts(endpoints.get(entry.id) ?? [], sentParams(row, CHAT)).length > 0,
 			)
 			.map((entry) => entry.id);
 		if (newer.length > 0) lines.push(`${row.key}: newer with a zero-retention host: ${newer.join(", ")}`);
