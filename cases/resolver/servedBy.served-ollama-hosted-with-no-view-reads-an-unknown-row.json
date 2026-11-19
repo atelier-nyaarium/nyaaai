@@ -1,0 +1,61 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.servedBy",
+	"name": "served-ollama-hosted-with-no-view-reads-an-unknown-row",
+	"input": {
+		"kind": "ollama",
+		"entry": {
+			"id": "lab",
+			"kind": "ollama",
+			"label": "Lab",
+			"url": "http://lab.local:11434"
+		},
+		"key": "ollama:qwen",
+		"use": "chat",
+		"view": null,
+		"zdrOnly": false,
+		"flippedTo": true
+	},
+	"expected": {
+		"key": "ollama:qwen",
+		"entry": "lab",
+		"binding": "qwen",
+		"view": {
+			"row": {
+				"key": "ollama:qwen",
+				"bindings": {
+					"ollama": {
+						"id": "qwen"
+					}
+				},
+				"family": "ollama:qwen",
+				"label": "ollama:qwen",
+				"reasoning": false,
+				"schema": false,
+				"cache": "implicit",
+				"verified": "",
+				"verifiedPrice": {
+					"prompt": 0,
+					"completion": 0
+				},
+				"identity": {
+					"kind": "hosted",
+					"provider": "ollama",
+					"id": "qwen"
+				}
+			},
+			"status": "unknown",
+			"efforts": [],
+			"hosts": []
+		},
+		"path": "/v1/chat/completions",
+		"passed": [],
+		"candidates": 1,
+		"zdrOnResolve": false,
+		"sent": {
+			"zdrOnly": true,
+			"path": "/v1/chat/completions"
+		}
+	}
+}

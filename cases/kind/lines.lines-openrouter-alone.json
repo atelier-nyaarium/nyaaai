@@ -1,0 +1,20 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.lines",
+	"name": "lines-openrouter-alone",
+	"input": {
+		"kinds": [
+			"openrouter"
+		]
+	},
+	"expected": {
+		"lines": [
+			{
+				"kind": "openrouter",
+				"label": "OpenRouter",
+				"field": "key"
+			}
+		]
+	}
+}

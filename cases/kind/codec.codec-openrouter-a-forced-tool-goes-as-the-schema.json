@@ -1,0 +1,91 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.codec",
+	"name": "codec-openrouter-a-forced-tool-goes-as-the-schema",
+	"input": {
+		"kind": "openrouter",
+		"label": "Zen",
+		"view": null,
+		"request": {
+			"model": "openai/gpt-6-luna",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Hi"
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true,
+			"tools": [
+				{
+					"name": "answer",
+					"description": "Answers.",
+					"parameters": {
+						"type": "object",
+						"properties": {}
+					}
+				}
+			],
+			"toolChoice": {
+				"name": "answer"
+			}
+		},
+		"mode": "stream",
+		"nowMs": 1790337600000,
+		"failures": []
+	},
+	"expected": {
+		"encoded": {
+			"path": "/chat/completions",
+			"body": {
+				"model": "openai/gpt-6-luna",
+				"messages": [
+					{
+						"role": "system",
+						"content": "Rules."
+					},
+					{
+						"role": "user",
+						"content": "Hi"
+					}
+				],
+				"stream": true,
+				"session_id": "root-1",
+				"provider": {
+					"zdr": true,
+					"data_collection": "deny",
+					"require_parameters": true
+				},
+				"tools": [
+					{
+						"type": "function",
+						"function": {
+							"name": "answer",
+							"description": "Answers.",
+							"parameters": {
+								"type": "object",
+								"properties": {}
+							}
+						}
+					}
+				],
+				"tool_choice": {
+					"type": "function",
+					"function": {
+						"name": "answer"
+					}
+				}
+			}
+		},
+		"refusal": null,
+		"facts": null,
+		"failures": []
+	}
+}

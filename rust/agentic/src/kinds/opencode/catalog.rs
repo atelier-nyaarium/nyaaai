@@ -504,6 +504,10 @@ impl EntryCatalog for OpenCodeCatalog {
         self
     }
 
+    fn arc_any(self: Arc<Self>) -> Arc<dyn std::any::Any + Send + Sync> {
+        self
+    }
+
     fn views(
         &self,
         use_: ModelUse,

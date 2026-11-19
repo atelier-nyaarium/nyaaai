@@ -1,0 +1,69 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.route",
+	"name": "opencode-a-failing-list-leaves-views-unknown",
+	"input": {
+		"kind": "opencode",
+		"entry": {
+			"label": "Zen"
+		},
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 500,
+				"json": {}
+			}
+		],
+		"rows": [
+			"openai/gpt-6-luna",
+			"anthropic/claude-opus-5.5"
+		],
+		"steps": [
+			{
+				"kind": "views"
+			},
+			{
+				"kind": "list"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "views",
+					"views": [
+						{
+							"key": "openai/gpt-6-luna",
+							"status": "noZdrHost",
+							"efforts": [],
+							"hosts": []
+						},
+						{
+							"key": "anthropic/claude-opus-5.5",
+							"status": "noZdrHost",
+							"efforts": [],
+							"hosts": []
+						}
+					]
+				}
+			},
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "list",
+					"models": null
+				}
+			}
+		],
+		"requests": [
+			"/v1/models"
+		],
+		"read": [
+			1
+		],
+		"waiting": []
+	}
+}

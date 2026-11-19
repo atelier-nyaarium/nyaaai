@@ -1,0 +1,125 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routes",
+	"name": "kinds-a-model-only-one-kind-has",
+	"input": {
+		"entries": [
+			{
+				"id": "go",
+				"kind": "opencode",
+				"plan": "go",
+				"label": "Go"
+			},
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "First"
+			}
+		],
+		"answers": {
+			"go": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			},
+			"a": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"failing": [],
+		"rows": [
+			"openai/gpt-6-luna",
+			"google/gemini-3.8-flash",
+			"openai/gpt-oss-120b"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama",
+			"lmstudio",
+			"llamacpp",
+			"compatible"
+		],
+		"listings": {},
+		"zdrOnly": true,
+		"steps": [
+			{
+				"kind": "routes",
+				"model": "openai/gpt-oss-120b",
+				"use": "chat"
+			},
+			{
+				"kind": "candidates",
+				"use": "chat"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answer": {
+					"kind": "routes",
+					"unresolved": null,
+					"candidates": [
+						{
+							"entry": "a",
+							"kind": "openrouter",
+							"binding": "openai/gpt-oss-120b",
+							"status": "ok",
+							"zdrOnly": true,
+							"path": "/chat/completions"
+						}
+					],
+					"passed": []
+				},
+				"built": 1,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "candidates",
+					"served": [
+						{
+							"key": "openai/gpt-6-luna",
+							"status": "ok",
+							"via": {
+								"entry": "go",
+								"label": "Go"
+							}
+						},
+						{
+							"key": "google/gemini-3.8-flash",
+							"status": "ok",
+							"via": {
+								"entry": "go",
+								"label": "Go"
+							}
+						},
+						{
+							"key": "openai/gpt-oss-120b",
+							"status": "ok",
+							"via": {
+								"entry": "a",
+								"label": "First"
+							}
+						}
+					]
+				},
+				"built": 2,
+				"disposed": 0
+			}
+		],
+		"transports": [
+			"First",
+			"Go/go"
+		],
+		"stopped": [
+			"First",
+			"Go/go"
+		],
+		"refreshed": [],
+		"keyReads": 3,
+		"listReads": 4
+	}
+}

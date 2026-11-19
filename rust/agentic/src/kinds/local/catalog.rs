@@ -591,6 +591,10 @@ impl EntryCatalog for LocalCatalog {
     fn as_any(&self) -> &dyn Any {
         self
     }
+
+    fn arc_any(self: Arc<Self>) -> Arc<dyn Any + Send + Sync> {
+        self
+    }
 }
 
 /// The browser of a local catalog.

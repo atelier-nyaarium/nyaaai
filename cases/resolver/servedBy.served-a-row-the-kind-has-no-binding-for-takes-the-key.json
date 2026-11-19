@@ -1,0 +1,61 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.servedBy",
+	"name": "served-a-row-the-kind-has-no-binding-for-takes-the-key",
+	"input": {
+		"tag": "openrouter-curated",
+		"kind": "opencode",
+		"entry": {
+			"id": "go",
+			"kind": "opencode",
+			"plan": "go",
+			"label": "Go"
+		},
+		"key": "openai/gpt-oss-120b",
+		"use": "chat",
+		"view": "ok",
+		"zdrOnly": true,
+		"flippedTo": true
+	},
+	"expected": {
+		"key": "openai/gpt-oss-120b",
+		"entry": "go",
+		"binding": "openai/gpt-oss-120b",
+		"view": {
+			"row": {
+				"key": "openai/gpt-oss-120b",
+				"bindings": {
+					"openrouter": {
+						"id": "openai/gpt-oss-120b"
+					}
+				},
+				"family": "openai/gpt-oss-*",
+				"label": "gpt-oss-120b",
+				"reasoning": true,
+				"schema": false,
+				"cache": "implicit",
+				"verified": "2026-09-25",
+				"verifiedPrice": {
+					"prompt": 0.15,
+					"completion": 0.6
+				},
+				"identity": {
+					"kind": "curated",
+					"key": "openai/gpt-oss-120b"
+				}
+			},
+			"status": "ok",
+			"efforts": [],
+			"hosts": []
+		},
+		"path": "/openai/v1/chat/completions",
+		"passed": [],
+		"candidates": 1,
+		"zdrOnResolve": true,
+		"sent": {
+			"zdrOnly": true,
+			"path": "/openai/v1/chat/completions"
+		}
+	}
+}

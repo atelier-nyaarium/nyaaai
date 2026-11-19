@@ -1,0 +1,136 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.route",
+	"name": "openrouter-detail-reads-the-endpoints-of-a-model",
+	"input": {
+		"kind": "openrouter",
+		"entry": {
+			"label": "Zen"
+		},
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "openai/gpt-6-luna",
+							"name": "Luna",
+							"context_length": 1000000,
+							"pricing": {
+								"prompt": "0.00000012",
+								"completion": "0.0000006"
+							},
+							"reasoning": {
+								"supported_efforts": [
+									"high",
+									"low"
+								]
+							}
+						},
+						{
+							"id": "anthropic/claude-opus-5.5",
+							"pricing": {
+								"prompt": "0.000005",
+								"completion": "0.000025"
+							}
+						}
+					]
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"model_id": "openai/gpt-6-luna",
+							"tag": "alpha",
+							"supported_parameters": [
+								"tools",
+								"reasoning",
+								"response_format",
+								"structured_outputs"
+							],
+							"pricing": {
+								"prompt": "0.00000012",
+								"completion": "0.0000006"
+							}
+						},
+						{
+							"model_id": "anthropic/claude-opus-5.5",
+							"tag": "beta",
+							"supported_parameters": [
+								"tools",
+								"reasoning",
+								"response_format",
+								"structured_outputs"
+							]
+						}
+					]
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"endpoints": [
+							{
+								"provider_name": "Alpha",
+								"tag": "alpha",
+								"context_length": 131000,
+								"pricing": {
+									"prompt": "0.00000012",
+									"completion": "0.0000006"
+								}
+							}
+						]
+					}
+				}
+			}
+		],
+		"rows": [
+			"openai/gpt-6-luna",
+			"anthropic/claude-opus-5.5"
+		],
+		"steps": [
+			{
+				"kind": "detail",
+				"id": "openai/gpt-6-luna"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "detail",
+					"detail": {
+						"hosts": [
+							{
+								"name": "Alpha",
+								"tag": "alpha",
+								"context": 131000,
+								"prompt": 0.12,
+								"completion": 0.6,
+								"zdr": true
+							}
+						]
+					}
+				}
+			}
+		],
+		"requests": [
+			"/models",
+			"/endpoints/zdr",
+			"/models/openai/gpt-6-luna/endpoints"
+		],
+		"read": [
+			1,
+			1,
+			1
+		],
+		"waiting": []
+	}
+}

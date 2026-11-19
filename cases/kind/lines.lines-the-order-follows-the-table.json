@@ -1,0 +1,61 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.lines",
+	"name": "lines-the-order-follows-the-table",
+	"input": {
+		"kinds": [
+			"compatible",
+			"llamacpp",
+			"lmstudio",
+			"ollama",
+			"openrouter",
+			"opencode"
+		]
+	},
+	"expected": {
+		"lines": [
+			{
+				"kind": "compatible",
+				"label": "OpenAI-compatible",
+				"field": "url",
+				"optionalKey": true
+			},
+			{
+				"kind": "llamacpp",
+				"label": "llama.cpp",
+				"field": "url",
+				"url": "http://127.0.0.1:8080"
+			},
+			{
+				"kind": "lmstudio",
+				"label": "LM Studio",
+				"field": "url",
+				"url": "http://127.0.0.1:1234"
+			},
+			{
+				"kind": "ollama",
+				"label": "Ollama",
+				"field": "url",
+				"url": "http://127.0.0.1:11434"
+			},
+			{
+				"kind": "openrouter",
+				"label": "OpenRouter",
+				"field": "key"
+			},
+			{
+				"kind": "opencode",
+				"plan": "go",
+				"label": "OpenCode Go",
+				"field": "key"
+			},
+			{
+				"kind": "opencode",
+				"plan": "payg",
+				"label": "OpenCode (pay-as-you-go)",
+				"field": "key"
+			}
+		]
+	}
+}

@@ -1,0 +1,61 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.servedBy",
+	"name": "served-lmstudio-hosted-with-a-view",
+	"input": {
+		"kind": "lmstudio",
+		"entry": {
+			"id": "studio",
+			"kind": "lmstudio",
+			"label": "Studio",
+			"url": "http://lab.local:1234"
+		},
+		"key": "lmstudio:qwen",
+		"use": "chat",
+		"view": "ok",
+		"zdrOnly": true,
+		"flippedTo": false
+	},
+	"expected": {
+		"key": "lmstudio:qwen",
+		"entry": "studio",
+		"binding": "qwen",
+		"view": {
+			"row": {
+				"key": "lmstudio:qwen",
+				"bindings": {
+					"lmstudio": {
+						"id": "qwen"
+					}
+				},
+				"family": "lmstudio:qwen",
+				"label": "Made Up",
+				"reasoning": true,
+				"schema": true,
+				"cache": "implicit",
+				"verified": "2026-01-01",
+				"verifiedPrice": {
+					"prompt": 1,
+					"completion": 2
+				},
+				"identity": {
+					"kind": "hosted",
+					"provider": "lmstudio",
+					"id": "qwen"
+				}
+			},
+			"status": "ok",
+			"efforts": [],
+			"hosts": []
+		},
+		"path": "/v1/chat/completions",
+		"passed": [],
+		"candidates": 1,
+		"zdrOnResolve": true,
+		"sent": {
+			"zdrOnly": false,
+			"path": "/v1/chat/completions"
+		}
+	}
+}

@@ -9,8 +9,8 @@ use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::model_registry::ModelRegistry;
 use nyaaai_contract::shapes::model::{BrowseDetail, BrowseModel, ModelRow, ModelUse, ModelView};
 use nyaaai_contract::shapes::provider::{
-    Billed, Disposition, EntryFields, KeyState, Limits, ProviderEntry, ProviderKindName,
-    ProviderPlan,
+    Billed, Disposition, EntryFields, KeyState, KindLine, KindLineField, Limits, ProviderEntry,
+    ProviderKindName, ProviderPlan, ProviderView,
 };
 use nyaaai_contract::shapes::step::Failure;
 use nyaaai_contract::time::Scheduler;
@@ -71,8 +71,14 @@ pub trait EntryCatalog: Send + Sync {
     /// Reads the server again, when the kind can.
     fn rediscover(&self) {}
 
+    /// Stops what the catalog listens to; a route that goes calls it.
+    fn dispose(&self) {}
+
     /// The catalog as its own type, for a kind's browser.
     fn as_any(&self) -> &dyn Any;
+
+    /// The same, held: a browser keeps its catalog.
+    fn arc_any(self: Arc<Self>) -> Arc<dyn Any + Send + Sync>;
 }
 
 /// An entry's model browser.
@@ -251,6 +257,11 @@ pub trait ProviderKind: Send + Sync {
     /// Retry, fall-through, or stop.
     fn failure(&self, failure: &Failure, view: Option<&ModelView>) -> Disposition;
 
+    /// Whether the kind reads provider limits.
+    fn has_limits(&self) -> bool {
+        false
+    }
+
     /// Optional provider limits.
     fn limits<'a>(
         &'a self,
@@ -258,5 +269,80 @@ pub trait ProviderKind: Send + Sync {
         _cancel: &'a CancelToken,
     ) -> BoxFuture<'a, Option<Limits>> {
         Box::pin(async { None })
+    }
+}
+
+/// Dropdown order.
+pub static KINDS: std::sync::LazyLock<Vec<Arc<dyn ProviderKind>>> =
+    std::sync::LazyLock::new(|| {
+        vec![
+            Arc::clone(&crate::kinds::opencode::kind::OPENCODE),
+            Arc::clone(&crate::kinds::openrouter::kind::OPENROUTER),
+            crate::kinds::ollama::OLLAMA.clone() as Arc<dyn ProviderKind>,
+            crate::kinds::lmstudio::LMSTUDIO.clone() as Arc<dyn ProviderKind>,
+            crate::kinds::llamacpp::LLAMACPP.clone() as Arc<dyn ProviderKind>,
+            crate::kinds::compatible::COMPATIBLE.clone() as Arc<dyn ProviderKind>,
+        ]
+    });
+
+/// One line per plan.
+pub fn kind_lines(kinds: &[Arc<dyn ProviderKind>]) -> Vec<KindLine> {
+    kinds
+        .iter()
+        .flat_map(|kind| {
+            let line = |plan: Option<ProviderPlan>, label: &str| KindLine {
+                kind: kind.kind(),
+                plan,
+                label: label.to_owned(),
+                field: match kind.field() {
+                    KindField::Key => KindLineField::Key,
+                    KindField::Url => KindLineField::Url,
+                },
+                url: kind.url().map(str::to_owned),
+                optional_key: kind.optional_key().then_some(()),
+            };
+            let plans = kind.plans();
+            if plans.is_empty() {
+                vec![line(None, kind.label())]
+            } else {
+                plans
+                    .iter()
+                    .map(|(plan, label)| line(Some(*plan), label))
+                    .collect()
+            }
+        })
+        .collect()
+}
+
+/// An entry's line of the provider list.
+pub fn provider_view(
+    entry: &ProviderEntry,
+    status: &KeyState,
+    kinds: &[Arc<dyn ProviderKind>],
+    bill: Option<&Billed>,
+) -> ProviderView {
+    let kind = kinds.iter().find(|held| held.kind() == entry.kind);
+    let fields = EntryFields {
+        kind: entry.kind,
+        label: entry.label.clone(),
+        plan: entry.plan,
+        url: entry.url.clone(),
+        extra_usage: entry.extra_usage,
+    };
+    ProviderView {
+        id: entry.id.clone(),
+        kind: entry.kind,
+        plan: entry.plan,
+        label: entry.label.clone(),
+        url: entry.url.clone(),
+        status: status.clone(),
+        facts: kind.and_then(|held| held.facts(status, &fields, bill)),
+        balance: kind.and_then(|held| held.balance()).map(|_| ()),
+        extra_usage: match (entry.plan, kind) {
+            (Some(plan), Some(held)) if held.extra_usage().contains(&plan) => {
+                Some(entry.extra_usage == Some(true))
+            }
+            _ => None,
+        },
     }
 }

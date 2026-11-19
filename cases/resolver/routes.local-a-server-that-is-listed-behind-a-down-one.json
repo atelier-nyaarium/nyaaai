@@ -1,0 +1,90 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routes",
+	"name": "local-a-server-that-is-listed-behind-a-down-one",
+	"input": {
+		"entries": [
+			{
+				"id": "lab",
+				"kind": "ollama",
+				"label": "Lab",
+				"url": "http://lab.local:11434"
+			},
+			{
+				"id": "lab2",
+				"kind": "ollama",
+				"label": "Lab Two",
+				"url": "http://lab2.local:11434"
+			}
+		],
+		"answers": {
+			"lab": {
+				"kind": "unready"
+			},
+			"lab2": {
+				"kind": "none"
+			}
+		},
+		"failing": [],
+		"rows": [
+			"ollama:qwen"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama",
+			"lmstudio",
+			"llamacpp",
+			"compatible"
+		],
+		"listings": {},
+		"zdrOnly": true,
+		"steps": [
+			{
+				"kind": "routes",
+				"model": "ollama:qwen",
+				"use": "chat"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answer": {
+					"kind": "routes",
+					"unresolved": null,
+					"candidates": [
+						{
+							"entry": "lab2",
+							"kind": "ollama",
+							"binding": "qwen",
+							"status": "ok",
+							"zdrOnly": true,
+							"path": "/v1/chat/completions"
+						}
+					],
+					"passed": [
+						{
+							"entry": "lab",
+							"label": "Lab",
+							"reason": "network",
+							"before": 0
+						}
+					]
+				},
+				"built": 1,
+				"disposed": 0
+			}
+		],
+		"transports": [
+			"Lab Two http://lab2.local:11434"
+		],
+		"stopped": [
+			"Lab Two http://lab2.local:11434"
+		],
+		"refreshed": [],
+		"keyReads": 2,
+		"listReads": 1
+	}
+}

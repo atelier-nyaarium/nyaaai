@@ -1,0 +1,76 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routes",
+	"name": "local-an-entry-of-another-kind-does-not-serve-the-row",
+	"input": {
+		"entries": [
+			{
+				"id": "studio",
+				"kind": "lmstudio",
+				"label": "Studio",
+				"url": "http://lab.local:1234"
+			},
+			{
+				"id": "lab",
+				"kind": "ollama",
+				"label": "Lab",
+				"url": "http://lab.local:11434"
+			}
+		],
+		"answers": {},
+		"failing": [],
+		"rows": [
+			"local:lab/local-a:27b"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama",
+			"lmstudio",
+			"llamacpp",
+			"compatible"
+		],
+		"listings": {},
+		"zdrOnly": true,
+		"steps": [
+			{
+				"kind": "routes",
+				"model": "local:lab/local-a:27b",
+				"use": "chat"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answer": {
+					"kind": "routes",
+					"unresolved": null,
+					"candidates": [
+						{
+							"entry": "lab",
+							"kind": "ollama",
+							"binding": "local-a:27b",
+							"status": "ok",
+							"zdrOnly": true,
+							"path": "/v1/chat/completions"
+						}
+					],
+					"passed": []
+				},
+				"built": 1,
+				"disposed": 0
+			}
+		],
+		"transports": [
+			"Lab http://lab.local:11434"
+		],
+		"stopped": [
+			"Lab http://lab.local:11434"
+		],
+		"refreshed": [],
+		"keyReads": 1,
+		"listReads": 1
+	}
+}

@@ -1,0 +1,74 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routes",
+	"name": "refusal-a-row-no-entry-is-bound-to",
+	"input": {
+		"entries": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "First"
+			},
+			{
+				"id": "b",
+				"kind": "openrouter",
+				"label": "Second"
+			}
+		],
+		"answers": {
+			"a": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			},
+			"b": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"failing": [],
+		"rows": [
+			"ollama:qwen"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama",
+			"lmstudio",
+			"llamacpp",
+			"compatible"
+		],
+		"listings": {},
+		"zdrOnly": true,
+		"steps": [
+			{
+				"kind": "routes",
+				"model": "ollama:qwen",
+				"use": "chat"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answer": {
+					"kind": "routes",
+					"unresolved": {
+						"ok": false,
+						"key": "ollama:qwen",
+						"refusal": "keyMissing"
+					},
+					"candidates": [],
+					"passed": []
+				},
+				"built": 0,
+				"disposed": 0
+			}
+		],
+		"transports": [],
+		"stopped": [],
+		"refreshed": [],
+		"keyReads": 0,
+		"listReads": 1
+	}
+}

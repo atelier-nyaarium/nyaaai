@@ -502,6 +502,34 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
             shapes::KindOpenrouterKeyInput,
             shapes::KindOpenrouterKeyResult,
         >(input, super::kind::openrouter_key),
+        "kind.lines" => {
+            run::<shapes::KindLinesInput, shapes::KindLinesResult>(input, super::kind::lines)
+        }
+        "kind.providerView" => {
+            run::<shapes::KindProviderViewInput, shapes::KindProviderViewResult>(
+                input,
+                super::kind::provider_view,
+            )
+        }
+        "kind.facts" => {
+            run::<shapes::KindFactsInput, shapes::KindFactsResult>(input, super::kind::facts)
+        }
+        "kind.check" => {
+            run::<shapes::KindCheckInput, shapes::KindCheckResult>(input, super::kind::check)
+        }
+        "kind.limits" => {
+            run::<shapes::KindLimitsInput, shapes::KindLimitsResult>(input, super::kind::limits)
+        }
+        "kind.codec" => {
+            run::<shapes::KindCodecInput, shapes::KindCodecResult>(input, super::kind::codec)
+        }
+        "kind.disposition" => run::<shapes::KindDispositionInput, shapes::KindDispositionResult>(
+            input,
+            super::kind::disposition,
+        ),
+        "kind.route" => {
+            run::<shapes::KindRouteInput, shapes::KindRouteResult>(input, super::kind::route)
+        }
         "local.efforts" => run::<shapes::LocalEffortsInput, shapes::LocalEffortsResult>(
             input,
             super::local::efforts,
@@ -581,6 +609,30 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
             shapes::LocalKindDispositionInput,
             shapes::LocalKindDispositionResult,
         >(input, super::local::kind_disposition),
+        "resolver.reach" => run::<shapes::ResolverReachInput, shapes::ResolverReachResult>(
+            input,
+            super::resolver::reach,
+        ),
+        "resolver.routeKey" => {
+            run::<shapes::ResolverRouteKeyInput, shapes::ResolverRouteKeyResult>(
+                input,
+                super::resolver::route_key,
+            )
+        }
+        "resolver.keySource" => run::<
+            shapes::ResolverKeySourceInput,
+            shapes::ResolverKeySourceResult,
+        >(input, super::resolver::key_source),
+        "resolver.servedBy" => {
+            run::<shapes::ResolverServedByInput, shapes::ResolverServedByResult>(
+                input,
+                super::resolver::served_by,
+            )
+        }
+        "resolver.routes" => run::<shapes::ResolverRoutesInput, shapes::ResolverRoutesResult>(
+            input,
+            super::resolver::routes,
+        ),
         _ => return None,
     })
 }

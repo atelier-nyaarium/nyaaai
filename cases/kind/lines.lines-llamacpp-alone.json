@@ -1,0 +1,21 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.lines",
+	"name": "lines-llamacpp-alone",
+	"input": {
+		"kinds": [
+			"llamacpp"
+		]
+	},
+	"expected": {
+		"lines": [
+			{
+				"kind": "llamacpp",
+				"label": "llama.cpp",
+				"field": "url",
+				"url": "http://127.0.0.1:8080"
+			}
+		]
+	}
+}

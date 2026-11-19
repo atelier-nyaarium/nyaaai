@@ -1,0 +1,29 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.providerView",
+	"name": "view-compatible-state-9",
+	"input": {
+		"entry": {
+			"id": "e1",
+			"kind": "compatible",
+			"label": "Lab",
+			"url": "http://lab.local:8000/v1"
+		},
+		"status": {
+			"kind": "invalid"
+		}
+	},
+	"expected": {
+		"view": {
+			"id": "e1",
+			"kind": "compatible",
+			"label": "Lab",
+			"url": "http://lab.local:8000/v1",
+			"status": {
+				"kind": "invalid"
+			},
+			"facts": "http://lab.local:8000/v1"
+		}
+	}
+}

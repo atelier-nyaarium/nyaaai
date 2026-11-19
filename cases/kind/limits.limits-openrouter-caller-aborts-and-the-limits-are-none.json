@@ -1,0 +1,42 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.limits",
+	"name": "limits-openrouter-caller-aborts-and-the-limits-are-none",
+	"input": {
+		"kind": "openrouter",
+		"entry": {
+			"label": "Zen"
+		},
+		"stored": "key-0123456789abcdef",
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"usage": 4.12,
+						"limit": 20,
+						"limit_reset": "monthly"
+					}
+				},
+				"headMs": 100
+			}
+		],
+		"abortAfterMs": 50
+	},
+	"expected": {
+		"present": true,
+		"limits": null,
+		"thrown": null,
+		"requests": [
+			{
+				"method": "GET",
+				"url": "https://openrouter.ai/api/v1/key",
+				"authorization": "Bearer key-0123456789abcdef",
+				"userAgent": "cases/1.0"
+			}
+		],
+		"waiting": []
+	}
+}

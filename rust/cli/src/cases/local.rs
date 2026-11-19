@@ -121,7 +121,7 @@ impl Which {
     }
 }
 
-fn message_of(error: &KindError) -> String {
+pub(super) fn message_of(error: &KindError) -> String {
     match error {
         KindError::Cancelled => CALLER_REASON.to_owned(),
         KindError::TimedOut => "The operation timed out.".to_owned(),
@@ -221,7 +221,7 @@ fn passing(label: &str) -> TestRecord {
 }
 
 /// A local row by its key, `local:<entry>/<tag>`.
-fn local_row_of(key: &str) -> Outcome<ModelRow> {
+pub(super) fn local_row_of(key: &str) -> Outcome<ModelRow> {
     let identity = parse_row_key_text(key);
     let Some(RowIdentity::Local(local)) = &identity else {
         return Err(format!("No local row {key}."));
@@ -255,14 +255,14 @@ impl KeySource for Keys {
 }
 
 /// A kind's deps over a scripted network on a wheel.
-struct Net {
-    wheel: Arc<TimerWheel>,
-    played: Arc<ScriptedFetch>,
-    scheduler: Arc<FakeScheduler>,
-    deps: KindDeps,
+pub(super) struct Net {
+    pub wheel: Arc<TimerWheel>,
+    pub played: Arc<ScriptedFetch>,
+    pub scheduler: Arc<FakeScheduler>,
+    pub deps: KindDeps,
 }
 
-fn net_of(start_ms: i64, exchanges: &[NetExchange]) -> Net {
+pub(super) fn net_of(start_ms: i64, exchanges: &[NetExchange]) -> Net {
     let wheel = Arc::new(TimerWheel::new(start_ms));
     let played = Arc::new(ScriptedFetch::new(
         exchanges.iter().map(exchange_of).collect(),
@@ -284,7 +284,7 @@ fn net_of(start_ms: i64, exchanges: &[NetExchange]) -> Net {
     }
 }
 
-fn keys_of(stored: &Option<String>) -> Outcome<Arc<dyn KeySource>> {
+pub(super) fn keys_of(stored: &Option<String>) -> Outcome<Arc<dyn KeySource>> {
     let keys =
         FakeKeys::new(vec![stored.clone()]).ok_or_else(|| "fakeKeys needs a value".to_owned())?;
     Ok(Arc::new(Keys(Arc::new(keys))))
@@ -299,7 +299,7 @@ fn transport_of(
     which.kind().transport(entry, keys_of(stored)?, deps)
 }
 
-fn requests_of(played: &ScriptedFetch) -> Vec<(String, String, Option<String>, Value)> {
+pub(super) fn requests_of(played: &ScriptedFetch) -> Vec<(String, String, Option<String>, Value)> {
     played
         .requests()
         .iter()

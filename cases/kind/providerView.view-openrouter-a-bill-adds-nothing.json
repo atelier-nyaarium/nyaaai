@@ -1,0 +1,35 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.providerView",
+	"name": "view-openrouter-a-bill-adds-nothing",
+	"input": {
+		"entry": {
+			"id": "e1",
+			"kind": "openrouter",
+			"label": "Router"
+		},
+		"status": {
+			"kind": "ok",
+			"usage": 2
+		},
+		"bill": {
+			"billing": "balance",
+			"allowance": 3.256,
+			"cost": 0.1
+		}
+	},
+	"expected": {
+		"view": {
+			"id": "e1",
+			"kind": "openrouter",
+			"label": "Router",
+			"status": {
+				"kind": "ok",
+				"usage": 2
+			},
+			"facts": "$2.00 used",
+			"balance": true
+		}
+	}
+}

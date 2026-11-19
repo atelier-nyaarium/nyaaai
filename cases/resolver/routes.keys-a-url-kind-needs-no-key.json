@@ -1,0 +1,70 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routes",
+	"name": "keys-a-url-kind-needs-no-key",
+	"input": {
+		"entries": [
+			{
+				"id": "lab",
+				"kind": "ollama",
+				"label": "Lab",
+				"url": "http://lab.local:11434"
+			}
+		],
+		"answers": {},
+		"failing": [],
+		"rows": [
+			"ollama:qwen"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama",
+			"lmstudio",
+			"llamacpp",
+			"compatible"
+		],
+		"listings": {},
+		"zdrOnly": true,
+		"steps": [
+			{
+				"kind": "routes",
+				"model": "ollama:qwen",
+				"use": "chat"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answer": {
+					"kind": "routes",
+					"unresolved": null,
+					"candidates": [
+						{
+							"entry": "lab",
+							"kind": "ollama",
+							"binding": "qwen",
+							"status": "ok",
+							"zdrOnly": true,
+							"path": "/v1/chat/completions"
+						}
+					],
+					"passed": []
+				},
+				"built": 1,
+				"disposed": 0
+			}
+		],
+		"transports": [
+			"Lab http://lab.local:11434"
+		],
+		"stopped": [
+			"Lab http://lab.local:11434"
+		],
+		"refreshed": [],
+		"keyReads": 1,
+		"listReads": 1
+	}
+}

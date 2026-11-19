@@ -36,7 +36,7 @@ impl KeySource for StaticKey {
     }
 }
 
-pub fn static_key(key: &str) -> impl KeySource {
+pub fn static_key(key: &str) -> impl KeySource + use<> {
     StaticKey(key.to_owned())
 }
 

@@ -1,0 +1,29 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.providerView",
+	"name": "view-lmstudio-state-8",
+	"input": {
+		"entry": {
+			"id": "e1",
+			"kind": "lmstudio",
+			"label": "Lab",
+			"url": "http://lab.local:1234"
+		},
+		"status": {
+			"kind": "unreachable"
+		}
+	},
+	"expected": {
+		"view": {
+			"id": "e1",
+			"kind": "lmstudio",
+			"label": "Lab",
+			"url": "http://lab.local:1234",
+			"status": {
+				"kind": "unreachable"
+			},
+			"facts": "http://lab.local:1234"
+		}
+	}
+}

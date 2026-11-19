@@ -1,0 +1,61 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.servedBy",
+	"name": "served-compatible-hosted-with-a-view",
+	"input": {
+		"kind": "compatible",
+		"entry": {
+			"id": "host",
+			"kind": "compatible",
+			"label": "Host",
+			"url": "http://lab.local:8000/v1"
+		},
+		"key": "compatible:qwen",
+		"use": "chat",
+		"view": "ok",
+		"zdrOnly": true,
+		"flippedTo": false
+	},
+	"expected": {
+		"key": "compatible:qwen",
+		"entry": "host",
+		"binding": "qwen",
+		"view": {
+			"row": {
+				"key": "compatible:qwen",
+				"bindings": {
+					"compatible": {
+						"id": "qwen"
+					}
+				},
+				"family": "compatible:qwen",
+				"label": "Made Up",
+				"reasoning": true,
+				"schema": true,
+				"cache": "implicit",
+				"verified": "2026-01-01",
+				"verifiedPrice": {
+					"prompt": 1,
+					"completion": 2
+				},
+				"identity": {
+					"kind": "hosted",
+					"provider": "compatible",
+					"id": "qwen"
+				}
+			},
+			"status": "ok",
+			"efforts": [],
+			"hosts": []
+		},
+		"path": "/chat/completions",
+		"passed": [],
+		"candidates": 1,
+		"zdrOnResolve": true,
+		"sent": {
+			"zdrOnly": false,
+			"path": "/chat/completions"
+		}
+	}
+}

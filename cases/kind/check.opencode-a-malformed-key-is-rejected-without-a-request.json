@@ -1,0 +1,35 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.check",
+	"name": "opencode-a-malformed-key-is-rejected-without-a-request",
+	"input": {
+		"kind": "opencode",
+		"entry": {
+			"label": "Zen"
+		},
+		"secret": "key bad",
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "glm-5.3-flash"
+						}
+					]
+				}
+			}
+		]
+	},
+	"expected": {
+		"state": {
+			"kind": "rejected"
+		},
+		"thrown": null,
+		"facts": null,
+		"requests": [],
+		"waiting": []
+	}
+}

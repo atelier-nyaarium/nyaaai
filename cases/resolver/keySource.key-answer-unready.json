@@ -1,0 +1,35 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.keySource",
+	"name": "key-answer-unready",
+	"input": {
+		"entry": {
+			"id": "a",
+			"kind": "openrouter",
+			"label": "First"
+		},
+		"list": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "First"
+			}
+		],
+		"answers": {
+			"a": {
+				"kind": "unready"
+			}
+		},
+		"steps": [
+			{
+				"kind": "get"
+			}
+		]
+	},
+	"expected": {
+		"gets": [
+			null
+		]
+	}
+}

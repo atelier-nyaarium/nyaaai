@@ -1,0 +1,42 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.check",
+	"name": "opencode-payg-status-401",
+	"input": {
+		"kind": "opencode",
+		"entry": {
+			"label": "Zen",
+			"plan": "payg"
+		},
+		"secret": "key-0123456789abcdef",
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 401,
+				"json": {
+					"error": {
+						"message": "No.",
+						"code": 401
+					}
+				}
+			}
+		]
+	},
+	"expected": {
+		"state": {
+			"kind": "rejected"
+		},
+		"thrown": null,
+		"facts": null,
+		"requests": [
+			{
+				"method": "GET",
+				"url": "https://opencode.ai/inference/v1/models",
+				"authorization": "Bearer key-0123456789abcdef",
+				"userAgent": "cases/1.0"
+			}
+		],
+		"waiting": []
+	}
+}

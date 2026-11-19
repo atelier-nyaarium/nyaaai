@@ -1,0 +1,21 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.lines",
+	"name": "lines-lmstudio-alone",
+	"input": {
+		"kinds": [
+			"lmstudio"
+		]
+	},
+	"expected": {
+		"lines": [
+			{
+				"kind": "lmstudio",
+				"label": "LM Studio",
+				"field": "url",
+				"url": "http://127.0.0.1:1234"
+			}
+		]
+	}
+}

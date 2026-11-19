@@ -1,0 +1,75 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routes",
+	"name": "refusal-missing-key-outranks-a-refused-one",
+	"input": {
+		"entries": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "First"
+			},
+			{
+				"id": "b",
+				"kind": "openrouter",
+				"label": "Second"
+			}
+		],
+		"answers": {
+			"a": {
+				"kind": "refused"
+			},
+			"b": {
+				"kind": "none"
+			}
+		},
+		"failing": [],
+		"rows": [
+			"openai/gpt-6-luna",
+			"google/gemini-3.8-flash",
+			"openai/gpt-oss-120b"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama",
+			"lmstudio",
+			"llamacpp",
+			"compatible"
+		],
+		"listings": {},
+		"zdrOnly": true,
+		"steps": [
+			{
+				"kind": "routes",
+				"model": "openai/gpt-6-luna",
+				"use": "chat"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answer": {
+					"kind": "routes",
+					"unresolved": {
+						"ok": false,
+						"key": "openai/gpt-6-luna",
+						"refusal": "keyMissing",
+						"entry": "Second"
+					},
+					"candidates": [],
+					"passed": []
+				},
+				"built": 0,
+				"disposed": 0
+			}
+		],
+		"transports": [],
+		"stopped": [],
+		"refreshed": [],
+		"keyReads": 2,
+		"listReads": 1
+	}
+}

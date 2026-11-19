@@ -27,6 +27,7 @@ pub mod order;
 pub mod paths;
 pub mod pattern;
 pub mod registry;
+pub mod resolver;
 pub mod retention;
 pub mod row_key;
 pub mod schema_projection;

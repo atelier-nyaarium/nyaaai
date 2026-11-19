@@ -1,0 +1,71 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.keySource",
+	"name": "key-the-answer-is-read-at-each-request",
+	"input": {
+		"entry": {
+			"id": "a",
+			"kind": "openrouter",
+			"label": "First"
+		},
+		"list": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "First"
+			}
+		],
+		"answers": {
+			"a": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"steps": [
+			{
+				"kind": "get"
+			},
+			{
+				"kind": "answer",
+				"id": "a",
+				"answer": {
+					"kind": "key",
+					"key": "key-fedcba9876543210"
+				}
+			},
+			{
+				"kind": "get"
+			},
+			{
+				"kind": "answer",
+				"id": "a",
+				"answer": {
+					"kind": "none"
+				}
+			},
+			{
+				"kind": "get"
+			},
+			{
+				"kind": "answer",
+				"id": "a",
+				"answer": {
+					"kind": "key",
+					"key": "key-0123456789abcdef"
+				}
+			},
+			{
+				"kind": "get"
+			}
+		]
+	},
+	"expected": {
+		"gets": [
+			"key-0123456789abcdef",
+			"key-fedcba9876543210",
+			null,
+			"key-0123456789abcdef"
+		]
+	}
+}

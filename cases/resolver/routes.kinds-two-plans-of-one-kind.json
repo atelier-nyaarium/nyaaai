@@ -1,0 +1,126 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routes",
+	"name": "kinds-two-plans-of-one-kind",
+	"input": {
+		"entries": [
+			{
+				"id": "payg",
+				"kind": "opencode",
+				"plan": "payg",
+				"label": "Pay-as-you-go"
+			},
+			{
+				"id": "go",
+				"kind": "opencode",
+				"plan": "go",
+				"label": "Go"
+			}
+		],
+		"answers": {
+			"payg": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			},
+			"go": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"failing": [],
+		"rows": [
+			"openai/gpt-6-luna",
+			"google/gemini-3.8-flash",
+			"openai/gpt-oss-120b"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama",
+			"lmstudio",
+			"llamacpp",
+			"compatible"
+		],
+		"listings": {},
+		"zdrOnly": true,
+		"steps": [
+			{
+				"kind": "routes",
+				"model": "openai/gpt-6-luna",
+				"use": "chat"
+			},
+			{
+				"kind": "candidates",
+				"use": "chat"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answer": {
+					"kind": "routes",
+					"unresolved": null,
+					"candidates": [
+						{
+							"entry": "payg",
+							"kind": "opencode",
+							"binding": "gpt-6-luna",
+							"status": "ok",
+							"zdrOnly": true,
+							"path": "/openai/v1/chat/completions"
+						},
+						{
+							"entry": "go",
+							"kind": "opencode",
+							"binding": "gpt-6-luna",
+							"status": "ok",
+							"zdrOnly": true,
+							"path": "/openai/v1/chat/completions"
+						}
+					],
+					"passed": []
+				},
+				"built": 2,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "candidates",
+					"served": [
+						{
+							"key": "openai/gpt-6-luna",
+							"status": "ok",
+							"via": {
+								"entry": "payg",
+								"label": "Pay-as-you-go"
+							}
+						},
+						{
+							"key": "google/gemini-3.8-flash",
+							"status": "ok",
+							"via": {
+								"entry": "payg",
+								"label": "Pay-as-you-go"
+							}
+						}
+					]
+				},
+				"built": 2,
+				"disposed": 0
+			}
+		],
+		"transports": [
+			"Pay-as-you-go/payg",
+			"Go/go"
+		],
+		"stopped": [
+			"Pay-as-you-go/payg",
+			"Go/go"
+		],
+		"refreshed": [],
+		"keyReads": 3,
+		"listReads": 4
+	}
+}

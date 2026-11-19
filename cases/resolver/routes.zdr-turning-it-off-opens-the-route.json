@@ -1,0 +1,176 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routes",
+	"name": "zdr-turning-it-off-opens-the-route",
+	"input": {
+		"entries": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "First"
+			},
+			{
+				"id": "b",
+				"kind": "openrouter",
+				"label": "Second"
+			}
+		],
+		"answers": {
+			"a": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			},
+			"b": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"failing": [],
+		"rows": [
+			"openai/gpt-6-luna",
+			"google/gemini-3.8-flash",
+			"openai/gpt-oss-120b"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama",
+			"lmstudio",
+			"llamacpp",
+			"compatible"
+		],
+		"listings": {
+			"a": {
+				"google/gemini-3.8-flash": {
+					"status": "noZdrHost",
+					"whenZdrOff": "ok"
+				}
+			},
+			"b": {
+				"google/gemini-3.8-flash": {
+					"status": "noZdrHost",
+					"whenZdrOff": "ok"
+				}
+			}
+		},
+		"zdrOnly": true,
+		"steps": [
+			{
+				"kind": "routes",
+				"model": "google/gemini-3.8-flash",
+				"use": "chat"
+			},
+			{
+				"kind": "zdr",
+				"on": false
+			},
+			{
+				"kind": "routes",
+				"model": "google/gemini-3.8-flash",
+				"use": "chat"
+			},
+			{
+				"kind": "rows",
+				"use": "chat"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answer": {
+					"kind": "routes",
+					"unresolved": {
+						"ok": false,
+						"key": "google/gemini-3.8-flash",
+						"refusal": "noZdrHost",
+						"entry": "First"
+					},
+					"candidates": [],
+					"passed": []
+				},
+				"built": 2,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "changed"
+				},
+				"built": 2,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "routes",
+					"unresolved": null,
+					"candidates": [
+						{
+							"entry": "a",
+							"kind": "openrouter",
+							"binding": "google/gemini-3.8-flash",
+							"status": "ok",
+							"zdrOnly": false,
+							"path": "/chat/completions"
+						},
+						{
+							"entry": "b",
+							"kind": "openrouter",
+							"binding": "google/gemini-3.8-flash",
+							"status": "ok",
+							"zdrOnly": false,
+							"path": "/chat/completions"
+						}
+					],
+					"passed": []
+				},
+				"built": 2,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "rows",
+					"options": [
+						{
+							"key": "openai/gpt-6-luna",
+							"status": "ok",
+							"via": {
+								"entry": "a",
+								"label": "First"
+							}
+						},
+						{
+							"key": "google/gemini-3.8-flash",
+							"status": "ok",
+							"via": {
+								"entry": "a",
+								"label": "First"
+							}
+						},
+						{
+							"key": "openai/gpt-oss-120b",
+							"status": "ok",
+							"via": {
+								"entry": "a",
+								"label": "First"
+							}
+						}
+					]
+				},
+				"built": 2,
+				"disposed": 0
+			}
+		],
+		"transports": [
+			"First",
+			"Second"
+		],
+		"stopped": [
+			"First",
+			"Second"
+		],
+		"refreshed": [],
+		"keyReads": 5,
+		"listReads": 5
+	}
+}

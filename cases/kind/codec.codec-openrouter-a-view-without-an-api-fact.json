@@ -1,0 +1,71 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.codec",
+	"name": "codec-openrouter-a-view-without-an-api-fact",
+	"input": {
+		"kind": "openrouter",
+		"label": "Zen",
+		"view": {
+			"efforts": [
+				"low",
+				"high"
+			]
+		},
+		"request": {
+			"model": "openai/gpt-6-luna",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Hi"
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true
+		},
+		"mode": "complete",
+		"nowMs": 1790337600000,
+		"failures": []
+	},
+	"expected": {
+		"encoded": {
+			"path": "/chat/completions",
+			"body": {
+				"model": "openai/gpt-6-luna",
+				"messages": [
+					{
+						"role": "system",
+						"content": "Rules."
+					},
+					{
+						"role": "user",
+						"content": "Hi"
+					}
+				],
+				"stream": false,
+				"session_id": "root-1",
+				"provider": {
+					"zdr": true,
+					"data_collection": "deny",
+					"require_parameters": true
+				}
+			}
+		},
+		"refusal": null,
+		"facts": {
+			"efforts": [
+				"low",
+				"high"
+			],
+			"free": false,
+			"outputLimit": null
+		},
+		"failures": []
+	}
+}

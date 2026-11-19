@@ -1,0 +1,136 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routes",
+	"name": "rows-every-row-with-its-first-serving-entry",
+	"input": {
+		"entries": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "First"
+			},
+			{
+				"id": "b",
+				"kind": "openrouter",
+				"label": "Second"
+			}
+		],
+		"answers": {
+			"a": {
+				"kind": "none"
+			},
+			"b": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"failing": [],
+		"rows": [
+			"openai/gpt-6-luna",
+			"google/gemini-3.8-flash",
+			"openai/gpt-oss-120b"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama",
+			"lmstudio",
+			"llamacpp",
+			"compatible"
+		],
+		"listings": {},
+		"zdrOnly": true,
+		"steps": [
+			{
+				"kind": "rows",
+				"use": "chat"
+			},
+			{
+				"kind": "candidates",
+				"use": "chat"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answer": {
+					"kind": "rows",
+					"options": [
+						{
+							"key": "openai/gpt-6-luna",
+							"status": "ok",
+							"via": {
+								"entry": "b",
+								"label": "Second"
+							}
+						},
+						{
+							"key": "google/gemini-3.8-flash",
+							"status": "ok",
+							"via": {
+								"entry": "b",
+								"label": "Second"
+							}
+						},
+						{
+							"key": "openai/gpt-oss-120b",
+							"status": "ok",
+							"via": {
+								"entry": "b",
+								"label": "Second"
+							}
+						}
+					]
+				},
+				"built": 2,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "candidates",
+					"served": [
+						{
+							"key": "openai/gpt-6-luna",
+							"status": "ok",
+							"via": {
+								"entry": "b",
+								"label": "Second"
+							}
+						},
+						{
+							"key": "google/gemini-3.8-flash",
+							"status": "ok",
+							"via": {
+								"entry": "b",
+								"label": "Second"
+							}
+						},
+						{
+							"key": "openai/gpt-oss-120b",
+							"status": "ok",
+							"via": {
+								"entry": "b",
+								"label": "Second"
+							}
+						}
+					]
+				},
+				"built": 2,
+				"disposed": 0
+			}
+		],
+		"transports": [
+			"First",
+			"Second"
+		],
+		"stopped": [
+			"First",
+			"Second"
+		],
+		"refreshed": [],
+		"keyReads": 4,
+		"listReads": 6
+	}
+}

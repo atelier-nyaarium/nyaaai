@@ -1,0 +1,72 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.reach",
+	"name": "reach-every-answer-for-a-key-kind-and-a-url-kind",
+	"input": {
+		"rows": [
+			{
+				"field": "key",
+				"answer": {
+					"kind": "key",
+					"key": "key-0123456789abcdef"
+				}
+			},
+			{
+				"field": "key",
+				"answer": {
+					"kind": "none"
+				}
+			},
+			{
+				"field": "key",
+				"answer": {
+					"kind": "refused"
+				}
+			},
+			{
+				"field": "key",
+				"answer": {
+					"kind": "unready"
+				}
+			},
+			{
+				"field": "url",
+				"answer": {
+					"kind": "key",
+					"key": "key-0123456789abcdef"
+				}
+			},
+			{
+				"field": "url",
+				"answer": {
+					"kind": "none"
+				}
+			},
+			{
+				"field": "url",
+				"answer": {
+					"kind": "refused"
+				}
+			},
+			{
+				"field": "url",
+				"answer": {
+					"kind": "unready"
+				}
+			}
+		]
+	},
+	"expected": {
+		"reaches": [
+			"ok",
+			"keyMissing",
+			"keyRejected",
+			"unreachable",
+			"ok",
+			"ok",
+			"keyRejected",
+			"unreachable"
+		]
+	}
+}

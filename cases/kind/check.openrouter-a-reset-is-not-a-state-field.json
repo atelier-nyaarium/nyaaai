@@ -1,0 +1,42 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.check",
+	"name": "openrouter-a-reset-is-not-a-state-field",
+	"input": {
+		"kind": "openrouter",
+		"entry": {
+			"label": "Zen"
+		},
+		"secret": "key-0123456789abcdef",
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"usage": 1,
+						"limit_reset": "daily"
+					}
+				}
+			}
+		]
+	},
+	"expected": {
+		"state": {
+			"kind": "ok",
+			"usage": 1
+		},
+		"thrown": null,
+		"facts": "$1.00 used",
+		"requests": [
+			{
+				"method": "GET",
+				"url": "https://openrouter.ai/api/v1/key",
+				"authorization": "Bearer key-0123456789abcdef",
+				"userAgent": "cases/1.0"
+			}
+		],
+		"waiting": []
+	}
+}

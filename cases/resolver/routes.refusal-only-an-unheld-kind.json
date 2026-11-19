@@ -1,0 +1,67 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routes",
+	"name": "refusal-only-an-unheld-kind",
+	"input": {
+		"entries": [
+			{
+				"id": "go",
+				"kind": "opencode",
+				"plan": "go",
+				"label": "Go"
+			}
+		],
+		"answers": {
+			"a": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			},
+			"b": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"failing": [],
+		"rows": [
+			"openai/gpt-6-luna",
+			"google/gemini-3.8-flash",
+			"openai/gpt-oss-120b"
+		],
+		"kinds": [
+			"openrouter"
+		],
+		"listings": {},
+		"zdrOnly": true,
+		"steps": [
+			{
+				"kind": "routes",
+				"model": "openai/gpt-6-luna",
+				"use": "chat"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answer": {
+					"kind": "routes",
+					"unresolved": {
+						"ok": false,
+						"key": "openai/gpt-6-luna",
+						"refusal": "keyMissing"
+					},
+					"candidates": [],
+					"passed": []
+				},
+				"built": 0,
+				"disposed": 0
+			}
+		],
+		"transports": [],
+		"stopped": [],
+		"refreshed": [],
+		"keyReads": 0,
+		"listReads": 1
+	}
+}

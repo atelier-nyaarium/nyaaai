@@ -1,0 +1,93 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routes",
+	"name": "rows-an-unserved-row-no-catalog-lists-reads-unknown",
+	"input": {
+		"entries": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "First"
+			},
+			{
+				"id": "b",
+				"kind": "openrouter",
+				"label": "Second"
+			}
+		],
+		"answers": {},
+		"failing": [],
+		"rows": [
+			"openai/gpt-6-luna",
+			"google/gemini-3.8-flash",
+			"openai/gpt-oss-120b"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama",
+			"lmstudio",
+			"llamacpp",
+			"compatible"
+		],
+		"listings": {
+			"a": {
+				"google/gemini-3.8-flash": {
+					"status": "unlisted"
+				}
+			},
+			"b": {
+				"google/gemini-3.8-flash": {
+					"status": "unlisted"
+				}
+			}
+		},
+		"zdrOnly": true,
+		"steps": [
+			{
+				"kind": "rows",
+				"use": "chat"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answer": {
+					"kind": "rows",
+					"options": [
+						{
+							"key": "openai/gpt-6-luna",
+							"status": "ok",
+							"via": null
+						},
+						{
+							"key": "google/gemini-3.8-flash",
+							"status": "unknown",
+							"via": null
+						},
+						{
+							"key": "openai/gpt-oss-120b",
+							"status": "ok",
+							"via": null
+						}
+					]
+				},
+				"built": 2,
+				"disposed": 0
+			}
+		],
+		"transports": [
+			"First",
+			"Second"
+		],
+		"stopped": [
+			"First",
+			"Second"
+		],
+		"refreshed": [],
+		"keyReads": 2,
+		"listReads": 3
+	}
+}

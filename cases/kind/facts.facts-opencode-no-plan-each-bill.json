@@ -1,0 +1,105 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.facts",
+	"name": "facts-opencode-no-plan-each-bill",
+	"input": {
+		"kind": "opencode",
+		"entry": {
+			"label": "Zen"
+		},
+		"rows": [
+			{
+				"state": {
+					"kind": "ok"
+				}
+			},
+			{
+				"state": {
+					"kind": "ok"
+				},
+				"bill": {
+					"billing": "balance",
+					"allowance": 3.256,
+					"cost": 0.1
+				}
+			},
+			{
+				"state": {
+					"kind": "ok"
+				},
+				"bill": {
+					"billing": "allowance",
+					"allowance": 5
+				}
+			},
+			{
+				"state": {
+					"kind": "ok"
+				},
+				"bill": {
+					"billing": "allowance"
+				}
+			},
+			{
+				"state": {
+					"kind": "ok"
+				},
+				"bill": {
+					"billing": "balance"
+				}
+			},
+			{
+				"state": {
+					"kind": "ok"
+				},
+				"bill": {
+					"billing": "balance",
+					"cost": 0
+				}
+			},
+			{
+				"state": {
+					"kind": "ok"
+				},
+				"bill": {
+					"billing": "payg",
+					"cost": 12.345
+				}
+			},
+			{
+				"state": {
+					"kind": "ok"
+				},
+				"bill": {
+					"billing": "allowance",
+					"allowance": 0,
+					"cost": 0
+				}
+			},
+			{
+				"state": {
+					"kind": "ok"
+				},
+				"bill": {
+					"billing": "allowance",
+					"allowance": 1,
+					"cost": 0.004
+				}
+			}
+		]
+	},
+	"expected": {
+		"facts": [
+			null,
+			"Allowance $3.26 used · Extra usage $0.10",
+			"Allowance $5.00 used",
+			null,
+			"Extra usage $0.00",
+			"Extra usage $0.00",
+			"Extra usage $12.35",
+			"Allowance $0.00 used",
+			"Allowance $1.00 used · Extra usage $0.00"
+		]
+	}
+}

@@ -8,14 +8,22 @@ import type {
 	Disposition,
 	EntryFields,
 	KeyState,
+	KindLine,
 	Limits,
 	ProviderEntry,
 	ProviderKindName,
 	ProviderPlan,
+	ProviderView,
 } from "@nyaaai/contract/shapes/provider";
 import type { Failure } from "@nyaaai/contract/shapes/step";
 import type { Scheduler } from "@nyaaai/contract/time";
 import type { Codec } from "../codec";
+import { COMPATIBLE } from "../kinds/compatible";
+import { LLAMACPP } from "../kinds/llamacpp";
+import { LMSTUDIO } from "../kinds/lmstudio";
+import { OLLAMA } from "../kinds/ollama";
+import { OPENCODE } from "../kinds/opencode/kind";
+import { OPENROUTER } from "../kinds/openrouter/kind";
 import type { KeySource, Transport } from "../transport";
 
 ////////////////////////////////
@@ -119,4 +127,58 @@ export interface ProviderKind {
 	failure(failure: Failure, view: ModelView | undefined): Disposition;
 	/** Optional provider limits. */
 	limits?(transport: Pick<Transport, "getJson">, signal: AbortSignal): Promise<Limits | undefined>;
+}
+
+////////////////////////////////
+//  Constants
+
+/** Dropdown order. */
+export const KINDS: Partial<Record<ProviderKindName, ProviderKind>> = {
+	opencode: OPENCODE,
+	openrouter: OPENROUTER,
+	ollama: OLLAMA,
+	lmstudio: LMSTUDIO,
+	llamacpp: LLAMACPP,
+	compatible: COMPATIBLE,
+};
+
+////////////////////////////////
+//  Functions & Helpers
+
+/** One line per plan. */
+export function kindLines(kinds: Partial<Record<ProviderKindName, ProviderKind>>): KindLine[] {
+	return Object.values(kinds).flatMap((kind): KindLine[] => {
+		const line = {
+			kind: kind.kind,
+			field: kind.field,
+			...(kind.url === undefined ? {} : { url: kind.url }),
+			...(kind.optionalKey === undefined ? {} : { optionalKey: kind.optionalKey }),
+		};
+		if (kind.plans === undefined) return [{ ...line, label: kind.label }];
+		return kind.plans.map(({ plan, label }) => ({ ...line, plan, label }));
+	});
+}
+
+/** An entry's line of the provider list. */
+export function providerView(
+	entry: ProviderEntry,
+	status: KeyState,
+	kinds: Partial<Record<ProviderKindName, ProviderKind>>,
+	bill?: Billed,
+): ProviderView {
+	const kind = kinds[entry.kind];
+	const facts = kind?.facts?.(status, entry, bill);
+	return {
+		id: entry.id,
+		kind: entry.kind,
+		...(entry.plan === undefined ? {} : { plan: entry.plan }),
+		label: entry.label,
+		...(entry.url === undefined ? {} : { url: entry.url }),
+		status,
+		...(facts === undefined ? {} : { facts }),
+		...(kind?.balance === undefined ? {} : { balance: true as const }),
+		...(entry.plan !== undefined && kind?.extraUsage?.includes(entry.plan) === true
+			? { extraUsage: entry.extraUsage === true }
+			: {}),
+	};
 }

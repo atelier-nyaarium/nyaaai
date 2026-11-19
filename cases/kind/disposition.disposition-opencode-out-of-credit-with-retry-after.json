@@ -1,0 +1,51 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.disposition",
+	"name": "disposition-opencode-out-of-credit-with-retry-after",
+	"input": {
+		"kind": "opencode",
+		"rows": [
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "m",
+					"retryAfterMs": 1
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "m",
+					"retryAfterMs": 0
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "m"
+				},
+				"status": "ok"
+			}
+		]
+	},
+	"expected": {
+		"dispositions": [
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "spendLimit"
+			}
+		]
+	}
+}

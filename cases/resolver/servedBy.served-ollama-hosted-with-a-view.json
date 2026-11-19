@@ -1,0 +1,61 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.servedBy",
+	"name": "served-ollama-hosted-with-a-view",
+	"input": {
+		"kind": "ollama",
+		"entry": {
+			"id": "lab",
+			"kind": "ollama",
+			"label": "Lab",
+			"url": "http://lab.local:11434"
+		},
+		"key": "ollama:qwen",
+		"use": "chat",
+		"view": "ok",
+		"zdrOnly": true,
+		"flippedTo": false
+	},
+	"expected": {
+		"key": "ollama:qwen",
+		"entry": "lab",
+		"binding": "qwen",
+		"view": {
+			"row": {
+				"key": "ollama:qwen",
+				"bindings": {
+					"ollama": {
+						"id": "qwen"
+					}
+				},
+				"family": "ollama:qwen",
+				"label": "Made Up",
+				"reasoning": true,
+				"schema": true,
+				"cache": "implicit",
+				"verified": "2026-01-01",
+				"verifiedPrice": {
+					"prompt": 1,
+					"completion": 2
+				},
+				"identity": {
+					"kind": "hosted",
+					"provider": "ollama",
+					"id": "qwen"
+				}
+			},
+			"status": "ok",
+			"efforts": [],
+			"hosts": []
+		},
+		"path": "/v1/chat/completions",
+		"passed": [],
+		"candidates": 1,
+		"zdrOnResolve": true,
+		"sent": {
+			"zdrOnly": false,
+			"path": "/v1/chat/completions"
+		}
+	}
+}

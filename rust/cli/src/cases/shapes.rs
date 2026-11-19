@@ -18022,6 +18022,2078 @@ impl Shape for KindOpenrouterKeyResultChecksItemReason {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+pub struct KindLinesInput {
+    pub kinds: Option<Vec<nyaaai_contract::shapes::provider::ProviderKindName>>,
+}
+
+impl Shape for KindLinesInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let kinds = shape::optional(object, "kinds", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::ProviderKindName::decode_at,
+            )
+        })?;
+        Ok(Self { kinds })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        if let Some(held) = &self.kinds {
+            object.insert(
+                "kinds",
+                Value::Array(held.iter().map(|held| held.encode()).collect()),
+            );
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindLinesResult {
+    pub lines: Vec<nyaaai_contract::shapes::provider::KindLine>,
+}
+
+impl Shape for KindLinesResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let lines = shape::required(object, "lines", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::KindLine::decode_at,
+            )
+        })?;
+        Ok(Self { lines })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "lines",
+            Value::Array(self.lines.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindProviderViewInput {
+    pub entry: nyaaai_contract::shapes::provider::ProviderEntry,
+    pub status: nyaaai_contract::shapes::provider::KeyState,
+    pub kinds: Option<Vec<nyaaai_contract::shapes::provider::ProviderKindName>>,
+    pub bill: Option<nyaaai_contract::shapes::provider::Billed>,
+}
+
+impl Shape for KindProviderViewInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let entry = shape::required(
+            object,
+            "entry",
+            at,
+            nyaaai_contract::shapes::provider::ProviderEntry::decode_at,
+        )?;
+        let status = shape::required(
+            object,
+            "status",
+            at,
+            nyaaai_contract::shapes::provider::KeyState::decode_at,
+        )?;
+        let kinds = shape::optional(object, "kinds", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::ProviderKindName::decode_at,
+            )
+        })?;
+        let bill = shape::optional(
+            object,
+            "bill",
+            at,
+            nyaaai_contract::shapes::provider::Billed::decode_at,
+        )?;
+        Ok(Self {
+            entry,
+            status,
+            kinds,
+            bill,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("entry", self.entry.encode());
+        object.insert("status", self.status.encode());
+        if let Some(held) = &self.kinds {
+            object.insert(
+                "kinds",
+                Value::Array(held.iter().map(|held| held.encode()).collect()),
+            );
+        }
+        if let Some(held) = &self.bill {
+            object.insert("bill", held.encode());
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindProviderViewResult {
+    pub view: nyaaai_contract::shapes::provider::ProviderView,
+}
+
+impl Shape for KindProviderViewResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let view = shape::required(
+            object,
+            "view",
+            at,
+            nyaaai_contract::shapes::provider::ProviderView::decode_at,
+        )?;
+        Ok(Self { view })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("view", self.view.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindFactsInput {
+    pub kind: KindFactsInputKind,
+    pub entry: KindFactsInputEntry,
+    pub rows: Vec<KindFactsInputRowsItem>,
+}
+
+impl Shape for KindFactsInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let kind = shape::required(object, "kind", at, KindFactsInputKind::decode_at)?;
+        let entry = shape::required(object, "entry", at, KindFactsInputEntry::decode_at)?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, KindFactsInputRowsItem::decode_at)
+        })?;
+        Ok(Self { kind, entry, rows })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", self.kind.encode());
+        object.insert("entry", self.entry.encode());
+        object.insert(
+            "rows",
+            Value::Array(self.rows.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum KindFactsInputKind {
+    Openrouter,
+    Opencode,
+}
+
+impl KindFactsInputKind {
+    pub const ALL: [Self; 2] = [Self::Openrouter, Self::Opencode];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Openrouter => "openrouter",
+            Self::Opencode => "opencode",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for KindFactsInputKind {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindFactsInputEntry {
+    pub label: String,
+    pub plan: Option<nyaaai_contract::shapes::provider::ProviderPlan>,
+}
+
+impl Shape for KindFactsInputEntry {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let label = shape::required(object, "label", at, shape::text)?;
+        let plan = shape::optional(
+            object,
+            "plan",
+            at,
+            nyaaai_contract::shapes::provider::ProviderPlan::decode_at,
+        )?;
+        Ok(Self { label, plan })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("label", Value::from(self.label.as_str()));
+        if let Some(held) = &self.plan {
+            object.insert("plan", held.encode());
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindFactsInputRowsItem {
+    pub state: nyaaai_contract::shapes::provider::KeyState,
+    pub bill: Option<nyaaai_contract::shapes::provider::Billed>,
+}
+
+impl Shape for KindFactsInputRowsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let state = shape::required(
+            object,
+            "state",
+            at,
+            nyaaai_contract::shapes::provider::KeyState::decode_at,
+        )?;
+        let bill = shape::optional(
+            object,
+            "bill",
+            at,
+            nyaaai_contract::shapes::provider::Billed::decode_at,
+        )?;
+        Ok(Self { state, bill })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("state", self.state.encode());
+        if let Some(held) = &self.bill {
+            object.insert("bill", held.encode());
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindFactsResult {
+    pub facts: Vec<Option<String>>,
+}
+
+impl Shape for KindFactsResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let facts = shape::required(object, "facts", at, |value, at| {
+            shape::list(value, at, |value, at| {
+                shape::nullable(value, at, shape::text)
+            })
+        })?;
+        Ok(Self { facts })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "facts",
+            Value::Array(
+                self.facts
+                    .iter()
+                    .map(|held| {
+                        held.as_ref()
+                            .map_or(Value::Null, |held| Value::from(held.as_str()))
+                    })
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindCheckInput {
+    pub kind: KindCheckInputKind,
+    pub entry: KindCheckInputEntry,
+    pub secret: Option<String>,
+    pub base_url: Option<String>,
+    pub start_ms: i64,
+    pub exchanges: Vec<NetExchange>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for KindCheckInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let kind = shape::required(object, "kind", at, KindCheckInputKind::decode_at)?;
+        let entry = shape::required(object, "entry", at, KindCheckInputEntry::decode_at)?;
+        let secret = shape::required(object, "secret", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let base_url = shape::optional(object, "baseUrl", at, shape::text)?;
+        let start_ms = shape::required(object, "startMs", at, shape::integer)?;
+        let exchanges = shape::required(object, "exchanges", at, |value, at| {
+            shape::list(value, at, NetExchange::decode_at)
+        })?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            kind,
+            entry,
+            secret,
+            base_url,
+            start_ms,
+            exchanges,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", self.kind.encode());
+        object.insert("entry", self.entry.encode());
+        object.insert(
+            "secret",
+            self.secret
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        if let Some(held) = &self.base_url {
+            object.insert("baseUrl", Value::from(held.as_str()));
+        }
+        object.insert("startMs", Value::Number(self.start_ms as f64));
+        object.insert(
+            "exchanges",
+            Value::Array(self.exchanges.iter().map(|held| held.encode()).collect()),
+        );
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum KindCheckInputKind {
+    Openrouter,
+    Opencode,
+}
+
+impl KindCheckInputKind {
+    pub const ALL: [Self; 2] = [Self::Openrouter, Self::Opencode];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Openrouter => "openrouter",
+            Self::Opencode => "opencode",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for KindCheckInputKind {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindCheckInputEntry {
+    pub label: String,
+    pub plan: Option<nyaaai_contract::shapes::provider::ProviderPlan>,
+}
+
+impl Shape for KindCheckInputEntry {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let label = shape::required(object, "label", at, shape::text)?;
+        let plan = shape::optional(
+            object,
+            "plan",
+            at,
+            nyaaai_contract::shapes::provider::ProviderPlan::decode_at,
+        )?;
+        Ok(Self { label, plan })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("label", Value::from(self.label.as_str()));
+        if let Some(held) = &self.plan {
+            object.insert("plan", held.encode());
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindCheckResult {
+    pub state: Option<nyaaai_contract::shapes::provider::KeyState>,
+    pub thrown: Option<String>,
+    pub facts: Option<String>,
+    pub requests: Vec<KindCheckResultRequestsItem>,
+    pub waiting: Vec<String>,
+}
+
+impl Shape for KindCheckResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let state = shape::required(object, "state", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::KeyState::decode_at,
+            )
+        })?;
+        let thrown = shape::required(object, "thrown", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let facts = shape::required(object, "facts", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let requests = shape::required(object, "requests", at, |value, at| {
+            shape::list(value, at, KindCheckResultRequestsItem::decode_at)
+        })?;
+        let waiting = shape::required(object, "waiting", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self {
+            state,
+            thrown,
+            facts,
+            requests,
+            waiting,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "state",
+            self.state
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert(
+            "thrown",
+            self.thrown
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "facts",
+            self.facts
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "requests",
+            Value::Array(self.requests.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "waiting",
+            Value::Array(
+                self.waiting
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindCheckResultRequestsItem {
+    pub method: String,
+    pub url: String,
+    pub authorization: Option<String>,
+    pub user_agent: Option<String>,
+}
+
+impl Shape for KindCheckResultRequestsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let method = shape::required(object, "method", at, shape::text)?;
+        let url = shape::required(object, "url", at, shape::text)?;
+        let authorization = shape::required(object, "authorization", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let user_agent = shape::required(object, "userAgent", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        Ok(Self {
+            method,
+            url,
+            authorization,
+            user_agent,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("method", Value::from(self.method.as_str()));
+        object.insert("url", Value::from(self.url.as_str()));
+        object.insert(
+            "authorization",
+            self.authorization
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "userAgent",
+            self.user_agent
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindLimitsInput {
+    pub kind: KindLimitsInputKind,
+    pub entry: KindLimitsInputEntry,
+    pub stored: Option<String>,
+    pub start_ms: i64,
+    pub exchanges: Vec<NetExchange>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for KindLimitsInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let kind = shape::required(object, "kind", at, KindLimitsInputKind::decode_at)?;
+        let entry = shape::required(object, "entry", at, KindLimitsInputEntry::decode_at)?;
+        let stored = shape::required(object, "stored", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let start_ms = shape::required(object, "startMs", at, shape::integer)?;
+        let exchanges = shape::required(object, "exchanges", at, |value, at| {
+            shape::list(value, at, NetExchange::decode_at)
+        })?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            kind,
+            entry,
+            stored,
+            start_ms,
+            exchanges,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", self.kind.encode());
+        object.insert("entry", self.entry.encode());
+        object.insert(
+            "stored",
+            self.stored
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert("startMs", Value::Number(self.start_ms as f64));
+        object.insert(
+            "exchanges",
+            Value::Array(self.exchanges.iter().map(|held| held.encode()).collect()),
+        );
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum KindLimitsInputKind {
+    Openrouter,
+    Opencode,
+}
+
+impl KindLimitsInputKind {
+    pub const ALL: [Self; 2] = [Self::Openrouter, Self::Opencode];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Openrouter => "openrouter",
+            Self::Opencode => "opencode",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for KindLimitsInputKind {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindLimitsInputEntry {
+    pub label: String,
+    pub plan: Option<nyaaai_contract::shapes::provider::ProviderPlan>,
+}
+
+impl Shape for KindLimitsInputEntry {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let label = shape::required(object, "label", at, shape::text)?;
+        let plan = shape::optional(
+            object,
+            "plan",
+            at,
+            nyaaai_contract::shapes::provider::ProviderPlan::decode_at,
+        )?;
+        Ok(Self { label, plan })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("label", Value::from(self.label.as_str()));
+        if let Some(held) = &self.plan {
+            object.insert("plan", held.encode());
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindLimitsResult {
+    pub present: bool,
+    pub limits: Option<nyaaai_contract::shapes::provider::Limits>,
+    pub thrown: Option<String>,
+    pub requests: Vec<KindLimitsResultRequestsItem>,
+    pub waiting: Vec<String>,
+}
+
+impl Shape for KindLimitsResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let present = shape::required(object, "present", at, shape::flag)?;
+        let limits = shape::required(object, "limits", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::Limits::decode_at,
+            )
+        })?;
+        let thrown = shape::required(object, "thrown", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let requests = shape::required(object, "requests", at, |value, at| {
+            shape::list(value, at, KindLimitsResultRequestsItem::decode_at)
+        })?;
+        let waiting = shape::required(object, "waiting", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self {
+            present,
+            limits,
+            thrown,
+            requests,
+            waiting,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("present", Value::Bool(self.present));
+        object.insert(
+            "limits",
+            self.limits
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert(
+            "thrown",
+            self.thrown
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "requests",
+            Value::Array(self.requests.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "waiting",
+            Value::Array(
+                self.waiting
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindLimitsResultRequestsItem {
+    pub method: String,
+    pub url: String,
+    pub authorization: Option<String>,
+    pub user_agent: Option<String>,
+}
+
+impl Shape for KindLimitsResultRequestsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let method = shape::required(object, "method", at, shape::text)?;
+        let url = shape::required(object, "url", at, shape::text)?;
+        let authorization = shape::required(object, "authorization", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let user_agent = shape::required(object, "userAgent", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        Ok(Self {
+            method,
+            url,
+            authorization,
+            user_agent,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("method", Value::from(self.method.as_str()));
+        object.insert("url", Value::from(self.url.as_str()));
+        object.insert(
+            "authorization",
+            self.authorization
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "userAgent",
+            self.user_agent
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindCodecInput {
+    pub kind: KindCodecInputKind,
+    pub label: String,
+    pub view: Option<KindCodecInputView>,
+    pub request: nyaaai_contract::shapes::step::CanonicalRequest,
+    pub mode: KindCodecInputMode,
+    pub now_ms: i64,
+    pub failures: Vec<KindCodecInputFailuresItem>,
+}
+
+impl Shape for KindCodecInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let kind = shape::required(object, "kind", at, KindCodecInputKind::decode_at)?;
+        let label = shape::required(object, "label", at, shape::text)?;
+        let view = shape::required(object, "view", at, |value, at| {
+            shape::nullable(value, at, KindCodecInputView::decode_at)
+        })?;
+        let request = shape::required(
+            object,
+            "request",
+            at,
+            nyaaai_contract::shapes::step::CanonicalRequest::decode_at,
+        )?;
+        let mode = shape::required(object, "mode", at, KindCodecInputMode::decode_at)?;
+        let now_ms = shape::required(object, "nowMs", at, shape::integer)?;
+        let failures = shape::required(object, "failures", at, |value, at| {
+            shape::list(value, at, KindCodecInputFailuresItem::decode_at)
+        })?;
+        Ok(Self {
+            kind,
+            label,
+            view,
+            request,
+            mode,
+            now_ms,
+            failures,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", self.kind.encode());
+        object.insert("label", Value::from(self.label.as_str()));
+        object.insert(
+            "view",
+            self.view.as_ref().map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert("request", self.request.encode());
+        object.insert("mode", self.mode.encode());
+        object.insert("nowMs", Value::Number(self.now_ms as f64));
+        object.insert(
+            "failures",
+            Value::Array(self.failures.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum KindCodecInputKind {
+    Openrouter,
+    Opencode,
+}
+
+impl KindCodecInputKind {
+    pub const ALL: [Self; 2] = [Self::Openrouter, Self::Opencode];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Openrouter => "openrouter",
+            Self::Opencode => "opencode",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for KindCodecInputKind {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindCodecInputView {
+    pub efforts: Vec<nyaaai_contract::shapes::step::Effort>,
+    pub api: Option<nyaaai_contract::shapes::step::ApiFacts>,
+    pub output_limit: Option<f64>,
+    pub price: Option<KindCodecInputViewPrice>,
+}
+
+impl Shape for KindCodecInputView {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let efforts = shape::required(object, "efforts", at, |value, at| {
+            shape::list(value, at, nyaaai_contract::shapes::step::Effort::decode_at)
+        })?;
+        let api = shape::optional(
+            object,
+            "api",
+            at,
+            nyaaai_contract::shapes::step::ApiFacts::decode_at,
+        )?;
+        let output_limit = shape::optional(object, "outputLimit", at, shape::number)?;
+        let price = shape::optional(object, "price", at, KindCodecInputViewPrice::decode_at)?;
+        Ok(Self {
+            efforts,
+            api,
+            output_limit,
+            price,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "efforts",
+            Value::Array(self.efforts.iter().map(|held| held.encode()).collect()),
+        );
+        if let Some(held) = &self.api {
+            object.insert("api", held.encode());
+        }
+        if let Some(held) = &self.output_limit {
+            object.insert("outputLimit", Value::Number(*held));
+        }
+        if let Some(held) = &self.price {
+            object.insert("price", held.encode());
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum KindCodecInputMode {
+    Stream,
+    Complete,
+}
+
+impl KindCodecInputMode {
+    pub const ALL: [Self; 2] = [Self::Stream, Self::Complete];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Stream => "stream",
+            Self::Complete => "complete",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for KindCodecInputMode {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindCodecInputFailuresItem {
+    pub status: i64,
+    pub body: Value,
+    pub headers: Option<Vec<(String, String)>>,
+}
+
+impl Shape for KindCodecInputFailuresItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let status = shape::required(object, "status", at, shape::integer)?;
+        let body = shape::required(object, "body", at, shape::any)?;
+        let headers = shape::optional(object, "headers", at, |value, at| {
+            shape::list(value, at, |value, at| {
+                shape::tuple(value, at, 2).and_then(|items| {
+                    Ok((
+                        shape::place(items, 0, at, shape::text)?,
+                        shape::place(items, 1, at, shape::text)?,
+                    ))
+                })
+            })
+        })?;
+        Ok(Self {
+            status,
+            body,
+            headers,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("status", Value::Number(self.status as f64));
+        object.insert("body", self.body.clone());
+        if let Some(held) = &self.headers {
+            object.insert(
+                "headers",
+                Value::Array(
+                    held.iter()
+                        .map(|held| {
+                            Value::Array(vec![
+                                Value::from(held.0.as_str()),
+                                Value::from(held.1.as_str()),
+                            ])
+                        })
+                        .collect(),
+                ),
+            );
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum KindCodecInputViewPrice {
+    Free,
+    Unknown,
+}
+
+impl KindCodecInputViewPrice {
+    pub const ALL: [Self; 2] = [Self::Free, Self::Unknown];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Free => "free",
+            Self::Unknown => "unknown",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for KindCodecInputViewPrice {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindCodecResult {
+    pub encoded: Option<nyaaai_contract::shapes::step::Encoded>,
+    pub refusal: Option<String>,
+    pub facts: Option<KindCodecResultFacts>,
+    pub failures: Vec<nyaaai_contract::shapes::step::Failure>,
+}
+
+impl Shape for KindCodecResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let encoded = shape::required(object, "encoded", at, |value, at| {
+            shape::nullable(value, at, nyaaai_contract::shapes::step::Encoded::decode_at)
+        })?;
+        let refusal = shape::required(object, "refusal", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let facts = shape::required(object, "facts", at, |value, at| {
+            shape::nullable(value, at, KindCodecResultFacts::decode_at)
+        })?;
+        let failures = shape::required(object, "failures", at, |value, at| {
+            shape::list(value, at, nyaaai_contract::shapes::step::Failure::decode_at)
+        })?;
+        Ok(Self {
+            encoded,
+            refusal,
+            facts,
+            failures,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "encoded",
+            self.encoded
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert(
+            "refusal",
+            self.refusal
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "facts",
+            self.facts
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert(
+            "failures",
+            Value::Array(self.failures.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindCodecResultFacts {
+    pub efforts: Vec<nyaaai_contract::shapes::step::Effort>,
+    pub free: bool,
+    pub output_limit: Option<f64>,
+}
+
+impl Shape for KindCodecResultFacts {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let efforts = shape::required(object, "efforts", at, |value, at| {
+            shape::list(value, at, nyaaai_contract::shapes::step::Effort::decode_at)
+        })?;
+        let free = shape::required(object, "free", at, shape::flag)?;
+        let output_limit = shape::required(object, "outputLimit", at, |value, at| {
+            shape::nullable(value, at, shape::number)
+        })?;
+        Ok(Self {
+            efforts,
+            free,
+            output_limit,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "efforts",
+            Value::Array(self.efforts.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert("free", Value::Bool(self.free));
+        object.insert(
+            "outputLimit",
+            self.output_limit
+                .as_ref()
+                .map_or(Value::Null, |held| Value::Number(*held)),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindDispositionInput {
+    pub kind: KindDispositionInputKind,
+    pub rows: Vec<KindDispositionInputRowsItem>,
+}
+
+impl Shape for KindDispositionInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let kind = shape::required(object, "kind", at, KindDispositionInputKind::decode_at)?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, KindDispositionInputRowsItem::decode_at)
+        })?;
+        Ok(Self { kind, rows })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", self.kind.encode());
+        object.insert(
+            "rows",
+            Value::Array(self.rows.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum KindDispositionInputKind {
+    Openrouter,
+    Opencode,
+}
+
+impl KindDispositionInputKind {
+    pub const ALL: [Self; 2] = [Self::Openrouter, Self::Opencode];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Openrouter => "openrouter",
+            Self::Opencode => "opencode",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for KindDispositionInputKind {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindDispositionInputRowsItem {
+    pub failure: nyaaai_contract::shapes::step::Failure,
+    pub status: Option<KindDispositionInputRowsItemStatus>,
+}
+
+impl Shape for KindDispositionInputRowsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let failure = shape::required(
+            object,
+            "failure",
+            at,
+            nyaaai_contract::shapes::step::Failure::decode_at,
+        )?;
+        let status = shape::required(object, "status", at, |value, at| {
+            shape::nullable(value, at, KindDispositionInputRowsItemStatus::decode_at)
+        })?;
+        Ok(Self { failure, status })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("failure", self.failure.encode());
+        object.insert(
+            "status",
+            self.status
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum KindDispositionInputRowsItemStatus {
+    Ok,
+    Retired,
+    NoZdrHost,
+    NoTools,
+    Unknown,
+}
+
+impl KindDispositionInputRowsItemStatus {
+    pub const ALL: [Self; 5] = [
+        Self::Ok,
+        Self::Retired,
+        Self::NoZdrHost,
+        Self::NoTools,
+        Self::Unknown,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Ok => "ok",
+            Self::Retired => "retired",
+            Self::NoZdrHost => "noZdrHost",
+            Self::NoTools => "noTools",
+            Self::Unknown => "unknown",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for KindDispositionInputRowsItemStatus {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindDispositionResult {
+    pub dispositions: Vec<nyaaai_contract::shapes::provider::Disposition>,
+}
+
+impl Shape for KindDispositionResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let dispositions = shape::required(object, "dispositions", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::Disposition::decode_at,
+            )
+        })?;
+        Ok(Self { dispositions })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "dispositions",
+            Value::Array(self.dispositions.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindRouteInput {
+    pub kind: KindRouteInputKind,
+    pub entry: KindRouteInputEntry,
+    pub start_ms: i64,
+    pub exchanges: Vec<NetExchange>,
+    pub rows: Vec<String>,
+    pub steps: Vec<KindRouteInputStepsItem>,
+}
+
+impl Shape for KindRouteInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let kind = shape::required(object, "kind", at, KindRouteInputKind::decode_at)?;
+        let entry = shape::required(object, "entry", at, KindRouteInputEntry::decode_at)?;
+        let start_ms = shape::required(object, "startMs", at, shape::integer)?;
+        let exchanges = shape::required(object, "exchanges", at, |value, at| {
+            shape::list(value, at, NetExchange::decode_at)
+        })?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list_within(value, at, Some(1), None, KindRouteInputStepsItem::decode_at)
+        })?;
+        Ok(Self {
+            kind,
+            entry,
+            start_ms,
+            exchanges,
+            rows,
+            steps,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", self.kind.encode());
+        object.insert("entry", self.entry.encode());
+        object.insert("startMs", Value::Number(self.start_ms as f64));
+        object.insert(
+            "exchanges",
+            Value::Array(self.exchanges.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "rows",
+            Value::Array(
+                self.rows
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum KindRouteInputKind {
+    Openrouter,
+    Opencode,
+}
+
+impl KindRouteInputKind {
+    pub const ALL: [Self; 2] = [Self::Openrouter, Self::Opencode];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Openrouter => "openrouter",
+            Self::Opencode => "opencode",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for KindRouteInputKind {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindRouteInputEntry {
+    pub label: String,
+    pub plan: Option<nyaaai_contract::shapes::provider::ProviderPlan>,
+}
+
+impl Shape for KindRouteInputEntry {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let label = shape::required(object, "label", at, shape::text)?;
+        let plan = shape::optional(
+            object,
+            "plan",
+            at,
+            nyaaai_contract::shapes::provider::ProviderPlan::decode_at,
+        )?;
+        Ok(Self { label, plan })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("label", Value::from(self.label.as_str()));
+        if let Some(held) = &self.plan {
+            object.insert("plan", held.encode());
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum KindRouteInputStepsItem {
+    Views(KindRouteInputStepsItemViews),
+    List(KindRouteInputStepsItemList),
+    Detail(KindRouteInputStepsItemDetail),
+    Listed(KindRouteInputStepsItemListed),
+    View(KindRouteInputStepsItemView),
+    Advance(KindRouteInputStepsItemAdvance),
+}
+
+impl Shape for KindRouteInputStepsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "views" => KindRouteInputStepsItemViews::decode_at(value, at).map(Self::Views),
+            "list" => KindRouteInputStepsItemList::decode_at(value, at).map(Self::List),
+            "detail" => KindRouteInputStepsItemDetail::decode_at(value, at).map(Self::Detail),
+            "listed" => KindRouteInputStepsItemListed::decode_at(value, at).map(Self::Listed),
+            "view" => KindRouteInputStepsItemView::decode_at(value, at).map(Self::View),
+            "advance" => KindRouteInputStepsItemAdvance::decode_at(value, at).map(Self::Advance),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Views(held) => held.encode(),
+            Self::List(held) => held.encode(),
+            Self::Detail(held) => held.encode(),
+            Self::Listed(held) => held.encode(),
+            Self::View(held) => held.encode(),
+            Self::Advance(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindRouteInputStepsItemViews {
+    pub use_: Option<nyaaai_contract::shapes::model::ModelUse>,
+    pub zdr_only: Option<bool>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for KindRouteInputStepsItemViews {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "views")
+        })?;
+        let use_ = shape::optional(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        let zdr_only = shape::optional(object, "zdrOnly", at, shape::flag)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            use_,
+            zdr_only,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("views"));
+        if let Some(held) = &self.use_ {
+            object.insert("use", held.encode());
+        }
+        if let Some(held) = &self.zdr_only {
+            object.insert("zdrOnly", Value::Bool(*held));
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindRouteInputStepsItemList {
+    pub fresh: Option<bool>,
+}
+
+impl Shape for KindRouteInputStepsItemList {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "list")
+        })?;
+        let fresh = shape::optional(object, "fresh", at, shape::flag)?;
+        Ok(Self { fresh })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("list"));
+        if let Some(held) = &self.fresh {
+            object.insert("fresh", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindRouteInputStepsItemDetail {
+    pub id: String,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for KindRouteInputStepsItemDetail {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "detail")
+        })?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            id,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("detail"));
+        object.insert("id", Value::from(self.id.as_str()));
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindRouteInputStepsItemListed {
+    pub id: String,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for KindRouteInputStepsItemListed {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "listed")
+        })?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            id,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("listed"));
+        object.insert("id", Value::from(self.id.as_str()));
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindRouteInputStepsItemView {
+    pub row: String,
+    pub use_: Option<nyaaai_contract::shapes::model::ModelUse>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for KindRouteInputStepsItemView {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "view")
+        })?;
+        let row = shape::required(object, "row", at, shape::text)?;
+        let use_ = shape::optional(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            row,
+            use_,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("view"));
+        object.insert("row", Value::from(self.row.as_str()));
+        if let Some(held) = &self.use_ {
+            object.insert("use", held.encode());
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindRouteInputStepsItemAdvance {
+    pub ms: u64,
+}
+
+impl Shape for KindRouteInputStepsItemAdvance {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "advance")
+        })?;
+        let ms = shape::required(object, "ms", at, shape::natural)?;
+        Ok(Self { ms })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("advance"));
+        object.insert("ms", Value::Number(self.ms as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindRouteResult {
+    pub steps: Vec<KindRouteResultStepsItem>,
+    pub requests: Vec<String>,
+    pub read: Vec<i64>,
+    pub waiting: Vec<String>,
+}
+
+impl Shape for KindRouteResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list(value, at, KindRouteResultStepsItem::decode_at)
+        })?;
+        let requests = shape::required(object, "requests", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let read = shape::required(object, "read", at, |value, at| {
+            shape::list(value, at, shape::integer)
+        })?;
+        let waiting = shape::required(object, "waiting", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self {
+            steps,
+            requests,
+            read,
+            waiting,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "requests",
+            Value::Array(
+                self.requests
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "read",
+            Value::Array(
+                self.read
+                    .iter()
+                    .map(|held| Value::Number(*held as f64))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "waiting",
+            Value::Array(
+                self.waiting
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindRouteResultStepsItem {
+    pub now_ms: i64,
+    pub answer: KindRouteResultStepsItemAnswer,
+}
+
+impl Shape for KindRouteResultStepsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let now_ms = shape::required(object, "nowMs", at, shape::integer)?;
+        let answer = shape::required(
+            object,
+            "answer",
+            at,
+            KindRouteResultStepsItemAnswer::decode_at,
+        )?;
+        Ok(Self { now_ms, answer })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("nowMs", Value::Number(self.now_ms as f64));
+        object.insert("answer", self.answer.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum KindRouteResultStepsItemAnswer {
+    Views(KindRouteResultStepsItemAnswerViews),
+    List(KindRouteResultStepsItemAnswerList),
+    Detail(KindRouteResultStepsItemAnswerDetail),
+    Listed(KindRouteResultStepsItemAnswerListed),
+    View(KindRouteResultStepsItemAnswerView),
+    Advanced(KindRouteResultStepsItemAnswerAdvanced),
+    Thrown(KindRouteResultStepsItemAnswerThrown),
+}
+
+impl Shape for KindRouteResultStepsItemAnswer {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "views" => KindRouteResultStepsItemAnswerViews::decode_at(value, at).map(Self::Views),
+            "list" => KindRouteResultStepsItemAnswerList::decode_at(value, at).map(Self::List),
+            "detail" => {
+                KindRouteResultStepsItemAnswerDetail::decode_at(value, at).map(Self::Detail)
+            }
+            "listed" => {
+                KindRouteResultStepsItemAnswerListed::decode_at(value, at).map(Self::Listed)
+            }
+            "view" => KindRouteResultStepsItemAnswerView::decode_at(value, at).map(Self::View),
+            "advanced" => {
+                KindRouteResultStepsItemAnswerAdvanced::decode_at(value, at).map(Self::Advanced)
+            }
+            "thrown" => {
+                KindRouteResultStepsItemAnswerThrown::decode_at(value, at).map(Self::Thrown)
+            }
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Views(held) => held.encode(),
+            Self::List(held) => held.encode(),
+            Self::Detail(held) => held.encode(),
+            Self::Listed(held) => held.encode(),
+            Self::View(held) => held.encode(),
+            Self::Advanced(held) => held.encode(),
+            Self::Thrown(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindRouteResultStepsItemAnswerViews {
+    pub views: Vec<ViewLine>,
+}
+
+impl Shape for KindRouteResultStepsItemAnswerViews {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "views")
+        })?;
+        let views = shape::required(object, "views", at, |value, at| {
+            shape::list(value, at, ViewLine::decode_at)
+        })?;
+        Ok(Self { views })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("views"));
+        object.insert(
+            "views",
+            Value::Array(self.views.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindRouteResultStepsItemAnswerList {
+    pub models: Option<Vec<nyaaai_contract::shapes::model::BrowseModel>>,
+}
+
+impl Shape for KindRouteResultStepsItemAnswerList {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "list")
+        })?;
+        let models = shape::required(object, "models", at, |value, at| {
+            shape::nullable(value, at, |value, at| {
+                shape::list(
+                    value,
+                    at,
+                    nyaaai_contract::shapes::model::BrowseModel::decode_at,
+                )
+            })
+        })?;
+        Ok(Self { models })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("list"));
+        object.insert(
+            "models",
+            self.models.as_ref().map_or(Value::Null, |held| {
+                Value::Array(held.iter().map(|held| held.encode()).collect())
+            }),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindRouteResultStepsItemAnswerDetail {
+    pub detail: Option<nyaaai_contract::shapes::model::BrowseDetail>,
+}
+
+impl Shape for KindRouteResultStepsItemAnswerDetail {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "detail")
+        })?;
+        let detail = shape::required(object, "detail", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                nyaaai_contract::shapes::model::BrowseDetail::decode_at,
+            )
+        })?;
+        Ok(Self { detail })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("detail"));
+        object.insert(
+            "detail",
+            self.detail
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindRouteResultStepsItemAnswerListed {
+    pub listed: Option<KindRouteResultStepsItemAnswerListedListed>,
+}
+
+impl Shape for KindRouteResultStepsItemAnswerListed {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "listed")
+        })?;
+        let listed = shape::required(object, "listed", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                KindRouteResultStepsItemAnswerListedListed::decode_at,
+            )
+        })?;
+        Ok(Self { listed })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("listed"));
+        object.insert(
+            "listed",
+            self.listed
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindRouteResultStepsItemAnswerView {
+    pub view: ViewLine,
+}
+
+impl Shape for KindRouteResultStepsItemAnswerView {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "view")
+        })?;
+        let view = shape::required(object, "view", at, ViewLine::decode_at)?;
+        Ok(Self { view })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("view"));
+        object.insert("view", self.view.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindRouteResultStepsItemAnswerAdvanced {}
+
+impl Shape for KindRouteResultStepsItemAnswerAdvanced {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "advanced")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("advanced"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindRouteResultStepsItemAnswerThrown {
+    pub message: String,
+}
+
+impl Shape for KindRouteResultStepsItemAnswerThrown {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "thrown")
+        })?;
+        let message = shape::required(object, "message", at, shape::text)?;
+        Ok(Self { message })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("thrown"));
+        object.insert("message", Value::from(self.message.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindRouteResultStepsItemAnswerListedListed {
+    pub label: String,
+    pub reasoning: bool,
+}
+
+impl Shape for KindRouteResultStepsItemAnswerListedListed {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let label = shape::required(object, "label", at, shape::text)?;
+        let reasoning = shape::required(object, "reasoning", at, shape::flag)?;
+        Ok(Self { label, reasoning })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("label", Value::from(self.label.as_str()));
+        object.insert("reasoning", Value::Bool(self.reasoning));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct ServedModel {
     pub tag: String,
     pub tools: bool,
@@ -22599,5 +24671,2561 @@ impl Shape for LocalKindDispositionResult {
             Value::Array(self.dispositions.iter().map(|held| held.encode()).collect()),
         );
         Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverReachInput {
+    pub rows: Vec<ResolverReachInputRowsItem>,
+}
+
+impl Shape for ResolverReachInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, ResolverReachInputRowsItem::decode_at)
+        })?;
+        Ok(Self { rows })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "rows",
+            Value::Array(self.rows.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverReachInputRowsItem {
+    pub field: ResolverReachInputRowsItemField,
+    pub answer: ResolverReachInputRowsItemAnswer,
+}
+
+impl Shape for ResolverReachInputRowsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let field = shape::required(
+            object,
+            "field",
+            at,
+            ResolverReachInputRowsItemField::decode_at,
+        )?;
+        let answer = shape::required(
+            object,
+            "answer",
+            at,
+            ResolverReachInputRowsItemAnswer::decode_at,
+        )?;
+        Ok(Self { field, answer })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("field", self.field.encode());
+        object.insert("answer", self.answer.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ResolverReachInputRowsItemField {
+    Key,
+    Url,
+}
+
+impl ResolverReachInputRowsItemField {
+    pub const ALL: [Self; 2] = [Self::Key, Self::Url];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Key => "key",
+            Self::Url => "url",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for ResolverReachInputRowsItemField {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ResolverReachInputRowsItemAnswer {
+    Key(ResolverReachInputRowsItemAnswerKey),
+    None(ResolverReachInputRowsItemAnswerNone),
+    Refused(ResolverReachInputRowsItemAnswerRefused),
+    Unready(ResolverReachInputRowsItemAnswerUnready),
+}
+
+impl Shape for ResolverReachInputRowsItemAnswer {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "key" => ResolverReachInputRowsItemAnswerKey::decode_at(value, at).map(Self::Key),
+            "none" => ResolverReachInputRowsItemAnswerNone::decode_at(value, at).map(Self::None),
+            "refused" => {
+                ResolverReachInputRowsItemAnswerRefused::decode_at(value, at).map(Self::Refused)
+            }
+            "unready" => {
+                ResolverReachInputRowsItemAnswerUnready::decode_at(value, at).map(Self::Unready)
+            }
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Key(held) => held.encode(),
+            Self::None(held) => held.encode(),
+            Self::Refused(held) => held.encode(),
+            Self::Unready(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverReachInputRowsItemAnswerKey {
+    pub key: String,
+}
+
+impl Shape for ResolverReachInputRowsItemAnswerKey {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "key")
+        })?;
+        let key = shape::required(object, "key", at, shape::text)?;
+        Ok(Self { key })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("key"));
+        object.insert("key", Value::from(self.key.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverReachInputRowsItemAnswerNone {}
+
+impl Shape for ResolverReachInputRowsItemAnswerNone {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "none")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("none"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverReachInputRowsItemAnswerRefused {}
+
+impl Shape for ResolverReachInputRowsItemAnswerRefused {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "refused")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("refused"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverReachInputRowsItemAnswerUnready {}
+
+impl Shape for ResolverReachInputRowsItemAnswerUnready {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "unready")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("unready"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverReachResult {
+    pub reaches: Vec<nyaaai_contract::shapes::provider::KeyReach>,
+}
+
+impl Shape for ResolverReachResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let reaches = shape::required(object, "reaches", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::KeyReach::decode_at,
+            )
+        })?;
+        Ok(Self { reaches })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "reaches",
+            Value::Array(self.reaches.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRouteKeyInput {
+    pub entries: Vec<nyaaai_contract::shapes::provider::ProviderEntry>,
+}
+
+impl Shape for ResolverRouteKeyInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let entries = shape::required(object, "entries", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::ProviderEntry::decode_at,
+            )
+        })?;
+        Ok(Self { entries })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "entries",
+            Value::Array(self.entries.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRouteKeyResult {
+    pub keys: Vec<String>,
+}
+
+impl Shape for ResolverRouteKeyResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let keys = shape::required(object, "keys", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { keys })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "keys",
+            Value::Array(
+                self.keys
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverKeySourceInput {
+    pub entry: nyaaai_contract::shapes::provider::ProviderEntry,
+    pub list: Vec<nyaaai_contract::shapes::provider::ProviderEntry>,
+    pub answers: Record<ResolverKeySourceInputAnswersValue>,
+    pub steps: Vec<ResolverKeySourceInputStepsItem>,
+}
+
+impl Shape for ResolverKeySourceInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let entry = shape::required(
+            object,
+            "entry",
+            at,
+            nyaaai_contract::shapes::provider::ProviderEntry::decode_at,
+        )?;
+        let list = shape::required(object, "list", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::ProviderEntry::decode_at,
+            )
+        })?;
+        let answers = shape::required(object, "answers", at, |value, at| {
+            shape::record(value, at, ResolverKeySourceInputAnswersValue::decode_at)
+        })?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list(value, at, ResolverKeySourceInputStepsItem::decode_at)
+        })?;
+        Ok(Self {
+            entry,
+            list,
+            answers,
+            steps,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("entry", self.entry.encode());
+        object.insert(
+            "list",
+            Value::Array(self.list.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "answers",
+            shape::record_value(&self.answers, |held| held.encode()),
+        );
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ResolverKeySourceInputAnswersValue {
+    Key(ResolverKeySourceInputAnswersValueKey),
+    None(ResolverKeySourceInputAnswersValueNone),
+    Refused(ResolverKeySourceInputAnswersValueRefused),
+    Unready(ResolverKeySourceInputAnswersValueUnready),
+}
+
+impl Shape for ResolverKeySourceInputAnswersValue {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "key" => ResolverKeySourceInputAnswersValueKey::decode_at(value, at).map(Self::Key),
+            "none" => ResolverKeySourceInputAnswersValueNone::decode_at(value, at).map(Self::None),
+            "refused" => {
+                ResolverKeySourceInputAnswersValueRefused::decode_at(value, at).map(Self::Refused)
+            }
+            "unready" => {
+                ResolverKeySourceInputAnswersValueUnready::decode_at(value, at).map(Self::Unready)
+            }
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Key(held) => held.encode(),
+            Self::None(held) => held.encode(),
+            Self::Refused(held) => held.encode(),
+            Self::Unready(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ResolverKeySourceInputStepsItem {
+    Get(ResolverKeySourceInputStepsItemGet),
+    List(ResolverKeySourceInputStepsItemList),
+    Answer(ResolverKeySourceInputStepsItemAnswer),
+}
+
+impl Shape for ResolverKeySourceInputStepsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "get" => ResolverKeySourceInputStepsItemGet::decode_at(value, at).map(Self::Get),
+            "list" => ResolverKeySourceInputStepsItemList::decode_at(value, at).map(Self::List),
+            "answer" => {
+                ResolverKeySourceInputStepsItemAnswer::decode_at(value, at).map(Self::Answer)
+            }
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Get(held) => held.encode(),
+            Self::List(held) => held.encode(),
+            Self::Answer(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverKeySourceInputAnswersValueKey {
+    pub key: String,
+}
+
+impl Shape for ResolverKeySourceInputAnswersValueKey {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "key")
+        })?;
+        let key = shape::required(object, "key", at, shape::text)?;
+        Ok(Self { key })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("key"));
+        object.insert("key", Value::from(self.key.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverKeySourceInputAnswersValueNone {}
+
+impl Shape for ResolverKeySourceInputAnswersValueNone {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "none")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("none"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverKeySourceInputAnswersValueRefused {}
+
+impl Shape for ResolverKeySourceInputAnswersValueRefused {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "refused")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("refused"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverKeySourceInputAnswersValueUnready {}
+
+impl Shape for ResolverKeySourceInputAnswersValueUnready {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "unready")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("unready"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverKeySourceInputStepsItemGet {}
+
+impl Shape for ResolverKeySourceInputStepsItemGet {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "get")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("get"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverKeySourceInputStepsItemList {
+    pub entries: Vec<nyaaai_contract::shapes::provider::ProviderEntry>,
+}
+
+impl Shape for ResolverKeySourceInputStepsItemList {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "list")
+        })?;
+        let entries = shape::required(object, "entries", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::ProviderEntry::decode_at,
+            )
+        })?;
+        Ok(Self { entries })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("list"));
+        object.insert(
+            "entries",
+            Value::Array(self.entries.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverKeySourceInputStepsItemAnswer {
+    pub id: String,
+    pub answer: ResolverKeySourceInputStepsItemAnswerAnswer,
+}
+
+impl Shape for ResolverKeySourceInputStepsItemAnswer {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "answer")
+        })?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let answer = shape::required(
+            object,
+            "answer",
+            at,
+            ResolverKeySourceInputStepsItemAnswerAnswer::decode_at,
+        )?;
+        Ok(Self { id, answer })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("answer"));
+        object.insert("id", Value::from(self.id.as_str()));
+        object.insert("answer", self.answer.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ResolverKeySourceInputStepsItemAnswerAnswer {
+    Key(ResolverKeySourceInputStepsItemAnswerAnswerKey),
+    None(ResolverKeySourceInputStepsItemAnswerAnswerNone),
+    Refused(ResolverKeySourceInputStepsItemAnswerAnswerRefused),
+    Unready(ResolverKeySourceInputStepsItemAnswerAnswerUnready),
+}
+
+impl Shape for ResolverKeySourceInputStepsItemAnswerAnswer {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "key" => {
+                ResolverKeySourceInputStepsItemAnswerAnswerKey::decode_at(value, at).map(Self::Key)
+            }
+            "none" => ResolverKeySourceInputStepsItemAnswerAnswerNone::decode_at(value, at)
+                .map(Self::None),
+            "refused" => ResolverKeySourceInputStepsItemAnswerAnswerRefused::decode_at(value, at)
+                .map(Self::Refused),
+            "unready" => ResolverKeySourceInputStepsItemAnswerAnswerUnready::decode_at(value, at)
+                .map(Self::Unready),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Key(held) => held.encode(),
+            Self::None(held) => held.encode(),
+            Self::Refused(held) => held.encode(),
+            Self::Unready(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverKeySourceInputStepsItemAnswerAnswerKey {
+    pub key: String,
+}
+
+impl Shape for ResolverKeySourceInputStepsItemAnswerAnswerKey {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "key")
+        })?;
+        let key = shape::required(object, "key", at, shape::text)?;
+        Ok(Self { key })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("key"));
+        object.insert("key", Value::from(self.key.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverKeySourceInputStepsItemAnswerAnswerNone {}
+
+impl Shape for ResolverKeySourceInputStepsItemAnswerAnswerNone {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "none")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("none"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverKeySourceInputStepsItemAnswerAnswerRefused {}
+
+impl Shape for ResolverKeySourceInputStepsItemAnswerAnswerRefused {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "refused")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("refused"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverKeySourceInputStepsItemAnswerAnswerUnready {}
+
+impl Shape for ResolverKeySourceInputStepsItemAnswerAnswerUnready {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "unready")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("unready"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverKeySourceResult {
+    pub gets: Vec<Option<String>>,
+}
+
+impl Shape for ResolverKeySourceResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let gets = shape::required(object, "gets", at, |value, at| {
+            shape::list(value, at, |value, at| {
+                shape::nullable(value, at, shape::text)
+            })
+        })?;
+        Ok(Self { gets })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "gets",
+            Value::Array(
+                self.gets
+                    .iter()
+                    .map(|held| {
+                        held.as_ref()
+                            .map_or(Value::Null, |held| Value::from(held.as_str()))
+                    })
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverServedByInput {
+    pub kind: nyaaai_contract::shapes::provider::ProviderKindName,
+    pub entry: nyaaai_contract::shapes::provider::ProviderEntry,
+    pub key: String,
+    pub use_: nyaaai_contract::shapes::model::ModelUse,
+    pub view: Option<ResolverServedByInputView>,
+    pub zdr_only: bool,
+    pub flipped_to: bool,
+}
+
+impl Shape for ResolverServedByInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let kind = shape::required(
+            object,
+            "kind",
+            at,
+            nyaaai_contract::shapes::provider::ProviderKindName::decode_at,
+        )?;
+        let entry = shape::required(
+            object,
+            "entry",
+            at,
+            nyaaai_contract::shapes::provider::ProviderEntry::decode_at,
+        )?;
+        let key = shape::required(object, "key", at, shape::text)?;
+        let use_ = shape::required(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        let view = shape::required(object, "view", at, |value, at| {
+            shape::nullable(value, at, ResolverServedByInputView::decode_at)
+        })?;
+        let zdr_only = shape::required(object, "zdrOnly", at, shape::flag)?;
+        let flipped_to = shape::required(object, "flippedTo", at, shape::flag)?;
+        Ok(Self {
+            kind,
+            entry,
+            key,
+            use_,
+            view,
+            zdr_only,
+            flipped_to,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", self.kind.encode());
+        object.insert("entry", self.entry.encode());
+        object.insert("key", Value::from(self.key.as_str()));
+        object.insert("use", self.use_.encode());
+        object.insert(
+            "view",
+            self.view.as_ref().map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert("zdrOnly", Value::Bool(self.zdr_only));
+        object.insert("flippedTo", Value::Bool(self.flipped_to));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ResolverServedByInputView {
+    Ok,
+    Retired,
+    NoZdrHost,
+    NoTools,
+    Unknown,
+}
+
+impl ResolverServedByInputView {
+    pub const ALL: [Self; 5] = [
+        Self::Ok,
+        Self::Retired,
+        Self::NoZdrHost,
+        Self::NoTools,
+        Self::Unknown,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Ok => "ok",
+            Self::Retired => "retired",
+            Self::NoZdrHost => "noZdrHost",
+            Self::NoTools => "noTools",
+            Self::Unknown => "unknown",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for ResolverServedByInputView {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverServedByResult {
+    pub key: String,
+    pub entry: String,
+    pub binding: String,
+    pub view: nyaaai_contract::shapes::model::ModelView,
+    pub path: String,
+    pub passed: Vec<nyaaai_contract::shapes::provider::Passed>,
+    pub candidates: i64,
+    pub zdr_on_resolve: bool,
+    pub sent: ResolverServedByResultSent,
+}
+
+impl Shape for ResolverServedByResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let key = shape::required(object, "key", at, shape::text)?;
+        let entry = shape::required(object, "entry", at, shape::text)?;
+        let binding = shape::required(object, "binding", at, shape::text)?;
+        let view = shape::required(
+            object,
+            "view",
+            at,
+            nyaaai_contract::shapes::model::ModelView::decode_at,
+        )?;
+        let path = shape::required(object, "path", at, shape::text)?;
+        let passed = shape::required(object, "passed", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::Passed::decode_at,
+            )
+        })?;
+        let candidates = shape::required(object, "candidates", at, shape::integer)?;
+        let zdr_on_resolve = shape::required(object, "zdrOnResolve", at, shape::flag)?;
+        let sent = shape::required(object, "sent", at, ResolverServedByResultSent::decode_at)?;
+        Ok(Self {
+            key,
+            entry,
+            binding,
+            view,
+            path,
+            passed,
+            candidates,
+            zdr_on_resolve,
+            sent,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("key", Value::from(self.key.as_str()));
+        object.insert("entry", Value::from(self.entry.as_str()));
+        object.insert("binding", Value::from(self.binding.as_str()));
+        object.insert("view", self.view.encode());
+        object.insert("path", Value::from(self.path.as_str()));
+        object.insert(
+            "passed",
+            Value::Array(self.passed.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert("candidates", Value::Number(self.candidates as f64));
+        object.insert("zdrOnResolve", Value::Bool(self.zdr_on_resolve));
+        object.insert("sent", self.sent.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverServedByResultSent {
+    pub zdr_only: bool,
+    pub path: String,
+}
+
+impl Shape for ResolverServedByResultSent {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let zdr_only = shape::required(object, "zdrOnly", at, shape::flag)?;
+        let path = shape::required(object, "path", at, shape::text)?;
+        Ok(Self { zdr_only, path })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("zdrOnly", Value::Bool(self.zdr_only));
+        object.insert("path", Value::from(self.path.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesInput {
+    pub entries: Vec<nyaaai_contract::shapes::provider::ProviderEntry>,
+    pub answers: Record<ResolverRoutesInputAnswersValue>,
+    pub failing: Vec<String>,
+    pub rows: Vec<String>,
+    pub kinds: Vec<nyaaai_contract::shapes::provider::ProviderKindName>,
+    pub listings: Record<Record<ResolverRoutesInputListingsValueValue>>,
+    pub zdr_only: bool,
+    pub steps: Vec<ResolverRoutesInputStepsItem>,
+}
+
+impl Shape for ResolverRoutesInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let entries = shape::required(object, "entries", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::ProviderEntry::decode_at,
+            )
+        })?;
+        let answers = shape::required(object, "answers", at, |value, at| {
+            shape::record(value, at, ResolverRoutesInputAnswersValue::decode_at)
+        })?;
+        let failing = shape::required(object, "failing", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let kinds = shape::required(object, "kinds", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::ProviderKindName::decode_at,
+            )
+        })?;
+        let listings = shape::required(object, "listings", at, |value, at| {
+            shape::record(value, at, |value, at| {
+                shape::record(value, at, ResolverRoutesInputListingsValueValue::decode_at)
+            })
+        })?;
+        let zdr_only = shape::required(object, "zdrOnly", at, shape::flag)?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list_within(
+                value,
+                at,
+                Some(1),
+                None,
+                ResolverRoutesInputStepsItem::decode_at,
+            )
+        })?;
+        Ok(Self {
+            entries,
+            answers,
+            failing,
+            rows,
+            kinds,
+            listings,
+            zdr_only,
+            steps,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "entries",
+            Value::Array(self.entries.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "answers",
+            shape::record_value(&self.answers, |held| held.encode()),
+        );
+        object.insert(
+            "failing",
+            Value::Array(
+                self.failing
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "rows",
+            Value::Array(
+                self.rows
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "kinds",
+            Value::Array(self.kinds.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "listings",
+            shape::record_value(&self.listings, |held| {
+                shape::record_value(held, |held| held.encode())
+            }),
+        );
+        object.insert("zdrOnly", Value::Bool(self.zdr_only));
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ResolverRoutesInputAnswersValue {
+    Key(ResolverRoutesInputAnswersValueKey),
+    None(ResolverRoutesInputAnswersValueNone),
+    Refused(ResolverRoutesInputAnswersValueRefused),
+    Unready(ResolverRoutesInputAnswersValueUnready),
+}
+
+impl Shape for ResolverRoutesInputAnswersValue {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "key" => ResolverRoutesInputAnswersValueKey::decode_at(value, at).map(Self::Key),
+            "none" => ResolverRoutesInputAnswersValueNone::decode_at(value, at).map(Self::None),
+            "refused" => {
+                ResolverRoutesInputAnswersValueRefused::decode_at(value, at).map(Self::Refused)
+            }
+            "unready" => {
+                ResolverRoutesInputAnswersValueUnready::decode_at(value, at).map(Self::Unready)
+            }
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Key(held) => held.encode(),
+            Self::None(held) => held.encode(),
+            Self::Refused(held) => held.encode(),
+            Self::Unready(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesInputListingsValueValue {
+    pub status: ResolverRoutesInputListingsValueValueStatus,
+    pub when_zdr_off: Option<ResolverRoutesInputListingsValueValueWhenZdrOff>,
+}
+
+impl Shape for ResolverRoutesInputListingsValueValue {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let status = shape::required(
+            object,
+            "status",
+            at,
+            ResolverRoutesInputListingsValueValueStatus::decode_at,
+        )?;
+        let when_zdr_off = shape::optional(
+            object,
+            "whenZdrOff",
+            at,
+            ResolverRoutesInputListingsValueValueWhenZdrOff::decode_at,
+        )?;
+        Ok(Self {
+            status,
+            when_zdr_off,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("status", self.status.encode());
+        if let Some(held) = &self.when_zdr_off {
+            object.insert("whenZdrOff", held.encode());
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ResolverRoutesInputStepsItem {
+    Routes(ResolverRoutesInputStepsItemRoutes),
+    Resolve(ResolverRoutesInputStepsItemResolve),
+    Rows(ResolverRoutesInputStepsItemRows),
+    Candidates(ResolverRoutesInputStepsItemCandidates),
+    List(ResolverRoutesInputStepsItemList),
+    Answer(ResolverRoutesInputStepsItemAnswer),
+    Registry(ResolverRoutesInputStepsItemRegistry),
+    Zdr(ResolverRoutesInputStepsItemZdr),
+    Refreshed(ResolverRoutesInputStepsItemRefreshed),
+    Send(ResolverRoutesInputStepsItemSend),
+}
+
+impl Shape for ResolverRoutesInputStepsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "routes" => ResolverRoutesInputStepsItemRoutes::decode_at(value, at).map(Self::Routes),
+            "resolve" => {
+                ResolverRoutesInputStepsItemResolve::decode_at(value, at).map(Self::Resolve)
+            }
+            "rows" => ResolverRoutesInputStepsItemRows::decode_at(value, at).map(Self::Rows),
+            "candidates" => {
+                ResolverRoutesInputStepsItemCandidates::decode_at(value, at).map(Self::Candidates)
+            }
+            "list" => ResolverRoutesInputStepsItemList::decode_at(value, at).map(Self::List),
+            "answer" => ResolverRoutesInputStepsItemAnswer::decode_at(value, at).map(Self::Answer),
+            "registry" => {
+                ResolverRoutesInputStepsItemRegistry::decode_at(value, at).map(Self::Registry)
+            }
+            "zdr" => ResolverRoutesInputStepsItemZdr::decode_at(value, at).map(Self::Zdr),
+            "refreshed" => {
+                ResolverRoutesInputStepsItemRefreshed::decode_at(value, at).map(Self::Refreshed)
+            }
+            "send" => ResolverRoutesInputStepsItemSend::decode_at(value, at).map(Self::Send),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Routes(held) => held.encode(),
+            Self::Resolve(held) => held.encode(),
+            Self::Rows(held) => held.encode(),
+            Self::Candidates(held) => held.encode(),
+            Self::List(held) => held.encode(),
+            Self::Answer(held) => held.encode(),
+            Self::Registry(held) => held.encode(),
+            Self::Zdr(held) => held.encode(),
+            Self::Refreshed(held) => held.encode(),
+            Self::Send(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesInputAnswersValueKey {
+    pub key: String,
+}
+
+impl Shape for ResolverRoutesInputAnswersValueKey {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "key")
+        })?;
+        let key = shape::required(object, "key", at, shape::text)?;
+        Ok(Self { key })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("key"));
+        object.insert("key", Value::from(self.key.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesInputAnswersValueNone {}
+
+impl Shape for ResolverRoutesInputAnswersValueNone {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "none")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("none"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesInputAnswersValueRefused {}
+
+impl Shape for ResolverRoutesInputAnswersValueRefused {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "refused")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("refused"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesInputAnswersValueUnready {}
+
+impl Shape for ResolverRoutesInputAnswersValueUnready {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "unready")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("unready"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ResolverRoutesInputListingsValueValueStatus {
+    Choice(ResolverRoutesInputListingsValueValueStatusChoice),
+    Unlisted,
+}
+
+impl Shape for ResolverRoutesInputListingsValueValueStatus {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        if let Ok(held) = ResolverRoutesInputListingsValueValueStatusChoice::decode_at(value, at) {
+            return Ok(Self::Choice(held));
+        }
+        if shape::is_text(value, at, "unlisted").is_ok() {
+            return Ok(Self::Unlisted);
+        }
+        Err(shape::refused(at, "no branch matches"))
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Choice(held) => held.encode(),
+            Self::Unlisted => Value::from("unlisted"),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ResolverRoutesInputListingsValueValueWhenZdrOff {
+    Choice(ResolverRoutesInputListingsValueValueWhenZdrOffChoice),
+    Unlisted,
+}
+
+impl Shape for ResolverRoutesInputListingsValueValueWhenZdrOff {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        if let Ok(held) =
+            ResolverRoutesInputListingsValueValueWhenZdrOffChoice::decode_at(value, at)
+        {
+            return Ok(Self::Choice(held));
+        }
+        if shape::is_text(value, at, "unlisted").is_ok() {
+            return Ok(Self::Unlisted);
+        }
+        Err(shape::refused(at, "no branch matches"))
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Choice(held) => held.encode(),
+            Self::Unlisted => Value::from("unlisted"),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesInputStepsItemRoutes {
+    pub model: String,
+    pub use_: nyaaai_contract::shapes::model::ModelUse,
+}
+
+impl Shape for ResolverRoutesInputStepsItemRoutes {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "routes")
+        })?;
+        let model = shape::required(object, "model", at, shape::text)?;
+        let use_ = shape::required(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        Ok(Self { model, use_ })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("routes"));
+        object.insert("model", Value::from(self.model.as_str()));
+        object.insert("use", self.use_.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesInputStepsItemResolve {
+    pub model: String,
+    pub use_: nyaaai_contract::shapes::model::ModelUse,
+}
+
+impl Shape for ResolverRoutesInputStepsItemResolve {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "resolve")
+        })?;
+        let model = shape::required(object, "model", at, shape::text)?;
+        let use_ = shape::required(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        Ok(Self { model, use_ })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("resolve"));
+        object.insert("model", Value::from(self.model.as_str()));
+        object.insert("use", self.use_.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesInputStepsItemRows {
+    pub use_: nyaaai_contract::shapes::model::ModelUse,
+}
+
+impl Shape for ResolverRoutesInputStepsItemRows {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "rows")
+        })?;
+        let use_ = shape::required(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        Ok(Self { use_ })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("rows"));
+        object.insert("use", self.use_.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesInputStepsItemCandidates {
+    pub use_: nyaaai_contract::shapes::model::ModelUse,
+}
+
+impl Shape for ResolverRoutesInputStepsItemCandidates {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "candidates")
+        })?;
+        let use_ = shape::required(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        Ok(Self { use_ })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("candidates"));
+        object.insert("use", self.use_.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesInputStepsItemList {
+    pub entries: Vec<nyaaai_contract::shapes::provider::ProviderEntry>,
+}
+
+impl Shape for ResolverRoutesInputStepsItemList {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "list")
+        })?;
+        let entries = shape::required(object, "entries", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::ProviderEntry::decode_at,
+            )
+        })?;
+        Ok(Self { entries })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("list"));
+        object.insert(
+            "entries",
+            Value::Array(self.entries.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesInputStepsItemAnswer {
+    pub id: String,
+    pub answer: ResolverRoutesInputStepsItemAnswerAnswer,
+}
+
+impl Shape for ResolverRoutesInputStepsItemAnswer {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "answer")
+        })?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let answer = shape::required(
+            object,
+            "answer",
+            at,
+            ResolverRoutesInputStepsItemAnswerAnswer::decode_at,
+        )?;
+        Ok(Self { id, answer })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("answer"));
+        object.insert("id", Value::from(self.id.as_str()));
+        object.insert("answer", self.answer.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesInputStepsItemRegistry {
+    pub rows: Vec<String>,
+}
+
+impl Shape for ResolverRoutesInputStepsItemRegistry {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "registry")
+        })?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { rows })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("registry"));
+        object.insert(
+            "rows",
+            Value::Array(
+                self.rows
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesInputStepsItemZdr {
+    pub on: bool,
+}
+
+impl Shape for ResolverRoutesInputStepsItemZdr {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "zdr")
+        })?;
+        let on = shape::required(object, "on", at, shape::flag)?;
+        Ok(Self { on })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("zdr"));
+        object.insert("on", Value::Bool(self.on));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesInputStepsItemRefreshed {
+    pub entry: String,
+}
+
+impl Shape for ResolverRoutesInputStepsItemRefreshed {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "refreshed")
+        })?;
+        let entry = shape::required(object, "entry", at, shape::text)?;
+        Ok(Self { entry })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("refreshed"));
+        object.insert("entry", Value::from(self.entry.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesInputStepsItemSend {
+    pub from: u64,
+    pub candidate: u64,
+}
+
+impl Shape for ResolverRoutesInputStepsItemSend {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "send")
+        })?;
+        let from = shape::required(object, "from", at, shape::natural)?;
+        let candidate = shape::required(object, "candidate", at, shape::natural)?;
+        Ok(Self { from, candidate })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("send"));
+        object.insert("from", Value::Number(self.from as f64));
+        object.insert("candidate", Value::Number(self.candidate as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ResolverRoutesInputListingsValueValueStatusChoice {
+    Ok,
+    Retired,
+    NoZdrHost,
+    NoTools,
+    Unknown,
+}
+
+impl ResolverRoutesInputListingsValueValueStatusChoice {
+    pub const ALL: [Self; 5] = [
+        Self::Ok,
+        Self::Retired,
+        Self::NoZdrHost,
+        Self::NoTools,
+        Self::Unknown,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Ok => "ok",
+            Self::Retired => "retired",
+            Self::NoZdrHost => "noZdrHost",
+            Self::NoTools => "noTools",
+            Self::Unknown => "unknown",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for ResolverRoutesInputListingsValueValueStatusChoice {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ResolverRoutesInputListingsValueValueWhenZdrOffChoice {
+    Ok,
+    Retired,
+    NoZdrHost,
+    NoTools,
+    Unknown,
+}
+
+impl ResolverRoutesInputListingsValueValueWhenZdrOffChoice {
+    pub const ALL: [Self; 5] = [
+        Self::Ok,
+        Self::Retired,
+        Self::NoZdrHost,
+        Self::NoTools,
+        Self::Unknown,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Ok => "ok",
+            Self::Retired => "retired",
+            Self::NoZdrHost => "noZdrHost",
+            Self::NoTools => "noTools",
+            Self::Unknown => "unknown",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for ResolverRoutesInputListingsValueValueWhenZdrOffChoice {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ResolverRoutesInputStepsItemAnswerAnswer {
+    Key(ResolverRoutesInputStepsItemAnswerAnswerKey),
+    None(ResolverRoutesInputStepsItemAnswerAnswerNone),
+    Refused(ResolverRoutesInputStepsItemAnswerAnswerRefused),
+    Unready(ResolverRoutesInputStepsItemAnswerAnswerUnready),
+}
+
+impl Shape for ResolverRoutesInputStepsItemAnswerAnswer {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "key" => {
+                ResolverRoutesInputStepsItemAnswerAnswerKey::decode_at(value, at).map(Self::Key)
+            }
+            "none" => {
+                ResolverRoutesInputStepsItemAnswerAnswerNone::decode_at(value, at).map(Self::None)
+            }
+            "refused" => ResolverRoutesInputStepsItemAnswerAnswerRefused::decode_at(value, at)
+                .map(Self::Refused),
+            "unready" => ResolverRoutesInputStepsItemAnswerAnswerUnready::decode_at(value, at)
+                .map(Self::Unready),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Key(held) => held.encode(),
+            Self::None(held) => held.encode(),
+            Self::Refused(held) => held.encode(),
+            Self::Unready(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesInputStepsItemAnswerAnswerKey {
+    pub key: String,
+}
+
+impl Shape for ResolverRoutesInputStepsItemAnswerAnswerKey {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "key")
+        })?;
+        let key = shape::required(object, "key", at, shape::text)?;
+        Ok(Self { key })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("key"));
+        object.insert("key", Value::from(self.key.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesInputStepsItemAnswerAnswerNone {}
+
+impl Shape for ResolverRoutesInputStepsItemAnswerAnswerNone {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "none")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("none"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesInputStepsItemAnswerAnswerRefused {}
+
+impl Shape for ResolverRoutesInputStepsItemAnswerAnswerRefused {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "refused")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("refused"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesInputStepsItemAnswerAnswerUnready {}
+
+impl Shape for ResolverRoutesInputStepsItemAnswerAnswerUnready {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "unready")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("unready"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesResult {
+    pub steps: Vec<ResolverRoutesResultStepsItem>,
+    pub transports: Vec<String>,
+    pub stopped: Vec<String>,
+    pub refreshed: Vec<String>,
+    pub key_reads: i64,
+    pub list_reads: i64,
+}
+
+impl Shape for ResolverRoutesResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list(value, at, ResolverRoutesResultStepsItem::decode_at)
+        })?;
+        let transports = shape::required(object, "transports", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let stopped = shape::required(object, "stopped", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let refreshed = shape::required(object, "refreshed", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let key_reads = shape::required(object, "keyReads", at, shape::integer)?;
+        let list_reads = shape::required(object, "listReads", at, shape::integer)?;
+        Ok(Self {
+            steps,
+            transports,
+            stopped,
+            refreshed,
+            key_reads,
+            list_reads,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "transports",
+            Value::Array(
+                self.transports
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "stopped",
+            Value::Array(
+                self.stopped
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "refreshed",
+            Value::Array(
+                self.refreshed
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert("keyReads", Value::Number(self.key_reads as f64));
+        object.insert("listReads", Value::Number(self.list_reads as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesResultStepsItem {
+    pub answer: ResolverRoutesResultStepsItemAnswer,
+    pub built: i64,
+    pub disposed: i64,
+}
+
+impl Shape for ResolverRoutesResultStepsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let answer = shape::required(
+            object,
+            "answer",
+            at,
+            ResolverRoutesResultStepsItemAnswer::decode_at,
+        )?;
+        let built = shape::required(object, "built", at, shape::integer)?;
+        let disposed = shape::required(object, "disposed", at, shape::integer)?;
+        Ok(Self {
+            answer,
+            built,
+            disposed,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("answer", self.answer.encode());
+        object.insert("built", Value::Number(self.built as f64));
+        object.insert("disposed", Value::Number(self.disposed as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ResolverRoutesResultStepsItemAnswer {
+    Routes(ResolverRoutesResultStepsItemAnswerRoutes),
+    Resolve(ResolverRoutesResultStepsItemAnswerResolve),
+    Rows(ResolverRoutesResultStepsItemAnswerRows),
+    Candidates(ResolverRoutesResultStepsItemAnswerCandidates),
+    Changed(ResolverRoutesResultStepsItemAnswerChanged),
+    Sent(ResolverRoutesResultStepsItemAnswerSent),
+    None(ResolverRoutesResultStepsItemAnswerNone),
+}
+
+impl Shape for ResolverRoutesResultStepsItemAnswer {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "routes" => {
+                ResolverRoutesResultStepsItemAnswerRoutes::decode_at(value, at).map(Self::Routes)
+            }
+            "resolve" => {
+                ResolverRoutesResultStepsItemAnswerResolve::decode_at(value, at).map(Self::Resolve)
+            }
+            "rows" => ResolverRoutesResultStepsItemAnswerRows::decode_at(value, at).map(Self::Rows),
+            "candidates" => ResolverRoutesResultStepsItemAnswerCandidates::decode_at(value, at)
+                .map(Self::Candidates),
+            "changed" => {
+                ResolverRoutesResultStepsItemAnswerChanged::decode_at(value, at).map(Self::Changed)
+            }
+            "sent" => ResolverRoutesResultStepsItemAnswerSent::decode_at(value, at).map(Self::Sent),
+            "none" => ResolverRoutesResultStepsItemAnswerNone::decode_at(value, at).map(Self::None),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Routes(held) => held.encode(),
+            Self::Resolve(held) => held.encode(),
+            Self::Rows(held) => held.encode(),
+            Self::Candidates(held) => held.encode(),
+            Self::Changed(held) => held.encode(),
+            Self::Sent(held) => held.encode(),
+            Self::None(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesResultStepsItemAnswerRoutes {
+    pub unresolved: Option<nyaaai_contract::shapes::model::Unresolved>,
+    pub candidates: Vec<ResolverRoutesResultStepsItemAnswerRoutesCandidatesItem>,
+    pub passed: Vec<nyaaai_contract::shapes::provider::Passed>,
+}
+
+impl Shape for ResolverRoutesResultStepsItemAnswerRoutes {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "routes")
+        })?;
+        let unresolved = shape::required(object, "unresolved", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                nyaaai_contract::shapes::model::Unresolved::decode_at,
+            )
+        })?;
+        let candidates = shape::required(object, "candidates", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                ResolverRoutesResultStepsItemAnswerRoutesCandidatesItem::decode_at,
+            )
+        })?;
+        let passed = shape::required(object, "passed", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::Passed::decode_at,
+            )
+        })?;
+        Ok(Self {
+            unresolved,
+            candidates,
+            passed,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("routes"));
+        object.insert(
+            "unresolved",
+            self.unresolved
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert(
+            "candidates",
+            Value::Array(self.candidates.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "passed",
+            Value::Array(self.passed.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesResultStepsItemAnswerResolve {
+    pub unresolved: Option<nyaaai_contract::shapes::model::Unresolved>,
+    pub candidate: Option<ResolverRoutesResultStepsItemAnswerResolveCandidate>,
+}
+
+impl Shape for ResolverRoutesResultStepsItemAnswerResolve {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "resolve")
+        })?;
+        let unresolved = shape::required(object, "unresolved", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                nyaaai_contract::shapes::model::Unresolved::decode_at,
+            )
+        })?;
+        let candidate = shape::required(object, "candidate", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                ResolverRoutesResultStepsItemAnswerResolveCandidate::decode_at,
+            )
+        })?;
+        Ok(Self {
+            unresolved,
+            candidate,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("resolve"));
+        object.insert(
+            "unresolved",
+            self.unresolved
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert(
+            "candidate",
+            self.candidate
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesResultStepsItemAnswerRows {
+    pub options: Vec<ResolverRoutesResultStepsItemAnswerRowsOptionsItem>,
+}
+
+impl Shape for ResolverRoutesResultStepsItemAnswerRows {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "rows")
+        })?;
+        let options = shape::required(object, "options", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                ResolverRoutesResultStepsItemAnswerRowsOptionsItem::decode_at,
+            )
+        })?;
+        Ok(Self { options })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("rows"));
+        object.insert(
+            "options",
+            Value::Array(self.options.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesResultStepsItemAnswerCandidates {
+    pub served: Vec<ResolverRoutesResultStepsItemAnswerCandidatesServedItem>,
+}
+
+impl Shape for ResolverRoutesResultStepsItemAnswerCandidates {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "candidates")
+        })?;
+        let served = shape::required(object, "served", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                ResolverRoutesResultStepsItemAnswerCandidatesServedItem::decode_at,
+            )
+        })?;
+        Ok(Self { served })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("candidates"));
+        object.insert(
+            "served",
+            Value::Array(self.served.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesResultStepsItemAnswerChanged {}
+
+impl Shape for ResolverRoutesResultStepsItemAnswerChanged {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "changed")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("changed"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesResultStepsItemAnswerSent {
+    pub transport: String,
+    pub zdr_only: bool,
+    pub key: Option<String>,
+    pub path: String,
+}
+
+impl Shape for ResolverRoutesResultStepsItemAnswerSent {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "sent")
+        })?;
+        let transport = shape::required(object, "transport", at, shape::text)?;
+        let zdr_only = shape::required(object, "zdrOnly", at, shape::flag)?;
+        let key = shape::required(object, "key", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let path = shape::required(object, "path", at, shape::text)?;
+        Ok(Self {
+            transport,
+            zdr_only,
+            key,
+            path,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("sent"));
+        object.insert("transport", Value::from(self.transport.as_str()));
+        object.insert("zdrOnly", Value::Bool(self.zdr_only));
+        object.insert(
+            "key",
+            self.key
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert("path", Value::from(self.path.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesResultStepsItemAnswerNone {}
+
+impl Shape for ResolverRoutesResultStepsItemAnswerNone {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "none")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("none"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesResultStepsItemAnswerRoutesCandidatesItem {
+    pub entry: String,
+    pub kind: nyaaai_contract::shapes::provider::ProviderKindName,
+    pub binding: String,
+    pub status: ResolverRoutesResultStepsItemAnswerRoutesCandidatesItemStatus,
+    pub zdr_only: bool,
+    pub path: String,
+}
+
+impl Shape for ResolverRoutesResultStepsItemAnswerRoutesCandidatesItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let entry = shape::required(object, "entry", at, shape::text)?;
+        let kind = shape::required(
+            object,
+            "kind",
+            at,
+            nyaaai_contract::shapes::provider::ProviderKindName::decode_at,
+        )?;
+        let binding = shape::required(object, "binding", at, shape::text)?;
+        let status = shape::required(
+            object,
+            "status",
+            at,
+            ResolverRoutesResultStepsItemAnswerRoutesCandidatesItemStatus::decode_at,
+        )?;
+        let zdr_only = shape::required(object, "zdrOnly", at, shape::flag)?;
+        let path = shape::required(object, "path", at, shape::text)?;
+        Ok(Self {
+            entry,
+            kind,
+            binding,
+            status,
+            zdr_only,
+            path,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("entry", Value::from(self.entry.as_str()));
+        object.insert("kind", self.kind.encode());
+        object.insert("binding", Value::from(self.binding.as_str()));
+        object.insert("status", self.status.encode());
+        object.insert("zdrOnly", Value::Bool(self.zdr_only));
+        object.insert("path", Value::from(self.path.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesResultStepsItemAnswerResolveCandidate {
+    pub entry: String,
+    pub kind: nyaaai_contract::shapes::provider::ProviderKindName,
+    pub binding: String,
+    pub status: ResolverRoutesResultStepsItemAnswerResolveCandidateStatus,
+    pub zdr_only: bool,
+    pub path: String,
+}
+
+impl Shape for ResolverRoutesResultStepsItemAnswerResolveCandidate {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let entry = shape::required(object, "entry", at, shape::text)?;
+        let kind = shape::required(
+            object,
+            "kind",
+            at,
+            nyaaai_contract::shapes::provider::ProviderKindName::decode_at,
+        )?;
+        let binding = shape::required(object, "binding", at, shape::text)?;
+        let status = shape::required(
+            object,
+            "status",
+            at,
+            ResolverRoutesResultStepsItemAnswerResolveCandidateStatus::decode_at,
+        )?;
+        let zdr_only = shape::required(object, "zdrOnly", at, shape::flag)?;
+        let path = shape::required(object, "path", at, shape::text)?;
+        Ok(Self {
+            entry,
+            kind,
+            binding,
+            status,
+            zdr_only,
+            path,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("entry", Value::from(self.entry.as_str()));
+        object.insert("kind", self.kind.encode());
+        object.insert("binding", Value::from(self.binding.as_str()));
+        object.insert("status", self.status.encode());
+        object.insert("zdrOnly", Value::Bool(self.zdr_only));
+        object.insert("path", Value::from(self.path.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesResultStepsItemAnswerRowsOptionsItem {
+    pub key: String,
+    pub status: ResolverRoutesResultStepsItemAnswerRowsOptionsItemStatus,
+    pub via: Option<nyaaai_contract::shapes::model::Via>,
+}
+
+impl Shape for ResolverRoutesResultStepsItemAnswerRowsOptionsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let key = shape::required(object, "key", at, shape::text)?;
+        let status = shape::required(
+            object,
+            "status",
+            at,
+            ResolverRoutesResultStepsItemAnswerRowsOptionsItemStatus::decode_at,
+        )?;
+        let via = shape::required(object, "via", at, |value, at| {
+            shape::nullable(value, at, nyaaai_contract::shapes::model::Via::decode_at)
+        })?;
+        Ok(Self { key, status, via })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("key", Value::from(self.key.as_str()));
+        object.insert("status", self.status.encode());
+        object.insert(
+            "via",
+            self.via.as_ref().map_or(Value::Null, |held| held.encode()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesResultStepsItemAnswerCandidatesServedItem {
+    pub key: String,
+    pub status: ResolverRoutesResultStepsItemAnswerCandidatesServedItemStatus,
+    pub via: nyaaai_contract::shapes::model::Via,
+}
+
+impl Shape for ResolverRoutesResultStepsItemAnswerCandidatesServedItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let key = shape::required(object, "key", at, shape::text)?;
+        let status = shape::required(
+            object,
+            "status",
+            at,
+            ResolverRoutesResultStepsItemAnswerCandidatesServedItemStatus::decode_at,
+        )?;
+        let via = shape::required(
+            object,
+            "via",
+            at,
+            nyaaai_contract::shapes::model::Via::decode_at,
+        )?;
+        Ok(Self { key, status, via })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("key", Value::from(self.key.as_str()));
+        object.insert("status", self.status.encode());
+        object.insert("via", self.via.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ResolverRoutesResultStepsItemAnswerRoutesCandidatesItemStatus {
+    Ok,
+    Retired,
+    NoZdrHost,
+    NoTools,
+    Unknown,
+}
+
+impl ResolverRoutesResultStepsItemAnswerRoutesCandidatesItemStatus {
+    pub const ALL: [Self; 5] = [
+        Self::Ok,
+        Self::Retired,
+        Self::NoZdrHost,
+        Self::NoTools,
+        Self::Unknown,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Ok => "ok",
+            Self::Retired => "retired",
+            Self::NoZdrHost => "noZdrHost",
+            Self::NoTools => "noTools",
+            Self::Unknown => "unknown",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for ResolverRoutesResultStepsItemAnswerRoutesCandidatesItemStatus {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ResolverRoutesResultStepsItemAnswerResolveCandidateStatus {
+    Ok,
+    Retired,
+    NoZdrHost,
+    NoTools,
+    Unknown,
+}
+
+impl ResolverRoutesResultStepsItemAnswerResolveCandidateStatus {
+    pub const ALL: [Self; 5] = [
+        Self::Ok,
+        Self::Retired,
+        Self::NoZdrHost,
+        Self::NoTools,
+        Self::Unknown,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Ok => "ok",
+            Self::Retired => "retired",
+            Self::NoZdrHost => "noZdrHost",
+            Self::NoTools => "noTools",
+            Self::Unknown => "unknown",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for ResolverRoutesResultStepsItemAnswerResolveCandidateStatus {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ResolverRoutesResultStepsItemAnswerRowsOptionsItemStatus {
+    Ok,
+    Retired,
+    NoZdrHost,
+    NoTools,
+    Unknown,
+}
+
+impl ResolverRoutesResultStepsItemAnswerRowsOptionsItemStatus {
+    pub const ALL: [Self; 5] = [
+        Self::Ok,
+        Self::Retired,
+        Self::NoZdrHost,
+        Self::NoTools,
+        Self::Unknown,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Ok => "ok",
+            Self::Retired => "retired",
+            Self::NoZdrHost => "noZdrHost",
+            Self::NoTools => "noTools",
+            Self::Unknown => "unknown",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for ResolverRoutesResultStepsItemAnswerRowsOptionsItemStatus {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ResolverRoutesResultStepsItemAnswerCandidatesServedItemStatus {
+    Ok,
+    Retired,
+    NoZdrHost,
+    NoTools,
+    Unknown,
+}
+
+impl ResolverRoutesResultStepsItemAnswerCandidatesServedItemStatus {
+    pub const ALL: [Self; 5] = [
+        Self::Ok,
+        Self::Retired,
+        Self::NoZdrHost,
+        Self::NoTools,
+        Self::Unknown,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Ok => "ok",
+            Self::Retired => "retired",
+            Self::NoZdrHost => "noZdrHost",
+            Self::NoTools => "noTools",
+            Self::Unknown => "unknown",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for ResolverRoutesResultStepsItemAnswerCandidatesServedItemStatus {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
     }
 }

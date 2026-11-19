@@ -1,0 +1,31 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.providerView",
+	"name": "view-opencode-state-3",
+	"input": {
+		"entry": {
+			"id": "e1",
+			"kind": "opencode",
+			"label": "Zen"
+		},
+		"status": {
+			"kind": "ok",
+			"usage": 4.5,
+			"limit": 20
+		}
+	},
+	"expected": {
+		"view": {
+			"id": "e1",
+			"kind": "opencode",
+			"label": "Zen",
+			"status": {
+				"kind": "ok",
+				"usage": 4.5,
+				"limit": 20
+			},
+			"balance": true
+		}
+	}
+}

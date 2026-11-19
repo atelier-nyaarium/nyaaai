@@ -1,0 +1,144 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.codec",
+	"name": "codec-opencode-family-messages-failures",
+	"input": {
+		"kind": "opencode",
+		"label": "Zen",
+		"view": {
+			"efforts": [
+				"low",
+				"high"
+			],
+			"api": {
+				"family": "messages",
+				"structured": true,
+				"choice": [
+					"auto",
+					"any"
+				],
+				"strict": false
+			}
+		},
+		"request": {
+			"model": "openai/gpt-6-luna",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Hi"
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true
+		},
+		"mode": "stream",
+		"nowMs": 1790337600000,
+		"failures": [
+			{
+				"status": 401,
+				"body": {
+					"error": {
+						"message": "bad key",
+						"type": "AuthError"
+					}
+				}
+			},
+			{
+				"status": 429,
+				"body": {
+					"error": {
+						"message": "slow",
+						"type": "RateLimitError"
+					}
+				}
+			},
+			{
+				"status": 500,
+				"body": {
+					"type": "error",
+					"error": {
+						"type": "api_error",
+						"message": "boom"
+					}
+				}
+			},
+			{
+				"status": 404,
+				"body": {
+					"error": {
+						"message": "no model",
+						"code": 404
+					}
+				}
+			}
+		]
+	},
+	"expected": {
+		"encoded": {
+			"path": "/anthropic/v1/messages",
+			"body": {
+				"model": "openai/gpt-6-luna",
+				"max_tokens": 32000,
+				"system": [
+					{
+						"type": "text",
+						"text": "Rules."
+					}
+				],
+				"messages": [
+					{
+						"role": "user",
+						"content": [
+							{
+								"type": "text",
+								"text": "Hi"
+							}
+						]
+					}
+				],
+				"stream": true
+			},
+			"headers": {
+				"x-opencode-session": "root-1"
+			}
+		},
+		"refusal": null,
+		"facts": {
+			"efforts": [
+				"low",
+				"high"
+			],
+			"free": false,
+			"outputLimit": null
+		},
+		"failures": [
+			{
+				"category": "keyRejected",
+				"status": 401,
+				"message": "bad key"
+			},
+			{
+				"category": "rateLimited",
+				"status": 429,
+				"message": "slow"
+			},
+			{
+				"category": "unavailable",
+				"status": 500,
+				"message": "boom"
+			},
+			{
+				"category": "notFound",
+				"status": 404,
+				"message": "no model"
+			}
+		]
+	}
+}

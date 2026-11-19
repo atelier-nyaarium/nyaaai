@@ -1,0 +1,37 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.keySource",
+	"name": "key-a-url-gained-by-the-entry",
+	"input": {
+		"entry": {
+			"id": "a",
+			"kind": "openrouter",
+			"label": "First"
+		},
+		"list": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "First",
+				"url": "http://lab.local:1"
+			}
+		],
+		"answers": {
+			"a": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"steps": [
+			{
+				"kind": "get"
+			}
+		]
+	},
+	"expected": {
+		"gets": [
+			null
+		]
+	}
+}

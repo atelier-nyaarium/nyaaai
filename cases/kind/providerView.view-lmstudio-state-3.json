@@ -1,0 +1,33 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.providerView",
+	"name": "view-lmstudio-state-3",
+	"input": {
+		"entry": {
+			"id": "e1",
+			"kind": "lmstudio",
+			"label": "Lab",
+			"url": "http://lab.local:1234"
+		},
+		"status": {
+			"kind": "ok",
+			"usage": 4.5,
+			"limit": 20
+		}
+	},
+	"expected": {
+		"view": {
+			"id": "e1",
+			"kind": "lmstudio",
+			"label": "Lab",
+			"url": "http://lab.local:1234",
+			"status": {
+				"kind": "ok",
+				"usage": 4.5,
+				"limit": 20
+			},
+			"facts": "http://lab.local:1234"
+		}
+	}
+}

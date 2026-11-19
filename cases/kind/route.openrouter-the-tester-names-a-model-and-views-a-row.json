@@ -1,0 +1,158 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.route",
+	"name": "openrouter-the-tester-names-a-model-and-views-a-row",
+	"input": {
+		"kind": "openrouter",
+		"entry": {
+			"label": "Zen"
+		},
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "openai/gpt-6-luna",
+							"name": "Luna",
+							"context_length": 1000000,
+							"pricing": {
+								"prompt": "0.00000012",
+								"completion": "0.0000006"
+							},
+							"reasoning": {
+								"supported_efforts": [
+									"high",
+									"low"
+								]
+							}
+						},
+						{
+							"id": "anthropic/claude-opus-5.5",
+							"pricing": {
+								"prompt": "0.000005",
+								"completion": "0.000025"
+							}
+						}
+					]
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"model_id": "openai/gpt-6-luna",
+							"tag": "alpha",
+							"supported_parameters": [
+								"tools",
+								"reasoning",
+								"response_format",
+								"structured_outputs"
+							],
+							"pricing": {
+								"prompt": "0.00000012",
+								"completion": "0.0000006"
+							}
+						},
+						{
+							"model_id": "anthropic/claude-opus-5.5",
+							"tag": "beta",
+							"supported_parameters": [
+								"tools",
+								"reasoning",
+								"response_format",
+								"structured_outputs"
+							]
+						}
+					]
+				}
+			}
+		],
+		"rows": [
+			"openai/gpt-6-luna",
+			"anthropic/claude-opus-5.5"
+		],
+		"steps": [
+			{
+				"kind": "listed",
+				"id": "openai/gpt-6-luna"
+			},
+			{
+				"kind": "view",
+				"row": "openai/gpt-6-luna"
+			},
+			{
+				"kind": "listed",
+				"id": "lab/none"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "listed",
+					"listed": {
+						"label": "Luna",
+						"reasoning": true
+					}
+				}
+			},
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "view",
+					"view": {
+						"key": "openai/gpt-6-luna",
+						"status": "ok",
+						"efforts": [
+							"low",
+							"high"
+						],
+						"promptLimit": 1000000,
+						"price": {
+							"prompt": [
+								0.12,
+								0.12
+							],
+							"completion": [
+								0.6,
+								0.6
+							],
+							"tiers": [
+								{
+									"minPromptTokens": 0,
+									"prompt": 0.12,
+									"completion": 0.6
+								}
+							]
+						},
+						"hosts": [
+							"alpha"
+						]
+					}
+				}
+			},
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "listed",
+					"listed": null
+				}
+			}
+		],
+		"requests": [
+			"/models",
+			"/endpoints/zdr"
+		],
+		"read": [
+			1,
+			1
+		],
+		"waiting": []
+	}
+}

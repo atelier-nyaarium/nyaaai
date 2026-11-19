@@ -1,0 +1,43 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.check",
+	"name": "opencode-the-url-of-a-test-loopback",
+	"input": {
+		"kind": "opencode",
+		"entry": {
+			"label": "Zen"
+		},
+		"secret": "key-0123456789abcdef",
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "glm-5.3-flash"
+						}
+					]
+				}
+			}
+		],
+		"baseUrl": "http://127.0.0.1:9"
+	},
+	"expected": {
+		"state": {
+			"kind": "ok"
+		},
+		"thrown": null,
+		"facts": null,
+		"requests": [
+			{
+				"method": "GET",
+				"url": "http://127.0.0.1:9/v1/models",
+				"authorization": "Bearer key-0123456789abcdef",
+				"userAgent": "cases/1.0"
+			}
+		],
+		"waiting": []
+	}
+}

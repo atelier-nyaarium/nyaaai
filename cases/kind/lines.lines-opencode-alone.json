@@ -1,0 +1,27 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.lines",
+	"name": "lines-opencode-alone",
+	"input": {
+		"kinds": [
+			"opencode"
+		]
+	},
+	"expected": {
+		"lines": [
+			{
+				"kind": "opencode",
+				"plan": "go",
+				"label": "OpenCode Go",
+				"field": "key"
+			},
+			{
+				"kind": "opencode",
+				"plan": "payg",
+				"label": "OpenCode (pay-as-you-go)",
+				"field": "key"
+			}
+		]
+	}
+}

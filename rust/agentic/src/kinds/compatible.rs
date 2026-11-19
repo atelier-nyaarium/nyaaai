@@ -131,8 +131,8 @@ pub fn base_of(url: &str) -> Result<String, String> {
     })
 }
 
-pub static COMPATIBLE: LazyLock<LocalKind> = LazyLock::new(|| {
-    local_kind(LocalKindSpec {
+pub static COMPATIBLE: LazyLock<Arc<LocalKind>> = LazyLock::new(|| {
+    Arc::new(local_kind(LocalKindSpec {
         kind: ProviderKindName::Compatible,
         label: "OpenAI-compatible",
         url: None,
@@ -148,5 +148,5 @@ pub static COMPATIBLE: LazyLock<LocalKind> = LazyLock::new(|| {
             })
         },
         server,
-    })
+    }))
 });

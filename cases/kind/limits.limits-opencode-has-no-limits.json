@@ -1,0 +1,33 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.limits",
+	"name": "limits-opencode-has-no-limits",
+	"input": {
+		"kind": "opencode",
+		"entry": {
+			"label": "Zen"
+		},
+		"stored": "key-0123456789abcdef",
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "glm-5.3-flash"
+						}
+					]
+				}
+			}
+		]
+	},
+	"expected": {
+		"present": false,
+		"limits": null,
+		"thrown": null,
+		"requests": [],
+		"waiting": []
+	}
+}

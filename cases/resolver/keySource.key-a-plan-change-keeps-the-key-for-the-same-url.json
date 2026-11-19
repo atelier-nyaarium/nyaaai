@@ -1,0 +1,38 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.keySource",
+	"name": "key-a-plan-change-keeps-the-key-for-the-same-url",
+	"input": {
+		"entry": {
+			"id": "go",
+			"kind": "opencode",
+			"plan": "go",
+			"label": "Go"
+		},
+		"list": [
+			{
+				"id": "go",
+				"kind": "opencode",
+				"plan": "payg",
+				"label": "Go"
+			}
+		],
+		"answers": {
+			"go": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"steps": [
+			{
+				"kind": "get"
+			}
+		]
+	},
+	"expected": {
+		"gets": [
+			"key-0123456789abcdef"
+		]
+	}
+}

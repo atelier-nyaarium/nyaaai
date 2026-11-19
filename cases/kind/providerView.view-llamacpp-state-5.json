@@ -1,0 +1,31 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.providerView",
+	"name": "view-llamacpp-state-5",
+	"input": {
+		"entry": {
+			"id": "e1",
+			"kind": "llamacpp",
+			"label": "Lab",
+			"url": "http://lab.local:8080"
+		},
+		"status": {
+			"kind": "ok",
+			"models": 3
+		}
+	},
+	"expected": {
+		"view": {
+			"id": "e1",
+			"kind": "llamacpp",
+			"label": "Lab",
+			"url": "http://lab.local:8080",
+			"status": {
+				"kind": "ok",
+				"models": 3
+			},
+			"facts": "http://lab.local:8080 · 3 models"
+		}
+	}
+}

@@ -1,0 +1,86 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routes",
+	"name": "refusal-a-key-beats-a-listing",
+	"input": {
+		"entries": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "First"
+			},
+			{
+				"id": "b",
+				"kind": "openrouter",
+				"label": "Second"
+			}
+		],
+		"answers": {
+			"a": {
+				"kind": "none"
+			},
+			"b": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"failing": [],
+		"rows": [
+			"openai/gpt-6-luna",
+			"google/gemini-3.8-flash",
+			"openai/gpt-oss-120b"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama",
+			"lmstudio",
+			"llamacpp",
+			"compatible"
+		],
+		"listings": {
+			"b": {
+				"google/gemini-3.8-flash": {
+					"status": "retired"
+				}
+			}
+		},
+		"zdrOnly": true,
+		"steps": [
+			{
+				"kind": "routes",
+				"model": "google/gemini-3.8-flash",
+				"use": "chat"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answer": {
+					"kind": "routes",
+					"unresolved": {
+						"ok": false,
+						"key": "google/gemini-3.8-flash",
+						"refusal": "keyMissing",
+						"entry": "First"
+					},
+					"candidates": [],
+					"passed": []
+				},
+				"built": 1,
+				"disposed": 0
+			}
+		],
+		"transports": [
+			"Second"
+		],
+		"stopped": [
+			"Second"
+		],
+		"refreshed": [],
+		"keyReads": 2,
+		"listReads": 1
+	}
+}

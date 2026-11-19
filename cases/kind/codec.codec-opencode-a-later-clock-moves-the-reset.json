@@ -1,0 +1,78 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.codec",
+	"name": "codec-opencode-a-later-clock-moves-the-reset",
+	"input": {
+		"kind": "opencode",
+		"label": "Zen",
+		"view": null,
+		"request": {
+			"model": "openai/gpt-6-luna",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Hi"
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true
+		},
+		"mode": "stream",
+		"nowMs": 1790340000000,
+		"failures": [
+			{
+				"status": 429,
+				"body": {
+					"type": "error",
+					"error": {
+						"type": "SubscriptionUsageLimitError",
+						"message": "Limit.",
+						"resetsAt": 1790341200
+					}
+				}
+			}
+		]
+	},
+	"expected": {
+		"encoded": {
+			"path": "/openai/v1/chat/completions",
+			"body": {
+				"model": "openai/gpt-6-luna",
+				"messages": [
+					{
+						"role": "system",
+						"content": "Rules."
+					},
+					{
+						"role": "user",
+						"content": "Hi"
+					}
+				],
+				"stream": true,
+				"stream_options": {
+					"include_usage": true
+				}
+			},
+			"headers": {
+				"x-opencode-session": "root-1"
+			}
+		},
+		"refusal": null,
+		"facts": null,
+		"failures": [
+			{
+				"category": "rateLimited",
+				"status": 429,
+				"retryAfterMs": 1200000,
+				"message": "Limit."
+			}
+		]
+	}
+}

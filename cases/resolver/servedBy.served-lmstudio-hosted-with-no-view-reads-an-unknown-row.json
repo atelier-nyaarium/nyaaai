@@ -1,0 +1,61 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.servedBy",
+	"name": "served-lmstudio-hosted-with-no-view-reads-an-unknown-row",
+	"input": {
+		"kind": "lmstudio",
+		"entry": {
+			"id": "studio",
+			"kind": "lmstudio",
+			"label": "Studio",
+			"url": "http://lab.local:1234"
+		},
+		"key": "lmstudio:qwen",
+		"use": "chat",
+		"view": null,
+		"zdrOnly": false,
+		"flippedTo": true
+	},
+	"expected": {
+		"key": "lmstudio:qwen",
+		"entry": "studio",
+		"binding": "qwen",
+		"view": {
+			"row": {
+				"key": "lmstudio:qwen",
+				"bindings": {
+					"lmstudio": {
+						"id": "qwen"
+					}
+				},
+				"family": "lmstudio:qwen",
+				"label": "lmstudio:qwen",
+				"reasoning": false,
+				"schema": false,
+				"cache": "implicit",
+				"verified": "",
+				"verifiedPrice": {
+					"prompt": 0,
+					"completion": 0
+				},
+				"identity": {
+					"kind": "hosted",
+					"provider": "lmstudio",
+					"id": "qwen"
+				}
+			},
+			"status": "unknown",
+			"efforts": [],
+			"hosts": []
+		},
+		"path": "/v1/chat/completions",
+		"passed": [],
+		"candidates": 1,
+		"zdrOnResolve": false,
+		"sent": {
+			"zdrOnly": true,
+			"path": "/v1/chat/completions"
+		}
+	}
+}

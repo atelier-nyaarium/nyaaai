@@ -1,0 +1,59 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.servedBy",
+	"name": "served-openrouter-curated-with-no-view-reads-an-unknown-row",
+	"input": {
+		"kind": "openrouter",
+		"entry": {
+			"id": "a",
+			"kind": "openrouter",
+			"label": "First"
+		},
+		"key": "openai/gpt-6-luna",
+		"use": "chat",
+		"view": null,
+		"zdrOnly": false,
+		"flippedTo": true
+	},
+	"expected": {
+		"key": "openai/gpt-6-luna",
+		"entry": "a",
+		"binding": "openai/gpt-6-luna",
+		"view": {
+			"row": {
+				"key": "openai/gpt-6-luna",
+				"bindings": {
+					"openrouter": {
+						"id": "openai/gpt-6-luna"
+					}
+				},
+				"family": "openai/gpt-6-luna",
+				"label": "openai/gpt-6-luna",
+				"reasoning": false,
+				"schema": false,
+				"cache": "implicit",
+				"verified": "",
+				"verifiedPrice": {
+					"prompt": 0,
+					"completion": 0
+				},
+				"identity": {
+					"kind": "curated",
+					"key": "openai/gpt-6-luna"
+				}
+			},
+			"status": "unknown",
+			"efforts": [],
+			"hosts": []
+		},
+		"path": "/chat/completions",
+		"passed": [],
+		"candidates": 1,
+		"zdrOnResolve": false,
+		"sent": {
+			"zdrOnly": true,
+			"path": "/chat/completions"
+		}
+	}
+}

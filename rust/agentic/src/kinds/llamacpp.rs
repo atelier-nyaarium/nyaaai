@@ -193,8 +193,8 @@ pub fn server(transport: Arc<Transport>) -> Arc<dyn LocalServer> {
     Arc::new(LlamaCppServer { transport })
 }
 
-pub static LLAMACPP: LazyLock<LocalKind> = LazyLock::new(|| {
-    local_kind(LocalKindSpec {
+pub static LLAMACPP: LazyLock<Arc<LocalKind>> = LazyLock::new(|| {
+    Arc::new(local_kind(LocalKindSpec {
         kind: ProviderKindName::Llamacpp,
         label: "llama.cpp",
         url: Some("http://127.0.0.1:8080"),
@@ -210,5 +210,5 @@ pub static LLAMACPP: LazyLock<LocalKind> = LazyLock::new(|| {
             })
         },
         server,
-    })
+    }))
 });

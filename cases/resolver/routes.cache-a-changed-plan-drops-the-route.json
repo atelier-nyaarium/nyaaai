@@ -1,0 +1,121 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routes",
+	"name": "cache-a-changed-plan-drops-the-route",
+	"input": {
+		"entries": [
+			{
+				"id": "go",
+				"kind": "opencode",
+				"plan": "go",
+				"label": "Go"
+			}
+		],
+		"answers": {
+			"go": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"failing": [],
+		"rows": [
+			"openai/gpt-6-luna",
+			"google/gemini-3.8-flash",
+			"openai/gpt-oss-120b"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama",
+			"lmstudio",
+			"llamacpp",
+			"compatible"
+		],
+		"listings": {},
+		"zdrOnly": true,
+		"steps": [
+			{
+				"kind": "routes",
+				"model": "openai/gpt-6-luna",
+				"use": "chat"
+			},
+			{
+				"kind": "list",
+				"entries": [
+					{
+						"id": "go",
+						"kind": "opencode",
+						"plan": "payg",
+						"label": "Go"
+					}
+				]
+			},
+			{
+				"kind": "routes",
+				"model": "openai/gpt-6-luna",
+				"use": "chat"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answer": {
+					"kind": "routes",
+					"unresolved": null,
+					"candidates": [
+						{
+							"entry": "go",
+							"kind": "opencode",
+							"binding": "gpt-6-luna",
+							"status": "ok",
+							"zdrOnly": true,
+							"path": "/openai/v1/chat/completions"
+						}
+					],
+					"passed": []
+				},
+				"built": 1,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "changed"
+				},
+				"built": 1,
+				"disposed": 1
+			},
+			{
+				"answer": {
+					"kind": "routes",
+					"unresolved": null,
+					"candidates": [
+						{
+							"entry": "go",
+							"kind": "opencode",
+							"binding": "gpt-6-luna",
+							"status": "ok",
+							"zdrOnly": true,
+							"path": "/openai/v1/chat/completions"
+						}
+					],
+					"passed": []
+				},
+				"built": 2,
+				"disposed": 1
+			}
+		],
+		"transports": [
+			"Go/go",
+			"Go/payg"
+		],
+		"stopped": [
+			"Go/go",
+			"Go/payg"
+		],
+		"refreshed": [],
+		"keyReads": 2,
+		"listReads": 3
+	}
+}

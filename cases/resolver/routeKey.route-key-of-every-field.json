@@ -1,0 +1,54 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routeKey",
+	"name": "route-key-of-every-field",
+	"input": {
+		"entries": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "First"
+			},
+			{
+				"id": "go",
+				"kind": "opencode",
+				"plan": "go",
+				"label": "Go"
+			},
+			{
+				"id": "lab",
+				"kind": "ollama",
+				"label": "Lab",
+				"url": "http://lab.local:11434"
+			},
+			{
+				"id": "go",
+				"kind": "opencode",
+				"plan": "payg",
+				"label": "Go"
+			},
+			{
+				"id": "lab",
+				"kind": "ollama",
+				"label": "Other",
+				"url": "http://lab.local:11434"
+			},
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "Renamed"
+			}
+		]
+	},
+	"expected": {
+		"keys": [
+			"a\n\n",
+			"go\ngo\n",
+			"lab\n\nhttp://lab.local:11434",
+			"go\npayg\n",
+			"lab\n\nhttp://lab.local:11434",
+			"a\n\n"
+		]
+	}
+}

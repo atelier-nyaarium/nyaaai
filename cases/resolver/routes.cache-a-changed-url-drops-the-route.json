@@ -1,0 +1,119 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routes",
+	"name": "cache-a-changed-url-drops-the-route",
+	"input": {
+		"entries": [
+			{
+				"id": "lab",
+				"kind": "ollama",
+				"label": "Lab",
+				"url": "http://lab.local:11434"
+			}
+		],
+		"answers": {
+			"lab": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"failing": [],
+		"rows": [
+			"ollama:qwen"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama",
+			"lmstudio",
+			"llamacpp",
+			"compatible"
+		],
+		"listings": {},
+		"zdrOnly": true,
+		"steps": [
+			{
+				"kind": "routes",
+				"model": "ollama:qwen",
+				"use": "chat"
+			},
+			{
+				"kind": "list",
+				"entries": [
+					{
+						"id": "lab",
+						"kind": "ollama",
+						"label": "Lab",
+						"url": "http://lab.local:9999"
+					}
+				]
+			},
+			{
+				"kind": "routes",
+				"model": "ollama:qwen",
+				"use": "chat"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answer": {
+					"kind": "routes",
+					"unresolved": null,
+					"candidates": [
+						{
+							"entry": "lab",
+							"kind": "ollama",
+							"binding": "qwen",
+							"status": "ok",
+							"zdrOnly": true,
+							"path": "/v1/chat/completions"
+						}
+					],
+					"passed": []
+				},
+				"built": 1,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "changed"
+				},
+				"built": 1,
+				"disposed": 1
+			},
+			{
+				"answer": {
+					"kind": "routes",
+					"unresolved": null,
+					"candidates": [
+						{
+							"entry": "lab",
+							"kind": "ollama",
+							"binding": "qwen",
+							"status": "ok",
+							"zdrOnly": true,
+							"path": "/v1/chat/completions"
+						}
+					],
+					"passed": []
+				},
+				"built": 2,
+				"disposed": 1
+			}
+		],
+		"transports": [
+			"Lab http://lab.local:11434",
+			"Lab http://lab.local:9999"
+		],
+		"stopped": [
+			"Lab http://lab.local:11434",
+			"Lab http://lab.local:9999"
+		],
+		"refreshed": [],
+		"keyReads": 2,
+		"listReads": 3
+	}
+}

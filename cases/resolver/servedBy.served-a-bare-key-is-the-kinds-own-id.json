@@ -1,0 +1,61 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.servedBy",
+	"name": "served-a-bare-key-is-the-kinds-own-id",
+	"input": {
+		"tag": "openrouter-curated",
+		"kind": "openrouter",
+		"entry": {
+			"id": "a",
+			"kind": "openrouter",
+			"label": "First"
+		},
+		"key": "lab/none",
+		"use": "chat",
+		"view": null,
+		"zdrOnly": true,
+		"flippedTo": true
+	},
+	"expected": {
+		"key": "lab/none",
+		"entry": "a",
+		"binding": "lab/none",
+		"view": {
+			"row": {
+				"key": "lab/none",
+				"bindings": {
+					"openrouter": {
+						"id": "lab/none"
+					}
+				},
+				"family": "lab/none",
+				"label": "lab/none",
+				"reasoning": false,
+				"schema": false,
+				"cache": "implicit",
+				"verified": "",
+				"verifiedPrice": {
+					"prompt": 0,
+					"completion": 0
+				},
+				"identity": {
+					"kind": "hosted",
+					"provider": "openrouter",
+					"id": "lab/none"
+				}
+			},
+			"status": "unknown",
+			"efforts": [],
+			"hosts": []
+		},
+		"path": "/chat/completions",
+		"passed": [],
+		"candidates": 1,
+		"zdrOnResolve": true,
+		"sent": {
+			"zdrOnly": true,
+			"path": "/chat/completions"
+		}
+	}
+}

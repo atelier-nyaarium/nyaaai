@@ -1,0 +1,75 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.route",
+	"name": "openrouter-a-failing-catalog-leaves-views-unknown",
+	"input": {
+		"kind": "openrouter",
+		"entry": {
+			"label": "Zen"
+		},
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 500,
+				"json": {}
+			},
+			{
+				"status": 500,
+				"json": {}
+			}
+		],
+		"rows": [
+			"openai/gpt-6-luna",
+			"anthropic/claude-opus-5.5"
+		],
+		"steps": [
+			{
+				"kind": "views"
+			},
+			{
+				"kind": "list"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "views",
+					"views": [
+						{
+							"key": "openai/gpt-6-luna",
+							"status": "unknown",
+							"efforts": [],
+							"hosts": []
+						},
+						{
+							"key": "anthropic/claude-opus-5.5",
+							"status": "unknown",
+							"efforts": [],
+							"hosts": []
+						}
+					]
+				}
+			},
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "list",
+					"models": null
+				}
+			}
+		],
+		"requests": [
+			"/models",
+			"/endpoints/zdr"
+		],
+		"read": [
+			1,
+			1
+		],
+		"waiting": []
+	}
+}

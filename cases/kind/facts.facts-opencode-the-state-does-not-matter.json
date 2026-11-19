@@ -1,0 +1,135 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.facts",
+	"name": "facts-opencode-the-state-does-not-matter",
+	"input": {
+		"kind": "opencode",
+		"entry": {
+			"label": "Zen",
+			"plan": "go"
+		},
+		"rows": [
+			{
+				"state": {
+					"kind": "none"
+				},
+				"bill": {
+					"billing": "balance",
+					"allowance": 3.256,
+					"cost": 0.1
+				}
+			},
+			{
+				"state": {
+					"kind": "checking"
+				},
+				"bill": {
+					"billing": "balance",
+					"allowance": 3.256,
+					"cost": 0.1
+				}
+			},
+			{
+				"state": {
+					"kind": "ok"
+				},
+				"bill": {
+					"billing": "balance",
+					"allowance": 3.256,
+					"cost": 0.1
+				}
+			},
+			{
+				"state": {
+					"kind": "ok",
+					"usage": 4.5,
+					"limit": 20
+				},
+				"bill": {
+					"billing": "balance",
+					"allowance": 3.256,
+					"cost": 0.1
+				}
+			},
+			{
+				"state": {
+					"kind": "ok",
+					"usage": 0
+				},
+				"bill": {
+					"billing": "balance",
+					"allowance": 3.256,
+					"cost": 0.1
+				}
+			},
+			{
+				"state": {
+					"kind": "ok",
+					"models": 3
+				},
+				"bill": {
+					"billing": "balance",
+					"allowance": 3.256,
+					"cost": 0.1
+				}
+			},
+			{
+				"state": {
+					"kind": "ok",
+					"models": 1,
+					"usage": 1
+				},
+				"bill": {
+					"billing": "balance",
+					"allowance": 3.256,
+					"cost": 0.1
+				}
+			},
+			{
+				"state": {
+					"kind": "rejected"
+				},
+				"bill": {
+					"billing": "balance",
+					"allowance": 3.256,
+					"cost": 0.1
+				}
+			},
+			{
+				"state": {
+					"kind": "unreachable"
+				},
+				"bill": {
+					"billing": "balance",
+					"allowance": 3.256,
+					"cost": 0.1
+				}
+			},
+			{
+				"state": {
+					"kind": "invalid"
+				},
+				"bill": {
+					"billing": "balance",
+					"allowance": 3.256,
+					"cost": 0.1
+				}
+			}
+		]
+	},
+	"expected": {
+		"facts": [
+			"Allowance $3.26 used · Extra usage $0.10",
+			"Allowance $3.26 used · Extra usage $0.10",
+			"Allowance $3.26 used · Extra usage $0.10",
+			"Allowance $3.26 used · Extra usage $0.10",
+			"Allowance $3.26 used · Extra usage $0.10",
+			"Allowance $3.26 used · Extra usage $0.10",
+			"Allowance $3.26 used · Extra usage $0.10",
+			"Allowance $3.26 used · Extra usage $0.10",
+			"Allowance $3.26 used · Extra usage $0.10",
+			"Allowance $3.26 used · Extra usage $0.10"
+		]
+	}
+}

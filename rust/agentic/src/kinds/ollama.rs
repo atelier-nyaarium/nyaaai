@@ -236,8 +236,8 @@ pub fn server(transport: Arc<Transport>) -> Arc<dyn LocalServer> {
     Arc::new(OllamaServer { transport })
 }
 
-pub static OLLAMA: LazyLock<LocalKind> = LazyLock::new(|| {
-    local_kind(LocalKindSpec {
+pub static OLLAMA: LazyLock<Arc<LocalKind>> = LazyLock::new(|| {
+    Arc::new(local_kind(LocalKindSpec {
         kind: ProviderKindName::Ollama,
         label: "Ollama",
         url: Some("http://127.0.0.1:11434"),
@@ -255,5 +255,5 @@ pub static OLLAMA: LazyLock<LocalKind> = LazyLock::new(|| {
             })
         },
         server,
-    })
+    }))
 });

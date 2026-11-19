@@ -157,8 +157,8 @@ pub fn server(transport: Arc<Transport>) -> Arc<dyn LocalServer> {
     Arc::new(LmStudioServer { transport })
 }
 
-pub static LMSTUDIO: LazyLock<LocalKind> = LazyLock::new(|| {
-    local_kind(LocalKindSpec {
+pub static LMSTUDIO: LazyLock<Arc<LocalKind>> = LazyLock::new(|| {
+    Arc::new(local_kind(LocalKindSpec {
         kind: ProviderKindName::Lmstudio,
         label: "LM Studio",
         url: Some("http://127.0.0.1:1234"),
@@ -174,5 +174,5 @@ pub static LMSTUDIO: LazyLock<LocalKind> = LazyLock::new(|| {
             })
         },
         server,
-    })
+    }))
 });

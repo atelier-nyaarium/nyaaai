@@ -1,0 +1,33 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.providerView",
+	"name": "view-ollama-state-6",
+	"input": {
+		"entry": {
+			"id": "e1",
+			"kind": "ollama",
+			"label": "Lab",
+			"url": "http://lab.local:11434"
+		},
+		"status": {
+			"kind": "ok",
+			"models": 1,
+			"usage": 1
+		}
+	},
+	"expected": {
+		"view": {
+			"id": "e1",
+			"kind": "ollama",
+			"label": "Lab",
+			"url": "http://lab.local:11434",
+			"status": {
+				"kind": "ok",
+				"usage": 1,
+				"models": 1
+			},
+			"facts": "http://lab.local:11434 · 1 model"
+		}
+	}
+}

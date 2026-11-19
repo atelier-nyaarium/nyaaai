@@ -1,0 +1,57 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.facts",
+	"name": "facts-openrouter-dollars-round-as-toFixed-does",
+	"input": {
+		"kind": "openrouter",
+		"entry": {
+			"label": "Router"
+		},
+		"rows": [
+			{
+				"state": {
+					"kind": "ok",
+					"usage": 4.125,
+					"limit": 1.005
+				}
+			},
+			{
+				"state": {
+					"kind": "ok",
+					"usage": 0.004,
+					"limit": 0.005
+				}
+			},
+			{
+				"state": {
+					"kind": "ok",
+					"usage": 1234567.891,
+					"limit": 99.999
+				}
+			},
+			{
+				"state": {
+					"kind": "ok",
+					"usage": -1.5
+				}
+			},
+			{
+				"state": {
+					"kind": "ok",
+					"usage": 1e+21,
+					"limit": 1e-7
+				}
+			}
+		]
+	},
+	"expected": {
+		"facts": [
+			"$4.13 used · $1.00 key limit",
+			"$0.00 used · $0.01 key limit",
+			"$1234567.89 used · $100.00 key limit",
+			"$-1.50 used",
+			"$1e+21 used · $0.00 key limit"
+		]
+	}
+}

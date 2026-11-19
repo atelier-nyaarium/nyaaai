@@ -1,0 +1,37 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.check",
+	"name": "openrouter-a-dropped-connection-is-unreachable",
+	"input": {
+		"kind": "openrouter",
+		"entry": {
+			"label": "Zen"
+		},
+		"secret": "key-0123456789abcdef",
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"text": "{",
+				"end": "dropped"
+			}
+		]
+	},
+	"expected": {
+		"state": {
+			"kind": "unreachable"
+		},
+		"thrown": null,
+		"facts": null,
+		"requests": [
+			{
+				"method": "GET",
+				"url": "https://openrouter.ai/api/v1/key",
+				"authorization": "Bearer key-0123456789abcdef",
+				"userAgent": "cases/1.0"
+			}
+		],
+		"waiting": []
+	}
+}

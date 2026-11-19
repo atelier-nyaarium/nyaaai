@@ -874,3 +874,27 @@ pub(crate) async fn both<A, B>(
         _ => unreachable!("both reads finished"),
     }
 }
+
+impl crate::provider::kind::EntryCatalog for ModelCatalog {
+    fn views(
+        &self,
+        use_: ModelUse,
+        zdr_only: bool,
+        cancel: Option<&CancelToken>,
+    ) -> nyaaai_contract::future::BoxFuture<'_, Result<Vec<ModelView>, Aborted>> {
+        let cancel = cancel.cloned();
+        Box::pin(async move { ModelCatalog::views(self, use_, zdr_only, cancel.as_ref()).await })
+    }
+
+    fn dispose(&self) {
+        ModelCatalog::dispose(self);
+    }
+
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+
+    fn arc_any(self: Arc<Self>) -> Arc<dyn std::any::Any + Send + Sync> {
+        self
+    }
+}

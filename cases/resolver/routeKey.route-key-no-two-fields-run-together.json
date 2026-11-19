@@ -1,0 +1,41 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routeKey",
+	"name": "route-key-no-two-fields-run-together",
+	"input": {
+		"entries": [
+			{
+				"id": "a",
+				"kind": "opencode",
+				"plan": "go",
+				"label": "x"
+			},
+			{
+				"id": "a",
+				"kind": "ollama",
+				"label": "x",
+				"url": "go"
+			},
+			{
+				"id": "a",
+				"kind": "ollama",
+				"label": "x",
+				"url": "go"
+			},
+			{
+				"id": "ago",
+				"kind": "openrouter",
+				"label": "x"
+			}
+		]
+	},
+	"expected": {
+		"keys": [
+			"a\ngo\n",
+			"a\n\ngo",
+			"a\n\ngo",
+			"ago\n\n"
+		]
+	}
+}

@@ -1,0 +1,40 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.check",
+	"name": "opencode-caller-aborts-while-the-server-fails",
+	"input": {
+		"kind": "opencode",
+		"entry": {
+			"label": "Zen"
+		},
+		"secret": "key-0123456789abcdef",
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 500,
+				"json": {
+					"error": {
+						"message": "Down."
+					}
+				},
+				"headMs": 100
+			}
+		],
+		"abortAfterMs": 50
+	},
+	"expected": {
+		"state": null,
+		"thrown": "caller aborted",
+		"facts": null,
+		"requests": [
+			{
+				"method": "GET",
+				"url": "https://opencode.ai/inference/go/v1/models",
+				"authorization": "Bearer key-0123456789abcdef",
+				"userAgent": "cases/1.0"
+			}
+		],
+		"waiting": []
+	}
+}

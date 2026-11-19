@@ -1,0 +1,35 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.check",
+	"name": "openrouter-a-malformed-key-is-rejected-without-a-request",
+	"input": {
+		"kind": "openrouter",
+		"entry": {
+			"label": "Zen"
+		},
+		"secret": "key bad",
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"usage": 4.12,
+						"limit": 20,
+						"limit_reset": "monthly"
+					}
+				}
+			}
+		]
+	},
+	"expected": {
+		"state": {
+			"kind": "rejected"
+		},
+		"thrown": null,
+		"facts": null,
+		"requests": [],
+		"waiting": []
+	}
+}

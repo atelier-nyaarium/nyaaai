@@ -1,0 +1,38 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.keySource",
+	"name": "key-another-entry-with-the-id-of-a-different-url",
+	"input": {
+		"entry": {
+			"id": "lab",
+			"kind": "ollama",
+			"label": "Lab",
+			"url": "http://lab.local:11434"
+		},
+		"list": [
+			{
+				"id": "lab",
+				"kind": "lmstudio",
+				"label": "Lab",
+				"url": "http://lab.local:11434"
+			}
+		],
+		"answers": {
+			"lab": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"steps": [
+			{
+				"kind": "get"
+			}
+		]
+	},
+	"expected": {
+		"gets": [
+			"key-0123456789abcdef"
+		]
+	}
+}

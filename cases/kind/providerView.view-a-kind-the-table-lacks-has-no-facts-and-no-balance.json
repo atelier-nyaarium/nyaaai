@@ -1,0 +1,31 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.providerView",
+	"name": "view-a-kind-the-table-lacks-has-no-facts-and-no-balance",
+	"input": {
+		"entry": {
+			"id": "e1",
+			"kind": "openrouter",
+			"label": "Router"
+		},
+		"status": {
+			"kind": "ok",
+			"usage": 2
+		},
+		"kinds": [
+			"opencode"
+		]
+	},
+	"expected": {
+		"view": {
+			"id": "e1",
+			"kind": "openrouter",
+			"label": "Router",
+			"status": {
+				"kind": "ok",
+				"usage": 2
+			}
+		}
+	}
+}

@@ -1,0 +1,159 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.disposition",
+	"name": "disposition-opencode-bad-request-and-replay-rejected",
+	"input": {
+		"kind": "opencode",
+		"rows": [
+			{
+				"failure": {
+					"category": "badRequest",
+					"status": 400,
+					"message": "m"
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "badRequest",
+					"status": 400,
+					"message": "m"
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "badRequest",
+					"status": 400,
+					"message": "m"
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "badRequest",
+					"status": 400,
+					"message": "m"
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "badRequest",
+					"status": 400,
+					"message": "m"
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "badRequest",
+					"status": 400,
+					"message": "m"
+				},
+				"status": "unknown"
+			},
+			{
+				"failure": {
+					"category": "replayRejected",
+					"status": 400,
+					"message": "m"
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "replayRejected",
+					"status": 400,
+					"message": "m"
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "replayRejected",
+					"status": 400,
+					"message": "m"
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "replayRejected",
+					"status": 400,
+					"message": "m"
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "replayRejected",
+					"status": 400,
+					"message": "m"
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "replayRejected",
+					"status": 400,
+					"message": "m"
+				},
+				"status": "unknown"
+			}
+		]
+	},
+	"expected": {
+		"dispositions": [
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			}
+		]
+	}
+}

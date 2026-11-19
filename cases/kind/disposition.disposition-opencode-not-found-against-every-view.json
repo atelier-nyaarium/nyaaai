@@ -1,0 +1,87 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.disposition",
+	"name": "disposition-opencode-not-found-against-every-view",
+	"input": {
+		"kind": "opencode",
+		"rows": [
+			{
+				"failure": {
+					"category": "notFound",
+					"status": 404,
+					"message": "m"
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "notFound",
+					"status": 404,
+					"message": "m"
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "notFound",
+					"status": 404,
+					"message": "m"
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "notFound",
+					"status": 404,
+					"message": "m"
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "notFound",
+					"status": 404,
+					"message": "m"
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "notFound",
+					"status": 404,
+					"message": "m"
+				},
+				"status": "unknown"
+			}
+		]
+	},
+	"expected": {
+		"dispositions": [
+			{
+				"act": "fallThrough",
+				"notice": "modelUnavailable"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "modelUnavailable"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "modelRetired"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "noZdrHost"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "modelUnavailable"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "modelUnavailable"
+			}
+		]
+	}
+}

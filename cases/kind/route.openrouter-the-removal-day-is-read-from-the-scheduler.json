@@ -1,0 +1,197 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.route",
+	"name": "openrouter-the-removal-day-is-read-from-the-scheduler",
+	"input": {
+		"kind": "openrouter",
+		"entry": {
+			"label": "Zen"
+		},
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "openai/gpt-6-luna",
+							"expiration_date": "2026-09-26"
+						}
+					]
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"model_id": "openai/gpt-6-luna",
+							"tag": "alpha",
+							"supported_parameters": [
+								"tools",
+								"reasoning",
+								"response_format",
+								"structured_outputs"
+							],
+							"pricing": {
+								"prompt": "0.00000012",
+								"completion": "0.0000006"
+							}
+						},
+						{
+							"model_id": "anthropic/claude-opus-5.5",
+							"tag": "beta",
+							"supported_parameters": [
+								"tools",
+								"reasoning",
+								"response_format",
+								"structured_outputs"
+							]
+						}
+					]
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "openai/gpt-6-luna",
+							"expiration_date": "2026-09-26"
+						}
+					]
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"model_id": "openai/gpt-6-luna",
+							"tag": "alpha",
+							"supported_parameters": [
+								"tools",
+								"reasoning",
+								"response_format",
+								"structured_outputs"
+							],
+							"pricing": {
+								"prompt": "0.00000012",
+								"completion": "0.0000006"
+							}
+						},
+						{
+							"model_id": "anthropic/claude-opus-5.5",
+							"tag": "beta",
+							"supported_parameters": [
+								"tools",
+								"reasoning",
+								"response_format",
+								"structured_outputs"
+							]
+						}
+					]
+				}
+			}
+		],
+		"rows": [
+			"openai/gpt-6-luna",
+			"anthropic/claude-opus-5.5"
+		],
+		"steps": [
+			{
+				"kind": "list"
+			},
+			{
+				"kind": "advance",
+				"ms": 86400000
+			},
+			{
+				"kind": "list",
+				"fresh": true
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "list",
+					"models": [
+						{
+							"id": "openrouter:openai/gpt-6-luna",
+							"display": "openai/gpt-6-luna",
+							"label": "openai/gpt-6-luna",
+							"curated": true,
+							"description": "",
+							"inputs": [],
+							"outputs": [],
+							"parameters": [],
+							"price": {
+								"prompt": [
+									0.12,
+									0.12
+								],
+								"completion": [
+									0.6,
+									0.6
+								]
+							},
+							"tools": "ok"
+						}
+					]
+				}
+			},
+			{
+				"nowMs": 1790424000000,
+				"answer": {
+					"kind": "advanced"
+				}
+			},
+			{
+				"nowMs": 1790424000000,
+				"answer": {
+					"kind": "list",
+					"models": [
+						{
+							"id": "openrouter:openai/gpt-6-luna",
+							"display": "openai/gpt-6-luna",
+							"label": "openai/gpt-6-luna",
+							"curated": true,
+							"description": "",
+							"inputs": [],
+							"outputs": [],
+							"parameters": [],
+							"price": {
+								"prompt": [
+									0.12,
+									0.12
+								],
+								"completion": [
+									0.6,
+									0.6
+								]
+							},
+							"tools": "noZdrHost"
+						}
+					]
+				}
+			}
+		],
+		"requests": [
+			"/models",
+			"/endpoints/zdr",
+			"/models",
+			"/endpoints/zdr"
+		],
+		"read": [
+			1,
+			1,
+			1,
+			1
+		],
+		"waiting": []
+	}
+}

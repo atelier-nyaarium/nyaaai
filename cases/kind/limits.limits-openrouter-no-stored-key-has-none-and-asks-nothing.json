@@ -1,0 +1,33 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.limits",
+	"name": "limits-openrouter-no-stored-key-has-none-and-asks-nothing",
+	"input": {
+		"kind": "openrouter",
+		"entry": {
+			"label": "Zen"
+		},
+		"stored": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"usage": 4.12,
+						"limit": 20,
+						"limit_reset": "monthly"
+					}
+				}
+			}
+		]
+	},
+	"expected": {
+		"present": true,
+		"limits": null,
+		"thrown": null,
+		"requests": [],
+		"waiting": []
+	}
+}

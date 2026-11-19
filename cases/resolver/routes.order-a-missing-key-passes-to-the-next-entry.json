@@ -1,0 +1,188 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routes",
+	"name": "order-a-missing-key-passes-to-the-next-entry",
+	"input": {
+		"entries": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "First"
+			},
+			{
+				"id": "b",
+				"kind": "openrouter",
+				"label": "Second"
+			}
+		],
+		"answers": {
+			"a": {
+				"kind": "none"
+			},
+			"b": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"failing": [],
+		"rows": [
+			"openai/gpt-6-luna",
+			"google/gemini-3.8-flash",
+			"openai/gpt-oss-120b"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama",
+			"lmstudio",
+			"llamacpp",
+			"compatible"
+		],
+		"listings": {},
+		"zdrOnly": true,
+		"steps": [
+			{
+				"kind": "routes",
+				"model": "openai/gpt-6-luna",
+				"use": "chat"
+			},
+			{
+				"kind": "resolve",
+				"model": "openai/gpt-6-luna",
+				"use": "chat"
+			},
+			{
+				"kind": "candidates",
+				"use": "chat"
+			},
+			{
+				"kind": "rows",
+				"use": "chat"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answer": {
+					"kind": "routes",
+					"unresolved": null,
+					"candidates": [
+						{
+							"entry": "b",
+							"kind": "openrouter",
+							"binding": "openai/gpt-6-luna",
+							"status": "ok",
+							"zdrOnly": true,
+							"path": "/chat/completions"
+						}
+					],
+					"passed": [
+						{
+							"entry": "a",
+							"label": "First",
+							"reason": "keyMissing",
+							"before": 0
+						}
+					]
+				},
+				"built": 1,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "resolve",
+					"unresolved": null,
+					"candidate": {
+						"entry": "b",
+						"kind": "openrouter",
+						"binding": "openai/gpt-6-luna",
+						"status": "ok",
+						"zdrOnly": true,
+						"path": "/chat/completions"
+					}
+				},
+				"built": 1,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "candidates",
+					"served": [
+						{
+							"key": "openai/gpt-6-luna",
+							"status": "ok",
+							"via": {
+								"entry": "b",
+								"label": "Second"
+							}
+						},
+						{
+							"key": "google/gemini-3.8-flash",
+							"status": "ok",
+							"via": {
+								"entry": "b",
+								"label": "Second"
+							}
+						},
+						{
+							"key": "openai/gpt-oss-120b",
+							"status": "ok",
+							"via": {
+								"entry": "b",
+								"label": "Second"
+							}
+						}
+					]
+				},
+				"built": 2,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "rows",
+					"options": [
+						{
+							"key": "openai/gpt-6-luna",
+							"status": "ok",
+							"via": {
+								"entry": "b",
+								"label": "Second"
+							}
+						},
+						{
+							"key": "google/gemini-3.8-flash",
+							"status": "ok",
+							"via": {
+								"entry": "b",
+								"label": "Second"
+							}
+						},
+						{
+							"key": "openai/gpt-oss-120b",
+							"status": "ok",
+							"via": {
+								"entry": "b",
+								"label": "Second"
+							}
+						}
+					]
+				},
+				"built": 2,
+				"disposed": 0
+			}
+		],
+		"transports": [
+			"Second",
+			"First"
+		],
+		"stopped": [
+			"Second",
+			"First"
+		],
+		"refreshed": [],
+		"keyReads": 8,
+		"listReads": 8
+	}
+}

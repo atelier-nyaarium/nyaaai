@@ -1,0 +1,12 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.lines",
+	"name": "lines-an-empty-table-has-no-line",
+	"input": {
+		"kinds": []
+	},
+	"expected": {
+		"lines": []
+	}
+}

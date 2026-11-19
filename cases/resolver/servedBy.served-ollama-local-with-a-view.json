@@ -1,0 +1,61 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.servedBy",
+	"name": "served-ollama-local-with-a-view",
+	"input": {
+		"kind": "ollama",
+		"entry": {
+			"id": "lab",
+			"kind": "ollama",
+			"label": "Lab",
+			"url": "http://lab.local:11434"
+		},
+		"key": "local:lab/local-a:27b",
+		"use": "chat",
+		"view": "ok",
+		"zdrOnly": true,
+		"flippedTo": false
+	},
+	"expected": {
+		"key": "local:lab/local-a:27b",
+		"entry": "lab",
+		"binding": "local-a:27b",
+		"view": {
+			"row": {
+				"key": "local:lab/local-a:27b",
+				"bindings": {
+					"ollama": {
+						"id": "local-a:27b"
+					}
+				},
+				"family": "local:lab/local-a:27b",
+				"label": "local-a:27b",
+				"reasoning": true,
+				"schema": true,
+				"cache": "implicit",
+				"verified": "2026-01-01",
+				"verifiedPrice": {
+					"prompt": 0,
+					"completion": 0
+				},
+				"identity": {
+					"kind": "local",
+					"entry": "lab",
+					"tag": "local-a:27b"
+				}
+			},
+			"status": "ok",
+			"efforts": [],
+			"hosts": []
+		},
+		"path": "/v1/chat/completions",
+		"passed": [],
+		"candidates": 1,
+		"zdrOnResolve": true,
+		"sent": {
+			"zdrOnly": false,
+			"path": "/v1/chat/completions"
+		}
+	}
+}

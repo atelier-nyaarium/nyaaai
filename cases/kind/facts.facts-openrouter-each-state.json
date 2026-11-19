@@ -1,0 +1,84 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.facts",
+	"name": "facts-openrouter-each-state",
+	"input": {
+		"kind": "openrouter",
+		"entry": {
+			"label": "Router"
+		},
+		"rows": [
+			{
+				"state": {
+					"kind": "none"
+				}
+			},
+			{
+				"state": {
+					"kind": "checking"
+				}
+			},
+			{
+				"state": {
+					"kind": "ok"
+				}
+			},
+			{
+				"state": {
+					"kind": "ok",
+					"usage": 4.5,
+					"limit": 20
+				}
+			},
+			{
+				"state": {
+					"kind": "ok",
+					"usage": 0
+				}
+			},
+			{
+				"state": {
+					"kind": "ok",
+					"models": 3
+				}
+			},
+			{
+				"state": {
+					"kind": "ok",
+					"models": 1,
+					"usage": 1
+				}
+			},
+			{
+				"state": {
+					"kind": "rejected"
+				}
+			},
+			{
+				"state": {
+					"kind": "unreachable"
+				}
+			},
+			{
+				"state": {
+					"kind": "invalid"
+				}
+			}
+		]
+	},
+	"expected": {
+		"facts": [
+			null,
+			null,
+			null,
+			"$4.50 used · $20.00 key limit",
+			"$0.00 used",
+			null,
+			"$1.00 used",
+			null,
+			null,
+			null
+		]
+	}
+}

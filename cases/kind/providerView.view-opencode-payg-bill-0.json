@@ -1,0 +1,35 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.providerView",
+	"name": "view-opencode-payg-bill-0",
+	"input": {
+		"entry": {
+			"id": "e1",
+			"kind": "opencode",
+			"label": "Zen",
+			"plan": "payg"
+		},
+		"status": {
+			"kind": "ok"
+		},
+		"bill": {
+			"billing": "balance",
+			"allowance": 3.256,
+			"cost": 0.1
+		}
+	},
+	"expected": {
+		"view": {
+			"id": "e1",
+			"kind": "opencode",
+			"plan": "payg",
+			"label": "Zen",
+			"status": {
+				"kind": "ok"
+			},
+			"facts": "$0.10 spent",
+			"balance": true
+		}
+	}
+}

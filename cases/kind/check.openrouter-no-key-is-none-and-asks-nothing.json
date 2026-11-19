@@ -1,0 +1,35 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.check",
+	"name": "openrouter-no-key-is-none-and-asks-nothing",
+	"input": {
+		"kind": "openrouter",
+		"entry": {
+			"label": "Zen"
+		},
+		"secret": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"usage": 4.12,
+						"limit": 20,
+						"limit_reset": "monthly"
+					}
+				}
+			}
+		]
+	},
+	"expected": {
+		"state": {
+			"kind": "none"
+		},
+		"thrown": null,
+		"facts": null,
+		"requests": [],
+		"waiting": []
+	}
+}

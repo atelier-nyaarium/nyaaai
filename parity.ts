@@ -37,6 +37,7 @@ import { order } from "./scripts/caseGroups/order";
 import { paths } from "./scripts/caseGroups/paths";
 import { pattern } from "./scripts/caseGroups/pattern";
 import { registry } from "./scripts/caseGroups/registry";
+import { resolver } from "./scripts/caseGroups/resolver";
 import { retention } from "./scripts/caseGroups/retention";
 import { rowKeyGroup } from "./scripts/caseGroups/rowKey";
 import { schemaProjection } from "./scripts/caseGroups/schemaProjection";
@@ -203,6 +204,7 @@ export default project({
 		browse,
 		kindGroup,
 		local,
+		resolver,
 	],
 	runs: adapterCases,
 	cases: { crate: "nyaaai_cli", module: "cases", dir: "rust/cli/src/cases" },

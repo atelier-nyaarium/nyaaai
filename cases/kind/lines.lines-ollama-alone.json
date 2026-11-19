@@ -1,0 +1,21 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.lines",
+	"name": "lines-ollama-alone",
+	"input": {
+		"kinds": [
+			"ollama"
+		]
+	},
+	"expected": {
+		"lines": [
+			{
+				"kind": "ollama",
+				"label": "Ollama",
+				"field": "url",
+				"url": "http://127.0.0.1:11434"
+			}
+		]
+	}
+}

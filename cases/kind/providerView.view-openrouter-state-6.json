@@ -1,0 +1,32 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.providerView",
+	"name": "view-openrouter-state-6",
+	"input": {
+		"entry": {
+			"id": "e1",
+			"kind": "openrouter",
+			"label": "Router"
+		},
+		"status": {
+			"kind": "ok",
+			"models": 1,
+			"usage": 1
+		}
+	},
+	"expected": {
+		"view": {
+			"id": "e1",
+			"kind": "openrouter",
+			"label": "Router",
+			"status": {
+				"kind": "ok",
+				"usage": 1,
+				"models": 1
+			},
+			"facts": "$1.00 used",
+			"balance": true
+		}
+	}
+}

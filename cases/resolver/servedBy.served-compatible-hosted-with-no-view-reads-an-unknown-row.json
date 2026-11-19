@@ -1,0 +1,61 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.servedBy",
+	"name": "served-compatible-hosted-with-no-view-reads-an-unknown-row",
+	"input": {
+		"kind": "compatible",
+		"entry": {
+			"id": "host",
+			"kind": "compatible",
+			"label": "Host",
+			"url": "http://lab.local:8000/v1"
+		},
+		"key": "compatible:qwen",
+		"use": "chat",
+		"view": null,
+		"zdrOnly": false,
+		"flippedTo": true
+	},
+	"expected": {
+		"key": "compatible:qwen",
+		"entry": "host",
+		"binding": "qwen",
+		"view": {
+			"row": {
+				"key": "compatible:qwen",
+				"bindings": {
+					"compatible": {
+						"id": "qwen"
+					}
+				},
+				"family": "compatible:qwen",
+				"label": "compatible:qwen",
+				"reasoning": false,
+				"schema": false,
+				"cache": "implicit",
+				"verified": "",
+				"verifiedPrice": {
+					"prompt": 0,
+					"completion": 0
+				},
+				"identity": {
+					"kind": "hosted",
+					"provider": "compatible",
+					"id": "qwen"
+				}
+			},
+			"status": "unknown",
+			"efforts": [],
+			"hosts": []
+		},
+		"path": "/chat/completions",
+		"passed": [],
+		"candidates": 1,
+		"zdrOnResolve": false,
+		"sent": {
+			"zdrOnly": true,
+			"path": "/chat/completions"
+		}
+	}
+}

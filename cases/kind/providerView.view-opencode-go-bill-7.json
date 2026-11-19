@@ -1,0 +1,36 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.providerView",
+	"name": "view-opencode-go-bill-7",
+	"input": {
+		"entry": {
+			"id": "e1",
+			"kind": "opencode",
+			"label": "Zen",
+			"plan": "go"
+		},
+		"status": {
+			"kind": "ok"
+		},
+		"bill": {
+			"billing": "allowance",
+			"allowance": 1,
+			"cost": 0.004
+		}
+	},
+	"expected": {
+		"view": {
+			"id": "e1",
+			"kind": "opencode",
+			"plan": "go",
+			"label": "Zen",
+			"status": {
+				"kind": "ok"
+			},
+			"facts": "Allowance $1.00 used · Extra usage $0.00",
+			"balance": true,
+			"extraUsage": false
+		}
+	}
+}

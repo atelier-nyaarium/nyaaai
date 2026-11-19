@@ -1,0 +1,30 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.providerView",
+	"name": "view-opencode-go-extra-usage-absent",
+	"input": {
+		"entry": {
+			"id": "e1",
+			"kind": "opencode",
+			"label": "Zen",
+			"plan": "go"
+		},
+		"status": {
+			"kind": "ok"
+		}
+	},
+	"expected": {
+		"view": {
+			"id": "e1",
+			"kind": "opencode",
+			"plan": "go",
+			"label": "Zen",
+			"status": {
+				"kind": "ok"
+			},
+			"balance": true,
+			"extraUsage": false
+		}
+	}
+}

@@ -1,0 +1,36 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.keySource",
+	"name": "key-the-key-text-is-given-as-it-is",
+	"input": {
+		"entry": {
+			"id": "a",
+			"kind": "openrouter",
+			"label": "First"
+		},
+		"list": [
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "First"
+			}
+		],
+		"answers": {
+			"a": {
+				"kind": "key",
+				"key": "  key-with-blanks  "
+			}
+		},
+		"steps": [
+			{
+				"kind": "get"
+			}
+		]
+	},
+	"expected": {
+		"gets": [
+			"  key-with-blanks  "
+		]
+	}
+}

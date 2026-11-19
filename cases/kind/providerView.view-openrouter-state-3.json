@@ -1,0 +1,32 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.providerView",
+	"name": "view-openrouter-state-3",
+	"input": {
+		"entry": {
+			"id": "e1",
+			"kind": "openrouter",
+			"label": "Router"
+		},
+		"status": {
+			"kind": "ok",
+			"usage": 4.5,
+			"limit": 20
+		}
+	},
+	"expected": {
+		"view": {
+			"id": "e1",
+			"kind": "openrouter",
+			"label": "Router",
+			"status": {
+				"kind": "ok",
+				"usage": 4.5,
+				"limit": 20
+			},
+			"facts": "$4.50 used · $20.00 key limit",
+			"balance": true
+		}
+	}
+}

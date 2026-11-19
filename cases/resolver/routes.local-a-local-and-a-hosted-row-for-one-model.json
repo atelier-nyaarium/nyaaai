@@ -1,0 +1,140 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routes",
+	"name": "local-a-local-and-a-hosted-row-for-one-model",
+	"input": {
+		"entries": [
+			{
+				"id": "lab",
+				"kind": "ollama",
+				"label": "Lab",
+				"url": "http://lab.local:11434"
+			},
+			{
+				"id": "lab2",
+				"kind": "ollama",
+				"label": "Lab Two",
+				"url": "http://lab2.local:11434"
+			},
+			{
+				"id": "a",
+				"kind": "openrouter",
+				"label": "First"
+			}
+		],
+		"answers": {
+			"a": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"failing": [],
+		"rows": [
+			"local:lab/local-a:27b",
+			"ollama:qwen",
+			"openai/gpt-6-luna"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama",
+			"lmstudio",
+			"llamacpp",
+			"compatible"
+		],
+		"listings": {},
+		"zdrOnly": true,
+		"steps": [
+			{
+				"kind": "rows",
+				"use": "chat"
+			},
+			{
+				"kind": "candidates",
+				"use": "chat"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answer": {
+					"kind": "rows",
+					"options": [
+						{
+							"key": "local:lab/local-a:27b",
+							"status": "ok",
+							"via": {
+								"entry": "lab",
+								"label": "Lab"
+							}
+						},
+						{
+							"key": "ollama:qwen",
+							"status": "ok",
+							"via": {
+								"entry": "lab",
+								"label": "Lab"
+							}
+						},
+						{
+							"key": "openai/gpt-6-luna",
+							"status": "ok",
+							"via": {
+								"entry": "a",
+								"label": "First"
+							}
+						}
+					]
+				},
+				"built": 2,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "candidates",
+					"served": [
+						{
+							"key": "local:lab/local-a:27b",
+							"status": "ok",
+							"via": {
+								"entry": "lab",
+								"label": "Lab"
+							}
+						},
+						{
+							"key": "ollama:qwen",
+							"status": "ok",
+							"via": {
+								"entry": "lab",
+								"label": "Lab"
+							}
+						},
+						{
+							"key": "openai/gpt-6-luna",
+							"status": "ok",
+							"via": {
+								"entry": "a",
+								"label": "First"
+							}
+						}
+					]
+				},
+				"built": 2,
+				"disposed": 0
+			}
+		],
+		"transports": [
+			"Lab http://lab.local:11434",
+			"First"
+		],
+		"stopped": [
+			"Lab http://lab.local:11434",
+			"First"
+		],
+		"refreshed": [],
+		"keyReads": 4,
+		"listReads": 6
+	}
+}

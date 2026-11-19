@@ -1,0 +1,29 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.providerView",
+	"name": "view-an-entry-keeps-its-label-and-url",
+	"input": {
+		"entry": {
+			"id": "e9",
+			"kind": "compatible",
+			"label": "Host B",
+			"url": "https://host.lab.example/api/v2"
+		},
+		"status": {
+			"kind": "unreachable"
+		}
+	},
+	"expected": {
+		"view": {
+			"id": "e9",
+			"kind": "compatible",
+			"label": "Host B",
+			"url": "https://host.lab.example/api/v2",
+			"status": {
+				"kind": "unreachable"
+			},
+			"facts": "https://host.lab.example/api/v2"
+		}
+	}
+}

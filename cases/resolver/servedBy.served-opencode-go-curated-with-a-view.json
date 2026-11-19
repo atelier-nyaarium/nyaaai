@@ -1,0 +1,63 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.servedBy",
+	"name": "served-opencode-go-curated-with-a-view",
+	"input": {
+		"kind": "opencode",
+		"entry": {
+			"id": "go",
+			"kind": "opencode",
+			"plan": "go",
+			"label": "Go"
+		},
+		"key": "openai/gpt-6-luna",
+		"use": "chat",
+		"view": "ok",
+		"zdrOnly": true,
+		"flippedTo": false
+	},
+	"expected": {
+		"key": "openai/gpt-6-luna",
+		"entry": "go",
+		"binding": "gpt-6-luna",
+		"view": {
+			"row": {
+				"key": "openai/gpt-6-luna",
+				"bindings": {
+					"openrouter": {
+						"id": "openai/gpt-6-luna"
+					},
+					"opencode": {
+						"id": "gpt-6-luna"
+					}
+				},
+				"family": "openai/gpt-*-luna",
+				"label": "GPT-6 Luna",
+				"reasoning": true,
+				"schema": true,
+				"cache": "implicit",
+				"verified": "2026-09-26",
+				"verifiedPrice": {
+					"prompt": 0.11,
+					"completion": 0.55
+				},
+				"identity": {
+					"kind": "curated",
+					"key": "openai/gpt-6-luna"
+				}
+			},
+			"status": "ok",
+			"efforts": [],
+			"hosts": []
+		},
+		"path": "/openai/v1/chat/completions",
+		"passed": [],
+		"candidates": 1,
+		"zdrOnResolve": true,
+		"sent": {
+			"zdrOnly": false,
+			"path": "/openai/v1/chat/completions"
+		}
+	}
+}
