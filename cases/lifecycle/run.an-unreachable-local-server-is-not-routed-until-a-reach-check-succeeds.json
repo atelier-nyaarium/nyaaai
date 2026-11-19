@@ -301,6 +301,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "box\nlocal:box/qwen",
+								"era": 1,
 								"generation": 0,
 								"probe": false,
 								"serial": 1
@@ -375,6 +376,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "box\nlocal:box/qwen",
+								"era": 1,
 								"generation": 0,
 								"probe": false,
 								"serial": 2
@@ -449,6 +451,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "box\nlocal:box/qwen",
+								"era": 1,
 								"generation": 0,
 								"probe": false,
 								"serial": 3
@@ -523,6 +526,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "box\nlocal:box/qwen",
+								"era": 1,
 								"generation": 0,
 								"probe": false,
 								"serial": 4
@@ -671,6 +675,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "box\nlocal:box/qwen",
+								"era": 1,
 								"generation": 0,
 								"probe": false,
 								"serial": 5

@@ -7,6 +7,7 @@ use std::sync::{Arc, Mutex, MutexGuard};
 use nyaaai_agentic::codec::Codec;
 use nyaaai_agentic::health::gate::Phase;
 use nyaaai_agentic::health::health::{Billing, Gate, HealthDeps, ProviderHealth, RouteRef};
+use nyaaai_agentic::provider::incarnation::{EntryRegistry, Incarnation};
 use nyaaai_agentic::provider::kind::{
     CatalogDeps, EntryCatalog, KINDS, KindDeps, KindError, KindField, ProviderKind,
 };
@@ -62,16 +63,62 @@ fn name(named: &Mutex<Vec<String>>, id: &str) {
     }
 }
 
-fn route_of(route: &HealthRoute) -> RouteRef<'_> {
-    RouteRef {
-        entry: &route.entry,
-        key: &route.key,
+/// A route held by the script: the row, the key and the incarnation it stands over.
+#[derive(Clone)]
+struct Owned {
+    entry: ProviderEntry,
+    key: String,
+    incarnation: Arc<Incarnation>,
+}
+
+impl Owned {
+    fn as_ref(&self) -> RouteRef<'_> {
+        RouteRef {
+            entry: &self.entry,
+            key: &self.key,
+            incarnation: &self.incarnation,
+        }
+    }
+}
+
+/// An incarnation whose entry has already left the list.
+fn left_incarnation(entry: &ProviderEntry) -> Arc<Incarnation> {
+    let list = Arc::new(ScriptedProviderList::new(vec![entry.clone()]));
+    let scratch = EntryRegistry::new(list.clone(), &ScriptedEntryKeys::new());
+    let incarnation = scratch.incarnation(&entry.id).expect("the entry is listed");
+    list.set(Vec::new());
+    scratch.dispose();
+    incarnation
+}
+
+/// The route over the entry's incarnation as it stands now.
+fn standing(entries: &EntryRegistry, route: &HealthRoute) -> Owned {
+    Owned {
+        entry: route.entry.clone(),
+        key: route.key.clone(),
+        incarnation: entries
+            .incarnation(&route.entry.id)
+            .unwrap_or_else(|| left_incarnation(&route.entry)),
+    }
+}
+
+fn routed(
+    entries: &EntryRegistry,
+    taken: &HashMap<String, Owned>,
+    route: &HealthRoute,
+) -> Outcome<Owned> {
+    match &route.taken {
+        None => Ok(standing(entries, route)),
+        Some(name) => taken
+            .get(name)
+            .cloned()
+            .ok_or_else(|| format!("No route taken as {name}.")),
     }
 }
 
 fn deps_of(
     net: &super::local::Net,
-    list: Arc<ScriptedProviderList>,
+    entries: Arc<EntryRegistry>,
     keys: Arc<dyn EntryKeys>,
     pause_ms: Option<i64>,
 ) -> HealthDeps {
@@ -79,7 +126,7 @@ fn deps_of(
     HealthDeps {
         runtime: nyaaai_testkit::cases::runtime(),
         scheduler: net.scheduler.clone(),
-        list,
+        entries,
         keys,
         kinds: KINDS.clone(),
         kind_deps: Arc::new(move |_| kind_deps.clone()),
@@ -279,6 +326,7 @@ async fn play(input: HealthRunInput) -> Outcome<HealthRunResult> {
     for (id, answer) in input.keys.iter() {
         raw.set(id, answer_of(answer));
     }
+    let entries = Arc::new(EntryRegistry::new(list.clone(), &*raw));
     let armed: Arc<Armed> = Arc::default();
     let mut holds: Vec<Arc<Hold>> = Vec::new();
     let keys = Arc::new(Held {
@@ -287,7 +335,7 @@ async fn play(input: HealthRunInput) -> Outcome<HealthRunResult> {
     });
     let mut deps = deps_of(
         &net,
-        Arc::clone(&list),
+        Arc::clone(&entries),
         keys,
         input.pause_ms.map(|held| held as i64),
     );
@@ -325,6 +373,7 @@ async fn play(input: HealthRunInput) -> Outcome<HealthRunResult> {
     }
     let mut run: HashSet<String> = HashSet::new();
     let mut tickets: HashMap<String, Ticket> = HashMap::new();
+    let mut taken: HashMap<String, Owned> = HashMap::new();
     let mut steps = Vec::new();
     for step in &input.steps {
         let mut answer =
@@ -334,6 +383,9 @@ async fn play(input: HealthRunInput) -> Outcome<HealthRunResult> {
             .map(|held| held.seen.load(Ordering::SeqCst))
             .collect();
         match step {
+            HealthRunInputStepsItem::Take(held) => {
+                taken.insert(held.name.clone(), standing(&entries, &held.route));
+            }
             HealthRunInputStepsItem::Hold(held) => {
                 let hold = Hold::new(held.at);
                 match held.at {
@@ -384,6 +436,7 @@ async fn play(input: HealthRunInput) -> Outcome<HealthRunResult> {
             }
             HealthRunInputStepsItem::Served(held) => {
                 name(&named, &held.route.entry.id);
+                let owned = routed(&entries, &taken, &held.route)?;
                 let usage = NormalizedUsage {
                     input: 1.0,
                     output: 1.0,
@@ -398,11 +451,12 @@ async fn play(input: HealthRunInput) -> Outcome<HealthRunResult> {
                     allowance: None,
                 };
                 let keep = (held.keep == Some(true)).then_some(&mut run);
-                health.served(route_of(&held.route), Some(&usage), keep, None);
+                health.served(owned.as_ref(), Some(&usage), keep, None);
             }
             HealthRunInputStepsItem::Failed(held) => {
                 name(&named, &held.route.entry.id);
-                health.failed(route_of(&held.route), &held.failure, held.onward, None);
+                let owned = routed(&entries, &taken, &held.route)?;
+                health.failed(owned.as_ref(), &held.failure, held.onward, None);
             }
             HealthRunInputStepsItem::Billed(held) => {
                 name(&named, &held.id);
@@ -418,23 +472,26 @@ async fn play(input: HealthRunInput) -> Outcome<HealthRunResult> {
             }
             HealthRunInputStepsItem::Deferred(held) => {
                 name(&named, &held.route.entry.id);
+                let owned = routed(&entries, &taken, &held.route)?;
                 let keep = (held.keep == Some(true)).then_some(&run);
                 answer = HealthRunResultStepsItemAnswer::Skip(HealthRunResultStepsItemAnswerSkip {
-                    skip: health.deferred(route_of(&held.route), keep),
+                    skip: health.deferred(owned.as_ref(), keep),
                 });
             }
             HealthRunInputStepsItem::Blocked(held) => {
                 name(&named, &held.route.entry.id);
+                let owned = routed(&entries, &taken, &held.route)?;
                 let keep = (held.keep == Some(true)).then_some(&run);
                 answer = HealthRunResultStepsItemAnswer::Blocked(
                     HealthRunResultStepsItemAnswerBlocked {
-                        blocked: health.blocked(route_of(&held.route), keep),
+                        blocked: health.blocked(owned.as_ref(), keep),
                     },
                 );
             }
             HealthRunInputStepsItem::TryAdmit(held) => {
                 name(&named, &held.route.entry.id);
-                let ticket = health.try_admit(route_of(&held.route));
+                let owned = routed(&entries, &taken, &held.route)?;
+                let ticket = health.try_admit(owned.as_ref());
                 if let Some(ticket) = &ticket {
                     tickets.insert(held.request.clone(), ticket.clone());
                 }
@@ -445,7 +502,8 @@ async fn play(input: HealthRunInput) -> Outcome<HealthRunResult> {
             }
             HealthRunInputStepsItem::Admit(held) => {
                 name(&named, &held.route.entry.id);
-                let route = route_of(&held.route);
+                let owned = routed(&entries, &taken, &held.route)?;
+                let route = owned.as_ref();
                 if let Some(gate) = health.gate_state(route)
                     && (gate.phase == Phase::Paused
                         || (gate.phase == Phase::Probing && gate.probe.is_some()))
@@ -534,6 +592,7 @@ async fn play(input: HealthRunInput) -> Outcome<HealthRunResult> {
     }
     health.idle().await;
     health.dispose();
+    entries.dispose();
     Ok(HealthRunResult {
         steps,
         requests: net
@@ -605,14 +664,20 @@ async fn ask(input: HealthKeysInput) -> Outcome<HealthKeysResult> {
         } else {
             vec![row.entry.clone()]
         }));
+        let keys = Arc::new(Keys(Arc::clone(&store)));
+        let entries = Arc::new(EntryRegistry::new(list, &*keys));
         let health = ProviderHealth::new(
-            deps_of(&net, list, Arc::new(Keys(Arc::clone(&store))), None),
+            deps_of(&net, Arc::clone(&entries), keys, None),
             &CountedIds::new("gate-"),
         );
-        let route = RouteRef {
-            entry: &row.entry,
-            key: "lab/model-a",
+        let owned = Owned {
+            entry: row.entry.clone(),
+            key: "lab/model-a".to_owned(),
+            incarnation: entries
+                .incarnation(&row.entry.id)
+                .unwrap_or_else(|| left_incarnation(&row.entry)),
         };
+        let route = owned.as_ref();
         let id = row.entry.id.as_str();
         let failure = |category: FailureCategory, status: FailureStatus, message: &str| Failure {
             category,
@@ -683,6 +748,7 @@ async fn ask(input: HealthKeysInput) -> Outcome<HealthKeysResult> {
         health.idle().await;
         let status_after = health.status(id);
         health.dispose();
+        entries.dispose();
         let heard = locked(&heard).clone();
         rows.push(HealthKeysResultRowsItem {
             status,

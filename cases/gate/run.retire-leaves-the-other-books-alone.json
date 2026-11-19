@@ -2,14 +2,15 @@
 	"format": 2,
 	"type": "function",
 	"kind": "gate.run",
-	"name": "clear-leaves-the-other-entries-alone",
+	"name": "retire-leaves-the-other-books-alone",
 	"input": {
 		"startMs": 1000000,
 		"steps": [
 			{
 				"kind": "admit",
 				"request": "a",
-				"model": "one\nlab/model-a"
+				"model": "one\nlab/model-a",
+				"book": "one"
 			},
 			{
 				"kind": "settle",
@@ -19,7 +20,8 @@
 			{
 				"kind": "admit",
 				"request": "b",
-				"model": "two\nlab/model-a"
+				"model": "two\nlab/model-a",
+				"book": "two"
 			},
 			{
 				"kind": "settle",
@@ -29,16 +31,18 @@
 			{
 				"kind": "admit",
 				"request": "wa",
-				"model": "one\nlab/model-a"
+				"model": "one\nlab/model-a",
+				"book": "one"
 			},
 			{
 				"kind": "admit",
 				"request": "wb",
-				"model": "two\nlab/model-a"
+				"model": "two\nlab/model-a",
+				"book": "two"
 			},
 			{
-				"kind": "clear",
-				"prefix": "one\n"
+				"kind": "retire",
+				"book": "one"
 			}
 		]
 	},
@@ -56,6 +60,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "one\nlab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": false,
 								"serial": 1
@@ -120,6 +125,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "two\nlab/model-a",
+								"era": 2,
 								"generation": 0,
 								"probe": false,
 								"serial": 2
@@ -323,14 +329,7 @@
 					{
 						"request": "wa",
 						"admission": {
-							"kind": "go",
-							"ticket": {
-								"gate": "gate-1",
-								"model": "one\nlab/model-a",
-								"generation": 1,
-								"probe": false,
-								"serial": 3
-							}
+							"kind": "retired"
 						}
 					}
 				],
@@ -342,14 +341,7 @@
 				"gates": [
 					{
 						"model": "one\nlab/model-a",
-						"gate": {
-							"phase": "open",
-							"generation": 1,
-							"pauses": 0,
-							"resumeAt": 1060000,
-							"probe": null,
-							"queued": 0
-						}
+						"gate": null
 					},
 					{
 						"model": "two\nlab/model-a",

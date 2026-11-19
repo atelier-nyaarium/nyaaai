@@ -172,8 +172,8 @@
 			"Second"
 		],
 		"stopped": [
-			"First",
-			"Second"
+			"Second",
+			"First"
 		],
 		"refreshed": [],
 		"keyReads": 6

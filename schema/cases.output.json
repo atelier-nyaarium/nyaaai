@@ -13853,7 +13853,7 @@
 			],
 			"additionalProperties": false
 		},
-		"ResolverRouteKeyInput": {
+		"ResolverIdentityInput": {
 			"type": "object",
 			"properties": {
 				"entries": {
@@ -13868,10 +13868,10 @@
 			],
 			"additionalProperties": false
 		},
-		"ResolverRouteKeyResult": {
+		"ResolverIdentityResult": {
 			"type": "object",
 			"properties": {
-				"keys": {
+				"identities": {
 					"type": "array",
 					"items": {
 						"type": "string"
@@ -13879,7 +13879,7 @@
 				}
 			},
 			"required": [
-				"keys"
+				"identities"
 			],
 			"additionalProperties": false
 		},
@@ -16584,6 +16584,9 @@
 											"tryAdmit",
 											"settleTrigger"
 										]
+									},
+									"book": {
+										"type": "string"
 									}
 								},
 								"required": [
@@ -16604,6 +16607,9 @@
 										"type": "string"
 									},
 									"model": {
+										"type": "string"
+									},
+									"book": {
 										"type": "string"
 									}
 								},
@@ -16675,6 +16681,9 @@
 										"type": "integer",
 										"minimum": 0,
 										"maximum": 9007199254740991
+									},
+									"book": {
+										"type": "string"
 									}
 								},
 								"required": [
@@ -16688,15 +16697,14 @@
 								"properties": {
 									"kind": {
 										"type": "string",
-										"const": "clear"
+										"const": "retire"
 									},
-									"prefix": {
+									"book": {
 										"type": "string"
 									}
 								},
 								"required": [
-									"kind",
-									"prefix"
+									"kind"
 								],
 								"additionalProperties": false
 							},
@@ -17288,6 +17296,9 @@
 				},
 				"key": {
 					"type": "string"
+				},
+				"taken": {
+					"type": "string"
 				}
 			},
 			"required": [
@@ -17399,6 +17410,27 @@
 								"required": [
 									"kind",
 									"id"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "take"
+									},
+									"name": {
+										"type": "string"
+									},
+									"route": {
+										"$ref": "#/$defs/HealthRoute"
+									}
+								},
+								"required": [
+									"kind",
+									"name",
+									"route"
 								],
 								"additionalProperties": false
 							},

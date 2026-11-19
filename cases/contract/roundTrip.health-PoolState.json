@@ -13,13 +13,13 @@
 			"{\"kind\":\"paused\",\"reason\":\"credit\",\"until\":5}",
 			"{\"kind\":\"reset\",\"at\":1794528001000}",
 			"{\"kind\":\"balance\",\"eta\":100,\"next\":50,\"probe\":null}",
-			"{\"kind\":\"balance\",\"eta\":100,\"next\":50,\"probe\":{\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":3,\"probe\":true,\"serial\":7},\"at\":40}}",
-			"{\"kind\":\"balance\",\"eta\":100,\"next\":50,\"probe\":{\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1},\"at\":40,\"extra\":1},\"extra\":2}",
+			"{\"kind\":\"balance\",\"eta\":100,\"next\":50,\"probe\":{\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"era\":2,\"generation\":3,\"probe\":true,\"serial\":7},\"at\":40}}",
+			"{\"kind\":\"balance\",\"eta\":100,\"next\":50,\"probe\":{\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"era\":1,\"generation\":0,\"probe\":false,\"serial\":1},\"at\":40,\"extra\":1},\"extra\":2}",
 			"{\"kind\":\"paused\",\"reason\":\"other\",\"until\":5}",
 			"{\"kind\":\"paused\",\"reason\":\"credit\"}",
 			"{\"kind\":\"reset\"}",
 			"{\"kind\":\"balance\",\"eta\":100,\"next\":50}",
-			"{\"kind\":\"balance\",\"eta\":100,\"next\":50,\"probe\":{\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1}}}",
+			"{\"kind\":\"balance\",\"eta\":100,\"next\":50,\"probe\":{\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"era\":1,\"generation\":0,\"probe\":false,\"serial\":1}}}",
 			"{\"kind\":\"balance\",\"eta\":100,\"next\":50,\"probe\":{\"at\":1}}",
 			"{\"kind\":\"other\"}",
 			"{}"
@@ -53,11 +53,11 @@
 			},
 			{
 				"ok": true,
-				"text": "{\"kind\":\"balance\",\"eta\":100,\"next\":50,\"probe\":{\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":3,\"probe\":true,\"serial\":7},\"at\":40}}"
+				"text": "{\"kind\":\"balance\",\"eta\":100,\"next\":50,\"probe\":{\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"era\":2,\"generation\":3,\"probe\":true,\"serial\":7},\"at\":40}}"
 			},
 			{
 				"ok": true,
-				"text": "{\"kind\":\"balance\",\"eta\":100,\"next\":50,\"probe\":{\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1},\"at\":40}}"
+				"text": "{\"kind\":\"balance\",\"eta\":100,\"next\":50,\"probe\":{\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"era\":1,\"generation\":0,\"probe\":false,\"serial\":1},\"at\":40}}"
 			},
 			{
 				"ok": false,

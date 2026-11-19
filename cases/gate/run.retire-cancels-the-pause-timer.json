@@ -2,75 +2,41 @@
 	"format": 2,
 	"type": "function",
 	"kind": "gate.run",
-	"name": "a-ticket-of-a-cleared-pause-is-stale",
+	"name": "retire-cancels-the-pause-timer",
 	"input": {
 		"startMs": 1000000,
 		"steps": [
 			{
 				"kind": "admit",
-				"request": "early",
+				"request": "trigger",
 				"model": "lab/model-a"
+			},
+			{
+				"kind": "settle",
+				"request": "trigger",
+				"outcome": "overloaded"
 			},
 			{
 				"kind": "admit",
-				"request": "trigger",
+				"request": "w",
 				"model": "lab/model-a"
 			},
 			{
-				"kind": "settle",
-				"request": "trigger",
-				"outcome": "overloaded"
+				"kind": "retire"
 			},
 			{
-				"kind": "clear",
-				"prefix": ""
+				"kind": "advance",
+				"ms": 60000
 			},
 			{
-				"kind": "settle",
-				"request": "early",
-				"outcome": "overloaded"
+				"kind": "admit",
+				"request": "after",
+				"model": "lab/model-a"
 			}
 		]
 	},
 	"expected": {
 		"steps": [
-			{
-				"nowMs": 1000000,
-				"settled": null,
-				"ticket": null,
-				"resolved": [
-					{
-						"request": "early",
-						"admission": {
-							"kind": "go",
-							"ticket": {
-								"gate": "gate-1",
-								"model": "lab/model-a",
-								"generation": 0,
-								"probe": false,
-								"serial": 1
-							}
-						}
-					}
-				],
-				"inside": [],
-				"waits": [],
-				"told": [],
-				"gates": [
-					{
-						"model": "lab/model-a",
-						"gate": {
-							"phase": "open",
-							"generation": 0,
-							"pauses": 0,
-							"resumeAt": 0,
-							"probe": null,
-							"queued": 0
-						}
-					}
-				],
-				"holding": []
-			},
 			{
 				"nowMs": 1000000,
 				"settled": null,
@@ -83,9 +49,10 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": false,
-								"serial": 2
+								"serial": 1
 							}
 						}
 					}
@@ -140,6 +107,60 @@
 				"settled": null,
 				"ticket": null,
 				"resolved": [],
+				"inside": [
+					{
+						"request": "w",
+						"gate": {
+							"phase": "paused",
+							"generation": 0,
+							"pauses": 1,
+							"resumeAt": 1060000,
+							"probe": null,
+							"queued": 1
+						}
+					}
+				],
+				"waits": [
+					{
+						"request": "w",
+						"waiting": {
+							"model": "lab/model-a",
+							"resumeAt": 1060000,
+							"pause": 1,
+							"of": 10
+						}
+					}
+				],
+				"told": [],
+				"gates": [
+					{
+						"model": "lab/model-a",
+						"gate": {
+							"phase": "paused",
+							"generation": 0,
+							"pauses": 1,
+							"resumeAt": 1060000,
+							"probe": null,
+							"queued": 1
+						}
+					}
+				],
+				"holding": [
+					"lab/model-a"
+				]
+			},
+			{
+				"nowMs": 1000000,
+				"settled": null,
+				"ticket": null,
+				"resolved": [
+					{
+						"request": "w",
+						"admission": {
+							"kind": "retired"
+						}
+					}
+				],
 				"inside": [],
 				"waits": [],
 				"told": [
@@ -148,21 +169,14 @@
 				"gates": [
 					{
 						"model": "lab/model-a",
-						"gate": {
-							"phase": "open",
-							"generation": 1,
-							"pauses": 0,
-							"resumeAt": 1060000,
-							"probe": null,
-							"queued": 0
-						}
+						"gate": null
 					}
 				],
 				"holding": []
 			},
 			{
-				"nowMs": 1000000,
-				"settled": "again",
+				"nowMs": 1060000,
+				"settled": null,
 				"ticket": null,
 				"resolved": [],
 				"inside": [],
@@ -171,11 +185,42 @@
 				"gates": [
 					{
 						"model": "lab/model-a",
+						"gate": null
+					}
+				],
+				"holding": []
+			},
+			{
+				"nowMs": 1060000,
+				"settled": null,
+				"ticket": null,
+				"resolved": [
+					{
+						"request": "after",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "lab/model-a",
+								"era": 2,
+								"generation": 0,
+								"probe": false,
+								"serial": 2
+							}
+						}
+					}
+				],
+				"inside": [],
+				"waits": [],
+				"told": [],
+				"gates": [
+					{
+						"model": "lab/model-a",
 						"gate": {
 							"phase": "open",
-							"generation": 1,
+							"generation": 0,
 							"pauses": 0,
-							"resumeAt": 1060000,
+							"resumeAt": 0,
 							"probe": null,
 							"queued": 0
 						}

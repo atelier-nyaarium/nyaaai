@@ -14,6 +14,7 @@ const at = (minutes: number): number => NOW + minutes * MINUTE;
 const ticket = (serial: number, extra: Record<string, unknown> = {}) => ({
 	gate: "go",
 	model: "go\nm",
+	era: 1,
 	generation: 0,
 	probe: false,
 	serial,

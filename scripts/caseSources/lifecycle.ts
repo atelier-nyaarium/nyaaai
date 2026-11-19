@@ -3,6 +3,7 @@
 import { probeAt } from "@nyaaai/agentic/health/pool";
 import type { CaseSource } from "../caseAdapter";
 import type { Json } from "./codecFixtures";
+import { incarnationCases } from "./lifecycleIncarnation";
 import {
 	A,
 	ANALYSIS,
@@ -353,7 +354,7 @@ const extraUsage: CaseSource[] = [
 		exchanges: [says("Go", BALANCE), says("Go", BALANCE), says("B")],
 		steps: [send("first"), list(GO, B), send("second"), send("third")],
 	}),
-	run("a-plan-change-clears-the-balance-cooldown-and-keeps-the-bill", {
+	run("a-plan-change-clears-the-balance-cooldown-and-the-bill", {
 		...GO_WITH_B,
 		exchanges: [says("Go", BALANCE), says("B"), says("Go")],
 		steps: [send("bill"), send("cooled"), list({ ...GO, plan: "payg" }, B), send("changed")],
@@ -708,4 +709,5 @@ export const lifecycleCases: CaseSource[] = [
 	...notices,
 	...sinks,
 	...staleCases,
+	...incarnationCases,
 ];

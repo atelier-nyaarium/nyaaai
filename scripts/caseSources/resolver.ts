@@ -485,7 +485,7 @@ export const resolverCases: CaseSource[] = [
 			send(5),
 		],
 	}),
-	run("route-an-entry-removed-and-added-as-the-same-kind-takes-the-new-key", {
+	run("route-an-entry-removed-and-added-as-the-same-kind-leaves-the-held-route-keyless", {
 		entries: [FIRST],
 		answers: { a: KEY },
 		steps: [

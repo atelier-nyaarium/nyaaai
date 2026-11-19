@@ -11,6 +11,7 @@ import {
 import { RetryPolicy } from "@nyaaai/agentic/lifecycle/retry";
 import { parseRowKey } from "@nyaaai/agentic/models/rowKey";
 import { CHAT } from "@nyaaai/agentic/models/uses";
+import { EntryRegistry } from "@nyaaai/agentic/provider/incarnation";
 import { type EntryCatalog, KINDS, type ProviderKind } from "@nyaaai/agentic/provider/kind";
 import { ModelResolver, type Resolved, type Routes } from "@nyaaai/agentic/provider/resolver";
 import { replyCalls, replyText, StepAssembler } from "@nyaaai/agentic/step";
@@ -336,6 +337,7 @@ export const lifecycle = caseGroup("lifecycle", {
 
 				const scriptedKeys = scriptedEntryKeys(input.keys as Record<string, KeyAnswer>);
 				const list = scriptedProviderList(input.entries);
+				const entries = new EntryRegistry({ list, keys: scriptedKeys });
 				const registry = scriptedModelRegistry(input.rows.map(rowFor));
 				const usage = scriptedUsageSink();
 				usage.setIds(input.usageIds ?? []);
@@ -389,7 +391,7 @@ export const lifecycle = caseGroup("lifecycle", {
 				const health = new ProviderHealth({
 					scheduler,
 					ids: countedIds("gate-"),
-					list,
+					entries,
 					keys: scriptedKeys,
 					kinds: checks,
 					kindDeps: () => deps,
@@ -397,7 +399,7 @@ export const lifecycle = caseGroup("lifecycle", {
 					...(input.maxPauses === undefined ? {} : { maxPauses: input.maxPauses }),
 				});
 				const resolver = new ModelResolver({
-					list,
+					entries,
 					keys: health.entryKeys,
 					registry,
 					kinds,
@@ -470,12 +472,13 @@ export const lifecycle = caseGroup("lifecycle", {
 				const refresh = () => {
 					for (const [model, held] of queues) {
 						for (const slot of held.slots.filter((each) => each.signal.aborted)) {
-							slot.state = "running";
+							if (slot.state === "held") slot.state = "running";
 						}
 						held.slots = held.slots.filter((each) => !each.signal.aborted);
 						const queued = health.gateState(held.route)?.queued ?? 0;
 						const released = held.slots.length - queued;
-						for (const slot of held.slots.splice(0, Math.max(0, released))) slot.state = "running";
+						for (const slot of held.slots.splice(0, Math.max(0, released)))
+							if (slot.state === "held") slot.state = "running";
 						if (held.slots.length === 0) queues.delete(model);
 					}
 				};
@@ -706,6 +709,7 @@ export const lifecycle = caseGroup("lifecycle", {
 				}));
 				resolver.dispose();
 				health.dispose();
+				entries.dispose();
 				const waiting = wheel.waiting();
 				return {
 					steps: stepOuts,

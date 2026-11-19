@@ -26,6 +26,7 @@ export const ALLOWANCE_SOURCES: ReadonlySet<string> = new Set(["go", "go-plus"])
 const sameTicket = (left: Ticket, right: Ticket): boolean =>
 	left.gate === right.gate &&
 	left.model === right.model &&
+	left.era === right.era &&
 	left.generation === right.generation &&
 	left.probe === right.probe &&
 	left.serial === right.serial;

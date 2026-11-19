@@ -1,4 +1,5 @@
 import { ProviderHealth } from "@nyaaai/agentic/health/health";
+import { EntryRegistry } from "@nyaaai/agentic/provider/incarnation";
 import { KINDS } from "@nyaaai/agentic/provider/kind";
 import type { Resolved } from "@nyaaai/agentic/provider/resolver";
 import type { KeyAnswer } from "@nyaaai/contract/entryKeys";
@@ -19,6 +20,7 @@ import { caseGroup, casesFor, kind } from "@nyaaai/testkit/caseGroup";
 import { scriptedEntryKeys, scriptedProviderList } from "@nyaaai/testkit/scriptedPorts";
 import { healthCases } from "../caseSources/health";
 import { NetExchange } from "./catalogKit";
+import { leftIncarnation } from "./incarnationKit";
 import { networkOf } from "./localKit";
 
 ////////////////////////////////
@@ -32,8 +34,8 @@ const HealthKeyAnswer = z.discriminatedUnion("kind", [
 	z.object({ kind: z.literal("unready") }),
 ]);
 
-/** The fields health reads of a resolved route. */
-const HealthRoute = z.object({ entry: ProviderEntry, key: z.string() });
+/** The fields health reads of a resolved route; `taken` names a route a `take` step held, entry and key still given. */
+const HealthRoute = z.object({ entry: ProviderEntry, key: z.string(), taken: z.string().exactOptional() });
 
 /** A script step; a step that starts a check waits for it to end. */
 const NoIdle = { idle: z.literal(false).exactOptional() };
@@ -52,6 +54,8 @@ const Step = () =>
 		}),
 		/** On this entry's first change told, a listener starts a check. */
 		z.object({ kind: z.literal("listenAndCheck"), id: z.string() }),
+		/** Holds the route as it stands now, under a name; later routes name it with `taken`. */
+		z.object({ kind: z.literal("take"), name: z.string(), route: HealthRoute }),
 		/** The list changes, and tells. */
 		z.object({ kind: z.literal("list"), entries: z.array(ProviderEntry), ...NoIdle }),
 		/** The store's key changes, and tells. */
@@ -161,6 +165,7 @@ export const health = caseGroup("health", {
 				const net = networkOf(input.startMs, input.exchanges);
 				const list = scriptedProviderList(input.entries);
 				const raw = scriptedEntryKeys(input.keys);
+				const entries = new EntryRegistry({ list, keys: raw });
 				interface Hold {
 					at: "store" | "check";
 					reached: Promise<void>;
@@ -232,7 +237,7 @@ export const health = caseGroup("health", {
 				const health = new ProviderHealth({
 					scheduler: net.scheduler,
 					ids: countedIds("gate-"),
-					list,
+					entries,
 					keys,
 					kinds,
 					kindDeps: () => net.deps,
@@ -253,9 +258,19 @@ export const health = caseGroup("health", {
 				for (const entry of input.entries) name(entry.id);
 				const run = new Set<string>();
 				const tickets = new Map<string, z.infer<typeof Ticket>>();
-				const routeOf = (route: { entry: z.infer<typeof ProviderEntry>; key: string }) => {
+				const held = new Map<string, Resolved>();
+				/** The route over the entry's incarnation as it stands now. */
+				const standing = (route: { entry: z.infer<typeof ProviderEntry>; key: string }) => {
 					name(route.entry.id);
-					return route as unknown as Resolved;
+					const incarnation = entries.incarnation(route.entry.id) ?? leftIncarnation(route.entry);
+					return { entry: route.entry, key: route.key, incarnation } as unknown as Resolved;
+				};
+				const routeOf = (route: { entry: z.infer<typeof ProviderEntry>; key: string; taken?: string }) => {
+					if (route.taken === undefined) return standing(route);
+					name(route.entry.id);
+					const taken = held.get(route.taken);
+					if (taken === undefined) throw new Error(`No route taken as ${route.taken}.`);
+					return taken;
 				};
 				const steps: Array<z.infer<ReturnType<typeof Outcome>>> = [];
 				for (const step of input.steps) {
@@ -263,6 +278,8 @@ export const health = caseGroup("health", {
 					const seenBefore = new Set(holds.filter((held) => held.seen));
 					if (step.kind === "hold") {
 						arm(step.at);
+					} else if (step.kind === "take") {
+						held.set(step.name, standing(step.route));
 					} else if (step.kind === "release") {
 						const held = holds[step.hold - 1];
 						if (held === undefined) throw new Error(`No hold ${step.hold}.`);
@@ -359,6 +376,7 @@ export const health = caseGroup("health", {
 						held.release(held.at === "check" ? { state: { kind: "none" } } : { answer: { kind: "none" } });
 				await health.idle();
 				health.dispose();
+				entries.dispose();
 				return {
 					steps,
 					requests: net.played.requests.map((sent) => sent.url),
@@ -433,15 +451,23 @@ export const health = caseGroup("health", {
 					const tell = (id: string) => {
 						for (const listener of [...listeners]) listener(id);
 					};
+					const entries = new EntryRegistry({
+						list: scriptedProviderList(row.listed === false ? [] : [row.entry]),
+						keys,
+					});
 					const health = new ProviderHealth({
 						scheduler: net.scheduler,
 						ids: countedIds("gate-"),
-						list: scriptedProviderList(row.listed === false ? [] : [row.entry]),
+						entries,
 						keys,
 						kinds: KINDS,
 						kindDeps: () => net.deps,
 					});
-					const route = { entry: row.entry, key: "lab/model-a" } as unknown as Resolved;
+					const route = {
+						entry: row.entry,
+						key: "lab/model-a",
+						incarnation: entries.incarnation(row.entry.id) ?? leftIncarnation(row.entry),
+					} as unknown as Resolved;
 					if (row.prepare === "checking") health.check(row.entry.id);
 					else if (row.prepare === "ok") {
 						health.check(row.entry.id);
@@ -465,6 +491,7 @@ export const health = caseGroup("health", {
 					await health.idle();
 					const statusAfter = health.status(row.entry.id);
 					health.dispose();
+					entries.dispose();
 					rows.push({
 						status,
 						answers,

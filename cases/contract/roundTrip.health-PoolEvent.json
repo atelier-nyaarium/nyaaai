@@ -13,8 +13,8 @@
 			"{\"kind\":\"refused\",\"reason\":\"credit\",\"resetsAt\":1794528001000,\"retryAfterMs\":60000}",
 			"{\"kind\":\"extraUsage\",\"on\":true}",
 			"{\"kind\":\"extraUsage\",\"on\":false,\"lastBill\":\"balance\"}",
-			"{\"kind\":\"admitted\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1}}",
-			"{\"kind\":\"settled\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":3,\"probe\":true,\"serial\":7}}",
+			"{\"kind\":\"admitted\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"era\":1,\"generation\":0,\"probe\":false,\"serial\":1}}",
+			"{\"kind\":\"settled\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"era\":2,\"generation\":3,\"probe\":true,\"serial\":7}}",
 			"{\"kind\":\"billed\",\"source\":\"balance\"}",
 			"{\"kind\":\"refused\",\"reason\":\"other\"}",
 			"{\"kind\":\"refused\"}",
@@ -52,11 +52,11 @@
 			},
 			{
 				"ok": true,
-				"text": "{\"kind\":\"admitted\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1}}"
+				"text": "{\"kind\":\"admitted\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"era\":1,\"generation\":0,\"probe\":false,\"serial\":1}}"
 			},
 			{
 				"ok": true,
-				"text": "{\"kind\":\"settled\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":3,\"probe\":true,\"serial\":7}}"
+				"text": "{\"kind\":\"settled\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"era\":2,\"generation\":3,\"probe\":true,\"serial\":7}}"
 			},
 			{
 				"ok": false,

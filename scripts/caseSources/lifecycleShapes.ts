@@ -14,7 +14,7 @@ const lifecycle = (shape: string, texts: Text[]): CaseSource => ({
 	},
 });
 
-const ticket = { gate: "g1", model: "m1", generation: 0, probe: false, serial: 1 };
+const ticket = { gate: "g1", model: "m1", era: 1, generation: 0, probe: false, serial: 1 };
 const failure = { category: "overloaded", status: 429, message: "Busy.", retryAfterMs: 5000 };
 const call = {
 	tag: { feature: "chat" },

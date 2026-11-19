@@ -214,6 +214,7 @@
 					"ticket": {
 						"gate": "gate-1",
 						"model": "go\nlab/model-a",
+						"era": 1,
 						"generation": 0,
 						"probe": false,
 						"serial": 1
@@ -241,6 +242,7 @@
 								"ticket": {
 									"gate": "gate-1",
 									"model": "go\nlab/model-a",
+									"era": 1,
 									"generation": 0,
 									"probe": false,
 									"serial": 1
@@ -279,6 +281,7 @@
 								"ticket": {
 									"gate": "gate-1",
 									"model": "go\nlab/model-a",
+									"era": 1,
 									"generation": 0,
 									"probe": false,
 									"serial": 1
@@ -313,6 +316,7 @@
 								"ticket": {
 									"gate": "gate-1",
 									"model": "go\nlab/model-a",
+									"era": 1,
 									"generation": 0,
 									"probe": false,
 									"serial": 1
@@ -348,6 +352,7 @@
 								"ticket": {
 									"gate": "gate-1",
 									"model": "go\nlab/model-a",
+									"era": 1,
 									"generation": 0,
 									"probe": false,
 									"serial": 1

@@ -11,6 +11,8 @@ export const Ticket = z.object({
 	/** The issuing gate's name. */
 	gate: z.string(),
 	model: z.string(),
+	/** The key era of its gate rows. */
+	era: z.int().min(0),
 	/** Bumped by every reopening of the gate. */
 	generation: z.int().min(0),
 	probe: z.boolean(),
@@ -23,6 +25,8 @@ export const Admission = z.discriminatedUnion("kind", [
 	z.object({ kind: z.literal("go"), ticket: Ticket }),
 	z.object({ kind: z.literal("gaveUp") }),
 	z.object({ kind: z.literal("stopped") }),
+	/** Its incarnation ended, or its era retired. */
+	z.object({ kind: z.literal("retired") }),
 ]);
 export type Admission = z.infer<typeof Admission>;
 

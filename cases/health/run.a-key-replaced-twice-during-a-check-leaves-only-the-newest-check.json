@@ -1,0 +1,235 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.run",
+	"name": "a-key-replaced-twice-during-a-check-leaves-only-the-newest-check",
+	"input": {
+		"startMs": 2000000,
+		"entries": [
+			{
+				"id": "main",
+				"kind": "openrouter",
+				"label": "Main"
+			}
+		],
+		"keys": {
+			"main": {
+				"kind": "key",
+				"key": "fake-key-one"
+			}
+		},
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"usage": 2
+					}
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"usage": 3
+					}
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "hold",
+				"at": "check"
+			},
+			{
+				"kind": "check",
+				"id": "main"
+			},
+			{
+				"kind": "key",
+				"id": "main",
+				"answer": {
+					"kind": "key",
+					"key": "fake-key-two"
+				}
+			},
+			{
+				"kind": "key",
+				"id": "main",
+				"answer": {
+					"kind": "key",
+					"key": "fake-key-three"
+				}
+			},
+			{
+				"kind": "release",
+				"hold": 1,
+				"state": {
+					"kind": "ok",
+					"usage": 9
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0,
+				"parked": []
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "main",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "checking"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0,
+				"parked": [
+					1
+				]
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "main",
+						"changed": [
+							"key"
+						]
+					},
+					{
+						"entry": "main",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "ok",
+							"usage": 2
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 1,
+				"parked": [
+					1
+				]
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "main",
+						"changed": [
+							"key"
+						]
+					},
+					{
+						"entry": "main",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "ok",
+							"usage": 3
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 2,
+				"parked": [
+					1
+				]
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "ok",
+							"usage": 3
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 2,
+				"parked": []
+			}
+		],
+		"requests": [
+			"https://openrouter.ai/api/v1/key",
+			"https://openrouter.ai/api/v1/key"
+		],
+		"waiting": []
+	}
+}

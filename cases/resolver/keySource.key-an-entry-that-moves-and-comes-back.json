@@ -62,7 +62,7 @@
 		"gets": [
 			"fake-key-one",
 			null,
-			"fake-key-one"
+			null
 		]
 	}
 }

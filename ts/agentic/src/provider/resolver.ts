@@ -2,7 +2,6 @@
 
 import type { EntryKeys, KeyAnswer } from "@nyaaai/contract/entryKeys";
 import type { ModelRegistry } from "@nyaaai/contract/modelRegistry";
-import type { ProviderList } from "@nyaaai/contract/providerList";
 import type { Binding, ModelRow, ModelUse, ModelView, Refusal, Unresolved, Via } from "@nyaaai/contract/shapes/model";
 import type { KeyReach, Passed, ProviderEntry, ProviderKindName, SkipReason } from "@nyaaai/contract/shapes/provider";
 import type { Codec } from "../codec";
@@ -10,6 +9,7 @@ import { joinAll } from "../kinds/join";
 import { parseRowKey, servedIdOf } from "../models/rowKey";
 import { unknownView } from "../models/view";
 import type { KeySource, Transport } from "../transport";
+import { type EntryRegistry, type Incarnation, identityOf, type Made, type RegistryEvent } from "./incarnation";
 import type { KindDeps, ProviderKind, Route } from "./kind";
 
 ////////////////////////////////
@@ -23,7 +23,10 @@ export interface Catalog {
 export interface Resolved {
 	ok: true;
 	key: string;
+	/** The row when resolved. */
 	entry: ProviderEntry;
+	/** Sends nothing once it ended. */
+	incarnation: Incarnation;
 	kind: ProviderKind;
 	binding: Binding;
 	/** The serving entry's price, context and efforts. */
@@ -64,9 +67,10 @@ export type Served = ResolvedOption & { via: Via };
 
 /** What a resolver stands on. */
 export interface ResolverDeps {
-	/** List order is priority order. */
-	list: ProviderList;
-	keys: EntryKeys;
+	/** Incarnations in priority order. */
+	entries: EntryRegistry;
+	/** Key reads go through it. */
+	keys: Pick<EntryKeys, "get">;
 	registry: Pick<ModelRegistry, "rows" | "onChange">;
 	kinds: Partial<Record<ProviderKindName, ProviderKind>>;
 	/** What a kind's transport stands on. */
@@ -122,11 +126,6 @@ export function viaOf(entry: ProviderEntry): Via {
 	return { entry: entry.id, label: entry.label };
 }
 
-/** What identifies a route: id, kind, plan and URL. */
-export function routeKey(entry: ProviderEntry): string {
-	return [entry.id, entry.kind, entry.plan ?? "", entry.url ?? ""].join("\n");
-}
-
 /** A URL kind needs no key; a key kind needs one. */
 export function reachOf(kind: Pick<ProviderKind, "field">, answer: KeyAnswer): KeyReach {
 	switch (answer.kind) {
@@ -141,14 +140,12 @@ export function reachOf(kind: Pick<ProviderKind, "field">, answer: KeyAnswer): K
 	}
 }
 
-/** One route's key, given only while the list holds the same id, kind, plan and URL. */
-export function keySourceOf(keys: EntryKeys, list: ProviderList, entry: ProviderEntry): KeySource {
+/** The key, only while its incarnation lives. */
+export function keySourceOf(keys: Pick<EntryKeys, "get">, incarnation: Incarnation): KeySource {
 	return {
 		get: async () => {
-			const answer = await keys.get(entry.id).catch((): KeyAnswer => ({ kind: "unready" }));
-			const listed = list.entries().find((each) => each.id === entry.id);
-			if (listed === undefined || routeKey(listed) !== routeKey(entry)) return undefined;
-			return answer.kind === "key" ? answer.key : undefined;
+			const answer = await keys.get(incarnation.id).catch((): KeyAnswer => ({ kind: "unready" }));
+			return incarnation.live && answer.kind === "key" ? answer.key : undefined;
 		},
 	};
 }
@@ -207,7 +204,7 @@ function disposed(catalog: Route["catalog"]): void {
 
 /** Resolves through one entry. */
 export function servedBy(d: {
-	entry: ProviderEntry;
+	incarnation: Incarnation;
 	kind: ProviderKind;
 	transport: Resolved["transport"];
 	catalog: Catalog;
@@ -217,11 +214,13 @@ export function servedBy(d: {
 	const { zdrOnly } = d;
 	return async (key, use) => {
 		const view = (await d.catalog.view(key, use)) ?? unknownView(adhocRow(key, d.kind.kind));
-		const codec = d.kind.codec(view, d.entry, d.deps);
+		const { entry } = d.incarnation;
+		const codec = d.kind.codec(view, entry, d.deps);
 		const route: Resolved = {
 			ok: true,
 			key,
-			entry: d.entry,
+			entry,
+			incarnation: d.incarnation,
 			kind: d.kind,
 			binding: view.row.bindings[d.kind.kind] ?? { id: key },
 			view,
@@ -240,12 +239,11 @@ export function servedBy(d: {
 
 /** Routes keys across entries; holds one route per entry as it stands. */
 export class ModelResolver {
-	private readonly made = new Map<string, { route: Route; deps: KindDeps }>();
 	private readonly unsubscribe: () => void;
 	private closed = false;
 
 	constructor(private readonly d: ResolverDeps) {
-		this.unsubscribe = d.list.onChange(() => this.drop());
+		this.unsubscribe = d.entries.watch((events) => this.observe(events));
 	}
 
 	/** Stops listening; the routes go; nothing is built after. */
@@ -253,37 +251,40 @@ export class ModelResolver {
 		if (this.closed) return;
 		this.closed = true;
 		this.unsubscribe();
-		for (const held of this.made.values()) disposed(held.route.catalog);
-		this.made.clear();
+		for (const incarnation of this.d.entries.incarnations()) this.release(incarnation);
 	}
 
-	/** The entry's route, made once per id, kind, plan and URL. */
+	/** The incarnation's route, made once. */
 	route(entry: ProviderEntry): Route {
-		return this.held(entry).route;
+		if (this.closed) throw new Error("The resolver is disposed.");
+		const incarnation = this.d.entries.incarnation(entry.id);
+		if (incarnation === undefined || incarnation.identity !== identityOf(entry))
+			throw new Error("The entry is not listed.");
+		return this.held(incarnation).route;
 	}
 
-	private held(entry: ProviderEntry): { route: Route; deps: KindDeps } {
+	private held(incarnation: Incarnation): Made {
 		if (this.closed) throw new Error("The resolver is disposed.");
-		const at = routeKey(entry);
-		const known = this.made.get(at);
-		if (known !== undefined) return known;
+		if (incarnation.made !== undefined) return incarnation.made;
+		const { entry } = incarnation;
 		const kind = this.d.kinds[entry.kind];
 		if (kind === undefined) throw new Error(`No ${entry.kind} provider kind.`);
 		const deps = this.d.kindDeps(entry.kind);
-		const transport = kind.transport(entry, keySourceOf(this.d.keys, this.d.list, entry), deps);
+		const transport = kind.transport(entry, keySourceOf(this.d.keys, incarnation), deps);
 		const catalog = kind.catalog(entry, transport, {
 			scheduler: deps.scheduler,
 			rows: this.d.registry,
-			refreshed: () => this.d.refreshed?.(this.listedAs(entry) ?? entry),
+			refreshed: () => this.d.refreshed?.(incarnation.entry),
 		});
-		const made = { route: { transport, catalog }, deps };
-		this.made.set(at, made);
-		return made;
+		incarnation.made = { route: { transport, catalog }, deps };
+		return incarnation.made;
 	}
 
-	/** The entry as the list holds it, when it is the route's. */
-	private listedAs(entry: ProviderEntry): ProviderEntry | undefined {
-		return this.d.list.entries().find((each) => routeKey(each) === routeKey(entry));
+	/** Stops its route. */
+	private release(incarnation: Incarnation): void {
+		if (incarnation.made === undefined) return;
+		disposed(incarnation.made.route.catalog);
+		incarnation.made = undefined;
 	}
 
 	/** What a key says of one entry. */
@@ -333,14 +334,9 @@ export class ModelResolver {
 		return (await this.rows(use)).filter((option): option is Served => option.via !== undefined);
 	}
 
-	/** Drops routes of unlisted entries. */
-	private drop(): void {
-		const listed = new Set(this.d.list.entries().map(routeKey));
-		for (const [at, held] of this.made) {
-			if (listed.has(at)) continue;
-			this.made.delete(at);
-			disposed(held.route.catalog);
-		}
+	/** Drops routes of ended incarnations. */
+	private observe(events: RegistryEvent[]): void {
+		for (const event of events) if (event.kind === "retired") this.release(event.incarnation);
 	}
 
 	/** Key check per read. */
@@ -368,10 +364,13 @@ export class ModelResolver {
 		let matched = false;
 		const found: Resolved[] = [];
 		const passed: Passed[] = [];
-		const listed = this.closed ? [] : this.d.list.entries();
+		const listed = this.closed
+			? []
+			: this.d.entries.incarnations().map((each) => ({ incarnation: each, entry: each.entry }));
 		const owner = row.identity.kind === "local" ? row.identity.entry : undefined;
-		if (owner !== undefined && !listed.some((each) => each.id === owner)) return { ok: false, refusal: "noModel" };
-		for (const entry of listed) {
+		if (owner !== undefined && !listed.some((each) => each.entry.id === owner))
+			return { ok: false, refusal: "noModel" };
+		for (const { incarnation, entry } of listed) {
 			if (found.length > 0 && !all) break;
 			const kind = this.d.kinds[entry.kind];
 			const binding = row.bindings[entry.kind];
@@ -382,7 +381,7 @@ export class ModelResolver {
 			try {
 				const reached = await this.bounded(reach(entry), bound);
 				if (reached === OUT) continue;
-				if (!this.stands(entry)) continue;
+				if (this.closed || !incarnation.live) continue;
 				matched = true;
 				if (reached !== "ok") {
 					passed.push({
@@ -391,12 +390,12 @@ export class ModelResolver {
 						reason: REACH_SKIPS[reached],
 						before: found.length,
 					});
-					const held = standing && worst.view === undefined ? this.tried(entry) : undefined;
+					const held = standing && worst.view === undefined ? this.tried(incarnation) : undefined;
 					const behind = held === undefined ? undefined : await this.viewOf(held.route, row, use, zdrOnly);
 					worst = raised(worst, reached, behind, entry.label);
 					continue;
 				}
-				const held = this.tried(entry);
+				const held = this.tried(incarnation);
 				if (held === undefined) {
 					passed.push({ entry: entry.id, label: entry.label, reason: "network", before: found.length });
 					worst = raised(worst, "unreachable", undefined, entry.label);
@@ -415,6 +414,7 @@ export class ModelResolver {
 					ok: true,
 					key: row.key,
 					entry,
+					incarnation,
 					kind,
 					binding,
 					view,
@@ -433,15 +433,10 @@ export class ModelResolver {
 		return matched ? { ok: false, ...worst } : { ok: false, refusal: "keyMissing" };
 	}
 
-	/** The entry is still listed as it was. */
-	private stands(entry: ProviderEntry): boolean {
-		return !this.closed && this.d.list.entries().some((each) => routeKey(each) === routeKey(entry));
-	}
-
 	/** The route, or none when it cannot be made. */
-	private tried(entry: ProviderEntry): { route: Route; deps: KindDeps } | undefined {
+	private tried(incarnation: Incarnation): Made | undefined {
 		try {
-			return this.held(entry);
+			return this.held(incarnation);
 		} catch {
 			return undefined;
 		}

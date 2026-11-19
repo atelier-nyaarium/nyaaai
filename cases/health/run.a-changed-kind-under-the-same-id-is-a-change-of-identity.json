@@ -199,6 +199,7 @@
 						"entry": "main",
 						"changed": [
 							"key",
+							"billed",
 							"waiting"
 						]
 					},
@@ -214,10 +215,6 @@
 						"entry": "main",
 						"key": {
 							"kind": "ok"
-						},
-						"billed": {
-							"billing": "go",
-							"allowance": 1
 						},
 						"pool": {
 							"kind": "clear"

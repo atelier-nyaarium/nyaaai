@@ -7,11 +7,13 @@
 		"set": "health",
 		"shape": "Admission",
 		"texts": [
-			"{\"kind\":\"go\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1}}",
-			"{\"kind\":\"go\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":3,\"probe\":true,\"serial\":7},\"extra\":1}",
+			"{\"kind\":\"go\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"era\":1,\"generation\":0,\"probe\":false,\"serial\":1}}",
+			"{\"kind\":\"go\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"era\":2,\"generation\":3,\"probe\":true,\"serial\":7},\"extra\":1}",
 			"{\"kind\":\"gaveUp\"}",
 			"{\"kind\":\"stopped\"}",
-			"{\"kind\":\"stopped\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1}}",
+			"{\"kind\":\"stopped\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"era\":1,\"generation\":0,\"probe\":false,\"serial\":1}}",
+			"{\"kind\":\"retired\"}",
+			"{\"kind\":\"retired\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"era\":1,\"generation\":0,\"probe\":false,\"serial\":1}}",
 			"{\"kind\":\"go\"}",
 			"{\"kind\":\"go\",\"ticket\":{\"model\":\"m1\"}}",
 			"{\"kind\":\"wait\"}",
@@ -22,11 +24,11 @@
 		"results": [
 			{
 				"ok": true,
-				"text": "{\"kind\":\"go\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1}}"
+				"text": "{\"kind\":\"go\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"era\":1,\"generation\":0,\"probe\":false,\"serial\":1}}"
 			},
 			{
 				"ok": true,
-				"text": "{\"kind\":\"go\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":3,\"probe\":true,\"serial\":7}}"
+				"text": "{\"kind\":\"go\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"era\":2,\"generation\":3,\"probe\":true,\"serial\":7}}"
 			},
 			{
 				"ok": true,
@@ -39,6 +41,14 @@
 			{
 				"ok": true,
 				"text": "{\"kind\":\"stopped\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"retired\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"retired\"}"
 			},
 			{
 				"ok": false,

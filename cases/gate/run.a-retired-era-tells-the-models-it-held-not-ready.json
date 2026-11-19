@@ -2,28 +2,30 @@
 	"format": 2,
 	"type": "function",
 	"kind": "gate.run",
-	"name": "clear-leaves-an-open-gate-and-its-generation",
+	"name": "a-retired-era-tells-the-models-it-held-not-ready",
 	"input": {
 		"startMs": 1000000,
 		"steps": [
 			{
 				"kind": "admit",
 				"request": "a",
-				"model": "lab/model-a"
+				"model": "one\nlab/model-a",
+				"book": "one"
 			},
 			{
 				"kind": "settle",
 				"request": "a",
-				"outcome": "ok"
-			},
-			{
-				"kind": "clear",
-				"prefix": ""
+				"outcome": "overloaded"
 			},
 			{
 				"kind": "admit",
-				"request": "b",
-				"model": "lab/model-a"
+				"request": "w",
+				"model": "one\nlab/model-a",
+				"book": "one"
+			},
+			{
+				"kind": "retire",
+				"book": "one"
 			}
 		]
 	},
@@ -40,7 +42,8 @@
 							"kind": "go",
 							"ticket": {
 								"gate": "gate-1",
-								"model": "lab/model-a",
+								"model": "one\nlab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": false,
 								"serial": 1
@@ -53,7 +56,7 @@
 				"told": [],
 				"gates": [
 					{
-						"model": "lab/model-a",
+						"model": "one\nlab/model-a",
 						"gate": {
 							"phase": "open",
 							"generation": 0,
@@ -68,49 +71,77 @@
 			},
 			{
 				"nowMs": 1000000,
-				"settled": "done",
+				"settled": "again",
 				"ticket": null,
 				"resolved": [],
 				"inside": [],
 				"waits": [],
-				"told": [],
+				"told": [
+					"one\nlab/model-a"
+				],
 				"gates": [
 					{
-						"model": "lab/model-a",
+						"model": "one\nlab/model-a",
 						"gate": {
-							"phase": "open",
+							"phase": "paused",
 							"generation": 0,
-							"pauses": 0,
-							"resumeAt": 0,
+							"pauses": 1,
+							"resumeAt": 1060000,
 							"probe": null,
 							"queued": 0
 						}
 					}
 				],
-				"holding": []
+				"holding": [
+					"one\nlab/model-a"
+				]
 			},
 			{
 				"nowMs": 1000000,
 				"settled": null,
 				"ticket": null,
 				"resolved": [],
-				"inside": [],
-				"waits": [],
-				"told": [],
-				"gates": [
+				"inside": [
 					{
-						"model": "lab/model-a",
+						"request": "w",
 						"gate": {
-							"phase": "open",
+							"phase": "paused",
 							"generation": 0,
-							"pauses": 0,
-							"resumeAt": 0,
+							"pauses": 1,
+							"resumeAt": 1060000,
 							"probe": null,
-							"queued": 0
+							"queued": 1
 						}
 					}
 				],
-				"holding": []
+				"waits": [
+					{
+						"request": "w",
+						"waiting": {
+							"model": "one\nlab/model-a",
+							"resumeAt": 1060000,
+							"pause": 1,
+							"of": 10
+						}
+					}
+				],
+				"told": [],
+				"gates": [
+					{
+						"model": "one\nlab/model-a",
+						"gate": {
+							"phase": "paused",
+							"generation": 0,
+							"pauses": 1,
+							"resumeAt": 1060000,
+							"probe": null,
+							"queued": 1
+						}
+					}
+				],
+				"holding": [
+					"one\nlab/model-a"
+				]
 			},
 			{
 				"nowMs": 1000000,
@@ -118,33 +149,21 @@
 				"ticket": null,
 				"resolved": [
 					{
-						"request": "b",
+						"request": "w",
 						"admission": {
-							"kind": "go",
-							"ticket": {
-								"gate": "gate-1",
-								"model": "lab/model-a",
-								"generation": 0,
-								"probe": false,
-								"serial": 2
-							}
+							"kind": "retired"
 						}
 					}
 				],
 				"inside": [],
 				"waits": [],
-				"told": [],
+				"told": [
+					"one\nlab/model-a"
+				],
 				"gates": [
 					{
-						"model": "lab/model-a",
-						"gate": {
-							"phase": "open",
-							"generation": 0,
-							"pauses": 0,
-							"resumeAt": 0,
-							"probe": null,
-							"queued": 0
-						}
+						"model": "one\nlab/model-a",
+						"gate": null
 					}
 				],
 				"holding": []

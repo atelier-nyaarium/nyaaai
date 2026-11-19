@@ -2,7 +2,7 @@
 	"format": 2,
 	"type": "function",
 	"kind": "gate.run",
-	"name": "clear-takes-the-probe-away-from-a-probing-gate",
+	"name": "retire-takes-the-probe-away-from-a-probing-gate",
 	"input": {
 		"startMs": 1000000,
 		"steps": [
@@ -26,8 +26,7 @@
 				"ms": 60000
 			},
 			{
-				"kind": "clear",
-				"prefix": ""
+				"kind": "retire"
 			},
 			{
 				"kind": "settle",
@@ -55,6 +54,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": false,
 								"serial": 1
@@ -166,6 +166,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 2
@@ -187,6 +188,7 @@
 							"probe": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 2
@@ -212,21 +214,14 @@
 				"gates": [
 					{
 						"model": "lab/model-a",
-						"gate": {
-							"phase": "open",
-							"generation": 1,
-							"pauses": 0,
-							"resumeAt": 1060000,
-							"probe": null,
-							"queued": 0
-						}
+						"gate": null
 					}
 				],
 				"holding": []
 			},
 			{
 				"nowMs": 1060000,
-				"settled": "again",
+				"settled": "done",
 				"ticket": null,
 				"resolved": [],
 				"inside": [],
@@ -235,14 +230,7 @@
 				"gates": [
 					{
 						"model": "lab/model-a",
-						"gate": {
-							"phase": "open",
-							"generation": 1,
-							"pauses": 0,
-							"resumeAt": 1060000,
-							"probe": null,
-							"queued": 0
-						}
+						"gate": null
 					}
 				],
 				"holding": []
@@ -259,7 +247,8 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
-								"generation": 1,
+								"era": 2,
+								"generation": 0,
 								"probe": false,
 								"serial": 3
 							}
@@ -274,9 +263,9 @@
 						"model": "lab/model-a",
 						"gate": {
 							"phase": "open",
-							"generation": 1,
+							"generation": 0,
 							"pauses": 0,
-							"resumeAt": 1060000,
+							"resumeAt": 0,
 							"probe": null,
 							"queued": 0
 						}

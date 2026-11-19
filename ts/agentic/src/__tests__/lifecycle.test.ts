@@ -48,6 +48,7 @@ function routeOf(): Candidates {
 		ok: true,
 		key: "m",
 		entry,
+		incarnation: { live: true },
 		kind: { failure: () => ({ act: "retry" }) },
 		view: { row: { label: "M" }, status: "ok", efforts: [], hosts: [] },
 		zdrOnly: false,

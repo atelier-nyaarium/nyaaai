@@ -1,8 +1,8 @@
 {
 	"format": 2,
 	"type": "function",
-	"kind": "resolver.routeKey",
-	"name": "route-key-no-two-fields-run-together",
+	"kind": "resolver.identity",
+	"name": "identity-no-two-fields-run-together",
 	"input": {
 		"entries": [
 			{
@@ -31,11 +31,11 @@
 		]
 	},
 	"expected": {
-		"keys": [
-			"a\nopencode\ngo\n",
-			"a\nollama\n\ngo",
-			"a\nollama\n\ngo",
-			"ago\nopenrouter\n\n"
+		"identities": [
+			"[\"opencode\",\"go\",null]",
+			"[\"ollama\",null,\"go\"]",
+			"[\"ollama\",null,\"go\"]",
+			"[\"openrouter\",null,null]"
 		]
 	}
 }

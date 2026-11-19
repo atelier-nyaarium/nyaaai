@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex, MutexGuard};
 use std::task::{Context, Poll, Waker};
 
-use nyaaai_agentic::health::gate::{GateDeps, GateState, Phase, ProviderGate, WaitFn};
+use nyaaai_agentic::health::gate::{GateBook, GateDeps, GateState, Phase, ProviderGate, WaitFn};
 use nyaaai_contract::cancel::CancelToken;
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::id::CountedIds;
@@ -19,6 +19,68 @@ fn locked<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
     mutex
         .lock()
         .unwrap_or_else(|poisoned| poisoned.into_inner())
+}
+
+/// The books a script names; a book's era is counted from 1 as books are first used.
+#[derive(Default)]
+struct Books {
+    named: HashMap<String, Arc<GateBook>>,
+    by_era: HashMap<u64, Arc<GateBook>>,
+    eras: u64,
+    /// The book each model was first used in.
+    homes: HashMap<String, String>,
+}
+
+const MAIN: &str = "main";
+
+impl Books {
+    fn book_of(&mut self, name: Option<&str>) -> Arc<GateBook> {
+        let name = name.unwrap_or(MAIN);
+        if let Some(book) = self.named.get(name) {
+            return Arc::clone(book);
+        }
+        self.eras += 1;
+        let book = Arc::new(GateBook::new(self.eras, name.to_owned()));
+        self.named.insert(name.to_owned(), Arc::clone(&book));
+        self.by_era.insert(self.eras, Arc::clone(&book));
+        book
+    }
+
+    fn use_in(&mut self, model: &str, name: Option<&str>) {
+        self.homes
+            .insert(model.to_owned(), name.unwrap_or(MAIN).to_owned());
+    }
+
+    /// The book a ticket's era names, else the main one.
+    fn book_for(&mut self, ticket: &Ticket) -> Arc<GateBook> {
+        match self.by_era.get(&ticket.era) {
+            Some(book) => Arc::clone(book),
+            None => self.book_of(None),
+        }
+    }
+
+    fn live(&self, name: Option<&str>) -> Option<Arc<GateBook>> {
+        self.named.get(name.unwrap_or(MAIN)).cloned()
+    }
+
+    fn home(&self, model: &str) -> Option<String> {
+        self.homes.get(model).cloned()
+    }
+}
+
+fn state_in(
+    gate: &ProviderGate,
+    books: &Mutex<Books>,
+    model: &str,
+    name: Option<&str>,
+) -> Option<GateState> {
+    let book = locked(books).live(name)?;
+    gate.state_of(&book, model)
+}
+
+fn state_of_model(gate: &ProviderGate, books: &Mutex<Books>, model: &str) -> Option<GateState> {
+    let home = locked(books).home(model);
+    state_in(gate, books, model, home.as_deref())
 }
 
 /// What the script knows of its requests: queues and who just stopped.
@@ -136,12 +198,19 @@ async fn play(input: GateRunInput) -> Outcome<GateRunResult> {
     let mut order: Vec<String> = Vec::new();
     {
         let told = Arc::clone(&told);
-        drop(gate.on_change(Box::new(move |model| locked(&told).push(model.to_owned()))));
+        drop(gate.on_change(Box::new(move |_owner, model| {
+            locked(&told).push(model.to_owned())
+        })));
     }
     let mut models: Vec<String> = Vec::new();
     let mut steps = Vec::new();
     let mut disposed = false;
-    let queued_of = |model: &str| gate.state_of(model).map_or(0, |held| held.queued);
+    let books: Arc<Mutex<Books>> = Arc::default();
+    let queued_of = |model: &str, name: Option<&str>| {
+        state_in(&gate, &books, model, name).map_or(0, |held| held.queued)
+    };
+    let queued_home =
+        |model: &str| state_of_model(&gate, &books, model).map_or(0, |held| held.queued);
     for step in &input.steps {
         let mut settled = None;
         let mut ticket = None;
@@ -150,6 +219,7 @@ async fn play(input: GateRunInput) -> Outcome<GateRunResult> {
                 if !models.contains(&held.model) {
                     models.push(held.model.clone());
                 }
+                locked(&books).use_in(&held.model, held.book.as_deref());
                 let token = CancelToken::new();
                 locked(&mirror)
                     .tokens
@@ -166,24 +236,34 @@ async fn play(input: GateRunInput) -> Outcome<GateRunResult> {
                         }),
                     );
                 }
-                let before = queued_of(&held.model);
+                let before = queued_of(&held.model, held.book.as_deref());
                 let on_wait: WaitFn = {
                     let (waits, request) = (Arc::clone(&waits), held.request.clone());
-                    let (gate, inside, tickets) =
-                        (Arc::clone(&gate), Arc::clone(&inside), Arc::clone(&tickets));
-                    let (model, action) = (held.model.clone(), held.inside);
+                    let (gate, inside, tickets, books) = (
+                        Arc::clone(&gate),
+                        Arc::clone(&inside),
+                        Arc::clone(&tickets),
+                        Arc::clone(&books),
+                    );
+                    let (model, action, name) =
+                        (held.model.clone(), held.inside, held.book.clone());
                     Arc::new(move |waiting| {
                         locked(&waits).push((request.clone(), waiting));
-                        locked(&inside).push((request.clone(), gate.state_of(&model)));
+                        locked(&inside)
+                            .push((request.clone(), state_of_model(&gate, &books, &model)));
+                        let book = locked(&books).book_of(name.as_deref());
                         match action {
-                            Some(GateRunInputStepsItemAdmitInside::Cool) => gate.cool(&model, None),
+                            Some(GateRunInputStepsItemAdmitInside::Cool) => {
+                                gate.cool(&book, &model, None);
+                            }
                             Some(GateRunInputStepsItemAdmitInside::TryAdmit) => {
-                                let _ = gate.try_admit(&model);
+                                let _ = gate.try_admit(&book, &model);
                             }
                             Some(GateRunInputStepsItemAdmitInside::SettleTrigger) => {
                                 let held = locked(&tickets).get("trigger").cloned();
                                 if let Some(held) = held {
-                                    gate.settle(&held, GateOutcome::Overloaded, None);
+                                    let book = locked(&books).book_for(&held);
+                                    gate.settle(&book, &held, GateOutcome::Overloaded, None);
                                 }
                             }
                             None => {}
@@ -191,10 +271,12 @@ async fn play(input: GateRunInput) -> Outcome<GateRunResult> {
                     })
                 };
                 let again = held.again == Some(true);
-                let admission = Box::pin(gate.admit(&held.model, &token, Some(on_wait), again));
+                let book = locked(&books).book_of(held.book.as_deref());
+                let admission =
+                    Box::pin(gate.admit(&book, &held.model, &token, Some(on_wait), again));
                 pending.insert(held.request.clone(), admission);
                 order.push(held.request.clone());
-                if queued_of(&held.model) > before {
+                if queued_of(&held.model, held.book.as_deref()) > before {
                     let mut mirror = locked(&mirror);
                     let at = match mirror
                         .queues
@@ -221,7 +303,9 @@ async fn play(input: GateRunInput) -> Outcome<GateRunResult> {
                 if !models.contains(&held.model) {
                     models.push(held.model.clone());
                 }
-                ticket = gate.try_admit(&held.model);
+                locked(&books).use_in(&held.model, held.book.as_deref());
+                let book = locked(&books).book_of(held.book.as_deref());
+                ticket = gate.try_admit(&book, &held.model);
                 if let Some(ticket) = &ticket {
                     locked(&tickets).insert(held.request.clone(), ticket.clone());
                 }
@@ -234,7 +318,14 @@ async fn play(input: GateRunInput) -> Outcome<GateRunResult> {
                 if !models.contains(&ticket.model) {
                     models.push(ticket.model.clone());
                 }
+                {
+                    let mut books = locked(&books);
+                    let home = books.home(&ticket.model);
+                    books.use_in(&ticket.model, home.as_deref());
+                }
+                let book = locked(&books).book_for(&ticket);
                 settled = Some(gate.settle(
+                    &book,
                     &ticket,
                     held.outcome,
                     held.retry_after_ms.map(|after| after as i64),
@@ -244,16 +335,32 @@ async fn play(input: GateRunInput) -> Outcome<GateRunResult> {
                 if !models.contains(&held.ticket.model) {
                     models.push(held.ticket.model.clone());
                 }
-                settled = Some(gate.settle(&held.ticket, held.outcome, None));
+                {
+                    let mut books = locked(&books);
+                    let home = books.home(&held.ticket.model);
+                    books.use_in(&held.ticket.model, home.as_deref());
+                }
+                let book = locked(&books).book_for(&held.ticket);
+                settled = Some(gate.settle(&book, &held.ticket, held.outcome, None));
             }
             GateRunInputStepsItem::Cool(held) => {
                 if !models.contains(&held.model) {
                     models.push(held.model.clone());
                 }
-                gate.cool(&held.model, held.retry_after_ms.map(|after| after as i64));
+                locked(&books).use_in(&held.model, held.book.as_deref());
+                let book = locked(&books).book_of(held.book.as_deref());
+                gate.cool(
+                    &book,
+                    &held.model,
+                    held.retry_after_ms.map(|after| after as i64),
+                );
             }
-            GateRunInputStepsItem::Clear(held) => {
-                gate.clear(|model| model.starts_with(&held.prefix));
+            GateRunInputStepsItem::Retire(held) => {
+                let book = locked(&books).book_of(held.book.as_deref());
+                gate.retire(&book);
+                locked(&books)
+                    .named
+                    .remove(held.book.as_deref().unwrap_or(MAIN));
             }
             GateRunInputStepsItem::Advance(held) => {
                 wheel.advance(held.ms as i64);
@@ -271,7 +378,7 @@ async fn play(input: GateRunInput) -> Outcome<GateRunResult> {
                 .iter()
                 .map(|(model, _)| model.clone())
                 .collect();
-            let counts: Vec<usize> = names.iter().map(|model| queued_of(model)).collect();
+            let counts: Vec<usize> = names.iter().map(|model| queued_home(model)).collect();
             let mut mirror = locked(&mirror);
             let mut released = Vec::new();
             for ((_, queue), queued) in mirror.queues.iter_mut().zip(counts) {
@@ -312,10 +419,14 @@ async fn play(input: GateRunInput) -> Outcome<GateRunResult> {
                 .iter()
                 .map(|model| GateRunResultStepsItemGatesItem {
                     model: model.clone(),
-                    gate: gate.state_of(model).map(gate_of),
+                    gate: state_of_model(&gate, &books, model).map(gate_of),
                 })
                 .collect(),
-            holding: gate.holding(),
+            holding: {
+                let live: Vec<Arc<GateBook>> = locked(&books).named.values().cloned().collect();
+                let held: Vec<String> = live.iter().flat_map(|book| gate.holding(book)).collect();
+                nyaaai_contract::order::sorted_texts(&held)
+            },
         });
     }
     if !disposed {

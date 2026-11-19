@@ -300,6 +300,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "a\nopenai/gpt-6-luna",
+								"era": 1,
 								"generation": 0,
 								"probe": false,
 								"serial": 1
@@ -438,6 +439,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "a\nopenai/gpt-6-luna",
+								"era": 1,
 								"generation": 0,
 								"probe": false,
 								"serial": 2
@@ -576,6 +578,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "a\nopenai/gpt-6-luna",
+								"era": 1,
 								"generation": 0,
 								"probe": false,
 								"serial": 3
@@ -714,6 +717,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "a\nanthropic/claude-opus-5.5",
+								"era": 1,
 								"generation": 0,
 								"probe": false,
 								"serial": 4

@@ -105,11 +105,11 @@
 			}
 		],
 		"transports": [
-			"First",
+			"Renamed",
 			"Second"
 		],
 		"stopped": [
-			"First",
+			"Renamed",
 			"Second"
 		],
 		"refreshed": [],

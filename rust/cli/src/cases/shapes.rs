@@ -25804,11 +25804,11 @@ impl Shape for ResolverReachResult {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct ResolverRouteKeyInput {
+pub struct ResolverIdentityInput {
     pub entries: Vec<nyaaai_contract::shapes::provider::ProviderEntry>,
 }
 
-impl Shape for ResolverRouteKeyInput {
+impl Shape for ResolverIdentityInput {
     fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
         let object = shape::object(value, at)?;
         let entries = shape::required(object, "entries", at, |value, at| {
@@ -25832,25 +25832,25 @@ impl Shape for ResolverRouteKeyInput {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct ResolverRouteKeyResult {
-    pub keys: Vec<String>,
+pub struct ResolverIdentityResult {
+    pub identities: Vec<String>,
 }
 
-impl Shape for ResolverRouteKeyResult {
+impl Shape for ResolverIdentityResult {
     fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
         let object = shape::object(value, at)?;
-        let keys = shape::required(object, "keys", at, |value, at| {
+        let identities = shape::required(object, "identities", at, |value, at| {
             shape::list(value, at, shape::text)
         })?;
-        Ok(Self { keys })
+        Ok(Self { identities })
     }
 
     fn encode(&self) -> Value {
         let mut object = Object::new();
         object.insert(
-            "keys",
+            "identities",
             Value::Array(
-                self.keys
+                self.identities
                     .iter()
                     .map(|held| Value::from(held.as_str()))
                     .collect(),
@@ -31055,7 +31055,7 @@ pub enum GateRunInputStepsItem {
     Settle(GateRunInputStepsItemSettle),
     SettleTicket(GateRunInputStepsItemSettleTicket),
     Cool(GateRunInputStepsItemCool),
-    Clear(GateRunInputStepsItemClear),
+    Retire(GateRunInputStepsItemRetire),
     Advance(GateRunInputStepsItemAdvance),
     Abort(GateRunInputStepsItemAbort),
     Dispose(GateRunInputStepsItemDispose),
@@ -31072,7 +31072,7 @@ impl Shape for GateRunInputStepsItem {
                 GateRunInputStepsItemSettleTicket::decode_at(value, at).map(Self::SettleTicket)
             }
             "cool" => GateRunInputStepsItemCool::decode_at(value, at).map(Self::Cool),
-            "clear" => GateRunInputStepsItemClear::decode_at(value, at).map(Self::Clear),
+            "retire" => GateRunInputStepsItemRetire::decode_at(value, at).map(Self::Retire),
             "advance" => GateRunInputStepsItemAdvance::decode_at(value, at).map(Self::Advance),
             "abort" => GateRunInputStepsItemAbort::decode_at(value, at).map(Self::Abort),
             "dispose" => GateRunInputStepsItemDispose::decode_at(value, at).map(Self::Dispose),
@@ -31087,7 +31087,7 @@ impl Shape for GateRunInputStepsItem {
             Self::Settle(held) => held.encode(),
             Self::SettleTicket(held) => held.encode(),
             Self::Cool(held) => held.encode(),
-            Self::Clear(held) => held.encode(),
+            Self::Retire(held) => held.encode(),
             Self::Advance(held) => held.encode(),
             Self::Abort(held) => held.encode(),
             Self::Dispose(held) => held.encode(),
@@ -31103,6 +31103,7 @@ pub struct GateRunInputStepsItemAdmit {
     pub abort_after_ms: Option<u64>,
     pub aborted_before: Option<bool>,
     pub inside: Option<GateRunInputStepsItemAdmitInside>,
+    pub book: Option<String>,
 }
 
 impl Shape for GateRunInputStepsItemAdmit {
@@ -31122,6 +31123,7 @@ impl Shape for GateRunInputStepsItemAdmit {
             at,
             GateRunInputStepsItemAdmitInside::decode_at,
         )?;
+        let book = shape::optional(object, "book", at, shape::text)?;
         Ok(Self {
             request,
             model,
@@ -31129,6 +31131,7 @@ impl Shape for GateRunInputStepsItemAdmit {
             abort_after_ms,
             aborted_before,
             inside,
+            book,
         })
     }
 
@@ -31149,6 +31152,9 @@ impl Shape for GateRunInputStepsItemAdmit {
         if let Some(held) = &self.inside {
             object.insert("inside", held.encode());
         }
+        if let Some(held) = &self.book {
+            object.insert("book", Value::from(held.as_str()));
+        }
         Value::Object(object)
     }
 }
@@ -31157,6 +31163,7 @@ impl Shape for GateRunInputStepsItemAdmit {
 pub struct GateRunInputStepsItemTryAdmit {
     pub request: String,
     pub model: String,
+    pub book: Option<String>,
 }
 
 impl Shape for GateRunInputStepsItemTryAdmit {
@@ -31167,7 +31174,12 @@ impl Shape for GateRunInputStepsItemTryAdmit {
         })?;
         let request = shape::required(object, "request", at, shape::text)?;
         let model = shape::required(object, "model", at, shape::text)?;
-        Ok(Self { request, model })
+        let book = shape::optional(object, "book", at, shape::text)?;
+        Ok(Self {
+            request,
+            model,
+            book,
+        })
     }
 
     fn encode(&self) -> Value {
@@ -31175,6 +31187,9 @@ impl Shape for GateRunInputStepsItemTryAdmit {
         object.insert("kind", Value::from("tryAdmit"));
         object.insert("request", Value::from(self.request.as_str()));
         object.insert("model", Value::from(self.model.as_str()));
+        if let Some(held) = &self.book {
+            object.insert("book", Value::from(held.as_str()));
+        }
         Value::Object(object)
     }
 }
@@ -31259,6 +31274,7 @@ impl Shape for GateRunInputStepsItemSettleTicket {
 pub struct GateRunInputStepsItemCool {
     pub model: String,
     pub retry_after_ms: Option<u64>,
+    pub book: Option<String>,
 }
 
 impl Shape for GateRunInputStepsItemCool {
@@ -31269,9 +31285,11 @@ impl Shape for GateRunInputStepsItemCool {
         })?;
         let model = shape::required(object, "model", at, shape::text)?;
         let retry_after_ms = shape::optional(object, "retryAfterMs", at, shape::natural)?;
+        let book = shape::optional(object, "book", at, shape::text)?;
         Ok(Self {
             model,
             retry_after_ms,
+            book,
         })
     }
 
@@ -31282,29 +31300,34 @@ impl Shape for GateRunInputStepsItemCool {
         if let Some(held) = &self.retry_after_ms {
             object.insert("retryAfterMs", Value::Number(*held as f64));
         }
+        if let Some(held) = &self.book {
+            object.insert("book", Value::from(held.as_str()));
+        }
         Value::Object(object)
     }
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct GateRunInputStepsItemClear {
-    pub prefix: String,
+pub struct GateRunInputStepsItemRetire {
+    pub book: Option<String>,
 }
 
-impl Shape for GateRunInputStepsItemClear {
+impl Shape for GateRunInputStepsItemRetire {
     fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
         let object = shape::object(value, at)?;
         shape::required(object, "kind", at, |value, at| {
-            shape::is_text(value, at, "clear")
+            shape::is_text(value, at, "retire")
         })?;
-        let prefix = shape::required(object, "prefix", at, shape::text)?;
-        Ok(Self { prefix })
+        let book = shape::optional(object, "book", at, shape::text)?;
+        Ok(Self { book })
     }
 
     fn encode(&self) -> Value {
         let mut object = Object::new();
-        object.insert("kind", Value::from("clear"));
-        object.insert("prefix", Value::from(self.prefix.as_str()));
+        object.insert("kind", Value::from("retire"));
+        if let Some(held) = &self.book {
+            object.insert("book", Value::from(held.as_str()));
+        }
         Value::Object(object)
     }
 }
@@ -32366,6 +32389,7 @@ impl Shape for HealthKeyAnswerUnready {
 pub struct HealthRoute {
     pub entry: nyaaai_contract::shapes::provider::ProviderEntry,
     pub key: String,
+    pub taken: Option<String>,
 }
 
 impl Shape for HealthRoute {
@@ -32378,13 +32402,17 @@ impl Shape for HealthRoute {
             nyaaai_contract::shapes::provider::ProviderEntry::decode_at,
         )?;
         let key = shape::required(object, "key", at, shape::text)?;
-        Ok(Self { entry, key })
+        let taken = shape::optional(object, "taken", at, shape::text)?;
+        Ok(Self { entry, key, taken })
     }
 
     fn encode(&self) -> Value {
         let mut object = Object::new();
         object.insert("entry", self.entry.encode());
         object.insert("key", Value::from(self.key.as_str()));
+        if let Some(held) = &self.taken {
+            object.insert("taken", Value::from(held.as_str()));
+        }
         Value::Object(object)
     }
 }
@@ -32461,6 +32489,7 @@ pub enum HealthRunInputStepsItem {
     Hold(HealthRunInputStepsItemHold),
     Release(HealthRunInputStepsItemRelease),
     ListenAndCheck(HealthRunInputStepsItemListenAndCheck),
+    Take(HealthRunInputStepsItemTake),
     List(HealthRunInputStepsItemList),
     Key(HealthRunInputStepsItemKey),
     Check(HealthRunInputStepsItemCheck),
@@ -32486,6 +32515,7 @@ impl Shape for HealthRunInputStepsItem {
             "release" => HealthRunInputStepsItemRelease::decode_at(value, at).map(Self::Release),
             "listenAndCheck" => HealthRunInputStepsItemListenAndCheck::decode_at(value, at)
                 .map(Self::ListenAndCheck),
+            "take" => HealthRunInputStepsItemTake::decode_at(value, at).map(Self::Take),
             "list" => HealthRunInputStepsItemList::decode_at(value, at).map(Self::List),
             "key" => HealthRunInputStepsItemKey::decode_at(value, at).map(Self::Key),
             "check" => HealthRunInputStepsItemCheck::decode_at(value, at).map(Self::Check),
@@ -32512,6 +32542,7 @@ impl Shape for HealthRunInputStepsItem {
             Self::Hold(held) => held.encode(),
             Self::Release(held) => held.encode(),
             Self::ListenAndCheck(held) => held.encode(),
+            Self::Take(held) => held.encode(),
             Self::List(held) => held.encode(),
             Self::Key(held) => held.encode(),
             Self::Check(held) => held.encode(),
@@ -32625,6 +32656,32 @@ impl Shape for HealthRunInputStepsItemListenAndCheck {
         let mut object = Object::new();
         object.insert("kind", Value::from("listenAndCheck"));
         object.insert("id", Value::from(self.id.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HealthRunInputStepsItemTake {
+    pub name: String,
+    pub route: HealthRoute,
+}
+
+impl Shape for HealthRunInputStepsItemTake {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "take")
+        })?;
+        let name = shape::required(object, "name", at, shape::text)?;
+        let route = shape::required(object, "route", at, HealthRoute::decode_at)?;
+        Ok(Self { name, route })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("take"));
+        object.insert("name", Value::from(self.name.as_str()));
+        object.insert("route", self.route.encode());
         Value::Object(object)
     }
 }

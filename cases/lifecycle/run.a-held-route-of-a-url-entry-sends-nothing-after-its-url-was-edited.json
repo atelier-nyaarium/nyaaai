@@ -1,0 +1,191 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "lifecycle.run",
+	"name": "a-held-route-of-a-url-entry-sends-nothing-after-its-url-was-edited",
+	"input": {
+		"startMs": 1794052800000,
+		"entries": [
+			{
+				"id": "box",
+				"kind": "ollama",
+				"label": "Box",
+				"url": "http://box.local:11434"
+			}
+		],
+		"keys": {},
+		"rows": [
+			"local:box/qwen"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama"
+		],
+		"listings": {},
+		"zdrOnly": false,
+		"exchanges": [
+			{
+				"status": 0,
+				"headers": [],
+				"chunks": [],
+				"end": "refused",
+				"error": "fetch failed"
+			},
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Local\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":100,\"completion_tokens\":10,\"cost\":0.001}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			}
+		],
+		"steps": [
+			{
+				"kind": "plan",
+				"name": "held",
+				"model": "local:box/qwen"
+			},
+			{
+				"kind": "list",
+				"entries": [
+					{
+						"id": "box",
+						"kind": "ollama",
+						"label": "Box",
+						"url": "http://box.local:11435"
+					}
+				]
+			},
+			{
+				"kind": "send",
+				"call": "late",
+				"model": "local:box/qwen",
+				"tag": {
+					"feature": "chat"
+				},
+				"plan": "held"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1794052800000,
+				"answer": {
+					"kind": "plan",
+					"unresolved": null,
+					"candidates": [
+						"box"
+					],
+					"passed": []
+				},
+				"ended": [],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "box",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 0
+			},
+			{
+				"nowMs": 1794052800000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "box",
+						"key": {
+							"kind": "ok"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 0
+			},
+			{
+				"nowMs": 1794052800000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"late"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "box",
+						"key": {
+							"kind": "ok"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 0
+			}
+		],
+		"calls": [
+			{
+				"call": "late",
+				"result": {
+					"kind": "notice",
+					"notice": {
+						"kind": "modelUnavailable",
+						"message": "qwen is unavailable on Box.",
+						"model": "qwen",
+						"entry": "Box"
+					},
+					"failure": null
+				},
+				"trace": [
+					{
+						"kind": "admitted",
+						"entry": "box",
+						"admission": {
+							"kind": "retired"
+						}
+					},
+					{
+						"kind": "notice",
+						"notice": {
+							"kind": "modelUnavailable",
+							"message": "qwen is unavailable on Box.",
+							"model": "qwen",
+							"entry": "Box"
+						}
+					}
+				],
+				"told": [],
+				"attempts": []
+			}
+		],
+		"requests": [],
+		"recorded": [],
+		"stats": [],
+		"waiting": []
+	}
+}

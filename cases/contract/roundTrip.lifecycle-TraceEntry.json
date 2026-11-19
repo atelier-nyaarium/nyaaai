@@ -18,7 +18,7 @@
 			"{\"kind\":\"held\",\"entry\":\"a\"}",
 			"{\"kind\":\"released\",\"entry\":\"a\"}",
 			"{\"kind\":\"released\"}",
-			"{\"kind\":\"admitted\",\"entry\":\"a\",\"admission\":{\"kind\":\"go\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1}}}",
+			"{\"kind\":\"admitted\",\"entry\":\"a\",\"admission\":{\"kind\":\"go\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"era\":1,\"generation\":0,\"probe\":false,\"serial\":1}}}",
 			"{\"kind\":\"admitted\",\"entry\":\"a\",\"admission\":{\"kind\":\"gaveUp\"}}",
 			"{\"kind\":\"admitted\",\"entry\":\"a\",\"admission\":{\"kind\":\"stopped\"}}",
 			"{\"kind\":\"admitted\",\"entry\":\"a\",\"admission\":{\"kind\":\"wait\"}}",
@@ -132,7 +132,7 @@
 			},
 			{
 				"ok": true,
-				"text": "{\"kind\":\"admitted\",\"entry\":\"a\",\"admission\":{\"kind\":\"go\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1}}}"
+				"text": "{\"kind\":\"admitted\",\"entry\":\"a\",\"admission\":{\"kind\":\"go\",\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"era\":1,\"generation\":0,\"probe\":false,\"serial\":1}}}"
 			},
 			{
 				"ok": true,

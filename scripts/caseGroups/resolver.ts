@@ -1,6 +1,7 @@
 import type { Codec } from "@nyaaai/agentic/codec";
 import { failureOf } from "@nyaaai/agentic/failure";
 import { parseRowKey } from "@nyaaai/agentic/models/rowKey";
+import { EntryRegistry, identityOf } from "@nyaaai/agentic/provider/incarnation";
 import { type EntryCatalog, KINDS, type ProviderKind } from "@nyaaai/agentic/provider/kind";
 import {
 	type Catalog,
@@ -8,7 +9,6 @@ import {
 	ModelResolver,
 	type Resolved,
 	reachOf,
-	routeKey,
 	servedBy,
 	viaOf,
 } from "@nyaaai/agentic/provider/resolver";
@@ -293,17 +293,18 @@ export const resolver = caseGroup("resolver", {
 			z.object({ reaches: z.array(KeyReach) }),
 			(input) => ({ reaches: input.rows.map((row) => reachOf({ field: row.field }, row.answer)) }),
 		),
-		/** What identifies a route. */
-		routeKey: kind(
+		/** What identifies an entry across list changes. */
+		identity: kind(
 			z.object({ entries: z.array(ProviderEntry) }),
-			z.object({ keys: z.array(z.string()) }),
-			(input) => ({ keys: input.entries.map(routeKey) }),
+			z.object({ identities: z.array(z.string()) }),
+			(input) => ({ identities: input.entries.map(identityOf) }),
 		),
-		/** A route's key; answers only while the list holds the entry at its URL. */
+		/** A route's key; answers only while its incarnation lives, never again once it ended. */
 		keySource: kind(
 			z.object({
-				/** The entry the route was made for. */
+				/** The entry the route was made for, listed alone at first. */
 				entry: ProviderEntry,
+				/** The list the first `get` meets. */
 				list: z.array(ProviderEntry),
 				answers: z.record(z.string(), KeyAnswerIn),
 				steps: z.array(
@@ -317,14 +318,19 @@ export const resolver = caseGroup("resolver", {
 			z.object({ gets: z.array(z.string().nullable()) }),
 			async (input) => {
 				const keys = scriptedEntryKeys(input.answers as Record<string, KeyAnswer>);
-				const list = scriptedProviderList(input.list);
-				const source = keySourceOf(keys, list, input.entry);
+				const list = scriptedProviderList([input.entry]);
+				const entries = new EntryRegistry({ list, keys });
+				const incarnation = entries.incarnation(input.entry.id);
+				if (incarnation === undefined) throw new Error("The entry is listed.");
+				const source = keySourceOf(keys, incarnation);
+				list.set(input.list);
 				const gets: Array<string | null> = [];
 				for (const step of input.steps) {
 					if (step.kind === "get") gets.push((await source.get()) ?? null);
 					else if (step.kind === "list") list.set(step.entries);
 					else keys.set(step.id, step.answer);
 				}
+				entries.dispose();
 				return { gets };
 			},
 		),
@@ -370,9 +376,15 @@ export const resolver = caseGroup("resolver", {
 					log: () => {},
 					userAgent: "cases/1.0",
 				};
+				const entries = new EntryRegistry({
+					list: scriptedProviderList([input.entry]),
+					keys: scriptedEntryKeys(),
+				});
+				const incarnation = entries.incarnation(input.entry.id);
+				if (incarnation === undefined) throw new Error("The entry is listed.");
 				const transport = named.transport(input.entry, { get: async () => KEY }, deps);
 				const plan = servedBy({
-					entry: input.entry,
+					incarnation,
 					kind: named,
 					transport,
 					catalog,
@@ -385,6 +397,7 @@ export const resolver = caseGroup("resolver", {
 				const zdrOnResolve = first.zdrOnly;
 				zdr = input.flippedTo;
 				const sent = await sendThrough(first, seen, host, {});
+				entries.dispose();
 				return {
 					key: routes.key,
 					entry: first.entry.id,
@@ -428,9 +441,11 @@ export const resolver = caseGroup("resolver", {
 					}),
 				};
 				const entry = { id: "a", kind: "openrouter" as const, label: "First" };
+				const keys = scriptedEntryKeys({ a: { kind: "key", key: KEY } });
+				const entries = new EntryRegistry({ list: scriptedProviderList([entry]), keys });
 				const resolver = new ModelResolver({
-					list: scriptedProviderList([entry]),
-					keys: scriptedEntryKeys({ a: { kind: "key", key: KEY } }),
+					entries,
+					keys,
 					registry: scriptedModelRegistry(input.rows.map(rowFor)),
 					kinds: { openrouter: stub },
 					kindDeps: () => ({
@@ -458,6 +473,7 @@ export const resolver = caseGroup("resolver", {
 					}
 				}
 				resolver.dispose();
+				entries.dispose();
 				return { calls };
 			},
 		),
@@ -530,6 +546,7 @@ export const resolver = caseGroup("resolver", {
 					onChange: scriptedKeys.onChange,
 				};
 				const list = scriptedProviderList(input.entries);
+				const entries = new EntryRegistry({ list, keys: scriptedKeys });
 				const registry = scriptedModelRegistry(input.rows.map(rowFor));
 				const transports: string[] = [];
 				const madeNow: Array<{ id: string; label: string }> = [];
@@ -593,7 +610,7 @@ export const resolver = caseGroup("resolver", {
 				for (const name of NAMES) if (input.kinds.includes(name)) kinds[name] = stub(name);
 
 				const resolver = new ModelResolver({
-					list,
+					entries,
 					keys,
 					registry,
 					kinds,
@@ -746,6 +763,7 @@ export const resolver = caseGroup("resolver", {
 					steps.push({ answer, built: transports.length, disposed: stopped.length });
 				}
 				resolver.dispose();
+				entries.dispose();
 				return {
 					steps,
 					transports,

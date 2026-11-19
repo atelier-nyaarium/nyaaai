@@ -20,6 +20,7 @@
 							"ticket": {
 								"gate": "g",
 								"model": "m",
+								"era": 1,
 								"generation": 3,
 								"probe": true,
 								"serial": 5
@@ -43,6 +44,7 @@
 							"ticket": {
 								"gate": "g",
 								"model": "m",
+								"era": 1,
 								"generation": 3,
 								"probe": true,
 								"serial": 5

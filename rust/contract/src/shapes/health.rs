@@ -13,6 +13,7 @@ use crate::shape::{self, Path, Refused, Shape};
 pub struct Ticket {
     pub gate: String,
     pub model: String,
+    pub era: u64,
     pub generation: u64,
     pub probe: bool,
     pub serial: u64,
@@ -23,12 +24,14 @@ impl Shape for Ticket {
         let object = shape::object(value, at)?;
         let gate = shape::required(object, "gate", at, shape::text)?;
         let model = shape::required(object, "model", at, shape::text)?;
+        let era = shape::required(object, "era", at, shape::natural)?;
         let generation = shape::required(object, "generation", at, shape::natural)?;
         let probe = shape::required(object, "probe", at, shape::flag)?;
         let serial = shape::required(object, "serial", at, shape::natural)?;
         Ok(Self {
             gate,
             model,
+            era,
             generation,
             probe,
             serial,
@@ -39,6 +42,7 @@ impl Shape for Ticket {
         let mut object = Object::new();
         object.insert("gate", Value::from(self.gate.as_str()));
         object.insert("model", Value::from(self.model.as_str()));
+        object.insert("era", Value::Number(self.era as f64));
         object.insert("generation", Value::Number(self.generation as f64));
         object.insert("probe", Value::Bool(self.probe));
         object.insert("serial", Value::Number(self.serial as f64));
@@ -51,6 +55,7 @@ pub enum Admission {
     Go(AdmissionGo),
     GaveUp(AdmissionGaveUp),
     Stopped(AdmissionStopped),
+    Retired(AdmissionRetired),
 }
 
 impl Shape for Admission {
@@ -60,6 +65,7 @@ impl Shape for Admission {
             "go" => AdmissionGo::decode_at(value, at).map(Self::Go),
             "gaveUp" => AdmissionGaveUp::decode_at(value, at).map(Self::GaveUp),
             "stopped" => AdmissionStopped::decode_at(value, at).map(Self::Stopped),
+            "retired" => AdmissionRetired::decode_at(value, at).map(Self::Retired),
             _ => Err(shape::no_branch(at, "kind")),
         }
     }
@@ -69,6 +75,7 @@ impl Shape for Admission {
             Self::Go(held) => held.encode(),
             Self::GaveUp(held) => held.encode(),
             Self::Stopped(held) => held.encode(),
+            Self::Retired(held) => held.encode(),
         }
     }
 }
@@ -130,6 +137,25 @@ impl Shape for AdmissionStopped {
     fn encode(&self) -> Value {
         let mut object = Object::new();
         object.insert("kind", Value::from("stopped"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct AdmissionRetired {}
+
+impl Shape for AdmissionRetired {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "retired")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("retired"));
         Value::Object(object)
     }
 }

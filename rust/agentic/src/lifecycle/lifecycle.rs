@@ -162,12 +162,15 @@ enum Tried<'a, T> {
     Onward(Failure, Option<Ticket>),
     /// Deferred by ZDR.
     Kept,
+    /// Its incarnation ended.
+    Gone,
 }
 
 enum Gated {
     Go(Option<Ticket>),
     Stopped,
     GaveUp,
+    Retired,
 }
 
 const LIVE_TRIES: i64 = 2;
@@ -218,6 +221,19 @@ fn overloaded(route: &Resolved) -> Ended {
         message: Some(overloaded_text(Some(&model))),
         model: Some(model),
         ..empty_notice(NoticeKind::ProviderOverloaded)
+    })
+}
+
+/// A route of an ended incarnation.
+fn gone(route: &Resolved) -> Ended {
+    let model = route.view.row.label.clone();
+    let entry = route.entry.label.clone();
+    Ended::Notice(Notice {
+        kind: NoticeKind::ModelUnavailable,
+        message: Some(unavailable_text(Some(&model), Some(&entry))),
+        model: Some(model),
+        entry: Some(entry),
+        ..empty_notice(NoticeKind::ModelUnavailable)
     })
 }
 
@@ -493,6 +509,15 @@ impl Inner {
             }
             match self.tries(route, call, o, keep, true).await? {
                 Tried::Kept => continue,
+                Tried::Gone => {
+                    self.skip(
+                        o,
+                        route,
+                        SkipReason::Unavailable,
+                        TraceEntrySkipCause::Deferred,
+                    );
+                    continue;
+                }
                 Tried::Done(done) => return Ok(done),
                 Tried::Onward(failure, ticket) => {
                     self.failed(route, &failure, true, o, ticket.as_ref());
@@ -526,6 +551,10 @@ impl Inner {
         Ok(match self.tries(last, call, o, keep, false).await? {
             Tried::Kept => Attempt::Failed {
                 outcome: notice(NoticeKind::NoZdrHost, None, None),
+                failure: None,
+            },
+            Tried::Gone => Attempt::Failed {
+                outcome: gone(last),
                 failure: None,
             },
             Tried::Done(done) => done,
@@ -589,6 +618,7 @@ impl Inner {
                         failure: None,
                     }));
                 }
+                Gated::Retired => return Ok(Tried::Gone),
                 Gated::GaveUp => {
                     // A give-up ends a route that is not the last, not the request.
                     if onward {
@@ -606,7 +636,17 @@ impl Inner {
                 gate: self.gate.clone(),
                 ticket,
             };
-            // Recheck ZDR on admission.
+            // Recheck the incarnation and ZDR.
+            if !route.incarnation.live() {
+                self.settle(
+                    route,
+                    holding.take().as_ref(),
+                    GateOutcome::Cancelled,
+                    None,
+                    o,
+                );
+                return Ok(Tried::Gone);
+            }
             if route.zdr_only() && route.view.data_kept.is_some() {
                 trace(o, || {
                     TraceEntry::Kept(TraceEntryKept {
@@ -982,7 +1022,11 @@ impl Inner {
             return Gated::Go(None);
         };
         let ticket = gate.try_admit(RouteRef::from(route));
+        let live = route.incarnation.live();
         let admission = match &ticket {
+            None if !live => {
+                Admission::Retired(nyaaai_contract::shapes::health::AdmissionRetired {})
+            }
             None => Admission::GaveUp(nyaaai_contract::shapes::health::AdmissionGaveUp {}),
             Some(held) => Admission::Go(nyaaai_contract::shapes::health::AdmissionGo {
                 ticket: held.clone(),
@@ -996,6 +1040,7 @@ impl Inner {
         });
         match ticket {
             Some(held) => Gated::Go(Some(held)),
+            None if !live => Gated::Retired,
             None => Gated::GaveUp,
         }
     }
@@ -1063,6 +1108,7 @@ impl Inner {
             }
             Admission::GaveUp(_) => Gated::GaveUp,
             Admission::Stopped(_) => Gated::Stopped,
+            Admission::Retired(_) => Gated::Retired,
         }
     }
 

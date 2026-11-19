@@ -18,6 +18,7 @@ use nyaaai_agentic::lifecycle::lifecycle::{
 use nyaaai_agentic::lifecycle::retry::RetryPolicy;
 use nyaaai_agentic::models::uses::CHAT;
 use nyaaai_agentic::models::view::unknown_view;
+use nyaaai_agentic::provider::incarnation::EntryRegistry;
 use nyaaai_agentic::provider::kind::{
     CatalogDeps, EntryCatalog, KINDS, KindDeps, KindError, KindField, ProviderKind,
 };
@@ -572,6 +573,7 @@ async fn play(input: LifecycleRunInput) -> Outcome<LifecycleRunResult> {
         scripted.set(id, key_answer(answer));
     }
     let list = Arc::new(ScriptedProviderList::new(input.entries.clone()));
+    let entries = Arc::new(EntryRegistry::new(list.clone(), &*scripted));
     let registry = Arc::new(ScriptedModelRegistry::empty());
     registry.set_rows(
         input
@@ -622,7 +624,7 @@ async fn play(input: LifecycleRunInput) -> Outcome<LifecycleRunResult> {
         HealthDeps {
             runtime: nyaaai_testkit::cases::runtime(),
             scheduler: scheduler.clone(),
-            list: list.clone(),
+            entries: Arc::clone(&entries),
             keys: scripted.clone(),
             kinds: checks,
             kind_deps: {
@@ -635,7 +637,7 @@ async fn play(input: LifecycleRunInput) -> Outcome<LifecycleRunResult> {
         &CountedIds::new("gate-"),
     );
     let resolver = ModelResolver::new(ResolverDeps {
-        list: list.clone(),
+        entries: Arc::clone(&entries),
         keys: health.entry_keys(),
         registry: registry.clone() as Arc<dyn ModelRegistry>,
         kinds: stubs,
@@ -1030,6 +1032,7 @@ async fn play(input: LifecycleRunInput) -> Outcome<LifecycleRunResult> {
         .collect();
     resolver.dispose();
     health.dispose();
+    entries.dispose();
     let waiting = wheel.waiting();
     let recorded = usage.recorded();
     let stats = std::mem::take(&mut *locked(&stats));
@@ -1114,6 +1117,7 @@ mod tests {
                         ticket: Ticket {
                             gate: "gate-1".to_owned(),
                             model,
+                            era: 0,
                             generation: 0,
                             probe: false,
                             serial: 1,
@@ -1312,10 +1316,14 @@ mod tests {
             }),
             checked: false,
         };
-        let resolver = ModelResolver::new(ResolverDeps {
-            list: Arc::new(ScriptedProviderList::new(
+        let entries = Arc::new(EntryRegistry::new(
+            Arc::new(ScriptedProviderList::new(
                 ids.iter().map(|id| entry(id)).collect(),
             )),
+            &*keys,
+        ));
+        let resolver = ModelResolver::new(ResolverDeps {
+            entries,
             keys,
             registry: registry as Arc<dyn ModelRegistry>,
             kinds: vec![Arc::new(stub)],

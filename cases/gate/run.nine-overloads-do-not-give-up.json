@@ -186,6 +186,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": false,
 								"serial": 1
@@ -344,6 +345,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 2
@@ -362,6 +364,7 @@
 							"probe": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 2
@@ -393,6 +396,7 @@
 							"probe": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 2
@@ -511,6 +515,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 3
@@ -529,6 +534,7 @@
 							"probe": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 3
@@ -560,6 +566,7 @@
 							"probe": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 3
@@ -678,6 +685,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 4
@@ -696,6 +704,7 @@
 							"probe": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 4
@@ -727,6 +736,7 @@
 							"probe": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 4
@@ -845,6 +855,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 5
@@ -863,6 +874,7 @@
 							"probe": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 5
@@ -894,6 +906,7 @@
 							"probe": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 5
@@ -1012,6 +1025,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 6
@@ -1030,6 +1044,7 @@
 							"probe": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 6
@@ -1061,6 +1076,7 @@
 							"probe": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 6
@@ -1179,6 +1195,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 7
@@ -1197,6 +1214,7 @@
 							"probe": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 7
@@ -1228,6 +1246,7 @@
 							"probe": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 7
@@ -1346,6 +1365,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 8
@@ -1364,6 +1384,7 @@
 							"probe": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 8
@@ -1395,6 +1416,7 @@
 							"probe": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 8
@@ -1513,6 +1535,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 9
@@ -1531,6 +1554,7 @@
 							"probe": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 9
@@ -1562,6 +1586,7 @@
 							"probe": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 9
@@ -1680,6 +1705,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 10
@@ -1698,6 +1724,7 @@
 							"probe": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 10
@@ -1729,6 +1756,7 @@
 							"probe": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 10
@@ -1847,6 +1875,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 11
@@ -1865,6 +1894,7 @@
 							"probe": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 11
@@ -1896,6 +1926,7 @@
 							"probe": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 0,
 								"probe": true,
 								"serial": 11
@@ -1920,6 +1951,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "lab/model-a",
+								"era": 1,
 								"generation": 1,
 								"probe": false,
 								"serial": 12

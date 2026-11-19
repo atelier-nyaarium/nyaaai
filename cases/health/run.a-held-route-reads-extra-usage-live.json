@@ -2,7 +2,7 @@
 	"format": 2,
 	"type": "function",
 	"kind": "health.run",
-	"name": "a-plan-changed-clears-the-status-the-pool-and-the-gate-and-keeps-the-bill",
+	"name": "a-held-route-reads-extra-usage-live",
 	"input": {
 		"startMs": 2000000,
 		"entries": [
@@ -10,95 +10,23 @@
 				"id": "go",
 				"kind": "opencode",
 				"plan": "go",
-				"label": "Go"
+				"label": "Go",
+				"extraUsage": true
 			}
 		],
-		"keys": {
-			"go": {
-				"kind": "key",
-				"key": "fake-key-one"
-			}
-		},
-		"exchanges": [
-			{
-				"status": 200,
-				"json": {
-					"data": [
-						{
-							"id": "model-a"
-						}
-					]
-				}
-			},
-			{
-				"status": 200,
-				"json": {
-					"data": [
-						{
-							"id": "model-a"
-						}
-					]
-				}
-			}
-		],
+		"keys": {},
+		"exchanges": [],
 		"steps": [
 			{
-				"kind": "check",
-				"id": "go"
-			},
-			{
-				"kind": "billed",
-				"id": "go",
-				"reply": {
-					"source": "go",
-					"allowance": 0.5
-				}
-			},
-			{
-				"kind": "failed",
+				"kind": "take",
+				"name": "held",
 				"route": {
 					"entry": {
 						"id": "go",
 						"kind": "opencode",
 						"plan": "go",
-						"label": "Go"
-					},
-					"key": "lab/model-a"
-				},
-				"failure": {
-					"category": "allowance",
-					"status": "allowance",
-					"message": "allowance",
-					"retryAfterMs": 600000
-				},
-				"onward": false
-			},
-			{
-				"kind": "failed",
-				"route": {
-					"entry": {
-						"id": "go",
-						"kind": "opencode",
-						"plan": "go",
-						"label": "Go"
-					},
-					"key": "lab/model-a"
-				},
-				"failure": {
-					"category": "unavailable",
-					"status": "unavailable",
-					"message": "unavailable"
-				},
-				"onward": true
-			},
-			{
-				"kind": "deferred",
-				"route": {
-					"entry": {
-						"id": "go",
-						"kind": "opencode",
-						"plan": "go",
-						"label": "Go"
+						"label": "Go",
+						"extraUsage": true
 					},
 					"key": "lab/model-a"
 				}
@@ -109,8 +37,63 @@
 					{
 						"id": "go",
 						"kind": "opencode",
-						"plan": "payg",
+						"plan": "go",
 						"label": "Go"
+					}
+				]
+			},
+			{
+				"kind": "served",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go",
+						"extraUsage": true
+					},
+					"key": "lab/model-a",
+					"taken": "held"
+				},
+				"billingSource": "balance"
+			},
+			{
+				"kind": "deferred",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go",
+						"extraUsage": true
+					},
+					"key": "lab/model-a",
+					"taken": "held"
+				}
+			},
+			{
+				"kind": "blocked",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go",
+						"extraUsage": true
+					},
+					"key": "lab/model-a",
+					"taken": "held"
+				}
+			},
+			{
+				"kind": "list",
+				"entries": [
+					{
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go",
+						"extraUsage": true
 					}
 				]
 			},
@@ -123,7 +106,8 @@
 						"plan": "go",
 						"label": "Go"
 					},
-					"key": "lab/model-a"
+					"key": "lab/model-a",
+					"taken": "held"
 				}
 			}
 		]
@@ -135,25 +119,12 @@
 				"answer": {
 					"kind": "none"
 				},
-				"changes": [
-					{
-						"entry": "go",
-						"changed": [
-							"key"
-						]
-					},
-					{
-						"entry": "go",
-						"changed": [
-							"key"
-						]
-					}
-				],
+				"changes": [],
 				"entries": [
 					{
 						"entry": "go",
 						"key": {
-							"kind": "ok"
+							"kind": "none"
 						},
 						"pool": {
 							"kind": "clear"
@@ -162,7 +133,7 @@
 					}
 				],
 				"run": [],
-				"requests": 1,
+				"requests": 0,
 				"parked": []
 			},
 			{
@@ -170,23 +141,12 @@
 				"answer": {
 					"kind": "none"
 				},
-				"changes": [
-					{
-						"entry": "go",
-						"changed": [
-							"billed"
-						]
-					}
-				],
+				"changes": [],
 				"entries": [
 					{
 						"entry": "go",
 						"key": {
-							"kind": "ok"
-						},
-						"billed": {
-							"billing": "go",
-							"allowance": 0.5
+							"kind": "none"
 						},
 						"pool": {
 							"kind": "clear"
@@ -195,7 +155,7 @@
 					}
 				],
 				"run": [],
-				"requests": 1,
+				"requests": 0,
 				"parked": []
 			},
 			{
@@ -215,57 +175,19 @@
 					{
 						"entry": "go",
 						"key": {
-							"kind": "ok"
-						},
-						"billed": {
-							"billing": "go",
-							"allowance": 0.5
+							"kind": "none"
 						},
 						"pool": {
-							"kind": "reset",
-							"at": 2600000
+							"kind": "balance",
+							"eta": 20000000,
+							"next": 11000000,
+							"probe": null
 						},
 						"waiting": []
 					}
 				],
 				"run": [],
-				"requests": 1,
-				"parked": []
-			},
-			{
-				"nowMs": 2000000,
-				"answer": {
-					"kind": "none"
-				},
-				"changes": [
-					{
-						"entry": "go",
-						"changed": [
-							"waiting"
-						]
-					}
-				],
-				"entries": [
-					{
-						"entry": "go",
-						"key": {
-							"kind": "ok"
-						},
-						"billed": {
-							"billing": "go",
-							"allowance": 0.5
-						},
-						"pool": {
-							"kind": "reset",
-							"at": 2600000
-						},
-						"waiting": [
-							"lab/model-a"
-						]
-					}
-				],
-				"run": [],
-				"requests": 1,
+				"requests": 0,
 				"parked": []
 			},
 			{
@@ -279,23 +201,48 @@
 					{
 						"entry": "go",
 						"key": {
-							"kind": "ok"
-						},
-						"billed": {
-							"billing": "go",
-							"allowance": 0.5
+							"kind": "none"
 						},
 						"pool": {
-							"kind": "reset",
-							"at": 2600000
+							"kind": "balance",
+							"eta": 20000000,
+							"next": 11000000,
+							"probe": null
 						},
-						"waiting": [
-							"lab/model-a"
-						]
+						"waiting": []
 					}
 				],
 				"run": [],
-				"requests": 1,
+				"requests": 0,
+				"parked": []
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "blocked",
+					"blocked": {
+						"kind": "spendLimit",
+						"nextTryAt": 11000000
+					}
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 20000000,
+							"next": 11000000,
+							"probe": null
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0,
 				"parked": []
 			},
 			{
@@ -307,15 +254,7 @@
 					{
 						"entry": "go",
 						"changed": [
-							"key",
-							"pool",
-							"waiting"
-						]
-					},
-					{
-						"entry": "go",
-						"changed": [
-							"key"
+							"pool"
 						]
 					}
 				],
@@ -323,11 +262,7 @@
 					{
 						"entry": "go",
 						"key": {
-							"kind": "ok"
-						},
-						"billed": {
-							"billing": "go",
-							"allowance": 0.5
+							"kind": "none"
 						},
 						"pool": {
 							"kind": "clear"
@@ -336,7 +271,7 @@
 					}
 				],
 				"run": [],
-				"requests": 2,
+				"requests": 0,
 				"parked": []
 			},
 			{
@@ -350,11 +285,7 @@
 					{
 						"entry": "go",
 						"key": {
-							"kind": "ok"
-						},
-						"billed": {
-							"billing": "go",
-							"allowance": 0.5
+							"kind": "none"
 						},
 						"pool": {
 							"kind": "clear"
@@ -363,14 +294,11 @@
 					}
 				],
 				"run": [],
-				"requests": 2,
+				"requests": 0,
 				"parked": []
 			}
 		],
-		"requests": [
-			"https://opencode.ai/inference/go/v1/models",
-			"https://opencode.ai/inference/v1/models"
-		],
+		"requests": [],
 		"waiting": []
 	}
 }

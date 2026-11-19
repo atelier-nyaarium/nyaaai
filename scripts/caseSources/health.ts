@@ -32,6 +32,10 @@ const DENIED = { status: 401, json: { error: { message: "No." } } };
 
 const route = (entry: Fields, key = "lab/model-a") => ({ entry, key });
 
+/** The route a `take` step held under the name. */
+const heldRoute = (entry: Fields, taken: string, key = "lab/model-a") => ({ entry, key, taken });
+const take = (name: string, entry: Fields): Step => ({ kind: "take", name, route: route(entry) });
+
 const failure = (category: string, extra: Fields = {}) => ({ category, status: category, message: category, ...extra });
 
 const key = (id: string, text = KEY): Step => ({ kind: "key", id, answer: { kind: "key", key: text } });
@@ -277,7 +281,7 @@ export const healthCases: CaseSource[] = [
 	}),
 
 	// A URL or plan changed.
-	run("a-url-changed-rechecks-an-unreachable-server-and-clears-its-pauses-keeping-its-bill", {
+	run("a-url-changed-rechecks-an-unreachable-server-and-clears-its-pauses-and-its-bill", {
 		entries: [BOX],
 		exchanges: [BOX_OK],
 		steps: [
@@ -290,7 +294,7 @@ export const healthCases: CaseSource[] = [
 			deferred(BOX, undefined, "box/qwen"),
 		],
 	}),
-	run("a-plan-changed-clears-the-status-the-pool-and-the-gate-and-keeps-the-bill", {
+	run("a-plan-changed-clears-the-status-the-pool-the-gate-and-the-bill", {
 		entries: [GO],
 		keys: { go: { kind: "key", key: KEY } },
 		exchanges: [OC_OK, OC_OK],
@@ -720,7 +724,59 @@ export const healthCases: CaseSource[] = [
 		],
 	}),
 
+	// A route held across a change of the entry.
+	run("a-held-route-reads-extra-usage-live", {
+		entries: [{ ...GO, extraUsage: true }],
+		steps: [
+			take("held", { ...GO, extraUsage: true }),
+			list(GO),
+			{ kind: "served", route: heldRoute({ ...GO, extraUsage: true }, "held"), billingSource: "balance" },
+			{ kind: "deferred", route: heldRoute({ ...GO, extraUsage: true }, "held") },
+			{ kind: "blocked", route: heldRoute({ ...GO, extraUsage: true }, "held") },
+			list({ ...GO, extraUsage: true }),
+			{ kind: "deferred", route: heldRoute(GO, "held") },
+		],
+	}),
+	run("a-held-route-of-an-entry-removed-and-added-again-reports-nothing", {
+		entries: [GO],
+		steps: [
+			take("held", GO),
+			list(),
+			list(GO),
+			{ kind: "served", route: heldRoute(GO, "held"), billingSource: "balance" },
+			{ kind: "failed", route: heldRoute(GO, "held"), failure: failure("allowance"), onward: false },
+			deferred(GO),
+			{ kind: "tryAdmit", request: "late", route: heldRoute(GO, "held") },
+			failed(GO, failure("allowance")),
+			deferred(GO),
+		],
+	}),
+	run("a-held-route-of-an-entry-whose-key-was-replaced-still-reports", {
+		entries: [GO],
+		keys: { go: { kind: "key", key: KEY } },
+		exchanges: [OC_OK, OC_OK],
+		steps: [
+			check("go"),
+			take("held", GO),
+			key("go", OTHER),
+			{ kind: "failed", route: heldRoute(GO, "held"), failure: failure("allowance"), onward: false },
+			deferred(GO),
+		],
+	}),
+
 	// A check held open, and what happens to it.
+	run("a-key-replaced-twice-during-a-check-leaves-only-the-newest-check", {
+		entries: [MAIN],
+		keys: { main: { kind: "key", key: KEY } },
+		exchanges: [reply({ data: { usage: 2 } }), reply({ data: { usage: 3 } })],
+		steps: [
+			hold("check"),
+			check("main"),
+			key("main", OTHER),
+			key("main", "fake-key-three"),
+			release(1, { state: { kind: "ok", usage: 9 } }),
+		],
+	}),
 	run("a-key-change-during-a-held-store-read-drops-that-check", {
 		entries: [MAIN],
 		keys: { main: { kind: "key", key: KEY } },

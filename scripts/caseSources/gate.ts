@@ -16,6 +16,7 @@ const FLASH = "lab/model-b";
 type Step = Record<string, unknown>;
 
 const admit = (request: string, model = LUNA, extra: Step = {}): Step => ({ kind: "admit", request, model, ...extra });
+const inBook = (book: string): Step => ({ book });
 const again = (request: string, model = LUNA, extra: Step = {}): Step =>
 	admit(request, model, { again: true, ...extra });
 const tryAdmit = (request: string, model = LUNA): Step => ({ kind: "tryAdmit", request, model });
@@ -26,13 +27,13 @@ const settle = (request: string, outcome: string, retryAfterMs?: number): Step =
 	...(retryAfterMs === undefined ? {} : { retryAfterMs }),
 });
 const settleTicket = (ticket: Step, outcome: string): Step => ({ kind: "settleTicket", ticket, outcome });
-const TICKET = (gate: string, serial = 1): Step => ({ gate, model: LUNA, generation: 0, probe: false, serial });
+const TICKET = (gate: string, serial = 1): Step => ({ gate, model: LUNA, era: 1, generation: 0, probe: false, serial });
 const cool = (model = LUNA, retryAfterMs?: number): Step => ({
 	kind: "cool",
 	model,
 	...(retryAfterMs === undefined ? {} : { retryAfterMs }),
 });
-const clear = (prefix: string): Step => ({ kind: "clear", prefix });
+const retire = (book?: string): Step => ({ kind: "retire", ...(book === undefined ? {} : { book }) });
 const advance = (ms: number): Step => ({ kind: "advance", ms });
 const abort = (request: string): Step => ({ kind: "abort", request });
 const dispose = (): Step => ({ kind: "dispose" });
@@ -43,6 +44,12 @@ const run = (name: string, steps: Step[], extra: Step = {}): CaseSource =>
 /** One overload pause and the probe it ends in: the model is open, then paused, then probing. */
 const overloaded = (trigger = "trigger", model = LUNA): Step[] => [
 	admit(trigger, model),
+	settle(trigger, "overloaded"),
+];
+
+/** The same in a named book. */
+const overloadedIn = (book: string, trigger: string, model: string): Step[] => [
+	admit(trigger, model, inBook(book)),
 	settle(trigger, "overloaded"),
 ];
 
@@ -403,37 +410,42 @@ export const gateCases: CaseSource[] = [
 		settle("p2", "ok"),
 	]),
 
-	// Clearing.
-	run("clear-reopens-a-matching-paused-gate-and-releases-its-queue", [
+	// Retiring.
+	run("retire-answers-the-waiters-retired-and-the-next-use-starts-a-new-era", [
 		...overloaded("trigger", `entry\n${LUNA}`),
 		admit("w1", `entry\n${LUNA}`),
 		admit("w2", `entry\n${LUNA}`),
-		clear("entry\n"),
+		retire(),
 		admit("after", `entry\n${LUNA}`),
 	]),
-	run("clear-leaves-the-other-entries-alone", [
-		...overloaded("a", `one\n${LUNA}`),
-		...overloaded("b", `two\n${LUNA}`),
-		admit("wa", `one\n${LUNA}`),
-		admit("wb", `two\n${LUNA}`),
-		clear("one\n"),
+	run("retire-leaves-the-other-books-alone", [
+		...overloadedIn("one", "a", `one\n${LUNA}`),
+		...overloadedIn("two", "b", `two\n${LUNA}`),
+		admit("wa", `one\n${LUNA}`, inBook("one")),
+		admit("wb", `two\n${LUNA}`, inBook("two")),
+		retire("one"),
 	]),
-	run("clear-cancels-the-pause-timer", [...overloaded(), admit("w"), clear(""), advance(MINUTE), admit("after")]),
-	run("clear-takes-the-probe-away-from-a-probing-gate", [
+	run("retire-cancels-the-pause-timer", [...overloaded(), admit("w"), retire(), advance(MINUTE), admit("after")]),
+	run("retire-takes-the-probe-away-from-a-probing-gate", [
 		...overloaded(),
 		admit("p"),
 		advance(MINUTE),
-		clear(""),
+		retire(),
 		settle("p", "overloaded"),
 		admit("after"),
 	]),
-	run("clear-leaves-an-open-gate-and-its-generation", [admit("a"), settle("a", "ok"), clear(""), admit("b")]),
-	run("a-ticket-of-a-cleared-pause-is-stale", [
+	run("retire-forgets-an-open-gate-and-its-generation", [admit("a"), settle("a", "ok"), retire(), admit("b")]),
+	run("a-ticket-of-a-retired-era-is-stale", [
 		admit("early"),
 		admit("trigger"),
 		settle("trigger", "overloaded"),
-		clear(""),
+		retire(),
 		settle("early", "overloaded"),
+	]),
+	run("a-retired-era-tells-the-models-it-held-not-ready", [
+		...overloadedIn("one", "a", `one\n${LUNA}`),
+		admit("w", `one\n${LUNA}`, inBook("one")),
+		retire("one"),
 	]),
 
 	// Disposing.
@@ -473,7 +485,7 @@ export const gateCases: CaseSource[] = [
 		dispose(),
 		cool(),
 		cool(FLASH, MINUTE),
-		clear(""),
+		retire(),
 		advance(MINUTE),
 	]),
 

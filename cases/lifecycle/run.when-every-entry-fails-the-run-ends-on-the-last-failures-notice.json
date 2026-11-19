@@ -349,6 +349,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "a\nopenai/gpt-6-luna",
+								"era": 1,
 								"generation": 0,
 								"probe": false,
 								"serial": 1
@@ -433,6 +434,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "go\nopenai/gpt-6-luna",
+								"era": 2,
 								"generation": 0,
 								"probe": false,
 								"serial": 2
@@ -519,6 +521,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "b\nopenai/gpt-6-luna",
+								"era": 3,
 								"generation": 0,
 								"probe": false,
 								"serial": 3
@@ -593,6 +596,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "b\nopenai/gpt-6-luna",
+								"era": 3,
 								"generation": 0,
 								"probe": false,
 								"serial": 4
@@ -667,6 +671,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "b\nopenai/gpt-6-luna",
+								"era": 3,
 								"generation": 0,
 								"probe": false,
 								"serial": 5
@@ -741,6 +746,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "b\nopenai/gpt-6-luna",
+								"era": 3,
 								"generation": 0,
 								"probe": false,
 								"serial": 6

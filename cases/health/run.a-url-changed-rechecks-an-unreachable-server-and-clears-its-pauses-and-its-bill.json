@@ -2,7 +2,7 @@
 	"format": 2,
 	"type": "function",
 	"kind": "health.run",
-	"name": "a-url-changed-rechecks-an-unreachable-server-and-clears-its-pauses-keeping-its-bill",
+	"name": "a-url-changed-rechecks-an-unreachable-server-and-clears-its-pauses-and-its-bill",
 	"input": {
 		"startMs": 2000000,
 		"entries": [
@@ -149,6 +149,7 @@
 					"ticket": {
 						"gate": "gate-1",
 						"model": "box\nbox/qwen",
+						"era": 1,
 						"generation": 0,
 						"probe": false,
 						"serial": 1
@@ -277,6 +278,7 @@
 						"entry": "box",
 						"changed": [
 							"key",
+							"billed",
 							"waiting"
 						]
 					},
@@ -293,10 +295,6 @@
 						"key": {
 							"kind": "ok",
 							"models": 2
-						},
-						"billed": {
-							"billing": "local",
-							"cost": 0
 						},
 						"pool": {
 							"kind": "clear"
@@ -321,10 +319,6 @@
 						"key": {
 							"kind": "ok",
 							"models": 2
-						},
-						"billed": {
-							"billing": "local",
-							"cost": 0
 						},
 						"pool": {
 							"kind": "clear"

@@ -3,7 +3,6 @@
 import type { EntryKeys } from "@nyaaai/contract/entryKeys";
 import type { Ids } from "@nyaaai/contract/id";
 import { canonicalJson } from "@nyaaai/contract/json";
-import type { ProviderList } from "@nyaaai/contract/providerList";
 import type {
 	Admission,
 	Blocked,
@@ -13,13 +12,13 @@ import type {
 	GateWaiting,
 	HealthChange,
 	PoolEvent,
-	PoolState,
 	PoolVerdict,
 	Ticket,
 } from "@nyaaai/contract/shapes/health";
 import type { Billed, KeyState, ProviderEntry, ProviderKindName, SkipReason } from "@nyaaai/contract/shapes/provider";
 import type { Failure, NormalizedUsage } from "@nyaaai/contract/shapes/step";
 import type { Scheduler } from "@nyaaai/contract/time";
+import type { EntryRegistry, Era, Incarnation, RegistryEvent } from "../provider/incarnation";
 import type { KindDeps, ProviderKind } from "../provider/kind";
 import type { Resolved } from "../provider/resolver";
 import { type GateState, ProviderGate } from "./gate";
@@ -31,21 +30,21 @@ import { CLEAR, step, verdict } from "./pool";
 
 /** What the lifecycle calls: per-route admission, cooldowns and skips. */
 export interface Gate {
-	/** Waits through route pauses. */
+	/** Waits through route pauses; `retired` once its incarnation ended. */
 	admit(
 		route: Resolved,
 		signal: AbortSignal,
 		onWait?: (waiting: GateWaiting) => void,
 		again?: boolean,
 	): Promise<Admission>;
-	/** Never waits. */
+	/** Never waits; none once its incarnation ended. */
 	tryAdmit(route: Resolved): Ticket | null;
 	settle(ticket: Ticket, outcome: GateOutcome, retryAfterMs?: number): GateSettled;
 	/** Balance-cooldown exemption. */
 	deferred(route: Resolved, keep?: ReadonlySet<string>): SkipReason | undefined;
 	/** Last-route refusal. */
 	blocked(route: Resolved, keep?: ReadonlySet<string>): Blocked | undefined;
-	/** True when the report was dropped: its request began before the entry changed. */
+	/** True when the report was dropped: its era ended. */
 	failed(route: Resolved, failure: Failure, onward: boolean, ticket?: Ticket): boolean;
 	/** Balance replies join `run`; true when the report was dropped as `failed` says. */
 	served(route: Resolved, usage: NormalizedUsage | undefined, run?: Set<string>, ticket?: Ticket): boolean;
@@ -64,10 +63,10 @@ export interface HealthDeps {
 	scheduler: Scheduler;
 	/** Asked once, for the gate's name. */
 	ids: Ids;
-	/** The entries in priority order. */
-	list: ProviderList;
+	/** Shared with the resolver. */
+	entries: EntryRegistry;
 	/** The store's keys; health offers `entryKeys` over them. */
-	keys: EntryKeys;
+	keys: Pick<EntryKeys, "get">;
 	kinds: Partial<Record<ProviderKindName, ProviderKind>>;
 	/** What a kind's check stands on. */
 	kindDeps(kind: ProviderKindName): KindDeps;
@@ -76,19 +75,6 @@ export interface HealthDeps {
 }
 
 type Part = HealthChange["changed"][number];
-
-interface Status {
-	state: KeyState;
-	reader: KeyReader;
-}
-
-/** Tracked provider fields. */
-interface Identity {
-	kind: string;
-	plan?: string;
-	url?: string;
-	extraUsage: boolean;
-}
 
 ////////////////////////////////
 //  Constants
@@ -109,12 +95,6 @@ function keyOf(route: Pick<Resolved, "entry" | "key">): string {
 	return `${route.entry.id}\n${route.key}`;
 }
 
-/** The entry a gate's model key belongs to. */
-function entryOfModel(model: string): string {
-	const end = model.indexOf("\n");
-	return end < 0 ? model : model.slice(0, end);
-}
-
 const ticketKey = (ticket: Ticket): string => canonicalJson(ticket);
 
 function total(sum: number | undefined, more: number | undefined): number | undefined {
@@ -131,15 +111,6 @@ function billedWith(was: Billed | undefined, reply: Billing): Billed {
 	};
 }
 
-function identityOf(entry: ProviderEntry): Identity {
-	return {
-		kind: entry.kind,
-		...(entry.plan === undefined ? {} : { plan: entry.plan }),
-		...(entry.url === undefined ? {} : { url: entry.url }),
-		extraUsage: entry.extraUsage === true,
-	};
-}
-
 ////////////////////////////////
 //  Classes
 
@@ -148,22 +119,10 @@ export class ProviderHealth implements Gate {
 	/** Store keys, unless health holds the entry out. */
 	readonly entryKeys: EntryKeys;
 	private readonly gate: ProviderGate;
-	/** Absent pool means clear. */
-	private readonly pools = new Map<string, PoolState>();
-	/** Admitted tickets' entries, by the ticket's data. */
-	private readonly probes = new Map<string, string>();
-	/** The newest serial a ticket has had. */
-	private lastSerial = 0;
-	/** Per entry, the serial at its last invalidation; a ticket up to it began before. */
-	private readonly floors = new Map<string, number>();
-	private readonly statuses = new Map<string, Status>();
 	/** Readers dropped while a check ran. */
 	private retired: KeyReader[] = [];
-	private readonly rechecked = new Map<string, number>();
-	private readonly bills = new Map<string, Billed>();
 	private readonly listeners = new Set<(change: HealthChange) => void>();
 	private readonly unsubscribe: (() => void)[] = [];
-	private identities: Map<string, Identity>;
 	/** Depth of the running changes whose telling waits for their end. */
 	private batching = 0;
 	private readonly pending = new Map<string, Set<Part>>();
@@ -179,97 +138,96 @@ export class ProviderHealth implements Gate {
 			ids: d.ids,
 			...(d.pauseMs === undefined ? {} : { pauseMs: d.pauseMs }),
 			...(d.maxPauses === undefined ? {} : { maxPauses: d.maxPauses }),
-			onTicket: (ticket) => this.admitted(entryOfModel(ticket.model), ticket),
+			onTicket: (ticket) => this.admitted(ticket),
 		});
 		this.entryKeys = {
 			get: async (id) => {
 				try {
-					const entry = this.entryOf(id);
-					if (entry === undefined) return { kind: "none" };
-					const standing = this.standing(entry);
+					const incarnation = d.entries.incarnation(id);
+					if (incarnation === undefined) return { kind: "none" };
+					const standing = this.standing(incarnation);
 					if (standing !== undefined) return { kind: standing };
 					const answer = await d.keys.get(id);
 					// A URL kind needs no key, so an unreadable store is no key.
-					return answer.kind === "unready" && this.keyless(entry) ? { kind: "none" } : answer;
+					return answer.kind === "unready" && this.keyless(incarnation.entry) ? { kind: "none" } : answer;
 				} catch {
 					return { kind: "unready" };
 				}
 			},
-			onChange: (listener) => d.keys.onChange(listener),
+			onChange: (listener) => d.entries.onKeyChange(listener),
 		};
-		this.identities = this.snapshot();
 		this.unsubscribe.push(
-			d.keys.onChange((id) =>
-				this.batch(() => {
-					this.invalidate(id, true);
-					this.check(id);
-				}),
-			),
-			d.list.onChange(() => this.diff()),
-			this.gate.onChange((model) => this.touch(entryOfModel(model), "waiting")),
+			d.entries.watch((events) => this.observe(events)),
+			this.gate.onChange((owner) => this.touch(owner, "waiting")),
 		);
 	}
 
 	/** Cached key state. */
 	status(id: string): KeyState {
-		return { ...(this.statuses.get(id)?.state ?? none()) };
+		return { ...(this.eraOf(id)?.status?.state ?? none()) };
 	}
 
 	/** Listed replies create bills. */
 	bill(id: string): Billed | undefined {
-		const held = this.bills.get(id);
+		const held = this.eraOf(id)?.bill;
 		return held === undefined ? undefined : { ...held };
 	}
 
 	/** Everything health tracks of one entry. */
 	state(id: string): EntryHealth {
+		const era = this.eraOf(id);
 		const prefix = `${id}\n`;
 		const billed = this.bill(id);
 		return {
 			entry: id,
 			key: this.status(id),
 			...(billed === undefined ? {} : { billed }),
-			pool: structuredClone(this.pools.get(id) ?? CLEAR),
-			waiting: this.gate
-				.holding()
-				.filter((model) => model.startsWith(prefix))
-				.map((model) => model.slice(prefix.length)),
+			pool: structuredClone(era?.pool ?? CLEAR),
+			waiting:
+				era === undefined
+					? []
+					: this.gate
+							.holding(era.gates)
+							.filter((model) => model.startsWith(prefix))
+							.map((model) => model.slice(prefix.length)),
 		};
 	}
 
 	/** One model's gate as data; none until it is first used. */
-	gateState(route: Pick<Resolved, "entry" | "key">): GateState | undefined {
-		return this.gate.stateOf(keyOf(route));
+	gateState(route: Pick<Resolved, "entry" | "key" | "incarnation">): GateState | undefined {
+		return route.incarnation.live ? this.gate.stateOf(route.incarnation.era.gates, keyOf(route)) : undefined;
 	}
 
 	/** Accumulates reply billing. */
 	billed(id: string, reply: Billing, ticket?: Ticket): void {
-		if (!this.listed(id) || this.began(id, ticket)) return;
-		const was = this.bills.get(id);
+		const era = ticket === undefined ? this.eraOf(id) : this.d.entries.era(ticket.era);
+		if (era === undefined) return;
+		const was = era.bill;
 		const next = billedWith(was, reply);
 		if (was?.billing === next.billing && was.allowance === next.allowance && was.cost === next.cost) return;
-		this.bills.set(id, next);
-		this.touch(id, "billed");
+		era.bill = next;
+		this.touch(era.incarnation.id, "billed");
 	}
 
 	/** Replaces pending checks. */
 	check(id: string): void {
-		if (this.disposed || !this.listed(id)) return;
+		const incarnation = this.d.entries.incarnation(id);
+		if (this.disposed || incarnation === undefined) return;
+		const { era } = incarnation;
 		this.batch(() => {
-			void this.statusOf(id).reader.read();
+			void this.statusOf(era).reader.read();
 		});
 	}
 
 	checkUnread(): void {
-		for (const { id } of this.d.list.entries()) if (!this.statuses.has(id)) this.check(id);
+		for (const { id, era } of this.d.entries.incarnations()) if (era.status === undefined) this.check(id);
 	}
 
 	/** Settles when no key check is running. */
 	async idle(): Promise<void> {
 		for (;;) {
-			const busy = [...[...this.statuses.values()].map((status) => status.reader), ...this.retired].filter(
-				(reader) => reader.busy(),
-			);
+			const readers = this.d.entries.incarnations().flatMap(({ era }) => (era.status ? [era.status.reader] : []));
+			const busy = [...readers, ...this.retired].filter((reader) => reader.busy());
 			if (busy.length === 0) {
 				this.retired = [];
 				return;
@@ -293,45 +251,53 @@ export class ProviderHealth implements Gate {
 		onWait?: (waiting: GateWaiting) => void,
 		again = false,
 	): Promise<Admission> {
-		return this.batch(() => this.gate.admit(keyOf(route), signal, onWait, again));
+		const { incarnation } = route;
+		if (!incarnation.live) return Promise.resolve({ kind: "retired" });
+		const asked = this.batch(() => this.gate.admit(incarnation.era.gates, keyOf(route), signal, onWait, again));
+		// A key change moves the waiter to the new era.
+		return asked.then((admission) =>
+			admission.kind === "retired" && incarnation.live ? this.admit(route, signal, onWait, again) : admission,
+		);
 	}
 
 	tryAdmit(route: Resolved): Ticket | null {
-		return this.batch(() => this.gate.tryAdmit(keyOf(route)));
+		const { incarnation } = route;
+		if (!incarnation.live) return null;
+		return this.batch(() => this.gate.tryAdmit(incarnation.era.gates, keyOf(route)));
 	}
 
 	settle(ticket: Ticket, outcome: GateOutcome, retryAfterMs?: number): GateSettled {
+		const era = this.d.entries.era(ticket.era);
+		if (era === undefined || this.disposed) return "done";
 		return this.batch(() => {
-			const key = ticketKey(ticket);
-			const id = this.probes.get(key);
-			if (id !== undefined) {
-				this.probes.delete(key);
-				this.apply(id, { kind: "settled", ticket });
-			}
-			return this.gate.settle(ticket, outcome, retryAfterMs);
+			if (era.probes.delete(ticketKey(ticket))) this.apply(era, { kind: "settled", ticket });
+			return this.gate.settle(era.gates, ticket, outcome, retryAfterMs);
 		});
 	}
 
 	deferred(route: Resolved, keep?: ReadonlySet<string>): SkipReason | undefined {
-		if (this.rejected(route.entry)) return "keyRejected";
-		const pool = this.verdict(route.entry, keep);
+		const { incarnation } = route;
+		if (this.rejected(incarnation.era)) return "keyRejected";
+		const pool = this.verdict(incarnation, keep);
 		if (pool !== undefined) return pool.skip;
-		return this.gate.ready(keyOf(route)) ? undefined : "paused";
+		return this.gate.ready(incarnation.era.gates, keyOf(route)) ? undefined : "paused";
 	}
 
 	blocked(route: Resolved, keep?: ReadonlySet<string>): Blocked | undefined {
-		if (this.rejected(route.entry)) return { kind: "keyRejected" };
-		return this.verdict(route.entry, keep)?.blocked;
+		const { incarnation } = route;
+		if (this.rejected(incarnation.era)) return { kind: "keyRejected" };
+		return this.verdict(incarnation, keep)?.blocked;
 	}
 
 	/** Balance replies extend `run`. */
 	served(route: Resolved, usage: NormalizedUsage | undefined, run?: Set<string>, ticket?: Ticket): boolean {
 		const source = usage?.billingSource;
 		if (source === undefined) return false;
-		if (this.began(route.entry.id, ticket)) return true;
+		const era = this.eraFor(route.incarnation, ticket);
+		if (era === undefined) return true;
 		// Settings may change mid-request.
-		const entry = this.entryOf(route.entry.id) ?? route.entry;
-		this.apply(entry.id, {
+		const { entry } = route.incarnation;
+		this.apply(era, {
 			kind: "billed",
 			source,
 			...(entry.plan === undefined ? {} : { plan: entry.plan }),
@@ -342,17 +308,18 @@ export class ProviderHealth implements Gate {
 	}
 
 	failed(route: Resolved, failure: Failure, onward: boolean, ticket?: Ticket): boolean {
+		const era = this.eraFor(route.incarnation, ticket);
+		if (era === undefined) return true;
 		const { entry } = route;
-		if (this.began(entry.id, ticket)) return true;
 		this.batch(() => {
 			switch (failure.category) {
 				case "keyRejected":
-					this.mark(entry.id, { kind: "rejected" });
+					this.mark(era, { kind: "rejected" });
 					return;
 				// One pool per entry.
 				case "allowance":
 				case "outOfCredit":
-					this.apply(entry.id, {
+					this.apply(era, {
 						kind: "refused",
 						reason: failure.category === "allowance" ? "allowance" : "credit",
 						...(failure.resetsAt === undefined ? {} : { resetsAt: failure.resetsAt }),
@@ -360,8 +327,8 @@ export class ProviderHealth implements Gate {
 					});
 					return;
 				case "network":
-					if (this.byUrl(entry)) this.mark(entry.id, { kind: "unreachable" });
-					else if (onward) this.gate.cool(keyOf(route), failure.retryAfterMs);
+					if (this.byUrl(entry)) this.mark(era, { kind: "unreachable" });
+					else if (onward) this.gate.cool(era.gates, keyOf(route), failure.retryAfterMs);
 					return;
 				// Settlement owns overload pauses.
 				case "overloaded":
@@ -371,7 +338,7 @@ export class ProviderHealth implements Gate {
 				case "replayRejected":
 					return;
 				default:
-					if (onward) this.gate.cool(keyOf(route), failure.retryAfterMs);
+					if (onward) this.gate.cool(era.gates, keyOf(route), failure.retryAfterMs);
 			}
 		});
 		return false;
@@ -380,105 +347,147 @@ export class ProviderHealth implements Gate {
 	dispose(): void {
 		this.disposed = true;
 		for (const off of this.unsubscribe) off();
-		for (const status of this.statuses.values()) status.reader.dispose();
-		this.statuses.clear();
-		this.bills.clear();
-		this.pools.clear();
-		this.probes.clear();
-		this.floors.clear();
+		for (const { era } of this.d.entries.incarnations()) {
+			era.status?.reader.dispose();
+			era.status = undefined;
+			era.bill = undefined;
+			era.pool = CLEAR;
+			era.probes.clear();
+		}
 		this.listeners.clear();
 		this.gate.dispose();
 	}
 
-	/** Unhealthy entries are held out; asking rechecks an unreachable server. */
-	private standing(entry: ProviderEntry): "refused" | "unready" | undefined {
-		const status = this.status(entry.id).kind;
-		if (status === "rejected") return "refused";
-		if (!this.byUrl(entry)) return undefined;
-		if (status === "unreachable") this.recheck(entry.id);
-		// Out until the recheck passes.
-		return status === "unreachable" || (status === "checking" && this.rechecking(entry.id)) ? "unready" : undefined;
-	}
-
-	/** A later turn may find it back. */
-	private recheck(id: string): void {
-		const now = this.d.scheduler.nowMs();
-		const last = this.rechecked.get(id);
-		if (last !== undefined && now - last < RECHECK_MS) return;
-		this.rechecked.set(id, now);
-		this.check(id);
-	}
-
-	private rechecking(id: string): boolean {
-		const last = this.rechecked.get(id);
-		return last !== undefined && this.d.scheduler.nowMs() - last < KEY_CHECK_MS;
-	}
-
-	/** The only pool writer. */
-	private apply(id: string, event: PoolEvent): void {
-		if (!this.listed(id)) return;
-		const was = this.pools.get(id) ?? CLEAR;
-		const next = step(was, event, this.d.scheduler.nowMs(), this.d.pauseMs ?? PAUSE_MS);
-		if (next.kind === "clear") this.pools.delete(id);
-		else this.pools.set(id, next);
-		if (canonicalJson(next) !== canonicalJson(was)) this.touch(id, "pool");
-	}
-
-	private admitted(id: string, ticket: Ticket): void {
-		this.lastSerial = Math.max(this.lastSerial, ticket.serial);
-		if (!this.listed(id)) return;
+	/** Applies registry changes in order. */
+	private observe(events: RegistryEvent[]): void {
 		this.batch(() => {
-			this.probes.set(ticketKey(ticket), id);
-			this.apply(id, { kind: "admitted", ticket });
+			for (const event of events) {
+				switch (event.kind) {
+					case "retired":
+						this.retire(event.incarnation.era);
+						break;
+					case "rekeyed":
+						this.retire(event.retired);
+						this.check(event.incarnation.id);
+						break;
+					case "added":
+						this.check(event.incarnation.id);
+						break;
+					case "extraUsage": {
+						const { era } = event.incarnation;
+						const lastBill = era.bill?.billing;
+						this.apply(era, {
+							kind: "extraUsage",
+							on: event.on,
+							...(lastBill === undefined ? {} : { lastBill }),
+						});
+						break;
+					}
+				}
+			}
 		});
 	}
 
-	/** A request whose ticket came before the entry's last invalidation reports nothing. */
-	private began(id: string, ticket: Ticket | undefined): boolean {
-		return ticket !== undefined && ticket.serial <= (this.floors.get(id) ?? 0);
+	/** Ends what a retired era held. */
+	private retire(era: Era): void {
+		const id = era.incarnation.id;
+		this.batch(() => {
+			const { status } = era;
+			if (status !== undefined) {
+				status.reader.dispose();
+				if (status.reader.busy()) this.retired.push(status.reader);
+				era.status = undefined;
+				if (status.state.kind !== "none") this.touch(id, "key");
+			}
+			if (era.bill !== undefined) this.touch(id, "billed");
+			if (era.pool.kind !== "clear") this.touch(id, "pool");
+			this.gate.retire(era.gates);
+		});
 	}
 
-	/** Extra usage or `keep` exempts balance. */
-	private verdict(entry: ProviderEntry, keep: ReadonlySet<string> | undefined): PoolVerdict | undefined {
-		const exempt = entry.extraUsage === true || keep?.has(entry.id) === true;
-		return verdict(this.pools.get(entry.id) ?? CLEAR, exempt, this.d.scheduler.nowMs());
+	/** Unhealthy entries are held out; asking rechecks an unreachable server. */
+	private standing(incarnation: Incarnation): "refused" | "unready" | undefined {
+		const { era, entry } = incarnation;
+		const status = era.status?.state.kind ?? "none";
+		if (status === "rejected") return "refused";
+		if (!this.byUrl(entry)) return undefined;
+		if (status === "unreachable") this.recheck(era);
+		// Out until the recheck passes.
+		return status === "unreachable" || (status === "checking" && this.rechecking(era)) ? "unready" : undefined;
+	}
+
+	/** A later turn may find it back. */
+	private recheck(era: Era): void {
+		const now = this.d.scheduler.nowMs();
+		if (era.rechecked !== undefined && now - era.rechecked < RECHECK_MS) return;
+		era.rechecked = now;
+		this.check(era.incarnation.id);
+	}
+
+	private rechecking(era: Era): boolean {
+		return era.rechecked !== undefined && this.d.scheduler.nowMs() - era.rechecked < KEY_CHECK_MS;
+	}
+
+	/** The only pool writer. */
+	private apply(era: Era, event: PoolEvent): void {
+		const was = era.pool;
+		era.pool = step(was, event, this.d.scheduler.nowMs(), this.d.pauseMs ?? PAUSE_MS);
+		if (canonicalJson(era.pool) !== canonicalJson(was)) this.touch(era.incarnation.id, "pool");
+	}
+
+	private admitted(ticket: Ticket): void {
+		const era = this.d.entries.era(ticket.era);
+		if (era === undefined) return;
+		this.batch(() => {
+			era.probes.add(ticketKey(ticket));
+			this.apply(era, { kind: "admitted", ticket });
+		});
+	}
+
+	/** The ticket's era, else the live one; none drops it. */
+	private eraFor(incarnation: Incarnation, ticket: Ticket | undefined): Era | undefined {
+		if (ticket !== undefined) return this.d.entries.era(ticket.era);
+		return incarnation.live ? incarnation.era : undefined;
+	}
+
+	/** Extra usage is read live. */
+	private verdict(incarnation: Incarnation, keep: ReadonlySet<string> | undefined): PoolVerdict | undefined {
+		const exempt = incarnation.entry.extraUsage === true || keep?.has(incarnation.id) === true;
+		return verdict(incarnation.era.pool, exempt, this.d.scheduler.nowMs());
 	}
 
 	/** Inference stands until recheck. */
-	private mark(id: string, state: KeyState): void {
-		if (!this.listed(id)) return;
-		const status = this.statusOf(id);
+	private mark(era: Era, state: KeyState): void {
+		const status = this.statusOf(era);
 		if (status.state.kind === state.kind) return;
 		status.state = state;
-		this.touch(id, "key");
+		this.touch(era.incarnation.id, "key");
 	}
 
-	private statusOf(id: string): Status {
-		const known = this.statuses.get(id);
-		if (known !== undefined) return known;
-		const fresh: Status = {
+	private statusOf(era: Era): NonNullable<Era["status"]> {
+		if (era.status !== undefined) return era.status;
+		const fresh: NonNullable<Era["status"]> = {
 			state: none(),
 			reader: new KeyReader(
 				this.d.scheduler,
-				(signal) => this.keyCheck(id, signal),
+				(signal) => this.keyCheck(era, signal),
 				(state) => {
 					fresh.state = state;
-					this.touch(id, "key");
+					this.touch(era.incarnation.id, "key");
 				},
 			),
 		};
-		this.statuses.set(id, fresh);
+		era.status = fresh;
 		return fresh;
 	}
 
-	/** Ends without effect once its signal ended or the entry's identity changed. */
-	private async keyCheck(id: string, signal: AbortSignal): Promise<KeyState | undefined> {
-		const entry = this.entryOf(id);
-		const kind = entry === undefined ? undefined : this.d.kinds[entry.kind];
-		if (entry === undefined || kind === undefined) return none();
-		const began = identityOf(entry);
-		const stale = () => signal.aborted || !this.sameIdentity(id, began);
-		const answer = await this.d.keys.get(id);
+	/** Ends without effect once its era retired. */
+	private async keyCheck(era: Era, signal: AbortSignal): Promise<KeyState | undefined> {
+		const { entry } = era.incarnation;
+		const kind = this.d.kinds[entry.kind];
+		if (kind === undefined) return none();
+		const stale = () => signal.aborted || era.retired;
+		const answer = await this.d.keys.get(entry.id);
 		if (stale()) return undefined;
 		let state: KeyState;
 		if (answer.kind === "refused") state = { kind: "rejected" };
@@ -492,63 +501,6 @@ export class ProviderHealth implements Gate {
 					: await kind.check(entry, secret, this.d.kindDeps(entry.kind), signal);
 		}
 		return stale() ? undefined : state;
-	}
-
-	private sameIdentity(id: string, began: Identity): boolean {
-		const entry = this.entryOf(id);
-		if (entry === undefined) return false;
-		const now = identityOf(entry);
-		return now.kind === began.kind && now.plan === began.plan && now.url === began.url;
-	}
-
-	private invalidate(id: string, unbill: boolean, identity = false): void {
-		this.floors.set(id, this.lastSerial);
-		this.batch(() => {
-			const status = this.statuses.get(id);
-			if (status !== undefined) {
-				status.reader.dispose();
-				if (status.reader.busy()) this.retired.push(status.reader);
-				this.statuses.delete(id);
-				if (status.state.kind !== "none") this.touch(id, "key");
-			}
-			if (unbill && this.bills.delete(id)) this.touch(id, "billed");
-			if (this.pools.delete(id)) this.touch(id, "pool");
-			for (const [held, owner] of [...this.probes]) if (owner === id) this.probes.delete(held);
-			if (identity) this.rechecked.delete(id);
-			this.gate.clear((key) => key.startsWith(`${id}\n`));
-		});
-	}
-
-	private diff(): void {
-		this.batch(() => {
-			const next = this.snapshot();
-			for (const [id, was] of this.identities) {
-				const now = next.get(id);
-				if (now === undefined) {
-					this.invalidate(id, true, true);
-				} else if (now.kind !== was.kind || now.plan !== was.plan || now.url !== was.url) {
-					this.invalidate(id, false, true);
-					this.check(id);
-				} else if (now.extraUsage !== was.extraUsage) {
-					const lastBill = this.bills.get(id)?.billing;
-					this.apply(id, {
-						kind: "extraUsage",
-						on: now.extraUsage,
-						...(lastBill === undefined ? {} : { lastBill }),
-					});
-				}
-			}
-			const added = [...next.keys()].filter((id) => !this.identities.has(id));
-			this.identities = next;
-			for (const id of added) this.check(id);
-		});
-	}
-
-	private snapshot(): Map<string, Identity> {
-		const held = new Map<string, Identity>();
-		// A repeated id keeps its first row.
-		for (const entry of this.d.list.entries()) if (!held.has(entry.id)) held.set(entry.id, identityOf(entry));
-		return held;
 	}
 
 	/** Runs a change whose parts are told together, once it ends. */
@@ -596,16 +548,13 @@ export class ProviderHealth implements Gate {
 		}
 	}
 
-	private entryOf(id: string): ProviderEntry | undefined {
-		return this.d.list.entries().find((entry) => entry.id === id);
+	/** The current era. */
+	private eraOf(id: string): Era | undefined {
+		return this.d.entries.incarnation(id)?.era;
 	}
 
-	private listed(id: string): boolean {
-		return this.entryOf(id) !== undefined;
-	}
-
-	private rejected(entry: ProviderEntry): boolean {
-		return this.status(entry.id).kind === "rejected";
+	private rejected(era: Era): boolean {
+		return era.status?.state.kind === "rejected";
 	}
 
 	/** A URL kind that takes no key at all. */
@@ -614,7 +563,7 @@ export class ProviderHealth implements Gate {
 		return kind?.field === "url" && kind.optionalKey !== true;
 	}
 
-	private byUrl(entry: ProviderEntry): boolean {
+	private byUrl(entry: Pick<ProviderEntry, "kind">): boolean {
 		return this.d.kinds[entry.kind]?.field === "url";
 	}
 }

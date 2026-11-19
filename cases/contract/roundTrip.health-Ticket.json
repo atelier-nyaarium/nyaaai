@@ -7,21 +7,24 @@
 		"set": "health",
 		"shape": "Ticket",
 		"texts": [
+			"{\"gate\":\"g1\",\"model\":\"m1\",\"era\":1,\"generation\":0,\"probe\":false,\"serial\":1}",
+			"{\"gate\":\"g1\",\"model\":\"m1\",\"era\":2,\"generation\":3,\"probe\":true,\"serial\":7}",
+			"{\"gate\":\"g1\",\"model\":\"m1\",\"era\":1,\"generation\":0,\"probe\":false,\"serial\":1,\"extra\":{\"deep\":1}}",
+			"{\"gate\":\"g2\",\"model\":\"m1\",\"era\":1,\"generation\":0,\"probe\":false,\"serial\":1}",
+			"{\"gate\":\"g1\",\"model\":\"m1\",\"era\":1,\"generation\":0,\"probe\":true,\"serial\":1}",
+			"{\"gate\":\"g1\",\"model\":\"m2\",\"era\":1,\"generation\":0,\"probe\":false,\"serial\":1}",
+			"{\"gate\":\"g1\",\"model\":\"m1\",\"era\":2,\"generation\":0,\"probe\":false,\"serial\":1}",
+			"{\"model\":\"m1\",\"era\":1,\"generation\":0,\"probe\":false,\"serial\":1}",
+			"{\"gate\":\"g1\",\"model\":\"m1\",\"era\":1,\"generation\":0,\"probe\":false}",
+			"{\"gate\":\"g1\",\"model\":\"m1\",\"era\":1,\"generation\":0,\"serial\":1}",
 			"{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1}",
-			"{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":3,\"probe\":true,\"serial\":7}",
-			"{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1,\"extra\":{\"deep\":1}}",
-			"{\"gate\":\"g2\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1}",
-			"{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":true,\"serial\":1}",
-			"{\"gate\":\"g1\",\"model\":\"m2\",\"generation\":0,\"probe\":false,\"serial\":1}",
-			"{\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1}",
-			"{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false}",
-			"{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"serial\":1}",
-			"{\"gate\":1,\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1}",
-			"{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":-1}",
-			"{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1.5}",
-			"{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":-1,\"probe\":false,\"serial\":1}",
-			"{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":1,\"serial\":1}",
-			"{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":\"1\"}",
+			"{\"gate\":\"g1\",\"model\":\"m1\",\"era\":-1,\"generation\":0,\"probe\":false,\"serial\":1}",
+			"{\"gate\":1,\"model\":\"m1\",\"era\":1,\"generation\":0,\"probe\":false,\"serial\":1}",
+			"{\"gate\":\"g1\",\"model\":\"m1\",\"era\":1,\"generation\":0,\"probe\":false,\"serial\":-1}",
+			"{\"gate\":\"g1\",\"model\":\"m1\",\"era\":1,\"generation\":0,\"probe\":false,\"serial\":1.5}",
+			"{\"gate\":\"g1\",\"model\":\"m1\",\"era\":1,\"generation\":-1,\"probe\":false,\"serial\":1}",
+			"{\"gate\":\"g1\",\"model\":\"m1\",\"era\":1,\"generation\":0,\"probe\":1,\"serial\":1}",
+			"{\"gate\":\"g1\",\"model\":\"m1\",\"era\":1,\"generation\":0,\"probe\":false,\"serial\":\"1\"}",
 			"[]"
 		]
 	},
@@ -29,27 +32,31 @@
 		"results": [
 			{
 				"ok": true,
-				"text": "{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1}"
+				"text": "{\"gate\":\"g1\",\"model\":\"m1\",\"era\":1,\"generation\":0,\"probe\":false,\"serial\":1}"
 			},
 			{
 				"ok": true,
-				"text": "{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":3,\"probe\":true,\"serial\":7}"
+				"text": "{\"gate\":\"g1\",\"model\":\"m1\",\"era\":2,\"generation\":3,\"probe\":true,\"serial\":7}"
 			},
 			{
 				"ok": true,
-				"text": "{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1}"
+				"text": "{\"gate\":\"g1\",\"model\":\"m1\",\"era\":1,\"generation\":0,\"probe\":false,\"serial\":1}"
 			},
 			{
 				"ok": true,
-				"text": "{\"gate\":\"g2\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1}"
+				"text": "{\"gate\":\"g2\",\"model\":\"m1\",\"era\":1,\"generation\":0,\"probe\":false,\"serial\":1}"
 			},
 			{
 				"ok": true,
-				"text": "{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":true,\"serial\":1}"
+				"text": "{\"gate\":\"g1\",\"model\":\"m1\",\"era\":1,\"generation\":0,\"probe\":true,\"serial\":1}"
 			},
 			{
 				"ok": true,
-				"text": "{\"gate\":\"g1\",\"model\":\"m2\",\"generation\":0,\"probe\":false,\"serial\":1}"
+				"text": "{\"gate\":\"g1\",\"model\":\"m2\",\"era\":1,\"generation\":0,\"probe\":false,\"serial\":1}"
+			},
+			{
+				"ok": true,
+				"text": "{\"gate\":\"g1\",\"model\":\"m1\",\"era\":2,\"generation\":0,\"probe\":false,\"serial\":1}"
 			},
 			{
 				"ok": false,
@@ -67,6 +74,18 @@
 				"ok": false,
 				"path": [
 					"probe"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"era"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"era"
 				]
 			},
 			{

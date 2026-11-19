@@ -11,6 +11,7 @@ use nyaaai_agentic::codec::{Codec, Mode, StreamDecoder};
 use nyaaai_agentic::failure::ProviderError;
 use nyaaai_agentic::kinds::fetcher::Aborted;
 use nyaaai_agentic::models::view::unknown_view;
+use nyaaai_agentic::provider::incarnation::{EntryRegistry, identity_of};
 use nyaaai_agentic::provider::kind::{
     CatalogDeps, EntryCatalog, KINDS, KindDeps, KindError, KindField, ProviderKind,
 };
@@ -573,13 +574,9 @@ pub fn reach(input: ResolverReachInput) -> Outcome<ResolverReachResult> {
     Ok(ResolverReachResult { reaches })
 }
 
-pub fn route_key(input: ResolverRouteKeyInput) -> Outcome<ResolverRouteKeyResult> {
-    Ok(ResolverRouteKeyResult {
-        keys: input
-            .entries
-            .iter()
-            .map(nyaaai_agentic::provider::resolver::route_key)
-            .collect(),
+pub fn identity(input: ResolverIdentityInput) -> Outcome<ResolverIdentityResult> {
+    Ok(ResolverIdentityResult {
+        identities: input.entries.iter().map(identity_of).collect(),
     })
 }
 
@@ -588,8 +585,13 @@ pub fn key_source(input: ResolverKeySourceInput) -> Outcome<ResolverKeySourceRes
     for (id, answer) in input.answers.iter() {
         keys.set(id, answer_of(answer)?);
     }
-    let list = Arc::new(ScriptedProviderList::new(input.list.clone()));
-    let source = key_source_of(keys.clone(), list.clone(), input.entry.clone());
+    let list = Arc::new(ScriptedProviderList::new(vec![input.entry.clone()]));
+    let entries = EntryRegistry::new(list.clone(), &*keys);
+    let incarnation = entries
+        .incarnation(&input.entry.id)
+        .ok_or_else(|| "The entry is listed.".to_owned())?;
+    let source = key_source_of(keys.clone(), &incarnation);
+    list.set(input.list.clone());
     let mut gets = Vec::new();
     for step in &input.steps {
         match step {
@@ -602,6 +604,7 @@ pub fn key_source(input: ResolverKeySourceInput) -> Outcome<ResolverKeySourceRes
             }
         }
     }
+    entries.dispose();
     Ok(ResolverKeySourceResult { gets })
 }
 
@@ -630,6 +633,13 @@ pub fn served_by(input: ResolverServedByInput) -> Outcome<ResolverServedByResult
         Arc::new(FakeScheduler::new(Arc::new(TimerWheel::new(0)))),
     );
     let zdr = Arc::new(AtomicBool::new(input.zdr_only));
+    let entries = EntryRegistry::new(
+        Arc::new(ScriptedProviderList::new(vec![input.entry.clone()])),
+        &ScriptedEntryKeys::new(),
+    );
+    let incarnation = entries
+        .incarnation(&input.entry.id)
+        .ok_or_else(|| "The entry is listed.".to_owned())?;
     let transport = named.transport(&fields_of(&input.entry), Arc::new(static_key(KEY)), &deps)?;
     let live = Arc::clone(&zdr);
     let status = match &input.view {
@@ -637,7 +647,7 @@ pub fn served_by(input: ResolverServedByInput) -> Outcome<ResolverServedByResult
         Some(held) => Some(convert::<ResolverServedByInputView, ModelViewStatus>(held)?),
     };
     let served = ServedByDeps {
-        entry: input.entry.clone(),
+        incarnation,
         kind: Arc::clone(&named),
         transport,
         catalog: Arc::new(Standing { status }),
@@ -652,6 +662,7 @@ pub fn served_by(input: ResolverServedByInput) -> Outcome<ResolverServedByResult
     let zdr_on_resolve = first.zdr_only();
     zdr.store(input.flipped_to, Ordering::SeqCst);
     let sent = block_on(send_through(first, &host, None, None))??;
+    entries.dispose();
     let path = first.codec.encode(&request("m")?, Mode::Complete)?.path;
     Ok(ResolverServedByResult {
         key: routes.key.clone(),
@@ -1090,8 +1101,9 @@ pub fn routes(input: ResolverRoutesInput) -> Outcome<ResolverRoutesResult> {
     let told = Arc::clone(&refreshed);
     let live = Arc::clone(&zdr);
     let deps_host = Arc::clone(&host);
+    let entries = Arc::new(EntryRegistry::new(list.clone(), &*scripted));
     let resolver = ModelResolver::new(ResolverDeps {
-        list: list.clone(),
+        entries: Arc::clone(&entries),
         keys: gate.clone(),
         registry: registry.clone() as Arc<dyn ModelRegistry>,
         kinds,
@@ -1140,6 +1152,7 @@ pub fn routes(input: ResolverRoutesInput) -> Outcome<ResolverRoutesResult> {
         Ok::<(), String>(())
     })??;
     rig.resolver.dispose();
+    entries.dispose();
     let refreshed = locked(&rig.refreshed).clone();
     Ok(ResolverRoutesResult {
         steps,
@@ -1280,8 +1293,12 @@ pub fn uses(input: ResolverUsesInput) -> Outcome<ResolverUsesResult> {
     keys.set("a", KeyAnswer::Key(KEY.to_owned()));
     let registry = Arc::new(ScriptedModelRegistry::empty());
     registry.set_rows(rows_for(&input.rows)?);
+    let entries = Arc::new(EntryRegistry::new(
+        Arc::new(ScriptedProviderList::new(vec![entry])),
+        &*keys,
+    ));
     let resolver = ModelResolver::new(ResolverDeps {
-        list: Arc::new(ScriptedProviderList::new(vec![entry])),
+        entries: Arc::clone(&entries),
         keys,
         registry: registry as Arc<dyn ModelRegistry>,
         kinds: vec![kind],
@@ -1318,5 +1335,6 @@ pub fn uses(input: ResolverUsesInput) -> Outcome<ResolverUsesResult> {
         }
     })?;
     resolver.dispose();
+    entries.dispose();
     Ok(ResolverUsesResult { calls })
 }

@@ -56,7 +56,7 @@
 	"expected": {
 		"gets": [
 			null,
-			"fake-key-two"
+			null
 		]
 	}
 }

@@ -52,6 +52,7 @@
 		"./noticeText": "./src/noticeText.ts",
 		"./provider/disposition": "./src/provider/disposition.ts",
 		"./provider/entry": "./src/provider/entry.ts",
+		"./provider/incarnation": "./src/provider/incarnation.ts",
 		"./provider/kind": "./src/provider/kind.ts",
 		"./provider/resolver": "./src/provider/resolver.ts",
 		"./responses/codec": "./src/responses/codec.ts",

@@ -97,6 +97,9 @@ type Onward = { onward: Failure; ticket?: Ticket | undefined };
 /** Deferred by ZDR. */
 type Kept = { kept: true };
 
+/** Its incarnation ended. */
+type Gone = { gone: true };
+
 type Gated = Admission | { kind: "go"; ticket: undefined };
 
 ////////////////////////////////
@@ -127,6 +130,16 @@ export function notice(kind: NoticeKind, failure?: Failure, route?: Resolved): E
 function overloaded(route: Resolved): Ended {
 	const model = route.view.row.label;
 	return { kind: "notice", notice: { kind: "providerOverloaded", model, message: overloadedText(model) } };
+}
+
+/** A route of an ended incarnation. */
+function gone(route: Resolved): Ended {
+	const model = route.view.row.label;
+	const entry = route.entry.label;
+	return {
+		kind: "notice",
+		notice: { kind: "modelUnavailable", model, entry, message: unavailableText(model, entry) },
+	};
 }
 
 /** A gate's give-up as an overload, so the route falls through. */
@@ -248,6 +261,10 @@ export class RequestLifecycle {
 			}
 			const tried = await this.tries(route, call, o, keep, true);
 			if ("kept" in tried) continue;
+			if ("gone" in tried) {
+				skip(route, "unavailable", "deferred");
+				continue;
+			}
 			if (!("onward" in tried)) return tried;
 			this.failed(route, tried.onward, true, o, tried.ticket);
 			skip(route, skipReasonOf(tried.onward), "fellThrough");
@@ -258,6 +275,7 @@ export class RequestLifecycle {
 		if (refused !== undefined && "blocked" in refused)
 			return { ok: false, outcome: { kind: "notice", notice: { ...refused.blocked, entry: last.entry.label } } };
 		const tried = await this.tries(last, call, o, keep, false);
+		if ("gone" in tried) return { ok: false, outcome: gone(last) };
 		return "kept" in tried ? { ok: false, outcome: notice("noZdrHost") } : tried;
 	}
 
@@ -279,21 +297,21 @@ export class RequestLifecycle {
 		o: Observer,
 		run: Set<string> | undefined,
 		onward: true,
-	): Promise<Attempt<T> | Onward | Kept>;
+	): Promise<Attempt<T> | Onward | Kept | Gone>;
 	private tries<T extends Billing>(
 		route: Resolved,
 		call: Call<T>,
 		o: Observer,
 		run: Set<string> | undefined,
 		onward: false,
-	): Promise<Attempt<T> | Kept>;
+	): Promise<Attempt<T> | Kept | Gone>;
 	private async tries<T extends Billing>(
 		route: Resolved,
 		call: Call<T>,
 		o: Observer,
 		run: Set<string> | undefined,
 		onward: boolean,
-	): Promise<Attempt<T> | Onward | Kept> {
+	): Promise<Attempt<T> | Onward | Kept | Gone> {
 		// Backoff consumes budget.
 		let waited = 0;
 		let again = false;
@@ -306,13 +324,18 @@ export class RequestLifecycle {
 				call.live === true ? this.admitLive(route, call.signal, o) : await this.admit(route, call, o, again);
 			again = false;
 			if (admission.kind === "stopped") return { ok: false, outcome: STOPPED };
+			if (admission.kind === "retired") return { gone: true };
 			if (admission.kind === "gaveUp") {
 				// A give-up ends a non-last route, not the request.
 				if (onward) return { onward: gaveUpOn(route) };
 				return { ok: false, outcome: overloaded(route) };
 			}
 			const { ticket } = admission;
-			// Recheck ZDR on admission.
+			// Recheck the incarnation and ZDR.
+			if (!route.incarnation.live) {
+				this.settle(route, ticket, "cancelled", undefined, o);
+				return { gone: true };
+			}
 			if (route.zdrOnly && route.view.dataKept === true) {
 				trace(o, () => ({ kind: "kept", entry: route.entry.id, model: route.key }));
 				this.settle(route, ticket, "cancelled", undefined, o);
@@ -515,7 +538,8 @@ export class RequestLifecycle {
 		const gate = this.d.gate;
 		if (gate === undefined) return { kind: "go", ticket: undefined };
 		const ticket = gate.tryAdmit(route);
-		const admission: Admission = ticket === null ? { kind: "gaveUp" } : { kind: "go", ticket };
+		const admission: Admission =
+			ticket !== null ? { kind: "go", ticket } : { kind: route.incarnation.live ? "gaveUp" : "retired" };
 		trace(o, () => ({ kind: "admitted", entry: route.entry.id, admission }));
 		return admission;
 	}

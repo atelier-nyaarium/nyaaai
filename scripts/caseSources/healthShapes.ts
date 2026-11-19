@@ -16,8 +16,8 @@ const health = (shape: string, texts: Text[]): CaseSource => ({
 
 const quoted = (...values: string[]): string[] => values.map((value) => JSON.stringify(value));
 
-const ticket = { gate: "g1", model: "m1", generation: 0, probe: false, serial: 1 };
-const probeTicket = { gate: "g1", model: "m1", generation: 3, probe: true, serial: 7 };
+const ticket = { gate: "g1", model: "m1", era: 1, generation: 0, probe: false, serial: 1 };
+const probeTicket = { gate: "g1", model: "m1", era: 2, generation: 3, probe: true, serial: 7 };
 
 export const healthShapeCases: CaseSource[] = [
 	health("Ticket", [
@@ -28,9 +28,12 @@ export const healthShapeCases: CaseSource[] = [
 		{ ...ticket, gate: "g2" },
 		{ ...ticket, probe: true },
 		{ ...ticket, model: "m2" },
-		{ model: "m1", generation: 0, probe: false, serial: 1 },
-		{ gate: "g1", model: "m1", generation: 0, probe: false },
-		{ gate: "g1", model: "m1", generation: 0, serial: 1 },
+		{ ...ticket, era: 2 },
+		{ model: "m1", era: 1, generation: 0, probe: false, serial: 1 },
+		{ gate: "g1", model: "m1", era: 1, generation: 0, probe: false },
+		{ gate: "g1", model: "m1", era: 1, generation: 0, serial: 1 },
+		{ gate: "g1", model: "m1", generation: 0, probe: false, serial: 1 },
+		{ ...ticket, era: -1 },
 		{ ...ticket, gate: 1 },
 		{ ...ticket, serial: -1 },
 		{ ...ticket, serial: 1.5 },
@@ -45,6 +48,8 @@ export const healthShapeCases: CaseSource[] = [
 		{ kind: "gaveUp" },
 		{ kind: "stopped" },
 		{ kind: "stopped", ticket },
+		{ kind: "retired" },
+		{ kind: "retired", ticket },
 		{ kind: "go" },
 		{ kind: "go", ticket: { model: "m1" } },
 		{ kind: "wait" },

@@ -1,11 +1,11 @@
 //! Routes a model key across the provider list.
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::fmt;
 use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::pin::Pin;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{Arc, Mutex, MutexGuard};
+use std::sync::{Arc, Mutex, MutexGuard, Weak};
 use std::task::{Context, Poll, Waker};
 
 use nyaaai_contract::cancel::{CancelToken, Unsubscribe};
@@ -13,7 +13,6 @@ use nyaaai_contract::entry_keys::{EntryKeys, KeyAnswer};
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::json::{Record, Value};
 use nyaaai_contract::model_registry::ModelRegistry;
-use nyaaai_contract::provider_list::ProviderList;
 use nyaaai_contract::shapes::model::{
     Binding, ModelRow, ModelRowCache, ModelRowVerifiedPrice, ModelUse, ModelView, ModelViewStatus,
     Refusal, RowIdentity, RowIdentityHosted, Unresolved, Via,
@@ -24,6 +23,7 @@ use nyaaai_contract::shapes::provider::{
 use nyaaai_contract::shapes::step::{CanonicalRequest, StepResult};
 use tokio::sync::OnceCell;
 
+use super::incarnation::{EntryRegistry, Incarnation, Made, RegistryEvent, identity_of};
 use super::kind::{EntryCatalog, KindDeps, KindField, ProviderKind, Route};
 use crate::codec::Codec;
 use crate::models::row_key::{parse_row_key_text, served_id_of};
@@ -94,7 +94,10 @@ impl RouteTransport {
 
 pub struct Resolved {
     pub key: String,
+    /// The row when resolved.
     pub entry: ProviderEntry,
+    /// Sends nothing once it ended.
+    pub incarnation: Arc<Incarnation>,
     pub kind: Arc<dyn ProviderKind>,
     pub binding: Binding,
     /// The serving entry's price, context and efforts.
@@ -153,8 +156,9 @@ impl std::error::Error for ResolveError {}
 
 /// What a resolver stands on.
 pub struct ResolverDeps {
-    /// List order is priority order.
-    pub list: Arc<dyn ProviderList>,
+    /// Incarnations in priority order.
+    pub entries: Arc<EntryRegistry>,
+    /// Key reads go through it.
     pub keys: Arc<dyn EntryKeys>,
     pub registry: Arc<dyn ModelRegistry>,
     pub kinds: Vec<Arc<dyn ProviderKind>>,
@@ -215,17 +219,6 @@ pub fn via_of(entry: &ProviderEntry) -> Via {
     }
 }
 
-/// What identifies a route: id, kind, plan and URL.
-pub fn route_key(entry: &ProviderEntry) -> String {
-    [
-        entry.id.as_str(),
-        entry.kind.as_str(),
-        entry.plan.map_or("", |plan| plan.as_str()),
-        entry.url.as_deref().unwrap_or(""),
-    ]
-    .join("\n")
-}
-
 /// A URL kind needs no key; a key kind needs one.
 pub fn reach_of(field: KindField, answer: &KeyAnswer) -> KeyReach {
     match answer {
@@ -242,32 +235,27 @@ pub fn reach_of(field: KindField, answer: &KeyAnswer) -> KeyReach {
     }
 }
 
-/// One route's key: a key stays with its URL.
+/// One route's key: given only while its incarnation lives.
 pub struct EntryKeySource {
     keys: Arc<dyn EntryKeys>,
-    list: Arc<dyn ProviderList>,
-    entry: ProviderEntry,
+    /// Weak: the route is held by the incarnation, and a strong one would keep it alive.
+    incarnation: Weak<Incarnation>,
+    id: String,
 }
 
-pub fn key_source_of(
-    keys: Arc<dyn EntryKeys>,
-    list: Arc<dyn ProviderList>,
-    entry: ProviderEntry,
-) -> EntryKeySource {
-    EntryKeySource { keys, list, entry }
+pub fn key_source_of(keys: Arc<dyn EntryKeys>, incarnation: &Arc<Incarnation>) -> EntryKeySource {
+    EntryKeySource {
+        keys,
+        incarnation: Arc::downgrade(incarnation),
+        id: incarnation.id.clone(),
+    }
 }
 
 impl KeySource for EntryKeySource {
-    /// Gives the key only while the list holds the same id, kind, plan and URL.
     fn get(&self) -> BoxFuture<'_, Option<String>> {
         Box::pin(async move {
-            let answer = self.keys.get(&self.entry.id).await;
-            let listed = self
-                .list
-                .entries()
-                .into_iter()
-                .find(|each| each.id == self.entry.id);
-            if !listed.is_some_and(|held| route_key(&held) == route_key(&self.entry)) {
+            let answer = self.keys.get(&self.id).await;
+            if !self.incarnation.upgrade().is_some_and(|held| held.live()) {
                 return None;
             }
             match answer {
@@ -352,7 +340,7 @@ fn adhoc_row(key: &str, kind: ProviderKindName) -> ModelRow {
 
 /// What `served_by` stands on.
 pub struct ServedByDeps {
-    pub entry: ProviderEntry,
+    pub incarnation: Arc<Incarnation>,
     pub kind: Arc<dyn ProviderKind>,
     pub transport: Arc<Transport>,
     pub catalog: Arc<dyn Catalog>,
@@ -367,7 +355,8 @@ pub async fn served_by(d: &ServedByDeps, key: &str, use_: &ModelUse) -> Routes {
         Some(view) => view,
         None => unknown_view(&adhoc_row(key, d.kind.kind())),
     };
-    let codec = d.kind.codec(Some(&view), &fields_of(&d.entry), &d.deps);
+    let entry = d.incarnation.entry();
+    let codec = d.kind.codec(Some(&view), &fields_of(&entry), &d.deps);
     let binding = view
         .row
         .bindings
@@ -376,7 +365,8 @@ pub async fn served_by(d: &ServedByDeps, key: &str, use_: &ModelUse) -> Routes {
         .unwrap_or_else(|| Binding { id: key.to_owned() });
     let route = Resolved {
         key: key.to_owned(),
-        entry: d.entry.clone(),
+        entry,
+        incarnation: Arc::clone(&d.incarnation),
         kind: Arc::clone(&d.kind),
         binding,
         view,
@@ -465,15 +455,6 @@ impl Drop for Bound {
     }
 }
 
-/// A route with the deps it was made with.
-#[derive(Clone)]
-struct Held {
-    route: Route,
-    deps: KindDeps,
-}
-
-type Made = Arc<Mutex<Vec<(String, Held)>>>;
-
 fn locked<T>(held: &Mutex<T>) -> MutexGuard<'_, T> {
     held.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
 }
@@ -483,45 +464,34 @@ fn disposed(catalog: &dyn EntryCatalog) {
     let _ = catch_unwind(AssertUnwindSafe(|| catalog.dispose()));
 }
 
-/// One key check per entry in one read, shared by the rows reading at once.
-type Reaches = Arc<Mutex<HashMap<String, Arc<OnceCell<KeyReach>>>>>;
+/// Stops an ended incarnation's route.
+fn release(incarnation: &Incarnation) {
+    if let Some(made) = incarnation.take_made() {
+        disposed(&*made.route.catalog);
+    }
+}
 
-/// Routes keys across entries; holds one route per entry as it stands.
+/// One key check per entry in one read, shared by the rows reading at once.
+type Reaches = Arc<Mutex<HashMap<u64, Arc<OnceCell<KeyReach>>>>>;
+
+/// Routes keys across entries; each incarnation holds its route.
 pub struct ModelResolver {
     d: ResolverDeps,
-    made: Made,
     unsubscribe: Mutex<Option<Unsubscribe>>,
     closed: AtomicBool,
 }
 
 impl ModelResolver {
     pub fn new(d: ResolverDeps) -> Self {
-        let made: Made = Arc::new(Mutex::new(Vec::new()));
-        let held = Arc::clone(&made);
-        let list = Arc::clone(&d.list);
-        let unsubscribe = d.list.on_change(Box::new(move || {
-            let listed: HashSet<String> = list.entries().iter().map(route_key).collect();
-            let gone: Vec<Held> = {
-                let mut held = locked(&held);
-                let mut gone = Vec::new();
-                let mut kept = Vec::new();
-                for (at, route) in held.drain(..) {
-                    if listed.contains(&at) {
-                        kept.push((at, route));
-                    } else {
-                        gone.push(route);
-                    }
+        let unsubscribe = d.entries.watch(Arc::new(|events| {
+            for event in events {
+                if let RegistryEvent::Retired(incarnation) = event {
+                    release(incarnation);
                 }
-                *held = kept;
-                gone
-            };
-            for route in gone {
-                disposed(&*route.route.catalog);
             }
         }));
         Self {
             d,
-            made,
             unsubscribe: Mutex::new(Some(unsubscribe)),
             closed: AtomicBool::new(false),
         }
@@ -539,9 +509,8 @@ impl ModelResolver {
         if let Some(unsubscribe) = locked(&self.unsubscribe).take() {
             unsubscribe();
         }
-        let routes: Vec<(String, Held)> = std::mem::take(&mut *locked(&self.made));
-        for (_, held) in routes {
-            disposed(&*held.route.catalog);
+        for incarnation in self.d.entries.incarnations() {
+            release(&incarnation);
         }
     }
 
@@ -549,94 +518,75 @@ impl ModelResolver {
         self.d.kinds.iter().find(|held| held.kind() == name)
     }
 
-    /// The entry's route, made once per id, kind, plan and URL.
+    /// The incarnation's route, made once.
     pub fn route(&self, entry: &ProviderEntry) -> Result<Route, ResolveError> {
-        Ok(self.held(entry)?.route)
-    }
-
-    fn held(&self, entry: &ProviderEntry) -> Result<Held, ResolveError> {
         if self.is_closed() {
             return Err(ResolveError("The resolver is disposed.".to_owned()));
         }
-        let at = route_key(entry);
-        if let Some((_, known)) = locked(&self.made).iter().find(|(held, _)| *held == at) {
-            return Ok(known.clone());
+        let incarnation = self
+            .d
+            .entries
+            .incarnation(&entry.id)
+            .filter(|held| held.identity == identity_of(entry))
+            .ok_or_else(|| ResolveError("The entry is not listed.".to_owned()))?;
+        Ok(self.held(&incarnation)?.route)
+    }
+
+    fn held(&self, incarnation: &Arc<Incarnation>) -> Result<Made, ResolveError> {
+        if self.is_closed() {
+            return Err(ResolveError("The resolver is disposed.".to_owned()));
         }
+        if let Some(known) = incarnation.made() {
+            return Ok(known);
+        }
+        let entry = incarnation.entry();
         let kind = self
             .kind_of(entry.kind)
             .ok_or_else(|| ResolveError(format!("No {} provider kind.", entry.kind.as_str())))?;
         let deps = (self.d.kind_deps)(entry.kind);
-        let key = key_source_of(
-            Arc::clone(&self.d.keys),
-            Arc::clone(&self.d.list),
-            entry.clone(),
-        );
+        let key = key_source_of(Arc::clone(&self.d.keys), incarnation);
         let transport = kind
-            .transport(&fields_of(entry), Arc::new(key), &deps)
+            .transport(&fields_of(&entry), Arc::new(key), &deps)
             .map_err(ResolveError)?;
         let told = self.d.refreshed.clone();
-        let named = entry.clone();
-        let list = Arc::clone(&self.d.list);
+        // Weak: the route is held by the incarnation.
+        let named = Arc::downgrade(incarnation);
         let catalog = kind.catalog(
-            entry,
+            &entry,
             Arc::clone(&transport),
             super::kind::CatalogDeps {
                 runtime: deps.runtime.clone(),
                 scheduler: Arc::clone(&deps.scheduler),
                 rows: Arc::clone(&self.d.registry),
                 refreshed: Arc::new(move || {
-                    let Some(told) = &told else {
-                        return;
-                    };
-                    // The entry as the list holds it, else the route's own.
-                    let listed = list
-                        .entries()
-                        .into_iter()
-                        .find(|each| route_key(each) == route_key(&named));
-                    told(listed.as_ref().unwrap_or(&named));
+                    if let (Some(told), Some(incarnation)) = (&told, named.upgrade()) {
+                        told(&incarnation.entry());
+                    }
                 }),
             },
         );
-        let made = Held {
+        let made = Made {
             route: Route { transport, catalog },
             deps,
         };
         // Another task may have made it first; the first one stays.
-        let extra = {
-            let mut held = locked(&self.made);
-            if self.is_closed() {
-                Some(made.clone())
-            } else if let Some((_, first)) = held.iter().find(|(held, _)| *held == at) {
-                let first = first.clone();
-                drop(held);
+        match incarnation.make(made.clone()) {
+            (made, true) if !self.is_closed() => Ok(made),
+            (made, true) => {
+                let _ = incarnation.take_made();
                 disposed(&*made.route.catalog);
-                return Ok(first);
-            } else {
-                held.push((at, made.clone()));
-                None
+                Err(ResolveError("The resolver is disposed.".to_owned()))
             }
-        };
-        if let Some(extra) = extra {
-            disposed(&*extra.route.catalog);
-            return Err(ResolveError("The resolver is disposed.".to_owned()));
+            (first, false) => {
+                disposed(&*made.route.catalog);
+                Ok(first)
+            }
         }
-        Ok(made)
     }
 
     /// The route, or none when it cannot be made.
-    fn tried(&self, entry: &ProviderEntry) -> Option<Held> {
-        self.held(entry).ok()
-    }
-
-    /// The entry is still listed as it was.
-    fn stands(&self, entry: &ProviderEntry) -> bool {
-        !self.is_closed()
-            && self
-                .d
-                .list
-                .entries()
-                .iter()
-                .any(|each| route_key(each) == route_key(entry))
+    fn tried(&self, incarnation: &Arc<Incarnation>) -> Option<Made> {
+        self.held(incarnation).ok()
     }
 
     /// What a key says of one entry.
@@ -739,9 +689,10 @@ impl ModelResolver {
         Arc::new(Mutex::new(HashMap::new()))
     }
 
-    async fn reach_once(&self, reaches: &Reaches, entry: &ProviderEntry) -> KeyReach {
-        let cell = Arc::clone(locked(reaches).entry(entry.id.clone()).or_default());
-        *cell.get_or_init(|| self.reach(entry)).await
+    async fn reach_once(&self, reaches: &Reaches, incarnation: &Incarnation) -> KeyReach {
+        let cell = Arc::clone(locked(reaches).entry(incarnation.number).or_default());
+        let entry = incarnation.entry();
+        *cell.get_or_init(|| self.reach(&entry)).await
     }
 
     async fn routed(
@@ -761,10 +712,10 @@ impl ModelResolver {
         let mut matched = false;
         let mut found: Vec<Resolved> = Vec::new();
         let mut passed: Vec<Passed> = Vec::new();
-        let listed = if self.is_closed() {
+        let listed: Vec<Arc<Incarnation>> = if self.is_closed() {
             Vec::new()
         } else {
-            self.d.list.entries()
+            self.d.entries.incarnations()
         };
         let owner = match &row.identity {
             RowIdentity::Local(local) => Some(local.entry.clone()),
@@ -779,7 +730,8 @@ impl ModelResolver {
                 entry: None,
             }));
         }
-        for entry in listed {
+        for incarnation in listed {
+            let entry = incarnation.entry();
             if !found.is_empty() && !all {
                 break;
             }
@@ -794,7 +746,7 @@ impl ModelResolver {
                 (!found.is_empty() && all).then(|| Bound::new(&(self.d.kind_deps)(entry.kind)));
             let reached = match &bound {
                 Some(bound) => {
-                    let cell = Arc::clone(locked(reaches).entry(entry.id.clone()).or_default());
+                    let cell = Arc::clone(locked(reaches).entry(incarnation.number).or_default());
                     let read = self.reach_owned(&entry);
                     let Some(reached) = bound
                         .go(Box::pin(async move { *cell.get_or_init(|| read).await }))
@@ -804,9 +756,9 @@ impl ModelResolver {
                     };
                     reached
                 }
-                None => self.reach_once(reaches, &entry).await,
+                None => self.reach_once(reaches, &incarnation).await,
             };
-            if !self.stands(&entry) {
+            if self.is_closed() || !incarnation.live() {
                 continue;
             }
             matched = true;
@@ -818,7 +770,7 @@ impl ModelResolver {
                     before: found.len() as f64,
                 });
                 let held = if standing && worst.view.is_none() {
-                    self.tried(&entry)
+                    self.tried(&incarnation)
                 } else {
                     None
                 };
@@ -829,7 +781,7 @@ impl ModelResolver {
                 worst = raised(worst, reach_refusal(reached), behind, &entry.label);
                 continue;
             }
-            let Some(held) = self.tried(&entry) else {
+            let Some(held) = self.tried(&incarnation) else {
                 passed.push(Passed {
                     entry: entry.id.clone(),
                     label: entry.label.clone(),
@@ -859,6 +811,7 @@ impl ModelResolver {
             found.push(Resolved {
                 key: row.key.clone(),
                 entry: entry.clone(),
+                incarnation: Arc::clone(&incarnation),
                 kind: Arc::clone(kind),
                 binding: binding.clone(),
                 codec: kind.codec(Some(&view), &fields_of(&entry), &held.deps),
@@ -889,7 +842,7 @@ impl ModelResolver {
     async fn within(
         &self,
         bound: &Bound,
-        held: &Held,
+        held: &Made,
         row: &ModelRow,
         use_: &ModelUse,
         zdr_only: bool,
@@ -1070,7 +1023,10 @@ mod tests {
             extra_usage: None,
         };
         let resolver = ModelResolver::new(ResolverDeps {
-            list: Arc::new(ScriptedProviderList::new(vec![entry.clone()])),
+            entries: Arc::new(EntryRegistry::new(
+                Arc::new(ScriptedProviderList::new(vec![entry.clone()])),
+                &ScriptedEntryKeys::new(),
+            )),
             keys: Arc::new(ScriptedEntryKeys::new()),
             registry: Arc::new(ScriptedModelRegistry::empty()),
             kinds: vec![kind.clone() as Arc<dyn ProviderKind>],
@@ -1098,5 +1054,53 @@ mod tests {
         assert_eq!(stopped.load(Ordering::SeqCst), 1);
         resolver.dispose();
         assert_eq!(stopped.load(Ordering::SeqCst), 2);
+    }
+
+    #[test]
+    fn an_incarnation_that_left_is_freed_with_its_route() {
+        let wheel = Arc::new(TimerWheel::new(0));
+        let scheduler = Arc::new(FakeScheduler::new(Arc::clone(&wheel)));
+        let fetch = Arc::new(ScriptedFetch::new(Vec::new(), wheel));
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .build()
+            .unwrap();
+        let stopped = Arc::new(AtomicUsize::new(0));
+        let kind = Arc::new(Meeting {
+            barrier: Barrier::new(1),
+            built: AtomicUsize::new(0),
+            stopped: Arc::clone(&stopped),
+        });
+        let entry = ProviderEntry {
+            id: "a".to_owned(),
+            kind: ProviderKindName::Openrouter,
+            label: "First".to_owned(),
+            plan: None,
+            url: None,
+            extra_usage: None,
+        };
+        let list = Arc::new(ScriptedProviderList::new(vec![entry.clone()]));
+        let entries = Arc::new(EntryRegistry::new(list.clone(), &ScriptedEntryKeys::new()));
+        let resolver = ModelResolver::new(ResolverDeps {
+            entries: Arc::clone(&entries),
+            keys: Arc::new(ScriptedEntryKeys::new()),
+            registry: Arc::new(ScriptedModelRegistry::empty()),
+            kinds: vec![kind as Arc<dyn ProviderKind>],
+            kind_deps: Arc::new(move |_| KindDeps {
+                runtime: runtime.handle().clone(),
+                fetch: fetch.clone(),
+                scheduler: scheduler.clone(),
+                log: Arc::new(|_| {}),
+                user_agent: "tests/1.0".to_owned(),
+                base_url: None,
+            }),
+            zdr_only: Arc::new(|| true),
+            refreshed: None,
+        });
+        let route = resolver.route(&entry).expect("a route");
+        let held = Arc::downgrade(&entries.incarnation("a").expect("listed"));
+        list.set(Vec::new());
+        assert_eq!(stopped.load(Ordering::SeqCst), 1);
+        drop(route);
+        assert!(held.upgrade().is_none());
     }
 }

@@ -3,6 +3,7 @@
 import { describe, expect, it } from "bun:test";
 import { fakeScheduler, TimerWheel } from "@nyaaai/testkit/scheduler";
 import { scriptedEntryKeys, scriptedModelRegistry, scriptedProviderList } from "@nyaaai/testkit/scriptedPorts";
+import { EntryRegistry } from "../provider/incarnation";
 import { KINDS, kindLines } from "../provider/kind";
 import { keySourceOf, ModelResolver } from "../provider/resolver";
 
@@ -17,9 +18,9 @@ describe("ModelResolver", () => {
 			get: () => Promise.reject(new Error("The store is unreadable.")),
 			onChange: () => () => {},
 		};
-		const list = scriptedProviderList([FIRST]);
+		const entries = new EntryRegistry({ list: scriptedProviderList([FIRST]), keys });
 		const resolver = new ModelResolver({
-			list,
+			entries,
 			keys,
 			registry: scriptedModelRegistry(),
 			kinds: KINDS,
@@ -34,14 +35,16 @@ describe("ModelResolver", () => {
 			zdrOnly: () => true,
 		});
 		expect(await resolver.reach(FIRST)).toBe("unreachable");
-		expect(await keySourceOf(keys, list, FIRST).get()).toBeUndefined();
+		const [incarnation] = entries.incarnations();
+		if (incarnation === undefined) throw new Error("The entry is listed.");
+		expect(await keySourceOf(keys, incarnation).get()).toBeUndefined();
 	});
 
 	it("refuses a kind it does not hold", () => {
-		const list = scriptedProviderList([]);
+		const keys = scriptedEntryKeys();
 		const resolver = new ModelResolver({
-			list,
-			keys: scriptedEntryKeys(),
+			entries: new EntryRegistry({ list: scriptedProviderList([]), keys }),
+			keys,
 			registry: scriptedModelRegistry(),
 			kinds: {},
 			kindDeps: () => {

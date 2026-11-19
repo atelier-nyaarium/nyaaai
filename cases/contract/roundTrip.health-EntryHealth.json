@@ -8,7 +8,7 @@
 		"shape": "EntryHealth",
 		"texts": [
 			"{\"entry\":\"e1\",\"key\":{\"kind\":\"none\"},\"pool\":{\"kind\":\"clear\"},\"waiting\":[]}",
-			"{\"entry\":\"e2\",\"key\":{\"kind\":\"ok\",\"usage\":1.5,\"limit\":10,\"models\":3},\"billed\":{\"billing\":\"balance\",\"allowance\":0.5,\"cost\":0.25},\"pool\":{\"kind\":\"balance\",\"eta\":100,\"next\":50,\"probe\":{\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1},\"at\":40}},\"waiting\":[\"m1\",\"m2\"]}",
+			"{\"entry\":\"e2\",\"key\":{\"kind\":\"ok\",\"usage\":1.5,\"limit\":10,\"models\":3},\"billed\":{\"billing\":\"balance\",\"allowance\":0.5,\"cost\":0.25},\"pool\":{\"kind\":\"balance\",\"eta\":100,\"next\":50,\"probe\":{\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"era\":1,\"generation\":0,\"probe\":false,\"serial\":1},\"at\":40}},\"waiting\":[\"m1\",\"m2\"]}",
 			"{\"entry\":\"e1\",\"key\":{\"kind\":\"rejected\"},\"pool\":{\"kind\":\"clear\"},\"waiting\":[],\"extra\":{\"deep\":1}}",
 			"{\"entry\":\"e1\",\"key\":{\"kind\":\"checking\"},\"pool\":{\"kind\":\"paused\",\"reason\":\"credit\",\"until\":9},\"waiting\":[]}",
 			"{\"entry\":\"e1\",\"pool\":{\"kind\":\"clear\"},\"waiting\":[]}",
@@ -27,7 +27,7 @@
 			},
 			{
 				"ok": true,
-				"text": "{\"entry\":\"e2\",\"key\":{\"kind\":\"ok\",\"usage\":1.5,\"limit\":10,\"models\":3},\"billed\":{\"billing\":\"balance\",\"allowance\":0.5,\"cost\":0.25},\"pool\":{\"kind\":\"balance\",\"eta\":100,\"next\":50,\"probe\":{\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"generation\":0,\"probe\":false,\"serial\":1},\"at\":40}},\"waiting\":[\"m1\",\"m2\"]}"
+				"text": "{\"entry\":\"e2\",\"key\":{\"kind\":\"ok\",\"usage\":1.5,\"limit\":10,\"models\":3},\"billed\":{\"billing\":\"balance\",\"allowance\":0.5,\"cost\":0.25},\"pool\":{\"kind\":\"balance\",\"eta\":100,\"next\":50,\"probe\":{\"ticket\":{\"gate\":\"g1\",\"model\":\"m1\",\"era\":1,\"generation\":0,\"probe\":false,\"serial\":1},\"at\":40}},\"waiting\":[\"m1\",\"m2\"]}"
 			},
 			{
 				"ok": true,

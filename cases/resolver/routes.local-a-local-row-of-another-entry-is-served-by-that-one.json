@@ -106,8 +106,8 @@
 			"Lab http://lab.local:11434"
 		],
 		"stopped": [
-			"Lab Two http://lab2.local:11434",
-			"Lab http://lab.local:11434"
+			"Lab http://lab.local:11434",
+			"Lab Two http://lab2.local:11434"
 		],
 		"refreshed": [],
 		"keyReads": 3

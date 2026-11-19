@@ -22,7 +22,7 @@ const ANSWERS = [KEY, { kind: "none" }, { kind: "refused" }, { kind: "unready" }
 
 const key = caseOf("resolver.keySource");
 const reach = caseOf("resolver.reach");
-const routeKey = caseOf("resolver.routeKey");
+const identity = caseOf("resolver.identity");
 
 const get = { kind: "get" };
 const list = (...entries: unknown[]) => ({ kind: "list", entries });
@@ -137,11 +137,11 @@ export const resolverKeyCases: CaseSource[] = [
 		rows: ["key", "url"].flatMap((field) => ANSWERS.map((held) => ({ field, answer: held }))),
 	}),
 
-	// What identifies a route.
-	routeKey("route-key-of-every-field", {
+	// What identifies an entry.
+	identity("identity-of-every-field", {
 		entries: [FIRST, GO, LAB, { ...GO, plan: "payg" }, { ...LAB, label: "Other" }, { ...FIRST, label: "Renamed" }],
 	}),
-	routeKey("route-key-no-two-fields-run-together", {
+	identity("identity-no-two-fields-run-together", {
 		entries: [
 			{ id: "a", kind: "opencode", plan: "go", label: "x" },
 			{ id: "a", kind: "ollama", label: "x", url: "go" },

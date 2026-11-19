@@ -627,10 +627,10 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
             input,
             super::resolver::reach,
         ),
-        "resolver.routeKey" => {
-            run::<shapes::ResolverRouteKeyInput, shapes::ResolverRouteKeyResult>(
+        "resolver.identity" => {
+            run::<shapes::ResolverIdentityInput, shapes::ResolverIdentityResult>(
                 input,
-                super::resolver::route_key,
+                super::resolver::identity,
             )
         }
         "resolver.keySource" => run::<

@@ -1,8 +1,8 @@
 {
 	"format": 2,
 	"type": "function",
-	"kind": "resolver.routeKey",
-	"name": "route-key-of-every-field",
+	"kind": "resolver.identity",
+	"name": "identity-of-every-field",
 	"input": {
 		"entries": [
 			{
@@ -42,13 +42,13 @@
 		]
 	},
 	"expected": {
-		"keys": [
-			"a\nopenrouter\n\n",
-			"go\nopencode\ngo\n",
-			"lab\nollama\n\nhttp://lab.local:11434",
-			"go\nopencode\npayg\n",
-			"lab\nollama\n\nhttp://lab.local:11434",
-			"a\nopenrouter\n\n"
+		"identities": [
+			"[\"openrouter\",null,null]",
+			"[\"opencode\",\"go\",null]",
+			"[\"ollama\",null,\"http://lab.local:11434\"]",
+			"[\"opencode\",\"payg\",null]",
+			"[\"ollama\",null,\"http://lab.local:11434\"]",
+			"[\"openrouter\",null,null]"
 		]
 	}
 }

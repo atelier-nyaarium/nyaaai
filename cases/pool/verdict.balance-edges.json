@@ -64,6 +64,7 @@
 						"ticket": {
 							"gate": "go",
 							"model": "go\nm",
+							"era": 1,
 							"generation": 0,
 							"probe": false,
 							"serial": 1
@@ -83,6 +84,7 @@
 						"ticket": {
 							"gate": "go",
 							"model": "go\nm",
+							"era": 1,
 							"generation": 0,
 							"probe": false,
 							"serial": 1
@@ -102,6 +104,7 @@
 						"ticket": {
 							"gate": "go",
 							"model": "go\nm",
+							"era": 1,
 							"generation": 0,
 							"probe": false,
 							"serial": 1
@@ -121,6 +124,7 @@
 						"ticket": {
 							"gate": "go",
 							"model": "go\nm",
+							"era": 1,
 							"generation": 0,
 							"probe": false,
 							"serial": 1
@@ -140,6 +144,7 @@
 						"ticket": {
 							"gate": "go",
 							"model": "go\nm",
+							"era": 1,
 							"generation": 0,
 							"probe": false,
 							"serial": 1
