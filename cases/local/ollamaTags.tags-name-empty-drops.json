@@ -1,0 +1,23 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaTags",
+	"name": "tags-name-empty-drops",
+	"input": {
+		"body": {
+			"models": [
+				{
+					"name": ""
+				},
+				{
+					"name": "local-b:9b"
+				}
+			]
+		}
+	},
+	"expected": {
+		"tags": [
+			"local-b:9b"
+		]
+	}
+}

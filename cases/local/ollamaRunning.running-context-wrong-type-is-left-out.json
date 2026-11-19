@@ -1,0 +1,19 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaRunning",
+	"name": "running-context-wrong-type-is-left-out",
+	"input": {
+		"body": {
+			"models": [
+				{
+					"name": "local-a:27b",
+					"context_length": "4096"
+				}
+			]
+		}
+	},
+	"expected": {
+		"contexts": []
+	}
+}

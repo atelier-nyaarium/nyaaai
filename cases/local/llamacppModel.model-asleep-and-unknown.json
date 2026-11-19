@@ -1,0 +1,18 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.llamacppModel",
+	"name": "model-asleep-and-unknown",
+	"input": {
+		"id": "local-b.gguf"
+	},
+	"expected": {
+		"model": {
+			"tag": "local-b.gguf",
+			"tools": true,
+			"thinking": false,
+			"efforts": [],
+			"probed": false
+		}
+	}
+}

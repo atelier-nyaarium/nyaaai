@@ -1,0 +1,12 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.lmstudioModels",
+	"name": "lmstudio-body-list",
+	"input": {
+		"body": []
+	},
+	"expected": {
+		"models": null
+	}
+}

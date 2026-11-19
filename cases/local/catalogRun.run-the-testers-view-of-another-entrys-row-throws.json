@@ -1,0 +1,82 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.catalogRun",
+	"name": "run-the-testers-view-of-another-entrys-row-throws",
+	"input": {
+		"startMs": 1790337600000,
+		"entry": "lab",
+		"terms": {
+			"kept": false,
+			"price": "free"
+		},
+		"rows": [
+			"local:lab/local-a:27b",
+			"local:lab/local-b:9b"
+		],
+		"steps": [
+			{
+				"kind": "call",
+				"call": {
+					"kind": "viewFor",
+					"row": "local:other/local-a:27b"
+				}
+			}
+		],
+		"server": {
+			"live": false,
+			"loaded": false,
+			"warm": false,
+			"models": [
+				{
+					"models": [
+						{
+							"tag": "local-a:27b",
+							"tools": true,
+							"thinking": true,
+							"efforts": [
+								"low",
+								"high"
+							],
+							"context": 8192
+						},
+						{
+							"tag": "local-b:9b",
+							"tools": true,
+							"thinking": false,
+							"efforts": [],
+							"trained": 4096
+						}
+					]
+				}
+			],
+			"loads": [],
+			"warms": []
+		}
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "thrown",
+						"message": "local-a:27b is not on the server."
+					}
+				],
+				"served": [
+					{
+						"method": "models",
+						"tag": null,
+						"known": [],
+						"startMs": 1790337600000,
+						"endMs": 1790337600000,
+						"aborted": false
+					}
+				],
+				"refreshed": 1
+			}
+		],
+		"waiting": []
+	}
+}

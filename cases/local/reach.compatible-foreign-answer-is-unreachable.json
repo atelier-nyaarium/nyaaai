@@ -1,0 +1,39 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.reach",
+	"name": "compatible-foreign-answer-is-unreachable",
+	"input": {
+		"kind": "compatible",
+		"entry": {
+			"label": "Lab",
+			"url": "http://lab.local:8000"
+		},
+		"secret": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"models": []
+				}
+			}
+		]
+	},
+	"expected": {
+		"state": {
+			"kind": "unreachable"
+		},
+		"thrown": null,
+		"facts": "http://lab.local:8000/v1",
+		"requests": [
+			{
+				"method": "GET",
+				"url": "http://lab.local:8000/v1/models",
+				"authorization": null,
+				"body": null
+			}
+		],
+		"waiting": []
+	}
+}

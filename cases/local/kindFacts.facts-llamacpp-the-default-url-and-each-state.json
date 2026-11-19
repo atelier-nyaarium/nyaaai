@@ -1,0 +1,61 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.kindFacts",
+	"name": "facts-llamacpp-the-default-url-and-each-state",
+	"input": {
+		"kind": "llamacpp",
+		"states": [
+			{
+				"kind": "none"
+			},
+			{
+				"kind": "checking"
+			},
+			{
+				"kind": "ok"
+			},
+			{
+				"kind": "ok",
+				"models": 0
+			},
+			{
+				"kind": "ok",
+				"models": 1
+			},
+			{
+				"kind": "ok",
+				"models": 2
+			},
+			{
+				"kind": "ok",
+				"models": 12,
+				"usage": 1,
+				"limit": 2
+			},
+			{
+				"kind": "rejected"
+			},
+			{
+				"kind": "unreachable"
+			},
+			{
+				"kind": "invalid"
+			}
+		]
+	},
+	"expected": {
+		"facts": [
+			"http://127.0.0.1:8080",
+			"http://127.0.0.1:8080",
+			"http://127.0.0.1:8080",
+			"http://127.0.0.1:8080 · 0 models",
+			"http://127.0.0.1:8080 · 1 model",
+			"http://127.0.0.1:8080 · 2 models",
+			"http://127.0.0.1:8080 · 12 models",
+			"http://127.0.0.1:8080",
+			"http://127.0.0.1:8080",
+			"http://127.0.0.1:8080"
+		]
+	}
+}

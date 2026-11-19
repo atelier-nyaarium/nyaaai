@@ -1,0 +1,21 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaRunning",
+	"name": "running-models-omitted-is-empty",
+	"input": {
+		"body": {
+			"data": [
+				{
+					"name": "local-a:27b",
+					"model": "local-a:27b",
+					"context_length": 65536,
+					"size_vram": 1
+				}
+			]
+		}
+	},
+	"expected": {
+		"contexts": []
+	}
+}

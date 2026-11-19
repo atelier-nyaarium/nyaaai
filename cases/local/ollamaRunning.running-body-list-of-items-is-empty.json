@@ -1,0 +1,16 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaRunning",
+	"name": "running-body-list-of-items-is-empty",
+	"input": {
+		"body": [
+			{
+				"name": "local-a:27b"
+			}
+		]
+	},
+	"expected": {
+		"contexts": []
+	}
+}

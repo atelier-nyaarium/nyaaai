@@ -1,0 +1,17 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaShow",
+	"name": "show-body-list-of-items",
+	"input": {
+		"tag": "local-a:27b",
+		"body": [
+			{
+				"name": "local-a:27b"
+			}
+		]
+	},
+	"expected": {
+		"model": null
+	}
+}

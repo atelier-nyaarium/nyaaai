@@ -18020,3 +18020,4584 @@ impl Shape for KindOpenrouterKeyResultChecksItemReason {
         Value::from(self.as_str())
     }
 }
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ServedModel {
+    pub tag: String,
+    pub tools: bool,
+    pub thinking: bool,
+    pub efforts: Vec<nyaaai_contract::shapes::step::Effort>,
+    pub context: Option<f64>,
+    pub loaded: Option<f64>,
+    pub trained: Option<f64>,
+    pub probed: Option<()>,
+}
+
+impl Shape for ServedModel {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let tag = shape::required(object, "tag", at, shape::text)?;
+        let tools = shape::required(object, "tools", at, shape::flag)?;
+        let thinking = shape::required(object, "thinking", at, shape::flag)?;
+        let efforts = shape::required(object, "efforts", at, |value, at| {
+            shape::list(value, at, nyaaai_contract::shapes::step::Effort::decode_at)
+        })?;
+        let context = shape::optional(object, "context", at, shape::number)?;
+        let loaded = shape::optional(object, "loaded", at, shape::number)?;
+        let trained = shape::optional(object, "trained", at, shape::number)?;
+        let probed = shape::optional(object, "probed", at, |value, at| {
+            shape::is_flag(value, at, false)
+        })?;
+        Ok(Self {
+            tag,
+            tools,
+            thinking,
+            efforts,
+            context,
+            loaded,
+            trained,
+            probed,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("tag", Value::from(self.tag.as_str()));
+        object.insert("tools", Value::Bool(self.tools));
+        object.insert("thinking", Value::Bool(self.thinking));
+        object.insert(
+            "efforts",
+            Value::Array(self.efforts.iter().map(|held| held.encode()).collect()),
+        );
+        if let Some(held) = &self.context {
+            object.insert("context", Value::Number(*held));
+        }
+        if let Some(held) = &self.loaded {
+            object.insert("loaded", Value::Number(*held));
+        }
+        if let Some(held) = &self.trained {
+            object.insert("trained", Value::Number(*held));
+        }
+        if self.probed.is_some() {
+            object.insert("probed", Value::Bool(false));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ServedTerms {
+    pub kept: bool,
+    pub price: ServedTermsPrice,
+}
+
+impl Shape for ServedTerms {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let kept = shape::required(object, "kept", at, shape::flag)?;
+        let price = shape::required(object, "price", at, ServedTermsPrice::decode_at)?;
+        Ok(Self { kept, price })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kept", Value::Bool(self.kept));
+        object.insert("price", self.price.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ServedTermsPrice {
+    Free,
+    Unknown,
+}
+
+impl ServedTermsPrice {
+    pub const ALL: [Self; 2] = [Self::Free, Self::Unknown];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Free => "free",
+            Self::Unknown => "unknown",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for ServedTermsPrice {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalEntry {
+    pub label: String,
+    pub url: Option<String>,
+}
+
+impl Shape for LocalEntry {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let label = shape::required(object, "label", at, shape::text)?;
+        let url = shape::optional(object, "url", at, shape::text)?;
+        Ok(Self { label, url })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("label", Value::from(self.label.as_str()));
+        if let Some(held) = &self.url {
+            object.insert("url", Value::from(held.as_str()));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalEffortsInput {
+    pub values: Vec<LocalEffortsInputValuesItem>,
+}
+
+impl Shape for LocalEffortsInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let values = shape::required(object, "values", at, |value, at| {
+            shape::list(value, at, LocalEffortsInputValuesItem::decode_at)
+        })?;
+        Ok(Self { values })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "values",
+            Value::Array(self.values.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum LocalEffortsInputValuesItem {
+    Flag(bool),
+    Text(String),
+}
+
+impl Shape for LocalEffortsInputValuesItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        if let Ok(held) = shape::flag(value, at) {
+            return Ok(Self::Flag(held));
+        }
+        if let Ok(held) = shape::text(value, at) {
+            return Ok(Self::Text(held));
+        }
+        Err(shape::refused(at, "no branch matches"))
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Flag(held) => Value::Bool(*held),
+            Self::Text(held) => Value::from(held.as_str()),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalEffortsResult {
+    pub efforts: Vec<nyaaai_contract::shapes::step::Effort>,
+}
+
+impl Shape for LocalEffortsResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let efforts = shape::required(object, "efforts", at, |value, at| {
+            shape::list(value, at, nyaaai_contract::shapes::step::Effort::decode_at)
+        })?;
+        Ok(Self { efforts })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "efforts",
+            Value::Array(self.efforts.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalLabelInput {
+    pub tags: Vec<String>,
+}
+
+impl Shape for LocalLabelInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let tags = shape::required(object, "tags", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { tags })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "tags",
+            Value::Array(
+                self.tags
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalLabelResult {
+    pub labels: Vec<String>,
+}
+
+impl Shape for LocalLabelResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let labels = shape::required(object, "labels", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { labels })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "labels",
+            Value::Array(
+                self.labels
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalViewInput {
+    pub row: String,
+    pub model: ServedModel,
+    pub loaded: Option<f64>,
+    pub terms: ServedTerms,
+    pub zdr_only: bool,
+}
+
+impl Shape for LocalViewInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let row = shape::required(object, "row", at, shape::text)?;
+        let model = shape::required(object, "model", at, ServedModel::decode_at)?;
+        let loaded = shape::optional(object, "loaded", at, shape::number)?;
+        let terms = shape::required(object, "terms", at, ServedTerms::decode_at)?;
+        let zdr_only = shape::required(object, "zdrOnly", at, shape::flag)?;
+        Ok(Self {
+            row,
+            model,
+            loaded,
+            terms,
+            zdr_only,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("row", Value::from(self.row.as_str()));
+        object.insert("model", self.model.encode());
+        if let Some(held) = &self.loaded {
+            object.insert("loaded", Value::Number(*held));
+        }
+        object.insert("terms", self.terms.encode());
+        object.insert("zdrOnly", Value::Bool(self.zdr_only));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalViewResult {
+    pub view: ViewLine,
+    pub context: Option<f64>,
+}
+
+impl Shape for LocalViewResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let view = shape::required(object, "view", at, ViewLine::decode_at)?;
+        let context = shape::required(object, "context", at, |value, at| {
+            shape::nullable(value, at, shape::number)
+        })?;
+        Ok(Self { view, context })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("view", self.view.encode());
+        object.insert(
+            "context",
+            self.context
+                .as_ref()
+                .map_or(Value::Null, |held| Value::Number(*held)),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalOllamaTagsInput {
+    pub body: Value,
+}
+
+impl Shape for LocalOllamaTagsInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let body = shape::required(object, "body", at, shape::any)?;
+        Ok(Self { body })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("body", self.body.clone());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalOllamaTagsResult {
+    pub tags: Option<Vec<String>>,
+}
+
+impl Shape for LocalOllamaTagsResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let tags = shape::required(object, "tags", at, |value, at| {
+            shape::nullable(value, at, |value, at| shape::list(value, at, shape::text))
+        })?;
+        Ok(Self { tags })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "tags",
+            self.tags.as_ref().map_or(Value::Null, |held| {
+                Value::Array(held.iter().map(|held| Value::from(held.as_str())).collect())
+            }),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalOllamaShowInput {
+    pub tag: String,
+    pub body: Value,
+}
+
+impl Shape for LocalOllamaShowInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let tag = shape::required(object, "tag", at, shape::text)?;
+        let body = shape::required(object, "body", at, shape::any)?;
+        Ok(Self { tag, body })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("tag", Value::from(self.tag.as_str()));
+        object.insert("body", self.body.clone());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalOllamaShowResult {
+    pub model: Option<ServedModel>,
+}
+
+impl Shape for LocalOllamaShowResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let model = shape::required(object, "model", at, |value, at| {
+            shape::nullable(value, at, ServedModel::decode_at)
+        })?;
+        Ok(Self { model })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "model",
+            self.model
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalOllamaNumCtxInput {
+    pub texts: Vec<String>,
+}
+
+impl Shape for LocalOllamaNumCtxInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let texts = shape::required(object, "texts", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { texts })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "texts",
+            Value::Array(
+                self.texts
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalOllamaNumCtxResult {
+    pub contexts: Vec<Option<f64>>,
+}
+
+impl Shape for LocalOllamaNumCtxResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let contexts = shape::required(object, "contexts", at, |value, at| {
+            shape::list(value, at, |value, at| {
+                shape::nullable(value, at, shape::number)
+            })
+        })?;
+        Ok(Self { contexts })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "contexts",
+            Value::Array(
+                self.contexts
+                    .iter()
+                    .map(|held| {
+                        held.as_ref()
+                            .map_or(Value::Null, |held| Value::Number(*held))
+                    })
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalOllamaRunningInput {
+    pub body: Value,
+}
+
+impl Shape for LocalOllamaRunningInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let body = shape::required(object, "body", at, shape::any)?;
+        Ok(Self { body })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("body", self.body.clone());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalOllamaRunningResult {
+    pub contexts: Vec<LocalOllamaRunningResultContextsItem>,
+}
+
+impl Shape for LocalOllamaRunningResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let contexts = shape::required(object, "contexts", at, |value, at| {
+            shape::list(value, at, LocalOllamaRunningResultContextsItem::decode_at)
+        })?;
+        Ok(Self { contexts })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "contexts",
+            Value::Array(self.contexts.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalOllamaRunningResultContextsItem {
+    pub tag: String,
+    pub context: f64,
+}
+
+impl Shape for LocalOllamaRunningResultContextsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let tag = shape::required(object, "tag", at, shape::text)?;
+        let context = shape::required(object, "context", at, shape::number)?;
+        Ok(Self { tag, context })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("tag", Value::from(self.tag.as_str()));
+        object.insert("context", Value::Number(self.context));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalLmstudioModelsInput {
+    pub body: Value,
+}
+
+impl Shape for LocalLmstudioModelsInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let body = shape::required(object, "body", at, shape::any)?;
+        Ok(Self { body })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("body", self.body.clone());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalLmstudioModelsResult {
+    pub models: Option<Vec<ServedModel>>,
+}
+
+impl Shape for LocalLmstudioModelsResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let models = shape::required(object, "models", at, |value, at| {
+            shape::nullable(value, at, |value, at| {
+                shape::list(value, at, ServedModel::decode_at)
+            })
+        })?;
+        Ok(Self { models })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "models",
+            self.models.as_ref().map_or(Value::Null, |held| {
+                Value::Array(held.iter().map(|held| held.encode()).collect())
+            }),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalLmstudioLoadedInput {
+    pub body: Value,
+}
+
+impl Shape for LocalLmstudioLoadedInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let body = shape::required(object, "body", at, shape::any)?;
+        Ok(Self { body })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("body", self.body.clone());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalLmstudioLoadedResult {
+    pub contexts: Vec<LocalLmstudioLoadedResultContextsItem>,
+}
+
+impl Shape for LocalLmstudioLoadedResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let contexts = shape::required(object, "contexts", at, |value, at| {
+            shape::list(value, at, LocalLmstudioLoadedResultContextsItem::decode_at)
+        })?;
+        Ok(Self { contexts })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "contexts",
+            Value::Array(self.contexts.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalLmstudioLoadedResultContextsItem {
+    pub tag: String,
+    pub context: f64,
+}
+
+impl Shape for LocalLmstudioLoadedResultContextsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let tag = shape::required(object, "tag", at, shape::text)?;
+        let context = shape::required(object, "context", at, shape::number)?;
+        Ok(Self { tag, context })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("tag", Value::from(self.tag.as_str()));
+        object.insert("context", Value::Number(self.context));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalLlamacppModelsInput {
+    pub body: Value,
+}
+
+impl Shape for LocalLlamacppModelsInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let body = shape::required(object, "body", at, shape::any)?;
+        Ok(Self { body })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("body", self.body.clone());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalLlamacppModelsResult {
+    pub models: Option<Vec<LocalLlamacppModelsResultModelsItem>>,
+}
+
+impl Shape for LocalLlamacppModelsResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let models = shape::required(object, "models", at, |value, at| {
+            shape::nullable(value, at, |value, at| {
+                shape::list(value, at, LocalLlamacppModelsResultModelsItem::decode_at)
+            })
+        })?;
+        Ok(Self { models })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "models",
+            self.models.as_ref().map_or(Value::Null, |held| {
+                Value::Array(held.iter().map(|held| held.encode()).collect())
+            }),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalLlamacppModelsResultModelsItem {
+    pub id: String,
+    pub trained: Option<f64>,
+}
+
+impl Shape for LocalLlamacppModelsResultModelsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let trained = shape::required(object, "trained", at, |value, at| {
+            shape::nullable(value, at, shape::number)
+        })?;
+        Ok(Self { id, trained })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("id", Value::from(self.id.as_str()));
+        object.insert(
+            "trained",
+            self.trained
+                .as_ref()
+                .map_or(Value::Null, |held| Value::Number(*held)),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalLlamacppPropsInput {
+    pub body: Value,
+}
+
+impl Shape for LocalLlamacppPropsInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let body = shape::required(object, "body", at, shape::any)?;
+        Ok(Self { body })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("body", self.body.clone());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalLlamacppPropsResult {
+    pub props: Option<LocalLlamacppPropsResultProps>,
+}
+
+impl Shape for LocalLlamacppPropsResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let props = shape::required(object, "props", at, |value, at| {
+            shape::nullable(value, at, LocalLlamacppPropsResultProps::decode_at)
+        })?;
+        Ok(Self { props })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "props",
+            self.props
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalLlamacppPropsResultProps {
+    pub context: Option<f64>,
+    pub efforts: Vec<String>,
+}
+
+impl Shape for LocalLlamacppPropsResultProps {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let context = shape::required(object, "context", at, |value, at| {
+            shape::nullable(value, at, shape::number)
+        })?;
+        let efforts = shape::required(object, "efforts", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { context, efforts })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "context",
+            self.context
+                .as_ref()
+                .map_or(Value::Null, |held| Value::Number(*held)),
+        );
+        object.insert(
+            "efforts",
+            Value::Array(
+                self.efforts
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalLlamacppModelInput {
+    pub id: String,
+    pub trained: Option<f64>,
+    pub props: Option<LocalLlamacppModelInputProps>,
+    pub known: Option<ServedModel>,
+}
+
+impl Shape for LocalLlamacppModelInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let trained = shape::optional(object, "trained", at, shape::number)?;
+        let props = shape::optional(object, "props", at, LocalLlamacppModelInputProps::decode_at)?;
+        let known = shape::optional(object, "known", at, ServedModel::decode_at)?;
+        Ok(Self {
+            id,
+            trained,
+            props,
+            known,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("id", Value::from(self.id.as_str()));
+        if let Some(held) = &self.trained {
+            object.insert("trained", Value::Number(*held));
+        }
+        if let Some(held) = &self.props {
+            object.insert("props", held.encode());
+        }
+        if let Some(held) = &self.known {
+            object.insert("known", held.encode());
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalLlamacppModelInputProps {
+    pub context: Option<f64>,
+    pub efforts: Vec<String>,
+}
+
+impl Shape for LocalLlamacppModelInputProps {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let context = shape::optional(object, "context", at, shape::number)?;
+        let efforts = shape::required(object, "efforts", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { context, efforts })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        if let Some(held) = &self.context {
+            object.insert("context", Value::Number(*held));
+        }
+        object.insert(
+            "efforts",
+            Value::Array(
+                self.efforts
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalLlamacppModelResult {
+    pub model: ServedModel,
+}
+
+impl Shape for LocalLlamacppModelResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let model = shape::required(object, "model", at, ServedModel::decode_at)?;
+        Ok(Self { model })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("model", self.model.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCompatibleModelsInput {
+    pub body: Value,
+}
+
+impl Shape for LocalCompatibleModelsInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let body = shape::required(object, "body", at, shape::any)?;
+        Ok(Self { body })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("body", self.body.clone());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCompatibleModelsResult {
+    pub models: Option<Vec<ServedModel>>,
+}
+
+impl Shape for LocalCompatibleModelsResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let models = shape::required(object, "models", at, |value, at| {
+            shape::nullable(value, at, |value, at| {
+                shape::list(value, at, ServedModel::decode_at)
+            })
+        })?;
+        Ok(Self { models })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "models",
+            self.models.as_ref().map_or(Value::Null, |held| {
+                Value::Array(held.iter().map(|held| held.encode()).collect())
+            }),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCompatibleTermsInput {
+    pub urls: Vec<Option<String>>,
+}
+
+impl Shape for LocalCompatibleTermsInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let urls = shape::required(object, "urls", at, |value, at| {
+            shape::list(value, at, |value, at| {
+                shape::nullable(value, at, shape::text)
+            })
+        })?;
+        Ok(Self { urls })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "urls",
+            Value::Array(
+                self.urls
+                    .iter()
+                    .map(|held| {
+                        held.as_ref()
+                            .map_or(Value::Null, |held| Value::from(held.as_str()))
+                    })
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCompatibleTermsResult {
+    pub terms: Vec<LocalCompatibleTermsResultTermsItem>,
+}
+
+impl Shape for LocalCompatibleTermsResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let terms = shape::required(object, "terms", at, |value, at| {
+            shape::list(value, at, LocalCompatibleTermsResultTermsItem::decode_at)
+        })?;
+        Ok(Self { terms })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "terms",
+            Value::Array(self.terms.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCompatibleTermsResultTermsItem {
+    pub remote: bool,
+    pub kept: bool,
+    pub price: LocalCompatibleTermsResultTermsItemPrice,
+}
+
+impl Shape for LocalCompatibleTermsResultTermsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let remote = shape::required(object, "remote", at, shape::flag)?;
+        let kept = shape::required(object, "kept", at, shape::flag)?;
+        let price = shape::required(
+            object,
+            "price",
+            at,
+            LocalCompatibleTermsResultTermsItemPrice::decode_at,
+        )?;
+        Ok(Self {
+            remote,
+            kept,
+            price,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("remote", Value::Bool(self.remote));
+        object.insert("kept", Value::Bool(self.kept));
+        object.insert("price", self.price.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum LocalCompatibleTermsResultTermsItemPrice {
+    Free,
+    Unknown,
+}
+
+impl LocalCompatibleTermsResultTermsItemPrice {
+    pub const ALL: [Self; 2] = [Self::Free, Self::Unknown];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Free => "free",
+            Self::Unknown => "unknown",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for LocalCompatibleTermsResultTermsItemPrice {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalReachInput {
+    pub kind: LocalReachInputKind,
+    pub entry: LocalEntry,
+    pub secret: Option<String>,
+    pub start_ms: i64,
+    pub exchanges: Vec<NetExchange>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for LocalReachInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let kind = shape::required(object, "kind", at, LocalReachInputKind::decode_at)?;
+        let entry = shape::required(object, "entry", at, LocalEntry::decode_at)?;
+        let secret = shape::required(object, "secret", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let start_ms = shape::required(object, "startMs", at, shape::integer)?;
+        let exchanges = shape::required(object, "exchanges", at, |value, at| {
+            shape::list(value, at, NetExchange::decode_at)
+        })?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            kind,
+            entry,
+            secret,
+            start_ms,
+            exchanges,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", self.kind.encode());
+        object.insert("entry", self.entry.encode());
+        object.insert(
+            "secret",
+            self.secret
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert("startMs", Value::Number(self.start_ms as f64));
+        object.insert(
+            "exchanges",
+            Value::Array(self.exchanges.iter().map(|held| held.encode()).collect()),
+        );
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum LocalReachInputKind {
+    Ollama,
+    Lmstudio,
+    Llamacpp,
+    Compatible,
+}
+
+impl LocalReachInputKind {
+    pub const ALL: [Self; 4] = [
+        Self::Ollama,
+        Self::Lmstudio,
+        Self::Llamacpp,
+        Self::Compatible,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Ollama => "ollama",
+            Self::Lmstudio => "lmstudio",
+            Self::Llamacpp => "llamacpp",
+            Self::Compatible => "compatible",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for LocalReachInputKind {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalReachResult {
+    pub state: Option<nyaaai_contract::shapes::provider::KeyState>,
+    pub thrown: Option<String>,
+    pub facts: Option<String>,
+    pub requests: Vec<LocalReachResultRequestsItem>,
+    pub waiting: Vec<String>,
+}
+
+impl Shape for LocalReachResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let state = shape::required(object, "state", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::KeyState::decode_at,
+            )
+        })?;
+        let thrown = shape::required(object, "thrown", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let facts = shape::required(object, "facts", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let requests = shape::required(object, "requests", at, |value, at| {
+            shape::list(value, at, LocalReachResultRequestsItem::decode_at)
+        })?;
+        let waiting = shape::required(object, "waiting", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self {
+            state,
+            thrown,
+            facts,
+            requests,
+            waiting,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "state",
+            self.state
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert(
+            "thrown",
+            self.thrown
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "facts",
+            self.facts
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "requests",
+            Value::Array(self.requests.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "waiting",
+            Value::Array(
+                self.waiting
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalReachResultRequestsItem {
+    pub method: String,
+    pub url: String,
+    pub authorization: Option<String>,
+    pub body: Value,
+}
+
+impl Shape for LocalReachResultRequestsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let method = shape::required(object, "method", at, shape::text)?;
+        let url = shape::required(object, "url", at, shape::text)?;
+        let authorization = shape::required(object, "authorization", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let body = shape::required(object, "body", at, shape::any)?;
+        Ok(Self {
+            method,
+            url,
+            authorization,
+            body,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("method", Value::from(self.method.as_str()));
+        object.insert("url", Value::from(self.url.as_str()));
+        object.insert(
+            "authorization",
+            self.authorization
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert("body", self.body.clone());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalServerInput {
+    pub kind: LocalServerInputKind,
+    pub entry: LocalEntry,
+    pub stored: Option<String>,
+    pub start_ms: i64,
+    pub exchanges: Vec<NetExchange>,
+    pub steps: Vec<LocalServerInputStepsItem>,
+}
+
+impl Shape for LocalServerInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let kind = shape::required(object, "kind", at, LocalServerInputKind::decode_at)?;
+        let entry = shape::required(object, "entry", at, LocalEntry::decode_at)?;
+        let stored = shape::required(object, "stored", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let start_ms = shape::required(object, "startMs", at, shape::integer)?;
+        let exchanges = shape::required(object, "exchanges", at, |value, at| {
+            shape::list(value, at, NetExchange::decode_at)
+        })?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list_within(
+                value,
+                at,
+                Some(1),
+                None,
+                LocalServerInputStepsItem::decode_at,
+            )
+        })?;
+        Ok(Self {
+            kind,
+            entry,
+            stored,
+            start_ms,
+            exchanges,
+            steps,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", self.kind.encode());
+        object.insert("entry", self.entry.encode());
+        object.insert(
+            "stored",
+            self.stored
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert("startMs", Value::Number(self.start_ms as f64));
+        object.insert(
+            "exchanges",
+            Value::Array(self.exchanges.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum LocalServerInputKind {
+    Ollama,
+    Lmstudio,
+    Llamacpp,
+    Compatible,
+}
+
+impl LocalServerInputKind {
+    pub const ALL: [Self; 4] = [
+        Self::Ollama,
+        Self::Lmstudio,
+        Self::Llamacpp,
+        Self::Compatible,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Ollama => "ollama",
+            Self::Lmstudio => "lmstudio",
+            Self::Llamacpp => "llamacpp",
+            Self::Compatible => "compatible",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for LocalServerInputKind {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum LocalServerInputStepsItem {
+    Models(LocalServerInputStepsItemModels),
+    Loaded(LocalServerInputStepsItemLoaded),
+    Warm(LocalServerInputStepsItemWarm),
+}
+
+impl Shape for LocalServerInputStepsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "models" => LocalServerInputStepsItemModels::decode_at(value, at).map(Self::Models),
+            "loaded" => LocalServerInputStepsItemLoaded::decode_at(value, at).map(Self::Loaded),
+            "warm" => LocalServerInputStepsItemWarm::decode_at(value, at).map(Self::Warm),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Models(held) => held.encode(),
+            Self::Loaded(held) => held.encode(),
+            Self::Warm(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalServerInputStepsItemModels {
+    pub known: Vec<ServedModel>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for LocalServerInputStepsItemModels {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "models")
+        })?;
+        let known = shape::required(object, "known", at, |value, at| {
+            shape::list(value, at, ServedModel::decode_at)
+        })?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            known,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("models"));
+        object.insert(
+            "known",
+            Value::Array(self.known.iter().map(|held| held.encode()).collect()),
+        );
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalServerInputStepsItemLoaded {
+    pub tag: String,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for LocalServerInputStepsItemLoaded {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "loaded")
+        })?;
+        let tag = shape::required(object, "tag", at, shape::text)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            tag,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("loaded"));
+        object.insert("tag", Value::from(self.tag.as_str()));
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalServerInputStepsItemWarm {
+    pub tag: String,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for LocalServerInputStepsItemWarm {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "warm")
+        })?;
+        let tag = shape::required(object, "tag", at, shape::text)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            tag,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("warm"));
+        object.insert("tag", Value::from(self.tag.as_str()));
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalServerResult {
+    pub steps: Vec<LocalServerResultStepsItem>,
+    pub requests: Vec<LocalServerResultRequestsItem>,
+    pub read: Vec<i64>,
+    pub waiting: Vec<String>,
+}
+
+impl Shape for LocalServerResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list(value, at, LocalServerResultStepsItem::decode_at)
+        })?;
+        let requests = shape::required(object, "requests", at, |value, at| {
+            shape::list(value, at, LocalServerResultRequestsItem::decode_at)
+        })?;
+        let read = shape::required(object, "read", at, |value, at| {
+            shape::list(value, at, shape::integer)
+        })?;
+        let waiting = shape::required(object, "waiting", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self {
+            steps,
+            requests,
+            read,
+            waiting,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "requests",
+            Value::Array(self.requests.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "read",
+            Value::Array(
+                self.read
+                    .iter()
+                    .map(|held| Value::Number(*held as f64))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "waiting",
+            Value::Array(
+                self.waiting
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalServerResultStepsItem {
+    pub models: Option<Vec<ServedModel>>,
+    pub contexts: Option<Vec<LocalServerResultStepsItemContextsItem>>,
+    pub done: bool,
+    pub thrown: Option<String>,
+}
+
+impl Shape for LocalServerResultStepsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let models = shape::required(object, "models", at, |value, at| {
+            shape::nullable(value, at, |value, at| {
+                shape::list(value, at, ServedModel::decode_at)
+            })
+        })?;
+        let contexts = shape::required(object, "contexts", at, |value, at| {
+            shape::nullable(value, at, |value, at| {
+                shape::list(value, at, LocalServerResultStepsItemContextsItem::decode_at)
+            })
+        })?;
+        let done = shape::required(object, "done", at, shape::flag)?;
+        let thrown = shape::required(object, "thrown", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        Ok(Self {
+            models,
+            contexts,
+            done,
+            thrown,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "models",
+            self.models.as_ref().map_or(Value::Null, |held| {
+                Value::Array(held.iter().map(|held| held.encode()).collect())
+            }),
+        );
+        object.insert(
+            "contexts",
+            self.contexts.as_ref().map_or(Value::Null, |held| {
+                Value::Array(held.iter().map(|held| held.encode()).collect())
+            }),
+        );
+        object.insert("done", Value::Bool(self.done));
+        object.insert(
+            "thrown",
+            self.thrown
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalServerResultRequestsItem {
+    pub method: String,
+    pub url: String,
+    pub authorization: Option<String>,
+    pub body: Value,
+}
+
+impl Shape for LocalServerResultRequestsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let method = shape::required(object, "method", at, shape::text)?;
+        let url = shape::required(object, "url", at, shape::text)?;
+        let authorization = shape::required(object, "authorization", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let body = shape::required(object, "body", at, shape::any)?;
+        Ok(Self {
+            method,
+            url,
+            authorization,
+            body,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("method", Value::from(self.method.as_str()));
+        object.insert("url", Value::from(self.url.as_str()));
+        object.insert(
+            "authorization",
+            self.authorization
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert("body", self.body.clone());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalServerResultStepsItemContextsItem {
+    pub tag: String,
+    pub context: f64,
+}
+
+impl Shape for LocalServerResultStepsItemContextsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let tag = shape::required(object, "tag", at, shape::text)?;
+        let context = shape::required(object, "context", at, shape::number)?;
+        Ok(Self { tag, context })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("tag", Value::from(self.tag.as_str()));
+        object.insert("context", Value::Number(self.context));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCatalogRunInput {
+    pub start_ms: i64,
+    pub entry: String,
+    pub terms: ServedTerms,
+    pub server: LocalCatalogRunInputServer,
+    pub rows: Vec<String>,
+    pub steps: Vec<LocalCatalogRunInputStepsItem>,
+}
+
+impl Shape for LocalCatalogRunInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let start_ms = shape::required(object, "startMs", at, shape::integer)?;
+        let entry = shape::required(object, "entry", at, shape::text)?;
+        let terms = shape::required(object, "terms", at, ServedTerms::decode_at)?;
+        let server = shape::required(object, "server", at, LocalCatalogRunInputServer::decode_at)?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list_within(
+                value,
+                at,
+                Some(1),
+                None,
+                LocalCatalogRunInputStepsItem::decode_at,
+            )
+        })?;
+        Ok(Self {
+            start_ms,
+            entry,
+            terms,
+            server,
+            rows,
+            steps,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("startMs", Value::Number(self.start_ms as f64));
+        object.insert("entry", Value::from(self.entry.as_str()));
+        object.insert("terms", self.terms.encode());
+        object.insert("server", self.server.encode());
+        object.insert(
+            "rows",
+            Value::Array(
+                self.rows
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCatalogRunInputServer {
+    pub live: bool,
+    pub loaded: bool,
+    pub warm: bool,
+    pub models: Vec<LocalCatalogRunInputServerModelsItem>,
+    pub loads: Vec<LocalCatalogRunInputServerLoadsItem>,
+    pub warms: Vec<LocalCatalogRunInputServerWarmsItem>,
+}
+
+impl Shape for LocalCatalogRunInputServer {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let live = shape::required(object, "live", at, shape::flag)?;
+        let loaded = shape::required(object, "loaded", at, shape::flag)?;
+        let warm = shape::required(object, "warm", at, shape::flag)?;
+        let models = shape::required(object, "models", at, |value, at| {
+            shape::list(value, at, LocalCatalogRunInputServerModelsItem::decode_at)
+        })?;
+        let loads = shape::required(object, "loads", at, |value, at| {
+            shape::list(value, at, LocalCatalogRunInputServerLoadsItem::decode_at)
+        })?;
+        let warms = shape::required(object, "warms", at, |value, at| {
+            shape::list(value, at, LocalCatalogRunInputServerWarmsItem::decode_at)
+        })?;
+        Ok(Self {
+            live,
+            loaded,
+            warm,
+            models,
+            loads,
+            warms,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("live", Value::Bool(self.live));
+        object.insert("loaded", Value::Bool(self.loaded));
+        object.insert("warm", Value::Bool(self.warm));
+        object.insert(
+            "models",
+            Value::Array(self.models.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "loads",
+            Value::Array(self.loads.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "warms",
+            Value::Array(self.warms.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum LocalCatalogRunInputStepsItem {
+    Call(LocalCatalogRunInputStepsItemCall),
+    Together(LocalCatalogRunInputStepsItemTogether),
+    Settled(LocalCatalogRunInputStepsItemSettled),
+    Rediscover(LocalCatalogRunInputStepsItemRediscover),
+    Advance(LocalCatalogRunInputStepsItemAdvance),
+    Rows(LocalCatalogRunInputStepsItemRows),
+}
+
+impl Shape for LocalCatalogRunInputStepsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "call" => LocalCatalogRunInputStepsItemCall::decode_at(value, at).map(Self::Call),
+            "together" => {
+                LocalCatalogRunInputStepsItemTogether::decode_at(value, at).map(Self::Together)
+            }
+            "settled" => {
+                LocalCatalogRunInputStepsItemSettled::decode_at(value, at).map(Self::Settled)
+            }
+            "rediscover" => {
+                LocalCatalogRunInputStepsItemRediscover::decode_at(value, at).map(Self::Rediscover)
+            }
+            "advance" => {
+                LocalCatalogRunInputStepsItemAdvance::decode_at(value, at).map(Self::Advance)
+            }
+            "rows" => LocalCatalogRunInputStepsItemRows::decode_at(value, at).map(Self::Rows),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Call(held) => held.encode(),
+            Self::Together(held) => held.encode(),
+            Self::Settled(held) => held.encode(),
+            Self::Rediscover(held) => held.encode(),
+            Self::Advance(held) => held.encode(),
+            Self::Rows(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCatalogRunInputServerModelsItem {
+    pub models: Vec<ServedModel>,
+    pub delay_ms: Option<i64>,
+    pub fails: Option<()>,
+}
+
+impl Shape for LocalCatalogRunInputServerModelsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let models = shape::required(object, "models", at, |value, at| {
+            shape::list(value, at, ServedModel::decode_at)
+        })?;
+        let delay_ms = shape::optional(object, "delayMs", at, shape::integer)?;
+        let fails = shape::optional(object, "fails", at, |value, at| {
+            shape::is_flag(value, at, true)
+        })?;
+        Ok(Self {
+            models,
+            delay_ms,
+            fails,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "models",
+            Value::Array(self.models.iter().map(|held| held.encode()).collect()),
+        );
+        if let Some(held) = &self.delay_ms {
+            object.insert("delayMs", Value::Number(*held as f64));
+        }
+        if self.fails.is_some() {
+            object.insert("fails", Value::Bool(true));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCatalogRunInputServerLoadsItem {
+    pub contexts: Vec<LocalCatalogRunInputServerLoadsItemContextsItem>,
+    pub delay_ms: Option<i64>,
+    pub fails: Option<()>,
+}
+
+impl Shape for LocalCatalogRunInputServerLoadsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let contexts = shape::required(object, "contexts", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                LocalCatalogRunInputServerLoadsItemContextsItem::decode_at,
+            )
+        })?;
+        let delay_ms = shape::optional(object, "delayMs", at, shape::integer)?;
+        let fails = shape::optional(object, "fails", at, |value, at| {
+            shape::is_flag(value, at, true)
+        })?;
+        Ok(Self {
+            contexts,
+            delay_ms,
+            fails,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "contexts",
+            Value::Array(self.contexts.iter().map(|held| held.encode()).collect()),
+        );
+        if let Some(held) = &self.delay_ms {
+            object.insert("delayMs", Value::Number(*held as f64));
+        }
+        if self.fails.is_some() {
+            object.insert("fails", Value::Bool(true));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCatalogRunInputServerWarmsItem {
+    pub delay_ms: Option<i64>,
+    pub fails: Option<()>,
+}
+
+impl Shape for LocalCatalogRunInputServerWarmsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let delay_ms = shape::optional(object, "delayMs", at, shape::integer)?;
+        let fails = shape::optional(object, "fails", at, |value, at| {
+            shape::is_flag(value, at, true)
+        })?;
+        Ok(Self { delay_ms, fails })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        if let Some(held) = &self.delay_ms {
+            object.insert("delayMs", Value::Number(*held as f64));
+        }
+        if self.fails.is_some() {
+            object.insert("fails", Value::Bool(true));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCatalogRunInputStepsItemCall {
+    pub call: LocalCatalogRunInputStepsItemCallCall,
+}
+
+impl Shape for LocalCatalogRunInputStepsItemCall {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "call")
+        })?;
+        let call = shape::required(
+            object,
+            "call",
+            at,
+            LocalCatalogRunInputStepsItemCallCall::decode_at,
+        )?;
+        Ok(Self { call })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("call"));
+        object.insert("call", self.call.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCatalogRunInputStepsItemTogether {
+    pub calls: Vec<LocalCatalogRunInputStepsItemTogetherCallsItem>,
+}
+
+impl Shape for LocalCatalogRunInputStepsItemTogether {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "together")
+        })?;
+        let calls = shape::required(object, "calls", at, |value, at| {
+            shape::list_within(
+                value,
+                at,
+                Some(2),
+                None,
+                LocalCatalogRunInputStepsItemTogetherCallsItem::decode_at,
+            )
+        })?;
+        Ok(Self { calls })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("together"));
+        object.insert(
+            "calls",
+            Value::Array(self.calls.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCatalogRunInputStepsItemSettled {
+    pub tag: String,
+    pub times: Option<u64>,
+}
+
+impl Shape for LocalCatalogRunInputStepsItemSettled {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "settled")
+        })?;
+        let tag = shape::required(object, "tag", at, shape::text)?;
+        let times = shape::optional(object, "times", at, |value, at| {
+            shape::natural(value, at).and_then(|held| shape::at_least(held, 1, at))
+        })?;
+        Ok(Self { tag, times })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("settled"));
+        object.insert("tag", Value::from(self.tag.as_str()));
+        if let Some(held) = &self.times {
+            object.insert("times", Value::Number(*held as f64));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCatalogRunInputStepsItemRediscover {}
+
+impl Shape for LocalCatalogRunInputStepsItemRediscover {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "rediscover")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("rediscover"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCatalogRunInputStepsItemAdvance {
+    pub ms: u64,
+}
+
+impl Shape for LocalCatalogRunInputStepsItemAdvance {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "advance")
+        })?;
+        let ms = shape::required(object, "ms", at, shape::natural)?;
+        Ok(Self { ms })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("advance"));
+        object.insert("ms", Value::Number(self.ms as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCatalogRunInputStepsItemRows {
+    pub rows: Vec<String>,
+}
+
+impl Shape for LocalCatalogRunInputStepsItemRows {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "rows")
+        })?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { rows })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("rows"));
+        object.insert(
+            "rows",
+            Value::Array(
+                self.rows
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCatalogRunInputServerLoadsItemContextsItem {
+    pub tag: String,
+    pub context: f64,
+}
+
+impl Shape for LocalCatalogRunInputServerLoadsItemContextsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let tag = shape::required(object, "tag", at, shape::text)?;
+        let context = shape::required(object, "context", at, shape::number)?;
+        Ok(Self { tag, context })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("tag", Value::from(self.tag.as_str()));
+        object.insert("context", Value::Number(self.context));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum LocalCatalogRunInputStepsItemCallCall {
+    Views(LocalCatalogRunInputStepsItemCallCallViews),
+    Discovered(LocalCatalogRunInputStepsItemCallCallDiscovered),
+    ViewFor(LocalCatalogRunInputStepsItemCallCallViewFor),
+    Warmed(LocalCatalogRunInputStepsItemCallCallWarmed),
+}
+
+impl Shape for LocalCatalogRunInputStepsItemCallCall {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "views" => {
+                LocalCatalogRunInputStepsItemCallCallViews::decode_at(value, at).map(Self::Views)
+            }
+            "discovered" => LocalCatalogRunInputStepsItemCallCallDiscovered::decode_at(value, at)
+                .map(Self::Discovered),
+            "viewFor" => LocalCatalogRunInputStepsItemCallCallViewFor::decode_at(value, at)
+                .map(Self::ViewFor),
+            "warmed" => {
+                LocalCatalogRunInputStepsItemCallCallWarmed::decode_at(value, at).map(Self::Warmed)
+            }
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Views(held) => held.encode(),
+            Self::Discovered(held) => held.encode(),
+            Self::ViewFor(held) => held.encode(),
+            Self::Warmed(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum LocalCatalogRunInputStepsItemTogetherCallsItem {
+    Views(LocalCatalogRunInputStepsItemTogetherCallsItemViews),
+    Discovered(LocalCatalogRunInputStepsItemTogetherCallsItemDiscovered),
+    ViewFor(LocalCatalogRunInputStepsItemTogetherCallsItemViewFor),
+    Warmed(LocalCatalogRunInputStepsItemTogetherCallsItemWarmed),
+}
+
+impl Shape for LocalCatalogRunInputStepsItemTogetherCallsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "views" => LocalCatalogRunInputStepsItemTogetherCallsItemViews::decode_at(value, at)
+                .map(Self::Views),
+            "discovered" => {
+                LocalCatalogRunInputStepsItemTogetherCallsItemDiscovered::decode_at(value, at)
+                    .map(Self::Discovered)
+            }
+            "viewFor" => {
+                LocalCatalogRunInputStepsItemTogetherCallsItemViewFor::decode_at(value, at)
+                    .map(Self::ViewFor)
+            }
+            "warmed" => LocalCatalogRunInputStepsItemTogetherCallsItemWarmed::decode_at(value, at)
+                .map(Self::Warmed),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Views(held) => held.encode(),
+            Self::Discovered(held) => held.encode(),
+            Self::ViewFor(held) => held.encode(),
+            Self::Warmed(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCatalogRunInputStepsItemCallCallViews {
+    pub use_: Option<nyaaai_contract::shapes::model::ModelUse>,
+    pub zdr_only: Option<bool>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for LocalCatalogRunInputStepsItemCallCallViews {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "views")
+        })?;
+        let use_ = shape::optional(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        let zdr_only = shape::optional(object, "zdrOnly", at, shape::flag)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            use_,
+            zdr_only,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("views"));
+        if let Some(held) = &self.use_ {
+            object.insert("use", held.encode());
+        }
+        if let Some(held) = &self.zdr_only {
+            object.insert("zdrOnly", Value::Bool(*held));
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCatalogRunInputStepsItemCallCallDiscovered {
+    pub fresh: Option<bool>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for LocalCatalogRunInputStepsItemCallCallDiscovered {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "discovered")
+        })?;
+        let fresh = shape::optional(object, "fresh", at, shape::flag)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            fresh,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("discovered"));
+        if let Some(held) = &self.fresh {
+            object.insert("fresh", Value::Bool(*held));
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCatalogRunInputStepsItemCallCallViewFor {
+    pub row: String,
+    pub use_: Option<nyaaai_contract::shapes::model::ModelUse>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for LocalCatalogRunInputStepsItemCallCallViewFor {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "viewFor")
+        })?;
+        let row = shape::required(object, "row", at, shape::text)?;
+        let use_ = shape::optional(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            row,
+            use_,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("viewFor"));
+        object.insert("row", Value::from(self.row.as_str()));
+        if let Some(held) = &self.use_ {
+            object.insert("use", held.encode());
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCatalogRunInputStepsItemCallCallWarmed {
+    pub tag: String,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for LocalCatalogRunInputStepsItemCallCallWarmed {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "warmed")
+        })?;
+        let tag = shape::required(object, "tag", at, shape::text)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            tag,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("warmed"));
+        object.insert("tag", Value::from(self.tag.as_str()));
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCatalogRunInputStepsItemTogetherCallsItemViews {
+    pub use_: Option<nyaaai_contract::shapes::model::ModelUse>,
+    pub zdr_only: Option<bool>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for LocalCatalogRunInputStepsItemTogetherCallsItemViews {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "views")
+        })?;
+        let use_ = shape::optional(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        let zdr_only = shape::optional(object, "zdrOnly", at, shape::flag)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            use_,
+            zdr_only,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("views"));
+        if let Some(held) = &self.use_ {
+            object.insert("use", held.encode());
+        }
+        if let Some(held) = &self.zdr_only {
+            object.insert("zdrOnly", Value::Bool(*held));
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCatalogRunInputStepsItemTogetherCallsItemDiscovered {
+    pub fresh: Option<bool>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for LocalCatalogRunInputStepsItemTogetherCallsItemDiscovered {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "discovered")
+        })?;
+        let fresh = shape::optional(object, "fresh", at, shape::flag)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            fresh,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("discovered"));
+        if let Some(held) = &self.fresh {
+            object.insert("fresh", Value::Bool(*held));
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCatalogRunInputStepsItemTogetherCallsItemViewFor {
+    pub row: String,
+    pub use_: Option<nyaaai_contract::shapes::model::ModelUse>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for LocalCatalogRunInputStepsItemTogetherCallsItemViewFor {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "viewFor")
+        })?;
+        let row = shape::required(object, "row", at, shape::text)?;
+        let use_ = shape::optional(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            row,
+            use_,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("viewFor"));
+        object.insert("row", Value::from(self.row.as_str()));
+        if let Some(held) = &self.use_ {
+            object.insert("use", held.encode());
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCatalogRunInputStepsItemTogetherCallsItemWarmed {
+    pub tag: String,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for LocalCatalogRunInputStepsItemTogetherCallsItemWarmed {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "warmed")
+        })?;
+        let tag = shape::required(object, "tag", at, shape::text)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            tag,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("warmed"));
+        object.insert("tag", Value::from(self.tag.as_str()));
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCatalogRunResult {
+    pub steps: Vec<LocalCatalogRunResultStepsItem>,
+    pub waiting: Vec<String>,
+}
+
+impl Shape for LocalCatalogRunResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list(value, at, LocalCatalogRunResultStepsItem::decode_at)
+        })?;
+        let waiting = shape::required(object, "waiting", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { steps, waiting })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "waiting",
+            Value::Array(
+                self.waiting
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCatalogRunResultStepsItem {
+    pub now_ms: i64,
+    pub answers: Vec<LocalCatalogRunResultStepsItemAnswersItem>,
+    pub served: Vec<LocalCatalogRunResultStepsItemServedItem>,
+    pub refreshed: i64,
+}
+
+impl Shape for LocalCatalogRunResultStepsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let now_ms = shape::required(object, "nowMs", at, shape::integer)?;
+        let answers = shape::required(object, "answers", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                LocalCatalogRunResultStepsItemAnswersItem::decode_at,
+            )
+        })?;
+        let served = shape::required(object, "served", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                LocalCatalogRunResultStepsItemServedItem::decode_at,
+            )
+        })?;
+        let refreshed = shape::required(object, "refreshed", at, shape::integer)?;
+        Ok(Self {
+            now_ms,
+            answers,
+            served,
+            refreshed,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("nowMs", Value::Number(self.now_ms as f64));
+        object.insert(
+            "answers",
+            Value::Array(self.answers.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "served",
+            Value::Array(self.served.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert("refreshed", Value::Number(self.refreshed as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum LocalCatalogRunResultStepsItemAnswersItem {
+    Views(LocalCatalogRunResultStepsItemAnswersItemViews),
+    Discovered(LocalCatalogRunResultStepsItemAnswersItemDiscovered),
+    View(LocalCatalogRunResultStepsItemAnswersItemView),
+    Warmed(LocalCatalogRunResultStepsItemAnswersItemWarmed),
+    Thrown(LocalCatalogRunResultStepsItemAnswersItemThrown),
+}
+
+impl Shape for LocalCatalogRunResultStepsItemAnswersItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "views" => LocalCatalogRunResultStepsItemAnswersItemViews::decode_at(value, at)
+                .map(Self::Views),
+            "discovered" => {
+                LocalCatalogRunResultStepsItemAnswersItemDiscovered::decode_at(value, at)
+                    .map(Self::Discovered)
+            }
+            "view" => {
+                LocalCatalogRunResultStepsItemAnswersItemView::decode_at(value, at).map(Self::View)
+            }
+            "warmed" => LocalCatalogRunResultStepsItemAnswersItemWarmed::decode_at(value, at)
+                .map(Self::Warmed),
+            "thrown" => LocalCatalogRunResultStepsItemAnswersItemThrown::decode_at(value, at)
+                .map(Self::Thrown),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Views(held) => held.encode(),
+            Self::Discovered(held) => held.encode(),
+            Self::View(held) => held.encode(),
+            Self::Warmed(held) => held.encode(),
+            Self::Thrown(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCatalogRunResultStepsItemServedItem {
+    pub method: LocalCatalogRunResultStepsItemServedItemMethod,
+    pub tag: Option<String>,
+    pub known: Vec<String>,
+    pub start_ms: i64,
+    pub end_ms: i64,
+    pub aborted: bool,
+}
+
+impl Shape for LocalCatalogRunResultStepsItemServedItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let method = shape::required(
+            object,
+            "method",
+            at,
+            LocalCatalogRunResultStepsItemServedItemMethod::decode_at,
+        )?;
+        let tag = shape::required(object, "tag", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let known = shape::required(object, "known", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let start_ms = shape::required(object, "startMs", at, shape::integer)?;
+        let end_ms = shape::required(object, "endMs", at, shape::integer)?;
+        let aborted = shape::required(object, "aborted", at, shape::flag)?;
+        Ok(Self {
+            method,
+            tag,
+            known,
+            start_ms,
+            end_ms,
+            aborted,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("method", self.method.encode());
+        object.insert(
+            "tag",
+            self.tag
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "known",
+            Value::Array(
+                self.known
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert("startMs", Value::Number(self.start_ms as f64));
+        object.insert("endMs", Value::Number(self.end_ms as f64));
+        object.insert("aborted", Value::Bool(self.aborted));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCatalogRunResultStepsItemAnswersItemViews {
+    pub views: Vec<ViewLine>,
+}
+
+impl Shape for LocalCatalogRunResultStepsItemAnswersItemViews {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "views")
+        })?;
+        let views = shape::required(object, "views", at, |value, at| {
+            shape::list(value, at, ViewLine::decode_at)
+        })?;
+        Ok(Self { views })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("views"));
+        object.insert(
+            "views",
+            Value::Array(self.views.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCatalogRunResultStepsItemAnswersItemDiscovered {
+    pub models: Option<Vec<LocalCatalogRunResultStepsItemAnswersItemDiscoveredModelsItem>>,
+}
+
+impl Shape for LocalCatalogRunResultStepsItemAnswersItemDiscovered {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "discovered")
+        })?;
+        let models = shape::required(object, "models", at, |value, at| {
+            shape::nullable(value, at, |value, at| {
+                shape::list(
+                    value,
+                    at,
+                    LocalCatalogRunResultStepsItemAnswersItemDiscoveredModelsItem::decode_at,
+                )
+            })
+        })?;
+        Ok(Self { models })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("discovered"));
+        object.insert(
+            "models",
+            self.models.as_ref().map_or(Value::Null, |held| {
+                Value::Array(held.iter().map(|held| held.encode()).collect())
+            }),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCatalogRunResultStepsItemAnswersItemView {
+    pub view: ViewLine,
+}
+
+impl Shape for LocalCatalogRunResultStepsItemAnswersItemView {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "view")
+        })?;
+        let view = shape::required(object, "view", at, ViewLine::decode_at)?;
+        Ok(Self { view })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("view"));
+        object.insert("view", self.view.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCatalogRunResultStepsItemAnswersItemWarmed {}
+
+impl Shape for LocalCatalogRunResultStepsItemAnswersItemWarmed {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "warmed")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("warmed"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCatalogRunResultStepsItemAnswersItemThrown {
+    pub message: String,
+}
+
+impl Shape for LocalCatalogRunResultStepsItemAnswersItemThrown {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "thrown")
+        })?;
+        let message = shape::required(object, "message", at, shape::text)?;
+        Ok(Self { message })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("thrown"));
+        object.insert("message", Value::from(self.message.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum LocalCatalogRunResultStepsItemServedItemMethod {
+    Models,
+    Loaded,
+    Warm,
+}
+
+impl LocalCatalogRunResultStepsItemServedItemMethod {
+    pub const ALL: [Self; 3] = [Self::Models, Self::Loaded, Self::Warm];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Models => "models",
+            Self::Loaded => "loaded",
+            Self::Warm => "warm",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for LocalCatalogRunResultStepsItemServedItemMethod {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalCatalogRunResultStepsItemAnswersItemDiscoveredModelsItem {
+    pub key: String,
+    pub display: String,
+    pub tag: String,
+    pub tools: bool,
+    pub reasoning: bool,
+    pub context: Option<f64>,
+}
+
+impl Shape for LocalCatalogRunResultStepsItemAnswersItemDiscoveredModelsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let key = shape::required(object, "key", at, shape::text)?;
+        let display = shape::required(object, "display", at, shape::text)?;
+        let tag = shape::required(object, "tag", at, shape::text)?;
+        let tools = shape::required(object, "tools", at, shape::flag)?;
+        let reasoning = shape::required(object, "reasoning", at, shape::flag)?;
+        let context = shape::optional(object, "context", at, shape::number)?;
+        Ok(Self {
+            key,
+            display,
+            tag,
+            tools,
+            reasoning,
+            context,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("key", Value::from(self.key.as_str()));
+        object.insert("display", Value::from(self.display.as_str()));
+        object.insert("tag", Value::from(self.tag.as_str()));
+        object.insert("tools", Value::Bool(self.tools));
+        object.insert("reasoning", Value::Bool(self.reasoning));
+        if let Some(held) = &self.context {
+            object.insert("context", Value::Number(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalFlowInput {
+    pub kind: LocalFlowInputKind,
+    pub entry: LocalFlowInputEntry,
+    pub stored: Option<String>,
+    pub start_ms: i64,
+    pub exchanges: Vec<NetExchange>,
+    pub rows: Vec<String>,
+    pub steps: Vec<LocalFlowInputStepsItem>,
+}
+
+impl Shape for LocalFlowInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let kind = shape::required(object, "kind", at, LocalFlowInputKind::decode_at)?;
+        let entry = shape::required(object, "entry", at, LocalFlowInputEntry::decode_at)?;
+        let stored = shape::required(object, "stored", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let start_ms = shape::required(object, "startMs", at, shape::integer)?;
+        let exchanges = shape::required(object, "exchanges", at, |value, at| {
+            shape::list(value, at, NetExchange::decode_at)
+        })?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list_within(value, at, Some(1), None, LocalFlowInputStepsItem::decode_at)
+        })?;
+        Ok(Self {
+            kind,
+            entry,
+            stored,
+            start_ms,
+            exchanges,
+            rows,
+            steps,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", self.kind.encode());
+        object.insert("entry", self.entry.encode());
+        object.insert(
+            "stored",
+            self.stored
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert("startMs", Value::Number(self.start_ms as f64));
+        object.insert(
+            "exchanges",
+            Value::Array(self.exchanges.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "rows",
+            Value::Array(
+                self.rows
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum LocalFlowInputKind {
+    Ollama,
+    Lmstudio,
+    Llamacpp,
+    Compatible,
+}
+
+impl LocalFlowInputKind {
+    pub const ALL: [Self; 4] = [
+        Self::Ollama,
+        Self::Lmstudio,
+        Self::Llamacpp,
+        Self::Compatible,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Ollama => "ollama",
+            Self::Lmstudio => "lmstudio",
+            Self::Llamacpp => "llamacpp",
+            Self::Compatible => "compatible",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for LocalFlowInputKind {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalFlowInputEntry {
+    pub id: String,
+    pub label: String,
+    pub url: Option<String>,
+}
+
+impl Shape for LocalFlowInputEntry {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let label = shape::required(object, "label", at, shape::text)?;
+        let url = shape::optional(object, "url", at, shape::text)?;
+        Ok(Self { id, label, url })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("id", Value::from(self.id.as_str()));
+        object.insert("label", Value::from(self.label.as_str()));
+        if let Some(held) = &self.url {
+            object.insert("url", Value::from(held.as_str()));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum LocalFlowInputStepsItem {
+    Views(LocalFlowInputStepsItemViews),
+    Chat(LocalFlowInputStepsItemChat),
+    List(LocalFlowInputStepsItemList),
+    Detail(LocalFlowInputStepsItemDetail),
+    Listed(LocalFlowInputStepsItemListed),
+    View(LocalFlowInputStepsItemView),
+    Advance(LocalFlowInputStepsItemAdvance),
+    Rows(LocalFlowInputStepsItemRows),
+}
+
+impl Shape for LocalFlowInputStepsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "views" => LocalFlowInputStepsItemViews::decode_at(value, at).map(Self::Views),
+            "chat" => LocalFlowInputStepsItemChat::decode_at(value, at).map(Self::Chat),
+            "list" => LocalFlowInputStepsItemList::decode_at(value, at).map(Self::List),
+            "detail" => LocalFlowInputStepsItemDetail::decode_at(value, at).map(Self::Detail),
+            "listed" => LocalFlowInputStepsItemListed::decode_at(value, at).map(Self::Listed),
+            "view" => LocalFlowInputStepsItemView::decode_at(value, at).map(Self::View),
+            "advance" => LocalFlowInputStepsItemAdvance::decode_at(value, at).map(Self::Advance),
+            "rows" => LocalFlowInputStepsItemRows::decode_at(value, at).map(Self::Rows),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Views(held) => held.encode(),
+            Self::Chat(held) => held.encode(),
+            Self::List(held) => held.encode(),
+            Self::Detail(held) => held.encode(),
+            Self::Listed(held) => held.encode(),
+            Self::View(held) => held.encode(),
+            Self::Advance(held) => held.encode(),
+            Self::Rows(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalFlowInputStepsItemViews {
+    pub use_: Option<nyaaai_contract::shapes::model::ModelUse>,
+    pub zdr_only: Option<bool>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for LocalFlowInputStepsItemViews {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "views")
+        })?;
+        let use_ = shape::optional(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        let zdr_only = shape::optional(object, "zdrOnly", at, shape::flag)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            use_,
+            zdr_only,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("views"));
+        if let Some(held) = &self.use_ {
+            object.insert("use", held.encode());
+        }
+        if let Some(held) = &self.zdr_only {
+            object.insert("zdrOnly", Value::Bool(*held));
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalFlowInputStepsItemChat {
+    pub model: String,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for LocalFlowInputStepsItemChat {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "chat")
+        })?;
+        let model = shape::required(object, "model", at, shape::text)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            model,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("chat"));
+        object.insert("model", Value::from(self.model.as_str()));
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalFlowInputStepsItemList {
+    pub fresh: Option<bool>,
+}
+
+impl Shape for LocalFlowInputStepsItemList {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "list")
+        })?;
+        let fresh = shape::optional(object, "fresh", at, shape::flag)?;
+        Ok(Self { fresh })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("list"));
+        if let Some(held) = &self.fresh {
+            object.insert("fresh", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalFlowInputStepsItemDetail {
+    pub id: String,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for LocalFlowInputStepsItemDetail {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "detail")
+        })?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            id,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("detail"));
+        object.insert("id", Value::from(self.id.as_str()));
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalFlowInputStepsItemListed {
+    pub id: String,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for LocalFlowInputStepsItemListed {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "listed")
+        })?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            id,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("listed"));
+        object.insert("id", Value::from(self.id.as_str()));
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalFlowInputStepsItemView {
+    pub row: String,
+    pub use_: Option<nyaaai_contract::shapes::model::ModelUse>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for LocalFlowInputStepsItemView {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "view")
+        })?;
+        let row = shape::required(object, "row", at, shape::text)?;
+        let use_ = shape::optional(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            row,
+            use_,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("view"));
+        object.insert("row", Value::from(self.row.as_str()));
+        if let Some(held) = &self.use_ {
+            object.insert("use", held.encode());
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalFlowInputStepsItemAdvance {
+    pub ms: u64,
+}
+
+impl Shape for LocalFlowInputStepsItemAdvance {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "advance")
+        })?;
+        let ms = shape::required(object, "ms", at, shape::natural)?;
+        Ok(Self { ms })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("advance"));
+        object.insert("ms", Value::Number(self.ms as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalFlowInputStepsItemRows {
+    pub rows: Vec<String>,
+}
+
+impl Shape for LocalFlowInputStepsItemRows {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "rows")
+        })?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { rows })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("rows"));
+        object.insert(
+            "rows",
+            Value::Array(
+                self.rows
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalFlowResult {
+    pub steps: Vec<LocalFlowResultStepsItem>,
+    pub requests: Vec<LocalFlowResultRequestsItem>,
+    pub read: Vec<i64>,
+    pub waiting: Vec<String>,
+    pub refreshed: i64,
+}
+
+impl Shape for LocalFlowResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list(value, at, LocalFlowResultStepsItem::decode_at)
+        })?;
+        let requests = shape::required(object, "requests", at, |value, at| {
+            shape::list(value, at, LocalFlowResultRequestsItem::decode_at)
+        })?;
+        let read = shape::required(object, "read", at, |value, at| {
+            shape::list(value, at, shape::integer)
+        })?;
+        let waiting = shape::required(object, "waiting", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let refreshed = shape::required(object, "refreshed", at, shape::integer)?;
+        Ok(Self {
+            steps,
+            requests,
+            read,
+            waiting,
+            refreshed,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "requests",
+            Value::Array(self.requests.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "read",
+            Value::Array(
+                self.read
+                    .iter()
+                    .map(|held| Value::Number(*held as f64))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "waiting",
+            Value::Array(
+                self.waiting
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert("refreshed", Value::Number(self.refreshed as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalFlowResultStepsItem {
+    pub now_ms: i64,
+    pub answer: LocalFlowResultStepsItemAnswer,
+}
+
+impl Shape for LocalFlowResultStepsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let now_ms = shape::required(object, "nowMs", at, shape::integer)?;
+        let answer = shape::required(
+            object,
+            "answer",
+            at,
+            LocalFlowResultStepsItemAnswer::decode_at,
+        )?;
+        Ok(Self { now_ms, answer })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("nowMs", Value::Number(self.now_ms as f64));
+        object.insert("answer", self.answer.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalFlowResultRequestsItem {
+    pub method: String,
+    pub url: String,
+    pub authorization: Option<String>,
+    pub body: Value,
+}
+
+impl Shape for LocalFlowResultRequestsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let method = shape::required(object, "method", at, shape::text)?;
+        let url = shape::required(object, "url", at, shape::text)?;
+        let authorization = shape::required(object, "authorization", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let body = shape::required(object, "body", at, shape::any)?;
+        Ok(Self {
+            method,
+            url,
+            authorization,
+            body,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("method", Value::from(self.method.as_str()));
+        object.insert("url", Value::from(self.url.as_str()));
+        object.insert(
+            "authorization",
+            self.authorization
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert("body", self.body.clone());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum LocalFlowResultStepsItemAnswer {
+    Views(LocalFlowResultStepsItemAnswerViews),
+    Chat(LocalFlowResultStepsItemAnswerChat),
+    List(LocalFlowResultStepsItemAnswerList),
+    Detail(LocalFlowResultStepsItemAnswerDetail),
+    Listed(LocalFlowResultStepsItemAnswerListed),
+    View(LocalFlowResultStepsItemAnswerView),
+    None(LocalFlowResultStepsItemAnswerNone),
+    Thrown(LocalFlowResultStepsItemAnswerThrown),
+}
+
+impl Shape for LocalFlowResultStepsItemAnswer {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "views" => LocalFlowResultStepsItemAnswerViews::decode_at(value, at).map(Self::Views),
+            "chat" => LocalFlowResultStepsItemAnswerChat::decode_at(value, at).map(Self::Chat),
+            "list" => LocalFlowResultStepsItemAnswerList::decode_at(value, at).map(Self::List),
+            "detail" => {
+                LocalFlowResultStepsItemAnswerDetail::decode_at(value, at).map(Self::Detail)
+            }
+            "listed" => {
+                LocalFlowResultStepsItemAnswerListed::decode_at(value, at).map(Self::Listed)
+            }
+            "view" => LocalFlowResultStepsItemAnswerView::decode_at(value, at).map(Self::View),
+            "none" => LocalFlowResultStepsItemAnswerNone::decode_at(value, at).map(Self::None),
+            "thrown" => {
+                LocalFlowResultStepsItemAnswerThrown::decode_at(value, at).map(Self::Thrown)
+            }
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Views(held) => held.encode(),
+            Self::Chat(held) => held.encode(),
+            Self::List(held) => held.encode(),
+            Self::Detail(held) => held.encode(),
+            Self::Listed(held) => held.encode(),
+            Self::View(held) => held.encode(),
+            Self::None(held) => held.encode(),
+            Self::Thrown(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalFlowResultStepsItemAnswerViews {
+    pub views: Vec<ViewLine>,
+}
+
+impl Shape for LocalFlowResultStepsItemAnswerViews {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "views")
+        })?;
+        let views = shape::required(object, "views", at, |value, at| {
+            shape::list(value, at, ViewLine::decode_at)
+        })?;
+        Ok(Self { views })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("views"));
+        object.insert(
+            "views",
+            Value::Array(self.views.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalFlowResultStepsItemAnswerChat {
+    pub text: String,
+}
+
+impl Shape for LocalFlowResultStepsItemAnswerChat {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "chat")
+        })?;
+        let text = shape::required(object, "text", at, shape::text)?;
+        Ok(Self { text })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("chat"));
+        object.insert("text", Value::from(self.text.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalFlowResultStepsItemAnswerList {
+    pub models: Option<Vec<nyaaai_contract::shapes::model::BrowseModel>>,
+}
+
+impl Shape for LocalFlowResultStepsItemAnswerList {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "list")
+        })?;
+        let models = shape::required(object, "models", at, |value, at| {
+            shape::nullable(value, at, |value, at| {
+                shape::list(
+                    value,
+                    at,
+                    nyaaai_contract::shapes::model::BrowseModel::decode_at,
+                )
+            })
+        })?;
+        Ok(Self { models })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("list"));
+        object.insert(
+            "models",
+            self.models.as_ref().map_or(Value::Null, |held| {
+                Value::Array(held.iter().map(|held| held.encode()).collect())
+            }),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalFlowResultStepsItemAnswerDetail {
+    pub detail: Option<nyaaai_contract::shapes::model::BrowseDetail>,
+}
+
+impl Shape for LocalFlowResultStepsItemAnswerDetail {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "detail")
+        })?;
+        let detail = shape::required(object, "detail", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                nyaaai_contract::shapes::model::BrowseDetail::decode_at,
+            )
+        })?;
+        Ok(Self { detail })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("detail"));
+        object.insert(
+            "detail",
+            self.detail
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalFlowResultStepsItemAnswerListed {
+    pub listed: Option<LocalFlowResultStepsItemAnswerListedListed>,
+}
+
+impl Shape for LocalFlowResultStepsItemAnswerListed {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "listed")
+        })?;
+        let listed = shape::required(object, "listed", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                LocalFlowResultStepsItemAnswerListedListed::decode_at,
+            )
+        })?;
+        Ok(Self { listed })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("listed"));
+        object.insert(
+            "listed",
+            self.listed
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalFlowResultStepsItemAnswerView {
+    pub view: ViewLine,
+}
+
+impl Shape for LocalFlowResultStepsItemAnswerView {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "view")
+        })?;
+        let view = shape::required(object, "view", at, ViewLine::decode_at)?;
+        Ok(Self { view })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("view"));
+        object.insert("view", self.view.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalFlowResultStepsItemAnswerNone {}
+
+impl Shape for LocalFlowResultStepsItemAnswerNone {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "none")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("none"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalFlowResultStepsItemAnswerThrown {
+    pub message: String,
+    pub category: Option<String>,
+}
+
+impl Shape for LocalFlowResultStepsItemAnswerThrown {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "thrown")
+        })?;
+        let message = shape::required(object, "message", at, shape::text)?;
+        let category = shape::required(object, "category", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        Ok(Self { message, category })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("thrown"));
+        object.insert("message", Value::from(self.message.as_str()));
+        object.insert(
+            "category",
+            self.category
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalFlowResultStepsItemAnswerListedListed {
+    pub label: String,
+    pub reasoning: bool,
+}
+
+impl Shape for LocalFlowResultStepsItemAnswerListedListed {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let label = shape::required(object, "label", at, shape::text)?;
+        let reasoning = shape::required(object, "reasoning", at, shape::flag)?;
+        Ok(Self { label, reasoning })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("label", Value::from(self.label.as_str()));
+        object.insert("reasoning", Value::Bool(self.reasoning));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalKindFactsInput {
+    pub kind: LocalKindFactsInputKind,
+    pub url: Option<String>,
+    pub states: Vec<nyaaai_contract::shapes::provider::KeyState>,
+}
+
+impl Shape for LocalKindFactsInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let kind = shape::required(object, "kind", at, LocalKindFactsInputKind::decode_at)?;
+        let url = shape::optional(object, "url", at, shape::text)?;
+        let states = shape::required(object, "states", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::KeyState::decode_at,
+            )
+        })?;
+        Ok(Self { kind, url, states })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", self.kind.encode());
+        if let Some(held) = &self.url {
+            object.insert("url", Value::from(held.as_str()));
+        }
+        object.insert(
+            "states",
+            Value::Array(self.states.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum LocalKindFactsInputKind {
+    Ollama,
+    Lmstudio,
+    Llamacpp,
+    Compatible,
+}
+
+impl LocalKindFactsInputKind {
+    pub const ALL: [Self; 4] = [
+        Self::Ollama,
+        Self::Lmstudio,
+        Self::Llamacpp,
+        Self::Compatible,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Ollama => "ollama",
+            Self::Lmstudio => "lmstudio",
+            Self::Llamacpp => "llamacpp",
+            Self::Compatible => "compatible",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for LocalKindFactsInputKind {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalKindFactsResult {
+    pub facts: Vec<Option<String>>,
+}
+
+impl Shape for LocalKindFactsResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let facts = shape::required(object, "facts", at, |value, at| {
+            shape::list(value, at, |value, at| {
+                shape::nullable(value, at, shape::text)
+            })
+        })?;
+        Ok(Self { facts })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "facts",
+            Value::Array(
+                self.facts
+                    .iter()
+                    .map(|held| {
+                        held.as_ref()
+                            .map_or(Value::Null, |held| Value::from(held.as_str()))
+                    })
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalKindCodecInput {
+    pub kind: LocalKindCodecInputKind,
+    pub label: String,
+    pub view: Option<LocalKindCodecInputView>,
+    pub request: nyaaai_contract::shapes::step::CanonicalRequest,
+    pub mode: LocalKindCodecInputMode,
+    pub failures: Vec<LocalKindCodecInputFailuresItem>,
+}
+
+impl Shape for LocalKindCodecInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let kind = shape::required(object, "kind", at, LocalKindCodecInputKind::decode_at)?;
+        let label = shape::required(object, "label", at, shape::text)?;
+        let view = shape::required(object, "view", at, |value, at| {
+            shape::nullable(value, at, LocalKindCodecInputView::decode_at)
+        })?;
+        let request = shape::required(
+            object,
+            "request",
+            at,
+            nyaaai_contract::shapes::step::CanonicalRequest::decode_at,
+        )?;
+        let mode = shape::required(object, "mode", at, LocalKindCodecInputMode::decode_at)?;
+        let failures = shape::required(object, "failures", at, |value, at| {
+            shape::list(value, at, LocalKindCodecInputFailuresItem::decode_at)
+        })?;
+        Ok(Self {
+            kind,
+            label,
+            view,
+            request,
+            mode,
+            failures,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", self.kind.encode());
+        object.insert("label", Value::from(self.label.as_str()));
+        object.insert(
+            "view",
+            self.view.as_ref().map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert("request", self.request.encode());
+        object.insert("mode", self.mode.encode());
+        object.insert(
+            "failures",
+            Value::Array(self.failures.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum LocalKindCodecInputKind {
+    Ollama,
+    Lmstudio,
+    Llamacpp,
+    Compatible,
+}
+
+impl LocalKindCodecInputKind {
+    pub const ALL: [Self; 4] = [
+        Self::Ollama,
+        Self::Lmstudio,
+        Self::Llamacpp,
+        Self::Compatible,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Ollama => "ollama",
+            Self::Lmstudio => "lmstudio",
+            Self::Llamacpp => "llamacpp",
+            Self::Compatible => "compatible",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for LocalKindCodecInputKind {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalKindCodecInputView {
+    pub efforts: Vec<nyaaai_contract::shapes::step::Effort>,
+    pub api: Option<nyaaai_contract::shapes::step::ApiFacts>,
+    pub output_limit: Option<f64>,
+    pub price: Option<LocalKindCodecInputViewPrice>,
+}
+
+impl Shape for LocalKindCodecInputView {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let efforts = shape::required(object, "efforts", at, |value, at| {
+            shape::list(value, at, nyaaai_contract::shapes::step::Effort::decode_at)
+        })?;
+        let api = shape::optional(
+            object,
+            "api",
+            at,
+            nyaaai_contract::shapes::step::ApiFacts::decode_at,
+        )?;
+        let output_limit = shape::optional(object, "outputLimit", at, shape::number)?;
+        let price = shape::optional(object, "price", at, LocalKindCodecInputViewPrice::decode_at)?;
+        Ok(Self {
+            efforts,
+            api,
+            output_limit,
+            price,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "efforts",
+            Value::Array(self.efforts.iter().map(|held| held.encode()).collect()),
+        );
+        if let Some(held) = &self.api {
+            object.insert("api", held.encode());
+        }
+        if let Some(held) = &self.output_limit {
+            object.insert("outputLimit", Value::Number(*held));
+        }
+        if let Some(held) = &self.price {
+            object.insert("price", held.encode());
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum LocalKindCodecInputMode {
+    Stream,
+    Complete,
+}
+
+impl LocalKindCodecInputMode {
+    pub const ALL: [Self; 2] = [Self::Stream, Self::Complete];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Stream => "stream",
+            Self::Complete => "complete",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for LocalKindCodecInputMode {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalKindCodecInputFailuresItem {
+    pub status: i64,
+    pub body: Value,
+}
+
+impl Shape for LocalKindCodecInputFailuresItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let status = shape::required(object, "status", at, shape::integer)?;
+        let body = shape::required(object, "body", at, shape::any)?;
+        Ok(Self { status, body })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("status", Value::Number(self.status as f64));
+        object.insert("body", self.body.clone());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum LocalKindCodecInputViewPrice {
+    Free,
+    Unknown,
+}
+
+impl LocalKindCodecInputViewPrice {
+    pub const ALL: [Self; 2] = [Self::Free, Self::Unknown];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Free => "free",
+            Self::Unknown => "unknown",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for LocalKindCodecInputViewPrice {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalKindCodecResult {
+    pub encoded: Option<nyaaai_contract::shapes::step::Encoded>,
+    pub refusal: Option<String>,
+    pub facts: Option<LocalKindCodecResultFacts>,
+    pub failures: Vec<nyaaai_contract::shapes::step::Failure>,
+}
+
+impl Shape for LocalKindCodecResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let encoded = shape::required(object, "encoded", at, |value, at| {
+            shape::nullable(value, at, nyaaai_contract::shapes::step::Encoded::decode_at)
+        })?;
+        let refusal = shape::required(object, "refusal", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let facts = shape::required(object, "facts", at, |value, at| {
+            shape::nullable(value, at, LocalKindCodecResultFacts::decode_at)
+        })?;
+        let failures = shape::required(object, "failures", at, |value, at| {
+            shape::list(value, at, nyaaai_contract::shapes::step::Failure::decode_at)
+        })?;
+        Ok(Self {
+            encoded,
+            refusal,
+            facts,
+            failures,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "encoded",
+            self.encoded
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert(
+            "refusal",
+            self.refusal
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "facts",
+            self.facts
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert(
+            "failures",
+            Value::Array(self.failures.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalKindCodecResultFacts {
+    pub efforts: Vec<nyaaai_contract::shapes::step::Effort>,
+    pub free: bool,
+    pub output_limit: Option<f64>,
+}
+
+impl Shape for LocalKindCodecResultFacts {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let efforts = shape::required(object, "efforts", at, |value, at| {
+            shape::list(value, at, nyaaai_contract::shapes::step::Effort::decode_at)
+        })?;
+        let free = shape::required(object, "free", at, shape::flag)?;
+        let output_limit = shape::required(object, "outputLimit", at, |value, at| {
+            shape::nullable(value, at, shape::number)
+        })?;
+        Ok(Self {
+            efforts,
+            free,
+            output_limit,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "efforts",
+            Value::Array(self.efforts.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert("free", Value::Bool(self.free));
+        object.insert(
+            "outputLimit",
+            self.output_limit
+                .as_ref()
+                .map_or(Value::Null, |held| Value::Number(*held)),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalKindDispositionInput {
+    pub kind: LocalKindDispositionInputKind,
+    pub rows: Vec<LocalKindDispositionInputRowsItem>,
+}
+
+impl Shape for LocalKindDispositionInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let kind = shape::required(object, "kind", at, LocalKindDispositionInputKind::decode_at)?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, LocalKindDispositionInputRowsItem::decode_at)
+        })?;
+        Ok(Self { kind, rows })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", self.kind.encode());
+        object.insert(
+            "rows",
+            Value::Array(self.rows.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum LocalKindDispositionInputKind {
+    Ollama,
+    Lmstudio,
+    Llamacpp,
+    Compatible,
+}
+
+impl LocalKindDispositionInputKind {
+    pub const ALL: [Self; 4] = [
+        Self::Ollama,
+        Self::Lmstudio,
+        Self::Llamacpp,
+        Self::Compatible,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Ollama => "ollama",
+            Self::Lmstudio => "lmstudio",
+            Self::Llamacpp => "llamacpp",
+            Self::Compatible => "compatible",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for LocalKindDispositionInputKind {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalKindDispositionInputRowsItem {
+    pub failure: nyaaai_contract::shapes::step::Failure,
+    pub status: Option<LocalKindDispositionInputRowsItemStatus>,
+}
+
+impl Shape for LocalKindDispositionInputRowsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let failure = shape::required(
+            object,
+            "failure",
+            at,
+            nyaaai_contract::shapes::step::Failure::decode_at,
+        )?;
+        let status = shape::required(object, "status", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                LocalKindDispositionInputRowsItemStatus::decode_at,
+            )
+        })?;
+        Ok(Self { failure, status })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("failure", self.failure.encode());
+        object.insert(
+            "status",
+            self.status
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum LocalKindDispositionInputRowsItemStatus {
+    Ok,
+    Retired,
+    NoZdrHost,
+    NoTools,
+    Unknown,
+}
+
+impl LocalKindDispositionInputRowsItemStatus {
+    pub const ALL: [Self; 5] = [
+        Self::Ok,
+        Self::Retired,
+        Self::NoZdrHost,
+        Self::NoTools,
+        Self::Unknown,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Ok => "ok",
+            Self::Retired => "retired",
+            Self::NoZdrHost => "noZdrHost",
+            Self::NoTools => "noTools",
+            Self::Unknown => "unknown",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for LocalKindDispositionInputRowsItemStatus {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalKindDispositionResult {
+    pub dispositions: Vec<nyaaai_contract::shapes::provider::Disposition>,
+}
+
+impl Shape for LocalKindDispositionResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let dispositions = shape::required(object, "dispositions", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::Disposition::decode_at,
+            )
+        })?;
+        Ok(Self { dispositions })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "dispositions",
+            Value::Array(self.dispositions.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}

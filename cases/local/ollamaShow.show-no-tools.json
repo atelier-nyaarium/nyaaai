@@ -1,0 +1,32 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaShow",
+	"name": "show-no-tools",
+	"input": {
+		"tag": "local-a:27b",
+		"body": {
+			"capabilities": [
+				"completion",
+				"thinking"
+			],
+			"thinking": {
+				"values": [
+					true
+				]
+			}
+		}
+	},
+	"expected": {
+		"model": {
+			"tag": "local-a:27b",
+			"tools": false,
+			"thinking": true,
+			"efforts": [
+				"low",
+				"medium",
+				"high"
+			]
+		}
+	}
+}

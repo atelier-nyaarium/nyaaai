@@ -1,0 +1,35 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.view",
+	"name": "view-kept-under-zero-retention",
+	"input": {
+		"row": "local:lab/local-a:27b",
+		"model": {
+			"tag": "local-a:27b",
+			"tools": true,
+			"thinking": true,
+			"efforts": [
+				"low"
+			],
+			"context": 8192
+		},
+		"terms": {
+			"kept": true,
+			"price": "unknown"
+		},
+		"zdrOnly": true
+	},
+	"expected": {
+		"view": {
+			"key": "local:lab/local-a:27b",
+			"status": "noZdrHost",
+			"efforts": [
+				"low"
+			],
+			"price": "unknown",
+			"hosts": []
+		},
+		"context": 8192
+	}
+}

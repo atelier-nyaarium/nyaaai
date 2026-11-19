@@ -1,0 +1,29 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.llamacppProps",
+	"name": "props-extra-fields-are-ignored",
+	"input": {
+		"body": {
+			"default_generation_settings": {
+				"n_ctx": 65536
+			},
+			"chat_template_caps": {
+				"reasoning_effort_levels": [
+					"low",
+					"high"
+				]
+			},
+			"total_slots": 1
+		}
+	},
+	"expected": {
+		"props": {
+			"context": 65536,
+			"efforts": [
+				"low",
+				"high"
+			]
+		}
+	}
+}

@@ -1,0 +1,35 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.llamacppModel",
+	"name": "model-props-with-a-context-replace-the-known-one",
+	"input": {
+		"id": "local-a.gguf",
+		"props": {
+			"context": 4096,
+			"efforts": [
+				"low"
+			]
+		},
+		"known": {
+			"tag": "local-a.gguf",
+			"tools": true,
+			"thinking": true,
+			"efforts": [
+				"high"
+			],
+			"context": 8192
+		}
+	},
+	"expected": {
+		"model": {
+			"tag": "local-a.gguf",
+			"tools": true,
+			"thinking": true,
+			"efforts": [
+				"low"
+			],
+			"context": 4096
+		}
+	}
+}

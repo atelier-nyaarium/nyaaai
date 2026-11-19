@@ -1,0 +1,27 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaRunning",
+	"name": "running-item-4-not-an-object-is-left-out",
+	"input": {
+		"body": {
+			"models": [
+				true,
+				{
+					"name": "local-a:27b",
+					"model": "local-a:27b",
+					"context_length": 65536,
+					"size_vram": 1
+				}
+			]
+		}
+	},
+	"expected": {
+		"contexts": [
+			{
+				"tag": "local-a:27b",
+				"context": 65536
+			}
+		]
+	}
+}

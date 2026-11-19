@@ -1,0 +1,12 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.lmstudioLoaded",
+	"name": "lmstudio-loaded-body-null-is-empty",
+	"input": {
+		"body": null
+	},
+	"expected": {
+		"contexts": []
+	}
+}

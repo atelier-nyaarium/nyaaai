@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaTags",
+	"name": "tags-extra-fields-are-ignored",
+	"input": {
+		"body": {
+			"models": [
+				{
+					"name": "local-a:27b",
+					"model": "local-a:27b",
+					"size": 3,
+					"details": {
+						"family": "arch-a"
+					}
+				}
+			],
+			"extra": 1
+		}
+	},
+	"expected": {
+		"tags": [
+			"local-a:27b"
+		]
+	}
+}

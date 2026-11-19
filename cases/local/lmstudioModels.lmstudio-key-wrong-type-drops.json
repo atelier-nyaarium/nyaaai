@@ -1,0 +1,50 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.lmstudioModels",
+	"name": "lmstudio-key-wrong-type-drops",
+	"input": {
+		"body": {
+			"models": [
+				{
+					"key": 7,
+					"type": "llm",
+					"max_context_length": 262144,
+					"loaded_instances": [
+						{
+							"id": "local-a",
+							"config": {
+								"context_length": 8192
+							}
+						}
+					],
+					"capabilities": {
+						"vision": false,
+						"trained_for_tool_use": true,
+						"reasoning": {
+							"allowed_options": [
+								"off",
+								"on"
+							],
+							"default": "on"
+						}
+					}
+				},
+				{
+					"key": "local-b",
+					"type": "llm"
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"tag": "local-b",
+				"tools": true,
+				"thinking": false,
+				"efforts": []
+			}
+		]
+	}
+}

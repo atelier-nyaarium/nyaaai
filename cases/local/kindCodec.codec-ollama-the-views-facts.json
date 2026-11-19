@@ -1,0 +1,69 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.kindCodec",
+	"name": "codec-ollama-the-views-facts",
+	"input": {
+		"kind": "ollama",
+		"label": "Lab",
+		"view": {
+			"efforts": [
+				"none",
+				"high"
+			],
+			"price": "free",
+			"outputLimit": 4096
+		},
+		"request": {
+			"model": "local-a:27b",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Hi"
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true
+		},
+		"mode": "stream",
+		"failures": []
+	},
+	"expected": {
+		"encoded": {
+			"path": "/v1/chat/completions",
+			"body": {
+				"model": "local-a:27b",
+				"messages": [
+					{
+						"role": "system",
+						"content": "Rules."
+					},
+					{
+						"role": "user",
+						"content": "Hi"
+					}
+				],
+				"stream": true,
+				"stream_options": {
+					"include_usage": true
+				}
+			}
+		},
+		"refusal": null,
+		"facts": {
+			"efforts": [
+				"none",
+				"high"
+			],
+			"free": true,
+			"outputLimit": 4096
+		},
+		"failures": []
+	}
+}

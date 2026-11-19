@@ -502,6 +502,85 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
             shapes::KindOpenrouterKeyInput,
             shapes::KindOpenrouterKeyResult,
         >(input, super::kind::openrouter_key),
+        "local.efforts" => run::<shapes::LocalEffortsInput, shapes::LocalEffortsResult>(
+            input,
+            super::local::efforts,
+        ),
+        "local.label" => {
+            run::<shapes::LocalLabelInput, shapes::LocalLabelResult>(input, super::local::label)
+        }
+        "local.view" => {
+            run::<shapes::LocalViewInput, shapes::LocalViewResult>(input, super::local::view)
+        }
+        "local.ollamaTags" => run::<shapes::LocalOllamaTagsInput, shapes::LocalOllamaTagsResult>(
+            input,
+            super::local::ollama_tags,
+        ),
+        "local.ollamaShow" => run::<shapes::LocalOllamaShowInput, shapes::LocalOllamaShowResult>(
+            input,
+            super::local::ollama_show,
+        ),
+        "local.ollamaNumCtx" => run::<
+            shapes::LocalOllamaNumCtxInput,
+            shapes::LocalOllamaNumCtxResult,
+        >(input, super::local::ollama_num_ctx),
+        "local.ollamaRunning" => run::<
+            shapes::LocalOllamaRunningInput,
+            shapes::LocalOllamaRunningResult,
+        >(input, super::local::ollama_running),
+        "local.lmstudioModels" => run::<
+            shapes::LocalLmstudioModelsInput,
+            shapes::LocalLmstudioModelsResult,
+        >(input, super::local::lmstudio_models),
+        "local.lmstudioLoaded" => run::<
+            shapes::LocalLmstudioLoadedInput,
+            shapes::LocalLmstudioLoadedResult,
+        >(input, super::local::lmstudio_loaded),
+        "local.llamacppModels" => run::<
+            shapes::LocalLlamacppModelsInput,
+            shapes::LocalLlamacppModelsResult,
+        >(input, super::local::llamacpp_models),
+        "local.llamacppProps" => run::<
+            shapes::LocalLlamacppPropsInput,
+            shapes::LocalLlamacppPropsResult,
+        >(input, super::local::llamacpp_props),
+        "local.llamacppModel" => run::<
+            shapes::LocalLlamacppModelInput,
+            shapes::LocalLlamacppModelResult,
+        >(input, super::local::llamacpp_model),
+        "local.compatibleModels" => run::<
+            shapes::LocalCompatibleModelsInput,
+            shapes::LocalCompatibleModelsResult,
+        >(input, super::local::compatible_models),
+        "local.compatibleTerms" => run::<
+            shapes::LocalCompatibleTermsInput,
+            shapes::LocalCompatibleTermsResult,
+        >(input, super::local::compatible_terms),
+        "local.reach" => {
+            run::<shapes::LocalReachInput, shapes::LocalReachResult>(input, super::local::reach)
+        }
+        "local.server" => {
+            run::<shapes::LocalServerInput, shapes::LocalServerResult>(input, super::local::server)
+        }
+        "local.catalogRun" => run::<shapes::LocalCatalogRunInput, shapes::LocalCatalogRunResult>(
+            input,
+            super::local::catalog_run,
+        ),
+        "local.flow" => {
+            run::<shapes::LocalFlowInput, shapes::LocalFlowResult>(input, super::local::flow)
+        }
+        "local.kindFacts" => run::<shapes::LocalKindFactsInput, shapes::LocalKindFactsResult>(
+            input,
+            super::local::kind_facts,
+        ),
+        "local.kindCodec" => run::<shapes::LocalKindCodecInput, shapes::LocalKindCodecResult>(
+            input,
+            super::local::kind_codec,
+        ),
+        "local.kindDisposition" => run::<
+            shapes::LocalKindDispositionInput,
+            shapes::LocalKindDispositionResult,
+        >(input, super::local::kind_disposition),
         _ => return None,
     })
 }

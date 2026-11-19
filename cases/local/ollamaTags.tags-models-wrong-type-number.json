@@ -1,0 +1,14 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaTags",
+	"name": "tags-models-wrong-type-number",
+	"input": {
+		"body": {
+			"models": 3
+		}
+	},
+	"expected": {
+		"tags": null
+	}
+}

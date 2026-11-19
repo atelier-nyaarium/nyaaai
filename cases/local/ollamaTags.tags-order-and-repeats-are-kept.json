@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaTags",
+	"name": "tags-order-and-repeats-are-kept",
+	"input": {
+		"body": {
+			"models": [
+				{
+					"name": "local-b:9b"
+				},
+				{
+					"name": "local-a:27b"
+				},
+				{
+					"name": "local-b:9b"
+				}
+			]
+		}
+	},
+	"expected": {
+		"tags": [
+			"local-b:9b",
+			"local-a:27b",
+			"local-b:9b"
+		]
+	}
+}

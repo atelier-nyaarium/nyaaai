@@ -1,0 +1,74 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.compatibleTerms",
+	"name": "hosts-loopback-and-names-of-this-network",
+	"input": {
+		"urls": [
+			"http://127.0.0.1:8000",
+			"http://localhost:8000",
+			"http://sub.localhost",
+			"http://[::1]:8000",
+			"http://labhost:8000",
+			"http://lab.local:8000",
+			"http://lab.lan",
+			"http://lab.internal",
+			"http://lab.home.arpa",
+			"http://a.b.local"
+		]
+	},
+	"expected": {
+		"terms": [
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			}
+		]
+	}
+}

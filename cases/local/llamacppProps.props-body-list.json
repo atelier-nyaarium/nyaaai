@@ -1,0 +1,12 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.llamacppProps",
+	"name": "props-body-list",
+	"input": {
+		"body": []
+	},
+	"expected": {
+		"props": null
+	}
+}

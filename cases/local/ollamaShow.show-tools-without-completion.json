@@ -1,0 +1,18 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaShow",
+	"name": "show-tools-without-completion",
+	"input": {
+		"tag": "local-a:27b",
+		"body": {
+			"capabilities": [
+				"tools",
+				"thinking"
+			]
+		}
+	},
+	"expected": {
+		"model": null
+	}
+}

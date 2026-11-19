@@ -1,0 +1,44 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.reach",
+	"name": "lmstudio-no-chat-models-is-ok-with-zero",
+	"input": {
+		"kind": "lmstudio",
+		"entry": {
+			"label": "Lab"
+		},
+		"secret": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"models": [
+						{
+							"key": "embed-a",
+							"type": "embedding"
+						}
+					]
+				}
+			}
+		]
+	},
+	"expected": {
+		"state": {
+			"kind": "ok",
+			"models": 0
+		},
+		"thrown": null,
+		"facts": "http://127.0.0.1:1234 · 0 models",
+		"requests": [
+			{
+				"method": "GET",
+				"url": "http://127.0.0.1:1234/api/v1/models",
+				"authorization": null,
+				"body": null
+			}
+		],
+		"waiting": []
+	}
+}

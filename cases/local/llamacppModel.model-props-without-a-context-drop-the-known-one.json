@@ -1,0 +1,29 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.llamacppModel",
+	"name": "model-props-without-a-context-drop-the-known-one",
+	"input": {
+		"id": "local-a.gguf",
+		"props": {
+			"efforts": []
+		},
+		"known": {
+			"tag": "local-a.gguf",
+			"tools": true,
+			"thinking": true,
+			"efforts": [
+				"high"
+			],
+			"context": 8192
+		}
+	},
+	"expected": {
+		"model": {
+			"tag": "local-a.gguf",
+			"tools": true,
+			"thinking": false,
+			"efforts": []
+		}
+	}
+}

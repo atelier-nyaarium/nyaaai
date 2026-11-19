@@ -1,0 +1,88 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.server",
+	"name": "llamacpp-loaded-reads-the-props-of-one-tag",
+	"input": {
+		"kind": "llamacpp",
+		"entry": {
+			"label": "Lab"
+		},
+		"stored": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"default_generation_settings": {
+						"n_ctx": 262144
+					},
+					"chat_template_caps": {
+						"reasoning_effort_levels": [
+							"low",
+							"high",
+							"bogus"
+						]
+					}
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"default_generation_settings": {},
+					"chat_template_caps": {}
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "loaded",
+				"tag": "local-a.gguf"
+			},
+			{
+				"kind": "loaded",
+				"tag": "local-b.gguf"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"models": null,
+				"contexts": [
+					{
+						"tag": "local-a.gguf",
+						"context": 262144
+					}
+				],
+				"done": false,
+				"thrown": null
+			},
+			{
+				"models": null,
+				"contexts": [],
+				"done": false,
+				"thrown": null
+			}
+		],
+		"requests": [
+			{
+				"method": "GET",
+				"url": "http://127.0.0.1:8080/props?model=local-a.gguf&autoload=false",
+				"authorization": null,
+				"body": null
+			},
+			{
+				"method": "GET",
+				"url": "http://127.0.0.1:8080/props?model=local-b.gguf&autoload=false",
+				"authorization": null,
+				"body": null
+			}
+		],
+		"read": [
+			1,
+			1
+		],
+		"waiting": []
+	}
+}

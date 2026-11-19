@@ -1,0 +1,81 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.flow",
+	"name": "ollama-a-chat-goes-keyless-to-the-v1-path",
+	"input": {
+		"kind": "ollama",
+		"entry": {
+			"id": "lab",
+			"label": "Lab"
+		},
+		"stored": "key-0123456789abcdef",
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"id": "c1",
+					"choices": [
+						{
+							"message": {
+								"content": "Hi"
+							},
+							"finish_reason": "stop"
+						}
+					],
+					"usage": {
+						"prompt_tokens": 5,
+						"completion_tokens": 1
+					}
+				}
+			}
+		],
+		"rows": [
+			"local:lab/local-a:27b"
+		],
+		"steps": [
+			{
+				"kind": "chat",
+				"model": "local-a:27b"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "chat",
+					"text": "Hi"
+				}
+			}
+		],
+		"requests": [
+			{
+				"method": "POST",
+				"url": "http://127.0.0.1:11434/v1/chat/completions",
+				"authorization": null,
+				"body": {
+					"model": "local-a:27b",
+					"messages": [
+						{
+							"role": "system",
+							"content": "Rules."
+						},
+						{
+							"role": "user",
+							"content": "Hi"
+						}
+					],
+					"stream": false
+				}
+			}
+		],
+		"read": [
+			1
+		],
+		"waiting": [],
+		"refreshed": 0
+	}
+}

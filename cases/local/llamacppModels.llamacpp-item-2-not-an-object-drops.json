@@ -1,0 +1,24 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.llamacppModels",
+	"name": "llamacpp-item-2-not-an-object-drops",
+	"input": {
+		"body": {
+			"data": [
+				null,
+				{
+					"id": "local-b.gguf"
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"id": "local-b.gguf",
+				"trained": null
+			}
+		]
+	}
+}

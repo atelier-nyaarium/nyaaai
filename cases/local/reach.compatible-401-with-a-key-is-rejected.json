@@ -1,0 +1,41 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.reach",
+	"name": "compatible-401-with-a-key-is-rejected",
+	"input": {
+		"kind": "compatible",
+		"entry": {
+			"label": "Lab",
+			"url": "https://host.lab.example/api/v2"
+		},
+		"secret": "key-0123456789abcdef",
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 401,
+				"json": {
+					"error": {
+						"message": "Down."
+					}
+				}
+			}
+		]
+	},
+	"expected": {
+		"state": {
+			"kind": "rejected"
+		},
+		"thrown": null,
+		"facts": "https://host.lab.example/api/v2",
+		"requests": [
+			{
+				"method": "GET",
+				"url": "https://host.lab.example/api/v2/models",
+				"authorization": "Bearer key-0123456789abcdef",
+				"body": null
+			}
+		],
+		"waiting": []
+	}
+}

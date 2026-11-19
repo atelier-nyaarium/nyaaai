@@ -1,0 +1,24 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaNumCtx",
+	"name": "num-ctx-needs-blanks-before-the-number",
+	"input": {
+		"texts": [
+			"num_ctx4096",
+			"num_ctx",
+			"num_ctx ",
+			"num_ctx\n",
+			"num_ctx:4096"
+		]
+	},
+	"expected": {
+		"contexts": [
+			null,
+			null,
+			null,
+			null,
+			null
+		]
+	}
+}

@@ -1,0 +1,38 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.kindFacts",
+	"name": "facts-lmstudio-trailing-slashes-are-trimmed",
+	"input": {
+		"kind": "lmstudio",
+		"url": "http://lab.local:9000///",
+		"states": [
+			{
+				"kind": "none"
+			},
+			{
+				"kind": "checking"
+			},
+			{
+				"kind": "ok"
+			},
+			{
+				"kind": "ok",
+				"models": 0
+			},
+			{
+				"kind": "ok",
+				"models": 1
+			}
+		]
+	},
+	"expected": {
+		"facts": [
+			"http://lab.local:9000",
+			"http://lab.local:9000",
+			"http://lab.local:9000",
+			"http://lab.local:9000 · 0 models",
+			"http://lab.local:9000 · 1 model"
+		]
+	}
+}

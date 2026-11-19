@@ -1,0 +1,24 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaTags",
+	"name": "tags-remote-model-is-dropped",
+	"input": {
+		"body": {
+			"models": [
+				{
+					"name": "local-a:27b"
+				},
+				{
+					"name": "far:1b-cloud",
+					"remote_host": "https://remote.example:443"
+				}
+			]
+		}
+	},
+	"expected": {
+		"tags": [
+			"local-a:27b"
+		]
+	}
+}

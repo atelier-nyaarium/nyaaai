@@ -1,0 +1,98 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.server",
+	"name": "llamacpp-an-id-is-escaped-in-the-query",
+	"input": {
+		"kind": "llamacpp",
+		"entry": {
+			"label": "Lab"
+		},
+		"stored": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "dir/local a.gguf"
+						},
+						{
+							"id": "x&autoload=true"
+						}
+					]
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"default_generation_settings": {},
+					"chat_template_caps": {}
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"default_generation_settings": {},
+					"chat_template_caps": {}
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "models",
+				"known": []
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"models": [
+					{
+						"tag": "dir/local a.gguf",
+						"tools": true,
+						"thinking": false,
+						"efforts": []
+					},
+					{
+						"tag": "x&autoload=true",
+						"tools": true,
+						"thinking": false,
+						"efforts": []
+					}
+				],
+				"contexts": null,
+				"done": false,
+				"thrown": null
+			}
+		],
+		"requests": [
+			{
+				"method": "GET",
+				"url": "http://127.0.0.1:8080/v1/models",
+				"authorization": null,
+				"body": null
+			},
+			{
+				"method": "GET",
+				"url": "http://127.0.0.1:8080/props?model=dir%2Flocal%20a.gguf&autoload=false",
+				"authorization": null,
+				"body": null
+			},
+			{
+				"method": "GET",
+				"url": "http://127.0.0.1:8080/props?model=x%26autoload%3Dtrue&autoload=false",
+				"authorization": null,
+				"body": null
+			}
+		],
+		"read": [
+			1,
+			1,
+			1
+		],
+		"waiting": []
+	}
+}

@@ -1,0 +1,41 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.reach",
+	"name": "compatible-status-403",
+	"input": {
+		"kind": "compatible",
+		"entry": {
+			"label": "Lab",
+			"url": "http://lab.local:8000"
+		},
+		"secret": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 403,
+				"json": {
+					"error": {
+						"message": "No."
+					}
+				}
+			}
+		]
+	},
+	"expected": {
+		"state": {
+			"kind": "rejected"
+		},
+		"thrown": null,
+		"facts": "http://lab.local:8000/v1",
+		"requests": [
+			{
+				"method": "GET",
+				"url": "http://lab.local:8000/v1/models",
+				"authorization": null,
+				"body": null
+			}
+		],
+		"waiting": []
+	}
+}

@@ -1,0 +1,73 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.flow",
+	"name": "ollama-a-missing-model-ends-on-not-found",
+	"input": {
+		"kind": "ollama",
+		"entry": {
+			"id": "lab",
+			"label": "Lab"
+		},
+		"stored": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 404,
+				"json": {
+					"error": {
+						"type": "not_found_error",
+						"message": "model \"local-a:27b\" not found"
+					}
+				}
+			}
+		],
+		"rows": [
+			"local:lab/local-a:27b"
+		],
+		"steps": [
+			{
+				"kind": "chat",
+				"model": "local-a:27b"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "thrown",
+					"message": "model \"local-a:27b\" not found",
+					"category": "notFound"
+				}
+			}
+		],
+		"requests": [
+			{
+				"method": "POST",
+				"url": "http://127.0.0.1:11434/v1/chat/completions",
+				"authorization": null,
+				"body": {
+					"model": "local-a:27b",
+					"messages": [
+						{
+							"role": "system",
+							"content": "Rules."
+						},
+						{
+							"role": "user",
+							"content": "Hi"
+						}
+					],
+					"stream": false
+				}
+			}
+		],
+		"read": [
+			1
+		],
+		"waiting": [],
+		"refreshed": 0
+	}
+}

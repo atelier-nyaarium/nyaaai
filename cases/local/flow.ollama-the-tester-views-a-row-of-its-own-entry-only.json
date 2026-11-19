@@ -1,0 +1,219 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.flow",
+	"name": "ollama-the-tester-views-a-row-of-its-own-entry-only",
+	"input": {
+		"kind": "ollama",
+		"entry": {
+			"id": "lab",
+			"label": "Lab"
+		},
+		"stored": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"models": [
+						{
+							"name": "local-a:27b"
+						},
+						{
+							"name": "local-b:9b"
+						},
+						{
+							"name": "local-c:3b"
+						},
+						{
+							"name": "embed-a:latest"
+						},
+						{
+							"name": "far:1b-cloud",
+							"remote_host": "https://remote.example:443"
+						}
+					]
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"parameters": "num_ctx                        32768\ntemperature                    0.6",
+					"capabilities": [
+						"completion",
+						"tools",
+						"thinking"
+					],
+					"thinking": {
+						"values": [
+							false,
+							true
+						],
+						"default": true
+					},
+					"model_info": {
+						"general.architecture": "arch-a",
+						"arch-a.context_length": 262144
+					}
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"capabilities": [
+						"completion",
+						"tools"
+					],
+					"model_info": {
+						"general.architecture": "arch-b",
+						"arch-b.context_length": 131072
+					}
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"capabilities": [
+						"completion"
+					]
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"capabilities": [
+						"embedding"
+					]
+				}
+			}
+		],
+		"rows": [],
+		"steps": [
+			{
+				"kind": "view",
+				"row": "local:lab/local-c:3b"
+			},
+			{
+				"kind": "view",
+				"row": "local:lab/local-a:27b"
+			},
+			{
+				"kind": "view",
+				"row": "local:lab/gone:1b"
+			},
+			{
+				"kind": "view",
+				"row": "local:twin/local-a:27b"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "view",
+					"view": {
+						"key": "local:lab/local-c:3b",
+						"status": "noTools",
+						"efforts": [],
+						"price": "free",
+						"hosts": []
+					}
+				}
+			},
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "view",
+					"view": {
+						"key": "local:lab/local-a:27b",
+						"status": "ok",
+						"efforts": [
+							"none",
+							"low",
+							"medium",
+							"high"
+						],
+						"promptLimit": 32768,
+						"price": "free",
+						"hosts": [],
+						"api": {
+							"family": "chat-completions",
+							"structured": true,
+							"choice": [],
+							"strict": false,
+							"reasoning": "reasoning"
+						},
+						"cache": "implicit"
+					}
+				}
+			},
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "thrown",
+					"message": "gone:1b is not on the server.",
+					"category": null
+				}
+			},
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "thrown",
+					"message": "local-a:27b is not on the server.",
+					"category": null
+				}
+			}
+		],
+		"requests": [
+			{
+				"method": "GET",
+				"url": "http://127.0.0.1:11434/api/tags",
+				"authorization": null,
+				"body": null
+			},
+			{
+				"method": "POST",
+				"url": "http://127.0.0.1:11434/api/show",
+				"authorization": null,
+				"body": {
+					"model": "local-a:27b"
+				}
+			},
+			{
+				"method": "POST",
+				"url": "http://127.0.0.1:11434/api/show",
+				"authorization": null,
+				"body": {
+					"model": "local-b:9b"
+				}
+			},
+			{
+				"method": "POST",
+				"url": "http://127.0.0.1:11434/api/show",
+				"authorization": null,
+				"body": {
+					"model": "local-c:3b"
+				}
+			},
+			{
+				"method": "POST",
+				"url": "http://127.0.0.1:11434/api/show",
+				"authorization": null,
+				"body": {
+					"model": "embed-a:latest"
+				}
+			}
+		],
+		"read": [
+			1,
+			1,
+			1,
+			1,
+			1
+		],
+		"waiting": [],
+		"refreshed": 1
+	}
+}

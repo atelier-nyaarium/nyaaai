@@ -1,0 +1,39 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.reach",
+	"name": "ollama-no-models-is-ok-with-zero",
+	"input": {
+		"kind": "ollama",
+		"entry": {
+			"label": "Lab"
+		},
+		"secret": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"models": []
+				}
+			}
+		]
+	},
+	"expected": {
+		"state": {
+			"kind": "ok",
+			"models": 0
+		},
+		"thrown": null,
+		"facts": "http://127.0.0.1:11434 · 0 models",
+		"requests": [
+			{
+				"method": "GET",
+				"url": "http://127.0.0.1:11434/api/tags",
+				"authorization": null,
+				"body": null
+			}
+		],
+		"waiting": []
+	}
+}

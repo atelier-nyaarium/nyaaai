@@ -1,0 +1,54 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.lmstudioModels",
+	"name": "lmstudio-first-instance-without-a-context-gives-none",
+	"input": {
+		"body": {
+			"models": [
+				{
+					"key": "local-a",
+					"type": "llm",
+					"max_context_length": 262144,
+					"loaded_instances": [
+						{
+							"config": {}
+						},
+						{
+							"config": {
+								"context_length": 8192
+							}
+						}
+					],
+					"capabilities": {
+						"vision": false,
+						"trained_for_tool_use": true,
+						"reasoning": {
+							"allowed_options": [
+								"off",
+								"on"
+							],
+							"default": "on"
+						}
+					}
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"tag": "local-a",
+				"tools": true,
+				"thinking": true,
+				"efforts": [
+					"none",
+					"low",
+					"medium",
+					"high"
+				],
+				"trained": 262144
+			}
+		]
+	}
+}

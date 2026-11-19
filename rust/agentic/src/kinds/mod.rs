@@ -1,4 +1,10 @@
+pub mod compatible;
 pub mod fetcher;
+pub mod join;
+pub mod llamacpp;
+pub mod lmstudio;
+pub mod local;
+pub mod ollama;
 pub mod opencode;
 pub mod openrouter;
 pub mod readers;

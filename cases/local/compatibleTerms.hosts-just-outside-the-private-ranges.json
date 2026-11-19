@@ -1,0 +1,68 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.compatibleTerms",
+	"name": "hosts-just-outside-the-private-ranges",
+	"input": {
+		"urls": [
+			"http://172.15.0.5",
+			"http://172.32.0.5",
+			"http://192.169.1.5",
+			"http://169.253.1.1",
+			"http://100.63.255.255",
+			"http://100.128.0.1",
+			"http://11.0.0.1",
+			"http://126.0.0.1",
+			"http://8.8.8.8"
+		]
+	},
+	"expected": {
+		"terms": [
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			},
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			},
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			},
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			},
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			},
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			},
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			},
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			},
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			}
+		]
+	}
+}

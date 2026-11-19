@@ -80,6 +80,11 @@ impl<T: Clone + Send + Sync + 'static> Fetcher<T> {
             .unwrap_or_else(|poisoned| poisoned.into_inner())
     }
 
+    /// The last good data, whatever its age.
+    pub fn good(&self) -> Option<T> {
+        self.locked().good.as_ref().map(|(value, _)| value.clone())
+    }
+
     /// A failure is forgotten, so the next call may refresh.
     pub fn retry(&self) {
         self.locked().failed_at = None;
@@ -93,7 +98,7 @@ impl<T: Clone + Send + Sync + 'static> Fetcher<T> {
         ttl: i64,
         start: impl FnOnce() -> BoxFuture<'static, Refreshed<T>>,
     ) -> Waiter<T> {
-        let mut state = self.locked();
+        let state = self.locked();
         if let Some((value, at)) = &state.good
             && now - at < ttl
         {
@@ -105,6 +110,23 @@ impl<T: Clone + Send + Sync + 'static> Fetcher<T> {
         {
             return Waiter::Ready(state.good.as_ref().map(|(value, _)| value.clone()));
         }
+        self.join_or_start(state, start)
+    }
+
+    /// Refreshes whatever the age of the data, or joins the refresh in flight.
+    pub fn refresh_now(
+        &self,
+        start: impl FnOnce() -> BoxFuture<'static, Refreshed<T>>,
+    ) -> Waiter<T> {
+        let state = self.locked();
+        self.join_or_start(state, start)
+    }
+
+    fn join_or_start(
+        &self,
+        mut state: MutexGuard<'_, State<T>>,
+        start: impl FnOnce() -> BoxFuture<'static, Refreshed<T>>,
+    ) -> Waiter<T> {
         if let Some(answer) = &state.inflight {
             return Waiter::Pending(answer.clone());
         }

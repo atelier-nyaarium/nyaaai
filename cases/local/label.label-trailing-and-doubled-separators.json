@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.label",
+	"name": "label-trailing-and-doubled-separators",
+	"input": {
+		"tags": [
+			"a/b/",
+			"a//b//",
+			"/x",
+			"x/"
+		]
+	},
+	"expected": {
+		"labels": [
+			"b",
+			"b",
+			"x",
+			"x"
+		]
+	}
+}

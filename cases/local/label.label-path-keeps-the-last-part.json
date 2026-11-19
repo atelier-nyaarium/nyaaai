@@ -1,0 +1,18 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.label",
+	"name": "label-path-keeps-the-last-part",
+	"input": {
+		"tags": [
+			"org/repo/model.gguf",
+			"a/b"
+		]
+	},
+	"expected": {
+		"labels": [
+			"model.gguf",
+			"b"
+		]
+	}
+}

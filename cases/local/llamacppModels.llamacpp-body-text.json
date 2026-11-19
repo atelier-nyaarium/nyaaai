@@ -1,0 +1,12 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.llamacppModels",
+	"name": "llamacpp-body-text",
+	"input": {
+		"body": "x"
+	},
+	"expected": {
+		"models": null
+	}
+}

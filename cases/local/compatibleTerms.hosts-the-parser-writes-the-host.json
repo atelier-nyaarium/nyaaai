@@ -1,0 +1,56 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.compatibleTerms",
+	"name": "hosts-the-parser-writes-the-host",
+	"input": {
+		"urls": [
+			"http://LAB.LOCAL",
+			"HTTP://LABHOST:8000",
+			"http://[FD00::1]",
+			"http://0x7f.1",
+			"http://2130706433",
+			"http://10.1",
+			"http://012.0.0.1"
+		]
+	},
+	"expected": {
+		"terms": [
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			}
+		]
+	}
+}

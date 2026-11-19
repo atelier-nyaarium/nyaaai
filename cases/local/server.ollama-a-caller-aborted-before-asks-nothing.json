@@ -1,0 +1,116 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.server",
+	"name": "ollama-a-caller-aborted-before-asks-nothing",
+	"input": {
+		"kind": "ollama",
+		"entry": {
+			"label": "Lab"
+		},
+		"stored": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"models": [
+						{
+							"name": "local-a:27b"
+						},
+						{
+							"name": "local-b:9b"
+						},
+						{
+							"name": "local-c:3b"
+						},
+						{
+							"name": "embed-a:latest"
+						},
+						{
+							"name": "far:1b-cloud",
+							"remote_host": "https://remote.example:443"
+						}
+					]
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"parameters": "num_ctx                        32768\ntemperature                    0.6",
+					"capabilities": [
+						"completion",
+						"tools",
+						"thinking"
+					],
+					"thinking": {
+						"values": [
+							false,
+							true
+						],
+						"default": true
+					},
+					"model_info": {
+						"general.architecture": "arch-a",
+						"arch-a.context_length": 262144
+					}
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"capabilities": [
+						"completion",
+						"tools"
+					],
+					"model_info": {
+						"general.architecture": "arch-b",
+						"arch-b.context_length": 131072
+					}
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"capabilities": [
+						"completion"
+					]
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"capabilities": [
+						"embedding"
+					]
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "models",
+				"known": [],
+				"abortedBefore": true
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"models": null,
+				"contexts": null,
+				"done": false,
+				"thrown": "caller aborted"
+			}
+		],
+		"requests": [],
+		"read": [
+			0,
+			0,
+			0,
+			0,
+			0
+		],
+		"waiting": []
+	}
+}

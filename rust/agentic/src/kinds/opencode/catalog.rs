@@ -500,6 +500,10 @@ impl OpenCodeCatalog {
 }
 
 impl EntryCatalog for OpenCodeCatalog {
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+
     fn views(
         &self,
         use_: ModelUse,

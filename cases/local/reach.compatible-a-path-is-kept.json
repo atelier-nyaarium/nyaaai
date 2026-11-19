@@ -1,0 +1,49 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.reach",
+	"name": "compatible-a-path-is-kept",
+	"input": {
+		"kind": "compatible",
+		"entry": {
+			"label": "Lab",
+			"url": "https://host.lab.example/api/v2"
+		},
+		"secret": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "local-a",
+							"context_length": 32768
+						},
+						{
+							"id": "local-b"
+						},
+						{}
+					]
+				}
+			}
+		]
+	},
+	"expected": {
+		"state": {
+			"kind": "ok",
+			"models": 2
+		},
+		"thrown": null,
+		"facts": "https://host.lab.example/api/v2 · 2 models",
+		"requests": [
+			{
+				"method": "GET",
+				"url": "https://host.lab.example/api/v2/models",
+				"authorization": null,
+				"body": null
+			}
+		],
+		"waiting": []
+	}
+}

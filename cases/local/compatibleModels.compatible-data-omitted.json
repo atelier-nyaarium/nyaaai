@@ -1,0 +1,18 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.compatibleModels",
+	"name": "compatible-data-omitted",
+	"input": {
+		"body": {
+			"models": [
+				{
+					"id": "a"
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": null
+	}
+}

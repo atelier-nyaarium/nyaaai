@@ -1,0 +1,80 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.compatibleTerms",
+	"name": "hosts-ipv6",
+	"input": {
+		"urls": [
+			"http://[fd00::1]",
+			"http://[fc00::1]",
+			"http://[fe80::1]",
+			"http://[fe9a::1]",
+			"http://[feab::1]",
+			"http://[febf::1]",
+			"http://[fec0::1]",
+			"http://[2001:db8::1]:8000",
+			"http://[::2]",
+			"http://[::ffff:127.0.0.1]",
+			"http://[::]"
+		]
+	},
+	"expected": {
+		"terms": [
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			},
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			},
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			},
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			},
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			}
+		]
+	}
+}

@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.compatibleModels",
+	"name": "compatible-id-wrong-type-drops",
+	"input": {
+		"body": {
+			"data": [
+				{
+					"id": 7
+				},
+				{
+					"id": "b"
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"tag": "b",
+				"tools": true,
+				"thinking": false,
+				"efforts": []
+			}
+		]
+	}
+}

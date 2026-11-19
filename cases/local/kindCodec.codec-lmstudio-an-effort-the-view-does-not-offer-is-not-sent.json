@@ -1,0 +1,68 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.kindCodec",
+	"name": "codec-lmstudio-an-effort-the-view-does-not-offer-is-not-sent",
+	"input": {
+		"kind": "lmstudio",
+		"label": "Lab",
+		"view": {
+			"efforts": [
+				"low",
+				"high"
+			]
+		},
+		"request": {
+			"model": "local-a:27b",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Hi"
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true,
+			"effort": "medium"
+		},
+		"mode": "stream",
+		"failures": []
+	},
+	"expected": {
+		"encoded": {
+			"path": "/v1/chat/completions",
+			"body": {
+				"model": "local-a:27b",
+				"messages": [
+					{
+						"role": "system",
+						"content": "Rules."
+					},
+					{
+						"role": "user",
+						"content": "Hi"
+					}
+				],
+				"stream": true,
+				"stream_options": {
+					"include_usage": true
+				}
+			}
+		},
+		"refusal": null,
+		"facts": {
+			"efforts": [
+				"low",
+				"high"
+			],
+			"free": false,
+			"outputLimit": null
+		},
+		"failures": []
+	}
+}

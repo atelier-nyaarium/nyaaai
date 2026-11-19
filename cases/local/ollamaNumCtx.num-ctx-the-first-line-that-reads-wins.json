@@ -1,0 +1,20 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaNumCtx",
+	"name": "num-ctx-the-first-line-that-reads-wins",
+	"input": {
+		"texts": [
+			"num_ctx 4096\nnum_ctx 8192",
+			"temperature 0.7\nnum_ctx 4096",
+			"num_ctx 0\nnum_ctx 8192"
+		]
+	},
+	"expected": {
+		"contexts": [
+			4096,
+			4096,
+			null
+		]
+	}
+}

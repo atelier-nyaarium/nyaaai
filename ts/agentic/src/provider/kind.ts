@@ -1,12 +1,37 @@
 // What a provider kind gives a host: catalogs, a browser and a tester.
 
+import type { Fetch } from "@nyaaai/contract/fetch";
 import type { ModelRegistry } from "@nyaaai/contract/modelRegistry";
 import type { BrowseDetail, BrowseModel, ModelRow, ModelUse, ModelView } from "@nyaaai/contract/shapes/model";
+import type {
+	Billed,
+	Disposition,
+	EntryFields,
+	KeyState,
+	Limits,
+	ProviderEntry,
+	ProviderKindName,
+	ProviderPlan,
+} from "@nyaaai/contract/shapes/provider";
+import type { Failure } from "@nyaaai/contract/shapes/step";
 import type { Scheduler } from "@nyaaai/contract/time";
 import type { Codec } from "../codec";
+import type { KeySource, Transport } from "../transport";
 
 ////////////////////////////////
 //  Interfaces & Types
+
+/** What a kind stands on. */
+export interface KindDeps {
+	fetch: Fetch;
+	/** The idle timer and the dates of a failure. */
+	scheduler: Scheduler;
+	log(line: string): void;
+	/** The consumer's `name/version`. */
+	userAgent: string;
+	/** Test loopback URL. */
+	baseUrl?: string;
+}
 
 /** What a catalog stands on. */
 export interface CatalogDeps {
@@ -53,4 +78,45 @@ export interface Pins {
 	pin(hosts: readonly string[]): void;
 	/** Detect resent reasoning. */
 	passedBack(): boolean;
+}
+
+/** An entry's transport and catalog. */
+export interface Route {
+	transport: Transport;
+	catalog: EntryCatalog;
+}
+
+/** Provider engine. */
+export interface ProviderKind {
+	readonly kind: ProviderKindName;
+	readonly label: string;
+	/** Plan dropdown lines. */
+	readonly plans?: readonly { plan: ProviderPlan; label: string }[];
+	/** Add-form third field. */
+	readonly field: "key" | "url";
+	/** URL kinds that also take a key. */
+	readonly optionalKey?: true;
+	/** Default URL. */
+	readonly url?: string;
+	/** The balance page. */
+	readonly balance?: string;
+	/** Plans with extra usage. */
+	readonly extraUsage?: readonly ProviderPlan[];
+	/** Delayed generation stats. */
+	readonly stats?: true;
+	/** Provider status facts. */
+	facts?(state: KeyState, entry: EntryFields, bill: Billed | undefined): string | undefined;
+	/** Key or URL check. */
+	check(entry: EntryFields, secret: string | undefined, deps: KindDeps, signal: AbortSignal): Promise<KeyState>;
+	transport(entry: EntryFields, key: KeySource, deps: KindDeps): Transport;
+	catalog(entry: ProviderEntry, transport: Transport, deps: CatalogDeps): EntryCatalog;
+	/** Omitted if unavailable. */
+	browse?(entry: ProviderEntry, route: Route): Browser;
+	tester?(entry: ProviderEntry, route: Route): Tester;
+	/** Model request codec. */
+	codec(view: ModelView | undefined, entry: EntryFields): Codec;
+	/** Retry, fall-through, or stop. */
+	failure(failure: Failure, view: ModelView | undefined): Disposition;
+	/** Optional provider limits. */
+	limits?(transport: Pick<Transport, "getJson">, signal: AbortSignal): Promise<Limits | undefined>;
 }

@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.llamacppModel",
+	"name": "model-props-without-efforts-do-not-think",
+	"input": {
+		"id": "local-a.gguf",
+		"props": {
+			"context": 4096,
+			"efforts": []
+		}
+	},
+	"expected": {
+		"model": {
+			"tag": "local-a.gguf",
+			"tools": true,
+			"thinking": false,
+			"efforts": [],
+			"context": 4096
+		}
+	}
+}

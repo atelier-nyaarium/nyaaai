@@ -1,0 +1,40 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.view",
+	"name": "view-kept-without-zero-retention-marks-the-data",
+	"input": {
+		"row": "local:lab/local-a:27b",
+		"model": {
+			"tag": "local-a:27b",
+			"tools": true,
+			"thinking": false,
+			"efforts": [],
+			"context": 8192
+		},
+		"terms": {
+			"kept": true,
+			"price": "unknown"
+		},
+		"zdrOnly": false
+	},
+	"expected": {
+		"view": {
+			"key": "local:lab/local-a:27b",
+			"status": "ok",
+			"efforts": [],
+			"promptLimit": 8192,
+			"price": "unknown",
+			"hosts": [],
+			"dataKept": true,
+			"api": {
+				"family": "chat-completions",
+				"structured": true,
+				"choice": [],
+				"strict": false
+			},
+			"cache": "implicit"
+		},
+		"context": 8192
+	}
+}

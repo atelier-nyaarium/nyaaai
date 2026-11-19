@@ -1,0 +1,17 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaShow",
+	"name": "show-no-completion-is-not-a-chat-model",
+	"input": {
+		"tag": "local-a:27b",
+		"body": {
+			"capabilities": [
+				"embedding"
+			]
+		}
+	},
+	"expected": {
+		"model": null
+	}
+}

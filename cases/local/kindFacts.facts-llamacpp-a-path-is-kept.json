@@ -1,0 +1,38 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.kindFacts",
+	"name": "facts-llamacpp-a-path-is-kept",
+	"input": {
+		"kind": "llamacpp",
+		"url": "https://host.lab.example/api/v2",
+		"states": [
+			{
+				"kind": "none"
+			},
+			{
+				"kind": "checking"
+			},
+			{
+				"kind": "ok"
+			},
+			{
+				"kind": "ok",
+				"models": 0
+			},
+			{
+				"kind": "ok",
+				"models": 1
+			}
+		]
+	},
+	"expected": {
+		"facts": [
+			"https://host.lab.example/api/v2",
+			"https://host.lab.example/api/v2",
+			"https://host.lab.example/api/v2",
+			"https://host.lab.example/api/v2 · 0 models",
+			"https://host.lab.example/api/v2 · 1 model"
+		]
+	}
+}

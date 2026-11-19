@@ -1,0 +1,91 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.catalogRun",
+	"name": "run-an-unreachable-server-lists-nothing",
+	"input": {
+		"startMs": 1790337600000,
+		"entry": "lab",
+		"terms": {
+			"kept": false,
+			"price": "free"
+		},
+		"rows": [
+			"local:lab/local-a:27b",
+			"local:lab/local-b:9b"
+		],
+		"steps": [
+			{
+				"kind": "call",
+				"call": {
+					"kind": "discovered"
+				}
+			},
+			{
+				"kind": "call",
+				"call": {
+					"kind": "discovered",
+					"fresh": true
+				}
+			}
+		],
+		"server": {
+			"live": false,
+			"loaded": false,
+			"warm": false,
+			"models": [
+				{
+					"fails": true,
+					"models": []
+				}
+			],
+			"loads": [],
+			"warms": []
+		}
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "discovered",
+						"models": null
+					}
+				],
+				"served": [
+					{
+						"method": "models",
+						"tag": null,
+						"known": [],
+						"startMs": 1790337600000,
+						"endMs": 1790337600000,
+						"aborted": false
+					}
+				],
+				"refreshed": 0
+			},
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "discovered",
+						"models": null
+					}
+				],
+				"served": [
+					{
+						"method": "models",
+						"tag": null,
+						"known": [],
+						"startMs": 1790337600000,
+						"endMs": 1790337600000,
+						"aborted": false
+					}
+				],
+				"refreshed": 0
+			}
+		],
+		"waiting": []
+	}
+}

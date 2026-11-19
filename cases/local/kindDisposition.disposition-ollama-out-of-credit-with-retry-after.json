@@ -1,0 +1,39 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.kindDisposition",
+	"name": "disposition-ollama-out-of-credit-with-retry-after",
+	"input": {
+		"kind": "ollama",
+		"rows": [
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "m",
+					"retryAfterMs": 1
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "m",
+					"retryAfterMs": 0
+				},
+				"status": "ok"
+			}
+		]
+	},
+	"expected": {
+		"dispositions": [
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			}
+		]
+	}
+}

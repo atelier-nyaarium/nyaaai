@@ -1,0 +1,20 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.label",
+	"name": "label-blank-parts-are-skipped",
+	"input": {
+		"tags": [
+			"a/ /",
+			"  /x",
+			"a/\t/\n"
+		]
+	},
+	"expected": {
+		"labels": [
+			"a",
+			"x",
+			"a"
+		]
+	}
+}

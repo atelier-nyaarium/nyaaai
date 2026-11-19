@@ -1,0 +1,14 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.lmstudioModels",
+	"name": "lmstudio-models-wrong-type",
+	"input": {
+		"body": {
+			"models": "x"
+		}
+	},
+	"expected": {
+		"models": null
+	}
+}

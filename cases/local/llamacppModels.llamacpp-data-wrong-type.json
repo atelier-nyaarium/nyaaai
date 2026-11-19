@@ -1,0 +1,14 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.llamacppModels",
+	"name": "llamacpp-data-wrong-type",
+	"input": {
+		"body": {
+			"data": "x"
+		}
+	},
+	"expected": {
+		"models": null
+	}
+}

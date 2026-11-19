@@ -1,0 +1,50 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.server",
+	"name": "ollama-loaded-that-does-not-read-is-empty",
+	"input": {
+		"kind": "ollama",
+		"entry": {
+			"label": "Lab"
+		},
+		"stored": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": []
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "loaded",
+				"tag": "local-a:27b"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"models": null,
+				"contexts": [],
+				"done": false,
+				"thrown": null
+			}
+		],
+		"requests": [
+			{
+				"method": "GET",
+				"url": "http://127.0.0.1:11434/api/ps",
+				"authorization": null,
+				"body": null
+			}
+		],
+		"read": [
+			1
+		],
+		"waiting": []
+	}
+}

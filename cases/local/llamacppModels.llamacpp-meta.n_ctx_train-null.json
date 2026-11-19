@@ -1,0 +1,27 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.llamacppModels",
+	"name": "llamacpp-meta.n_ctx_train-null",
+	"input": {
+		"body": {
+			"data": [
+				{
+					"id": "local-a.gguf",
+					"meta": {
+						"n_ctx_train": null
+					},
+					"context_length": 32768
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"id": "local-a.gguf",
+				"trained": 32768
+			}
+		]
+	}
+}

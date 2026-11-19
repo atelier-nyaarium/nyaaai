@@ -1,0 +1,25 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.llamacppProps",
+	"name": "props-levels-unknown-names-are-kept-as-text",
+	"input": {
+		"body": {
+			"chat_template_caps": {
+				"reasoning_effort_levels": [
+					"low",
+					"bogus"
+				]
+			}
+		}
+	},
+	"expected": {
+		"props": {
+			"context": null,
+			"efforts": [
+				"low",
+				"bogus"
+			]
+		}
+	}
+}

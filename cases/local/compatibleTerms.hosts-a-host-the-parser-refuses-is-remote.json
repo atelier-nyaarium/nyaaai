@@ -1,0 +1,32 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.compatibleTerms",
+	"name": "hosts-a-host-the-parser-refuses-is-remote",
+	"input": {
+		"urls": [
+			"http://büro.local",
+			"http://bo%78.local",
+			"http://テスト.local"
+		]
+	},
+	"expected": {
+		"terms": [
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			},
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			},
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			}
+		]
+	}
+}

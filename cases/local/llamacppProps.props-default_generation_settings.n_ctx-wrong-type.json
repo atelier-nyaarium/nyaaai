@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.llamacppProps",
+	"name": "props-default_generation_settings.n_ctx-wrong-type",
+	"input": {
+		"body": {
+			"default_generation_settings": {
+				"n_ctx": "7"
+			},
+			"chat_template_caps": {
+				"reasoning_effort_levels": [
+					"low",
+					"high"
+				]
+			}
+		}
+	},
+	"expected": {
+		"props": {
+			"context": null,
+			"efforts": [
+				"low",
+				"high"
+			]
+		}
+	}
+}

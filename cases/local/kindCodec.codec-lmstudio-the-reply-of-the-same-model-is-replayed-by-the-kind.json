@@ -1,0 +1,89 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.kindCodec",
+	"name": "codec-lmstudio-the-reply-of-the-same-model-is-replayed-by-the-kind",
+	"input": {
+		"kind": "lmstudio",
+		"label": "Lab",
+		"view": null,
+		"request": {
+			"model": "local-a:27b",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Hi"
+				},
+				{
+					"role": "step",
+					"producer": {
+						"model": "local-a:27b"
+					},
+					"parts": [
+						{
+							"kind": "thought",
+							"type": "reasoning",
+							"segments": [
+								{
+									"kind": "content",
+									"text": "Thinking."
+								}
+							]
+						},
+						{
+							"kind": "text",
+							"text": "Hello."
+						}
+					]
+				},
+				{
+					"role": "user",
+					"text": "More"
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true
+		},
+		"mode": "stream",
+		"failures": []
+	},
+	"expected": {
+		"encoded": {
+			"path": "/v1/chat/completions",
+			"body": {
+				"model": "local-a:27b",
+				"messages": [
+					{
+						"role": "system",
+						"content": "Rules."
+					},
+					{
+						"role": "user",
+						"content": "Hi"
+					},
+					{
+						"role": "assistant",
+						"content": "Hello."
+					},
+					{
+						"role": "user",
+						"content": "More"
+					}
+				],
+				"stream": true,
+				"stream_options": {
+					"include_usage": true
+				}
+			}
+		},
+		"refusal": null,
+		"facts": null,
+		"failures": []
+	}
+}

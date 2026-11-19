@@ -1,0 +1,17 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.efforts",
+	"name": "efforts-unknown-names-drop",
+	"input": {
+		"values": [
+			"bogus",
+			"low"
+		]
+	},
+	"expected": {
+		"efforts": [
+			"low"
+		]
+	}
+}

@@ -1,0 +1,13 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaShow",
+	"name": "show-body-number",
+	"input": {
+		"tag": "local-a:27b",
+		"body": 3
+	},
+	"expected": {
+		"model": null
+	}
+}

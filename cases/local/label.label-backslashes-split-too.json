@@ -1,0 +1,18 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.label",
+	"name": "label-backslashes-split-too",
+	"input": {
+		"tags": [
+			"dir\\sub\\file.gguf",
+			"dir/sub\\file"
+		]
+	},
+	"expected": {
+		"labels": [
+			"file.gguf",
+			"file"
+		]
+	}
+}

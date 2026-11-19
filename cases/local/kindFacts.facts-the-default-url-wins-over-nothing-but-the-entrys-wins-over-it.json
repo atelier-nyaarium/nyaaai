@@ -1,0 +1,38 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.kindFacts",
+	"name": "facts-the-default-url-wins-over-nothing-but-the-entrys-wins-over-it",
+	"input": {
+		"kind": "ollama",
+		"url": "http://127.0.0.1:11434/",
+		"states": [
+			{
+				"kind": "none"
+			},
+			{
+				"kind": "checking"
+			},
+			{
+				"kind": "ok"
+			},
+			{
+				"kind": "ok",
+				"models": 0
+			},
+			{
+				"kind": "ok",
+				"models": 1
+			}
+		]
+	},
+	"expected": {
+		"facts": [
+			"http://127.0.0.1:11434",
+			"http://127.0.0.1:11434",
+			"http://127.0.0.1:11434",
+			"http://127.0.0.1:11434 · 0 models",
+			"http://127.0.0.1:11434 · 1 model"
+		]
+	}
+}

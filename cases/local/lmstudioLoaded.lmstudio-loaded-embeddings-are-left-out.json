@@ -1,0 +1,55 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.lmstudioLoaded",
+	"name": "lmstudio-loaded-embeddings-are-left-out",
+	"input": {
+		"body": {
+			"models": [
+				{
+					"key": "embed-a",
+					"type": "embedding",
+					"loaded_instances": [
+						{
+							"config": {
+								"context_length": 512
+							}
+						}
+					]
+				},
+				{
+					"key": "local-a",
+					"type": "llm",
+					"max_context_length": 262144,
+					"loaded_instances": [
+						{
+							"id": "local-a",
+							"config": {
+								"context_length": 8192
+							}
+						}
+					],
+					"capabilities": {
+						"vision": false,
+						"trained_for_tool_use": true,
+						"reasoning": {
+							"allowed_options": [
+								"off",
+								"on"
+							],
+							"default": "on"
+						}
+					}
+				}
+			]
+		}
+	},
+	"expected": {
+		"contexts": [
+			{
+				"tag": "local-a",
+				"context": 8192
+			}
+		]
+	}
+}

@@ -1,0 +1,43 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.compatibleModels",
+	"name": "compatible-order-and-repeats-are-kept",
+	"input": {
+		"body": {
+			"data": [
+				{
+					"id": "b"
+				},
+				{
+					"id": "a"
+				},
+				{
+					"id": "b"
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"tag": "b",
+				"tools": true,
+				"thinking": false,
+				"efforts": []
+			},
+			{
+				"tag": "a",
+				"tools": true,
+				"thinking": false,
+				"efforts": []
+			},
+			{
+				"tag": "b",
+				"tools": true,
+				"thinking": false,
+				"efforts": []
+			}
+		]
+	}
+}

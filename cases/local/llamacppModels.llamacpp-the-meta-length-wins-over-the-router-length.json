@@ -1,0 +1,27 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.llamacppModels",
+	"name": "llamacpp-the-meta-length-wins-over-the-router-length",
+	"input": {
+		"body": {
+			"data": [
+				{
+					"id": "local-a.gguf",
+					"meta": {
+						"n_ctx_train": 4096
+					},
+					"context_length": 8192
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"id": "local-a.gguf",
+				"trained": 4096
+			}
+		]
+	}
+}

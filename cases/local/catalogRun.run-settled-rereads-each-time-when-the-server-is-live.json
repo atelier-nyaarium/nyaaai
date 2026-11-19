@@ -1,0 +1,353 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.catalogRun",
+	"name": "run-settled-rereads-each-time-when-the-server-is-live",
+	"input": {
+		"startMs": 1790337600000,
+		"entry": "lab",
+		"terms": {
+			"kept": false,
+			"price": "free"
+		},
+		"rows": [
+			"local:lab/local-a:27b",
+			"local:lab/local-b:9b"
+		],
+		"steps": [
+			{
+				"kind": "call",
+				"call": {
+					"kind": "views"
+				}
+			},
+			{
+				"kind": "settled",
+				"tag": "local-b:9b"
+			},
+			{
+				"kind": "call",
+				"call": {
+					"kind": "views"
+				}
+			},
+			{
+				"kind": "settled",
+				"tag": "local-b:9b"
+			},
+			{
+				"kind": "call",
+				"call": {
+					"kind": "views"
+				}
+			},
+			{
+				"kind": "settled",
+				"tag": "local-b:9b"
+			},
+			{
+				"kind": "call",
+				"call": {
+					"kind": "views"
+				}
+			}
+		],
+		"server": {
+			"live": true,
+			"loaded": true,
+			"warm": false,
+			"models": [
+				{
+					"models": [
+						{
+							"tag": "local-a:27b",
+							"tools": true,
+							"thinking": true,
+							"efforts": [
+								"low",
+								"high"
+							],
+							"context": 8192
+						},
+						{
+							"tag": "local-b:9b",
+							"tools": true,
+							"thinking": false,
+							"efforts": [],
+							"trained": 4096
+						}
+					]
+				}
+			],
+			"loads": [
+				{
+					"contexts": [
+						{
+							"tag": "local-b:9b",
+							"context": 65536
+						}
+					]
+				},
+				{
+					"contexts": [
+						{
+							"tag": "local-b:9b",
+							"context": 2048
+						}
+					]
+				},
+				{
+					"contexts": [
+						{
+							"tag": "local-b:9b",
+							"context": 2048
+						}
+					]
+				}
+			],
+			"warms": []
+		}
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "views",
+						"views": [
+							{
+								"key": "local:lab/local-a:27b",
+								"status": "ok",
+								"efforts": [
+									"low",
+									"high"
+								],
+								"promptLimit": 8192,
+								"price": "free",
+								"hosts": [],
+								"api": {
+									"family": "chat-completions",
+									"structured": true,
+									"choice": [],
+									"strict": false,
+									"reasoning": "reasoning"
+								},
+								"cache": "implicit"
+							},
+							{
+								"key": "local:lab/local-b:9b",
+								"status": "ok",
+								"efforts": [],
+								"price": "free",
+								"hosts": [],
+								"api": {
+									"family": "chat-completions",
+									"structured": true,
+									"choice": [],
+									"strict": false
+								},
+								"cache": "implicit"
+							}
+						]
+					}
+				],
+				"served": [
+					{
+						"method": "models",
+						"tag": null,
+						"known": [],
+						"startMs": 1790337600000,
+						"endMs": 1790337600000,
+						"aborted": false
+					}
+				],
+				"refreshed": 1
+			},
+			{
+				"nowMs": 1790337600000,
+				"answers": [],
+				"served": [
+					{
+						"method": "loaded",
+						"tag": "local-b:9b",
+						"known": [],
+						"startMs": 1790337600000,
+						"endMs": 1790337600000,
+						"aborted": false
+					}
+				],
+				"refreshed": 1
+			},
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "views",
+						"views": [
+							{
+								"key": "local:lab/local-a:27b",
+								"status": "ok",
+								"efforts": [
+									"low",
+									"high"
+								],
+								"promptLimit": 8192,
+								"price": "free",
+								"hosts": [],
+								"api": {
+									"family": "chat-completions",
+									"structured": true,
+									"choice": [],
+									"strict": false,
+									"reasoning": "reasoning"
+								},
+								"cache": "implicit"
+							},
+							{
+								"key": "local:lab/local-b:9b",
+								"status": "ok",
+								"efforts": [],
+								"promptLimit": 4096,
+								"price": "free",
+								"hosts": [],
+								"api": {
+									"family": "chat-completions",
+									"structured": true,
+									"choice": [],
+									"strict": false
+								},
+								"cache": "implicit"
+							}
+						]
+					}
+				],
+				"served": [],
+				"refreshed": 0
+			},
+			{
+				"nowMs": 1790337600000,
+				"answers": [],
+				"served": [
+					{
+						"method": "loaded",
+						"tag": "local-b:9b",
+						"known": [],
+						"startMs": 1790337600000,
+						"endMs": 1790337600000,
+						"aborted": false
+					}
+				],
+				"refreshed": 1
+			},
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "views",
+						"views": [
+							{
+								"key": "local:lab/local-a:27b",
+								"status": "ok",
+								"efforts": [
+									"low",
+									"high"
+								],
+								"promptLimit": 8192,
+								"price": "free",
+								"hosts": [],
+								"api": {
+									"family": "chat-completions",
+									"structured": true,
+									"choice": [],
+									"strict": false,
+									"reasoning": "reasoning"
+								},
+								"cache": "implicit"
+							},
+							{
+								"key": "local:lab/local-b:9b",
+								"status": "ok",
+								"efforts": [],
+								"promptLimit": 2048,
+								"price": "free",
+								"hosts": [],
+								"api": {
+									"family": "chat-completions",
+									"structured": true,
+									"choice": [],
+									"strict": false
+								},
+								"cache": "implicit"
+							}
+						]
+					}
+				],
+				"served": [],
+				"refreshed": 0
+			},
+			{
+				"nowMs": 1790337600000,
+				"answers": [],
+				"served": [
+					{
+						"method": "loaded",
+						"tag": "local-b:9b",
+						"known": [],
+						"startMs": 1790337600000,
+						"endMs": 1790337600000,
+						"aborted": false
+					}
+				],
+				"refreshed": 0
+			},
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "views",
+						"views": [
+							{
+								"key": "local:lab/local-a:27b",
+								"status": "ok",
+								"efforts": [
+									"low",
+									"high"
+								],
+								"promptLimit": 8192,
+								"price": "free",
+								"hosts": [],
+								"api": {
+									"family": "chat-completions",
+									"structured": true,
+									"choice": [],
+									"strict": false,
+									"reasoning": "reasoning"
+								},
+								"cache": "implicit"
+							},
+							{
+								"key": "local:lab/local-b:9b",
+								"status": "ok",
+								"efforts": [],
+								"promptLimit": 2048,
+								"price": "free",
+								"hosts": [],
+								"api": {
+									"family": "chat-completions",
+									"structured": true,
+									"choice": [],
+									"strict": false
+								},
+								"cache": "implicit"
+							}
+						]
+					}
+				],
+				"served": [],
+				"refreshed": 0
+			}
+		],
+		"waiting": []
+	}
+}

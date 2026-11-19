@@ -1,0 +1,20 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.compatibleTerms",
+	"name": "hosts-no-url-is-remote",
+	"input": {
+		"urls": [
+			null
+		]
+	},
+	"expected": {
+		"terms": [
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			}
+		]
+	}
+}

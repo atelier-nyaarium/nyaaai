@@ -1,0 +1,49 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.server",
+	"name": "ollama-tags-that-are-refused-throw",
+	"input": {
+		"kind": "ollama",
+		"entry": {
+			"label": "Lab"
+		},
+		"stored": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"text": "",
+				"end": "refused"
+			}
+		],
+		"steps": [
+			{
+				"kind": "models",
+				"known": []
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"models": null,
+				"contexts": null,
+				"done": false,
+				"thrown": "connection refused"
+			}
+		],
+		"requests": [
+			{
+				"method": "GET",
+				"url": "http://127.0.0.1:11434/api/tags",
+				"authorization": null,
+				"body": null
+			}
+		],
+		"read": [
+			0
+		],
+		"waiting": []
+	}
+}

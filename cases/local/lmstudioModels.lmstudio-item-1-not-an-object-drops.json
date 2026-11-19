@@ -1,0 +1,27 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.lmstudioModels",
+	"name": "lmstudio-item-1-not-an-object-drops",
+	"input": {
+		"body": {
+			"models": [
+				3,
+				{
+					"key": "local-b",
+					"type": "llm"
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"tag": "local-b",
+				"tools": true,
+				"thinking": false,
+				"efforts": []
+			}
+		]
+	}
+}

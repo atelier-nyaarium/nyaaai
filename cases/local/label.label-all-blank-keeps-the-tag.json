@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.label",
+	"name": "label-all-blank-keeps-the-tag",
+	"input": {
+		"tags": [
+			"/",
+			"//",
+			" / ",
+			"",
+			" ",
+			"\\"
+		]
+	},
+	"expected": {
+		"labels": [
+			"/",
+			"//",
+			" / ",
+			"",
+			" ",
+			"\\"
+		]
+	}
+}

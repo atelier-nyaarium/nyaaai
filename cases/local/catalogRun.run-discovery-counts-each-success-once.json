@@ -1,0 +1,217 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.catalogRun",
+	"name": "run-discovery-counts-each-success-once",
+	"input": {
+		"startMs": 1790337600000,
+		"entry": "lab",
+		"terms": {
+			"kept": false,
+			"price": "free"
+		},
+		"rows": [
+			"local:lab/local-a:27b",
+			"local:lab/local-b:9b"
+		],
+		"steps": [
+			{
+				"kind": "call",
+				"call": {
+					"kind": "views"
+				}
+			},
+			{
+				"kind": "call",
+				"call": {
+					"kind": "discovered",
+					"fresh": true
+				}
+			},
+			{
+				"kind": "rediscover"
+			},
+			{
+				"kind": "call",
+				"call": {
+					"kind": "views"
+				}
+			}
+		],
+		"server": {
+			"live": false,
+			"loaded": false,
+			"warm": false,
+			"models": [
+				{
+					"models": [
+						{
+							"tag": "local-a:27b",
+							"tools": true,
+							"thinking": true,
+							"efforts": [
+								"low",
+								"high"
+							],
+							"context": 8192
+						}
+					]
+				},
+				{
+					"models": [
+						{
+							"tag": "local-a:27b",
+							"tools": true,
+							"thinking": true,
+							"efforts": [
+								"low",
+								"high"
+							],
+							"context": 8192
+						}
+					]
+				},
+				{
+					"models": [
+						{
+							"tag": "local-a:27b",
+							"tools": true,
+							"thinking": true,
+							"efforts": [
+								"low",
+								"high"
+							],
+							"context": 8192
+						}
+					]
+				}
+			],
+			"loads": [],
+			"warms": []
+		}
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "views",
+						"views": [
+							{
+								"key": "local:lab/local-a:27b",
+								"status": "ok",
+								"efforts": [
+									"low",
+									"high"
+								],
+								"promptLimit": 8192,
+								"price": "free",
+								"hosts": [],
+								"api": {
+									"family": "chat-completions",
+									"structured": true,
+									"choice": [],
+									"strict": false,
+									"reasoning": "reasoning"
+								},
+								"cache": "implicit"
+							}
+						]
+					}
+				],
+				"served": [
+					{
+						"method": "models",
+						"tag": null,
+						"known": [],
+						"startMs": 1790337600000,
+						"endMs": 1790337600000,
+						"aborted": false
+					}
+				],
+				"refreshed": 1
+			},
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "discovered",
+						"models": [
+							{
+								"key": "local:lab/local-a:27b",
+								"display": "lab/local-a:27b",
+								"tag": "local-a:27b",
+								"tools": true,
+								"reasoning": true,
+								"context": 8192
+							}
+						]
+					}
+				],
+				"served": [
+					{
+						"method": "models",
+						"tag": null,
+						"known": [
+							"local-a:27b"
+						],
+						"startMs": 1790337600000,
+						"endMs": 1790337600000,
+						"aborted": false
+					}
+				],
+				"refreshed": 1
+			},
+			{
+				"nowMs": 1790337600000,
+				"answers": [],
+				"served": [
+					{
+						"method": "models",
+						"tag": null,
+						"known": [
+							"local-a:27b"
+						],
+						"startMs": 1790337600000,
+						"endMs": 1790337600000,
+						"aborted": false
+					}
+				],
+				"refreshed": 1
+			},
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "views",
+						"views": [
+							{
+								"key": "local:lab/local-a:27b",
+								"status": "ok",
+								"efforts": [
+									"low",
+									"high"
+								],
+								"promptLimit": 8192,
+								"price": "free",
+								"hosts": [],
+								"api": {
+									"family": "chat-completions",
+									"structured": true,
+									"choice": [],
+									"strict": false,
+									"reasoning": "reasoning"
+								},
+								"cache": "implicit"
+							}
+						]
+					}
+				],
+				"served": [],
+				"refreshed": 0
+			}
+		],
+		"waiting": []
+	}
+}

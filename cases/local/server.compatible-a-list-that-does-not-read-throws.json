@@ -1,0 +1,51 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.server",
+	"name": "compatible-a-list-that-does-not-read-throws",
+	"input": {
+		"kind": "compatible",
+		"entry": {
+			"label": "Lab",
+			"url": "http://lab.local:8000"
+		},
+		"stored": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"models": []
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "models",
+				"known": []
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"models": null,
+				"contexts": null,
+				"done": false,
+				"thrown": "The model list did not parse."
+			}
+		],
+		"requests": [
+			{
+				"method": "GET",
+				"url": "http://lab.local:8000/v1/models",
+				"authorization": null,
+				"body": null
+			}
+		],
+		"read": [
+			1
+		],
+		"waiting": []
+	}
+}

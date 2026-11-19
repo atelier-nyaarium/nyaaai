@@ -1,0 +1,42 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaShow",
+	"name": "show-parameters-null",
+	"input": {
+		"tag": "local-a:27b",
+		"body": {
+			"parameters": null,
+			"capabilities": [
+				"completion",
+				"tools",
+				"thinking"
+			],
+			"thinking": {
+				"values": [
+					false,
+					true
+				],
+				"default": true
+			},
+			"model_info": {
+				"general.architecture": "arch-a",
+				"arch-a.context_length": 262144
+			}
+		}
+	},
+	"expected": {
+		"model": {
+			"tag": "local-a:27b",
+			"tools": true,
+			"thinking": true,
+			"efforts": [
+				"none",
+				"low",
+				"medium",
+				"high"
+			],
+			"trained": 262144
+		}
+	}
+}

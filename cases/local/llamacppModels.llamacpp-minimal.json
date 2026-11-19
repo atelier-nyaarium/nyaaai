@@ -1,0 +1,23 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.llamacppModels",
+	"name": "llamacpp-minimal",
+	"input": {
+		"body": {
+			"data": [
+				{
+					"id": "local-b.gguf"
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"id": "local-b.gguf",
+				"trained": null
+			}
+		]
+	}
+}

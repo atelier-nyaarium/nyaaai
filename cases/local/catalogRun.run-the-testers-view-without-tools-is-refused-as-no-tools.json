@@ -1,0 +1,86 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.catalogRun",
+	"name": "run-the-testers-view-without-tools-is-refused-as-no-tools",
+	"input": {
+		"startMs": 1790337600000,
+		"entry": "lab",
+		"terms": {
+			"kept": false,
+			"price": "free"
+		},
+		"rows": [
+			"local:lab/local-c:3b"
+		],
+		"steps": [
+			{
+				"kind": "call",
+				"call": {
+					"kind": "viewFor",
+					"row": "local:lab/local-c:3b"
+				}
+			}
+		],
+		"server": {
+			"live": false,
+			"loaded": false,
+			"warm": false,
+			"models": [
+				{
+					"models": [
+						{
+							"tag": "local-a:27b",
+							"tools": true,
+							"thinking": true,
+							"efforts": [
+								"low",
+								"high"
+							],
+							"context": 8192
+						},
+						{
+							"tag": "local-c:3b",
+							"tools": false,
+							"thinking": false,
+							"efforts": []
+						}
+					]
+				}
+			],
+			"loads": [],
+			"warms": []
+		}
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "view",
+						"view": {
+							"key": "local:lab/local-c:3b",
+							"status": "noTools",
+							"efforts": [],
+							"price": "free",
+							"hosts": []
+						}
+					}
+				],
+				"served": [
+					{
+						"method": "models",
+						"tag": null,
+						"known": [],
+						"startMs": 1790337600000,
+						"endMs": 1790337600000,
+						"aborted": false
+					}
+				],
+				"refreshed": 1
+			}
+		],
+		"waiting": []
+	}
+}

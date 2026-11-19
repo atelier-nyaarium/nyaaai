@@ -1,0 +1,31 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.view",
+	"name": "view-no-tools",
+	"input": {
+		"row": "local:lab/local-b:9b",
+		"model": {
+			"tag": "local-b:9b",
+			"tools": false,
+			"thinking": false,
+			"efforts": [],
+			"context": 8192
+		},
+		"terms": {
+			"kept": false,
+			"price": "free"
+		},
+		"zdrOnly": true
+	},
+	"expected": {
+		"view": {
+			"key": "local:lab/local-b:9b",
+			"status": "noTools",
+			"efforts": [],
+			"price": "free",
+			"hosts": []
+		},
+		"context": 8192
+	}
+}

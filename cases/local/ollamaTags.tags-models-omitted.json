@@ -1,0 +1,18 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaTags",
+	"name": "tags-models-omitted",
+	"input": {
+		"body": {
+			"data": [
+				{
+					"name": "local-a:27b"
+				}
+			]
+		}
+	},
+	"expected": {
+		"tags": null
+	}
+}

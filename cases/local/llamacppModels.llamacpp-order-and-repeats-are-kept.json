@@ -1,0 +1,37 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.llamacppModels",
+	"name": "llamacpp-order-and-repeats-are-kept",
+	"input": {
+		"body": {
+			"data": [
+				{
+					"id": "b"
+				},
+				{
+					"id": "a"
+				},
+				{
+					"id": "b"
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"id": "b",
+				"trained": null
+			},
+			{
+				"id": "a",
+				"trained": null
+			},
+			{
+				"id": "b",
+				"trained": null
+			}
+		]
+	}
+}

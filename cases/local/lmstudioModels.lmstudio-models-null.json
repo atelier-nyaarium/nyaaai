@@ -1,0 +1,14 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.lmstudioModels",
+	"name": "lmstudio-models-null",
+	"input": {
+		"body": {
+			"models": null
+		}
+	},
+	"expected": {
+		"models": null
+	}
+}

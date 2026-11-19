@@ -1,0 +1,81 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.server",
+	"name": "llamacpp-a-caller-aborted-before-asks-nothing",
+	"input": {
+		"kind": "llamacpp",
+		"entry": {
+			"label": "Lab"
+		},
+		"stored": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"object": "list",
+					"data": [
+						{
+							"id": "local-a.gguf",
+							"meta": {
+								"n_ctx_train": 131072
+							}
+						},
+						{
+							"id": "local-b.gguf",
+							"meta": null
+						},
+						{}
+					]
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"default_generation_settings": {
+						"n_ctx": 262144
+					},
+					"chat_template_caps": {
+						"reasoning_effort_levels": [
+							"low",
+							"high",
+							"bogus"
+						]
+					}
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"default_generation_settings": {},
+					"chat_template_caps": {}
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "models",
+				"known": [],
+				"abortedBefore": true
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"models": null,
+				"contexts": null,
+				"done": false,
+				"thrown": "caller aborted"
+			}
+		],
+		"requests": [],
+		"read": [
+			0,
+			0,
+			0
+		],
+		"waiting": []
+	}
+}

@@ -1,0 +1,96 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.kindCodec",
+	"name": "codec-ollama-unkeyed-failures-never-name-the-key",
+	"input": {
+		"kind": "ollama",
+		"label": "Lab",
+		"view": null,
+		"request": {
+			"model": "local-a:27b",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Hi"
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true
+		},
+		"mode": "stream",
+		"failures": [
+			{
+				"status": 401,
+				"body": {
+					"error": {
+						"message": "bad key"
+					}
+				}
+			},
+			{
+				"status": 402,
+				"body": {
+					"error": {
+						"message": "pay"
+					}
+				}
+			},
+			{
+				"status": 403,
+				"body": {
+					"error": {
+						"message": "no"
+					}
+				}
+			}
+		]
+	},
+	"expected": {
+		"encoded": {
+			"path": "/v1/chat/completions",
+			"body": {
+				"model": "local-a:27b",
+				"messages": [
+					{
+						"role": "system",
+						"content": "Rules."
+					},
+					{
+						"role": "user",
+						"content": "Hi"
+					}
+				],
+				"stream": true,
+				"stream_options": {
+					"include_usage": true
+				}
+			}
+		},
+		"refusal": null,
+		"facts": null,
+		"failures": [
+			{
+				"category": "refused",
+				"status": 401,
+				"message": "bad key"
+			},
+			{
+				"category": "badRequest",
+				"status": 402,
+				"message": "pay"
+			},
+			{
+				"category": "refused",
+				"status": 403,
+				"message": "no"
+			}
+		]
+	}
+}

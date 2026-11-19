@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.compatibleModels",
+	"name": "compatible-item-1-not-an-object-drops",
+	"input": {
+		"body": {
+			"data": [
+				3,
+				{
+					"id": "b"
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"tag": "b",
+				"tools": true,
+				"thinking": false,
+				"efforts": []
+			}
+		]
+	}
+}

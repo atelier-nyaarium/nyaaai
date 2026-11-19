@@ -1,0 +1,14 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaTags",
+	"name": "tags-models-null",
+	"input": {
+		"body": {
+			"models": null
+		}
+	},
+	"expected": {
+		"tags": null
+	}
+}

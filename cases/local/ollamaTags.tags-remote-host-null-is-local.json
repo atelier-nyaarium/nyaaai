@@ -1,0 +1,21 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaTags",
+	"name": "tags-remote-host-null-is-local",
+	"input": {
+		"body": {
+			"models": [
+				{
+					"name": "local-a:27b",
+					"remote_host": null
+				}
+			]
+		}
+	},
+	"expected": {
+		"tags": [
+			"local-a:27b"
+		]
+	}
+}

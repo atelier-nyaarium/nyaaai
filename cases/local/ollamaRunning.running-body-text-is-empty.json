@@ -1,0 +1,12 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaRunning",
+	"name": "running-body-text-is-empty",
+	"input": {
+		"body": "x"
+	},
+	"expected": {
+		"contexts": []
+	}
+}

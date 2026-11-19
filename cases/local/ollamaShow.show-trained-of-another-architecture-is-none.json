@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaShow",
+	"name": "show-trained-of-another-architecture-is-none",
+	"input": {
+		"tag": "local-a:27b",
+		"body": {
+			"capabilities": [
+				"completion"
+			],
+			"model_info": {
+				"general.architecture": "arch-b",
+				"arch-a.context_length": 4096
+			}
+		}
+	},
+	"expected": {
+		"model": {
+			"tag": "local-a:27b",
+			"tools": false,
+			"thinking": false,
+			"efforts": []
+		}
+	}
+}

@@ -1,0 +1,18 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.llamacppModels",
+	"name": "llamacpp-data-omitted",
+	"input": {
+		"body": {
+			"models": [
+				{
+					"id": "local-a.gguf"
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": null
+	}
+}

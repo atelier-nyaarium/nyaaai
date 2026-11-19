@@ -1,0 +1,23 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaShow",
+	"name": "show-context-line-that-does-not-read-is-none",
+	"input": {
+		"tag": "local-a:27b",
+		"body": {
+			"capabilities": [
+				"completion"
+			],
+			"parameters": "num_ctx big"
+		}
+	},
+	"expected": {
+		"model": {
+			"tag": "local-a:27b",
+			"tools": false,
+			"thinking": false,
+			"efforts": []
+		}
+	}
+}

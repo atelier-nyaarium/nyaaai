@@ -1,0 +1,44 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.view",
+	"name": "view-thinking-names-the-reasoning-field",
+	"input": {
+		"row": "local:lab/local-a:27b",
+		"model": {
+			"tag": "local-a:27b",
+			"tools": true,
+			"thinking": true,
+			"efforts": [
+				"low",
+				"high"
+			]
+		},
+		"terms": {
+			"kept": false,
+			"price": "free"
+		},
+		"zdrOnly": true
+	},
+	"expected": {
+		"view": {
+			"key": "local:lab/local-a:27b",
+			"status": "ok",
+			"efforts": [
+				"low",
+				"high"
+			],
+			"price": "free",
+			"hosts": [],
+			"api": {
+				"family": "chat-completions",
+				"structured": true,
+				"choice": [],
+				"strict": false,
+				"reasoning": "reasoning"
+			},
+			"cache": "implicit"
+		},
+		"context": null
+	}
+}

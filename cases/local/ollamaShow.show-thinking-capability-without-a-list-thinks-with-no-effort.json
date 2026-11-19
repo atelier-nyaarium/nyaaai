@@ -1,0 +1,23 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaShow",
+	"name": "show-thinking-capability-without-a-list-thinks-with-no-effort",
+	"input": {
+		"tag": "local-a:27b",
+		"body": {
+			"capabilities": [
+				"completion",
+				"thinking"
+			]
+		}
+	},
+	"expected": {
+		"model": {
+			"tag": "local-a:27b",
+			"tools": false,
+			"thinking": true,
+			"efforts": []
+		}
+	}
+}

@@ -1,0 +1,175 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.catalogRun",
+	"name": "run-views-by-retention-and-tools",
+	"input": {
+		"startMs": 1790337600000,
+		"entry": "lab",
+		"terms": {
+			"kept": true,
+			"price": "unknown"
+		},
+		"rows": [
+			"local:lab/local-a:27b",
+			"local:lab/local-b:9b",
+			"local:lab/local-c:3b"
+		],
+		"steps": [
+			{
+				"kind": "call",
+				"call": {
+					"kind": "views",
+					"zdrOnly": true
+				}
+			},
+			{
+				"kind": "call",
+				"call": {
+					"kind": "views",
+					"zdrOnly": false
+				}
+			}
+		],
+		"server": {
+			"live": false,
+			"loaded": false,
+			"warm": false,
+			"models": [
+				{
+					"models": [
+						{
+							"tag": "local-a:27b",
+							"tools": true,
+							"thinking": true,
+							"efforts": [
+								"low",
+								"high"
+							],
+							"context": 8192
+						},
+						{
+							"tag": "local-b:9b",
+							"tools": true,
+							"thinking": false,
+							"efforts": [],
+							"trained": 4096
+						},
+						{
+							"tag": "local-c:3b",
+							"tools": false,
+							"thinking": false,
+							"efforts": []
+						}
+					]
+				}
+			],
+			"loads": [],
+			"warms": []
+		}
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "views",
+						"views": [
+							{
+								"key": "local:lab/local-a:27b",
+								"status": "noZdrHost",
+								"efforts": [
+									"low",
+									"high"
+								],
+								"price": "unknown",
+								"hosts": []
+							},
+							{
+								"key": "local:lab/local-b:9b",
+								"status": "noZdrHost",
+								"efforts": [],
+								"price": "unknown",
+								"hosts": []
+							},
+							{
+								"key": "local:lab/local-c:3b",
+								"status": "noTools",
+								"efforts": [],
+								"price": "unknown",
+								"hosts": []
+							}
+						]
+					}
+				],
+				"served": [
+					{
+						"method": "models",
+						"tag": null,
+						"known": [],
+						"startMs": 1790337600000,
+						"endMs": 1790337600000,
+						"aborted": false
+					}
+				],
+				"refreshed": 1
+			},
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "views",
+						"views": [
+							{
+								"key": "local:lab/local-a:27b",
+								"status": "ok",
+								"efforts": [
+									"low",
+									"high"
+								],
+								"promptLimit": 8192,
+								"price": "unknown",
+								"hosts": [],
+								"dataKept": true,
+								"api": {
+									"family": "chat-completions",
+									"structured": true,
+									"choice": [],
+									"strict": false,
+									"reasoning": "reasoning"
+								},
+								"cache": "implicit"
+							},
+							{
+								"key": "local:lab/local-b:9b",
+								"status": "ok",
+								"efforts": [],
+								"price": "unknown",
+								"hosts": [],
+								"dataKept": true,
+								"api": {
+									"family": "chat-completions",
+									"structured": true,
+									"choice": [],
+									"strict": false
+								},
+								"cache": "implicit"
+							},
+							{
+								"key": "local:lab/local-c:3b",
+								"status": "noTools",
+								"efforts": [],
+								"price": "unknown",
+								"hosts": []
+							}
+						]
+					}
+				],
+				"served": [],
+				"refreshed": 0
+			}
+		],
+		"waiting": []
+	}
+}

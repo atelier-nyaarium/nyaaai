@@ -1,0 +1,57 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.lmstudioModels",
+	"name": "lmstudio-two-instances-the-first-gives-the-context",
+	"input": {
+		"body": {
+			"models": [
+				{
+					"key": "local-a",
+					"type": "llm",
+					"max_context_length": 262144,
+					"loaded_instances": [
+						{
+							"config": {
+								"context_length": 4096
+							}
+						},
+						{
+							"config": {
+								"context_length": 8192
+							}
+						}
+					],
+					"capabilities": {
+						"vision": false,
+						"trained_for_tool_use": true,
+						"reasoning": {
+							"allowed_options": [
+								"off",
+								"on"
+							],
+							"default": "on"
+						}
+					}
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"tag": "local-a",
+				"tools": true,
+				"thinking": true,
+				"efforts": [
+					"none",
+					"low",
+					"medium",
+					"high"
+				],
+				"loaded": 4096,
+				"trained": 262144
+			}
+		]
+	}
+}

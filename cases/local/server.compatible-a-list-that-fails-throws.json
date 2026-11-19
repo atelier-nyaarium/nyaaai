@@ -1,0 +1,53 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.server",
+	"name": "compatible-a-list-that-fails-throws",
+	"input": {
+		"kind": "compatible",
+		"entry": {
+			"label": "Lab",
+			"url": "https://host.lab.example/api/v2"
+		},
+		"stored": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 503,
+				"json": {
+					"error": {
+						"message": "Down."
+					}
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "models",
+				"known": []
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"models": null,
+				"contexts": null,
+				"done": false,
+				"thrown": "Down."
+			}
+		],
+		"requests": [
+			{
+				"method": "GET",
+				"url": "https://host.lab.example/api/v2/models",
+				"authorization": null,
+				"body": null
+			}
+		],
+		"read": [
+			1
+		],
+		"waiting": []
+	}
+}

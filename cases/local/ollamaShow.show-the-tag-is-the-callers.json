@@ -1,0 +1,43 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaShow",
+	"name": "show-the-tag-is-the-callers",
+	"input": {
+		"tag": "local-b:9b",
+		"body": {
+			"parameters": "num_ctx                        32768\ntemperature                    0.6",
+			"capabilities": [
+				"completion",
+				"tools",
+				"thinking"
+			],
+			"thinking": {
+				"values": [
+					false,
+					true
+				],
+				"default": true
+			},
+			"model_info": {
+				"general.architecture": "arch-a",
+				"arch-a.context_length": 262144
+			}
+		}
+	},
+	"expected": {
+		"model": {
+			"tag": "local-b:9b",
+			"tools": true,
+			"thinking": true,
+			"efforts": [
+				"none",
+				"low",
+				"medium",
+				"high"
+			],
+			"context": 32768,
+			"trained": 262144
+		}
+	}
+}

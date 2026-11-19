@@ -1,0 +1,18 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.efforts",
+	"name": "efforts-true-is-low-medium-high",
+	"input": {
+		"values": [
+			true
+		]
+	},
+	"expected": {
+		"efforts": [
+			"low",
+			"medium",
+			"high"
+		]
+	}
+}

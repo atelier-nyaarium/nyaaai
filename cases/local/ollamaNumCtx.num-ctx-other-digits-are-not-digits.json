@@ -1,0 +1,20 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaNumCtx",
+	"name": "num-ctx-other-digits-are-not-digits",
+	"input": {
+		"texts": [
+			"num_ctx ٤٢",
+			"num_ctx ４２",
+			"num_ctx 4٢"
+		]
+	},
+	"expected": {
+		"contexts": [
+			null,
+			null,
+			null
+		]
+	}
+}

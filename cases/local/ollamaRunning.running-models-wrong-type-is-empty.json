@@ -1,0 +1,14 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaRunning",
+	"name": "running-models-wrong-type-is-empty",
+	"input": {
+		"body": {
+			"models": "x"
+		}
+	},
+	"expected": {
+		"contexts": []
+	}
+}

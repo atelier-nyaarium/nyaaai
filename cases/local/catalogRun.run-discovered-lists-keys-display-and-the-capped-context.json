@@ -1,0 +1,112 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.catalogRun",
+	"name": "run-discovered-lists-keys-display-and-the-capped-context",
+	"input": {
+		"startMs": 1790337600000,
+		"entry": "lab",
+		"terms": {
+			"kept": false,
+			"price": "free"
+		},
+		"rows": [
+			"local:lab/local-a:27b",
+			"local:lab/local-b:9b"
+		],
+		"steps": [
+			{
+				"kind": "call",
+				"call": {
+					"kind": "discovered"
+				}
+			}
+		],
+		"server": {
+			"live": false,
+			"loaded": false,
+			"warm": false,
+			"models": [
+				{
+					"models": [
+						{
+							"tag": "local-a:27b",
+							"tools": true,
+							"thinking": true,
+							"efforts": [
+								"low",
+								"high"
+							],
+							"context": 8192
+						},
+						{
+							"tag": "local-b:9b",
+							"tools": true,
+							"thinking": false,
+							"efforts": [],
+							"trained": 4096,
+							"context": 8192
+						},
+						{
+							"tag": "local-c:3b",
+							"tools": false,
+							"thinking": false,
+							"efforts": []
+						}
+					]
+				}
+			],
+			"loads": [],
+			"warms": []
+		}
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "discovered",
+						"models": [
+							{
+								"key": "local:lab/local-a:27b",
+								"display": "lab/local-a:27b",
+								"tag": "local-a:27b",
+								"tools": true,
+								"reasoning": true,
+								"context": 8192
+							},
+							{
+								"key": "local:lab/local-b:9b",
+								"display": "lab/local-b:9b",
+								"tag": "local-b:9b",
+								"tools": true,
+								"reasoning": false,
+								"context": 4096
+							},
+							{
+								"key": "local:lab/local-c:3b",
+								"display": "lab/local-c:3b",
+								"tag": "local-c:3b",
+								"tools": false,
+								"reasoning": false
+							}
+						]
+					}
+				],
+				"served": [
+					{
+						"method": "models",
+						"tag": null,
+						"known": [],
+						"startMs": 1790337600000,
+						"endMs": 1790337600000,
+						"aborted": false
+					}
+				],
+				"refreshed": 1
+			}
+		],
+		"waiting": []
+	}
+}

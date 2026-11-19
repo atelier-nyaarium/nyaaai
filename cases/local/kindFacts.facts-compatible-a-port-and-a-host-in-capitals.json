@@ -1,0 +1,38 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.kindFacts",
+	"name": "facts-compatible-a-port-and-a-host-in-capitals",
+	"input": {
+		"kind": "compatible",
+		"url": "HTTP://LAB.LOCAL:8000",
+		"states": [
+			{
+				"kind": "none"
+			},
+			{
+				"kind": "checking"
+			},
+			{
+				"kind": "ok"
+			},
+			{
+				"kind": "ok",
+				"models": 0
+			},
+			{
+				"kind": "ok",
+				"models": 1
+			}
+		]
+	},
+	"expected": {
+		"facts": [
+			"HTTP://LAB.LOCAL:8000/v1",
+			"HTTP://LAB.LOCAL:8000/v1",
+			"HTTP://LAB.LOCAL:8000/v1",
+			"HTTP://LAB.LOCAL:8000/v1 · 0 models",
+			"HTTP://LAB.LOCAL:8000/v1 · 1 model"
+		]
+	}
+}

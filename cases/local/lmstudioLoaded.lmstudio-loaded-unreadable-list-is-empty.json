@@ -1,0 +1,14 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.lmstudioLoaded",
+	"name": "lmstudio-loaded-unreadable-list-is-empty",
+	"input": {
+		"body": {
+			"data": []
+		}
+	},
+	"expected": {
+		"contexts": []
+	}
+}

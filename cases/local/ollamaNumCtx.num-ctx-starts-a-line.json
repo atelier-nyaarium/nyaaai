@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaNumCtx",
+	"name": "num-ctx-starts-a-line",
+	"input": {
+		"texts": [
+			"  num_ctx 4096",
+			"x num_ctx 4096",
+			"xnum_ctx 4096",
+			"\tnum_ctx 4096"
+		]
+	},
+	"expected": {
+		"contexts": [
+			null,
+			null,
+			null,
+			null
+		]
+	}
+}

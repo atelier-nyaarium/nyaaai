@@ -1,0 +1,73 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.server",
+	"name": "llamacpp-loaded-of-a-sleeping-model-is-empty",
+	"input": {
+		"kind": "llamacpp",
+		"entry": {
+			"label": "Lab"
+		},
+		"stored": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 400,
+				"json": {
+					"error": {
+						"message": "model is not loaded"
+					}
+				}
+			},
+			{
+				"status": 200,
+				"json": null
+			}
+		],
+		"steps": [
+			{
+				"kind": "loaded",
+				"tag": "local-a.gguf"
+			},
+			{
+				"kind": "loaded",
+				"tag": "local-b.gguf"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"models": null,
+				"contexts": [],
+				"done": false,
+				"thrown": null
+			},
+			{
+				"models": null,
+				"contexts": [],
+				"done": false,
+				"thrown": null
+			}
+		],
+		"requests": [
+			{
+				"method": "GET",
+				"url": "http://127.0.0.1:8080/props?model=local-a.gguf&autoload=false",
+				"authorization": null,
+				"body": null
+			},
+			{
+				"method": "GET",
+				"url": "http://127.0.0.1:8080/props?model=local-b.gguf&autoload=false",
+				"authorization": null,
+				"body": null
+			}
+		],
+		"read": [
+			1,
+			1
+		],
+		"waiting": []
+	}
+}

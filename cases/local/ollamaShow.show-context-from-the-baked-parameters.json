@@ -1,0 +1,24 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaShow",
+	"name": "show-context-from-the-baked-parameters",
+	"input": {
+		"tag": "local-a:27b",
+		"body": {
+			"capabilities": [
+				"completion"
+			],
+			"parameters": "temperature 0.7\nnum_ctx 4096\nstop <x>"
+		}
+	},
+	"expected": {
+		"model": {
+			"tag": "local-a:27b",
+			"tools": false,
+			"thinking": false,
+			"efforts": [],
+			"context": 4096
+		}
+	}
+}

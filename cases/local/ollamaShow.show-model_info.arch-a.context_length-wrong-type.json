@@ -1,0 +1,42 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaShow",
+	"name": "show-model_info.arch-a.context_length-wrong-type",
+	"input": {
+		"tag": "local-a:27b",
+		"body": {
+			"parameters": "num_ctx                        32768\ntemperature                    0.6",
+			"capabilities": [
+				"completion",
+				"tools",
+				"thinking"
+			],
+			"thinking": {
+				"values": [
+					false,
+					true
+				],
+				"default": true
+			},
+			"model_info": {
+				"general.architecture": "arch-a",
+				"arch-a.context_length": "7"
+			}
+		}
+	},
+	"expected": {
+		"model": {
+			"tag": "local-a:27b",
+			"tools": true,
+			"thinking": true,
+			"efforts": [
+				"none",
+				"low",
+				"medium",
+				"high"
+			],
+			"context": 32768
+		}
+	}
+}

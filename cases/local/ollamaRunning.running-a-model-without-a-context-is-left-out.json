@@ -1,0 +1,27 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaRunning",
+	"name": "running-a-model-without-a-context-is-left-out",
+	"input": {
+		"body": {
+			"models": [
+				{
+					"name": "local-a:27b"
+				},
+				{
+					"name": "local-b:9b",
+					"context_length": 4096
+				}
+			]
+		}
+	},
+	"expected": {
+		"contexts": [
+			{
+				"tag": "local-b:9b",
+				"context": 4096
+			}
+		]
+	}
+}

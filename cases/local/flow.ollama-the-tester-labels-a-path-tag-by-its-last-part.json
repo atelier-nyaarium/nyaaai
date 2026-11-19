@@ -1,0 +1,83 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.flow",
+	"name": "ollama-the-tester-labels-a-path-tag-by-its-last-part",
+	"input": {
+		"kind": "ollama",
+		"entry": {
+			"id": "lab",
+			"label": "Lab"
+		},
+		"stored": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"models": [
+						{
+							"name": "hub/lab/local-d:7b"
+						}
+					]
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"capabilities": [
+						"completion",
+						"tools"
+					],
+					"model_info": {
+						"general.architecture": "arch-b",
+						"arch-b.context_length": 131072
+					}
+				}
+			}
+		],
+		"rows": [],
+		"steps": [
+			{
+				"kind": "listed",
+				"id": "hub/lab/local-d:7b"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "listed",
+					"listed": {
+						"label": "local-d:7b",
+						"reasoning": false
+					}
+				}
+			}
+		],
+		"requests": [
+			{
+				"method": "GET",
+				"url": "http://127.0.0.1:11434/api/tags",
+				"authorization": null,
+				"body": null
+			},
+			{
+				"method": "POST",
+				"url": "http://127.0.0.1:11434/api/show",
+				"authorization": null,
+				"body": {
+					"model": "hub/lab/local-d:7b"
+				}
+			}
+		],
+		"read": [
+			1,
+			1
+		],
+		"waiting": [],
+		"refreshed": 1
+	}
+}

@@ -1,0 +1,18 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaNumCtx",
+	"name": "num-ctx-a-later-line-reads-after-a-line-that-does-not",
+	"input": {
+		"texts": [
+			"num_ctx 4096 x\nnum_ctx 8192",
+			"num_ctx x\nnum_ctx 8192"
+		]
+	},
+	"expected": {
+		"contexts": [
+			8192,
+			8192
+		]
+	}
+}

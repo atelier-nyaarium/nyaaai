@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaNumCtx",
+	"name": "num-ctx-zero-and-signs",
+	"input": {
+		"texts": [
+			"num_ctx 0",
+			"num_ctx 00",
+			"num_ctx -5",
+			"num_ctx +5",
+			"num_ctx 007",
+			"num_ctx 0\nnum_ctx 4096"
+		]
+	},
+	"expected": {
+		"contexts": [
+			null,
+			null,
+			null,
+			null,
+			7,
+			null
+		]
+	}
+}

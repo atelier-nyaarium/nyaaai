@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaShow",
+	"name": "show-trained-needs-a-positive-number",
+	"input": {
+		"tag": "local-a:27b",
+		"body": {
+			"capabilities": [
+				"completion"
+			],
+			"model_info": {
+				"general.architecture": "arch-a",
+				"arch-a.context_length": 0
+			}
+		}
+	},
+	"expected": {
+		"model": {
+			"tag": "local-a:27b",
+			"tools": false,
+			"thinking": false,
+			"efforts": []
+		}
+	}
+}

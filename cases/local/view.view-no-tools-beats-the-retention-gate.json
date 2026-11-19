@@ -1,0 +1,34 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.view",
+	"name": "view-no-tools-beats-the-retention-gate",
+	"input": {
+		"row": "local:lab/local-b:9b",
+		"model": {
+			"tag": "local-b:9b",
+			"tools": false,
+			"thinking": true,
+			"efforts": [
+				"low"
+			]
+		},
+		"terms": {
+			"kept": true,
+			"price": "unknown"
+		},
+		"zdrOnly": true
+	},
+	"expected": {
+		"view": {
+			"key": "local:lab/local-b:9b",
+			"status": "noTools",
+			"efforts": [
+				"low"
+			],
+			"price": "unknown",
+			"hosts": []
+		},
+		"context": null
+	}
+}

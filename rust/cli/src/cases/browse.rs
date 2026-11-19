@@ -64,6 +64,7 @@ fn message_of(error: &KindError) -> String {
         KindError::Cancelled => CALLER_REASON.to_owned(),
         KindError::TimedOut => "The operation timed out.".to_owned(),
         KindError::Provider(held) => held.failure.message.clone(),
+        KindError::Message(text) => text.clone(),
     }
 }
 

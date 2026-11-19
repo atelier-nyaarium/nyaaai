@@ -1,0 +1,20 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.efforts",
+	"name": "efforts-repeats-count-once",
+	"input": {
+		"values": [
+			"low",
+			"low",
+			true
+		]
+	},
+	"expected": {
+		"efforts": [
+			"low",
+			"medium",
+			"high"
+		]
+	}
+}

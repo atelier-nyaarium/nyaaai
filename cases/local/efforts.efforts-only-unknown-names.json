@@ -1,0 +1,14 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.efforts",
+	"name": "efforts-only-unknown-names",
+	"input": {
+		"values": [
+			"bogus"
+		]
+	},
+	"expected": {
+		"efforts": []
+	}
+}

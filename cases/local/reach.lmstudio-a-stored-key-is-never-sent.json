@@ -1,0 +1,55 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.reach",
+	"name": "lmstudio-a-stored-key-is-never-sent",
+	"input": {
+		"kind": "lmstudio",
+		"entry": {
+			"label": "Lab"
+		},
+		"secret": "key-0123456789abcdef",
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"models": [
+						{
+							"key": "local-a",
+							"type": "llm"
+						},
+						{
+							"key": "embed-a",
+							"type": "embedding"
+						},
+						{
+							"key": "local-b",
+							"type": "llm"
+						},
+						{
+							"type": "llm"
+						}
+					]
+				}
+			}
+		]
+	},
+	"expected": {
+		"state": {
+			"kind": "ok",
+			"models": 2
+		},
+		"thrown": null,
+		"facts": "http://127.0.0.1:1234 · 2 models",
+		"requests": [
+			{
+				"method": "GET",
+				"url": "http://127.0.0.1:1234/api/v1/models",
+				"authorization": null,
+				"body": null
+			}
+		],
+		"waiting": []
+	}
+}

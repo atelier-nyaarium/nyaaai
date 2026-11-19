@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.llamacppProps",
+	"name": "props-chat_template_caps.reasoning_effort_levels-wrong-type",
+	"input": {
+		"body": {
+			"default_generation_settings": {
+				"n_ctx": 65536
+			},
+			"chat_template_caps": {
+				"reasoning_effort_levels": "x"
+			}
+		}
+	},
+	"expected": {
+		"props": {
+			"context": 65536,
+			"efforts": []
+		}
+	}
+}

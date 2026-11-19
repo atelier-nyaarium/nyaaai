@@ -1,0 +1,24 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaNumCtx",
+	"name": "num-ctx-end-of-the-text-ends-the-line",
+	"input": {
+		"texts": [
+			"num_ctx 4096",
+			"num_ctx 4096 ",
+			"num_ctx\t4096\t",
+			"num_ctx 4096 ",
+			"num_ctx 4096 \n"
+		]
+	},
+	"expected": {
+		"contexts": [
+			4096,
+			4096,
+			4096,
+			4096,
+			4096
+		]
+	}
+}

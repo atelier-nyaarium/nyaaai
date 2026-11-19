@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.efforts",
+	"name": "efforts-the-top-two-are-never-on",
+	"input": {
+		"values": [
+			true,
+			"xhigh",
+			"max"
+		]
+	},
+	"expected": {
+		"efforts": [
+			"low",
+			"medium",
+			"high",
+			"xhigh",
+			"max"
+		]
+	}
+}

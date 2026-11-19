@@ -1,0 +1,24 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaNumCtx",
+	"name": "num-ctx-more-after-the-number-on-the-line-is-no-match",
+	"input": {
+		"texts": [
+			"num_ctx 4096 x",
+			"num_ctx 4096x",
+			"num_ctx 40.5",
+			"num_ctx 1e5",
+			"num_ctx 4096,"
+		]
+	},
+	"expected": {
+		"contexts": [
+			null,
+			null,
+			null,
+			null,
+			null
+		]
+	}
+}

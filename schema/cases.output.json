@@ -9802,6 +9802,2477 @@
 				"waiting"
 			],
 			"additionalProperties": false
+		},
+		"ServedModel": {
+			"type": "object",
+			"properties": {
+				"tag": {
+					"type": "string"
+				},
+				"tools": {
+					"type": "boolean"
+				},
+				"thinking": {
+					"type": "boolean"
+				},
+				"efforts": {
+					"type": "array",
+					"items": {
+						"$ref": "step.output.json#/$defs/Effort"
+					}
+				},
+				"context": {
+					"type": "number"
+				},
+				"loaded": {
+					"type": "number"
+				},
+				"trained": {
+					"type": "number"
+				},
+				"probed": {
+					"type": "boolean",
+					"const": false
+				}
+			},
+			"required": [
+				"tag",
+				"tools",
+				"thinking",
+				"efforts"
+			],
+			"additionalProperties": false
+		},
+		"ServedTerms": {
+			"type": "object",
+			"properties": {
+				"kept": {
+					"type": "boolean"
+				},
+				"price": {
+					"type": "string",
+					"enum": [
+						"free",
+						"unknown"
+					]
+				}
+			},
+			"required": [
+				"kept",
+				"price"
+			],
+			"additionalProperties": false
+		},
+		"LocalEntry": {
+			"type": "object",
+			"properties": {
+				"label": {
+					"type": "string"
+				},
+				"url": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"label"
+			],
+			"additionalProperties": false
+		},
+		"LocalEffortsInput": {
+			"type": "object",
+			"properties": {
+				"values": {
+					"type": "array",
+					"items": {
+						"type": [
+							"boolean",
+							"string"
+						]
+					}
+				}
+			},
+			"required": [
+				"values"
+			],
+			"additionalProperties": false
+		},
+		"LocalEffortsResult": {
+			"type": "object",
+			"properties": {
+				"efforts": {
+					"type": "array",
+					"items": {
+						"$ref": "step.output.json#/$defs/Effort"
+					}
+				}
+			},
+			"required": [
+				"efforts"
+			],
+			"additionalProperties": false
+		},
+		"LocalLabelInput": {
+			"type": "object",
+			"properties": {
+				"tags": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"tags"
+			],
+			"additionalProperties": false
+		},
+		"LocalLabelResult": {
+			"type": "object",
+			"properties": {
+				"labels": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"labels"
+			],
+			"additionalProperties": false
+		},
+		"LocalViewInput": {
+			"type": "object",
+			"properties": {
+				"row": {
+					"type": "string"
+				},
+				"model": {
+					"$ref": "#/$defs/ServedModel"
+				},
+				"loaded": {
+					"type": "number"
+				},
+				"terms": {
+					"$ref": "#/$defs/ServedTerms"
+				},
+				"zdrOnly": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"row",
+				"model",
+				"terms",
+				"zdrOnly"
+			],
+			"additionalProperties": false
+		},
+		"LocalViewResult": {
+			"type": "object",
+			"properties": {
+				"view": {
+					"$ref": "#/$defs/ViewLine"
+				},
+				"context": {
+					"type": [
+						"number",
+						"null"
+					]
+				}
+			},
+			"required": [
+				"view",
+				"context"
+			],
+			"additionalProperties": false
+		},
+		"LocalOllamaTagsInput": {
+			"type": "object",
+			"properties": {
+				"body": {}
+			},
+			"required": [
+				"body"
+			],
+			"additionalProperties": false
+		},
+		"LocalOllamaTagsResult": {
+			"type": "object",
+			"properties": {
+				"tags": {
+					"anyOf": [
+						{
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						},
+						{
+							"type": "null"
+						}
+					]
+				}
+			},
+			"required": [
+				"tags"
+			],
+			"additionalProperties": false
+		},
+		"LocalOllamaShowInput": {
+			"type": "object",
+			"properties": {
+				"tag": {
+					"type": "string"
+				},
+				"body": {}
+			},
+			"required": [
+				"tag",
+				"body"
+			],
+			"additionalProperties": false
+		},
+		"LocalOllamaShowResult": {
+			"type": "object",
+			"properties": {
+				"model": {
+					"anyOf": [
+						{
+							"$ref": "#/$defs/ServedModel"
+						},
+						{
+							"type": "null"
+						}
+					]
+				}
+			},
+			"required": [
+				"model"
+			],
+			"additionalProperties": false
+		},
+		"LocalOllamaNumCtxInput": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			],
+			"additionalProperties": false
+		},
+		"LocalOllamaNumCtxResult": {
+			"type": "object",
+			"properties": {
+				"contexts": {
+					"type": "array",
+					"items": {
+						"type": [
+							"number",
+							"null"
+						]
+					}
+				}
+			},
+			"required": [
+				"contexts"
+			],
+			"additionalProperties": false
+		},
+		"LocalOllamaRunningInput": {
+			"type": "object",
+			"properties": {
+				"body": {}
+			},
+			"required": [
+				"body"
+			],
+			"additionalProperties": false
+		},
+		"LocalOllamaRunningResult": {
+			"type": "object",
+			"properties": {
+				"contexts": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"tag": {
+								"type": "string"
+							},
+							"context": {
+								"type": "number"
+							}
+						},
+						"required": [
+							"tag",
+							"context"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"contexts"
+			],
+			"additionalProperties": false
+		},
+		"LocalLmstudioModelsInput": {
+			"type": "object",
+			"properties": {
+				"body": {}
+			},
+			"required": [
+				"body"
+			],
+			"additionalProperties": false
+		},
+		"LocalLmstudioModelsResult": {
+			"type": "object",
+			"properties": {
+				"models": {
+					"anyOf": [
+						{
+							"type": "array",
+							"items": {
+								"$ref": "#/$defs/ServedModel"
+							}
+						},
+						{
+							"type": "null"
+						}
+					]
+				}
+			},
+			"required": [
+				"models"
+			],
+			"additionalProperties": false
+		},
+		"LocalLmstudioLoadedInput": {
+			"type": "object",
+			"properties": {
+				"body": {}
+			},
+			"required": [
+				"body"
+			],
+			"additionalProperties": false
+		},
+		"LocalLmstudioLoadedResult": {
+			"type": "object",
+			"properties": {
+				"contexts": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"tag": {
+								"type": "string"
+							},
+							"context": {
+								"type": "number"
+							}
+						},
+						"required": [
+							"tag",
+							"context"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"contexts"
+			],
+			"additionalProperties": false
+		},
+		"LocalLlamacppModelsInput": {
+			"type": "object",
+			"properties": {
+				"body": {}
+			},
+			"required": [
+				"body"
+			],
+			"additionalProperties": false
+		},
+		"LocalLlamacppModelsResult": {
+			"type": "object",
+			"properties": {
+				"models": {
+					"anyOf": [
+						{
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"id": {
+										"type": "string"
+									},
+									"trained": {
+										"type": [
+											"number",
+											"null"
+										]
+									}
+								},
+								"required": [
+									"id",
+									"trained"
+								],
+								"additionalProperties": false
+							}
+						},
+						{
+							"type": "null"
+						}
+					]
+				}
+			},
+			"required": [
+				"models"
+			],
+			"additionalProperties": false
+		},
+		"LocalLlamacppPropsInput": {
+			"type": "object",
+			"properties": {
+				"body": {}
+			},
+			"required": [
+				"body"
+			],
+			"additionalProperties": false
+		},
+		"LocalLlamacppPropsResult": {
+			"type": "object",
+			"properties": {
+				"props": {
+					"anyOf": [
+						{
+							"type": "object",
+							"properties": {
+								"context": {
+									"type": [
+										"number",
+										"null"
+									]
+								},
+								"efforts": {
+									"type": "array",
+									"items": {
+										"type": "string"
+									}
+								}
+							},
+							"required": [
+								"context",
+								"efforts"
+							],
+							"additionalProperties": false
+						},
+						{
+							"type": "null"
+						}
+					]
+				}
+			},
+			"required": [
+				"props"
+			],
+			"additionalProperties": false
+		},
+		"LocalLlamacppModelInput": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "string"
+				},
+				"trained": {
+					"type": "number"
+				},
+				"props": {
+					"type": "object",
+					"properties": {
+						"context": {
+							"type": "number"
+						},
+						"efforts": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						}
+					},
+					"required": [
+						"efforts"
+					],
+					"additionalProperties": false
+				},
+				"known": {
+					"$ref": "#/$defs/ServedModel"
+				}
+			},
+			"required": [
+				"id"
+			],
+			"additionalProperties": false
+		},
+		"LocalLlamacppModelResult": {
+			"type": "object",
+			"properties": {
+				"model": {
+					"$ref": "#/$defs/ServedModel"
+				}
+			},
+			"required": [
+				"model"
+			],
+			"additionalProperties": false
+		},
+		"LocalCompatibleModelsInput": {
+			"type": "object",
+			"properties": {
+				"body": {}
+			},
+			"required": [
+				"body"
+			],
+			"additionalProperties": false
+		},
+		"LocalCompatibleModelsResult": {
+			"type": "object",
+			"properties": {
+				"models": {
+					"anyOf": [
+						{
+							"type": "array",
+							"items": {
+								"$ref": "#/$defs/ServedModel"
+							}
+						},
+						{
+							"type": "null"
+						}
+					]
+				}
+			},
+			"required": [
+				"models"
+			],
+			"additionalProperties": false
+		},
+		"LocalCompatibleTermsInput": {
+			"type": "object",
+			"properties": {
+				"urls": {
+					"type": "array",
+					"items": {
+						"type": [
+							"string",
+							"null"
+						]
+					}
+				}
+			},
+			"required": [
+				"urls"
+			],
+			"additionalProperties": false
+		},
+		"LocalCompatibleTermsResult": {
+			"type": "object",
+			"properties": {
+				"terms": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"remote": {
+								"type": "boolean"
+							},
+							"kept": {
+								"type": "boolean"
+							},
+							"price": {
+								"type": "string",
+								"enum": [
+									"free",
+									"unknown"
+								]
+							}
+						},
+						"required": [
+							"remote",
+							"kept",
+							"price"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"terms"
+			],
+			"additionalProperties": false
+		},
+		"LocalReachInput": {
+			"type": "object",
+			"properties": {
+				"kind": {
+					"type": "string",
+					"enum": [
+						"ollama",
+						"lmstudio",
+						"llamacpp",
+						"compatible"
+					]
+				},
+				"entry": {
+					"$ref": "#/$defs/LocalEntry"
+				},
+				"secret": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"startMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"exchanges": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/NetExchange"
+					}
+				},
+				"abortAfterMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"abortedBefore": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"kind",
+				"entry",
+				"secret",
+				"startMs",
+				"exchanges"
+			],
+			"additionalProperties": false
+		},
+		"LocalReachResult": {
+			"type": "object",
+			"properties": {
+				"state": {
+					"anyOf": [
+						{
+							"$ref": "provider.output.json#/$defs/KeyState"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"thrown": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"facts": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"requests": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"method": {
+								"type": "string"
+							},
+							"url": {
+								"type": "string"
+							},
+							"authorization": {
+								"type": [
+									"string",
+									"null"
+								]
+							},
+							"body": {}
+						},
+						"required": [
+							"method",
+							"url",
+							"authorization",
+							"body"
+						],
+						"additionalProperties": false
+					}
+				},
+				"waiting": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"state",
+				"thrown",
+				"facts",
+				"requests",
+				"waiting"
+			],
+			"additionalProperties": false
+		},
+		"LocalServerInput": {
+			"type": "object",
+			"properties": {
+				"kind": {
+					"type": "string",
+					"enum": [
+						"ollama",
+						"lmstudio",
+						"llamacpp",
+						"compatible"
+					]
+				},
+				"entry": {
+					"$ref": "#/$defs/LocalEntry"
+				},
+				"stored": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"startMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"exchanges": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/NetExchange"
+					}
+				},
+				"steps": {
+					"minItems": 1,
+					"type": "array",
+					"items": {
+						"oneOf": [
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "models"
+									},
+									"known": {
+										"type": "array",
+										"items": {
+											"$ref": "#/$defs/ServedModel"
+										}
+									},
+									"abortAfterMs": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991
+									},
+									"abortedBefore": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"kind",
+									"known"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "loaded"
+									},
+									"tag": {
+										"type": "string"
+									},
+									"abortAfterMs": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991
+									},
+									"abortedBefore": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"kind",
+									"tag"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "warm"
+									},
+									"tag": {
+										"type": "string"
+									},
+									"abortAfterMs": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991
+									},
+									"abortedBefore": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"kind",
+									"tag"
+								],
+								"additionalProperties": false
+							}
+						],
+						"x-tag": "kind"
+					}
+				}
+			},
+			"required": [
+				"kind",
+				"entry",
+				"stored",
+				"startMs",
+				"exchanges",
+				"steps"
+			],
+			"additionalProperties": false
+		},
+		"LocalServerResult": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"models": {
+								"anyOf": [
+									{
+										"type": "array",
+										"items": {
+											"$ref": "#/$defs/ServedModel"
+										}
+									},
+									{
+										"type": "null"
+									}
+								]
+							},
+							"contexts": {
+								"anyOf": [
+									{
+										"type": "array",
+										"items": {
+											"type": "object",
+											"properties": {
+												"tag": {
+													"type": "string"
+												},
+												"context": {
+													"type": "number"
+												}
+											},
+											"required": [
+												"tag",
+												"context"
+											],
+											"additionalProperties": false
+										}
+									},
+									{
+										"type": "null"
+									}
+								]
+							},
+							"done": {
+								"type": "boolean"
+							},
+							"thrown": {
+								"type": [
+									"string",
+									"null"
+								]
+							}
+						},
+						"required": [
+							"models",
+							"contexts",
+							"done",
+							"thrown"
+						],
+						"additionalProperties": false
+					}
+				},
+				"requests": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"method": {
+								"type": "string"
+							},
+							"url": {
+								"type": "string"
+							},
+							"authorization": {
+								"type": [
+									"string",
+									"null"
+								]
+							},
+							"body": {}
+						},
+						"required": [
+							"method",
+							"url",
+							"authorization",
+							"body"
+						],
+						"additionalProperties": false
+					}
+				},
+				"read": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"minimum": -9007199254740991,
+						"maximum": 9007199254740991
+					}
+				},
+				"waiting": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"steps",
+				"requests",
+				"read",
+				"waiting"
+			],
+			"additionalProperties": false
+		},
+		"LocalCatalogRunInput": {
+			"type": "object",
+			"properties": {
+				"startMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"entry": {
+					"type": "string"
+				},
+				"terms": {
+					"$ref": "#/$defs/ServedTerms"
+				},
+				"server": {
+					"type": "object",
+					"properties": {
+						"live": {
+							"type": "boolean"
+						},
+						"loaded": {
+							"type": "boolean"
+						},
+						"warm": {
+							"type": "boolean"
+						},
+						"models": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"models": {
+										"type": "array",
+										"items": {
+											"$ref": "#/$defs/ServedModel"
+										}
+									},
+									"delayMs": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991
+									},
+									"fails": {
+										"type": "boolean",
+										"const": true
+									}
+								},
+								"required": [
+									"models"
+								],
+								"additionalProperties": false
+							}
+						},
+						"loads": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"contexts": {
+										"type": "array",
+										"items": {
+											"type": "object",
+											"properties": {
+												"tag": {
+													"type": "string"
+												},
+												"context": {
+													"type": "number"
+												}
+											},
+											"required": [
+												"tag",
+												"context"
+											],
+											"additionalProperties": false
+										}
+									},
+									"delayMs": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991
+									},
+									"fails": {
+										"type": "boolean",
+										"const": true
+									}
+								},
+								"required": [
+									"contexts"
+								],
+								"additionalProperties": false
+							}
+						},
+						"warms": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"delayMs": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991
+									},
+									"fails": {
+										"type": "boolean",
+										"const": true
+									}
+								},
+								"additionalProperties": false
+							}
+						}
+					},
+					"required": [
+						"live",
+						"loaded",
+						"warm",
+						"models",
+						"loads",
+						"warms"
+					],
+					"additionalProperties": false
+				},
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"steps": {
+					"minItems": 1,
+					"type": "array",
+					"items": {
+						"oneOf": [
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "call"
+									},
+									"call": {
+										"oneOf": [
+											{
+												"type": "object",
+												"properties": {
+													"kind": {
+														"type": "string",
+														"const": "views"
+													},
+													"use": {
+														"$ref": "model.output.json#/$defs/ModelUse"
+													},
+													"zdrOnly": {
+														"type": "boolean"
+													},
+													"abortAfterMs": {
+														"type": "integer",
+														"minimum": -9007199254740991,
+														"maximum": 9007199254740991
+													},
+													"abortedBefore": {
+														"type": "boolean"
+													}
+												},
+												"required": [
+													"kind"
+												],
+												"additionalProperties": false
+											},
+											{
+												"type": "object",
+												"properties": {
+													"kind": {
+														"type": "string",
+														"const": "discovered"
+													},
+													"fresh": {
+														"type": "boolean"
+													},
+													"abortAfterMs": {
+														"type": "integer",
+														"minimum": -9007199254740991,
+														"maximum": 9007199254740991
+													},
+													"abortedBefore": {
+														"type": "boolean"
+													}
+												},
+												"required": [
+													"kind"
+												],
+												"additionalProperties": false
+											},
+											{
+												"type": "object",
+												"properties": {
+													"kind": {
+														"type": "string",
+														"const": "viewFor"
+													},
+													"row": {
+														"type": "string"
+													},
+													"use": {
+														"$ref": "model.output.json#/$defs/ModelUse"
+													},
+													"abortAfterMs": {
+														"type": "integer",
+														"minimum": -9007199254740991,
+														"maximum": 9007199254740991
+													},
+													"abortedBefore": {
+														"type": "boolean"
+													}
+												},
+												"required": [
+													"kind",
+													"row"
+												],
+												"additionalProperties": false
+											},
+											{
+												"type": "object",
+												"properties": {
+													"kind": {
+														"type": "string",
+														"const": "warmed"
+													},
+													"tag": {
+														"type": "string"
+													},
+													"abortAfterMs": {
+														"type": "integer",
+														"minimum": -9007199254740991,
+														"maximum": 9007199254740991
+													},
+													"abortedBefore": {
+														"type": "boolean"
+													}
+												},
+												"required": [
+													"kind",
+													"tag"
+												],
+												"additionalProperties": false
+											}
+										],
+										"x-tag": "kind"
+									}
+								},
+								"required": [
+									"kind",
+									"call"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "together"
+									},
+									"calls": {
+										"minItems": 2,
+										"type": "array",
+										"items": {
+											"oneOf": [
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"type": "string",
+															"const": "views"
+														},
+														"use": {
+															"$ref": "model.output.json#/$defs/ModelUse"
+														},
+														"zdrOnly": {
+															"type": "boolean"
+														},
+														"abortAfterMs": {
+															"type": "integer",
+															"minimum": -9007199254740991,
+															"maximum": 9007199254740991
+														},
+														"abortedBefore": {
+															"type": "boolean"
+														}
+													},
+													"required": [
+														"kind"
+													],
+													"additionalProperties": false
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"type": "string",
+															"const": "discovered"
+														},
+														"fresh": {
+															"type": "boolean"
+														},
+														"abortAfterMs": {
+															"type": "integer",
+															"minimum": -9007199254740991,
+															"maximum": 9007199254740991
+														},
+														"abortedBefore": {
+															"type": "boolean"
+														}
+													},
+													"required": [
+														"kind"
+													],
+													"additionalProperties": false
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"type": "string",
+															"const": "viewFor"
+														},
+														"row": {
+															"type": "string"
+														},
+														"use": {
+															"$ref": "model.output.json#/$defs/ModelUse"
+														},
+														"abortAfterMs": {
+															"type": "integer",
+															"minimum": -9007199254740991,
+															"maximum": 9007199254740991
+														},
+														"abortedBefore": {
+															"type": "boolean"
+														}
+													},
+													"required": [
+														"kind",
+														"row"
+													],
+													"additionalProperties": false
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"type": "string",
+															"const": "warmed"
+														},
+														"tag": {
+															"type": "string"
+														},
+														"abortAfterMs": {
+															"type": "integer",
+															"minimum": -9007199254740991,
+															"maximum": 9007199254740991
+														},
+														"abortedBefore": {
+															"type": "boolean"
+														}
+													},
+													"required": [
+														"kind",
+														"tag"
+													],
+													"additionalProperties": false
+												}
+											],
+											"x-tag": "kind"
+										}
+									}
+								},
+								"required": [
+									"kind",
+									"calls"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "settled"
+									},
+									"tag": {
+										"type": "string"
+									},
+									"times": {
+										"type": "integer",
+										"minimum": 1,
+										"maximum": 9007199254740991
+									}
+								},
+								"required": [
+									"kind",
+									"tag"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "rediscover"
+									}
+								},
+								"required": [
+									"kind"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "advance"
+									},
+									"ms": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740991
+									}
+								},
+								"required": [
+									"kind",
+									"ms"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "rows"
+									},
+									"rows": {
+										"type": "array",
+										"items": {
+											"type": "string"
+										}
+									}
+								},
+								"required": [
+									"kind",
+									"rows"
+								],
+								"additionalProperties": false
+							}
+						],
+						"x-tag": "kind"
+					}
+				}
+			},
+			"required": [
+				"startMs",
+				"entry",
+				"terms",
+				"server",
+				"rows",
+				"steps"
+			],
+			"additionalProperties": false
+		},
+		"LocalCatalogRunResult": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"nowMs": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"answers": {
+								"type": "array",
+								"items": {
+									"oneOf": [
+										{
+											"type": "object",
+											"properties": {
+												"kind": {
+													"type": "string",
+													"const": "views"
+												},
+												"views": {
+													"type": "array",
+													"items": {
+														"$ref": "#/$defs/ViewLine"
+													}
+												}
+											},
+											"required": [
+												"kind",
+												"views"
+											],
+											"additionalProperties": false
+										},
+										{
+											"type": "object",
+											"properties": {
+												"kind": {
+													"type": "string",
+													"const": "discovered"
+												},
+												"models": {
+													"anyOf": [
+														{
+															"type": "array",
+															"items": {
+																"type": "object",
+																"properties": {
+																	"key": {
+																		"type": "string"
+																	},
+																	"display": {
+																		"type": "string"
+																	},
+																	"tag": {
+																		"type": "string"
+																	},
+																	"tools": {
+																		"type": "boolean"
+																	},
+																	"reasoning": {
+																		"type": "boolean"
+																	},
+																	"context": {
+																		"type": "number"
+																	}
+																},
+																"required": [
+																	"key",
+																	"display",
+																	"tag",
+																	"tools",
+																	"reasoning"
+																],
+																"additionalProperties": false
+															}
+														},
+														{
+															"type": "null"
+														}
+													]
+												}
+											},
+											"required": [
+												"kind",
+												"models"
+											],
+											"additionalProperties": false
+										},
+										{
+											"type": "object",
+											"properties": {
+												"kind": {
+													"type": "string",
+													"const": "view"
+												},
+												"view": {
+													"$ref": "#/$defs/ViewLine"
+												}
+											},
+											"required": [
+												"kind",
+												"view"
+											],
+											"additionalProperties": false
+										},
+										{
+											"type": "object",
+											"properties": {
+												"kind": {
+													"type": "string",
+													"const": "warmed"
+												}
+											},
+											"required": [
+												"kind"
+											],
+											"additionalProperties": false
+										},
+										{
+											"type": "object",
+											"properties": {
+												"kind": {
+													"type": "string",
+													"const": "thrown"
+												},
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"kind",
+												"message"
+											],
+											"additionalProperties": false
+										}
+									],
+									"x-tag": "kind"
+								}
+							},
+							"served": {
+								"type": "array",
+								"items": {
+									"type": "object",
+									"properties": {
+										"method": {
+											"type": "string",
+											"enum": [
+												"models",
+												"loaded",
+												"warm"
+											]
+										},
+										"tag": {
+											"type": [
+												"string",
+												"null"
+											]
+										},
+										"known": {
+											"type": "array",
+											"items": {
+												"type": "string"
+											}
+										},
+										"startMs": {
+											"type": "integer",
+											"minimum": -9007199254740991,
+											"maximum": 9007199254740991
+										},
+										"endMs": {
+											"type": "integer",
+											"minimum": -9007199254740991,
+											"maximum": 9007199254740991
+										},
+										"aborted": {
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"method",
+										"tag",
+										"known",
+										"startMs",
+										"endMs",
+										"aborted"
+									],
+									"additionalProperties": false
+								}
+							},
+							"refreshed": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							}
+						},
+						"required": [
+							"nowMs",
+							"answers",
+							"served",
+							"refreshed"
+						],
+						"additionalProperties": false
+					}
+				},
+				"waiting": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"steps",
+				"waiting"
+			],
+			"additionalProperties": false
+		},
+		"LocalFlowInput": {
+			"type": "object",
+			"properties": {
+				"kind": {
+					"type": "string",
+					"enum": [
+						"ollama",
+						"lmstudio",
+						"llamacpp",
+						"compatible"
+					]
+				},
+				"entry": {
+					"type": "object",
+					"properties": {
+						"id": {
+							"type": "string"
+						},
+						"label": {
+							"type": "string"
+						},
+						"url": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"id",
+						"label"
+					],
+					"additionalProperties": false
+				},
+				"stored": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"startMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"exchanges": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/NetExchange"
+					}
+				},
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"steps": {
+					"minItems": 1,
+					"type": "array",
+					"items": {
+						"oneOf": [
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "views"
+									},
+									"use": {
+										"$ref": "model.output.json#/$defs/ModelUse"
+									},
+									"zdrOnly": {
+										"type": "boolean"
+									},
+									"abortAfterMs": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991
+									},
+									"abortedBefore": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"kind"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "chat"
+									},
+									"model": {
+										"type": "string"
+									},
+									"abortAfterMs": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991
+									},
+									"abortedBefore": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"kind",
+									"model"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "list"
+									},
+									"fresh": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"kind"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "detail"
+									},
+									"id": {
+										"type": "string"
+									},
+									"abortAfterMs": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991
+									},
+									"abortedBefore": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"kind",
+									"id"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "listed"
+									},
+									"id": {
+										"type": "string"
+									},
+									"abortAfterMs": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991
+									},
+									"abortedBefore": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"kind",
+									"id"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "view"
+									},
+									"row": {
+										"type": "string"
+									},
+									"use": {
+										"$ref": "model.output.json#/$defs/ModelUse"
+									},
+									"abortAfterMs": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991
+									},
+									"abortedBefore": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"kind",
+									"row"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "advance"
+									},
+									"ms": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740991
+									}
+								},
+								"required": [
+									"kind",
+									"ms"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "rows"
+									},
+									"rows": {
+										"type": "array",
+										"items": {
+											"type": "string"
+										}
+									}
+								},
+								"required": [
+									"kind",
+									"rows"
+								],
+								"additionalProperties": false
+							}
+						],
+						"x-tag": "kind"
+					}
+				}
+			},
+			"required": [
+				"kind",
+				"entry",
+				"stored",
+				"startMs",
+				"exchanges",
+				"rows",
+				"steps"
+			],
+			"additionalProperties": false
+		},
+		"LocalFlowResult": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"nowMs": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"answer": {
+								"oneOf": [
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "views"
+											},
+											"views": {
+												"type": "array",
+												"items": {
+													"$ref": "#/$defs/ViewLine"
+												}
+											}
+										},
+										"required": [
+											"kind",
+											"views"
+										],
+										"additionalProperties": false
+									},
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "chat"
+											},
+											"text": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"kind",
+											"text"
+										],
+										"additionalProperties": false
+									},
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "list"
+											},
+											"models": {
+												"anyOf": [
+													{
+														"type": "array",
+														"items": {
+															"$ref": "model.output.json#/$defs/BrowseModel"
+														}
+													},
+													{
+														"type": "null"
+													}
+												]
+											}
+										},
+										"required": [
+											"kind",
+											"models"
+										],
+										"additionalProperties": false
+									},
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "detail"
+											},
+											"detail": {
+												"anyOf": [
+													{
+														"$ref": "model.output.json#/$defs/BrowseDetail"
+													},
+													{
+														"type": "null"
+													}
+												]
+											}
+										},
+										"required": [
+											"kind",
+											"detail"
+										],
+										"additionalProperties": false
+									},
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "listed"
+											},
+											"listed": {
+												"anyOf": [
+													{
+														"type": "object",
+														"properties": {
+															"label": {
+																"type": "string"
+															},
+															"reasoning": {
+																"type": "boolean"
+															}
+														},
+														"required": [
+															"label",
+															"reasoning"
+														],
+														"additionalProperties": false
+													},
+													{
+														"type": "null"
+													}
+												]
+											}
+										},
+										"required": [
+											"kind",
+											"listed"
+										],
+										"additionalProperties": false
+									},
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "view"
+											},
+											"view": {
+												"$ref": "#/$defs/ViewLine"
+											}
+										},
+										"required": [
+											"kind",
+											"view"
+										],
+										"additionalProperties": false
+									},
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "none"
+											}
+										},
+										"required": [
+											"kind"
+										],
+										"additionalProperties": false
+									},
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "thrown"
+											},
+											"message": {
+												"type": "string"
+											},
+											"category": {
+												"type": [
+													"string",
+													"null"
+												]
+											}
+										},
+										"required": [
+											"kind",
+											"message",
+											"category"
+										],
+										"additionalProperties": false
+									}
+								],
+								"x-tag": "kind"
+							}
+						},
+						"required": [
+							"nowMs",
+							"answer"
+						],
+						"additionalProperties": false
+					}
+				},
+				"requests": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"method": {
+								"type": "string"
+							},
+							"url": {
+								"type": "string"
+							},
+							"authorization": {
+								"type": [
+									"string",
+									"null"
+								]
+							},
+							"body": {}
+						},
+						"required": [
+							"method",
+							"url",
+							"authorization",
+							"body"
+						],
+						"additionalProperties": false
+					}
+				},
+				"read": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"minimum": -9007199254740991,
+						"maximum": 9007199254740991
+					}
+				},
+				"waiting": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"refreshed": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				}
+			},
+			"required": [
+				"steps",
+				"requests",
+				"read",
+				"waiting",
+				"refreshed"
+			],
+			"additionalProperties": false
+		},
+		"LocalKindFactsInput": {
+			"type": "object",
+			"properties": {
+				"kind": {
+					"type": "string",
+					"enum": [
+						"ollama",
+						"lmstudio",
+						"llamacpp",
+						"compatible"
+					]
+				},
+				"url": {
+					"type": "string"
+				},
+				"states": {
+					"type": "array",
+					"items": {
+						"$ref": "provider.output.json#/$defs/KeyState"
+					}
+				}
+			},
+			"required": [
+				"kind",
+				"states"
+			],
+			"additionalProperties": false
+		},
+		"LocalKindFactsResult": {
+			"type": "object",
+			"properties": {
+				"facts": {
+					"type": "array",
+					"items": {
+						"type": [
+							"string",
+							"null"
+						]
+					}
+				}
+			},
+			"required": [
+				"facts"
+			],
+			"additionalProperties": false
+		},
+		"LocalKindCodecInput": {
+			"type": "object",
+			"properties": {
+				"kind": {
+					"type": "string",
+					"enum": [
+						"ollama",
+						"lmstudio",
+						"llamacpp",
+						"compatible"
+					]
+				},
+				"label": {
+					"type": "string"
+				},
+				"view": {
+					"anyOf": [
+						{
+							"type": "object",
+							"properties": {
+								"efforts": {
+									"type": "array",
+									"items": {
+										"$ref": "step.output.json#/$defs/Effort"
+									}
+								},
+								"api": {
+									"$ref": "step.output.json#/$defs/ApiFacts"
+								},
+								"outputLimit": {
+									"type": "number"
+								},
+								"price": {
+									"type": "string",
+									"enum": [
+										"free",
+										"unknown"
+									]
+								}
+							},
+							"required": [
+								"efforts"
+							],
+							"additionalProperties": false
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"request": {
+					"$ref": "step.output.json#/$defs/CanonicalRequest"
+				},
+				"mode": {
+					"type": "string",
+					"enum": [
+						"stream",
+						"complete"
+					]
+				},
+				"failures": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"status": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"body": {}
+						},
+						"required": [
+							"status",
+							"body"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"kind",
+				"label",
+				"view",
+				"request",
+				"mode",
+				"failures"
+			],
+			"additionalProperties": false
+		},
+		"LocalKindCodecResult": {
+			"type": "object",
+			"properties": {
+				"encoded": {
+					"anyOf": [
+						{
+							"$ref": "step.output.json#/$defs/Encoded"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"refusal": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"facts": {
+					"anyOf": [
+						{
+							"type": "object",
+							"properties": {
+								"efforts": {
+									"type": "array",
+									"items": {
+										"$ref": "step.output.json#/$defs/Effort"
+									}
+								},
+								"free": {
+									"type": "boolean"
+								},
+								"outputLimit": {
+									"type": [
+										"number",
+										"null"
+									]
+								}
+							},
+							"required": [
+								"efforts",
+								"free",
+								"outputLimit"
+							],
+							"additionalProperties": false
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"failures": {
+					"type": "array",
+					"items": {
+						"$ref": "step.output.json#/$defs/Failure"
+					}
+				}
+			},
+			"required": [
+				"encoded",
+				"refusal",
+				"facts",
+				"failures"
+			],
+			"additionalProperties": false
+		},
+		"LocalKindDispositionInput": {
+			"type": "object",
+			"properties": {
+				"kind": {
+					"type": "string",
+					"enum": [
+						"ollama",
+						"lmstudio",
+						"llamacpp",
+						"compatible"
+					]
+				},
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"failure": {
+								"$ref": "step.output.json#/$defs/Failure"
+							},
+							"status": {
+								"anyOf": [
+									{
+										"type": "string",
+										"enum": [
+											"ok",
+											"retired",
+											"noZdrHost",
+											"noTools",
+											"unknown"
+										]
+									},
+									{
+										"type": "null"
+									}
+								]
+							}
+						},
+						"required": [
+							"failure",
+							"status"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"kind",
+				"rows"
+			],
+			"additionalProperties": false
+		},
+		"LocalKindDispositionResult": {
+			"type": "object",
+			"properties": {
+				"dispositions": {
+					"type": "array",
+					"items": {
+						"$ref": "provider.output.json#/$defs/Disposition"
+					}
+				}
+			},
+			"required": [
+				"dispositions"
+			],
+			"additionalProperties": false
 		}
 	}
 }

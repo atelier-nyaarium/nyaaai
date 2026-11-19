@@ -1,0 +1,12 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.lmstudioModels",
+	"name": "lmstudio-body-number",
+	"input": {
+		"body": 3
+	},
+	"expected": {
+		"models": null
+	}
+}

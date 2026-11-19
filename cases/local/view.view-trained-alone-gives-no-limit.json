@@ -1,0 +1,38 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.view",
+	"name": "view-trained-alone-gives-no-limit",
+	"input": {
+		"row": "local:lab/local-a:27b",
+		"model": {
+			"tag": "local-a:27b",
+			"tools": true,
+			"thinking": false,
+			"efforts": [],
+			"trained": 131072
+		},
+		"terms": {
+			"kept": false,
+			"price": "free"
+		},
+		"zdrOnly": true
+	},
+	"expected": {
+		"view": {
+			"key": "local:lab/local-a:27b",
+			"status": "ok",
+			"efforts": [],
+			"price": "free",
+			"hosts": [],
+			"api": {
+				"family": "chat-completions",
+				"structured": true,
+				"choice": [],
+				"strict": false
+			},
+			"cache": "implicit"
+		},
+		"context": null
+	}
+}

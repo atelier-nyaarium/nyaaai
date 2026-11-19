@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaNumCtx",
+	"name": "num-ctx-the-number-may-follow-on-a-later-line",
+	"input": {
+		"texts": [
+			"num_ctx\n4096",
+			"num_ctx  \n 4096",
+			"num_ctx\n\n4096\n",
+			"num_ctx\r\n4096"
+		]
+	},
+	"expected": {
+		"contexts": [
+			4096,
+			4096,
+			4096,
+			4096
+		]
+	}
+}

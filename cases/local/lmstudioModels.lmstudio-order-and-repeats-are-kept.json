@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.lmstudioModels",
+	"name": "lmstudio-order-and-repeats-are-kept",
+	"input": {
+		"body": {
+			"models": [
+				{
+					"key": "b",
+					"type": "llm"
+				},
+				{
+					"key": "a",
+					"type": "llm"
+				},
+				{
+					"key": "b",
+					"type": "llm"
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"tag": "b",
+				"tools": true,
+				"thinking": false,
+				"efforts": []
+			},
+			{
+				"tag": "a",
+				"tools": true,
+				"thinking": false,
+				"efforts": []
+			},
+			{
+				"tag": "b",
+				"tools": true,
+				"thinking": false,
+				"efforts": []
+			}
+		]
+	}
+}

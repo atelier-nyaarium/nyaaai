@@ -1,0 +1,96 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.kindCodec",
+	"name": "codec-compatible-keyed-failures-name-the-key",
+	"input": {
+		"kind": "compatible",
+		"label": "Lab",
+		"view": null,
+		"request": {
+			"model": "local-a:27b",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Hi"
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true
+		},
+		"mode": "stream",
+		"failures": [
+			{
+				"status": 401,
+				"body": {
+					"error": {
+						"message": "bad key"
+					}
+				}
+			},
+			{
+				"status": 402,
+				"body": {
+					"error": {
+						"message": "pay"
+					}
+				}
+			},
+			{
+				"status": 403,
+				"body": {
+					"error": {
+						"message": "no"
+					}
+				}
+			}
+		]
+	},
+	"expected": {
+		"encoded": {
+			"path": "/chat/completions",
+			"body": {
+				"model": "local-a:27b",
+				"messages": [
+					{
+						"role": "system",
+						"content": "Rules."
+					},
+					{
+						"role": "user",
+						"content": "Hi"
+					}
+				],
+				"stream": true,
+				"stream_options": {
+					"include_usage": true
+				}
+			}
+		},
+		"refusal": null,
+		"facts": null,
+		"failures": [
+			{
+				"category": "keyRejected",
+				"status": 401,
+				"message": "bad key"
+			},
+			{
+				"category": "outOfCredit",
+				"status": 402,
+				"message": "pay"
+			},
+			{
+				"category": "refused",
+				"status": 403,
+				"message": "no"
+			}
+		]
+	}
+}

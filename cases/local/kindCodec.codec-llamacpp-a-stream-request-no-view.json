@@ -1,0 +1,174 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.kindCodec",
+	"name": "codec-llamacpp-a-stream-request-no-view",
+	"input": {
+		"kind": "llamacpp",
+		"label": "Lab",
+		"view": null,
+		"request": {
+			"model": "local-a:27b",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Hi"
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true
+		},
+		"mode": "stream",
+		"failures": [
+			{
+				"status": 400,
+				"body": {
+					"error": {
+						"message": "No."
+					}
+				}
+			},
+			{
+				"status": 401,
+				"body": {
+					"error": {
+						"message": "No."
+					}
+				}
+			},
+			{
+				"status": 402,
+				"body": {
+					"error": {
+						"message": "No."
+					}
+				}
+			},
+			{
+				"status": 403,
+				"body": {
+					"error": {
+						"message": "No."
+					}
+				}
+			},
+			{
+				"status": 404,
+				"body": {
+					"error": {
+						"message": "No."
+					}
+				}
+			},
+			{
+				"status": 408,
+				"body": {
+					"error": {
+						"message": "No."
+					}
+				}
+			},
+			{
+				"status": 429,
+				"body": {
+					"error": {
+						"message": "No."
+					}
+				}
+			},
+			{
+				"status": 500,
+				"body": {
+					"error": {
+						"message": "No."
+					}
+				}
+			},
+			{
+				"status": 503,
+				"body": {
+					"error": {
+						"message": "No."
+					}
+				}
+			}
+		]
+	},
+	"expected": {
+		"encoded": {
+			"path": "/v1/chat/completions",
+			"body": {
+				"model": "local-a:27b",
+				"messages": [
+					{
+						"role": "system",
+						"content": "Rules."
+					},
+					{
+						"role": "user",
+						"content": "Hi"
+					}
+				],
+				"stream": true,
+				"stream_options": {
+					"include_usage": true
+				}
+			}
+		},
+		"refusal": null,
+		"facts": null,
+		"failures": [
+			{
+				"category": "badRequest",
+				"status": 400,
+				"message": "No."
+			},
+			{
+				"category": "refused",
+				"status": 401,
+				"message": "No."
+			},
+			{
+				"category": "badRequest",
+				"status": 402,
+				"message": "No."
+			},
+			{
+				"category": "refused",
+				"status": 403,
+				"message": "No."
+			},
+			{
+				"category": "notFound",
+				"status": 404,
+				"message": "No."
+			},
+			{
+				"category": "unavailable",
+				"status": 408,
+				"message": "No."
+			},
+			{
+				"category": "rateLimited",
+				"status": 429,
+				"message": "No."
+			},
+			{
+				"category": "unavailable",
+				"status": 500,
+				"message": "No."
+			},
+			{
+				"category": "unavailable",
+				"status": 503,
+				"message": "No."
+			}
+		]
+	}
+}

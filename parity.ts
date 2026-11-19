@@ -29,6 +29,7 @@ import { headers } from "./scripts/caseGroups/headers";
 import { js } from "./scripts/caseGroups/js";
 import { json } from "./scripts/caseGroups/json";
 import { kindGroup } from "./scripts/caseGroups/kind";
+import { local } from "./scripts/caseGroups/local";
 import { native } from "./scripts/caseGroups/native";
 import { noticeText } from "./scripts/caseGroups/noticeText";
 import { number } from "./scripts/caseGroups/number";
@@ -201,6 +202,7 @@ export default project({
 		catalog,
 		browse,
 		kindGroup,
+		local,
 	],
 	runs: adapterCases,
 	cases: { crate: "nyaaai_cli", module: "cases", dir: "rust/cli/src/cases" },

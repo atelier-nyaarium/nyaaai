@@ -1,0 +1,34 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.lmstudioLoaded",
+	"name": "lmstudio-loaded-a-bad-instance-list-gives-none",
+	"input": {
+		"body": {
+			"models": [
+				{
+					"key": "local-a",
+					"type": "llm",
+					"max_context_length": 262144,
+					"loaded_instances": [
+						"x"
+					],
+					"capabilities": {
+						"vision": false,
+						"trained_for_tool_use": true,
+						"reasoning": {
+							"allowed_options": [
+								"off",
+								"on"
+							],
+							"default": "on"
+						}
+					}
+				}
+			]
+		}
+	},
+	"expected": {
+		"contexts": []
+	}
+}

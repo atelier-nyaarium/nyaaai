@@ -1,0 +1,20 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.efforts",
+	"name": "efforts-named-in-ladder-order",
+	"input": {
+		"values": [
+			"high",
+			"low",
+			"minimal"
+		]
+	},
+	"expected": {
+		"efforts": [
+			"minimal",
+			"low",
+			"high"
+		]
+	}
+}

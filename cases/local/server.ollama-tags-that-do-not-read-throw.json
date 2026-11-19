@@ -1,0 +1,57 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.server",
+	"name": "ollama-tags-that-do-not-read-throw",
+	"input": {
+		"kind": "ollama",
+		"entry": {
+			"label": "Lab"
+		},
+		"stored": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": []
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "models",
+				"known": [
+					{
+						"tag": "local-a:27b",
+						"tools": true,
+						"thinking": false,
+						"efforts": []
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"models": null,
+				"contexts": null,
+				"done": false,
+				"thrown": "The model list did not parse."
+			}
+		],
+		"requests": [
+			{
+				"method": "GET",
+				"url": "http://127.0.0.1:11434/api/tags",
+				"authorization": null,
+				"body": null
+			}
+		],
+		"read": [
+			1
+		],
+		"waiting": []
+	}
+}

@@ -1,0 +1,19 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaTags",
+	"name": "tags-a-foreign-server-answers-data",
+	"input": {
+		"body": {
+			"object": "list",
+			"data": [
+				{
+					"id": "local-a:27b"
+				}
+			]
+		}
+	},
+	"expected": {
+		"tags": null
+	}
+}

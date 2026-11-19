@@ -1,0 +1,19 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaTags",
+	"name": "tags-remote-host-empty-text-still-drops",
+	"input": {
+		"body": {
+			"models": [
+				{
+					"name": "local-a:27b",
+					"remote_host": ""
+				}
+			]
+		}
+	},
+	"expected": {
+		"tags": []
+	}
+}

@@ -1,0 +1,12 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.compatibleModels",
+	"name": "compatible-body-null",
+	"input": {
+		"body": null
+	},
+	"expected": {
+		"models": null
+	}
+}

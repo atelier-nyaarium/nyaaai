@@ -1,0 +1,38 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.flow",
+	"name": "ollama-browse-detail-is-empty",
+	"input": {
+		"kind": "ollama",
+		"entry": {
+			"id": "lab",
+			"label": "Lab"
+		},
+		"stored": null,
+		"startMs": 1790337600000,
+		"exchanges": [],
+		"rows": [],
+		"steps": [
+			{
+				"kind": "detail",
+				"id": "local:lab/local-a:27b"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "detail",
+					"detail": {}
+				}
+			}
+		],
+		"requests": [],
+		"read": [],
+		"waiting": [],
+		"refreshed": 0
+	}
+}

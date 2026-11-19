@@ -1,0 +1,54 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.reach",
+	"name": "ollama-a-url-of-the-entry-is-asked",
+	"input": {
+		"kind": "ollama",
+		"entry": {
+			"label": "Lab",
+			"url": "http://lab.local:11434"
+		},
+		"secret": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"models": [
+						{
+							"name": "local-a:27b"
+						},
+						{
+							"name": "local-b:9b"
+						},
+						{
+							"name": "embed-a:latest"
+						},
+						{
+							"name": "far:1b-cloud",
+							"remote_host": "https://remote.example:443"
+						}
+					]
+				}
+			}
+		]
+	},
+	"expected": {
+		"state": {
+			"kind": "ok",
+			"models": 3
+		},
+		"thrown": null,
+		"facts": "http://lab.local:11434 · 3 models",
+		"requests": [
+			{
+				"method": "GET",
+				"url": "http://lab.local:11434/api/tags",
+				"authorization": null,
+				"body": null
+			}
+		],
+		"waiting": []
+	}
+}

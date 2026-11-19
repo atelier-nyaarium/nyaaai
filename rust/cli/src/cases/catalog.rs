@@ -140,7 +140,7 @@ impl Net {
     }
 }
 
-fn exchange_of(held: &NetExchange) -> ScriptedExchange {
+pub(super) fn exchange_of(held: &NetExchange) -> ScriptedExchange {
     let body = held
         .text
         .clone()

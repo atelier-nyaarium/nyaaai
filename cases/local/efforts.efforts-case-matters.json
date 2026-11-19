@@ -1,0 +1,15 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.efforts",
+	"name": "efforts-case-matters",
+	"input": {
+		"values": [
+			"Low",
+			"HIGH"
+		]
+	},
+	"expected": {
+		"efforts": []
+	}
+}

@@ -1,0 +1,35 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaRunning",
+	"name": "running-contexts-by-name",
+	"input": {
+		"body": {
+			"models": [
+				{
+					"name": "local-a:27b",
+					"model": "local-a:27b",
+					"context_length": 65536,
+					"size_vram": 1
+				},
+				{
+					"name": "local-b:9b",
+					"model": "local-b:9b",
+					"context_length": 8192
+				}
+			]
+		}
+	},
+	"expected": {
+		"contexts": [
+			{
+				"tag": "local-a:27b",
+				"context": 65536
+			},
+			{
+				"tag": "local-b:9b",
+				"context": 8192
+			}
+		]
+	}
+}

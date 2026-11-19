@@ -1,0 +1,114 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.flow",
+	"name": "compatible-every-listed-model-is-tested-for-tools-and-has-no-reasoning",
+	"input": {
+		"kind": "compatible",
+		"entry": {
+			"id": "lab",
+			"label": "Lab",
+			"url": "https://host.lab.example/api/v2"
+		},
+		"stored": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "local-a",
+							"context_length": 32768
+						},
+						{
+							"id": "local-b"
+						},
+						{}
+					]
+				}
+			}
+		],
+		"rows": [
+			"local:lab/local-a",
+			"local:lab/local-b"
+		],
+		"steps": [
+			{
+				"kind": "list"
+			},
+			{
+				"kind": "listed",
+				"id": "local-b"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "list",
+					"models": [
+						{
+							"id": "local:lab/local-a",
+							"display": "lab/local-a",
+							"label": "local-a",
+							"curated": false,
+							"description": "",
+							"context": 32768,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools"
+							],
+							"price": "unknown",
+							"tools": "ok",
+							"retestable": true,
+							"family": "chat-completions"
+						},
+						{
+							"id": "local:lab/local-b",
+							"display": "lab/local-b",
+							"label": "local-b",
+							"curated": false,
+							"description": "",
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools"
+							],
+							"price": "unknown",
+							"tools": "ok",
+							"retestable": true,
+							"family": "chat-completions"
+						}
+					]
+				}
+			},
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "listed",
+					"listed": {
+						"label": "local-b",
+						"reasoning": false
+					}
+				}
+			}
+		],
+		"requests": [
+			{
+				"method": "GET",
+				"url": "https://host.lab.example/api/v2/models",
+				"authorization": null,
+				"body": null
+			}
+		],
+		"read": [
+			1
+		],
+		"waiting": [],
+		"refreshed": 1
+	}
+}

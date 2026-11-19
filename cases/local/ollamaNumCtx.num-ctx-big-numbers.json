@@ -1,0 +1,20 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaNumCtx",
+	"name": "num-ctx-big-numbers",
+	"input": {
+		"texts": [
+			"num_ctx 99999999999999999999",
+			"num_ctx 9007199254740993",
+			"num_ctx 1000000"
+		]
+	},
+	"expected": {
+		"contexts": [
+			100000000000000000000,
+			9007199254740992,
+			1000000
+		]
+	}
+}

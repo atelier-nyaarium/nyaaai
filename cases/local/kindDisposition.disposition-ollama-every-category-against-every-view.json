@@ -1,0 +1,1119 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.kindDisposition",
+	"name": "disposition-ollama-every-category-against-every-view",
+	"input": {
+		"kind": "ollama",
+		"rows": [
+			{
+				"failure": {
+					"category": "keyMissing",
+					"status": "keyMissing",
+					"message": "m"
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "keyMissing",
+					"status": "keyMissing",
+					"message": "m"
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "keyMissing",
+					"status": "keyMissing",
+					"message": "m"
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "keyMissing",
+					"status": "keyMissing",
+					"message": "m"
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "keyMissing",
+					"status": "keyMissing",
+					"message": "m"
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "keyMissing",
+					"status": "keyMissing",
+					"message": "m"
+				},
+				"status": "unknown"
+			},
+			{
+				"failure": {
+					"category": "keyRejected",
+					"status": "keyRejected",
+					"message": "m"
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "keyRejected",
+					"status": "keyRejected",
+					"message": "m"
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "keyRejected",
+					"status": "keyRejected",
+					"message": "m"
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "keyRejected",
+					"status": "keyRejected",
+					"message": "m"
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "keyRejected",
+					"status": "keyRejected",
+					"message": "m"
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "keyRejected",
+					"status": "keyRejected",
+					"message": "m"
+				},
+				"status": "unknown"
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "m"
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "m"
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "m"
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "m"
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "m"
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "m"
+				},
+				"status": "unknown"
+			},
+			{
+				"failure": {
+					"category": "allowance",
+					"status": "allowance",
+					"message": "m"
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "allowance",
+					"status": "allowance",
+					"message": "m"
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "allowance",
+					"status": "allowance",
+					"message": "m"
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "allowance",
+					"status": "allowance",
+					"message": "m"
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "allowance",
+					"status": "allowance",
+					"message": "m"
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "allowance",
+					"status": "allowance",
+					"message": "m"
+				},
+				"status": "unknown"
+			},
+			{
+				"failure": {
+					"category": "refused",
+					"status": "refused",
+					"message": "m"
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "refused",
+					"status": "refused",
+					"message": "m"
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "refused",
+					"status": "refused",
+					"message": "m"
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "refused",
+					"status": "refused",
+					"message": "m"
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "refused",
+					"status": "refused",
+					"message": "m"
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "refused",
+					"status": "refused",
+					"message": "m"
+				},
+				"status": "unknown"
+			},
+			{
+				"failure": {
+					"category": "notFound",
+					"status": "notFound",
+					"message": "m"
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "notFound",
+					"status": "notFound",
+					"message": "m"
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "notFound",
+					"status": "notFound",
+					"message": "m"
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "notFound",
+					"status": "notFound",
+					"message": "m"
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "notFound",
+					"status": "notFound",
+					"message": "m"
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "notFound",
+					"status": "notFound",
+					"message": "m"
+				},
+				"status": "unknown"
+			},
+			{
+				"failure": {
+					"category": "badRequest",
+					"status": "badRequest",
+					"message": "m"
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "badRequest",
+					"status": "badRequest",
+					"message": "m"
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "badRequest",
+					"status": "badRequest",
+					"message": "m"
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "badRequest",
+					"status": "badRequest",
+					"message": "m"
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "badRequest",
+					"status": "badRequest",
+					"message": "m"
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "badRequest",
+					"status": "badRequest",
+					"message": "m"
+				},
+				"status": "unknown"
+			},
+			{
+				"failure": {
+					"category": "replayRejected",
+					"status": "replayRejected",
+					"message": "m"
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "replayRejected",
+					"status": "replayRejected",
+					"message": "m"
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "replayRejected",
+					"status": "replayRejected",
+					"message": "m"
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "replayRejected",
+					"status": "replayRejected",
+					"message": "m"
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "replayRejected",
+					"status": "replayRejected",
+					"message": "m"
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "replayRejected",
+					"status": "replayRejected",
+					"message": "m"
+				},
+				"status": "unknown"
+			},
+			{
+				"failure": {
+					"category": "rateLimited",
+					"status": "rateLimited",
+					"message": "m"
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "rateLimited",
+					"status": "rateLimited",
+					"message": "m"
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "rateLimited",
+					"status": "rateLimited",
+					"message": "m"
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "rateLimited",
+					"status": "rateLimited",
+					"message": "m"
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "rateLimited",
+					"status": "rateLimited",
+					"message": "m"
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "rateLimited",
+					"status": "rateLimited",
+					"message": "m"
+				},
+				"status": "unknown"
+			},
+			{
+				"failure": {
+					"category": "overloaded",
+					"status": "overloaded",
+					"message": "m"
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "overloaded",
+					"status": "overloaded",
+					"message": "m"
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "overloaded",
+					"status": "overloaded",
+					"message": "m"
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "overloaded",
+					"status": "overloaded",
+					"message": "m"
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "overloaded",
+					"status": "overloaded",
+					"message": "m"
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "overloaded",
+					"status": "overloaded",
+					"message": "m"
+				},
+				"status": "unknown"
+			},
+			{
+				"failure": {
+					"category": "unavailable",
+					"status": "unavailable",
+					"message": "m"
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "unavailable",
+					"status": "unavailable",
+					"message": "m"
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "unavailable",
+					"status": "unavailable",
+					"message": "m"
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "unavailable",
+					"status": "unavailable",
+					"message": "m"
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "unavailable",
+					"status": "unavailable",
+					"message": "m"
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "unavailable",
+					"status": "unavailable",
+					"message": "m"
+				},
+				"status": "unknown"
+			},
+			{
+				"failure": {
+					"category": "network",
+					"status": "network",
+					"message": "m"
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "network",
+					"status": "network",
+					"message": "m"
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "network",
+					"status": "network",
+					"message": "m"
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "network",
+					"status": "network",
+					"message": "m"
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "network",
+					"status": "network",
+					"message": "m"
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "network",
+					"status": "network",
+					"message": "m"
+				},
+				"status": "unknown"
+			},
+			{
+				"failure": {
+					"category": "stream",
+					"status": "stream",
+					"message": "m"
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "stream",
+					"status": "stream",
+					"message": "m"
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "stream",
+					"status": "stream",
+					"message": "m"
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "stream",
+					"status": "stream",
+					"message": "m"
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "stream",
+					"status": "stream",
+					"message": "m"
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "stream",
+					"status": "stream",
+					"message": "m"
+				},
+				"status": "unknown"
+			},
+			{
+				"failure": {
+					"category": "empty",
+					"status": "empty",
+					"message": "m"
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "empty",
+					"status": "empty",
+					"message": "m"
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "empty",
+					"status": "empty",
+					"message": "m"
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "empty",
+					"status": "empty",
+					"message": "m"
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "empty",
+					"status": "empty",
+					"message": "m"
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "empty",
+					"status": "empty",
+					"message": "m"
+				},
+				"status": "unknown"
+			},
+			{
+				"failure": {
+					"category": "truncated",
+					"status": "truncated",
+					"message": "m"
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "truncated",
+					"status": "truncated",
+					"message": "m"
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "truncated",
+					"status": "truncated",
+					"message": "m"
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "truncated",
+					"status": "truncated",
+					"message": "m"
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "truncated",
+					"status": "truncated",
+					"message": "m"
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "truncated",
+					"status": "truncated",
+					"message": "m"
+				},
+				"status": "unknown"
+			},
+			{
+				"failure": {
+					"category": "idle",
+					"status": "idle",
+					"message": "m"
+				},
+				"status": null
+			},
+			{
+				"failure": {
+					"category": "idle",
+					"status": "idle",
+					"message": "m"
+				},
+				"status": "ok"
+			},
+			{
+				"failure": {
+					"category": "idle",
+					"status": "idle",
+					"message": "m"
+				},
+				"status": "retired"
+			},
+			{
+				"failure": {
+					"category": "idle",
+					"status": "idle",
+					"message": "m"
+				},
+				"status": "noZdrHost"
+			},
+			{
+				"failure": {
+					"category": "idle",
+					"status": "idle",
+					"message": "m"
+				},
+				"status": "noTools"
+			},
+			{
+				"failure": {
+					"category": "idle",
+					"status": "idle",
+					"message": "m"
+				},
+				"status": "unknown"
+			}
+		]
+	},
+	"expected": {
+		"dispositions": [
+			{
+				"act": "fallThrough",
+				"notice": "keyMissing"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "keyMissing"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "keyMissing"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "keyMissing"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "keyMissing"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "keyMissing"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "keyRejected"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "keyRejected"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "keyRejected"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "keyRejected"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "keyRejected"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "keyRejected"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "spendLimit"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "spendLimit"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "spendLimit"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "spendLimit"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "spendLimit"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "spendLimit"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "spendLimit"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "spendLimit"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "spendLimit"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "spendLimit"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "spendLimit"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "spendLimit"
+			},
+			{
+				"act": "stop",
+				"notice": "refused"
+			},
+			{
+				"act": "stop",
+				"notice": "refused"
+			},
+			{
+				"act": "stop",
+				"notice": "refused"
+			},
+			{
+				"act": "stop",
+				"notice": "refused"
+			},
+			{
+				"act": "stop",
+				"notice": "refused"
+			},
+			{
+				"act": "stop",
+				"notice": "refused"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "modelUnavailable"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "modelUnavailable"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "modelUnavailable"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "modelUnavailable"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "modelUnavailable"
+			},
+			{
+				"act": "fallThrough",
+				"notice": "modelUnavailable"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "stop",
+				"notice": "badRequest"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			},
+			{
+				"act": "retry"
+			}
+		]
+	}
+}

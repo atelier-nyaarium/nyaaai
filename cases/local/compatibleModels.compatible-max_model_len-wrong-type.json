@@ -1,0 +1,29 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.compatibleModels",
+	"name": "compatible-max_model_len-wrong-type",
+	"input": {
+		"body": {
+			"data": [
+				{
+					"id": "local-a",
+					"context_length": 32768,
+					"max_context_length": 16384,
+					"max_model_len": "7"
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"tag": "local-a",
+				"tools": true,
+				"thinking": false,
+				"efforts": [],
+				"context": 32768
+			}
+		]
+	}
+}

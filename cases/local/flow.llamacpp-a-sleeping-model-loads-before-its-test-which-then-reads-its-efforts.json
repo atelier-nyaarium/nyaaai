@@ -1,0 +1,271 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.flow",
+	"name": "llamacpp-a-sleeping-model-loads-before-its-test-which-then-reads-its-efforts",
+	"input": {
+		"kind": "llamacpp",
+		"entry": {
+			"id": "lab",
+			"label": "Lab"
+		},
+		"stored": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"object": "list",
+					"data": [
+						{
+							"id": "local-a.gguf",
+							"meta": {
+								"n_ctx_train": 131072
+							}
+						},
+						{
+							"id": "local-b.gguf",
+							"meta": null
+						},
+						{}
+					]
+				}
+			},
+			{
+				"status": 400,
+				"json": {
+					"error": {
+						"message": "model is not loaded"
+					}
+				}
+			},
+			{
+				"status": 400,
+				"json": {
+					"error": {
+						"message": "model is not loaded"
+					}
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"default_generation_settings": {
+						"n_ctx": 262144
+					},
+					"chat_template_caps": {
+						"reasoning_effort_levels": [
+							"low",
+							"high",
+							"bogus"
+						]
+					}
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"object": "list",
+					"data": [
+						{
+							"id": "local-a.gguf",
+							"meta": {
+								"n_ctx_train": 131072
+							}
+						},
+						{
+							"id": "local-b.gguf",
+							"meta": null
+						},
+						{}
+					]
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"default_generation_settings": {
+						"n_ctx": 262144
+					},
+					"chat_template_caps": {
+						"reasoning_effort_levels": [
+							"low",
+							"high",
+							"bogus"
+						]
+					}
+				}
+			},
+			{
+				"status": 400,
+				"json": {
+					"error": {
+						"message": "model is not loaded"
+					}
+				}
+			}
+		],
+		"rows": [
+			"local:lab/local-a.gguf",
+			"local:lab/local-b.gguf"
+		],
+		"steps": [
+			{
+				"kind": "views"
+			},
+			{
+				"kind": "listed",
+				"id": "local-a.gguf"
+			},
+			{
+				"kind": "views"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "views",
+					"views": [
+						{
+							"key": "local:lab/local-a.gguf",
+							"status": "ok",
+							"efforts": [],
+							"price": "free",
+							"hosts": [],
+							"api": {
+								"family": "chat-completions",
+								"structured": true,
+								"choice": [],
+								"strict": false
+							},
+							"cache": "implicit"
+						},
+						{
+							"key": "local:lab/local-b.gguf",
+							"status": "ok",
+							"efforts": [],
+							"price": "free",
+							"hosts": [],
+							"api": {
+								"family": "chat-completions",
+								"structured": true,
+								"choice": [],
+								"strict": false
+							},
+							"cache": "implicit"
+						}
+					]
+				}
+			},
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "listed",
+					"listed": {
+						"label": "local-a.gguf",
+						"reasoning": true
+					}
+				}
+			},
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "views",
+					"views": [
+						{
+							"key": "local:lab/local-a.gguf",
+							"status": "ok",
+							"efforts": [
+								"low",
+								"high"
+							],
+							"promptLimit": 131072,
+							"price": "free",
+							"hosts": [],
+							"api": {
+								"family": "chat-completions",
+								"structured": true,
+								"choice": [],
+								"strict": false,
+								"reasoning": "reasoning"
+							},
+							"cache": "implicit"
+						},
+						{
+							"key": "local:lab/local-b.gguf",
+							"status": "ok",
+							"efforts": [],
+							"price": "free",
+							"hosts": [],
+							"api": {
+								"family": "chat-completions",
+								"structured": true,
+								"choice": [],
+								"strict": false
+							},
+							"cache": "implicit"
+						}
+					]
+				}
+			}
+		],
+		"requests": [
+			{
+				"method": "GET",
+				"url": "http://127.0.0.1:8080/v1/models",
+				"authorization": null,
+				"body": null
+			},
+			{
+				"method": "GET",
+				"url": "http://127.0.0.1:8080/props?model=local-a.gguf&autoload=false",
+				"authorization": null,
+				"body": null
+			},
+			{
+				"method": "GET",
+				"url": "http://127.0.0.1:8080/props?model=local-b.gguf&autoload=false",
+				"authorization": null,
+				"body": null
+			},
+			{
+				"method": "GET",
+				"url": "http://127.0.0.1:8080/props?model=local-a.gguf&autoload=true",
+				"authorization": null,
+				"body": null
+			},
+			{
+				"method": "GET",
+				"url": "http://127.0.0.1:8080/v1/models",
+				"authorization": null,
+				"body": null
+			},
+			{
+				"method": "GET",
+				"url": "http://127.0.0.1:8080/props?model=local-a.gguf&autoload=false",
+				"authorization": null,
+				"body": null
+			},
+			{
+				"method": "GET",
+				"url": "http://127.0.0.1:8080/props?model=local-b.gguf&autoload=false",
+				"authorization": null,
+				"body": null
+			}
+		],
+		"read": [
+			1,
+			1,
+			1,
+			1,
+			1,
+			1,
+			1
+		],
+		"waiting": [],
+		"refreshed": 2
+	}
+}

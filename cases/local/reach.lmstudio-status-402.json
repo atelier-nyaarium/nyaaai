@@ -1,0 +1,40 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.reach",
+	"name": "lmstudio-status-402",
+	"input": {
+		"kind": "lmstudio",
+		"entry": {
+			"label": "Lab"
+		},
+		"secret": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 402,
+				"json": {
+					"error": {
+						"message": "No."
+					}
+				}
+			}
+		]
+	},
+	"expected": {
+		"state": {
+			"kind": "unreachable"
+		},
+		"thrown": null,
+		"facts": "http://127.0.0.1:1234",
+		"requests": [
+			{
+				"method": "GET",
+				"url": "http://127.0.0.1:1234/api/v1/models",
+				"authorization": null,
+				"body": null
+			}
+		],
+		"waiting": []
+	}
+}

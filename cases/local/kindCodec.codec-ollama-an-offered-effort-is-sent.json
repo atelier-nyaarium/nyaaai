@@ -1,0 +1,69 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.kindCodec",
+	"name": "codec-ollama-an-offered-effort-is-sent",
+	"input": {
+		"kind": "ollama",
+		"label": "Lab",
+		"view": {
+			"efforts": [
+				"low",
+				"high"
+			]
+		},
+		"request": {
+			"model": "local-a:27b",
+			"system": [
+				"Rules."
+			],
+			"history": [
+				{
+					"role": "user",
+					"text": "Hi"
+				}
+			],
+			"cache": {
+				"kind": "implicit"
+			},
+			"session": "root-1",
+			"zdrOnly": true,
+			"effort": "low"
+		},
+		"mode": "stream",
+		"failures": []
+	},
+	"expected": {
+		"encoded": {
+			"path": "/v1/chat/completions",
+			"body": {
+				"model": "local-a:27b",
+				"messages": [
+					{
+						"role": "system",
+						"content": "Rules."
+					},
+					{
+						"role": "user",
+						"content": "Hi"
+					}
+				],
+				"stream": true,
+				"stream_options": {
+					"include_usage": true
+				},
+				"reasoning_effort": "low"
+			}
+		},
+		"refusal": null,
+		"facts": {
+			"efforts": [
+				"low",
+				"high"
+			],
+			"free": false,
+			"outputLimit": null
+		},
+		"failures": []
+	}
+}

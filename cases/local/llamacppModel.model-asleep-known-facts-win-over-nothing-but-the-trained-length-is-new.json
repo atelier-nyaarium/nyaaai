@@ -1,0 +1,33 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.llamacppModel",
+	"name": "model-asleep-known-facts-win-over-nothing-but-the-trained-length-is-new",
+	"input": {
+		"id": "local-a.gguf",
+		"trained": 1024,
+		"known": {
+			"tag": "local-a.gguf",
+			"tools": true,
+			"thinking": true,
+			"efforts": [
+				"low"
+			],
+			"context": 8192,
+			"trained": 4096
+		}
+	},
+	"expected": {
+		"model": {
+			"tag": "local-a.gguf",
+			"tools": true,
+			"thinking": true,
+			"efforts": [
+				"low"
+			],
+			"context": 8192,
+			"trained": 1024,
+			"probed": false
+		}
+	}
+}

@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaNumCtx",
+	"name": "num-ctx-a-line-start-follows-any-line-end",
+	"input": {
+		"texts": [
+			"x\nnum_ctx 5",
+			"x\rnum_ctx 5",
+			"x\r\nnum_ctx 5",
+			"x num_ctx 5",
+			"x num_ctx 5",
+			"\nnum_ctx 5"
+		]
+	},
+	"expected": {
+		"contexts": [
+			5,
+			5,
+			5,
+			5,
+			5,
+			5
+		]
+	}
+}

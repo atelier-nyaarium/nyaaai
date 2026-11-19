@@ -1,0 +1,18 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaRunning",
+	"name": "running-name-omitted-is-left-out",
+	"input": {
+		"body": {
+			"models": [
+				{
+					"context_length": 4096
+				}
+			]
+		}
+	},
+	"expected": {
+		"contexts": []
+	}
+}

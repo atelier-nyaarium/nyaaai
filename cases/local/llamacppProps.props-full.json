@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.llamacppProps",
+	"name": "props-full",
+	"input": {
+		"body": {
+			"default_generation_settings": {
+				"n_ctx": 65536
+			},
+			"chat_template_caps": {
+				"reasoning_effort_levels": [
+					"low",
+					"high"
+				]
+			}
+		}
+	},
+	"expected": {
+		"props": {
+			"context": 65536,
+			"efforts": [
+				"low",
+				"high"
+			]
+		}
+	}
+}

@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaTags",
+	"name": "tags-two-local-models",
+	"input": {
+		"body": {
+			"models": [
+				{
+					"name": "local-a:27b",
+					"model": "local-a:27b"
+				},
+				{
+					"name": "local-b:9b",
+					"model": "local-b:9b"
+				}
+			]
+		}
+	},
+	"expected": {
+		"tags": [
+			"local-a:27b",
+			"local-b:9b"
+		]
+	}
+}

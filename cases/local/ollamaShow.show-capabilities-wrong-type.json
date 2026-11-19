@@ -1,0 +1,27 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaShow",
+	"name": "show-capabilities-wrong-type",
+	"input": {
+		"tag": "local-a:27b",
+		"body": {
+			"parameters": "num_ctx                        32768\ntemperature                    0.6",
+			"capabilities": "x",
+			"thinking": {
+				"values": [
+					false,
+					true
+				],
+				"default": true
+			},
+			"model_info": {
+				"general.architecture": "arch-a",
+				"arch-a.context_length": 262144
+			}
+		}
+	},
+	"expected": {
+		"model": null
+	}
+}

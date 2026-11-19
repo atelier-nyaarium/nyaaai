@@ -1,0 +1,12 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaTags",
+	"name": "tags-body-list",
+	"input": {
+		"body": []
+	},
+	"expected": {
+		"tags": null
+	}
+}

@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.reach",
+	"name": "lmstudio-aborted-before-rethrows",
+	"input": {
+		"kind": "lmstudio",
+		"entry": {
+			"label": "Lab"
+		},
+		"secret": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"models": [
+						{
+							"key": "local-a",
+							"type": "llm"
+						},
+						{
+							"key": "embed-a",
+							"type": "embedding"
+						},
+						{
+							"key": "local-b",
+							"type": "llm"
+						},
+						{
+							"type": "llm"
+						}
+					]
+				}
+			}
+		],
+		"abortedBefore": true
+	},
+	"expected": {
+		"state": null,
+		"thrown": "caller aborted",
+		"facts": null,
+		"requests": [],
+		"waiting": []
+	}
+}

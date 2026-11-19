@@ -1,0 +1,16 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaNumCtx",
+	"name": "num-ctx-a-parameters-block",
+	"input": {
+		"texts": [
+			"num_ctx                        262144\ntemperature                    0.6"
+		]
+	},
+	"expected": {
+		"contexts": [
+			262144
+		]
+	}
+}

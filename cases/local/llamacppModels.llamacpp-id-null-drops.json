@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.llamacppModels",
+	"name": "llamacpp-id-null-drops",
+	"input": {
+		"body": {
+			"data": [
+				{
+					"id": null
+				},
+				{
+					"id": "local-b.gguf"
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"id": "local-b.gguf",
+				"trained": null
+			}
+		]
+	}
+}

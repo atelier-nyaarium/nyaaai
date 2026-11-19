@@ -1,0 +1,45 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.server",
+	"name": "compatible-has-no-loader-and-no-warm",
+	"input": {
+		"kind": "compatible",
+		"entry": {
+			"label": "Lab",
+			"url": "https://host.lab.example/api/v2"
+		},
+		"stored": null,
+		"startMs": 1790337600000,
+		"exchanges": [],
+		"steps": [
+			{
+				"kind": "loaded",
+				"tag": "local-a"
+			},
+			{
+				"kind": "warm",
+				"tag": "local-a"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"models": null,
+				"contexts": null,
+				"done": false,
+				"thrown": "This server reads no loaded contexts."
+			},
+			{
+				"models": null,
+				"contexts": null,
+				"done": false,
+				"thrown": "This server loads no model."
+			}
+		],
+		"requests": [],
+		"read": [],
+		"waiting": []
+	}
+}

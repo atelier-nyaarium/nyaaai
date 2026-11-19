@@ -1,0 +1,40 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.reach",
+	"name": "compatible-aborted-before-rethrows",
+	"input": {
+		"kind": "compatible",
+		"entry": {
+			"label": "Lab",
+			"url": "http://lab.local:8000"
+		},
+		"secret": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "local-a",
+							"context_length": 32768
+						},
+						{
+							"id": "local-b"
+						},
+						{}
+					]
+				}
+			}
+		],
+		"abortedBefore": true
+	},
+	"expected": {
+		"state": null,
+		"thrown": "caller aborted",
+		"facts": null,
+		"requests": [],
+		"waiting": []
+	}
+}

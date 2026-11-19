@@ -1,0 +1,53 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.server",
+	"name": "compatible-a-refused-key-throws-the-failure",
+	"input": {
+		"kind": "compatible",
+		"entry": {
+			"label": "Lab",
+			"url": "https://host.lab.example/api/v2"
+		},
+		"stored": "key-0123456789abcdef",
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 401,
+				"json": {
+					"error": {
+						"message": "bad key"
+					}
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "models",
+				"known": []
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"models": null,
+				"contexts": null,
+				"done": false,
+				"thrown": "bad key"
+			}
+		],
+		"requests": [
+			{
+				"method": "GET",
+				"url": "https://host.lab.example/api/v2/models",
+				"authorization": "Bearer key-0123456789abcdef",
+				"body": null
+			}
+		],
+		"read": [
+			1
+		],
+		"waiting": []
+	}
+}

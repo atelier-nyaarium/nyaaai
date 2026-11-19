@@ -1,0 +1,25 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.compatibleModels",
+	"name": "compatible-every-model-may-call-tools-and-none-thinks",
+	"input": {
+		"body": {
+			"data": [
+				{
+					"id": "a"
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"tag": "a",
+				"tools": true,
+				"thinking": false,
+				"efforts": []
+			}
+		]
+	}
+}

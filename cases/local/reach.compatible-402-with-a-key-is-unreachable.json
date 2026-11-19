@@ -1,0 +1,41 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.reach",
+	"name": "compatible-402-with-a-key-is-unreachable",
+	"input": {
+		"kind": "compatible",
+		"entry": {
+			"label": "Lab",
+			"url": "https://host.lab.example/api/v2"
+		},
+		"secret": "key-0123456789abcdef",
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 402,
+				"json": {
+					"error": {
+						"message": "No."
+					}
+				}
+			}
+		]
+	},
+	"expected": {
+		"state": {
+			"kind": "unreachable"
+		},
+		"thrown": null,
+		"facts": "https://host.lab.example/api/v2",
+		"requests": [
+			{
+				"method": "GET",
+				"url": "https://host.lab.example/api/v2/models",
+				"authorization": "Bearer key-0123456789abcdef",
+				"body": null
+			}
+		],
+		"waiting": []
+	}
+}

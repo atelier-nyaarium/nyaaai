@@ -1,0 +1,18 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.label",
+	"name": "label-the-part-is-kept-as-it-is",
+	"input": {
+		"tags": [
+			" a / b ",
+			"x/ y "
+		]
+	},
+	"expected": {
+		"labels": [
+			" b ",
+			" y "
+		]
+	}
+}

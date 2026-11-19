@@ -1,0 +1,16 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.efforts",
+	"name": "efforts-false-is-none",
+	"input": {
+		"values": [
+			false
+		]
+	},
+	"expected": {
+		"efforts": [
+			"none"
+		]
+	}
+}

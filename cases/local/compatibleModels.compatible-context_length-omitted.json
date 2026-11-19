@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.compatibleModels",
+	"name": "compatible-context_length-omitted",
+	"input": {
+		"body": {
+			"data": [
+				{
+					"id": "local-a",
+					"max_context_length": 16384,
+					"max_model_len": 8192
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"tag": "local-a",
+				"tools": true,
+				"thinking": false,
+				"efforts": [],
+				"context": 16384
+			}
+		]
+	}
+}

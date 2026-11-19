@@ -1,0 +1,20 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaTags",
+	"name": "tags-remote-host-omitted-is-local",
+	"input": {
+		"body": {
+			"models": [
+				{
+					"name": "local-a:27b"
+				}
+			]
+		}
+	},
+	"expected": {
+		"tags": [
+			"local-a:27b"
+		]
+	}
+}

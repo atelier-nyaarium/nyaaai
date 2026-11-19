@@ -1,0 +1,140 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.catalogRun",
+	"name": "run-warming-a-model-that-is-probed-does-nothing",
+	"input": {
+		"startMs": 1790337600000,
+		"entry": "lab",
+		"terms": {
+			"kept": false,
+			"price": "free"
+		},
+		"rows": [
+			"local:lab/local-a:27b",
+			"local:lab/local-b:9b"
+		],
+		"steps": [
+			{
+				"kind": "call",
+				"call": {
+					"kind": "views"
+				}
+			},
+			{
+				"kind": "call",
+				"call": {
+					"kind": "warmed",
+					"tag": "local-b:9b"
+				}
+			}
+		],
+		"server": {
+			"live": false,
+			"loaded": false,
+			"warm": true,
+			"models": [
+				{
+					"models": [
+						{
+							"tag": "local-a:27b",
+							"tools": true,
+							"thinking": true,
+							"efforts": [
+								"low",
+								"high"
+							],
+							"context": 8192
+						},
+						{
+							"tag": "local-b:9b",
+							"tools": true,
+							"thinking": true,
+							"efforts": [
+								"medium"
+							],
+							"context": 16384
+						}
+					]
+				}
+			],
+			"loads": [],
+			"warms": [
+				{}
+			]
+		}
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "views",
+						"views": [
+							{
+								"key": "local:lab/local-a:27b",
+								"status": "ok",
+								"efforts": [
+									"low",
+									"high"
+								],
+								"promptLimit": 8192,
+								"price": "free",
+								"hosts": [],
+								"api": {
+									"family": "chat-completions",
+									"structured": true,
+									"choice": [],
+									"strict": false,
+									"reasoning": "reasoning"
+								},
+								"cache": "implicit"
+							},
+							{
+								"key": "local:lab/local-b:9b",
+								"status": "ok",
+								"efforts": [
+									"medium"
+								],
+								"promptLimit": 16384,
+								"price": "free",
+								"hosts": [],
+								"api": {
+									"family": "chat-completions",
+									"structured": true,
+									"choice": [],
+									"strict": false,
+									"reasoning": "reasoning"
+								},
+								"cache": "implicit"
+							}
+						]
+					}
+				],
+				"served": [
+					{
+						"method": "models",
+						"tag": null,
+						"known": [],
+						"startMs": 1790337600000,
+						"endMs": 1790337600000,
+						"aborted": false
+					}
+				],
+				"refreshed": 1
+			},
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "warmed"
+					}
+				],
+				"served": [],
+				"refreshed": 0
+			}
+		],
+		"waiting": []
+	}
+}

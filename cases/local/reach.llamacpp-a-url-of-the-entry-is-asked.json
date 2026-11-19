@@ -1,0 +1,52 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.reach",
+	"name": "llamacpp-a-url-of-the-entry-is-asked",
+	"input": {
+		"kind": "llamacpp",
+		"entry": {
+			"label": "Lab",
+			"url": "http://lab.local:9000"
+		},
+		"secret": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"object": "list",
+					"data": [
+						{
+							"id": "local-a.gguf"
+						},
+						{
+							"id": "local-b.gguf"
+						},
+						{},
+						{
+							"id": ""
+						}
+					]
+				}
+			}
+		]
+	},
+	"expected": {
+		"state": {
+			"kind": "ok",
+			"models": 2
+		},
+		"thrown": null,
+		"facts": "http://lab.local:9000 · 2 models",
+		"requests": [
+			{
+				"method": "GET",
+				"url": "http://lab.local:9000/v1/models",
+				"authorization": null,
+				"body": null
+			}
+		],
+		"waiting": []
+	}
+}
