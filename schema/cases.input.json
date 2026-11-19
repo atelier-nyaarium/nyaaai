@@ -13792,6 +13792,28 @@
 						"type": "string"
 					}
 				},
+				"keySlow": {
+					"type": "object",
+					"propertyNames": {
+						"type": "string"
+					},
+					"additionalProperties": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 9007199254740991
+					}
+				},
+				"slow": {
+					"type": "object",
+					"propertyNames": {
+						"type": "string"
+					},
+					"additionalProperties": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 9007199254740991
+					}
+				},
 				"disposeFails": {
 					"type": "array",
 					"items": {

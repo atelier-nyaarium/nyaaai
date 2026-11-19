@@ -25,6 +25,8 @@ type Step = Record<string, unknown>;
 /** Replies of the checks. */
 const OR_OK = reply({ data: { usage: 1 } });
 const OC_OK = reply({ data: [{ id: "model-a" }] });
+const HOST = { id: "host", kind: "compatible", label: "Host", url: "http://lab.local:8000/v1" };
+
 const BOX_OK = reply({ models: [{ name: "local-a:27b" }, { name: "local-b:9b" }] });
 const DENIED = { status: 401, json: { error: { message: "No." } } };
 
@@ -176,6 +178,11 @@ export const healthCases: CaseSource[] = [
 		keys: { box: { kind: "unready" } },
 		exchanges: [BOX_OK],
 		steps: [check("box"), keysOf("box")],
+	}),
+	run("a-store-that-cannot-be-read-still-holds-an-optional-key-url-kind-out", {
+		entries: [HOST],
+		keys: { host: { kind: "unready" } },
+		steps: [check("host"), keysOf("host")],
 	}),
 	run("a-store-that-cannot-be-read-still-holds-a-key-kind-out", {
 		entries: [MAIN],

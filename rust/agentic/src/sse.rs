@@ -12,8 +12,6 @@ pub struct SseDecoder {
     scanned: usize,
     data: Vec<String>,
     event: Option<String>,
-    data_bytes: usize,
-    event_bytes: usize,
 }
 
 fn without_cr(line: &str) -> &str {
@@ -23,11 +21,6 @@ fn without_cr(line: &str) -> &str {
 impl SseDecoder {
     pub fn new() -> Self {
         Self::default()
-    }
-
-    /// UTF-8 bytes held: the pending line, and the gathered data and event lines.
-    pub fn held(&self) -> usize {
-        self.pending.len() + self.data_bytes + self.event_bytes
     }
 
     pub fn push(&mut self, bytes: &[u8]) -> Vec<SseItem> {
@@ -79,26 +72,18 @@ impl SseDecoder {
         let (field, raw) = line.split_once(':').unwrap_or((line, ""));
         let value = raw.strip_prefix(' ').unwrap_or(raw);
         match field {
-            "event" => {
-                self.event = Some(value.to_owned());
-                self.event_bytes = line.len() + 1;
-            }
-            "data" => {
-                self.data.push(value.to_owned());
-                self.data_bytes += line.len() + 1;
-            }
+            "event" => self.event = Some(value.to_owned()),
+            "data" => self.data.push(value.to_owned()),
             _ => {}
         }
     }
 
     fn dispatch(&mut self, items: &mut Vec<SseItem>) {
         let event = self.event.take();
-        self.event_bytes = 0;
         if self.data.is_empty() {
             return;
         }
         let data = std::mem::take(&mut self.data).join("\n");
-        self.data_bytes = 0;
         if data == "[DONE]" {
             items.push(SseItem::Done(SseItemDone {}));
         } else {

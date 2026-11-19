@@ -32,6 +32,7 @@ use nyaaai_contract::shapes::provider::{EntryFields, ProviderEntry, ProviderKind
 use nyaaai_contract::shapes::step::{
     CanonicalRequest, Failure, HeaderList, SseItem, StepEvent, StepResult,
 };
+use nyaaai_contract::time::Scheduler;
 use nyaaai_testkit::cases::{Outcome, block_on};
 use nyaaai_testkit::scheduler::{FakeScheduler, TimerWheel};
 use nyaaai_testkit::scripted_ports::{
@@ -328,6 +329,24 @@ struct Hub {
     waiting: Mutex<Vec<oneshot::Sender<()>>>,
     /// Told when a cold catalog is first asked.
     asked: Mutex<Option<oneshot::Sender<()>>>,
+    /// Entries whose catalog answers after this many milliseconds on the wheel.
+    slow: HashMap<String, u64>,
+    scheduler: Option<Arc<FakeScheduler>>,
+}
+
+impl Hub {
+    /// Tells a first ask, then waits on the wheel.
+    async fn delayed(&self, ms: Option<u64>) {
+        let Some(ms) = ms else {
+            return;
+        };
+        if let Some(told) = locked(&self.asked).take() {
+            let _ = told.send(());
+        }
+        if let Some(scheduler) = &self.scheduler {
+            let _ = scheduler.sleep(ms as i64, &CancelToken::new()).await;
+        }
+    }
 }
 
 struct StubCatalog {
@@ -353,6 +372,9 @@ impl EntryCatalog for StubCatalog {
                 locked(&self.hub.waiting).push(release);
                 let _ = wait.await;
             }
+            self.hub
+                .delayed(self.hub.slow.get(&self.entry.id).copied())
+                .await;
             let mut views = Vec::new();
             for row in self.rows.rows() {
                 let bound = row.bindings.get(self.name.as_str()).is_some();
@@ -508,6 +530,9 @@ struct Keys {
     inner: Arc<ScriptedEntryKeys>,
     failing: Vec<String>,
     gate: Mutex<Option<Gate>>,
+    hub: Arc<Hub>,
+    /// Entries whose key read answers after this many milliseconds on the wheel.
+    slow: HashMap<String, u64>,
 }
 
 impl EntryKeys for Keys {
@@ -519,6 +544,7 @@ impl EntryKeys for Keys {
                 let _ = gate.reached.send(());
                 let _ = gate.release.await;
             }
+            self.hub.delayed(self.slow.get(&id).copied()).await;
             if self.failing.contains(&id) {
                 KeyAnswer::Unready
             } else {
@@ -942,6 +968,8 @@ impl Rig {
                     None => call.await?,
                 };
                 *locked(&self.hub.asked) = None;
+                // Reads that went on past their bound run once before the step is read.
+                let _ = nyaaai_testkit::cases::runtime().spawn(async {}).await;
                 let Answer::Routes(routes) = answered else {
                     return Err("A routes call answers routes.".to_owned());
                 };
@@ -1007,11 +1035,6 @@ pub fn routes(input: ResolverRoutesInput) -> Outcome<ResolverRoutesResult> {
     for (id, answer) in input.answers.iter() {
         scripted.set(id, answer_of(answer)?);
     }
-    let gate = Arc::new(Keys {
-        inner: Arc::clone(&scripted),
-        failing: input.failing.clone(),
-        gate: Mutex::new(None),
-    });
     let list = Arc::new(ScriptedProviderList::new(input.entries.clone()));
     let registry = Arc::new(ScriptedModelRegistry::empty());
     registry.set_rows(rows_for(&input.rows)?);
@@ -1036,7 +1059,24 @@ pub fn routes(input: ResolverRoutesInput) -> Outcome<ResolverRoutesResult> {
         cold: Mutex::new(input.cold.clone().unwrap_or_default().into_iter().collect()),
         listings,
         dispose_fails: input.dispose_fails.clone().unwrap_or_default(),
+        slow: input
+            .slow
+            .iter()
+            .flat_map(|slow| slow.iter().map(|(entry, ms)| (entry.to_owned(), *ms)))
+            .collect(),
+        scheduler: Some(Arc::clone(&scheduler)),
         ..Hub::default()
+    });
+    let gate = Arc::new(Keys {
+        inner: Arc::clone(&scripted),
+        failing: input.failing.clone(),
+        gate: Mutex::new(None),
+        hub: Arc::clone(&hub),
+        slow: input
+            .key_slow
+            .iter()
+            .flat_map(|slow| slow.iter().map(|(entry, ms)| (entry.to_owned(), *ms)))
+            .collect(),
     });
     let zdr = Arc::new(AtomicBool::new(input.zdr_only));
     let refreshed = Arc::new(Mutex::new(Vec::<Via>::new()));

@@ -373,6 +373,12 @@ impl Core {
             .is_some_and(|kind| kind.field() == KindField::Url)
     }
 
+    /// A URL kind that takes no key at all.
+    fn keyless(&self, entry: &ProviderEntry) -> bool {
+        self.kind_of(entry)
+            .is_some_and(|kind| kind.field() == KindField::Url && !kind.optional_key())
+    }
+
     fn status(&self, id: &str) -> KeyState {
         let held = locked(&self.state).statuses.get(id).cloned();
         match held {
@@ -429,24 +435,35 @@ impl Core {
 
     /// The only pool writer.
     fn apply(&self, id: &str, event: PoolEvent) {
-        if !self.listed(id) {
-            return;
-        }
+        self.apply_after(id, None, event);
+    }
+
+    /// True when the report began before the entry's last change; nothing is applied then.
+    fn apply_after(&self, id: &str, ticket: Option<&Ticket>, event: PoolEvent) -> bool {
+        let listed = self.listed(id);
         let now = self.now() as f64;
-        let changed = {
+        let (dropped, changed) = {
             let mut state = locked(&self.state);
-            let was = state.pools.get(id).cloned().unwrap_or_else(clear);
-            let next = step(&was, &event, now, self.pause_ms as f64);
-            if matches!(next, PoolState::Clear(_)) {
-                state.pools.remove(id);
+            // The test and the apply share this lock; a change between them would let a stale report in.
+            if Self::began_in(&state, id, ticket) {
+                (true, false)
+            } else if !listed {
+                (false, false)
             } else {
-                state.pools.insert(id.to_owned(), next.clone());
+                let was = state.pools.get(id).cloned().unwrap_or_else(clear);
+                let next = step(&was, &event, now, self.pause_ms as f64);
+                if matches!(next, PoolState::Clear(_)) {
+                    state.pools.remove(id);
+                } else {
+                    state.pools.insert(id.to_owned(), next.clone());
+                }
+                (false, next != was)
             }
-            next != was
         };
         if changed {
             self.touch(id, Part::Pool);
         }
+        dropped
     }
 
     fn admitted(&self, id: &str, ticket: Ticket) {
@@ -464,12 +481,52 @@ impl Core {
         self.apply(id, PoolEvent::Admitted(PoolEventAdmitted { ticket }));
     }
 
+    /// A ticket nobody took is settled as the gate settles it.
+    fn withdrawn(&self, id: &str, ticket: &Ticket) {
+        let _batch = self.batch();
+        if locked(&self.state)
+            .probes
+            .remove(&ticket_key(ticket))
+            .is_some()
+        {
+            self.apply(
+                id,
+                PoolEvent::Settled(PoolEventSettled {
+                    ticket: ticket.clone(),
+                }),
+            );
+        }
+    }
+
     /// A request whose ticket came before the entry's last invalidation reports nothing.
     fn began(&self, id: &str, ticket: Option<&Ticket>) -> bool {
+        Self::began_in(&locked(&self.state), id, ticket)
+    }
+
+    fn began_in(state: &State, id: &str, ticket: Option<&Ticket>) -> bool {
         let Some(ticket) = ticket else {
             return false;
         };
-        ticket.serial <= locked(&self.state).floors.get(id).copied().unwrap_or(0)
+        ticket.serial <= state.floors.get(id).copied().unwrap_or(0)
+    }
+
+    /// Cools after the test; a change that lands between them clears it again.
+    fn cool_after(
+        &self,
+        route: RouteRef<'_>,
+        retry_after_ms: Option<i64>,
+        ticket: Option<&Ticket>,
+    ) -> bool {
+        let id = &route.entry.id;
+        if self.began(id, ticket) {
+            return true;
+        }
+        self.gate.cool(&key_of(route), retry_after_ms);
+        if self.began(id, ticket) {
+            self.gate.clear(|key| key.starts_with(&format!("{id}\n")));
+            return true;
+        }
+        false
     }
 
     /// Extra usage or `keep` exempts balance.
@@ -489,23 +546,31 @@ impl Core {
     }
 
     /// Inference stands until recheck.
-    fn mark(self: &Arc<Self>, id: &str, state: KeyState) {
+    /// True when the report began before the entry's last change; nothing is marked then.
+    fn mark_after(self: &Arc<Self>, id: &str, ticket: Option<&Ticket>, state: KeyState) -> bool {
         if !self.listed(id) {
-            return;
+            return self.began(id, ticket);
         }
         let status = self.status_of(id);
-        let changed = {
-            let mut held = locked(&status.state);
-            if discriminant(&*held) == discriminant(&state) {
-                false
+        let (dropped, changed) = {
+            // The test and the mark share this lock.
+            let guard = locked(&self.state);
+            if Self::began_in(&guard, id, ticket) {
+                (true, false)
             } else {
-                *held = state;
-                true
+                let mut held = locked(&status.state);
+                if discriminant(&*held) == discriminant(&state) {
+                    (false, false)
+                } else {
+                    *held = state;
+                    (false, true)
+                }
             }
         };
         if changed {
             self.touch(id, Part::Key);
         }
+        dropped
     }
 
     fn status_of(self: &Arc<Self>, id: &str) -> Arc<Status> {
@@ -572,7 +637,7 @@ impl Core {
         }
         let state = match answer {
             KeyAnswer::Refused => KeyState::Rejected(KeyStateRejected {}),
-            KeyAnswer::Unready if kind.field() == KindField::Key => {
+            KeyAnswer::Unready if kind.field() == KindField::Key || kind.optional_key() => {
                 KeyState::Unreachable(KeyStateUnreachable {})
             }
             held => {
@@ -729,7 +794,7 @@ impl EntryKeys for HealthKeys {
             }
             let answer = core.keys.get(&id).await;
             // A URL kind needs no key, so an unreadable store is no key.
-            if answer == KeyAnswer::Unready && core.by_url(&entry) {
+            if answer == KeyAnswer::Unready && core.keyless(&entry) {
                 return KeyAnswer::None;
             }
             answer
@@ -756,6 +821,14 @@ impl ProviderHealth {
                     on_ticket: Some(Arc::new(move |ticket: &Ticket| {
                         if let Some(core) = told.upgrade() {
                             core.admitted(entry_of_model(&ticket.model), ticket.clone());
+                        }
+                    })),
+                    on_withdrawn: Some(Arc::new({
+                        let gone = weak.clone();
+                        move |ticket: &Ticket| {
+                            if let Some(core) = gone.upgrade() {
+                                core.withdrawn(entry_of_model(&ticket.model), ticket);
+                            }
                         }
                     })),
                 },
@@ -1014,26 +1087,25 @@ impl Gate for ProviderHealth {
         run: Option<&mut HashSet<String>>,
         ticket: Option<&Ticket>,
     ) -> bool {
-        let dropped = self.core.began(&route.entry.id, ticket);
         let Some(source) = usage.and_then(|held| held.billing_source.clone()) else {
-            return dropped;
+            return false;
         };
         // Settings may change mid-request.
         let entry = self
             .core
             .entry_of(&route.entry.id)
             .unwrap_or_else(|| route.entry.clone());
-        if !dropped {
-            self.core.apply(
-                &entry.id,
-                PoolEvent::Billed(PoolEventBilled {
-                    source: source.clone(),
-                    plan: entry.plan.map(|plan| plan.as_str().to_owned()),
-                    extra_usage: entry.extra_usage == Some(true),
-                }),
-            );
-        }
-        if source == "balance"
+        let dropped = self.core.apply_after(
+            &entry.id,
+            ticket,
+            PoolEvent::Billed(PoolEventBilled {
+                source: source.clone(),
+                plan: entry.plan.map(|plan| plan.as_str().to_owned()),
+                extra_usage: entry.extra_usage == Some(true),
+            }),
+        );
+        if !dropped
+            && source == "balance"
             && let Some(run) = run
         {
             run.insert(entry.id);
@@ -1050,17 +1122,15 @@ impl Gate for ProviderHealth {
     ) -> bool {
         let core = &self.core;
         let entry = route.entry;
-        if core.began(&entry.id, ticket) {
-            return true;
-        }
         let _batch = core.batch();
         match failure.category {
             FailureCategory::KeyRejected => {
-                core.mark(&entry.id, KeyState::Rejected(KeyStateRejected {}));
+                core.mark_after(&entry.id, ticket, KeyState::Rejected(KeyStateRejected {}))
             }
             // One pool per entry.
-            FailureCategory::Allowance | FailureCategory::OutOfCredit => core.apply(
+            FailureCategory::Allowance | FailureCategory::OutOfCredit => core.apply_after(
                 &entry.id,
+                ticket,
                 PoolEvent::Refused(PoolEventRefused {
                     reason: if failure.category == FailureCategory::Allowance {
                         PoolEventRefusedReason::Allowance
@@ -1073,9 +1143,15 @@ impl Gate for ProviderHealth {
             ),
             FailureCategory::Network => {
                 if core.by_url(entry) {
-                    core.mark(&entry.id, KeyState::Unreachable(KeyStateUnreachable {}));
+                    core.mark_after(
+                        &entry.id,
+                        ticket,
+                        KeyState::Unreachable(KeyStateUnreachable {}),
+                    )
                 } else if onward {
-                    core.gate.cool(&key_of(route), failure.retry_after_ms);
+                    core.cool_after(route, failure.retry_after_ms, ticket)
+                } else {
+                    core.began(&entry.id, ticket)
                 }
             }
             // Settlement owns overload pauses.
@@ -1083,13 +1159,14 @@ impl Gate for ProviderHealth {
             | FailureCategory::KeyMissing
             | FailureCategory::Refused
             | FailureCategory::BadRequest
-            | FailureCategory::ReplayRejected => {}
+            | FailureCategory::ReplayRejected => core.began(&entry.id, ticket),
             _ => {
                 if onward {
-                    core.gate.cool(&key_of(route), failure.retry_after_ms);
+                    core.cool_after(route, failure.retry_after_ms, ticket)
+                } else {
+                    core.began(&entry.id, ticket)
                 }
             }
         }
-        false
     }
 }

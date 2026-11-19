@@ -1,5 +1,6 @@
 // LM Studio: the model list, read by hand.
 
+import { firstDistinct, MAX_LISTED } from "./join";
 import { effortsOf, itemsOf, type LocalModel, type LocalServer, type LocalTransport } from "./local/catalog";
 import { localKind } from "./local/kind";
 import { fieldOf, fieldsOf, objectField, positiveField, textField, textsField } from "./readers";
@@ -83,13 +84,13 @@ export function loadedContexts(models: readonly ListedModel[]): Map<string, numb
 	return new Map(models.flatMap((model) => (model.loaded === null ? [] : [[model.key, model.loaded] as const])));
 }
 
-export function server(transport: LocalTransport): LocalServer {
+export function server(transport: LocalTransport, maxListed = MAX_LISTED): LocalServer {
 	return {
 		live: true,
 		models: async (_known, signal) => {
 			const models = chatModels(await transport.getJson(LIST, signal, "none"));
 			if (models === undefined) throw new Error("The model list did not parse.");
-			return models.map(modelOf);
+			return firstDistinct(models, (model) => model.key, maxListed).map(modelOf);
 		},
 		loaded: async (_tag, signal) => loadedContexts(chatModels(await transport.getJson(LIST, signal, "none")) ?? []),
 	};

@@ -17,25 +17,26 @@ export function joinAll<T>(reads: ReadonlyArray<() => Promise<T>>): Promise<T[]>
 	return Promise.all(reads.map((read) => read()));
 }
 
-/** Starts reads in list order, at most `limit` at once; the first failure starts no more. */
+/** Starts reads in list order, at most `limit` at once; a failure starts no more, waits for those started, and the earliest in list order is thrown. */
 export async function joinLimited<T>(reads: ReadonlyArray<() => Promise<T>>, limit = READS_AT_ONCE): Promise<T[]> {
 	const answers: T[] = [];
+	const failures = new Map<number, unknown>();
 	let next = 0;
-	let failed = false;
 	const lane = async (): Promise<void> => {
-		while (!failed && next < reads.length) {
+		while (failures.size === 0 && next < reads.length) {
 			const at = next++;
 			const read = reads[at];
 			if (read === undefined) return;
 			try {
 				answers[at] = await read();
 			} catch (error) {
-				failed = true;
-				throw error;
+				failures.set(at, error);
 			}
 		}
 	};
 	await Promise.all(Array.from({ length: Math.min(Math.max(limit, 1), reads.length) }, lane));
+	const first = Math.min(...failures.keys());
+	if (failures.size > 0) throw failures.get(first);
 	return answers;
 }
 

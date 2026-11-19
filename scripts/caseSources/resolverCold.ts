@@ -47,4 +47,12 @@ export const resolverColdCases: CaseSource[] = [
 		cold: ["a"],
 		steps: [after(2000, LUNA, ["a"])],
 	}),
+	run("cold-a-later-entrys-view-ending-at-the-bound-is-left-out", {
+		slow: { b: 2000 },
+		steps: [after(2000, LUNA)],
+	}),
+	run("cold-a-later-entrys-slow-key-read-is-bounded-too", {
+		keySlow: { b: 2000 },
+		steps: [after(2000, LUNA)],
+	}),
 ];

@@ -121,6 +121,7 @@ async fn play(input: GateRunInput) -> Outcome<GateRunResult> {
             pause_ms: input.pause_ms.map(|held| held as i64),
             max_pauses: input.max_pauses,
             on_ticket: None,
+            on_withdrawn: None,
         },
         &CountedIds::new("gate-"),
     ));

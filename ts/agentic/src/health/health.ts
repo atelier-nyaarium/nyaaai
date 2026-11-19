@@ -190,7 +190,7 @@ export class ProviderHealth implements Gate {
 					if (standing !== undefined) return { kind: standing };
 					const answer = await d.keys.get(id);
 					// A URL kind needs no key, so an unreadable store is no key.
-					return answer.kind === "unready" && this.byUrl(entry) ? { kind: "none" } : answer;
+					return answer.kind === "unready" && this.keyless(entry) ? { kind: "none" } : answer;
 				} catch {
 					return { kind: "unready" };
 				}
@@ -327,19 +327,18 @@ export class ProviderHealth implements Gate {
 	/** Balance replies extend `run`. */
 	served(route: Resolved, usage: NormalizedUsage | undefined, run?: Set<string>, ticket?: Ticket): boolean {
 		const source = usage?.billingSource;
-		const dropped = this.began(route.entry.id, ticket);
-		if (source === undefined) return dropped;
+		if (source === undefined) return false;
+		if (this.began(route.entry.id, ticket)) return true;
 		// Settings may change mid-request.
 		const entry = this.entryOf(route.entry.id) ?? route.entry;
-		if (!dropped)
-			this.apply(entry.id, {
-				kind: "billed",
-				source,
-				...(entry.plan === undefined ? {} : { plan: entry.plan }),
-				extraUsage: entry.extraUsage === true,
-			});
+		this.apply(entry.id, {
+			kind: "billed",
+			source,
+			...(entry.plan === undefined ? {} : { plan: entry.plan }),
+			extraUsage: entry.extraUsage === true,
+		});
 		if (source === "balance") run?.add(entry.id);
-		return dropped;
+		return false;
 	}
 
 	failed(route: Resolved, failure: Failure, onward: boolean, ticket?: Ticket): boolean {
@@ -483,7 +482,8 @@ export class ProviderHealth implements Gate {
 		if (stale()) return undefined;
 		let state: KeyState;
 		if (answer.kind === "refused") state = { kind: "rejected" };
-		else if (answer.kind === "unready" && kind.field === "key") state = { kind: "unreachable" };
+		else if (answer.kind === "unready" && (kind.field === "key" || kind.optionalKey === true))
+			state = { kind: "unreachable" };
 		else {
 			const secret = answer.kind === "key" ? answer.key : undefined;
 			state =
@@ -606,6 +606,12 @@ export class ProviderHealth implements Gate {
 
 	private rejected(entry: ProviderEntry): boolean {
 		return this.status(entry.id).kind === "rejected";
+	}
+
+	/** A URL kind that takes no key at all. */
+	private keyless(entry: ProviderEntry): boolean {
+		const kind = this.d.kinds[entry.kind];
+		return kind?.field === "url" && kind.optionalKey !== true;
 	}
 
 	private byUrl(entry: ProviderEntry): boolean {

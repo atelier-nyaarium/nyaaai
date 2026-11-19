@@ -237,8 +237,7 @@
 					{
 						"kind": "billing",
 						"entry": "go",
-						"reply": "failed",
-						"dropped": true
+						"reply": "failed"
 					},
 					{
 						"kind": "settled",

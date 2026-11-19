@@ -8,6 +8,7 @@ use nyaaai_contract::json::Value;
 use nyaaai_contract::shapes::provider::ProviderKindName;
 use nyaaai_contract::url::parse_url;
 
+use super::join::{MAX_LISTED, first_distinct};
 use super::local::catalog::{LocalModel, LocalServer};
 use super::local::kind::{LocalKind, LocalKindSpec, local_kind};
 pub use super::local::kind::{remote, terms_of};
@@ -60,6 +61,7 @@ pub fn model_of(model: &ListedModel) -> LocalModel {
 
 struct CompatibleServer {
     transport: Arc<Transport>,
+    max_listed: usize,
 }
 
 impl LocalServer for CompatibleServer {
@@ -78,13 +80,22 @@ impl LocalServer for CompatibleServer {
                     "The model list did not parse.".to_owned(),
                 ));
             };
+            let models = first_distinct(models, |model| model.id.clone(), self.max_listed);
             Ok(models.iter().map(model_of).collect())
         })
     }
 }
 
 pub fn server(transport: Arc<Transport>) -> Arc<dyn LocalServer> {
-    Arc::new(CompatibleServer { transport })
+    server_limited(transport, MAX_LISTED)
+}
+
+/// A server that keeps at most `max_listed` distinct ids of a listing.
+pub fn server_limited(transport: Arc<Transport>, max_listed: usize) -> Arc<dyn LocalServer> {
+    Arc::new(CompatibleServer {
+        transport,
+        max_listed,
+    })
 }
 
 /// A bare origin means `/v1`; a query, fragment or credentials refuse.

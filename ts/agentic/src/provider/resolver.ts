@@ -107,6 +107,14 @@ const RANK: Record<Refusal, number> = {
 /** A later entry's view is waited for this long. */
 const LATER_VIEW_MS = 2000;
 
+const OUT = Symbol("out");
+
+interface Bound {
+	expired: boolean;
+	cancel: () => void;
+	late: Promise<void>;
+}
+
 ////////////////////////////////
 //  Functions & Helpers
 
@@ -369,48 +377,56 @@ export class ModelResolver {
 			const binding = row.bindings[entry.kind];
 			const elsewhere = owner !== undefined && owner !== entry.id;
 			if (kind === undefined || binding === undefined || elsewhere) continue;
-			const reached = await reach(entry);
-			if (!this.stands(entry)) continue;
-			matched = true;
-			if (reached !== "ok") {
-				passed.push({
-					entry: entry.id,
-					label: entry.label,
-					reason: REACH_SKIPS[reached],
-					before: found.length,
-				});
-				const held = standing && worst.view === undefined ? this.tried(entry) : undefined;
-				const behind = held === undefined ? undefined : await this.viewOf(held.route, row, use, zdrOnly);
-				worst = raised(worst, reached, behind, entry.label);
-				continue;
-			}
-			const held = this.tried(entry);
-			if (held === undefined) {
-				passed.push({ entry: entry.id, label: entry.label, reason: "network", before: found.length });
-				worst = raised(worst, "unreachable", undefined, entry.label);
-				continue;
-			}
-			const asked = this.viewOf(held.route, row, use, zdrOnly);
 			// A later entry's cold catalog does not hold the answer.
-			const view = found.length > 0 && all ? await this.within(asked, held.deps) : await asked;
-			if (view === undefined || !usable(view)) {
-				worst = raised(worst, refusalOf(view), view, entry.label);
-				continue;
+			const bound = found.length > 0 && all ? this.bound(this.d.kindDeps(entry.kind)) : undefined;
+			try {
+				const reached = await this.bounded(reach(entry), bound);
+				if (reached === OUT) continue;
+				if (!this.stands(entry)) continue;
+				matched = true;
+				if (reached !== "ok") {
+					passed.push({
+						entry: entry.id,
+						label: entry.label,
+						reason: REACH_SKIPS[reached],
+						before: found.length,
+					});
+					const held = standing && worst.view === undefined ? this.tried(entry) : undefined;
+					const behind = held === undefined ? undefined : await this.viewOf(held.route, row, use, zdrOnly);
+					worst = raised(worst, reached, behind, entry.label);
+					continue;
+				}
+				const held = this.tried(entry);
+				if (held === undefined) {
+					passed.push({ entry: entry.id, label: entry.label, reason: "network", before: found.length });
+					worst = raised(worst, "unreachable", undefined, entry.label);
+					continue;
+				}
+				const asked = this.viewOf(held.route, row, use, zdrOnly);
+				asked.catch(() => undefined);
+				const view = await this.bounded(asked, bound);
+				if (view === OUT) continue;
+				if (view === undefined || !usable(view)) {
+					worst = raised(worst, refusalOf(view), view, entry.label);
+					continue;
+				}
+				const live = () => this.d.zdrOnly();
+				found.push({
+					ok: true,
+					key: row.key,
+					entry,
+					kind,
+					binding,
+					view,
+					transport: stamped(held.route.transport, live),
+					codec: kind.codec(view, entry, held.deps),
+					get zdrOnly() {
+						return live();
+					},
+				});
+			} finally {
+				bound?.cancel();
 			}
-			const live = () => this.d.zdrOnly();
-			found.push({
-				ok: true,
-				key: row.key,
-				entry,
-				kind,
-				binding,
-				view,
-				transport: stamped(held.route.transport, live),
-				codec: kind.codec(view, entry, held.deps),
-				get zdrOnly() {
-					return live();
-				},
-			});
 		}
 		const [first, ...rest] = found;
 		if (first !== undefined) return { ok: true, candidates: [first, ...rest], passed };
@@ -431,18 +447,24 @@ export class ModelResolver {
 		}
 	}
 
-	/** The view, or none once the wait ends; the read goes on. */
-	private async within(read: Promise<ModelView | undefined>, deps: KindDeps): Promise<ModelView | undefined> {
-		let cancel = () => {};
-		const late = new Promise<undefined>((resolve) => {
-			cancel = deps.scheduler.schedule(LATER_VIEW_MS, () => resolve(undefined));
+	/** A read past the bound goes on and the next call shares it; every kind's catalog shares its reads. */
+	private bound(deps: KindDeps): Bound {
+		const bound = { expired: false, cancel: () => {}, late: Promise.resolve() };
+		bound.late = new Promise<void>((resolve) => {
+			bound.cancel = deps.scheduler.schedule(LATER_VIEW_MS, () => {
+				bound.expired = true;
+				resolve();
+			});
 		});
+		return bound;
+	}
+
+	/** The read's answer, or `OUT` once the bound ended, even when the read ended with it. */
+	private async bounded<T>(read: Promise<T>, bound: Bound | undefined): Promise<T | typeof OUT> {
+		if (bound === undefined) return read;
 		read.catch(() => undefined);
-		try {
-			return await Promise.race([read, late]);
-		} finally {
-			cancel();
-		}
+		const value = await Promise.race([read, bound.late]);
+		return bound.expired ? OUT : (value as T);
 	}
 
 	private async viewOf(route: Route, row: ModelRow, use: ModelUse, zdrOnly: boolean): Promise<ModelView | undefined> {

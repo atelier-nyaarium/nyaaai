@@ -1,6 +1,7 @@
 // OpenAI-compatible model list, network and base URL.
 
 import { parseUrl } from "@nyaaai/contract/url";
+import { firstDistinct, MAX_LISTED } from "./join";
 import type { LocalModel, LocalServer, LocalTransport } from "./local/catalog";
 import { localKind } from "./local/kind";
 
@@ -52,12 +53,12 @@ export function modelOf(model: ListedModel): LocalModel {
 	};
 }
 
-export function server(transport: LocalTransport): LocalServer {
+export function server(transport: LocalTransport, maxListed = MAX_LISTED): LocalServer {
 	return {
 		models: async (_known, signal) => {
 			const models = listed(await transport.getJson(LIST, signal, "stored"));
 			if (models === undefined) throw new Error("The model list did not parse.");
-			return models.map(modelOf);
+			return firstDistinct(models, (model) => model.id, maxListed).map(modelOf);
 		},
 	};
 }

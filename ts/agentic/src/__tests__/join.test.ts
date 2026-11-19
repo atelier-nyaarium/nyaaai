@@ -37,17 +37,19 @@ it("joinLimited keeps no more reads in flight than its limit and answers in list
 	expect(answers).toEqual(Array.from({ length: 20 }, (_, at) => at));
 });
 
-it("joinLimited starts no more reads after a failure", async () => {
+it("joinLimited after a failure starts no read, waits for those started and throws the earliest in list order", async () => {
 	const started: number[] = [];
-	const error = new Error("no");
-	const reads = [0, 1, 2, 3, 4].map((at) => async () => {
+	const first = new Error("first");
+	const second = new Error("second");
+	const reads = [0, 1, 2, 3].map((at) => async () => {
 		started.push(at);
-		await new Promise((resolve) => setTimeout(resolve, 5));
-		if (at === 1) throw error;
+		await new Promise((resolve) => setTimeout(resolve, at === 0 ? 20 : 5));
+		if (at === 0) throw first;
+		if (at === 1) throw second;
 		return at;
 	});
-	expect(await rejection(joinLimited(reads, 2))).toBe(error);
-	expect(started).toEqual([0, 1, 2]);
+	expect(await rejection(joinLimited(reads, 2))).toBe(first);
+	expect(started).toEqual([0, 1]);
 });
 
 it("joinSettled waits for every read, ends none, and answers the first failure in list order", async () => {

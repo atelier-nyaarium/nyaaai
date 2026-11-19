@@ -4,6 +4,8 @@ import type { CaseSource } from "../caseAdapter";
 import {
 	advance,
 	BALANCE,
+	begin,
+	dies,
 	failing,
 	GO,
 	KEY,
@@ -45,6 +47,22 @@ export const staleCases: CaseSource[] = [
 		...GO_ALONE,
 		exchanges: [says("Go", BALANCE, SLOW), says("Go")],
 		steps: [replaced("go"), send("first"), send("next")],
+	}),
+	run("a-reply-with-no-billing-source-after-the-key-was-replaced-is-not-dropped", {
+		...GO_ALONE,
+		exchanges: [says("Go", { prompt_tokens: 100, completion_tokens: 10, cost: 0.001 }, SLOW)],
+		steps: [replaced("go"), send("first")],
+	}),
+	run("a-dropped-balance-reply-does-not-exempt-its-entry-from-a-later-cooldown", {
+		...GO_ALONE,
+		exchanges: [{ ...dies(BALANCE), ...SLOW }, says("Go", BALANCE), says("Go")],
+		steps: [
+			begin("run"),
+			replaced("go"),
+			send("first", { run: "run" }),
+			send("other"),
+			send("second", { run: "run" }),
+		],
 	}),
 	run("a-401-before-the-key-was-replaced-still-rejects-it", {
 		entries: [{ id: "a", kind: "openrouter", label: "Alpha" }],

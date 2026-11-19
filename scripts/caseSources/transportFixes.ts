@@ -27,6 +27,8 @@ import {
 
 const HI = [piece(HI_FRAMES)];
 
+const finishFrames = `${frame(finish("stop"))}${DONE_TEXT}`;
+
 const REPLY = JSON.stringify({
 	id: "gen-1",
 	provider: "Azure",
@@ -170,7 +172,25 @@ const caps: CaseSource[] = [
 		{ maxBytes: 100 },
 	),
 	exchange(
-		"cap-a-stream-with-many-small-items-is-not-capped",
+		"cap-a-stream-of-id-lines-ends-at-the-cap",
+		[streamCall()],
+		[sseReply(Array.from({ length: 30 }, () => piece("id: 7\n")))],
+		{ maxBytes: 100 },
+	),
+	exchange(
+		"cap-a-stream-of-blank-lines-ends-at-the-cap",
+		[streamCall()],
+		[sseReply(Array.from({ length: 120 }, () => piece("\n")))],
+		{ maxBytes: 100 },
+	),
+	exchange(
+		"cap-a-stream-of-many-small-events-is-not-capped",
+		[streamCall()],
+		[sseReply([...Array.from({ length: 40 }, () => piece(frame(text("a")))), piece(finishFrames)])],
+		{ maxBytes: 150 },
+	),
+	exchange(
+		"cap-a-stream-of-comments-only-ends-at-the-cap",
 		[streamCall()],
 		[sseReply([...Array.from({ length: 30 }, () => piece(commentFrame("ping"))), piece(HI_FRAMES)])],
 		{ maxBytes: 30 },

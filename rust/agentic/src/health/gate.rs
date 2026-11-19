@@ -61,8 +61,10 @@ pub struct GateDeps {
     pub scheduler: Arc<dyn Scheduler>,
     pub pause_ms: Option<i64>,
     pub max_pauses: Option<u64>,
-    /// Told each ticket in the gate call that makes it, once its holder has it.
+    /// Told each ticket as it is made, before its holder has it.
     pub on_ticket: Option<TicketFn>,
+    /// Told a ticket whose holder was gone before it arrived.
+    pub on_withdrawn: Option<TicketFn>,
 }
 
 struct Waiter {
@@ -116,6 +118,7 @@ struct Core {
     pause_ms: i64,
     max_pauses: u64,
     on_ticket: Option<TicketFn>,
+    on_withdrawn: Option<TicketFn>,
     state: Mutex<State>,
     /// Effects made and not yet done, oldest first.
     outbox: Mutex<VecDeque<Effect>>,
@@ -388,18 +391,18 @@ impl Core {
                     Admission::Go(held) => Some(held.ticket.clone()),
                     _ => None,
                 };
-                match send.send(admission) {
-                    Ok(()) => {
-                        if let Some(ticket) = &ticket {
-                            self.made(ticket);
-                        }
+                // The ticket is told before its holder can use it.
+                if let Some(ticket) = &ticket {
+                    self.made(ticket);
+                }
+                // A gone caller passes the turn on as if it had cancelled.
+                if send.send(admission).is_err()
+                    && let Some(ticket) = &ticket
+                {
+                    if let Some(told) = &self.on_withdrawn {
+                        told(ticket);
                     }
-                    // The caller is gone: the turn passes on as if it had cancelled.
-                    Err(_) => {
-                        if let Some(ticket) = &ticket {
-                            self.settle(ticket, GateOutcome::Cancelled, None);
-                        }
-                    }
+                    self.settle(ticket, GateOutcome::Cancelled, None);
                 }
             }
             Effect::Made(ticket) => self.made(&ticket),
@@ -544,6 +547,7 @@ impl ProviderGate {
                 pause_ms: deps.pause_ms.unwrap_or(PAUSE_MS),
                 max_pauses: deps.max_pauses.unwrap_or(MAX_PAUSES),
                 on_ticket: deps.on_ticket,
+                on_withdrawn: deps.on_withdrawn,
                 state: Mutex::new(State {
                     models: Vec::new(),
                     serial: 0,
@@ -823,6 +827,7 @@ mod tests {
                 pause_ms: None,
                 max_pauses: None,
                 on_ticket: None,
+                on_withdrawn: None,
             },
             &CountedIds::new("gate-"),
         );

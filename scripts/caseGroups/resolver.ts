@@ -477,6 +477,10 @@ export const resolver = caseGroup("resolver", {
 				listings: z.record(z.string(), z.record(z.string(), Listing)),
 				/** Entries whose catalog answers no view until a `warm` step. */
 				cold: z.array(z.string()).exactOptional(),
+				/** Entries whose key read answers after this many milliseconds on the wheel. */
+				keySlow: z.record(z.string(), z.int().min(1)).exactOptional(),
+				/** Entries whose catalog answers its view after this many milliseconds on the wheel. */
+				slow: z.record(z.string(), z.int().min(1)).exactOptional(),
 				/** Entries whose catalog fails when stopped. */
 				disposeFails: z.array(z.string()).exactOptional(),
 				/** The scheduler's first instant. */
@@ -516,6 +520,11 @@ export const resolver = caseGroup("resolver", {
 							gate.reached();
 							await gate.release;
 						}
+						const delay = input.keySlow?.[id];
+						if (delay !== undefined) {
+							asked();
+							await scheduler.sleep(delay);
+						}
 						return input.failing.includes(id) ? { kind: "unready" } : scriptedKeys.get(id);
 					},
 					onChange: scriptedKeys.onChange,
@@ -551,6 +560,11 @@ export const resolver = caseGroup("resolver", {
 									if (cold.has(entry.id)) {
 										asked();
 										await new Promise<void>((resolve) => waiting.push(resolve));
+									}
+									const delay = input.slow?.[entry.id];
+									if (delay !== undefined) {
+										asked();
+										await scheduler.sleep(delay);
 									}
 									return deps.rows.rows().flatMap((row): ModelView[] => {
 										const bound = row.bindings[name] !== undefined;

@@ -224,6 +224,10 @@ impl ProviderKind for Kind {
         self.real.field()
     }
 
+    fn optional_key(&self) -> bool {
+        self.real.optional_key()
+    }
+
     fn check<'a>(
         &'a self,
         entry: &'a EntryFields,

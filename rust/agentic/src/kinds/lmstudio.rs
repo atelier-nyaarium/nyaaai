@@ -7,6 +7,7 @@ use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::json::{Object, Value};
 use nyaaai_contract::shapes::provider::ProviderKindName;
 
+use super::join::{MAX_LISTED, first_distinct};
 use super::local::catalog::{
     Loaded, LocalModel, LocalServer, Think, efforts_of, items_of, put_loaded,
 };
@@ -108,6 +109,7 @@ pub fn loaded_contexts(models: &[ListedModel]) -> Loaded {
 
 struct LmStudioServer {
     transport: Arc<Transport>,
+    max_listed: usize,
 }
 
 impl LocalServer for LmStudioServer {
@@ -126,6 +128,7 @@ impl LocalServer for LmStudioServer {
                     "The model list did not parse.".to_owned(),
                 ));
             };
+            let models = first_distinct(models, |model| model.key.clone(), self.max_listed);
             Ok(models.iter().map(model_of).collect())
         })
     }
@@ -154,7 +157,15 @@ impl LocalServer for LmStudioServer {
 }
 
 pub fn server(transport: Arc<Transport>) -> Arc<dyn LocalServer> {
-    Arc::new(LmStudioServer { transport })
+    server_limited(transport, MAX_LISTED)
+}
+
+/// A server that keeps at most `max_listed` distinct keys of a listing.
+pub fn server_limited(transport: Arc<Transport>, max_listed: usize) -> Arc<dyn LocalServer> {
+    Arc::new(LmStudioServer {
+        transport,
+        max_listed,
+    })
 }
 
 pub static LMSTUDIO: LazyLock<Arc<LocalKind>> = LazyLock::new(|| {

@@ -33,7 +33,8 @@ pub const MAX_LISTED: usize = 2000;
 /// Reads in flight at once, for a read per listed row.
 pub const READS_AT_ONCE: usize = 8;
 
-/// Starts reads in list order, at most `limit` at once; the first failure starts no more.
+/// Starts reads in list order, at most `limit` at once. A failure starts no more and waits for
+/// those started; the earliest failure in list order is answered.
 pub async fn join_limited<T, E, F: Future<Output = Result<T, E>>>(
     reads: impl IntoIterator<Item = F>,
     limit: usize,
@@ -42,9 +43,10 @@ pub async fn join_limited<T, E, F: Future<Output = Result<T, E>>>(
     let mut upcoming = reads.into_iter().enumerate();
     let mut flying: Vec<(usize, Pin<Box<F>>)> = Vec::new();
     let mut done: Vec<Option<T>> = Vec::new();
-    let answers = std::future::poll_fn(|context| {
+    let mut failure: Option<(usize, E)> = None;
+    std::future::poll_fn(|context| {
         loop {
-            while flying.len() < limit {
+            while failure.is_none() && flying.len() < limit {
                 let Some((at, read)) = upcoming.next() else {
                     break;
                 };
@@ -52,18 +54,24 @@ pub async fn join_limited<T, E, F: Future<Output = Result<T, E>>>(
                 flying.push((at, Box::pin(read)));
             }
             if flying.is_empty() {
-                return Poll::Ready(Ok(()));
+                return Poll::Ready(());
             }
             let mut finished = false;
             let mut at = 0;
             while at < flying.len() {
                 match flying[at].1.as_mut().poll(context) {
-                    Poll::Ready(Ok(held)) => {
+                    Poll::Ready(result) => {
                         let (place, _) = flying.remove(at);
-                        done[place] = Some(held);
                         finished = true;
+                        match result {
+                            Ok(held) => done[place] = Some(held),
+                            Err(error) => {
+                                if failure.as_ref().is_none_or(|(held, _)| place < *held) {
+                                    failure = Some((place, error));
+                                }
+                            }
+                        }
                     }
-                    Poll::Ready(Err(error)) => return Poll::Ready(Err(error)),
                     Poll::Pending => at += 1,
                 }
             }
@@ -73,7 +81,10 @@ pub async fn join_limited<T, E, F: Future<Output = Result<T, E>>>(
         }
     })
     .await;
-    answers.map(|()| done.into_iter().flatten().collect())
+    match failure {
+        Some((_, error)) => Err(error),
+        None => Ok(done.into_iter().flatten().collect()),
+    }
 }
 
 /// A read that cannot fail, as one a limited join takes.
@@ -185,6 +196,27 @@ mod tests {
             let answers = join_limited(reads, 3).await.expect("no failure");
             assert_eq!(answers, (0..20).collect::<Vec<_>>());
             assert_eq!(flying.lock().expect("held").1, 3);
+        });
+    }
+
+    #[test]
+    fn a_limited_join_after_failures_starts_no_read_and_answers_the_earliest_in_list_order() {
+        runtime().block_on(async {
+            let started = Arc::new(Mutex::new(Vec::new()));
+            let reads: Vec<_> = (0..4)
+                .map(|name: i32| {
+                    let started = Arc::clone(&started);
+                    async move {
+                        started.lock().expect("held").push(name);
+                        for _ in 0..if name == 0 { 6 } else { 1 } {
+                            tokio::task::yield_now().await;
+                        }
+                        if name < 2 { Err(name) } else { Ok(name) }
+                    }
+                })
+                .collect();
+            assert_eq!(join_limited(reads, 2).await, Err(0));
+            assert_eq!(*started.lock().expect("held"), [0, 1]);
         });
     }
 }

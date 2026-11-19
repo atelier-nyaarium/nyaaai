@@ -22,7 +22,7 @@ use nyaaai_contract::shapes::provider::{
     EntryFields, KeyReach, Passed, ProviderEntry, ProviderKindName, SkipReason,
 };
 use nyaaai_contract::shapes::step::{CanonicalRequest, StepResult};
-use tokio::sync::{OnceCell, oneshot};
+use tokio::sync::OnceCell;
 
 use super::kind::{EntryCatalog, KindDeps, KindField, ProviderKind, Route};
 use crate::codec::Codec;
@@ -394,6 +394,77 @@ pub async fn served_by(d: &ServedByDeps, key: &str, use_: &ModelUse) -> Routes {
 /// A later entry's view is waited for this long.
 const LATER_VIEW_MS: i64 = 2000;
 
+/// A later entry's wait: one timer over its key read and its view.
+struct Bound {
+    runtime: tokio::runtime::Handle,
+    expired: Arc<AtomicBool>,
+    waker: Arc<Mutex<Option<Waker>>>,
+    timer: nyaaai_contract::time::Scheduled,
+}
+
+impl Bound {
+    fn new(deps: &KindDeps) -> Self {
+        let expired = Arc::new(AtomicBool::new(false));
+        let waker: Arc<Mutex<Option<Waker>>> = Arc::new(Mutex::new(None));
+        let (flag, wake) = (Arc::clone(&expired), Arc::clone(&waker));
+        let timer = deps.scheduler.schedule(
+            LATER_VIEW_MS,
+            Box::new(move || {
+                flag.store(true, Ordering::SeqCst);
+                if let Some(waker) = locked(&wake).take() {
+                    waker.wake();
+                }
+            }),
+        );
+        Self {
+            runtime: deps.runtime.clone(),
+            expired,
+            waker,
+            timer,
+        }
+    }
+
+    /// Starts the read at the call; one that outlives the bound goes on, off the caller.
+    async fn go<T: Send + 'static>(&self, mut read: BoxFuture<'static, T>) -> Option<T> {
+        match started(read.as_mut()) {
+            Poll::Ready(value) => (!self.expired.load(Ordering::SeqCst)).then_some(value),
+            Poll::Pending => {
+                let running = self.runtime.spawn(read);
+                self.race(async move { running.await.ok() }).await.flatten()
+            }
+        }
+    }
+
+    /// The read's answer, or none once the bound ended, even when the read ended with it.
+    async fn race<T>(&self, read: impl Future<Output = T>) -> Option<T> {
+        let mut read = std::pin::pin!(read);
+        std::future::poll_fn(|context| {
+            *locked(&self.waker) = Some(context.waker().clone());
+            if self.expired.load(Ordering::SeqCst) {
+                return Poll::Ready(None);
+            }
+            match read.as_mut().poll(context) {
+                Poll::Ready(value) => {
+                    Poll::Ready((!self.expired.load(Ordering::SeqCst)).then_some(value))
+                }
+                Poll::Pending => Poll::Pending,
+            }
+        })
+        .await
+    }
+}
+
+/// The first poll, taken where no context lives across an await.
+fn started<T>(read: Pin<&mut (dyn Future<Output = T> + Send)>) -> Poll<T> {
+    read.poll(&mut Context::from_waker(Waker::noop()))
+}
+
+impl Drop for Bound {
+    fn drop(&mut self) {
+        self.timer.cancel();
+    }
+}
+
 /// A route with the deps it was made with.
 #[derive(Clone)]
 struct Held {
@@ -570,10 +641,15 @@ impl ModelResolver {
 
     /// What a key says of one entry.
     pub async fn reach(&self, entry: &ProviderEntry) -> KeyReach {
+        self.reach_owned(entry).await
+    }
+
+    fn reach_owned(&self, entry: &ProviderEntry) -> BoxFuture<'static, KeyReach> {
         let field = self
             .kind_of(entry.kind)
             .map_or(KindField::Key, |held| held.field());
-        reach_of(field, &self.d.keys.get(&entry.id).await)
+        let (keys, id) = (Arc::clone(&self.d.keys), entry.id.clone());
+        Box::pin(async move { reach_of(field, &keys.get(&id).await) })
     }
 
     pub async fn resolve(&self, key: &str, use_: &ModelUse) -> Resolution {
@@ -713,7 +789,23 @@ impl ModelResolver {
             let (Some(kind), Some(binding), false) = (kind, binding, elsewhere) else {
                 continue;
             };
-            let reached = self.reach_once(reaches, &entry).await;
+            // A later entry's cold key store or catalog does not hold the answer.
+            let bound =
+                (!found.is_empty() && all).then(|| Bound::new(&(self.d.kind_deps)(entry.kind)));
+            let reached = match &bound {
+                Some(bound) => {
+                    let cell = Arc::clone(locked(reaches).entry(entry.id.clone()).or_default());
+                    let read = self.reach_owned(&entry);
+                    let Some(reached) = bound
+                        .go(Box::pin(async move { *cell.get_or_init(|| read).await }))
+                        .await
+                    else {
+                        continue;
+                    };
+                    reached
+                }
+                None => self.reach_once(reaches, &entry).await,
+            };
             if !self.stands(&entry) {
                 continue;
             }
@@ -747,11 +839,14 @@ impl ModelResolver {
                 worst = raised(worst, Refusal::Unreachable, None, &entry.label);
                 continue;
             };
-            let later = !found.is_empty() && all;
-            let view = if later {
-                self.within(&held, row, use_, zdr_only).await
-            } else {
-                self.view_of(&held.route, row, use_, zdr_only).await
+            let view = match &bound {
+                Some(bound) => {
+                    let Some(view) = self.within(bound, &held, row, use_, zdr_only).await else {
+                        continue;
+                    };
+                    view
+                }
+                None => self.view_of(&held.route, row, use_, zdr_only).await,
             };
             let view = match view {
                 Some(held) if usable(&held) => held,
@@ -789,50 +884,27 @@ impl ModelResolver {
         }))
     }
 
-    /// The view, or none once a later entry's wait ends; its read goes on.
+    /// The view, or none once the bound ends; a read past it goes on and the next call shares it
+    /// (every kind's catalog shares its reads).
     async fn within(
         &self,
+        bound: &Bound,
         held: &Held,
         row: &ModelRow,
         use_: &ModelUse,
         zdr_only: bool,
-    ) -> Option<ModelView> {
+    ) -> Option<Option<ModelView>> {
         let catalog = Arc::clone(&held.route.catalog);
         let (use_, key) = (use_.clone(), row.key.clone());
-        let mut read: BoxFuture<'static, Option<ModelView>> = Box::pin(async move {
-            let views = catalog
-                .views(use_, zdr_only, None)
-                .await
-                .unwrap_or_default();
-            views.into_iter().find(|each| each.row.key == key)
-        });
-        // The read starts at the call, as an `async` function would.
-        let started = read.as_mut().poll(&mut Context::from_waker(Waker::noop()));
-        let (late, mut timed_out) = oneshot::channel::<()>();
-        let timer = held.deps.scheduler.schedule(
-            LATER_VIEW_MS,
-            Box::new(move || {
-                let _ = late.send(());
-            }),
-        );
-        let answer = match started {
-            Poll::Ready(view) => view,
-            Poll::Pending => {
-                let mut running = held.deps.runtime.spawn(read);
-                std::future::poll_fn(|context| {
-                    if let Poll::Ready(done) = Pin::new(&mut running).poll(context) {
-                        return Poll::Ready(done.unwrap_or(None));
-                    }
-                    match Pin::new(&mut timed_out).poll(context) {
-                        Poll::Ready(_) => Poll::Ready(None),
-                        Poll::Pending => Poll::Pending,
-                    }
-                })
-                .await
-            }
-        };
-        timer.cancel();
-        answer
+        bound
+            .go(Box::pin(async move {
+                let views = catalog
+                    .views(use_, zdr_only, None)
+                    .await
+                    .unwrap_or_default();
+                views.into_iter().find(|each| each.row.key == key)
+            }))
+            .await
     }
 
     async fn view_of(

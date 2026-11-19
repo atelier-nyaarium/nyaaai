@@ -26647,6 +26647,8 @@ pub struct ResolverRoutesInput {
     pub kinds: Vec<nyaaai_contract::shapes::provider::ProviderKindName>,
     pub listings: Record<Record<ResolverRoutesInputListingsValueValue>>,
     pub cold: Option<Vec<String>>,
+    pub key_slow: Option<Record<u64>>,
+    pub slow: Option<Record<u64>>,
     pub dispose_fails: Option<Vec<String>>,
     pub start_ms: Option<i64>,
     pub zdr_only: bool,
@@ -26687,6 +26689,16 @@ impl Shape for ResolverRoutesInput {
         let cold = shape::optional(object, "cold", at, |value, at| {
             shape::list(value, at, shape::text)
         })?;
+        let key_slow = shape::optional(object, "keySlow", at, |value, at| {
+            shape::record(value, at, |value, at| {
+                shape::natural(value, at).and_then(|held| shape::at_least(held, 1, at))
+            })
+        })?;
+        let slow = shape::optional(object, "slow", at, |value, at| {
+            shape::record(value, at, |value, at| {
+                shape::natural(value, at).and_then(|held| shape::at_least(held, 1, at))
+            })
+        })?;
         let dispose_fails = shape::optional(object, "disposeFails", at, |value, at| {
             shape::list(value, at, shape::text)
         })?;
@@ -26709,6 +26721,8 @@ impl Shape for ResolverRoutesInput {
             kinds,
             listings,
             cold,
+            key_slow,
+            slow,
             dispose_fails,
             start_ms,
             zdr_only,
@@ -26758,6 +26772,18 @@ impl Shape for ResolverRoutesInput {
             object.insert(
                 "cold",
                 Value::Array(held.iter().map(|held| Value::from(held.as_str())).collect()),
+            );
+        }
+        if let Some(held) = &self.key_slow {
+            object.insert(
+                "keySlow",
+                shape::record_value(held, |held| Value::Number(*held as f64)),
+            );
+        }
+        if let Some(held) = &self.slow {
+            object.insert(
+                "slow",
+                shape::record_value(held, |held| Value::Number(*held as f64)),
             );
         }
         if let Some(held) = &self.dispose_fails {
