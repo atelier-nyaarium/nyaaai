@@ -123,11 +123,11 @@ function treeState(dir: string): string {
 beforeAll(() => {
 	temp = mkdtempSync(path.join(tmpdir(), "nyaaai-consumer-"));
 	source = makeSource();
-});
+}, TIMEOUT);
 
 afterAll(() => {
 	rmSync(temp, { recursive: true, force: true });
-});
+}, TIMEOUT);
 
 describe("consumer", () => {
 	it(
