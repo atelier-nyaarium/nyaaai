@@ -28,6 +28,8 @@ interface Fresh {
 
 const SCHEMA = "schema";
 const GENERATED = "//! Generated from the case groups by scripts/contract.ts. Do not edit.";
+/** Formatter output limit. */
+const GENERATED_MAX_BYTES = 1 << 28;
 
 ////////////////////////////////
 //  Functions & Helpers
@@ -46,14 +48,20 @@ function biomeFormat(text: string): string {
 		cwd: PROJECT_ROOT,
 		input: text,
 		encoding: "utf8",
+		maxBuffer: GENERATED_MAX_BYTES,
 	});
-	if (ran.status !== 0) throw new Error(`biome refused generated code:\n${ran.stderr}`);
+	if (ran.status !== 0) throw new Error(`biome refused generated code:\n${ran.error?.message ?? ran.stderr}`);
 	return ran.stdout;
 }
 
 function rustfmt(text: string): string {
-	const ran = spawnSync(rustfmtBin(), ["--edition", "2024"], { cwd: PROJECT_ROOT, input: text, encoding: "utf8" });
-	if (ran.status !== 0) throw new Error(`rustfmt refused generated code:\n${ran.stderr}`);
+	const ran = spawnSync(rustfmtBin(), ["--edition", "2024"], {
+		cwd: PROJECT_ROOT,
+		input: text,
+		encoding: "utf8",
+		maxBuffer: GENERATED_MAX_BYTES,
+	});
+	if (ran.status !== 0) throw new Error(`rustfmt refused generated code:\n${ran.error?.message ?? ran.stderr}`);
 	return ran.stdout;
 }
 
