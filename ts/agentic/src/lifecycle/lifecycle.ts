@@ -505,7 +505,7 @@ export class RequestLifecycle {
 					...defined(fields),
 				};
 				trace(o, () => ({ kind: "metered", call: metered }));
-				meter.called(metered, ticket);
+				meter.called(metered, ticket, route.incarnation);
 			} catch {
 				// Metering cannot alter outcomes.
 			}

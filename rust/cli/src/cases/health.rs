@@ -7,7 +7,7 @@ use std::sync::{Arc, Mutex, MutexGuard};
 use nyaaai_agentic::codec::Codec;
 use nyaaai_agentic::health::gate::Phase;
 use nyaaai_agentic::health::health::{Billing, Gate, HealthDeps, ProviderHealth, RouteRef};
-use nyaaai_agentic::provider::incarnation::{EntryRegistry, Incarnation};
+use nyaaai_agentic::provider::incarnation::{EntryRegistry, Incarnation, RegistryEvent};
 use nyaaai_agentic::provider::kind::{
     CatalogDeps, EntryCatalog, KINDS, KindDeps, KindError, KindField, ProviderKind,
 };
@@ -81,16 +81,6 @@ impl Owned {
     }
 }
 
-/// An incarnation whose entry has already left the list.
-fn left_incarnation(entry: &ProviderEntry) -> Arc<Incarnation> {
-    let list = Arc::new(ScriptedProviderList::new(vec![entry.clone()]));
-    let scratch = EntryRegistry::new(list.clone(), &ScriptedEntryKeys::new());
-    let incarnation = scratch.incarnation(&entry.id).expect("the entry is listed");
-    list.set(Vec::new());
-    scratch.dispose();
-    incarnation
-}
-
 /// The route over the entry's incarnation as it stands now.
 fn standing(entries: &EntryRegistry, route: &HealthRoute) -> Owned {
     Owned {
@@ -98,7 +88,7 @@ fn standing(entries: &EntryRegistry, route: &HealthRoute) -> Owned {
         key: route.key.clone(),
         incarnation: entries
             .incarnation(&route.entry.id)
-            .unwrap_or_else(|| left_incarnation(&route.entry)),
+            .unwrap_or_else(|| Incarnation::ended(entries, route.entry.clone())),
     }
 }
 
@@ -468,6 +458,7 @@ async fn play(input: HealthRunInput) -> Outcome<HealthRunResult> {
                         cost: held.reply.cost,
                     },
                     None,
+                    None,
                 );
             }
             HealthRunInputStepsItem::Deferred(held) => {
@@ -646,6 +637,89 @@ impl EntryKeys for Keys {
     }
 }
 
+/// What a registry change made inside a callback does.
+fn made_by(list: &ScriptedProviderList, keys: &ScriptedEntryKeys, change: Option<RegistryChange>) {
+    match change {
+        Some(RegistryChange::List(entries)) => list.set(entries),
+        Some(RegistryChange::Key(id)) => keys.set(&id, KeyAnswer::None),
+        None => {}
+    }
+}
+
+enum RegistryChange {
+    List(Vec<ProviderEntry>),
+    Key(String),
+}
+
+fn text_of(event: &RegistryEvent) -> String {
+    let (kind, incarnation) = match event {
+        RegistryEvent::Added(held) => ("added", held),
+        RegistryEvent::Retired(held) => ("retired", held),
+        RegistryEvent::ExtraUsage { incarnation, .. } => ("extraUsage", incarnation),
+        RegistryEvent::Rekeyed { incarnation, .. } => ("rekeyed", incarnation),
+    };
+    format!("{kind}:{}#{}", incarnation.id, incarnation.number)
+}
+
+pub fn registry(input: HealthRegistryInput) -> Outcome<HealthRegistryResult> {
+    let list = Arc::new(ScriptedProviderList::new(input.entries.clone()));
+    let raw = Arc::new(ScriptedEntryKeys::new());
+    let entries = EntryRegistry::new(list.clone(), &*raw);
+    let told: Arc<Mutex<Vec<String>>> = Arc::default();
+    let mut steps = Vec::new();
+    for step in &input.steps {
+        match step {
+            HealthRegistryInputStepsItem::Watch(held) => {
+                let change = held.on_first.as_ref().map(|first| match first {
+                    HealthRegistryInputStepsItemWatchOnFirst::List(each) => {
+                        RegistryChange::List(each.entries.clone())
+                    }
+                    HealthRegistryInputStepsItemWatchOnFirst::Key(each) => {
+                        RegistryChange::Key(each.id.clone())
+                    }
+                });
+                let (told, name, throws) = (Arc::clone(&told), held.name.clone(), held.throws);
+                let (list, raw) = (list.clone(), raw.clone());
+                let change = Mutex::new(change);
+                drop(entries.watch(Arc::new(move |events| {
+                    let texts: Vec<String> = events.iter().map(text_of).collect();
+                    locked(&told).push(format!("{name} {}", texts.join(" ")));
+                    made_by(&list, &raw, locked(&change).take());
+                    if throws == Some(true) {
+                        std::panic::resume_unwind(Box::new("A watcher threw."));
+                    }
+                })));
+            }
+            HealthRegistryInputStepsItem::Listen(held) => {
+                let change = held.on_first.as_ref().map(|first| match first {
+                    HealthRegistryInputStepsItemListenOnFirst::List(each) => {
+                        RegistryChange::List(each.entries.clone())
+                    }
+                    HealthRegistryInputStepsItemListenOnFirst::Key(each) => {
+                        RegistryChange::Key(each.id.clone())
+                    }
+                });
+                let (told, name) = (Arc::clone(&told), held.name.clone());
+                let (list, raw) = (list.clone(), raw.clone());
+                let change = Mutex::new(change);
+                drop(entries.on_key_change(Arc::new(move |id| {
+                    locked(&told).push(format!("{name} key:{id}"));
+                    made_by(&list, &raw, locked(&change).take());
+                })));
+            }
+            HealthRegistryInputStepsItem::List(held) => list.set(held.entries.clone()),
+            HealthRegistryInputStepsItem::Key(held) => raw.set(&held.id, KeyAnswer::None),
+            HealthRegistryInputStepsItem::Dispose(_) => entries.dispose(),
+        }
+        steps.push(HealthRegistryResultStepsItem {
+            told: std::mem::take(&mut *locked(&told)),
+            thrown: false,
+        });
+    }
+    entries.dispose();
+    Ok(HealthRegistryResult { steps })
+}
+
 pub fn keys(input: HealthKeysInput) -> Outcome<HealthKeysResult> {
     block_on(ask(input))?
 }
@@ -675,7 +749,7 @@ async fn ask(input: HealthKeysInput) -> Outcome<HealthKeysResult> {
             key: "lab/model-a".to_owned(),
             incarnation: entries
                 .incarnation(&row.entry.id)
-                .unwrap_or_else(|| left_incarnation(&row.entry)),
+                .unwrap_or_else(|| Incarnation::ended(&entries, row.entry.clone())),
         };
         let route = owned.as_ref();
         let id = row.entry.id.as_str();

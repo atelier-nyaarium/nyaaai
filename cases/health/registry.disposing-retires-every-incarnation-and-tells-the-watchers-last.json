@@ -1,0 +1,58 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.registry",
+	"name": "disposing-retires-every-incarnation-and-tells-the-watchers-last",
+	"input": {
+		"entries": [
+			{
+				"id": "main",
+				"kind": "openrouter",
+				"label": "Main"
+			},
+			{
+				"id": "gone",
+				"kind": "openrouter",
+				"label": "Gone"
+			}
+		],
+		"steps": [
+			{
+				"kind": "watch",
+				"name": "w1"
+			},
+			{
+				"kind": "dispose"
+			},
+			{
+				"kind": "list",
+				"entries": [
+					{
+						"id": "main",
+						"kind": "openrouter",
+						"label": "Main",
+						"plan": "payg"
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"told": [],
+				"thrown": false
+			},
+			{
+				"told": [
+					"w1 retired:main#1 retired:gone#2"
+				],
+				"thrown": false
+			},
+			{
+				"told": [],
+				"thrown": false
+			}
+		]
+	}
+}

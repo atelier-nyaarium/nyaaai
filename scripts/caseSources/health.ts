@@ -96,6 +96,13 @@ const NONE = { kind: "none" };
 
 const row = (entry: Fields, prepare: string): Fields => ({ entry, prepare, exchanges: [] });
 
+const registryCase = (name: string, entries: Fields[], steps: Step[]): CaseSource =>
+	caseOf("health.registry")(name, { entries, steps });
+const watch = (name: string, extra: Fields = {}): Step => ({ kind: "watch", name, ...extra });
+const listen = (name: string, extra: Fields = {}): Step => ({ kind: "listen", name, ...extra });
+const EDITED = { ...MAIN, plan: "payg" };
+const EDITED_AGAIN = { ...MAIN, plan: "go" };
+
 const keysCase = (name: string, rows: Fields[]): CaseSource => caseOf("health.keys")(name, { rows });
 
 const run = (name: string, input: Fields): CaseSource =>
@@ -957,4 +964,26 @@ export const healthCases: CaseSource[] = [
 		{ ...row(MAIN, "none"), stored: NONE, tell: ["main", "elsewhere"], tellAfter: ["main", "later"] },
 		{ ...row(MAIN, "none"), stored: NONE },
 	]),
+
+	// The registry tells in the order made.
+	registryCase(
+		"a-change-made-by-a-watcher-is-told-after-the-change-it-came-from",
+		[MAIN],
+		[watch("w1", { onFirst: { kind: "list", entries: [EDITED_AGAIN] } }), watch("w2"), list(EDITED)],
+	),
+	registryCase(
+		"a-key-change-made-inside-a-list-change-is-told-after-it",
+		[MAIN],
+		[watch("w1", { onFirst: { kind: "key", id: "main" } }), watch("w2"), listen("k1"), list(EDITED)],
+	),
+	registryCase(
+		"a-watcher-that-throws-does-not-starve-the-others",
+		[MAIN],
+		[watch("w1", { throws: true }), watch("w2"), listen("k1"), list(EDITED), { kind: "key", id: "main" }],
+	),
+	registryCase(
+		"disposing-retires-every-incarnation-and-tells-the-watchers-last",
+		[MAIN, GONE],
+		[watch("w1"), { kind: "dispose" }, list(EDITED)],
+	),
 ];

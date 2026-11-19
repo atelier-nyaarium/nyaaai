@@ -123,8 +123,8 @@
 			"Go/go"
 		],
 		"stopped": [
-			"Go/go",
-			"First"
+			"First",
+			"Go/go"
 		],
 		"refreshed": [],
 		"keyReads": 3

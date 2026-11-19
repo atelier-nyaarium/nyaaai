@@ -25,6 +25,7 @@ impl Bills for Noting {
         id: &str,
         reply: &Billing,
         _ticket: Option<&nyaaai_contract::shapes::health::Ticket>,
+        _incarnation: Option<&nyaaai_agentic::provider::incarnation::Incarnation>,
     ) {
         *locked(&self.0) = Some(MeterBilled {
             entry: id.to_owned(),
@@ -56,7 +57,7 @@ pub fn called(input: MeterCalledInput) -> Outcome<MeterCalledResult> {
         sink.set_ids(each.id.iter().cloned().collect());
         *locked(&billed) = None;
         *locked(&stats) = None;
-        meter.called(&each.call, None);
+        meter.called(&each.call, None, None);
         let recorded = sink
             .recorded()
             .last()

@@ -1,0 +1,70 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.registry",
+	"name": "a-key-change-made-inside-a-list-change-is-told-after-it",
+	"input": {
+		"entries": [
+			{
+				"id": "main",
+				"kind": "openrouter",
+				"label": "Main"
+			}
+		],
+		"steps": [
+			{
+				"kind": "watch",
+				"name": "w1",
+				"onFirst": {
+					"kind": "key",
+					"id": "main"
+				}
+			},
+			{
+				"kind": "watch",
+				"name": "w2"
+			},
+			{
+				"kind": "listen",
+				"name": "k1"
+			},
+			{
+				"kind": "list",
+				"entries": [
+					{
+						"id": "main",
+						"kind": "openrouter",
+						"label": "Main",
+						"plan": "payg"
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"told": [],
+				"thrown": false
+			},
+			{
+				"told": [],
+				"thrown": false
+			},
+			{
+				"told": [],
+				"thrown": false
+			},
+			{
+				"told": [
+					"w1 retired:main#1 added:main#2",
+					"w2 retired:main#1 added:main#2",
+					"w1 rekeyed:main#2",
+					"w2 rekeyed:main#2",
+					"k1 key:main"
+				],
+				"thrown": false
+			}
+		]
+	}
+}

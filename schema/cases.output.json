@@ -17994,6 +17994,233 @@
 			],
 			"additionalProperties": false
 		},
+		"HealthRegistryInput": {
+			"type": "object",
+			"properties": {
+				"entries": {
+					"type": "array",
+					"items": {
+						"$ref": "provider.output.json#/$defs/ProviderEntry"
+					}
+				},
+				"steps": {
+					"minItems": 1,
+					"type": "array",
+					"items": {
+						"oneOf": [
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "watch"
+									},
+									"name": {
+										"type": "string"
+									},
+									"onFirst": {
+										"oneOf": [
+											{
+												"type": "object",
+												"properties": {
+													"kind": {
+														"type": "string",
+														"const": "list"
+													},
+													"entries": {
+														"type": "array",
+														"items": {
+															"$ref": "provider.output.json#/$defs/ProviderEntry"
+														}
+													}
+												},
+												"required": [
+													"kind",
+													"entries"
+												],
+												"additionalProperties": false
+											},
+											{
+												"type": "object",
+												"properties": {
+													"kind": {
+														"type": "string",
+														"const": "key"
+													},
+													"id": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"kind",
+													"id"
+												],
+												"additionalProperties": false
+											}
+										],
+										"x-tag": "kind"
+									},
+									"throws": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"kind",
+									"name"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "listen"
+									},
+									"name": {
+										"type": "string"
+									},
+									"onFirst": {
+										"oneOf": [
+											{
+												"type": "object",
+												"properties": {
+													"kind": {
+														"type": "string",
+														"const": "list"
+													},
+													"entries": {
+														"type": "array",
+														"items": {
+															"$ref": "provider.output.json#/$defs/ProviderEntry"
+														}
+													}
+												},
+												"required": [
+													"kind",
+													"entries"
+												],
+												"additionalProperties": false
+											},
+											{
+												"type": "object",
+												"properties": {
+													"kind": {
+														"type": "string",
+														"const": "key"
+													},
+													"id": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"kind",
+													"id"
+												],
+												"additionalProperties": false
+											}
+										],
+										"x-tag": "kind"
+									}
+								},
+								"required": [
+									"kind",
+									"name"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "list"
+									},
+									"entries": {
+										"type": "array",
+										"items": {
+											"$ref": "provider.output.json#/$defs/ProviderEntry"
+										}
+									}
+								},
+								"required": [
+									"kind",
+									"entries"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "key"
+									},
+									"id": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"kind",
+									"id"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "dispose"
+									}
+								},
+								"required": [
+									"kind"
+								],
+								"additionalProperties": false
+							}
+						],
+						"x-tag": "kind"
+					}
+				}
+			},
+			"required": [
+				"entries",
+				"steps"
+			],
+			"additionalProperties": false
+		},
+		"HealthRegistryResult": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"told": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"thrown": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"told",
+							"thrown"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"steps"
+			],
+			"additionalProperties": false
+		},
 		"HealthKeysInput": {
 			"type": "object",
 			"properties": {
@@ -18585,6 +18812,19 @@
 						"source"
 					],
 					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "dispose"
+						}
+					},
+					"required": [
+						"kind"
+					],
+					"additionalProperties": false
 				}
 			],
 			"x-tag": "kind"
@@ -19019,6 +19259,9 @@
 					}
 				},
 				"trace": {
+					"type": "boolean"
+				},
+				"gate": {
 					"type": "boolean"
 				},
 				"steps": {

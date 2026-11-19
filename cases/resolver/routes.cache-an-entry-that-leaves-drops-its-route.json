@@ -194,8 +194,8 @@
 		],
 		"stopped": [
 			"First",
-			"First",
-			"Second"
+			"Second",
+			"First"
 		],
 		"refreshed": [],
 		"keyReads": 5

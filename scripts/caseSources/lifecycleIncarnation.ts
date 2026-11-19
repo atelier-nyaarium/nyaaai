@@ -5,9 +5,11 @@ import {
 	A,
 	advance,
 	B,
+	BALANCE,
 	BOX,
 	down,
 	failing,
+	GO,
 	KEY,
 	LOCAL_ROW,
 	later,
@@ -70,6 +72,20 @@ export const incarnationCases: CaseSource[] = [
 		...ALONE,
 		exchanges: [says("A", undefined, SLOW), says("A")],
 		steps: [later(30, list()), later(60, list(A)), send("first"), send("next")],
+	}),
+
+	run("a-held-route-after-the-registry-is-disposed-is-skipped-as-unavailable", {
+		exchanges: [says("B")],
+		steps: [plan("held"), { kind: "dispose" }, send("late", { plan: "held" })],
+	}),
+
+	// A bill with no ticket.
+	run("a-reply-with-no-gate-for-a-request-in-flight-while-its-entry-is-removed-and-added-again-bills-nothing", {
+		entries: [GO],
+		keys: { go: KEY },
+		gate: false,
+		exchanges: [says("Go", BALANCE, SLOW)],
+		steps: [later(30, list()), later(60, list(GO)), send("first")],
 	}),
 
 	// A waiter at a paused gate.

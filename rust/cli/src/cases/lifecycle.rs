@@ -669,7 +669,7 @@ async fn play(input: LifecycleRunInput) -> Outcome<LifecycleRunResult> {
     let draws = SequenceRandom::new(input.draws.clone().unwrap_or_else(|| vec![1.0]))
         .ok_or_else(|| "no draws".to_owned())?;
     let lifecycle = RequestLifecycle::new(LifecycleDeps {
-        gate: Some(Arc::new(health.clone()) as Arc<dyn Gate>),
+        gate: (input.gate != Some(false)).then(|| Arc::new(health.clone()) as Arc<dyn Gate>),
         meter: Some(meter),
         retry: Some(RetryPolicy::new(
             &input.retry.clone().unwrap_or(RetryOptions {
@@ -715,6 +715,7 @@ async fn play(input: LifecycleRunInput) -> Outcome<LifecycleRunResult> {
             .collect();
         let mut answer = LifeAnswer::None(LifeAnswerNone {});
         match step {
+            LifeStep::Dispose(_) => entries.dispose(),
             LifeStep::Send(held) => {
                 let routes = match &held.plan {
                     Some(plan) => plans
@@ -927,6 +928,7 @@ async fn play(input: LifecycleRunInput) -> Outcome<LifecycleRunResult> {
                         allowance: None,
                         cost: held.cost,
                     },
+                    None,
                     None,
                 );
             }
@@ -1187,7 +1189,12 @@ mod tests {
     struct Records(Mutex<Vec<MeteredCall>>);
 
     impl Meter for Records {
-        fn called(&self, call: &MeteredCall, _ticket: Option<&Ticket>) {
+        fn called(
+            &self,
+            call: &MeteredCall,
+            _ticket: Option<&Ticket>,
+            _incarnation: Option<&nyaaai_agentic::provider::incarnation::Incarnation>,
+        ) {
             locked(&self.0).push(call.clone());
         }
     }

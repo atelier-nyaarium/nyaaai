@@ -1,5 +1,5 @@
 import { ProviderHealth } from "@nyaaai/agentic/health/health";
-import { EntryRegistry } from "@nyaaai/agentic/provider/incarnation";
+import { EntryRegistry, type RegistryEvent } from "@nyaaai/agentic/provider/incarnation";
 import { KINDS } from "@nyaaai/agentic/provider/kind";
 import type { Resolved } from "@nyaaai/agentic/provider/resolver";
 import type { KeyAnswer } from "@nyaaai/contract/entryKeys";
@@ -99,6 +99,26 @@ const Step = () =>
 			retryAfterMs: z.int().min(0).exactOptional(),
 		}),
 		z.object({ kind: z.literal("advance"), ms: z.int().min(0), ...NoIdle }),
+		z.object({ kind: z.literal("dispose") }),
+	]);
+
+const RegistryChange = z.discriminatedUnion("kind", [
+	z.object({ kind: z.literal("list"), entries: z.array(ProviderEntry) }),
+	z.object({ kind: z.literal("key"), id: z.string() }),
+]);
+
+const RegistryStep = () =>
+	z.discriminatedUnion("kind", [
+		/** A watcher of the registry; it makes `onFirst` when first told and throws after when `throws`. */
+		z.object({
+			kind: z.literal("watch"),
+			name: z.string(),
+			onFirst: RegistryChange.exactOptional(),
+			throws: z.boolean().exactOptional(),
+		}),
+		/** A key listener; it makes `onFirst` when first told. */
+		z.object({ kind: z.literal("listen"), name: z.string(), onFirst: RegistryChange.exactOptional() }),
+		...RegistryChange.options,
 		z.object({ kind: z.literal("dispose") }),
 	]);
 
@@ -262,7 +282,7 @@ export const health = caseGroup("health", {
 				/** The route over the entry's incarnation as it stands now. */
 				const standing = (route: { entry: z.infer<typeof ProviderEntry>; key: string }) => {
 					name(route.entry.id);
-					const incarnation = entries.incarnation(route.entry.id) ?? leftIncarnation(route.entry);
+					const incarnation = entries.incarnation(route.entry.id) ?? leftIncarnation(entries, route.entry);
 					return { entry: route.entry, key: route.key, incarnation } as unknown as Resolved;
 				};
 				const routeOf = (route: { entry: z.infer<typeof ProviderEntry>; key: string; taken?: string }) => {
@@ -384,6 +404,66 @@ export const health = caseGroup("health", {
 				};
 			},
 		),
+		/** The registry's changes, in the order told, to watchers that change the list or the keys themselves. */
+		registry: kind(
+			z.object({
+				entries: z.array(ProviderEntry),
+				steps: z.array(RegistryStep()).min(1),
+			}),
+			z.object({
+				steps: z.array(
+					z.object({
+						/** What the watchers and key listeners were told, in order: `name event:id#incarnation` or `name key:id`. */
+						told: z.array(z.string()),
+						/** Whether the change the step made threw. */
+						thrown: z.boolean(),
+					}),
+				),
+			}),
+			(input) => {
+				const list = scriptedProviderList(input.entries);
+				const raw = scriptedEntryKeys({});
+				const entries = new EntryRegistry({ list, keys: raw });
+				let told: string[] = [];
+				const change = (made: z.infer<typeof RegistryChange>) => {
+					if (made.kind === "list") list.set(made.entries);
+					else raw.set(made.id, { kind: "none" });
+				};
+				const textOf = (event: RegistryEvent) =>
+					`${event.kind}:${event.incarnation.id}#${event.incarnation.number}`;
+				const steps: Array<{ told: string[]; thrown: boolean }> = [];
+				for (const step of input.steps) {
+					let thrown = false;
+					if (step.kind === "watch") {
+						let first = true;
+						entries.watch((events) => {
+							told.push(`${step.name} ${events.map(textOf).join(" ")}`);
+							if (first && step.onFirst !== undefined) change(step.onFirst);
+							first = false;
+							if (step.throws === true) throw new Error("A watcher threw.");
+						});
+					} else if (step.kind === "listen") {
+						let first = true;
+						entries.onKeyChange((id) => {
+							told.push(`${step.name} key:${id}`);
+							if (first && step.onFirst !== undefined) change(step.onFirst);
+							first = false;
+						});
+					} else {
+						try {
+							if (step.kind === "dispose") entries.dispose();
+							else change(step);
+						} catch {
+							thrown = true;
+						}
+					}
+					steps.push({ told, thrown });
+					told = [];
+				}
+				entries.dispose();
+				return { steps };
+			},
+		),
 		/** The store's answer, unless health holds the entry out. */
 		keys: kind(
 			z.object({
@@ -466,7 +546,7 @@ export const health = caseGroup("health", {
 					const route = {
 						entry: row.entry,
 						key: "lab/model-a",
-						incarnation: entries.incarnation(row.entry.id) ?? leftIncarnation(row.entry),
+						incarnation: entries.incarnation(row.entry.id) ?? leftIncarnation(entries, row.entry),
 					} as unknown as Resolved;
 					if (row.prepare === "checking") health.check(row.entry.id);
 					else if (row.prepare === "ok") {

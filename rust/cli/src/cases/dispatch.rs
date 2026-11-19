@@ -707,6 +707,10 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
         "health.run" => {
             run::<shapes::HealthRunInput, shapes::HealthRunResult>(input, super::health::run)
         }
+        "health.registry" => run::<shapes::HealthRegistryInput, shapes::HealthRegistryResult>(
+            input,
+            super::health::registry,
+        ),
         "health.keys" => {
             run::<shapes::HealthKeysInput, shapes::HealthKeysResult>(input, super::health::keys)
         }

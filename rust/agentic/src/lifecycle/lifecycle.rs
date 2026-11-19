@@ -951,7 +951,7 @@ impl Inner {
                         call: metered.clone(),
                     })
                 });
-                meter.called(&metered, ticket);
+                meter.called(&metered, ticket, Some(&route.incarnation));
             }));
         };
         let first_token = || {

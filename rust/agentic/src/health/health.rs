@@ -338,6 +338,11 @@ impl Core {
         self.scheduler.now_ms()
     }
 
+    /// A route of another registry is a host error; its door answers as a dropped route.
+    fn owned(&self, incarnation: &Incarnation) -> bool {
+        incarnation.belongs_to(&self.entries)
+    }
+
     /// The current era of a listed id.
     fn era_of(&self, id: &str) -> Option<Arc<Era>> {
         self.entries.incarnation(id).map(|each| each.era())
@@ -826,9 +831,7 @@ impl ProviderHealth {
 
     /// One model's gate as data; none until it is first used.
     pub fn gate_state(&self, route: RouteRef<'_>) -> Option<GateState> {
-        route
-            .incarnation
-            .live()
+        (route.incarnation.live() && self.core.owned(route.incarnation))
             .then(|| {
                 self.core
                     .gate
@@ -838,10 +841,21 @@ impl ProviderHealth {
     }
 
     /// Accumulates reply billing.
-    pub fn billed(&self, id: &str, reply: &Billing, ticket: Option<&Ticket>) {
-        let era = match ticket {
-            Some(ticket) => self.core.entries.era(ticket.era),
-            None => self.core.era_of(id),
+    /// With a ticket its era takes the bill; with none, the route's incarnation does, while it lives.
+    pub fn billed(
+        &self,
+        id: &str,
+        reply: &Billing,
+        ticket: Option<&Ticket>,
+        incarnation: Option<&Incarnation>,
+    ) {
+        if incarnation.is_some_and(|held| !self.core.owned(held)) {
+            return;
+        }
+        let era = match (ticket, incarnation) {
+            (Some(ticket), _) => self.core.entries.era(ticket.era),
+            (None, Some(held)) => held.live().then(|| held.era()),
+            (None, None) => self.core.era_of(id),
         };
         let Some(era) = era else {
             return;
@@ -938,7 +952,9 @@ impl ProviderHealth {
 }
 
 impl Gate for ProviderHealth {
-    /// The ticket is told to health inside the gate call that makes it.
+    /// The ticket is told to health inside the gate call that makes it. A key change answers the
+    /// waiters of the old era at once and each asks again under the new era's open gate, so they
+    /// go out together. A route of another registry answers `Retired`.
     fn admit(
         &self,
         route: RouteRef<'_>,
@@ -948,7 +964,7 @@ impl Gate for ProviderHealth {
     ) -> BoxFuture<'static, Admission> {
         let incarnation = Arc::clone(route.incarnation);
         let retired = || Admission::Retired(AdmissionRetired {});
-        if !incarnation.live() {
+        if !incarnation.live() || !self.core.owned(&incarnation) {
             return Box::pin(async move { retired() });
         }
         let (core, key, cancel) = (Arc::clone(&self.core), key_of(route), cancel.clone());
@@ -984,7 +1000,7 @@ impl Gate for ProviderHealth {
 
     fn try_admit(&self, route: RouteRef<'_>) -> Option<Ticket> {
         let incarnation = route.incarnation;
-        if !incarnation.live() {
+        if !incarnation.live() || !self.core.owned(incarnation) {
             return None;
         }
         let _batch = self.core.batch();
@@ -1014,6 +1030,9 @@ impl Gate for ProviderHealth {
 
     fn deferred(&self, route: RouteRef<'_>, keep: Option<&HashSet<String>>) -> Option<SkipReason> {
         let incarnation = route.incarnation;
+        if !self.core.owned(incarnation) {
+            return Some(SkipReason::Unavailable);
+        }
         let era = incarnation.era();
         if Core::rejected(&era) {
             return Some(SkipReason::KeyRejected);
@@ -1030,6 +1049,9 @@ impl Gate for ProviderHealth {
 
     fn blocked(&self, route: RouteRef<'_>, keep: Option<&HashSet<String>>) -> Option<Blocked> {
         let incarnation = route.incarnation;
+        if !self.core.owned(incarnation) {
+            return None;
+        }
         if Core::rejected(&incarnation.era()) {
             return Some(Blocked::KeyRejected(BlockedKeyRejected {}));
         }
@@ -1044,6 +1066,9 @@ impl Gate for ProviderHealth {
         run: Option<&mut HashSet<String>>,
         ticket: Option<&Ticket>,
     ) -> bool {
+        if !self.core.owned(route.incarnation) {
+            return true;
+        }
         let Some(source) = usage.and_then(|held| held.billing_source.clone()) else {
             return false;
         };
@@ -1079,6 +1104,9 @@ impl Gate for ProviderHealth {
         ticket: Option<&Ticket>,
     ) -> bool {
         let core = &self.core;
+        if !core.owned(route.incarnation) {
+            return true;
+        }
         let Some(era) = core.era_for(route.incarnation, ticket) else {
             return true;
         };
@@ -1122,5 +1150,91 @@ impl Gate for ProviderHealth {
             _ => !onward || cool(&era),
         };
         !applied
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use nyaaai_contract::id::CountedIds;
+    use nyaaai_contract::shapes::step::FailureStatus;
+    use nyaaai_testkit::scheduler::{FakeScheduler, TimerWheel};
+    use nyaaai_testkit::scripted_ports::{ScriptedEntryKeys, ScriptedProviderList};
+
+    use super::*;
+
+    #[test]
+    fn a_route_of_another_registry_is_refused_at_every_door() {
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .build()
+            .unwrap();
+        let scheduler = Arc::new(FakeScheduler::new(Arc::new(TimerWheel::new(0))));
+        let entry = ProviderEntry {
+            id: "a".to_owned(),
+            kind: ProviderKindName::Openrouter,
+            label: "First".to_owned(),
+            plan: None,
+            url: None,
+            extra_usage: None,
+        };
+        let list = Arc::new(ScriptedProviderList::new(vec![entry.clone()]));
+        let keys = Arc::new(ScriptedEntryKeys::new());
+        let own = Arc::new(EntryRegistry::new(list.clone(), &*keys));
+        let other = EntryRegistry::new(list, &*keys);
+        let health = ProviderHealth::new(
+            HealthDeps {
+                runtime: runtime.handle().clone(),
+                scheduler,
+                entries: Arc::clone(&own),
+                keys: keys.clone(),
+                kinds: Vec::new(),
+                kind_deps: Arc::new(|_| unreachable!("no kind asks")),
+                pause_ms: None,
+                max_pauses: None,
+            },
+            &CountedIds::new("gate-"),
+        );
+        let route = |registry: &EntryRegistry| {
+            let incarnation = registry.incarnation("a").expect("listed");
+            (entry.clone(), incarnation)
+        };
+        let (row, mine) = route(&own);
+        let (_, foreign) = route(&other);
+        let mine = RouteRef {
+            entry: &row,
+            key: "lab/model-a",
+            incarnation: &mine,
+        };
+        let foreign = RouteRef {
+            incarnation: &foreign,
+            ..mine
+        };
+        let failure = Failure {
+            category: FailureCategory::KeyRejected,
+            status: FailureStatus::Number(401.0),
+            retry_after_ms: None,
+            resets_at: None,
+            message: "no".to_owned(),
+            reasons: None,
+            billed: None,
+        };
+        assert!(health.try_admit(mine).is_some());
+        assert!(health.try_admit(foreign).is_none());
+        assert!(matches!(
+            runtime.block_on(health.admit(foreign, &CancelToken::new(), None, false)),
+            Admission::Retired(_)
+        ));
+        assert!(health.gate_state(mine).is_some());
+        assert!(health.gate_state(foreign).is_none());
+        assert_eq!(
+            health.deferred(foreign, None),
+            Some(SkipReason::Unavailable)
+        );
+        assert!(health.blocked(foreign, None).is_none());
+        assert!(health.served(foreign, None, None, None));
+        assert!(health.failed(foreign, &failure, false, None));
+        assert!(matches!(health.status("a"), KeyState::None(_)));
+        health.dispose();
+        other.dispose();
+        own.dispose();
     }
 }

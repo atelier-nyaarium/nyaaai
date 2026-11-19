@@ -33588,6 +33588,454 @@ impl Shape for HealthRunResultStepsItemAnswerSettled {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+pub struct HealthRegistryInput {
+    pub entries: Vec<nyaaai_contract::shapes::provider::ProviderEntry>,
+    pub steps: Vec<HealthRegistryInputStepsItem>,
+}
+
+impl Shape for HealthRegistryInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let entries = shape::required(object, "entries", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::ProviderEntry::decode_at,
+            )
+        })?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list_within(
+                value,
+                at,
+                Some(1),
+                None,
+                HealthRegistryInputStepsItem::decode_at,
+            )
+        })?;
+        Ok(Self { entries, steps })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "entries",
+            Value::Array(self.entries.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum HealthRegistryInputStepsItem {
+    Watch(HealthRegistryInputStepsItemWatch),
+    Listen(HealthRegistryInputStepsItemListen),
+    List(HealthRegistryInputStepsItemList),
+    Key(HealthRegistryInputStepsItemKey),
+    Dispose(HealthRegistryInputStepsItemDispose),
+}
+
+impl Shape for HealthRegistryInputStepsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "watch" => HealthRegistryInputStepsItemWatch::decode_at(value, at).map(Self::Watch),
+            "listen" => HealthRegistryInputStepsItemListen::decode_at(value, at).map(Self::Listen),
+            "list" => HealthRegistryInputStepsItemList::decode_at(value, at).map(Self::List),
+            "key" => HealthRegistryInputStepsItemKey::decode_at(value, at).map(Self::Key),
+            "dispose" => {
+                HealthRegistryInputStepsItemDispose::decode_at(value, at).map(Self::Dispose)
+            }
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Watch(held) => held.encode(),
+            Self::Listen(held) => held.encode(),
+            Self::List(held) => held.encode(),
+            Self::Key(held) => held.encode(),
+            Self::Dispose(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HealthRegistryInputStepsItemWatch {
+    pub name: String,
+    pub on_first: Option<HealthRegistryInputStepsItemWatchOnFirst>,
+    pub throws: Option<bool>,
+}
+
+impl Shape for HealthRegistryInputStepsItemWatch {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "watch")
+        })?;
+        let name = shape::required(object, "name", at, shape::text)?;
+        let on_first = shape::optional(
+            object,
+            "onFirst",
+            at,
+            HealthRegistryInputStepsItemWatchOnFirst::decode_at,
+        )?;
+        let throws = shape::optional(object, "throws", at, shape::flag)?;
+        Ok(Self {
+            name,
+            on_first,
+            throws,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("watch"));
+        object.insert("name", Value::from(self.name.as_str()));
+        if let Some(held) = &self.on_first {
+            object.insert("onFirst", held.encode());
+        }
+        if let Some(held) = &self.throws {
+            object.insert("throws", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HealthRegistryInputStepsItemListen {
+    pub name: String,
+    pub on_first: Option<HealthRegistryInputStepsItemListenOnFirst>,
+}
+
+impl Shape for HealthRegistryInputStepsItemListen {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "listen")
+        })?;
+        let name = shape::required(object, "name", at, shape::text)?;
+        let on_first = shape::optional(
+            object,
+            "onFirst",
+            at,
+            HealthRegistryInputStepsItemListenOnFirst::decode_at,
+        )?;
+        Ok(Self { name, on_first })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("listen"));
+        object.insert("name", Value::from(self.name.as_str()));
+        if let Some(held) = &self.on_first {
+            object.insert("onFirst", held.encode());
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HealthRegistryInputStepsItemList {
+    pub entries: Vec<nyaaai_contract::shapes::provider::ProviderEntry>,
+}
+
+impl Shape for HealthRegistryInputStepsItemList {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "list")
+        })?;
+        let entries = shape::required(object, "entries", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::ProviderEntry::decode_at,
+            )
+        })?;
+        Ok(Self { entries })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("list"));
+        object.insert(
+            "entries",
+            Value::Array(self.entries.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HealthRegistryInputStepsItemKey {
+    pub id: String,
+}
+
+impl Shape for HealthRegistryInputStepsItemKey {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "key")
+        })?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        Ok(Self { id })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("key"));
+        object.insert("id", Value::from(self.id.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HealthRegistryInputStepsItemDispose {}
+
+impl Shape for HealthRegistryInputStepsItemDispose {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "dispose")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("dispose"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum HealthRegistryInputStepsItemWatchOnFirst {
+    List(HealthRegistryInputStepsItemWatchOnFirstList),
+    Key(HealthRegistryInputStepsItemWatchOnFirstKey),
+}
+
+impl Shape for HealthRegistryInputStepsItemWatchOnFirst {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "list" => {
+                HealthRegistryInputStepsItemWatchOnFirstList::decode_at(value, at).map(Self::List)
+            }
+            "key" => {
+                HealthRegistryInputStepsItemWatchOnFirstKey::decode_at(value, at).map(Self::Key)
+            }
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::List(held) => held.encode(),
+            Self::Key(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum HealthRegistryInputStepsItemListenOnFirst {
+    List(HealthRegistryInputStepsItemListenOnFirstList),
+    Key(HealthRegistryInputStepsItemListenOnFirstKey),
+}
+
+impl Shape for HealthRegistryInputStepsItemListenOnFirst {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "list" => {
+                HealthRegistryInputStepsItemListenOnFirstList::decode_at(value, at).map(Self::List)
+            }
+            "key" => {
+                HealthRegistryInputStepsItemListenOnFirstKey::decode_at(value, at).map(Self::Key)
+            }
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::List(held) => held.encode(),
+            Self::Key(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HealthRegistryInputStepsItemWatchOnFirstList {
+    pub entries: Vec<nyaaai_contract::shapes::provider::ProviderEntry>,
+}
+
+impl Shape for HealthRegistryInputStepsItemWatchOnFirstList {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "list")
+        })?;
+        let entries = shape::required(object, "entries", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::ProviderEntry::decode_at,
+            )
+        })?;
+        Ok(Self { entries })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("list"));
+        object.insert(
+            "entries",
+            Value::Array(self.entries.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HealthRegistryInputStepsItemWatchOnFirstKey {
+    pub id: String,
+}
+
+impl Shape for HealthRegistryInputStepsItemWatchOnFirstKey {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "key")
+        })?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        Ok(Self { id })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("key"));
+        object.insert("id", Value::from(self.id.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HealthRegistryInputStepsItemListenOnFirstList {
+    pub entries: Vec<nyaaai_contract::shapes::provider::ProviderEntry>,
+}
+
+impl Shape for HealthRegistryInputStepsItemListenOnFirstList {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "list")
+        })?;
+        let entries = shape::required(object, "entries", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::ProviderEntry::decode_at,
+            )
+        })?;
+        Ok(Self { entries })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("list"));
+        object.insert(
+            "entries",
+            Value::Array(self.entries.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HealthRegistryInputStepsItemListenOnFirstKey {
+    pub id: String,
+}
+
+impl Shape for HealthRegistryInputStepsItemListenOnFirstKey {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "key")
+        })?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        Ok(Self { id })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("key"));
+        object.insert("id", Value::from(self.id.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HealthRegistryResult {
+    pub steps: Vec<HealthRegistryResultStepsItem>,
+}
+
+impl Shape for HealthRegistryResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list(value, at, HealthRegistryResultStepsItem::decode_at)
+        })?;
+        Ok(Self { steps })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HealthRegistryResultStepsItem {
+    pub told: Vec<String>,
+    pub thrown: bool,
+}
+
+impl Shape for HealthRegistryResultStepsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let told = shape::required(object, "told", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let thrown = shape::required(object, "thrown", at, shape::flag)?;
+        Ok(Self { told, thrown })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "told",
+            Value::Array(
+                self.told
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert("thrown", Value::Bool(self.thrown));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct HealthKeysInput {
     pub rows: Vec<HealthKeysInputRowsItem>,
 }
@@ -34237,6 +34685,7 @@ pub enum LifeStep {
     Zdr(LifeStepZdr),
     Check(LifeStepCheck),
     Billed(LifeStepBilled),
+    Dispose(LifeStepDispose),
 }
 
 impl Shape for LifeStep {
@@ -34255,6 +34704,7 @@ impl Shape for LifeStep {
             "zdr" => LifeStepZdr::decode_at(value, at).map(Self::Zdr),
             "check" => LifeStepCheck::decode_at(value, at).map(Self::Check),
             "billed" => LifeStepBilled::decode_at(value, at).map(Self::Billed),
+            "dispose" => LifeStepDispose::decode_at(value, at).map(Self::Dispose),
             _ => Err(shape::no_branch(at, "kind")),
         }
     }
@@ -34273,6 +34723,7 @@ impl Shape for LifeStep {
             Self::Zdr(held) => held.encode(),
             Self::Check(held) => held.encode(),
             Self::Billed(held) => held.encode(),
+            Self::Dispose(held) => held.encode(),
         }
     }
 }
@@ -34662,6 +35113,25 @@ impl Shape for LifeStepBilled {
         if let Some(held) = &self.cost {
             object.insert("cost", Value::Number(*held));
         }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LifeStepDispose {}
+
+impl Shape for LifeStepDispose {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "dispose")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("dispose"));
         Value::Object(object)
     }
 }
@@ -35312,6 +35782,7 @@ pub struct LifecycleRunInput {
     pub usage_ids: Option<Vec<String>>,
     pub exchanges: Vec<LifeReply>,
     pub trace: Option<bool>,
+    pub gate: Option<bool>,
     pub steps: Vec<LifeStep>,
 }
 
@@ -35363,6 +35834,7 @@ impl Shape for LifecycleRunInput {
             shape::list(value, at, LifeReply::decode_at)
         })?;
         let trace = shape::optional(object, "trace", at, shape::flag)?;
+        let gate = shape::optional(object, "gate", at, shape::flag)?;
         let steps = shape::required(object, "steps", at, |value, at| {
             shape::list_within(value, at, Some(1), None, LifeStep::decode_at)
         })?;
@@ -35381,6 +35853,7 @@ impl Shape for LifecycleRunInput {
             usage_ids,
             exchanges,
             trace,
+            gate,
             steps,
         })
     }
@@ -35443,6 +35916,9 @@ impl Shape for LifecycleRunInput {
         );
         if let Some(held) = &self.trace {
             object.insert("trace", Value::Bool(*held));
+        }
+        if let Some(held) = &self.gate {
+            object.insert("gate", Value::Bool(*held));
         }
         object.insert(
             "steps",

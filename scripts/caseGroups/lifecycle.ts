@@ -130,6 +130,8 @@ const LifeStep = z.discriminatedUnion("kind", [
 	z.object({ kind: z.literal("check"), id: z.string() }),
 	/** A reply billed to an entry outside any request. */
 	z.object({ kind: z.literal("billed"), id: z.string(), source: z.string(), cost: z.number().exactOptional() }),
+	/** The registry of the entries is disposed. */
+	z.object({ kind: z.literal("dispose") }),
 ]);
 
 const LifeAnswer = z.discriminatedUnion("kind", [
@@ -282,6 +284,8 @@ export const lifecycle = caseGroup("lifecycle", {
 				exchanges: z.array(LifeReply),
 				/** False gives the lifecycle no trace sink. */
 				trace: z.boolean().exactOptional(),
+				/** False gives the lifecycle no gate. */
+				gate: z.boolean().exactOptional(),
 				steps: z.array(LifeStep).min(1),
 			}),
 			z.object({
@@ -454,7 +458,7 @@ export const lifecycle = caseGroup("lifecycle", {
 					stats: (id, generationId, call) => stats.push({ id, generationId, call: structuredClone(call) }),
 				});
 				const lifecycle = new RequestLifecycle({
-					gate,
+					...(input.gate === false ? {} : { gate }),
 					meter,
 					retry: new RetryPolicy(input.retry ?? {}, sequenceRandom(input.draws ?? [1])),
 					scheduler,
@@ -664,6 +668,8 @@ export const lifecycle = caseGroup("lifecycle", {
 					} else if (step.kind === "check") {
 						name(step.id);
 						health.check(step.id);
+					} else if (step.kind === "dispose") {
+						entries.dispose();
 					} else {
 						name(step.id);
 						health.billed(

@@ -8,7 +8,6 @@ import type { Billed, KeyState, ProviderEntry } from "@nyaaai/contract/shapes/pr
 import { GateBook } from "../health/gate";
 import type { KeyReader } from "../health/keyReader";
 import { CLEAR } from "../health/pool";
-import type { KindDeps, Route } from "./kind";
 
 ////////////////////////////////
 //  Interfaces & Types
@@ -17,12 +16,6 @@ import type { KindDeps, Route } from "./kind";
 export interface KeyStatus {
 	state: KeyState;
 	reader: KeyReader;
-}
-
-/** What the resolver made. */
-export interface Made {
-	route: Route;
-	deps: KindDeps;
 }
 
 /** A change, told once the registry holds it. */
@@ -78,8 +71,6 @@ export class Incarnation {
 	entry: ProviderEntry;
 	/** Replaced by the registry on a key change. */
 	era: Era;
-	/** Set and cleared by the resolver. */
-	made: Made | undefined;
 
 	constructor(
 		readonly number: number,
@@ -87,6 +78,8 @@ export class Incarnation {
 		readonly identity: string,
 		entry: ProviderEntry,
 		firstEra: number,
+		/** The registry that made it. */
+		readonly registry: EntryRegistry,
 	) {
 		this.entry = entry;
 		this.era = new Era(firstEra, this);
@@ -101,6 +94,9 @@ export class EntryRegistry {
 	private readonly watchers: Array<(events: RegistryEvent[]) => void> = [];
 	private readonly keyListeners: Array<(id: string) => void> = [];
 	private readonly unsubscribe: Array<() => void>;
+	/** Changes to tell, in the order made. */
+	private readonly outbox: Array<() => void> = [];
+	private delivering = false;
 	private incarnationCount = 0;
 	private eraCount = 0;
 	private disposed = false;
@@ -142,13 +138,22 @@ export class EntryRegistry {
 		};
 	}
 
-	/** Stops listening. */
+	/** Retires every incarnation, tells the watchers, then stops listening. */
 	dispose(): void {
 		if (this.disposed) return;
 		this.disposed = true;
 		for (const off of this.unsubscribe) off();
-		this.watchers.length = 0;
-		this.keyListeners.length = 0;
+		const events: RegistryEvent[] = [];
+		for (const incarnation of this.order) {
+			this.retire(incarnation);
+			events.push({ kind: "retired", incarnation });
+		}
+		this.order = [];
+		this.tell(events);
+		this.post(() => {
+			this.watchers.length = 0;
+			this.keyListeners.length = 0;
+		});
 	}
 
 	private rows(): Map<string, ProviderEntry> {
@@ -160,7 +165,14 @@ export class EntryRegistry {
 	private make(entry: ProviderEntry): Incarnation {
 		this.incarnationCount += 1;
 		this.eraCount += 1;
-		const incarnation = new Incarnation(this.incarnationCount, entry.id, identityOf(entry), entry, this.eraCount);
+		const incarnation = new Incarnation(
+			this.incarnationCount,
+			entry.id,
+			identityOf(entry),
+			entry,
+			this.eraCount,
+			this,
+		);
 		this.eras.set(incarnation.era.number, incarnation.era);
 		return incarnation;
 	}
@@ -173,7 +185,27 @@ export class EntryRegistry {
 
 	private tell(events: RegistryEvent[]): void {
 		if (events.length === 0) return;
-		for (const watcher of [...this.watchers]) watcher(events);
+		this.post(() => {
+			for (const watcher of [...this.watchers]) {
+				try {
+					watcher(events);
+				} catch {
+					// A watcher cannot change the registry.
+				}
+			}
+		});
+	}
+
+	/** One deliverer; a change made while telling queues behind. */
+	private post(deliver: () => void): void {
+		this.outbox.push(deliver);
+		if (this.delivering) return;
+		this.delivering = true;
+		try {
+			for (let next = this.outbox.shift(); next !== undefined; next = this.outbox.shift()) next();
+		} finally {
+			this.delivering = false;
+		}
 	}
 
 	private listChanged(): void {
@@ -224,6 +256,14 @@ export class EntryRegistry {
 			this.eras.set(incarnation.era.number, incarnation.era);
 			this.tell([{ kind: "rekeyed", incarnation, retired: was }]);
 		}
-		for (const listener of [...this.keyListeners]) listener(id);
+		this.post(() => {
+			for (const listener of [...this.keyListeners]) {
+				try {
+					listener(id);
+				} catch {
+					// A listener cannot change the registry.
+				}
+			}
+		});
 	}
 }

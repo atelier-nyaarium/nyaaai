@@ -12,7 +12,6 @@ use nyaaai_contract::provider_list::ProviderList;
 use nyaaai_contract::shapes::health::PoolState;
 use nyaaai_contract::shapes::provider::{Billed, KeyState, ProviderEntry};
 
-use super::kind::{KindDeps, Route};
 use crate::health::gate::GateBook;
 use crate::health::key_reader::KeyReader;
 use crate::health::pool::clear;
@@ -24,13 +23,6 @@ pub type TicketKey = (String, String, u64, u64, bool, u64);
 pub struct KeyStatus {
     pub state: Arc<Mutex<KeyState>>,
     pub reader: KeyReader,
-}
-
-/// What the resolver made.
-#[derive(Clone)]
-pub struct Made {
-    pub route: Route,
-    pub deps: KindDeps,
 }
 
 /// A change, told once the registry holds it.
@@ -134,8 +126,8 @@ pub struct Incarnation {
     entry: Mutex<ProviderEntry>,
     /// Replaced by the registry on a key change.
     era: Mutex<Option<Arc<Era>>>,
-    /// Set and cleared by the resolver.
-    made: Mutex<Option<Made>>,
+    /// The registry that made it; weak, so a route held past the registry makes no cycle.
+    registry: Weak<Core>,
 }
 
 impl Incarnation {
@@ -155,27 +147,22 @@ impl Incarnation {
             .expect("an incarnation always has an era")
     }
 
-    pub fn made(&self) -> Option<Made> {
-        locked(&self.made).clone()
+    /// Whether this registry made it.
+    pub fn belongs_to(&self, registry: &EntryRegistry) -> bool {
+        self.registry
+            .upgrade()
+            .is_some_and(|core| Arc::ptr_eq(&core, &registry.core))
     }
 
-    /// Sets the route unless one stands; answers the one that stands, and whether it is this one.
-    pub fn make(&self, made: Made) -> (Made, bool) {
-        let mut held = locked(&self.made);
-        match &*held {
-            Some(first) => (first.clone(), false),
-            None => {
-                *held = Some(made.clone());
-                (made, true)
-            }
-        }
+    /// An ended incarnation of the registry: what a held route of a removed entry stands on.
+    pub fn ended(registry: &EntryRegistry, entry: ProviderEntry) -> Arc<Self> {
+        let incarnation = Self::new(0, entry, 0, Arc::downgrade(&registry.core));
+        incarnation.live.store(false, Ordering::SeqCst);
+        incarnation.era().state().retired = true;
+        incarnation
     }
 
-    pub fn take_made(&self) -> Option<Made> {
-        locked(&self.made).take()
-    }
-
-    fn new(number: u64, entry: ProviderEntry, first_era: u64) -> Arc<Self> {
+    fn new(number: u64, entry: ProviderEntry, first_era: u64, registry: Weak<Core>) -> Arc<Self> {
         let incarnation = Arc::new(Self {
             number,
             id: entry.id.clone(),
@@ -183,7 +170,7 @@ impl Incarnation {
             live: AtomicBool::new(true),
             entry: Mutex::new(entry),
             era: Mutex::new(None),
-            made: Mutex::new(None),
+            registry,
         });
         *locked(&incarnation.era) = Some(Era::new(first_era, &incarnation));
         incarnation
@@ -194,6 +181,8 @@ impl Incarnation {
 enum Told {
     Events(Vec<RegistryEvent>),
     Key(String),
+    /// The last tell after a dispose: nothing is told after it.
+    Clear,
 }
 
 #[derive(Default)]
@@ -209,6 +198,7 @@ struct State {
 }
 
 struct Core {
+    me: Weak<Core>,
     list: Arc<dyn ProviderList>,
     /// Guards the live set and the counters; nothing runs under it but pushes to `outbox`.
     state: Mutex<State>,
@@ -244,10 +234,11 @@ fn rows_of(list: &dyn ProviderList) -> Vec<ProviderEntry> {
 }
 
 impl Core {
-    fn make(state: &mut State, entry: ProviderEntry) -> Arc<Incarnation> {
+    fn make(&self, state: &mut State, entry: ProviderEntry) -> Arc<Incarnation> {
         state.incarnations += 1;
         state.era_count += 1;
-        let incarnation = Incarnation::new(state.incarnations, entry, state.era_count);
+        let incarnation =
+            Incarnation::new(state.incarnations, entry, state.era_count, self.me.clone());
         let era = incarnation.era();
         state.eras.insert(era.number, era);
         incarnation
@@ -284,6 +275,10 @@ impl Core {
                             // A watcher cannot change what it is told.
                             let _ = catch_unwind(AssertUnwindSafe(|| watcher(&events)));
                         }
+                    }
+                    Told::Clear => {
+                        locked(&self.watchers).clear();
+                        locked(&self.key_listeners).clear();
                     }
                     Told::Key(id) => {
                         let held: Vec<KeyListener> = locked(&self.key_listeners)
@@ -327,7 +322,7 @@ impl Core {
                     Some(row) if identity_of(row) != was.identity => {
                         Self::retire(&mut state, &was);
                         events.push(RegistryEvent::Retired(Arc::clone(&was)));
-                        let next = Self::make(&mut state, row.clone());
+                        let next = self.make(&mut state, row.clone());
                         made.insert(was.id.clone(), Arc::clone(&next));
                         events.push(RegistryEvent::Added(next));
                     }
@@ -350,7 +345,7 @@ impl Core {
                 let held = match made.remove(&row.id) {
                     Some(held) => held,
                     None => {
-                        let fresh = Self::make(&mut state, row);
+                        let fresh = self.make(&mut state, row);
                         events.push(RegistryEvent::Added(Arc::clone(&fresh)));
                         fresh
                     }
@@ -392,7 +387,8 @@ impl Core {
 
 impl EntryRegistry {
     pub fn new(list: Arc<dyn ProviderList>, keys: &dyn EntryKeys) -> Self {
-        let core = Arc::new(Core {
+        let core = Arc::new_cyclic(|me| Core {
+            me: me.clone(),
             list,
             state: Mutex::new(State::default()),
             outbox: Mutex::new(VecDeque::new()),
@@ -408,7 +404,7 @@ impl EntryRegistry {
             let rows = rows_of(&*core.list);
             let mut state = locked(&core.state);
             for row in rows {
-                let incarnation = Core::make(&mut state, row);
+                let incarnation = core.make(&mut state, row);
                 state.order.push(incarnation);
             }
         }
@@ -472,7 +468,7 @@ impl EntryRegistry {
         })
     }
 
-    /// Stops listening.
+    /// Stops listening, retires every incarnation and tells the watchers before it forgets them.
     pub fn dispose(&self) {
         if self.core.disposed.swap(true, Ordering::SeqCst) {
             return;
@@ -481,7 +477,19 @@ impl EntryRegistry {
         for off in offs {
             off();
         }
-        locked(&self.core.watchers).clear();
-        locked(&self.core.key_listeners).clear();
+        {
+            let mut state = locked(&self.core.state);
+            let order = std::mem::take(&mut state.order);
+            let mut events = Vec::new();
+            for incarnation in order {
+                Core::retire(&mut state, &incarnation);
+                events.push(RegistryEvent::Retired(incarnation));
+            }
+            if !events.is_empty() {
+                self.core.push(Told::Events(events));
+            }
+            self.core.push(Told::Clear);
+        }
+        self.core.flush();
     }
 }

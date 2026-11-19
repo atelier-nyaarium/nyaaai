@@ -195,12 +195,16 @@ export class ProviderHealth implements Gate {
 
 	/** One model's gate as data; none until it is first used. */
 	gateState(route: Pick<Resolved, "entry" | "key" | "incarnation">): GateState | undefined {
-		return route.incarnation.live ? this.gate.stateOf(route.incarnation.era.gates, keyOf(route)) : undefined;
+		const incarnation = this.owned(route);
+		return incarnation.live ? this.gate.stateOf(incarnation.era.gates, keyOf(route)) : undefined;
 	}
 
-	/** Accumulates reply billing. */
-	billed(id: string, reply: Billing, ticket?: Ticket): void {
-		const era = ticket === undefined ? this.eraOf(id) : this.d.entries.era(ticket.era);
+	/** Accumulates reply billing; with no ticket, the route's incarnation must live. */
+	billed(id: string, reply: Billing, ticket?: Ticket, incarnation?: Incarnation): void {
+		let era: Era | undefined;
+		if (ticket !== undefined) era = this.d.entries.era(ticket.era);
+		else if (incarnation !== undefined) era = this.owned({ incarnation }).live ? incarnation.era : undefined;
+		else era = this.eraOf(id);
 		if (era === undefined) return;
 		const was = era.bill;
 		const next = billedWith(was, reply);
@@ -244,14 +248,14 @@ export class ProviderHealth implements Gate {
 		};
 	}
 
-	/** The ticket is recorded inside the gate call that makes it. */
+	/** A key change answers the waiters at once; each asks again and the new gate is open. */
 	admit(
 		route: Resolved,
 		signal: AbortSignal,
 		onWait?: (waiting: GateWaiting) => void,
 		again = false,
 	): Promise<Admission> {
-		const { incarnation } = route;
+		const incarnation = this.owned(route);
 		if (!incarnation.live) return Promise.resolve({ kind: "retired" });
 		const asked = this.batch(() => this.gate.admit(incarnation.era.gates, keyOf(route), signal, onWait, again));
 		// A key change moves the waiter to the new era.
@@ -261,7 +265,7 @@ export class ProviderHealth implements Gate {
 	}
 
 	tryAdmit(route: Resolved): Ticket | null {
-		const { incarnation } = route;
+		const incarnation = this.owned(route);
 		if (!incarnation.live) return null;
 		return this.batch(() => this.gate.tryAdmit(incarnation.era.gates, keyOf(route)));
 	}
@@ -276,7 +280,7 @@ export class ProviderHealth implements Gate {
 	}
 
 	deferred(route: Resolved, keep?: ReadonlySet<string>): SkipReason | undefined {
-		const { incarnation } = route;
+		const incarnation = this.owned(route);
 		if (this.rejected(incarnation.era)) return "keyRejected";
 		const pool = this.verdict(incarnation, keep);
 		if (pool !== undefined) return pool.skip;
@@ -284,19 +288,20 @@ export class ProviderHealth implements Gate {
 	}
 
 	blocked(route: Resolved, keep?: ReadonlySet<string>): Blocked | undefined {
-		const { incarnation } = route;
+		const incarnation = this.owned(route);
 		if (this.rejected(incarnation.era)) return { kind: "keyRejected" };
 		return this.verdict(incarnation, keep)?.blocked;
 	}
 
 	/** Balance replies extend `run`. */
 	served(route: Resolved, usage: NormalizedUsage | undefined, run?: Set<string>, ticket?: Ticket): boolean {
+		const incarnation = this.owned(route);
 		const source = usage?.billingSource;
 		if (source === undefined) return false;
-		const era = this.eraFor(route.incarnation, ticket);
+		const era = this.eraFor(incarnation, ticket);
 		if (era === undefined) return true;
 		// Settings may change mid-request.
-		const { entry } = route.incarnation;
+		const { entry } = incarnation;
 		this.apply(era, {
 			kind: "billed",
 			source,
@@ -308,7 +313,7 @@ export class ProviderHealth implements Gate {
 	}
 
 	failed(route: Resolved, failure: Failure, onward: boolean, ticket?: Ticket): boolean {
-		const era = this.eraFor(route.incarnation, ticket);
+		const era = this.eraFor(this.owned(route), ticket);
 		if (era === undefined) return true;
 		const { entry } = route;
 		this.batch(() => {
@@ -442,6 +447,12 @@ export class ProviderHealth implements Gate {
 			era.probes.add(ticketKey(ticket));
 			this.apply(era, { kind: "admitted", ticket });
 		});
+	}
+
+	/** The route's incarnation, which must be of this registry. */
+	private owned(route: Pick<Resolved, "incarnation">): Incarnation {
+		if (route.incarnation.registry !== this.d.entries) throw new Error("The route belongs to another registry.");
+		return route.incarnation;
 	}
 
 	/** The ticket's era, else the live one; none drops it. */

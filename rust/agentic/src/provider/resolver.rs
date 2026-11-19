@@ -23,7 +23,7 @@ use nyaaai_contract::shapes::provider::{
 use nyaaai_contract::shapes::step::{CanonicalRequest, StepResult};
 use tokio::sync::OnceCell;
 
-use super::incarnation::{EntryRegistry, Incarnation, Made, RegistryEvent, identity_of};
+use super::incarnation::{EntryRegistry, Incarnation, RegistryEvent, identity_of};
 use super::kind::{EntryCatalog, KindDeps, KindField, ProviderKind, Route};
 use crate::codec::Codec;
 use crate::models::row_key::{parse_row_key_text, served_id_of};
@@ -464,10 +464,26 @@ fn disposed(catalog: &dyn EntryCatalog) {
     let _ = catch_unwind(AssertUnwindSafe(|| catalog.dispose()));
 }
 
-/// Stops an ended incarnation's route.
-fn release(incarnation: &Incarnation) {
-    if let Some(made) = incarnation.take_made() {
-        disposed(&*made.route.catalog);
+/// A route with the deps it was made with.
+#[derive(Clone)]
+struct Made {
+    route: Route,
+    deps: KindDeps,
+}
+
+/// The routes a resolver made, by incarnation number, in the order made.
+type MadeRoutes = Arc<Mutex<Vec<(u64, Made)>>>;
+
+/// Stops the route made for an incarnation, when there is one.
+fn release(made: &Mutex<Vec<(u64, Made)>>, number: u64) {
+    let gone = {
+        let mut held = locked(made);
+        held.iter()
+            .position(|(each, _)| *each == number)
+            .map(|at| held.remove(at).1)
+    };
+    if let Some(gone) = gone {
+        disposed(&*gone.route.catalog);
     }
 }
 
@@ -477,21 +493,28 @@ type Reaches = Arc<Mutex<HashMap<u64, Arc<OnceCell<KeyReach>>>>>;
 /// Routes keys across entries; each incarnation holds its route.
 pub struct ModelResolver {
     d: ResolverDeps,
+    /// Owned here, not on the incarnation: a registry may serve several resolvers.
+    made: MadeRoutes,
     unsubscribe: Mutex<Option<Unsubscribe>>,
     closed: AtomicBool,
 }
 
 impl ModelResolver {
     pub fn new(d: ResolverDeps) -> Self {
-        let unsubscribe = d.entries.watch(Arc::new(|events| {
-            for event in events {
-                if let RegistryEvent::Retired(incarnation) = event {
-                    release(incarnation);
+        let made: MadeRoutes = Arc::new(Mutex::new(Vec::new()));
+        let unsubscribe = d.entries.watch(Arc::new({
+            let made = Arc::clone(&made);
+            move |events| {
+                for event in events {
+                    if let RegistryEvent::Retired(incarnation) = event {
+                        release(&made, incarnation.number);
+                    }
                 }
             }
         }));
         Self {
             d,
+            made,
             unsubscribe: Mutex::new(Some(unsubscribe)),
             closed: AtomicBool::new(false),
         }
@@ -509,8 +532,9 @@ impl ModelResolver {
         if let Some(unsubscribe) = locked(&self.unsubscribe).take() {
             unsubscribe();
         }
-        for incarnation in self.d.entries.incarnations() {
-            release(&incarnation);
+        let routes = std::mem::take(&mut *locked(&self.made));
+        for (_, made) in routes {
+            disposed(&*made.route.catalog);
         }
     }
 
@@ -536,8 +560,11 @@ impl ModelResolver {
         if self.is_closed() {
             return Err(ResolveError("The resolver is disposed.".to_owned()));
         }
-        if let Some(known) = incarnation.made() {
-            return Ok(known);
+        if let Some((_, known)) = locked(&self.made)
+            .iter()
+            .find(|(each, _)| *each == incarnation.number)
+        {
+            return Ok(known.clone());
         }
         let entry = incarnation.entry();
         let kind = self
@@ -570,18 +597,32 @@ impl ModelResolver {
             deps,
         };
         // Another task may have made it first; the first one stays.
-        match incarnation.make(made.clone()) {
-            (made, true) if !self.is_closed() => Ok(made),
-            (made, true) => {
-                let _ = incarnation.take_made();
+        let extra = {
+            let mut held = locked(&self.made);
+            if self.is_closed() {
+                Some(true)
+            } else if let Some((_, first)) =
+                held.iter().find(|(each, _)| *each == incarnation.number)
+            {
+                let first = first.clone();
+                drop(held);
                 disposed(&*made.route.catalog);
-                Err(ResolveError("The resolver is disposed.".to_owned()))
+                return Ok(first);
+            } else {
+                held.push((incarnation.number, made.clone()));
+                None
             }
-            (first, false) => {
-                disposed(&*made.route.catalog);
-                Ok(first)
-            }
+        };
+        if extra.is_some() {
+            disposed(&*made.route.catalog);
+            return Err(ResolveError("The resolver is disposed.".to_owned()));
         }
+        // The incarnation may have ended since it was last tested; its `retired` event
+        // may already have gone by, so what was stored is taken back.
+        if !incarnation.live() {
+            release(&self.made, incarnation.number);
+        }
+        Ok(made)
     }
 
     /// The route, or none when it cannot be made.

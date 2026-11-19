@@ -4,6 +4,7 @@ import type { Ticket } from "@nyaaai/contract/shapes/health";
 import type { CallTag, MeteredCall } from "@nyaaai/contract/shapes/usage";
 import type { UsageSink } from "@nyaaai/contract/usageSink";
 import type { Billing, ProviderHealth } from "../health/health";
+import type { Incarnation } from "../provider/incarnation";
 
 ////////////////////////////////
 //  Interfaces & Types
@@ -12,8 +13,8 @@ import type { Billing, ProviderHealth } from "../health/health";
 export type Feature = string;
 
 export interface Meter {
-	/** The ticket the request held, if the gate gave one. */
-	called(call: MeteredCall, ticket?: Ticket): void;
+	/** The ticket the request held, if the gate gave one, and its route's incarnation. */
+	called(call: MeteredCall, ticket?: Ticket, incarnation?: Incarnation): void;
 }
 
 export interface MeterDeps {
@@ -39,7 +40,7 @@ export function onBehalfOf(tag: CallTag, lane: "title" | "summary"): CallTag {
 /** Records calls and billing. */
 export function providerMeter(d: MeterDeps): Meter {
 	return {
-		called: (call, ticket) => {
+		called: (call, ticket, incarnation) => {
 			const id = d.usage.record(call);
 			if (id !== undefined && call.generationId !== undefined) d.stats(id, call.generationId, call);
 			const reply = call.usage;
@@ -48,7 +49,7 @@ export function providerMeter(d: MeterDeps): Meter {
 				const billing: Billing = { source };
 				if (reply?.allowance !== undefined) billing.allowance = reply.allowance;
 				if (reply?.cost !== undefined) billing.cost = reply.cost;
-				d.health.billed(call.entry, billing, ticket);
+				d.health.billed(call.entry, billing, ticket, incarnation);
 			}
 		},
 	};

@@ -7,6 +7,7 @@ use nyaaai_contract::shapes::usage::{CallTag, MeteredCall};
 use nyaaai_contract::usage_sink::UsageSink;
 
 use crate::health::health::{Billing, ProviderHealth};
+use crate::provider::incarnation::Incarnation;
 
 /// The features the page labels; any other string is kept and shown by its id.
 pub type Feature = String;
@@ -16,19 +17,36 @@ pub const KNOWN_FEATURES: [&str; 4] = ["chat", "analysis", "wand", "tester"];
 
 /// Where the health is told a reply's billing.
 pub trait Bills: Send + Sync {
-    fn billed(&self, id: &str, reply: &Billing, ticket: Option<&Ticket>);
+    fn billed(
+        &self,
+        id: &str,
+        reply: &Billing,
+        ticket: Option<&Ticket>,
+        incarnation: Option<&Incarnation>,
+    );
 }
 
 impl Bills for ProviderHealth {
-    fn billed(&self, id: &str, reply: &Billing, ticket: Option<&Ticket>) {
-        ProviderHealth::billed(self, id, reply, ticket);
+    fn billed(
+        &self,
+        id: &str,
+        reply: &Billing,
+        ticket: Option<&Ticket>,
+        incarnation: Option<&Incarnation>,
+    ) {
+        ProviderHealth::billed(self, id, reply, ticket, incarnation);
     }
 }
 
 /// Told each call a request made.
 pub trait Meter: Send + Sync {
-    /// The ticket the request held, if the gate gave one.
-    fn called(&self, call: &MeteredCall, ticket: Option<&Ticket>);
+    /// The ticket the request held, if the gate gave one, and the incarnation it ran on.
+    fn called(
+        &self,
+        call: &MeteredCall,
+        ticket: Option<&Ticket>,
+        incarnation: Option<&Incarnation>,
+    );
 }
 
 /// Queues delayed stats for a record: its id, the generation id and the call.
@@ -55,7 +73,12 @@ struct ProviderMeter {
 }
 
 impl Meter for ProviderMeter {
-    fn called(&self, call: &MeteredCall, ticket: Option<&Ticket>) {
+    fn called(
+        &self,
+        call: &MeteredCall,
+        ticket: Option<&Ticket>,
+        incarnation: Option<&Incarnation>,
+    ) {
         let id = self.d.usage.record(call);
         if let (Some(id), Some(generation_id)) = (&id, &call.generation_id) {
             (self.d.stats)(id, generation_id, call);
@@ -71,6 +94,7 @@ impl Meter for ProviderMeter {
                     cost: reply.and_then(|held| held.cost),
                 },
                 ticket,
+                incarnation,
             );
         }
     }

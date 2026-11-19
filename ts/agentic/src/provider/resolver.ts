@@ -9,7 +9,7 @@ import { joinAll } from "../kinds/join";
 import { parseRowKey, servedIdOf } from "../models/rowKey";
 import { unknownView } from "../models/view";
 import type { KeySource, Transport } from "../transport";
-import { type EntryRegistry, type Incarnation, identityOf, type Made, type RegistryEvent } from "./incarnation";
+import { type EntryRegistry, type Incarnation, identityOf, type RegistryEvent } from "./incarnation";
 import type { KindDeps, ProviderKind, Route } from "./kind";
 
 ////////////////////////////////
@@ -78,6 +78,12 @@ export interface ResolverDeps {
 	zdrOnly(): boolean;
 	/** Told after a catalog's refresh. */
 	refreshed?(entry: ProviderEntry): void;
+}
+
+/** What a resolver made for one incarnation. */
+interface Made {
+	route: Route;
+	deps: KindDeps;
 }
 
 /** Top refusal and view. */
@@ -239,6 +245,8 @@ export function servedBy(d: {
 
 /** Routes keys across entries; holds one route per entry as it stands. */
 export class ModelResolver {
+	/** The routes this resolver made, by incarnation. */
+	private readonly made = new Map<Incarnation, Made>();
 	private readonly unsubscribe: () => void;
 	private closed = false;
 
@@ -251,7 +259,7 @@ export class ModelResolver {
 		if (this.closed) return;
 		this.closed = true;
 		this.unsubscribe();
-		for (const incarnation of this.d.entries.incarnations()) this.release(incarnation);
+		for (const incarnation of [...this.made.keys()]) this.release(incarnation);
 	}
 
 	/** The incarnation's route, made once. */
@@ -265,7 +273,8 @@ export class ModelResolver {
 
 	private held(incarnation: Incarnation): Made {
 		if (this.closed) throw new Error("The resolver is disposed.");
-		if (incarnation.made !== undefined) return incarnation.made;
+		const known = this.made.get(incarnation);
+		if (known !== undefined) return known;
 		const { entry } = incarnation;
 		const kind = this.d.kinds[entry.kind];
 		if (kind === undefined) throw new Error(`No ${entry.kind} provider kind.`);
@@ -276,15 +285,17 @@ export class ModelResolver {
 			rows: this.d.registry,
 			refreshed: () => this.d.refreshed?.(incarnation.entry),
 		});
-		incarnation.made = { route: { transport, catalog }, deps };
-		return incarnation.made;
+		const made = { route: { transport, catalog }, deps };
+		this.made.set(incarnation, made);
+		return made;
 	}
 
 	/** Stops its route. */
 	private release(incarnation: Incarnation): void {
-		if (incarnation.made === undefined) return;
-		disposed(incarnation.made.route.catalog);
-		incarnation.made = undefined;
+		const made = this.made.get(incarnation);
+		if (made === undefined) return;
+		this.made.delete(incarnation);
+		disposed(made.route.catalog);
 	}
 
 	/** What a key says of one entry. */
