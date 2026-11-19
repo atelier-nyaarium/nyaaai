@@ -189,11 +189,19 @@ export const catalogOpenCodeCases: CaseSource[] = [
 		"models-cost.text.free-price-zero",
 		data(setIn(MODEL, ["cost", "text"], { input: { price: 0 }, output: { price: 0 } })),
 	),
-	// A cache that lists `explicit` as anything but null or nothing is explicit.
+	// A cache is explicit when the listing holds an object or `true` for it.
 	decode("models-cache.explicit-omitted", data(setIn(MODEL, ["capabilities", "cache"], { implicit: false }))),
 	decode(
 		"models-cache.explicit-null",
 		data(setIn(MODEL, ["capabilities", "cache"], { implicit: false, explicit: null })),
+	),
+	decode("models-cache.explicit-true", data(setIn(MODEL, ["capabilities", "cache"], { explicit: true }))),
+	decode("models-cache.explicit-empty-object", data(setIn(MODEL, ["capabilities", "cache"], { explicit: {} }))),
+	decode("models-cache.explicit-list", data(setIn(MODEL, ["capabilities", "cache"], { explicit: [] }))),
+	decode("models-cache.explicit-empty-text", data(setIn(MODEL, ["capabilities", "cache"], { explicit: "" }))),
+	decode(
+		"models-cache.explicit-false-beside-implicit-false",
+		data(setIn(MODEL, ["capabilities", "cache"], { implicit: false, explicit: false })),
 	),
 	decode("models-cache.explicit-false", data(setIn(MODEL, ["capabilities", "cache"], { explicit: false }))),
 	decode("models-cache.explicit-zero", data(setIn(MODEL, ["capabilities", "cache"], { explicit: 0 }))),

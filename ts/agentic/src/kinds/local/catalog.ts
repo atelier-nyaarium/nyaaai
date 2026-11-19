@@ -10,6 +10,7 @@ import { rowKey, shownId } from "../../models/rowKey";
 import { raced } from "../../models/view";
 import type { Browser, EntryCatalog, Tester } from "../../provider/kind";
 import type { Transport } from "../../transport";
+import { told } from "../join";
 import { fieldOf, fieldsOf } from "../readers";
 import type { Terms } from "./kind";
 
@@ -109,10 +110,15 @@ function apiOf(model: LocalModel): ApiFacts {
 	};
 }
 
-/** Trained length caps context. */
+/** A length that counts: above zero. */
+const positive = (length: number | undefined): number | undefined =>
+	length !== undefined && Number.isFinite(length) && length > 0 ? length : undefined;
+
+/** Trained length caps context; a length of zero or less is missing. */
 export function contextOf(model: LocalModel, loaded: number | undefined): number | undefined {
-	const known = model.context ?? loaded;
-	return known === undefined ? undefined : Math.min(known, model.trained ?? known);
+	const known = positive(model.context) ?? positive(loaded);
+	const trained = positive(model.trained);
+	return known === undefined ? undefined : Math.min(known, trained ?? known);
 }
 
 /** A model's view for a row under the entry's terms. */
@@ -202,6 +208,8 @@ export class LocalCatalog implements EntryCatalog {
 	/** Last reread by tag. */
 	private readonly reread = new Map<string, number>();
 	private reading = false;
+	/** Every discovery and loaded read that is running. */
+	private readonly work = new Set<Promise<unknown>>();
 
 	constructor(private readonly d: LocalCatalogDeps) {}
 
@@ -290,7 +298,7 @@ export class LocalCatalog implements EntryCatalog {
 		if (model.context !== undefined || this.reading || (this.loaded.has(tag) && server.live !== true)) return;
 		this.reading = true;
 		const limit = deadline(this.d.scheduler, DISCOVER_MS);
-		void server
+		const reading = server
 			.loaded(tag, limit.signal)
 			.then((contexts) => {
 				let changed = false;
@@ -299,13 +307,20 @@ export class LocalCatalog implements EntryCatalog {
 					this.loaded.set(name, context);
 					changed = true;
 				}
-				if (changed) this.d.refreshed?.();
+				if (changed) told(this.d.refreshed);
 			})
 			.catch(() => {})
 			.finally(() => {
 				limit.clear();
 				this.reading = false;
+				this.work.delete(reading);
 			});
+		this.work.add(reading);
+	}
+
+	/** Answers when no discovery or read is running, having waited for whatever was. */
+	async idle(): Promise<void> {
+		while (this.work.size > 0) await Promise.allSettled([...this.work]);
 	}
 
 	private fetched(): Promise<readonly LocalModel[] | undefined> {
@@ -316,9 +331,14 @@ export class LocalCatalog implements EntryCatalog {
 	}
 
 	private discovering(): Promise<readonly LocalModel[] | undefined> {
-		this.inflight ??= this.discover().finally(() => {
-			this.inflight = undefined;
-		});
+		if (this.inflight === undefined) {
+			const running = this.discover().finally(() => {
+				this.inflight = undefined;
+				this.work.delete(running);
+			});
+			this.inflight = running;
+			this.work.add(running);
+		}
 		return this.inflight;
 	}
 
@@ -334,13 +354,13 @@ export class LocalCatalog implements EntryCatalog {
 				else if (this.d.server.live === true) this.loaded.delete(model.tag);
 			}
 			this.failedAt = undefined;
-			this.d.refreshed?.();
-			return this.good;
 		} catch {
 			this.failedAt = this.d.scheduler.nowMs();
 			return this.good;
 		} finally {
 			limit.clear();
 		}
+		told(this.d.refreshed);
+		return this.good;
 	}
 }

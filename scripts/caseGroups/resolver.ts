@@ -367,6 +367,7 @@ export const resolver = caseGroup("resolver", {
 										if (status === "unlisted") return [];
 										return [{ row, status: status ?? "ok", efforts: [], hosts: [] }];
 									}),
+								idle: async () => {},
 								dispose: () => void stopped.push(labelOf(entry)),
 							};
 							return catalog;

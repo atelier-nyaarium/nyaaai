@@ -185,8 +185,7 @@ function stamped(transport: Resolved["transport"], zdrOnly: () => boolean): Reso
 
 /** Stops a catalog that listens, when it does. */
 function disposed(catalog: Route["catalog"]): void {
-	const held = catalog as { dispose?: unknown };
-	if (typeof held.dispose === "function") held.dispose();
+	catalog.dispose?.();
 }
 
 /** Resolves through one entry. */

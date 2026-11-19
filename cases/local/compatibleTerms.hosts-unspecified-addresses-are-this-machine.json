@@ -1,0 +1,50 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.compatibleTerms",
+	"name": "hosts-unspecified-addresses-are-this-machine",
+	"input": {
+		"urls": [
+			"http://0.0.0.0",
+			"http://0.0.0.0:8000",
+			"http://[::]",
+			"http://[::]:8000",
+			"http://0",
+			"http://0.0.0.1"
+		]
+	},
+	"expected": {
+		"terms": [
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			}
+		]
+	}
+}

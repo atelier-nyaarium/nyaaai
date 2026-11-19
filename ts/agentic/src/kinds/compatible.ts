@@ -5,7 +5,7 @@ import type { EntryFields } from "@nyaaai/contract/shapes/provider";
 import { parseUrl } from "@nyaaai/contract/url";
 import type { LocalModel, LocalServer, LocalTransport } from "./local/catalog";
 import { HOME, localKind, type Terms } from "./local/kind";
-import { dataList, fieldsOf, numberField, textField } from "./readers";
+import { dataList, fieldsOf, positiveField, textField } from "./readers";
 
 ////////////////////////////////
 //  Interfaces & Types
@@ -21,9 +21,9 @@ export interface ListedModel {
 
 const LIST = "/models";
 
-/** Loopback, private ranges, LAN names; a host as the URL parser wrote it. */
+/** Loopback, private ranges, LAN names; a host as the URL parser wrote it, trailing dot cut. */
 const PRIVATE_HOST = Pattern.compile(
-	"^(localhost|(127|10)\\.[\\d.]+|192\\.168\\.[\\d.]+|172\\.(1[6-9]|2\\d|3[01])\\.[\\d.]+|169\\.254\\.[\\d.]+|100\\.(6[4-9]|[7-9]\\d|1[01]\\d|12[0-7])\\.[\\d.]+|\\[(::1|f[cd][\\da-f:]*|fe[89ab][\\da-f:]*)\\]|[^.[]+|.+\\.(localhost|local|lan|internal|home\\.arpa))$",
+	"^(localhost|0\\.0\\.0\\.0|(127|10)\\.[\\d.]+|192\\.168\\.[\\d.]+|172\\.(1[6-9]|2\\d|3[01])\\.[\\d.]+|169\\.254\\.[\\d.]+|100\\.(6[4-9]|[7-9]\\d|1[01]\\d|12[0-7])\\.[\\d.]+|\\[(::1?|f[cd][0-9a-f]{2}:[0-9a-f:]*|fe[89ab][0-9a-f]:[0-9a-f:]*)\\]|[^.[]+|.+\\.(localhost|local|lan|internal|home\\.arpa))$",
 	"i",
 );
 
@@ -39,9 +39,9 @@ export function listed(raw: unknown): ListedModel[] | undefined {
 		const id = fields === undefined ? null : textField(fields, "id");
 		if (fields === undefined || id === null || id.length === 0) return [];
 		const context =
-			numberField(fields, "context_length") ??
-			numberField(fields, "max_context_length") ??
-			numberField(fields, "max_model_len");
+			positiveField(fields, "context_length") ??
+			positiveField(fields, "max_context_length") ??
+			positiveField(fields, "max_model_len");
 		return [{ id, context }];
 	});
 }
@@ -71,7 +71,9 @@ export function server(transport: LocalTransport): LocalServer {
 export function remote(entry: EntryFields): boolean {
 	if (entry.url === undefined) return true;
 	const parts = parseUrl(entry.url);
-	return parts === undefined || !PRIVATE_HOST.test(parts.host);
+	if (parts === undefined) return true;
+	const host = parts.host.endsWith(".") ? parts.host.slice(0, -1) : parts.host;
+	return !PRIVATE_HOST.test(host);
 }
 
 /** A remote host may keep data and bill. */
@@ -79,11 +81,20 @@ export function termsOf(entry: EntryFields): Terms {
 	return remote(entry) ? { kept: true, price: "unknown" } : HOME;
 }
 
-/** A bare origin means `/v1`; a URL that does not read throws. */
+/** The text without its trailing slashes. */
+function withoutSlashes(text: string): string {
+	let end = text.length;
+	while (end > 0 && text[end - 1] === "/") end -= 1;
+	return text.slice(0, end);
+}
+
+/** A bare origin means `/v1`; built from the parsed origin and path, and a URL that does not read, or carries a query, a fragment or credentials, throws. */
 export function baseOf(url: string): string {
 	const parts = parseUrl(url);
-	if (parts === undefined) throw new Error("Invalid URL.");
-	return parts.path === "/" ? `${url}/v1` : url;
+	const plain = parts !== undefined && parts.query === "" && parts.fragment === "";
+	if (parts === undefined || !plain || parts.username !== "" || parts.password !== "")
+		throw new Error("Invalid URL.");
+	return parts.path === "/" ? `${parts.origin}/v1` : withoutSlashes(`${parts.origin}${parts.path}`);
 }
 
 ////////////////////////////////

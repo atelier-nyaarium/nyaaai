@@ -373,6 +373,12 @@ export const browseCases: CaseSource[] = [
 		exchanges: [...PAIR, DETAIL_BODY],
 		steps: [{ kind: "detail", id: "lab/glm" }],
 	}),
+	...["lab/glm?x=1", "lab/glm#frag", "lab/../glm", "lab/glm one"].map((id, at) =>
+		browser(`browser-detail-an-id-goes-into-the-path-segment-by-segment-${at}`, {
+			exchanges: [...PAIR, DETAIL_BODY],
+			steps: [{ kind: "detail", id }],
+		}),
+	),
 	browser("browser-detail-with-a-listing-that-failed-marks-no-host", {
 		exchanges: [failing(), failing(), DETAIL_BODY],
 		steps: [{ kind: "detail", id: "lab/glm" }],
@@ -529,11 +535,29 @@ export const browseCases: CaseSource[] = [
 		id: "lab/glm",
 		viewHosts: ["a", "b", "c"],
 	}),
-	hop("hop-hosts-without-a-tag-count-as-the-empty-slug", {
+	hop("hop-hosts-without-a-tag-are-left-out", {
 		exchanges: [reply(detail([{}, { tag: "" }, { tag: "a" }, { provider_name: "A" }]))],
 		id: "lab/glm",
 		viewHosts: ["", "a"],
 	}),
+	hop("hop-a-host-named-by-its-provider-meets-the-tag-in-any-case", {
+		exchanges: [reply(detail([{ tag: "together/fp8" }, { tag: "novita" }, { tag: "other" }]))],
+		id: "lab/glm",
+		viewHosts: ["Together", "NOVITA ", "other-host"],
+	}),
+	hop("hop-an-endpoint-with-no-tag-meets-no-host", {
+		exchanges: [reply(detail([{ provider_name: "Together" }, { tag: "" }, { tag: "a" }, { tag: "b" }]))],
+		id: "lab/glm",
+		viewHosts: ["", "Together", "a"],
+	}),
+	...["lab/glm?x=1", "lab/glm#frag", "lab/../glm", "../glm", "lab/./glm", "lab/glm one", "lab//glm", "lab/gl%6D"].map(
+		(id, at) =>
+			hop(`hop-an-id-goes-into-the-path-segment-by-segment-${at}`, {
+				exchanges: [reply(detail([{ tag: "a" }, { tag: "b" }]))],
+				id,
+				viewHosts: ["a", "b"],
+			}),
+	),
 	hop("hop-a-body-that-is-no-detail-pins-none", {
 		exchanges: [reply({ data: [] })],
 		id: "lab/glm",

@@ -14021,6 +14021,7 @@ pub struct CatalogOpenrouterRunInput {
     pub exchanges: Vec<NetExchange>,
     pub rows: Vec<String>,
     pub ttl_ms: Option<i64>,
+    pub on_refreshed: Option<CatalogOpenrouterRunInputOnRefreshed>,
     pub steps: Vec<CatalogOpenrouterRunInputStepsItem>,
 }
 
@@ -14035,6 +14036,12 @@ impl Shape for CatalogOpenrouterRunInput {
             shape::list(value, at, shape::text)
         })?;
         let ttl_ms = shape::optional(object, "ttlMs", at, shape::integer)?;
+        let on_refreshed = shape::optional(
+            object,
+            "onRefreshed",
+            at,
+            CatalogOpenrouterRunInputOnRefreshed::decode_at,
+        )?;
         let steps = shape::required(object, "steps", at, |value, at| {
             shape::list_within(
                 value,
@@ -14049,6 +14056,7 @@ impl Shape for CatalogOpenrouterRunInput {
             exchanges,
             rows,
             ttl_ms,
+            on_refreshed,
             steps,
         })
     }
@@ -14072,11 +14080,48 @@ impl Shape for CatalogOpenrouterRunInput {
         if let Some(held) = &self.ttl_ms {
             object.insert("ttlMs", Value::Number(*held as f64));
         }
+        if let Some(held) = &self.on_refreshed {
+            object.insert("onRefreshed", held.encode());
+        }
         object.insert(
             "steps",
             Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
         );
         Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum CatalogOpenrouterRunInputOnRefreshed {
+    Reads,
+    ReadsAndThrows,
+}
+
+impl CatalogOpenrouterRunInputOnRefreshed {
+    pub const ALL: [Self; 2] = [Self::Reads, Self::ReadsAndThrows];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Reads => "reads",
+            Self::ReadsAndThrows => "readsAndThrows",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for CatalogOpenrouterRunInputOnRefreshed {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
     }
 }
 
@@ -14780,6 +14825,7 @@ pub struct CatalogOpenrouterRunResult {
     pub read: Vec<i64>,
     pub waiting: Vec<String>,
     pub refreshed: i64,
+    pub saw: Vec<String>,
 }
 
 impl Shape for CatalogOpenrouterRunResult {
@@ -14798,12 +14844,16 @@ impl Shape for CatalogOpenrouterRunResult {
             shape::list(value, at, shape::text)
         })?;
         let refreshed = shape::required(object, "refreshed", at, shape::integer)?;
+        let saw = shape::required(object, "saw", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
         Ok(Self {
             steps,
             requests,
             read,
             waiting,
             refreshed,
+            saw,
         })
     }
 
@@ -14841,6 +14891,15 @@ impl Shape for CatalogOpenrouterRunResult {
             ),
         );
         object.insert("refreshed", Value::Number(self.refreshed as f64));
+        object.insert(
+            "saw",
+            Value::Array(
+                self.saw
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
         Value::Object(object)
     }
 }
@@ -15148,6 +15207,7 @@ pub struct CatalogOpencodeRunInput {
     pub rows: Vec<String>,
     pub plan: nyaaai_contract::shapes::provider::ProviderPlan,
     pub ttl_ms: Option<i64>,
+    pub on_refreshed: Option<CatalogOpencodeRunInputOnRefreshed>,
     pub steps: Vec<CatalogOpencodeRunInputStepsItem>,
 }
 
@@ -15168,6 +15228,12 @@ impl Shape for CatalogOpencodeRunInput {
             nyaaai_contract::shapes::provider::ProviderPlan::decode_at,
         )?;
         let ttl_ms = shape::optional(object, "ttlMs", at, shape::integer)?;
+        let on_refreshed = shape::optional(
+            object,
+            "onRefreshed",
+            at,
+            CatalogOpencodeRunInputOnRefreshed::decode_at,
+        )?;
         let steps = shape::required(object, "steps", at, |value, at| {
             shape::list_within(
                 value,
@@ -15183,6 +15249,7 @@ impl Shape for CatalogOpencodeRunInput {
             rows,
             plan,
             ttl_ms,
+            on_refreshed,
             steps,
         })
     }
@@ -15207,11 +15274,48 @@ impl Shape for CatalogOpencodeRunInput {
         if let Some(held) = &self.ttl_ms {
             object.insert("ttlMs", Value::Number(*held as f64));
         }
+        if let Some(held) = &self.on_refreshed {
+            object.insert("onRefreshed", held.encode());
+        }
         object.insert(
             "steps",
             Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
         );
         Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum CatalogOpencodeRunInputOnRefreshed {
+    Reads,
+    ReadsAndThrows,
+}
+
+impl CatalogOpencodeRunInputOnRefreshed {
+    pub const ALL: [Self; 2] = [Self::Reads, Self::ReadsAndThrows];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Reads => "reads",
+            Self::ReadsAndThrows => "readsAndThrows",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for CatalogOpencodeRunInputOnRefreshed {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
     }
 }
 
@@ -15713,6 +15817,7 @@ pub struct CatalogOpencodeRunResult {
     pub read: Vec<i64>,
     pub waiting: Vec<String>,
     pub refreshed: i64,
+    pub saw: Vec<String>,
 }
 
 impl Shape for CatalogOpencodeRunResult {
@@ -15731,12 +15836,16 @@ impl Shape for CatalogOpencodeRunResult {
             shape::list(value, at, shape::text)
         })?;
         let refreshed = shape::required(object, "refreshed", at, shape::integer)?;
+        let saw = shape::required(object, "saw", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
         Ok(Self {
             steps,
             requests,
             read,
             waiting,
             refreshed,
+            saw,
         })
     }
 
@@ -15774,6 +15883,15 @@ impl Shape for CatalogOpencodeRunResult {
             ),
         );
         object.insert("refreshed", Value::Number(self.refreshed as f64));
+        object.insert(
+            "saw",
+            Value::Array(
+                self.saw
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
         Value::Object(object)
     }
 }
@@ -21855,6 +21973,7 @@ pub struct LocalCatalogRunInput {
     pub terms: ServedTerms,
     pub server: LocalCatalogRunInputServer,
     pub rows: Vec<String>,
+    pub on_refreshed: Option<LocalCatalogRunInputOnRefreshed>,
     pub steps: Vec<LocalCatalogRunInputStepsItem>,
 }
 
@@ -21868,6 +21987,12 @@ impl Shape for LocalCatalogRunInput {
         let rows = shape::required(object, "rows", at, |value, at| {
             shape::list(value, at, shape::text)
         })?;
+        let on_refreshed = shape::optional(
+            object,
+            "onRefreshed",
+            at,
+            LocalCatalogRunInputOnRefreshed::decode_at,
+        )?;
         let steps = shape::required(object, "steps", at, |value, at| {
             shape::list_within(
                 value,
@@ -21883,6 +22008,7 @@ impl Shape for LocalCatalogRunInput {
             terms,
             server,
             rows,
+            on_refreshed,
             steps,
         })
     }
@@ -21902,6 +22028,9 @@ impl Shape for LocalCatalogRunInput {
                     .collect(),
             ),
         );
+        if let Some(held) = &self.on_refreshed {
+            object.insert("onRefreshed", held.encode());
+        }
         object.insert(
             "steps",
             Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
@@ -21963,6 +22092,40 @@ impl Shape for LocalCatalogRunInputServer {
             Value::Array(self.warms.iter().map(|held| held.encode()).collect()),
         );
         Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum LocalCatalogRunInputOnRefreshed {
+    Reads,
+    ReadsAndThrows,
+}
+
+impl LocalCatalogRunInputOnRefreshed {
+    pub const ALL: [Self; 2] = [Self::Reads, Self::ReadsAndThrows];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Reads => "reads",
+            Self::ReadsAndThrows => "readsAndThrows",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for LocalCatalogRunInputOnRefreshed {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
     }
 }
 
@@ -22737,6 +22900,7 @@ impl Shape for LocalCatalogRunInputStepsItemTogetherCallsItemWarmed {
 pub struct LocalCatalogRunResult {
     pub steps: Vec<LocalCatalogRunResultStepsItem>,
     pub waiting: Vec<String>,
+    pub saw: Vec<String>,
 }
 
 impl Shape for LocalCatalogRunResult {
@@ -22748,7 +22912,14 @@ impl Shape for LocalCatalogRunResult {
         let waiting = shape::required(object, "waiting", at, |value, at| {
             shape::list(value, at, shape::text)
         })?;
-        Ok(Self { steps, waiting })
+        let saw = shape::required(object, "saw", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self {
+            steps,
+            waiting,
+            saw,
+        })
     }
 
     fn encode(&self) -> Value {
@@ -22761,6 +22932,15 @@ impl Shape for LocalCatalogRunResult {
             "waiting",
             Value::Array(
                 self.waiting
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "saw",
+            Value::Array(
+                self.saw
                     .iter()
                     .map(|held| Value::from(held.as_str()))
                     .collect(),

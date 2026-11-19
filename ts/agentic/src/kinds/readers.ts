@@ -29,6 +29,12 @@ export function numberField(fields: Fields, key: string): number | null {
 	return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
+/** A length: a finite number above zero. */
+export function positiveField(fields: Fields, key: string): number | null {
+	const value = numberField(fields, key);
+	return value !== null && value > 0 ? value : null;
+}
+
 export function booleanField(fields: Fields, key: string): boolean | null {
 	const value = fieldOf(fields, key);
 	return typeof value === "boolean" ? value : null;

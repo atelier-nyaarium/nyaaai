@@ -28,11 +28,11 @@
 	},
 	"expected": {
 		"facts": [
-			"HTTP://LAB.LOCAL:8000/v1",
-			"HTTP://LAB.LOCAL:8000/v1",
-			"HTTP://LAB.LOCAL:8000/v1",
-			"HTTP://LAB.LOCAL:8000/v1 · 0 models",
-			"HTTP://LAB.LOCAL:8000/v1 · 1 model"
+			"http://lab.local:8000/v1",
+			"http://lab.local:8000/v1",
+			"http://lab.local:8000/v1",
+			"http://lab.local:8000/v1 · 0 models",
+			"http://lab.local:8000/v1 · 1 model"
 		]
 	}
 }

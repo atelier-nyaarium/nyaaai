@@ -1,0 +1,43 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterHop",
+	"name": "hop-an-id-goes-into-the-path-segment-by-segment-3",
+	"input": {
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"endpoints": [
+							{
+								"tag": "a"
+							},
+							{
+								"tag": "b"
+							}
+						]
+					}
+				}
+			}
+		],
+		"id": "../glm",
+		"viewHosts": [
+			"a",
+			"b"
+		]
+	},
+	"expected": {
+		"hosts": [
+			"a",
+			"b"
+		],
+		"thrown": null,
+		"requests": [
+			"/models/%2E%2E/glm/endpoints"
+		],
+		"waiting": [],
+		"nowMs": 1790337600000
+	}
+}

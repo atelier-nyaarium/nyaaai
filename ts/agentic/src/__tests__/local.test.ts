@@ -105,7 +105,18 @@ it("the host test reads each host as the platform's pattern does", () => {
 		"http://1.2",
 	];
 	const platform = urls.map((url) => !PRIVATE_HOST.test(new URL(url).hostname));
-	expect(urls.map((url) => remote({ kind: "compatible", label: "Host", url }))).toEqual(platform);
+	const changed = new Set(["http://labhost.", "http://labhost.local."]);
+	const asked = urls.filter((url) => !changed.has(url));
+	expect(asked.map((url) => remote({ kind: "compatible", label: "Host", url }))).toEqual(
+		asked.map((url) => !PRIVATE_HOST.test(new URL(url).hostname)),
+	);
+	expect(platform.length).toBe(urls.length);
+	// A trailing dot is the same host.
+	expect(
+		["http://labhost.", "http://labhost.local.", "http://8.8.8.8."].map((url) =>
+			remote({ kind: "compatible", label: "H", url }),
+		),
+	).toEqual([false, false, true]);
 });
 
 it("a label is the platform's last non-blank part when no pair is cut", () => {
@@ -126,8 +137,20 @@ it("the request root of a URL reads its path as the platform does, and a URL tha
 		"http://[::1]:8000",
 		"HTTP://LAB.LOCAL",
 	];
-	const platform = (url: string) => (new URL(url).pathname === "/" ? `${url}/v1` : url);
+	const platform = (url: string) => {
+		const parsed = new URL(url);
+		return parsed.pathname === "/" ? `${parsed.origin}/v1` : `${parsed.origin}${parsed.pathname}`;
+	};
 	expect(urls.map(baseOf)).toEqual(urls.map(platform));
-	for (const bad of ["", "not a url", "labhost:8000", "http://", "http://b\u00fcro.local"])
+	for (const bad of [
+		"",
+		"not a url",
+		"labhost:8000",
+		"http://",
+		"http://b\u00fcro.local",
+		"http://h?x=1",
+		"http://h/#f",
+		"http://u:p@h",
+	])
 		expect(() => baseOf(bad)).toThrow();
 });

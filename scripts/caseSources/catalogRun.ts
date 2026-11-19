@@ -334,4 +334,51 @@ export const catalogRunCases: CaseSource[] = [
 		exchanges: [failing()],
 		steps: [call({ kind: "viewFor", row: "openai/gpt-6-luna" })],
 	}),
+
+	// Both reads settle before a refresh fails.
+	run("run-a-deadline-that-ends-the-first-read-ends-the-second-before-its-request", {
+		exchanges: [{ ...MODELS, headMs: 40_000 }, ...PAIR],
+		steps: [views(), advance(60_000), views()],
+	}),
+	run("run-a-failed-first-read-waits-for-the-slow-second-one", {
+		exchanges: [failing(), { ...ZDR, headMs: 20_000 }, ...PAIR],
+		steps: [views(), advance(59_999), views(), advance(1), views()],
+	}),
+	run("run-a-failed-first-read-and-a-second-that-hits-the-deadline", {
+		exchanges: [failing(), { ...ZDR, headMs: 40_000 }, ...PAIR],
+		steps: [views(), advance(60_000), views()],
+	}),
+	run("run-a-failed-second-read-beside-a-good-first-one", {
+		exchanges: [MODELS, failing(), ...PAIR],
+		steps: [views(), advance(60_000), views()],
+	}),
+	run("run-both-reads-fail", {
+		exchanges: [failing(404), failing(500), ...PAIR],
+		steps: [views(), advance(60_000), views()],
+	}),
+	run("run-a-read-that-does-not-parse-fails-after-both-settle", {
+		exchanges: [reply({ data: "x" }), ZDR, ...PAIR],
+		steps: [views(), advance(60_000), views()],
+	}),
+	// New data is stored before anyone is told.
+	run("run-refreshed-reads-the-new-data", {
+		exchanges: [...PAIR, ...PAIR],
+		onRefreshed: "reads",
+		steps: [views(), advance(13 * HOUR), views()],
+	}),
+	run("run-refreshed-that-throws-changes-nothing", {
+		exchanges: [...PAIR, ...PAIR],
+		onRefreshed: "readsAndThrows",
+		steps: [views(), views(), advance(13 * HOUR), views()],
+	}),
+	oc("run-opencode-refreshed-reads-the-new-data", {
+		exchanges: [LISTED, LISTED],
+		onRefreshed: "reads",
+		steps: [views(), advance(13 * HOUR), views()],
+	}),
+	oc("run-opencode-refreshed-that-throws-changes-nothing", {
+		exchanges: [LISTED, LISTED],
+		onRefreshed: "readsAndThrows",
+		steps: [views(), views(), advance(13 * HOUR), views()],
+	}),
 ];

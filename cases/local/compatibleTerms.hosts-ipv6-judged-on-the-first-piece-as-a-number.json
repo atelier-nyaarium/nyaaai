@@ -1,0 +1,92 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.compatibleTerms",
+	"name": "hosts-ipv6-judged-on-the-first-piece-as-a-number",
+	"input": {
+		"urls": [
+			"http://[fc::1]",
+			"http://[fd::1]",
+			"http://[fda::1]",
+			"http://[fe8::1]",
+			"http://[fc00::1]",
+			"http://[fdff:ffff::1]",
+			"http://[fe80::1]",
+			"http://[febf::1]",
+			"http://[fec0::1]",
+			"http://[fbff::1]",
+			"http://[fc00::]",
+			"http://[1fc0::1]",
+			"http://[fe8:0:0:0:0:0:0:1]"
+		]
+	},
+	"expected": {
+		"terms": [
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			},
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			},
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			},
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			},
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			},
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			}
+		]
+	}
+}

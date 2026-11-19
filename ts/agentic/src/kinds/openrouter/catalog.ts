@@ -1,5 +1,6 @@
 // The OpenRouter catalog: decoders, the join to rows and the cached fetch.
 
+import { parseJson, stringifyJson } from "@nyaaai/contract/json";
 import type { ModelRegistry } from "@nyaaai/contract/modelRegistry";
 import { numberOfText, roundHalfUp } from "@nyaaai/contract/number";
 import type { Binding, ModelRow, ModelUse, ModelView, PriceTier } from "@nyaaai/contract/shapes/model";
@@ -7,6 +8,7 @@ import { deadline, parseIsoTime, type Scheduler } from "@nyaaai/contract/time";
 import { EFFORTS } from "../../effort";
 import { raced, unknownView } from "../../models/view";
 import type { Transport } from "../../transport";
+import { joinSettled, told } from "../join";
 import { dataList, type Fields, fieldOf, fieldsOf, numberField, objectField, textField, textsField } from "../readers";
 
 ////////////////////////////////
@@ -371,6 +373,14 @@ function joinParsed(
 ////////////////////////////////
 //  Classes
 
+/** A caller's own views; the cached ones are never handed out. */
+function copyOf(views: readonly ModelView[]): ModelView[] {
+	return views.map((view) => {
+		const { row, ...rest } = view;
+		return { ...(parseJson(stringifyJson(rest)) as Omit<ModelView, "row">), row };
+	});
+}
+
 /** Shared 12-hour cache; failed refreshes keep the last good data. */
 export class ModelCatalog {
 	private good: Fetched | undefined;
@@ -390,6 +400,11 @@ export class ModelCatalog {
 	/** Stops listening to the registry. */
 	dispose(): void {
 		this.unsubscribe();
+	}
+
+	/** Answers when no refresh is running, having waited for the one that was. */
+	async idle(): Promise<void> {
+		while (this.inflight !== undefined) await this.inflight;
 	}
 
 	/** Rows bound under OpenRouter; off `zdrOnly`, hosts that keep data count. */
@@ -446,7 +461,7 @@ export class ModelCatalog {
 			known.zdrOnly === zdrOnly &&
 			now < known.until
 		)
-			return known.views;
+			return copyOf(known.views);
 		const version = this.version;
 		const rows = this.d.rows.rows();
 		const views =
@@ -455,15 +470,15 @@ export class ModelCatalog {
 				: joinParsed(rows, data.entries, data.endpoints, now, use, zdrOnly);
 		const removals = views.map((view) => expiryOf(view.retiredOn ?? "")).filter((at) => at > now);
 		this.joined.set(use, { version, data, zdrOnly, views, until: Math.min(Number.POSITIVE_INFINITY, ...removals) });
-		return views;
+		return copyOf(views);
 	}
 
 	private async refresh(): Promise<Fetched | undefined> {
 		const limit = deadline(this.d.scheduler, FETCH_MS);
 		try {
-			const [models, zdr] = await Promise.all([
-				this.d.transport.getJson("/models", limit.signal, "none"),
-				this.d.transport.getJson("/endpoints/zdr", limit.signal, "none"),
+			const [models, zdr] = await joinSettled([
+				() => this.d.transport.getJson("/models", limit.signal, "none"),
+				() => this.d.transport.getJson("/endpoints/zdr", limit.signal, "none"),
 			]);
 			const entries = parseModels(models);
 			const endpoints = parseEndpoints(zdr);
@@ -472,13 +487,13 @@ export class ModelCatalog {
 				throw new Error("The catalog did not parse.");
 			this.good = { entries, endpoints, raw: listed, at: this.d.scheduler.nowMs() };
 			this.failedAt = undefined;
-			this.d.refreshed?.();
-			return this.good;
 		} catch {
 			this.failedAt = this.d.scheduler.nowMs();
 			return this.good;
 		} finally {
 			limit.clear();
 		}
+		told(this.d.refreshed);
+		return this.good;
 	}
 }

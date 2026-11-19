@@ -1,0 +1,47 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterHop",
+	"name": "hop-an-endpoint-with-no-tag-meets-no-host",
+	"input": {
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"endpoints": [
+							{
+								"provider_name": "Together"
+							},
+							{
+								"tag": ""
+							},
+							{
+								"tag": "a"
+							},
+							{
+								"tag": "b"
+							}
+						]
+					}
+				}
+			}
+		],
+		"id": "lab/glm",
+		"viewHosts": [
+			"",
+			"Together",
+			"a"
+		]
+	},
+	"expected": {
+		"hosts": [],
+		"thrown": null,
+		"requests": [
+			"/models/lab/glm/endpoints"
+		],
+		"waiting": [],
+		"nowMs": 1790337600000
+	}
+}

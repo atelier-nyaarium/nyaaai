@@ -2,7 +2,7 @@
 
 import { effortsOf, itemsOf, type LocalModel, type LocalServer, type LocalTransport } from "./local/catalog";
 import { localKind } from "./local/kind";
-import { fieldOf, fieldsOf, numberField, objectField, textField, textsField } from "./readers";
+import { fieldOf, fieldsOf, objectField, positiveField, textField, textsField } from "./readers";
 
 ////////////////////////////////
 //  Interfaces & Types
@@ -36,7 +36,7 @@ function loadedOf(fields: Readonly<Record<string, unknown>>): number | null {
 	});
 	const first = configs[0];
 	if (configs.includes(null) || first === undefined || first === null) return null;
-	return numberField(first, "context_length");
+	return positiveField(first, "context_length");
 }
 
 function listedOf(item: unknown): ListedModel | undefined {
@@ -48,7 +48,7 @@ function listedOf(item: unknown): ListedModel | undefined {
 	const reasoning = capabilities === null ? null : objectField(capabilities, "reasoning");
 	return {
 		key,
-		trained: numberField(fields, "max_context_length"),
+		trained: positiveField(fields, "max_context_length"),
 		loaded: loadedOf(fields),
 		options: reasoning === null ? null : textsField(reasoning, "allowed_options"),
 	};

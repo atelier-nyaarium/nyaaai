@@ -108,7 +108,7 @@
 				"structured_output": true,
 				"cache": {
 					"implicit": null,
-					"explicit": true
+					"explicit": false
 				},
 				"context": 200000,
 				"input_limit": 190000,

@@ -197,6 +197,7 @@
 				"refreshed": 1
 			}
 		],
-		"waiting": []
+		"waiting": [],
+		"saw": []
 	}
 }

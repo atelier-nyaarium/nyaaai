@@ -1,0 +1,47 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterHop",
+	"name": "hop-a-host-named-by-its-provider-meets-the-tag-in-any-case",
+	"input": {
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"endpoints": [
+							{
+								"tag": "together/fp8"
+							},
+							{
+								"tag": "novita"
+							},
+							{
+								"tag": "other"
+							}
+						]
+					}
+				}
+			}
+		],
+		"id": "lab/glm",
+		"viewHosts": [
+			"Together",
+			"NOVITA ",
+			"other-host"
+		]
+	},
+	"expected": {
+		"hosts": [
+			"together",
+			"novita"
+		],
+		"thrown": null,
+		"requests": [
+			"/models/lab/glm/endpoints"
+		],
+		"waiting": [],
+		"nowMs": 1790337600000
+	}
+}

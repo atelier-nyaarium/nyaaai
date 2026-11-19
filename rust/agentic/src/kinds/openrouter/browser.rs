@@ -7,6 +7,7 @@ use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::json::{Object, Value};
 use nyaaai_contract::shapes::model::{BrowseDetail, BrowseModel, ModelRow, ModelUse, ModelView};
 use nyaaai_contract::shapes::step::{CanonicalRequest, Encoded, Failure, HeaderList, StepResult};
+use nyaaai_contract::text::{ascii_lower, encode_path_segment, trim_text};
 use nyaaai_contract::time::{Ended, Scheduler, deadline};
 
 use super::browse::{browse_models, parse_providers};
@@ -19,9 +20,24 @@ use crate::transport::{KeyAuth, Transport};
 
 const DETAIL_MS: i64 = FETCH_MS;
 
-/// Provider filter tag.
-fn slug_of(tag: &str) -> &str {
-    tag.split('/').next().unwrap_or(tag)
+/// Provider filter tag, the one rule for a tag and a host name.
+fn slug_of(tag: &str) -> String {
+    ascii_lower(trim_text(tag.split('/').next().unwrap_or(tag)))
+}
+
+/// A path segment; the dot segments are written out so none climbs a path.
+fn segment_of(part: &str) -> String {
+    match part {
+        "." => "%2E".to_owned(),
+        ".." => "%2E%2E".to_owned(),
+        other => encode_path_segment(other),
+    }
+}
+
+/// An id's endpoints path, its slashes kept.
+pub fn endpoints_path(id: &str) -> String {
+    let parts: Vec<String> = id.split('/').map(segment_of).collect();
+    format!("/models/{}/endpoints", parts.join("/"))
 }
 
 /// Catalog and provider endpoints.
@@ -45,8 +61,9 @@ pub fn open_router_browser(
 
 impl Browser for OpenRouterBrowser {
     fn list(&self, fresh: bool) -> BoxFuture<'_, Result<Option<Vec<BrowseModel>>, KindError>> {
+        let listing = self.catalog.listing(None, fresh);
         Box::pin(async move {
-            let listing = self.catalog.listing(None, fresh).await?;
+            let listing = listing.await?;
             Ok(listing.map(|held| browse_models(&held, self.clock.now_ms())))
         })
     }
@@ -56,11 +73,12 @@ impl Browser for OpenRouterBrowser {
         id: &'a str,
         cancel: &'a CancelToken,
     ) -> BoxFuture<'a, Result<Option<BrowseDetail>, KindError>> {
+        let listing = self.catalog.listing(Some(cancel), false);
         Box::pin(async move {
-            let listing = self.catalog.listing(Some(cancel), false).await?;
+            let listing = listing.await?;
             let raw = self
                 .transport
-                .get_json(&format!("/models/{id}/endpoints"), cancel, &KeyAuth::None)
+                .get_json(&endpoints_path(id), cancel, &KeyAuth::None)
                 .await?;
             let known: Vec<_> = listing
                 .as_ref()
@@ -103,8 +121,9 @@ impl Tester for OpenRouterTester {
         id: &'a str,
         cancel: &'a CancelToken,
     ) -> BoxFuture<'a, Result<Option<Listed>, KindError>> {
+        let entry = self.catalog.entry(id, Some(cancel));
         Box::pin(async move {
-            let Some(entry) = self.catalog.entry(id, Some(cancel)).await? else {
+            let Some(entry) = entry.await? else {
                 return Ok(None);
             };
             let efforts = entry
@@ -124,7 +143,8 @@ impl Tester for OpenRouterTester {
         use_: ModelUse,
         cancel: &'a CancelToken,
     ) -> BoxFuture<'a, Result<ModelView, KindError>> {
-        Box::pin(async move { Ok(self.catalog.view_for(row, use_, Some(cancel)).await?) })
+        let view = self.catalog.view_for(row, use_, Some(cancel));
+        Box::pin(async move { Ok(view.await?) })
     }
 
     fn pins(&self) -> Option<Box<dyn Pins>> {
@@ -167,11 +187,7 @@ impl Pins for OpenRouterPins {
             let limit = deadline(&*self.scheduler, DETAIL_MS, cancel);
             let read = self
                 .transport
-                .get_json(
-                    &format!("/models/{id}/endpoints"),
-                    limit.token(),
-                    &KeyAuth::None,
-                )
+                .get_json(&endpoints_path(id), limit.token(), &KeyAuth::None)
                 .await;
             let ended = limit.ended();
             limit.clear();
@@ -187,20 +203,17 @@ impl Pins for OpenRouterPins {
                 }
             };
             let serving = parse_providers(&raw, &[]).unwrap_or_default();
-            let zdr: Vec<&str> = view.hosts.iter().map(|tag| slug_of(tag)).collect();
-            let mut both: Vec<&str> = Vec::new();
+            let zdr: Vec<String> = view.hosts.iter().map(|tag| slug_of(tag)).collect();
+            let mut both: Vec<String> = Vec::new();
             for provider in &serving {
                 let slug = slug_of(&provider.tag);
                 if !both.contains(&slug) {
                     both.push(slug);
                 }
             }
-            both.retain(|slug| zdr.contains(slug));
-            Ok(if both.len() < 2 {
-                Vec::new()
-            } else {
-                both[..2].iter().map(|slug| (*slug).to_owned()).collect()
-            })
+            both.retain(|slug| !slug.is_empty() && zdr.contains(slug));
+            both.truncate(2);
+            Ok(if both.len() < 2 { Vec::new() } else { both })
         })
     }
 

@@ -1,0 +1,27 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.llamacppModels",
+	"name": "llamacpp-a-zero-trained-length-lets-the-router-length-supply-it",
+	"input": {
+		"body": {
+			"data": [
+				{
+					"id": "a",
+					"meta": {
+						"n_ctx_train": 0
+					},
+					"context_length": 4096
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"id": "a",
+				"trained": 4096
+			}
+		]
+	}
+}

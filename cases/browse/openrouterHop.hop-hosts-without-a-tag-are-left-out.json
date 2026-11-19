@@ -1,0 +1,44 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterHop",
+	"name": "hop-hosts-without-a-tag-are-left-out",
+	"input": {
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"endpoints": [
+							{},
+							{
+								"tag": ""
+							},
+							{
+								"tag": "a"
+							},
+							{
+								"provider_name": "A"
+							}
+						]
+					}
+				}
+			}
+		],
+		"id": "lab/glm",
+		"viewHosts": [
+			"",
+			"a"
+		]
+	},
+	"expected": {
+		"hosts": [],
+		"thrown": null,
+		"requests": [
+			"/models/lab/glm/endpoints"
+		],
+		"waiting": [],
+		"nowMs": 1790337600000
+	}
+}

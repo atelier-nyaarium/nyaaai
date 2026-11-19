@@ -2,8 +2,8 @@
 
 use std::future::Future;
 use std::pin::Pin;
-use std::sync::{Arc, Mutex};
-use std::task::Poll;
+use std::sync::atomic::{AtomicI64, Ordering};
+use std::sync::{Arc, Mutex, OnceLock};
 
 use nyaaai_agentic::dialects::openrouter::OPENROUTER_CHAT;
 use nyaaai_agentic::kinds::opencode::catalog::{
@@ -33,6 +33,8 @@ use nyaaai_testkit::keys::FakeKeys;
 use nyaaai_testkit::scheduler::{FakeScheduler, TimerWheel};
 use nyaaai_testkit::scripted_fetch::{ScriptedChunk, ScriptedEnd, ScriptedExchange, ScriptedFetch};
 use nyaaai_testkit::scripted_ports::ScriptedModelRegistry;
+
+use nyaaai_agentic::kinds::join::join_all;
 
 use super::shapes::*;
 
@@ -215,27 +217,6 @@ pub(super) fn caller_token(
         wheel.after_run(ms, tag, Box::new(move || held.cancel()));
     }
     caller
-}
-
-/// Runs the futures at once, each started in its place.
-pub(super) async fn join_all<T>(mut futures: Vec<Pin<Box<dyn Future<Output = T> + '_>>>) -> Vec<T> {
-    let mut done: Vec<Option<T>> = futures.iter().map(|_| None).collect();
-    std::future::poll_fn(|context| {
-        for (at, future) in futures.iter_mut().enumerate() {
-            if done[at].is_none()
-                && let Poll::Ready(held) = future.as_mut().poll(context)
-            {
-                done[at] = Some(held);
-            }
-        }
-        if done.iter().all(Option::is_some) {
-            Poll::Ready(())
-        } else {
-            Poll::Pending
-        }
-    })
-    .await;
-    done.into_iter().flatten().collect()
 }
 
 fn plain(value: &Option<Value>) -> Value {
@@ -735,6 +716,7 @@ async fn play<'a>(
     net: &Net,
     registry: &ScriptedModelRegistry,
     steps: Vec<Step>,
+    idle: impl Fn() -> BoxFuture<'a, ()>,
     answer: impl Fn(Call, CancelToken) -> Answered<'a>,
 ) -> Outcome<Played> {
     let mut tags = 0;
@@ -764,6 +746,7 @@ async fn play<'a>(
             }
             Step::Rows(keys) => registry.set_rows(rows_of_keys(&keys)?),
         }
+        idle().await;
         outcomes.push((
             nyaaai_contract::time::Clock::now_ms(&*net.wheel),
             answers,
@@ -791,137 +774,215 @@ fn use_of(held: Option<ModelUse>) -> ModelUse {
     held.unwrap_or(ModelUse::Chat)
 }
 
-fn counted_refresh() -> (Arc<Mutex<i64>>, Arc<dyn Fn() + Send + Sync>) {
-    let count = Arc::new(Mutex::new(0i64));
-    let held = Arc::clone(&count);
-    (
-        count,
+/// What the script's `refreshed` does: counts, and may read its catalog and throw.
+pub(super) struct Told {
+    count: Arc<AtomicI64>,
+    saw: Arc<Mutex<Vec<BoxFuture<'static, String>>>>,
+    read: Arc<OnceLock<ReadCatalog>>,
+    /// `Some(throws)` when it reads the catalog.
+    reads: Option<bool>,
+}
+
+type ReadCatalog = Box<dyn Fn() -> Option<BoxFuture<'static, String>> + Send + Sync>;
+
+impl Told {
+    pub(super) fn new(reads: Option<bool>) -> Self {
+        Self {
+            count: Arc::new(AtomicI64::new(0)),
+            saw: Arc::new(Mutex::new(Vec::new())),
+            read: Arc::new(OnceLock::new()),
+            reads,
+        }
+    }
+
+    pub(super) fn callback(&self) -> Arc<dyn Fn() + Send + Sync> {
+        let count = Arc::clone(&self.count);
+        let saw = Arc::clone(&self.saw);
+        let read = Arc::clone(&self.read);
+        let reads = self.reads;
         Arc::new(move || {
-            *held.lock().unwrap_or_else(|poisoned| poisoned.into_inner()) += 1;
-        }),
-    )
+            count.fetch_add(1, Ordering::SeqCst);
+            let Some(throws) = reads else {
+                return;
+            };
+            if let Some(started) = read.get().and_then(|held| held()) {
+                saw.lock()
+                    .unwrap_or_else(|poisoned| poisoned.into_inner())
+                    .push(started);
+            }
+            if throws {
+                std::panic::resume_unwind(Box::new("told badly"));
+            }
+        })
+    }
+
+    /// How the callback starts its read of the catalog.
+    pub(super) fn reading(
+        &self,
+        read: impl Fn() -> Option<BoxFuture<'static, String>> + Send + Sync + 'static,
+    ) {
+        let _ = self.read.set(Box::new(read));
+    }
+
+    pub(super) fn count(&self) -> i64 {
+        self.count.load(Ordering::SeqCst)
+    }
+
+    /// What each callback read, in order.
+    pub(super) async fn seen(&self) -> Vec<String> {
+        let reads: Vec<BoxFuture<'static, String>> = std::mem::take(
+            &mut *self
+                .saw
+                .lock()
+                .unwrap_or_else(|poisoned| poisoned.into_inner()),
+        );
+        join_all(reads).await
+    }
 }
 
 pub fn openrouter_run(input: CatalogOpenrouterRunInput) -> Outcome<CatalogOpenrouterRunResult> {
     let net = network_of(input.start_ms, &input.exchanges, None)?;
     let registry = registry_of(&input.rows)?;
-    let (refreshed, tell) = counted_refresh();
-    let catalog = ModelCatalog::new(ModelCatalogDeps {
+    let told = Told::new(
+        input
+            .on_refreshed
+            .map(|held| held.as_str() == "readsAndThrows"),
+    );
+    let catalog = Arc::new(ModelCatalog::new(ModelCatalogDeps {
         transport: Arc::clone(&net.transport),
         deps: CatalogDeps {
             scheduler: net.scheduler.clone(),
             rows: registry.clone() as Arc<dyn ModelRegistry>,
-            refreshed: tell,
+            refreshed: told.callback(),
         },
         ttl_ms: input.ttl_ms,
+    }));
+    told.reading({
+        let weak = Arc::downgrade(&catalog);
+        move || {
+            let catalog = weak.upgrade()?;
+            let read = catalog.listing(None, false);
+            Some(Box::pin(async move {
+                match read.await {
+                    Ok(Some(held)) => held.raw().len().to_string(),
+                    _ => "none".to_owned(),
+                }
+            }) as BoxFuture<'static, String>)
+        }
     });
     let steps = steps_openrouter(&input.steps);
     let catalog_ref = &catalog;
-    let outcomes = block_on(play(&net, &registry, steps, move |call, token| {
-        Box::pin(async move {
-            Ok(match &call {
-                Call::Views { use_, zdr_only } => {
-                    match catalog_ref
-                        .views(use_of(*use_), zdr_only.unwrap_or(true), Some(&token))
-                        .await
-                    {
-                        Ok(views) => answer_value("views", vec![("views", views_value(&views)?)]),
-                        Err(_) => thrown(CALLER_REASON),
-                    }
-                }
-                Call::View {
-                    key,
-                    use_,
-                    zdr_only,
-                } => match catalog_ref
-                    .view(key, use_of(*use_), zdr_only.unwrap_or(true), Some(&token))
-                    .await
-                {
-                    Ok(view) => answer_value(
-                        "view",
-                        vec![(
-                            "view",
-                            match view {
-                                None => Value::Null,
-                                Some(held) => view_line(&held)?.encode(),
-                            },
-                        )],
-                    ),
-                    Err(_) => thrown(CALLER_REASON),
-                },
-                Call::ViewFor { row, use_ } => {
-                    let row = row_of_key(row)?;
-                    match catalog_ref
-                        .view_for(&row, use_of(*use_), Some(&token))
-                        .await
-                    {
-                        Ok(view) => {
-                            answer_value("view", vec![("view", view_line(&view)?.encode())])
+    let outcomes =
+        block_on(play(
+            &net,
+            &registry,
+            steps,
+            || Box::pin(catalog_ref.idle()),
+            move |call, token| {
+                Box::pin(async move {
+                    Ok(match &call {
+                        Call::Views { use_, zdr_only } => {
+                            match catalog_ref
+                                .views(use_of(*use_), zdr_only.unwrap_or(true), Some(&token))
+                                .await
+                            {
+                                Ok(views) => {
+                                    answer_value("views", vec![("views", views_value(&views)?)])
+                                }
+                                Err(_) => thrown(CALLER_REASON),
+                            }
                         }
-                        Err(_) => thrown(CALLER_REASON),
-                    }
-                }
-                Call::Entry { id } => match catalog_ref.entry(id, Some(&token)).await {
-                    Ok(entry) => answer_value(
-                        "entry",
-                        vec![(
-                            "entry",
-                            match entry {
-                                None => Value::Null,
-                                Some(held) => object_value(vec![
-                                    ("id", Value::from(held.id.as_str())),
-                                    ("name", text_value(&held.name)),
-                                    (
-                                        "efforts",
-                                        texts_value(
-                                            &held
-                                                .reasoning
-                                                .and_then(|reasoning| reasoning.supported_efforts),
-                                        ),
-                                    ),
-                                ]),
-                            },
-                        )],
-                    ),
-                    Err(_) => thrown(CALLER_REASON),
-                },
-                Call::Listing { retry } => {
-                    match catalog_ref
-                        .listing(Some(&token), retry.unwrap_or(false))
-                        .await
-                    {
-                        Ok(listing) => answer_value(
-                            "listing",
-                            vec![(
-                                "listing",
-                                match listing {
-                                    None => Value::Null,
-                                    Some(held) => object_value(vec![
-                                        ("raw", Value::from(held.raw().len())),
-                                        (
-                                            "endpoints",
-                                            Value::Array(
-                                                held.endpoints()
-                                                    .iter()
-                                                    .map(|(key, _)| Value::from(key))
-                                                    .collect(),
+                        Call::View {
+                            key,
+                            use_,
+                            zdr_only,
+                        } => match catalog_ref
+                            .view(key, use_of(*use_), zdr_only.unwrap_or(true), Some(&token))
+                            .await
+                        {
+                            Ok(view) => answer_value(
+                                "view",
+                                vec![(
+                                    "view",
+                                    match view {
+                                        None => Value::Null,
+                                        Some(held) => view_line(&held)?.encode(),
+                                    },
+                                )],
+                            ),
+                            Err(_) => thrown(CALLER_REASON),
+                        },
+                        Call::ViewFor { row, use_ } => {
+                            let row = row_of_key(row)?;
+                            match catalog_ref
+                                .view_for(&row, use_of(*use_), Some(&token))
+                                .await
+                            {
+                                Ok(view) => {
+                                    answer_value("view", vec![("view", view_line(&view)?.encode())])
+                                }
+                                Err(_) => thrown(CALLER_REASON),
+                            }
+                        }
+                        Call::Entry { id } => match catalog_ref.entry(id, Some(&token)).await {
+                            Ok(entry) => answer_value(
+                                "entry",
+                                vec![(
+                                    "entry",
+                                    match entry {
+                                        None => Value::Null,
+                                        Some(held) => object_value(vec![
+                                            ("id", Value::from(held.id.as_str())),
+                                            ("name", text_value(&held.name)),
+                                            (
+                                                "efforts",
+                                                texts_value(&held.reasoning.and_then(
+                                                    |reasoning| reasoning.supported_efforts,
+                                                )),
                                             ),
-                                        ),
-                                    ]),
-                                },
-                            )],
-                        ),
-                        Err(_) => thrown(CALLER_REASON),
-                    }
-                }
-                Call::Models { .. } => thrown("a catalog has no models call"),
-            })
-        })
-    }))??;
+                                        ]),
+                                    },
+                                )],
+                            ),
+                            Err(_) => thrown(CALLER_REASON),
+                        },
+                        Call::Listing { retry } => {
+                            match catalog_ref
+                                .listing(Some(&token), retry.unwrap_or(false))
+                                .await
+                            {
+                                Ok(listing) => answer_value(
+                                    "listing",
+                                    vec![(
+                                        "listing",
+                                        match listing {
+                                            None => Value::Null,
+                                            Some(held) => object_value(vec![
+                                                ("raw", Value::from(held.raw().len())),
+                                                (
+                                                    "endpoints",
+                                                    Value::Array(
+                                                        held.endpoints()
+                                                            .iter()
+                                                            .map(|(key, _)| Value::from(key))
+                                                            .collect(),
+                                                    ),
+                                                ),
+                                            ]),
+                                        },
+                                    )],
+                                ),
+                                Err(_) => thrown(CALLER_REASON),
+                            }
+                        }
+                        Call::Models { .. } => thrown("a catalog has no models call"),
+                    })
+                })
+            },
+        ))??;
     catalog.dispose();
-    let count = *refreshed
-        .lock()
-        .unwrap_or_else(|poisoned| poisoned.into_inner());
+    let count = told.count();
+    let saw = block_on(told.seen())?;
     Ok(CatalogOpenrouterRunResult {
         steps: outcomes
             .into_iter()
@@ -942,76 +1003,105 @@ pub fn openrouter_run(input: CatalogOpenrouterRunInput) -> Outcome<CatalogOpenro
             .collect(),
         waiting: net.wheel.waiting(),
         refreshed: count,
+        saw,
     })
 }
 
 pub fn opencode_run(input: CatalogOpencodeRunInput) -> Outcome<CatalogOpencodeRunResult> {
     let net = network_of(input.start_ms, &input.exchanges, None)?;
     let registry = registry_of(&input.rows)?;
-    let (refreshed, tell) = counted_refresh();
-    let catalog = OpenCodeCatalog::new(OpenCodeCatalogDeps {
+    let told = Told::new(
+        input
+            .on_refreshed
+            .map(|held| held.as_str() == "readsAndThrows"),
+    );
+    let catalog = Arc::new(OpenCodeCatalog::new(OpenCodeCatalogDeps {
         plan: input.plan,
         transport: Arc::clone(&net.transport),
         deps: CatalogDeps {
             scheduler: net.scheduler.clone(),
             rows: registry.clone() as Arc<dyn ModelRegistry>,
-            refreshed: tell,
+            refreshed: told.callback(),
         },
         ttl_ms: input.ttl_ms,
+    }));
+    told.reading({
+        let weak = Arc::downgrade(&catalog);
+        move || {
+            let catalog = weak.upgrade()?;
+            let read = catalog.models(false, None);
+            Some(Box::pin(async move {
+                match read.await {
+                    Ok(Some(held)) => held
+                        .iter()
+                        .map(|(key, _)| key.to_owned())
+                        .collect::<Vec<_>>()
+                        .join(" "),
+                    _ => "none".to_owned(),
+                }
+            }) as BoxFuture<'static, String>)
+        }
     });
     let steps = steps_opencode(&input.steps);
     let catalog_ref = &catalog;
-    let outcomes = block_on(play(&net, &registry, steps, move |call, token| {
-        Box::pin(async move {
-            Ok(match &call {
-                Call::Views { use_, zdr_only } => {
-                    match catalog_ref
-                        .views(use_of(*use_), zdr_only.unwrap_or(true), Some(&token))
-                        .await
-                    {
-                        Ok(views) => answer_value("views", vec![("views", views_value(&views)?)]),
-                        Err(_) => thrown(CALLER_REASON),
-                    }
-                }
-                Call::ViewFor { row, use_ } => {
-                    let row = row_of_key(row)?;
-                    match catalog_ref
-                        .view_for(&row, use_of(*use_), Some(&token))
-                        .await
-                    {
-                        Ok(view) => {
-                            answer_value("view", vec![("view", view_line(&view)?.encode())])
+    let outcomes = block_on(play(
+        &net,
+        &registry,
+        steps,
+        || Box::pin(catalog_ref.idle()),
+        move |call, token| {
+            Box::pin(async move {
+                Ok(match &call {
+                    Call::Views { use_, zdr_only } => {
+                        match catalog_ref
+                            .views(use_of(*use_), zdr_only.unwrap_or(true), Some(&token))
+                            .await
+                        {
+                            Ok(views) => {
+                                answer_value("views", vec![("views", views_value(&views)?)])
+                            }
+                            Err(_) => thrown(CALLER_REASON),
                         }
-                        Err(_) => thrown(CALLER_REASON),
                     }
-                }
-                Call::Models { fresh } => {
-                    match catalog_ref
-                        .models(fresh.unwrap_or(false), Some(&token))
-                        .await
-                    {
-                        Ok(models) => answer_value(
-                            "models",
-                            vec![(
+                    Call::ViewFor { row, use_ } => {
+                        let row = row_of_key(row)?;
+                        match catalog_ref
+                            .view_for(&row, use_of(*use_), Some(&token))
+                            .await
+                        {
+                            Ok(view) => {
+                                answer_value("view", vec![("view", view_line(&view)?.encode())])
+                            }
+                            Err(_) => thrown(CALLER_REASON),
+                        }
+                    }
+                    Call::Models { fresh } => {
+                        match catalog_ref
+                            .models(fresh.unwrap_or(false), Some(&token))
+                            .await
+                        {
+                            Ok(models) => answer_value(
                                 "models",
-                                match models {
-                                    None => Value::Null,
-                                    Some(held) => Value::Array(
-                                        held.iter().map(|(key, _)| Value::from(key)).collect(),
-                                    ),
-                                },
-                            )],
-                        ),
-                        Err(_) => thrown(CALLER_REASON),
+                                vec![(
+                                    "models",
+                                    match models {
+                                        None => Value::Null,
+                                        Some(held) => Value::Array(
+                                            held.iter().map(|(key, _)| Value::from(key)).collect(),
+                                        ),
+                                    },
+                                )],
+                            ),
+                            Err(_) => thrown(CALLER_REASON),
+                        }
                     }
-                }
-                _ => thrown("an OpenCode catalog has no such call"),
+                    _ => thrown("an OpenCode catalog has no such call"),
+                })
             })
-        })
-    }))??;
-    let count = *refreshed
-        .lock()
-        .unwrap_or_else(|poisoned| poisoned.into_inner());
+        },
+    ))??;
+    let count = told.count();
+    let saw = block_on(told.seen())?;
     Ok(CatalogOpencodeRunResult {
         steps: outcomes
             .into_iter()
@@ -1032,5 +1122,6 @@ pub fn opencode_run(input: CatalogOpencodeRunInput) -> Outcome<CatalogOpencodeRu
             .collect(),
         waiting: net.wheel.waiting(),
         refreshed: count,
+        saw,
     })
 }

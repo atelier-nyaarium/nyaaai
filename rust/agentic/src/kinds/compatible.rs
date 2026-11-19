@@ -11,7 +11,7 @@ use nyaaai_contract::url::parse_url;
 
 use super::local::catalog::{LocalModel, LocalServer};
 use super::local::kind::{HOME, LocalKind, LocalKindSpec, Terms, TermsPrice, local_kind};
-use super::readers::{data_list, fields_of, number_field, text_field};
+use super::readers::{data_list, fields_of, positive_field, text_field};
 use crate::provider::kind::KindError;
 use crate::transport::{KeyAuth, Transport};
 
@@ -27,7 +27,7 @@ const LIST: &str = "/models";
 /// Loopback, private ranges, LAN names; a host as the URL parser wrote it.
 static PRIVATE_HOST: LazyLock<Pattern> = LazyLock::new(|| {
     Pattern::compile(
-        "^(localhost|(127|10)\\.[\\d.]+|192\\.168\\.[\\d.]+|172\\.(1[6-9]|2\\d|3[01])\\.[\\d.]+|169\\.254\\.[\\d.]+|100\\.(6[4-9]|[7-9]\\d|1[01]\\d|12[0-7])\\.[\\d.]+|\\[(::1|f[cd][\\da-f:]*|fe[89ab][\\da-f:]*)\\]|[^.[]+|.+\\.(localhost|local|lan|internal|home\\.arpa))$",
+        "^(localhost|0\\.0\\.0\\.0|(127|10)\\.[\\d.]+|192\\.168\\.[\\d.]+|172\\.(1[6-9]|2\\d|3[01])\\.[\\d.]+|169\\.254\\.[\\d.]+|100\\.(6[4-9]|[7-9]\\d|1[01]\\d|12[0-7])\\.[\\d.]+|\\[(::1?|f[cd][0-9a-f]{2}:[0-9a-f:]*|fe[89ab][0-9a-f]:[0-9a-f:]*)\\]|[^.[]+|.+\\.(localhost|local|lan|internal|home\\.arpa))$",
         "i",
     )
     .expect("a fixed pattern")
@@ -41,9 +41,9 @@ pub fn listed(raw: &Value) -> Option<Vec<ListedModel>> {
             .filter_map(|item| {
                 let fields = fields_of(item)?;
                 let id = text_field(fields, "id").filter(|id| !id.is_empty())?;
-                let context = number_field(fields, "context_length")
-                    .or_else(|| number_field(fields, "max_context_length"))
-                    .or_else(|| number_field(fields, "max_model_len"));
+                let context = positive_field(fields, "context_length")
+                    .or_else(|| positive_field(fields, "max_context_length"))
+                    .or_else(|| positive_field(fields, "max_model_len"));
                 Some(ListedModel {
                     id: id.to_owned(),
                     context,
@@ -103,7 +103,10 @@ pub fn remote(entry: &EntryFields) -> bool {
     };
     match parse_url(url) {
         None => true,
-        Some(parts) => !PRIVATE_HOST.test(&parts.host),
+        Some(parts) => {
+            let host = parts.host.strip_suffix('.').unwrap_or(&parts.host);
+            !PRIVATE_HOST.test(host)
+        }
     }
 }
 
@@ -119,15 +122,24 @@ pub fn terms_of(entry: &EntryFields) -> Terms {
     }
 }
 
-/// A bare origin means `/v1`; a URL that does not read is refused.
+/// A bare origin means `/v1`; built from the parsed origin and path. A URL that does not read, or
+/// carries a query, a fragment or credentials, is refused.
 pub fn base_of(url: &str) -> Result<String, String> {
-    let Some(parts) = parse_url(url) else {
+    let plain = parse_url(url).filter(|parts| {
+        parts.query.is_empty()
+            && parts.fragment.is_empty()
+            && parts.username.is_empty()
+            && parts.password.is_empty()
+    });
+    let Some(parts) = plain else {
         return Err("Invalid URL.".to_owned());
     };
     Ok(if parts.path == "/" {
-        format!("{url}/v1")
+        format!("{}/v1", parts.origin)
     } else {
-        url.to_owned()
+        format!("{}{}", parts.origin, parts.path)
+            .trim_end_matches('/')
+            .to_owned()
     })
 }
 

@@ -11,7 +11,7 @@ use super::local::catalog::{
     Loaded, LocalModel, LocalServer, Think, efforts_of, items_of, put_loaded,
 };
 use super::local::kind::{LocalKind, LocalKindSpec, local_kind};
-use super::readers::{field_of, fields_of, number_field, object_field, text_field, texts_field};
+use super::readers::{field_of, fields_of, object_field, positive_field, text_field, texts_field};
 use crate::provider::kind::KindError;
 use crate::transport::{KeyAuth, Transport};
 
@@ -39,7 +39,7 @@ fn loaded_of(fields: &Object) -> Option<f64> {
     if configs.contains(&None) {
         return None;
     }
-    number_field((*configs.first()?)?, "context_length")
+    positive_field((*configs.first()?)?, "context_length")
 }
 
 fn listed_of(item: &Value) -> Option<ListedModel> {
@@ -52,7 +52,7 @@ fn listed_of(item: &Value) -> Option<ListedModel> {
         object_field(fields, "capabilities").and_then(|held| object_field(held, "reasoning"));
     Some(ListedModel {
         key: key.to_owned(),
-        trained: number_field(fields, "max_context_length"),
+        trained: positive_field(fields, "max_context_length"),
         loaded: loaded_of(fields),
         options: reasoning.and_then(|held| texts_field(held, "allowed_options")),
     })

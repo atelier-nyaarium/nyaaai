@@ -55,6 +55,7 @@
 			1
 		],
 		"waiting": [],
-		"refreshed": 0
+		"refreshed": 0,
+		"saw": []
 	}
 }

@@ -1,0 +1,32 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.ollamaRunning",
+	"name": "running-a-zero-or-negative-context-is-left-out",
+	"input": {
+		"body": {
+			"models": [
+				{
+					"name": "local-a:27b",
+					"context_length": 0
+				},
+				{
+					"name": "local-b:9b",
+					"context_length": -1
+				},
+				{
+					"name": "c",
+					"context_length": 8
+				}
+			]
+		}
+	},
+	"expected": {
+		"contexts": [
+			{
+				"tag": "c",
+				"context": 8
+			}
+		]
+	}
+}

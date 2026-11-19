@@ -1,9 +1,10 @@
 // llama.cpp: the model list and each model's props, read by hand.
 
 import { encodePathSegment } from "@nyaaai/contract/text";
+import { joinAll } from "./join";
 import { effortsOf, type LocalModel, type LocalServer, type LocalTransport } from "./local/catalog";
 import { localKind } from "./local/kind";
-import { dataList, fieldsOf, numberField, objectField, textField, textsField } from "./readers";
+import { dataList, fieldsOf, objectField, positiveField, textField, textsField } from "./readers";
 
 ////////////////////////////////
 //  Interfaces & Types
@@ -39,7 +40,7 @@ export function listed(raw: unknown): ListedModel[] | undefined {
 		const meta = objectField(fields, "meta");
 		// Router lists, loaded or not.
 		const trained =
-			(meta === null ? null : numberField(meta, "n_ctx_train")) ?? numberField(fields, "context_length");
+			(meta === null ? null : positiveField(meta, "n_ctx_train")) ?? positiveField(fields, "context_length");
 		return [{ id, trained }];
 	});
 }
@@ -50,7 +51,7 @@ export function propsOfBody(raw: unknown): Props | undefined {
 	if (fields === undefined) return undefined;
 	const settings = objectField(fields, "default_generation_settings");
 	const caps = objectField(fields, "chat_template_caps");
-	const context = settings === null ? null : numberField(settings, "n_ctx");
+	const context = settings === null ? null : positiveField(settings, "n_ctx");
 	const efforts = caps === null ? null : textsField(caps, "reasoning_effort_levels");
 	return { efforts: efforts ?? [], ...(context === null ? {} : { context }) };
 }
@@ -91,14 +92,15 @@ export function server(transport: LocalTransport): LocalServer {
 		models: async (known, signal) => {
 			const models = listed(await transport.getJson(LIST, signal, "none"));
 			if (models === undefined) throw new Error("The model list did not parse.");
-			return Promise.all(
-				models.map(async (model) =>
-					modelOf(
-						model.id,
-						model.trained ?? undefined,
-						await propsOf(transport, model.id, false, signal),
-						known.find((each) => each.tag === model.id),
-					),
+			return joinAll(
+				models.map(
+					(model) => async () =>
+						modelOf(
+							model.id,
+							model.trained ?? undefined,
+							await propsOf(transport, model.id, false, signal),
+							known.find((each) => each.tag === model.id),
+						),
 				),
 			);
 		},

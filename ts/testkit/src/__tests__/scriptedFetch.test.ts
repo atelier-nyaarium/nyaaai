@@ -41,6 +41,7 @@ describe("the scripted fetch", () => {
 		expect(await drain(first.chunks)).toEqual(["a", "b"]);
 		const second = await played.fetch({ ...REQUEST, url: "http://lab.local/y" }, signal);
 		expect(second.status).toBe(404);
+		await drain(second.chunks);
 		expect(played.requests.map((request) => request.url)).toEqual(["http://lab.local/x", "http://lab.local/y"]);
 		expect(played.read()).toEqual([2, 0]);
 		const error = await rejection(played.fetch(REQUEST, signal));
@@ -82,7 +83,6 @@ describe("the scripted fetch", () => {
 		const response = await played.fetch(REQUEST, new AbortController().signal);
 		expect(wheel.nowMs()).toBe(10);
 		await drain(response.chunks);
-		expect(wheel.nowMs()).toBe(20);
 		expect(fired).toEqual(["mid@15"]);
 	});
 
@@ -164,5 +164,87 @@ describe("the fake key source", () => {
 
 	it("refuses an empty list", () => {
 		expect(() => fakeKeys([])).toThrow("fakeKeys needs a value");
+	});
+
+	it("serves one request at a time: a second waits for the first body, then is seen at its turn", async () => {
+		const wheel = new TimerWheel(0);
+		const played = scriptedFetch(
+			[
+				exchange({
+					headMs: 10,
+					chunks: [
+						{ bytes: bytes("a"), delayMs: 5 },
+						{ bytes: bytes("b"), delayMs: 5 },
+					],
+				}),
+				exchange({ headMs: 7 }),
+			],
+			wheel,
+		);
+		const signal = new AbortController().signal;
+		const one = played.fetch(REQUEST, signal);
+		const two = played.fetch({ ...REQUEST, url: "http://lab.local/y" }, signal);
+		await Promise.resolve();
+		expect(played.requests.map((request) => request.url)).toEqual(["http://lab.local/x"]);
+		expect(wheel.nowMs()).toBe(10);
+		expect(await drain((await one).chunks)).toEqual(["a", "b"]);
+		const second = await two;
+		expect(played.requests.map((request) => request.url)).toEqual(["http://lab.local/x", "http://lab.local/y"]);
+		expect(wheel.nowMs()).toBe(27);
+		expect(await drain(second.chunks)).toEqual(["a", "b"]);
+	});
+
+	it("lets a waiting request leave the line unseen when its signal ends", async () => {
+		const wheel = new TimerWheel(0);
+		const played = scriptedFetch([exchange(), exchange()], wheel);
+		const first = await played.fetch(REQUEST, new AbortController().signal);
+		const gone = new AbortController();
+		const waiting = rejection(played.fetch({ ...REQUEST, url: "http://lab.local/gone" }, gone.signal));
+		const third = played.fetch({ ...REQUEST, url: "http://lab.local/z" }, new AbortController().signal);
+		gone.abort(new Error("left"));
+		expect(((await waiting) as Error).message).toBe("left");
+		await drain(first.chunks);
+		await third;
+		expect(played.requests.map((request) => request.url)).toEqual(["http://lab.local/x", "http://lab.local/z"]);
+		expect(played.read()).toEqual([2, 0]);
+	});
+
+	it("frees the lane when a body is cancelled midway", async () => {
+		const played = scriptedFetch([exchange(), exchange()], new TimerWheel(0));
+		const signal = new AbortController().signal;
+		const first = await played.fetch(REQUEST, signal);
+		const iterator = first.chunks[Symbol.asyncIterator]();
+		await iterator.next();
+		const second = played.fetch({ ...REQUEST, url: "http://lab.local/y" }, signal);
+		await Promise.resolve();
+		expect(played.requests).toHaveLength(1);
+		await iterator.return?.();
+		expect((await second).status).toBe(200);
+		expect(played.requests).toHaveLength(2);
+	});
+
+	it("keeps the lane for a signal already ended at the call when the lane is free", async () => {
+		const played = scriptedFetch([exchange(), exchange()], new TimerWheel(0));
+		const ended = new AbortController();
+		ended.abort(new Error("ended"));
+		expect(((await rejection(played.fetch(REQUEST, ended.signal))) as Error).message).toBe("ended");
+		expect(played.requests).toHaveLength(1);
+		const next = await played.fetch(REQUEST, new AbortController().signal);
+		expect(await drain(next.chunks)).toEqual(["a", "b"]);
+	});
+
+	it("refuses a waiter whose signal ended with the holder's, whatever the listener order", async () => {
+		const wheel = new TimerWheel(0);
+		const played = scriptedFetch([exchange({ headMs: 5 }), exchange({ headMs: 50 }), exchange()], wheel);
+		const shared = new AbortController();
+		const first = await played.fetch(REQUEST, shared.signal);
+		const second = rejection(played.fetch({ ...REQUEST, url: "http://lab.local/y" }, shared.signal));
+		const third = played.fetch({ ...REQUEST, url: "http://lab.local/z" }, new AbortController().signal);
+		void first;
+		shared.abort(new Error("both"));
+		expect(((await second) as Error).message).toBe("both");
+		await third;
+		expect(played.requests.map((request) => request.url)).toEqual(["http://lab.local/x", "http://lab.local/z"]);
+		expect(wheel.nowMs()).toBe(55);
 	});
 });

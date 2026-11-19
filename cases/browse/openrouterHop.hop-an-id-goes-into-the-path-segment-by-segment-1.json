@@ -2,7 +2,7 @@
 	"format": 2,
 	"type": "function",
 	"kind": "browse.openrouterHop",
-	"name": "hop-hosts-without-a-tag-count-as-the-empty-slug",
+	"name": "hop-an-id-goes-into-the-path-segment-by-segment-1",
 	"input": {
 		"startMs": 1790337600000,
 		"exchanges": [
@@ -11,35 +11,31 @@
 				"json": {
 					"data": {
 						"endpoints": [
-							{},
-							{
-								"tag": ""
-							},
 							{
 								"tag": "a"
 							},
 							{
-								"provider_name": "A"
+								"tag": "b"
 							}
 						]
 					}
 				}
 			}
 		],
-		"id": "lab/glm",
+		"id": "lab/glm#frag",
 		"viewHosts": [
-			"",
-			"a"
+			"a",
+			"b"
 		]
 	},
 	"expected": {
 		"hosts": [
-			"",
-			"a"
+			"a",
+			"b"
 		],
 		"thrown": null,
 		"requests": [
-			"/models/lab/glm/endpoints"
+			"/models/lab/glm%23frag/endpoints"
 		],
 		"waiting": [],
 		"nowMs": 1790337600000

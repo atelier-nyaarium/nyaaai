@@ -1,5 +1,6 @@
 //! The OpenCode plan catalog: decoder, join, browser and tester.
 
+use std::future::Future;
 use std::sync::Arc;
 
 use nyaaai_contract::cancel::CancelToken;
@@ -123,7 +124,8 @@ fn cache_field(capabilities: Option<&Fields>) -> Option<OpenCodeCache> {
     let explicit = field_of(cache, "explicit");
     Some(OpenCodeCache {
         implicit: boolean_field(cache, "implicit"),
-        explicit: explicit.is_some_and(|held| !held.is_null()),
+        explicit: explicit
+            .is_some_and(|held| matches!(held, Value::Bool(true)) || fields_of(held).is_some()),
     })
 }
 
@@ -430,73 +432,88 @@ impl OpenCodeCatalog {
         }
     }
 
-    /// Fresh retries failures.
-    pub async fn models(
+    /// Answers when no refresh is running, having waited for the one that was.
+    pub fn idle(&self) -> impl Future<Output = ()> + Send + use<> {
+        self.shared.fetcher.idle()
+    }
+
+    /// Fresh retries failures. A refresh it needs starts at the call.
+    pub fn models(
         &self,
         fresh: bool,
         cancel: Option<&CancelToken>,
-    ) -> Result<Option<Arc<Ordered<OpenCodeModel>>>, Aborted> {
+    ) -> impl Future<Output = Result<Option<Arc<Ordered<OpenCodeModel>>>, Aborted>> + Send + use<>
+    {
         if fresh {
             self.shared.fetcher.retry();
         }
-        self.fetched().raced(cancel).await
+        let waiter = fetched(&self.shared);
+        let cancel = cancel.cloned();
+        async move { waiter.raced(cancel.as_ref()).await }
     }
 
     /// Tester ZDR view.
-    pub async fn view_for(
+    pub fn view_for(
         &self,
         row: &ModelRow,
         _use: ModelUse,
         cancel: Option<&CancelToken>,
-    ) -> Result<ModelView, Aborted> {
-        let models = self.fetched().raced(cancel).await?;
-        let id = row.bindings.get("opencode").map(|held| held.id.as_str());
-        let (Some(models), Some(id)) = (models, id) else {
-            return Ok(unknown_view(row));
-        };
-        let Some(model) = models.get(id) else {
-            let mut view = unknown_view(row);
-            view.status = ModelViewStatus::Retired;
-            return Ok(view);
-        };
-        let now = self.shared.scheduler.now_ms();
-        Ok(
-            view_of(row, model, self.shared.plan, true, now).unwrap_or_else(|| {
-                let mut view = unknown_view(row);
-                view.status = ModelViewStatus::NoZdrHost;
-                view
-            }),
-        )
-    }
-
-    fn fetched(&self) -> Waiter<Arc<Ordered<OpenCodeModel>>> {
+    ) -> impl Future<Output = Result<ModelView, Aborted>> + Send + use<> {
+        let waiter = fetched(&self.shared);
         let shared = Arc::clone(&self.shared);
-        let now = shared.scheduler.now_ms();
-        let ttl = shared.ttl_ms.unwrap_or(TTL_MS);
-        self.shared.fetcher.fetched(now, ttl, move || {
-            let limit = deadline(&*shared.scheduler, FETCH_MS, &CancelToken::new());
-            Box::pin(async move {
-                let read = shared
-                    .transport
-                    .get_json("/v1/models", limit.token(), &KeyAuth::None)
-                    .await;
-                limit.clear();
-                match read.ok().as_ref().and_then(parse_open_code) {
-                    Some(models) => {
-                        let at = shared.scheduler.now_ms();
-                        (shared.refreshed)();
-                        Refreshed::Good {
-                            value: Arc::new(models),
-                            at,
-                        }
-                    }
-                    None => Refreshed::Failed {
-                        at: shared.scheduler.now_ms(),
-                    },
-                }
-            })
-        })
+        let cancel = cancel.cloned();
+        let row = row.clone();
+        async move {
+            let models = waiter.raced(cancel.as_ref()).await?;
+            let id = row.bindings.get("opencode").map(|held| held.id.as_str());
+            let (Some(models), Some(id)) = (models, id) else {
+                return Ok(unknown_view(&row));
+            };
+            let Some(model) = models.get(id) else {
+                let mut view = unknown_view(&row);
+                view.status = ModelViewStatus::Retired;
+                return Ok(view);
+            };
+            let now = shared.scheduler.now_ms();
+            Ok(
+                view_of(&row, model, shared.plan, true, now).unwrap_or_else(|| {
+                    let mut view = unknown_view(&row);
+                    view.status = ModelViewStatus::NoZdrHost;
+                    view
+                }),
+            )
+        }
     }
+}
+
+fn fetched(shared: &Arc<Shared>) -> Waiter<Arc<Ordered<OpenCodeModel>>> {
+    let held = Arc::clone(shared);
+    let now = shared.scheduler.now_ms();
+    let ttl = shared.ttl_ms.unwrap_or(TTL_MS);
+    shared.fetcher.fetched(now, ttl, move || {
+        let limit = deadline(&*held.scheduler, FETCH_MS, &CancelToken::new());
+        Box::pin(async move {
+            let read = held
+                .transport
+                .get_json("/v1/models", limit.token(), &KeyAuth::None)
+                .await;
+            limit.clear();
+            match read.ok().as_ref().and_then(parse_open_code) {
+                Some(models) => {
+                    let at = held.scheduler.now_ms();
+                    let told = Arc::clone(&held);
+                    Refreshed::Good {
+                        value: Arc::new(models),
+                        at,
+                        told: Some(Box::new(move || (told.refreshed)())),
+                    }
+                }
+                None => Refreshed::Failed {
+                    at: held.scheduler.now_ms(),
+                },
+            }
+        })
+    })
 }
 
 impl EntryCatalog for OpenCodeCatalog {
@@ -514,7 +531,7 @@ impl EntryCatalog for OpenCodeCatalog {
         zdr_only: bool,
         cancel: Option<&CancelToken>,
     ) -> BoxFuture<'_, Result<Vec<ModelView>, Aborted>> {
-        let waiter = self.fetched();
+        let waiter = fetched(&self.shared);
         let cancel = cancel.cloned();
         Box::pin(async move {
             let models = waiter.raced(cancel.as_ref()).await?;
@@ -528,6 +545,10 @@ impl EntryCatalog for OpenCodeCatalog {
                 self.shared.scheduler.now_ms(),
             ))
         })
+    }
+
+    fn idle(&self) -> BoxFuture<'_, ()> {
+        Box::pin(OpenCodeCatalog::idle(self))
     }
 }
 
@@ -552,8 +573,9 @@ pub fn opencode_browser(
 
 impl Browser for OpenCodeBrowser {
     fn list(&self, fresh: bool) -> BoxFuture<'_, Result<Option<Vec<BrowseModel>>, KindError>> {
+        let models = self.catalog.models(fresh, None);
         Box::pin(async move {
-            let Some(models) = self.catalog.models(fresh, None).await? else {
+            let Some(models) = models.await? else {
                 return Ok(None);
             };
             let now = self.clock.now_ms();
@@ -572,8 +594,9 @@ impl Browser for OpenCodeBrowser {
         id: &'a str,
         _cancel: &'a CancelToken,
     ) -> BoxFuture<'a, Result<Option<BrowseDetail>, KindError>> {
+        let models = self.catalog.models(false, None);
         Box::pin(async move {
-            let models = self.catalog.models(false, None).await?;
+            let models = models.await?;
             Ok(models
                 .and_then(|held| held.get(id).cloned())
                 .map(|model| detail_of(&model, self.plan, self.clock.now_ms())))
@@ -596,8 +619,9 @@ impl Tester for OpenCodeTester {
         id: &'a str,
         cancel: &'a CancelToken,
     ) -> BoxFuture<'a, Result<Option<Listed>, KindError>> {
+        let models = self.catalog.models(false, Some(cancel));
         Box::pin(async move {
-            let models = self.catalog.models(false, Some(cancel)).await?;
+            let models = models.await?;
             Ok(models
                 .and_then(|held| held.get(id).cloned())
                 .map(|model| Listed {
@@ -613,6 +637,7 @@ impl Tester for OpenCodeTester {
         use_: ModelUse,
         cancel: &'a CancelToken,
     ) -> BoxFuture<'a, Result<ModelView, KindError>> {
-        Box::pin(async move { Ok(self.catalog.view_for(row, use_, Some(cancel)).await?) })
+        let view = self.catalog.view_for(row, use_, Some(cancel));
+        Box::pin(async move { Ok(view.await?) })
     }
 }

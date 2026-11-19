@@ -2,9 +2,10 @@
 
 import { numberOfText } from "@nyaaai/contract/number";
 import { isSpace } from "@nyaaai/contract/text";
+import { joinAll } from "./join";
 import { effortsOf, itemsOf, type LocalModel, type LocalServer, type LocalTransport } from "./local/catalog";
 import { localKind } from "./local/kind";
-import { fieldOf, fieldsOf, numberField, objectField, textField, textsField } from "./readers";
+import { fieldOf, fieldsOf, objectField, positiveField, textField, textsField } from "./readers";
 
 ////////////////////////////////
 //  Constants
@@ -108,7 +109,7 @@ export function runningOf(raw: unknown): Map<string, number> {
 		const fields = fieldsOf(item);
 		const name = fields === undefined ? null : textField(fields, "name");
 		if (fields === undefined || name === null) continue;
-		const context = numberField(fields, "context_length");
+		const context = positiveField(fields, "context_length");
 		if (context !== null) contexts.set(name, context);
 	}
 	return contexts;
@@ -120,13 +121,14 @@ export function server(transport: LocalTransport): LocalServer {
 			const tags = localTags(await transport.getJson("/api/tags", signal, "none"));
 			if (tags === undefined) throw new Error("The model list did not parse.");
 			const last = new Map(known.map((model) => [model.tag, model]));
-			const shown = await Promise.all(
-				tags.map((tag) =>
-					transport.postJson("/api/show", { model: tag }, signal, "none").then(
-						(raw) => modelOf(tag, raw),
-						// Failed show retains prior.
-						() => last.get(tag),
-					),
+			const shown = await joinAll(
+				tags.map(
+					(tag) => () =>
+						transport.postJson("/api/show", { model: tag }, signal, "none").then(
+							(raw) => modelOf(tag, raw),
+							// Failed show retains prior.
+							() => last.get(tag),
+						),
 				),
 			);
 			return shown.filter((model): model is LocalModel => model !== undefined);

@@ -1,0 +1,62 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.compatibleTerms",
+	"name": "hosts-a-trailing-dot-is-the-same-host",
+	"input": {
+		"urls": [
+			"http://localhost./",
+			"http://lab.local./",
+			"http://labhost./",
+			"http://lab.lan.",
+			"http://example.com./",
+			"http://api.example.com.",
+			"http://127.0.0.1./",
+			"http://8.8.8.8./"
+		]
+	},
+	"expected": {
+		"terms": [
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			},
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			}
+		]
+	}
+}

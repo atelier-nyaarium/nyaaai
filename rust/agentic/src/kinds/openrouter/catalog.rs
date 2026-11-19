@@ -3,7 +3,7 @@
 use std::collections::HashMap;
 use std::future::Future;
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::{Arc, Mutex, MutexGuard};
+use std::sync::{Arc, Mutex};
 
 use nyaaai_contract::cancel::{CancelToken, Unsubscribe};
 use nyaaai_contract::json::{Object, Value};
@@ -15,13 +15,14 @@ use nyaaai_contract::text::text_length;
 use nyaaai_contract::time::{deadline, parse_iso_time};
 
 use crate::effort::EFFORTS;
-use crate::kinds::fetcher::{Aborted, FETCH_MS, Fetcher, Refreshed, TTL_MS};
+use crate::kinds::fetcher::{Aborted, FETCH_MS, Fetcher, Refreshed, TTL_MS, Waiter};
+use crate::kinds::join::join_settled;
 use crate::kinds::readers::{
     data_list, field_of, fields_of, number_field, object_field, text_field, texts_field,
 };
 use crate::models::view::unknown_view;
 use crate::provider::kind::CatalogDeps;
-use crate::transport::{KeyAuth, Transport};
+use crate::transport::{KeyAuth, Transport, TransportError};
 
 /// Any listed parameter suffices.
 #[derive(Debug, Clone, PartialEq)]
@@ -633,6 +634,8 @@ fn same_data(left: &Option<Arc<Fetched>>, right: &Option<Arc<Fetched>>) -> bool 
     }
 }
 
+type Wait = Waiter<Arc<Fetched>>;
+
 impl ModelCatalog {
     pub fn new(deps: ModelCatalogDeps) -> Self {
         let version = Arc::new(AtomicU64::new(0));
@@ -663,98 +666,129 @@ impl ModelCatalog {
         }
     }
 
-    /// Rows bound under OpenRouter; off `zdr_only`, hosts that keep data count.
-    pub async fn views(
+    /// Answers when no refresh is running, having waited for the one that was.
+    pub fn idle(&self) -> impl Future<Output = ()> + Send + use<> {
+        self.shared.fetcher.idle()
+    }
+
+    /// Rows bound under OpenRouter; off `zdr_only`, hosts that keep data count. A refresh it needs
+    /// starts at the call.
+    pub fn views(
         &self,
         use_: ModelUse,
         zdr_only: bool,
         cancel: Option<&CancelToken>,
-    ) -> Result<Vec<ModelView>, Aborted> {
-        let data = self.fetched().raced(cancel).await?;
-        Ok(self.join(data, use_, zdr_only))
+    ) -> impl Future<Output = Result<Vec<ModelView>, Aborted>> + Send + use<> {
+        let waiter = fetched(&self.shared);
+        let shared = Arc::clone(&self.shared);
+        let cancel = cancel.cloned();
+        async move {
+            let data = waiter.raced(cancel.as_ref()).await?;
+            Ok(join(&shared, data, use_, zdr_only))
+        }
     }
 
-    pub async fn view(
+    pub fn view(
         &self,
         key: &str,
         use_: ModelUse,
         zdr_only: bool,
         cancel: Option<&CancelToken>,
-    ) -> Result<Option<ModelView>, Aborted> {
-        let views = self.views(use_, zdr_only, cancel).await?;
-        Ok(views.into_iter().find(|view| view.row.key == key))
+    ) -> impl Future<Output = Result<Option<ModelView>, Aborted>> + Send + use<> {
+        let views = self.views(use_, zdr_only, cancel);
+        let key = key.to_owned();
+        async move {
+            let views = views.await?;
+            Ok(views.into_iter().find(|view| view.row.key == key))
+        }
     }
 
     /// Joins a non-registry row on zero-retention hosts, as the tester checks it.
-    pub async fn view_for(
+    pub fn view_for(
         &self,
         row: &ModelRow,
         use_: ModelUse,
         cancel: Option<&CancelToken>,
-    ) -> Result<ModelView, Aborted> {
-        let data = self.fetched().raced(cancel).await?;
-        let Some(data) = data else {
-            return Ok(unknown_view(row));
-        };
-        let now = self.shared.deps.deps.scheduler.now_ms();
-        let views = join_parsed(
-            std::slice::from_ref(row),
-            &data.entries,
-            &data.endpoints,
-            now,
-            use_,
-            true,
-        );
-        Ok(views
-            .into_iter()
-            .next()
-            .unwrap_or_else(|| unknown_view(row)))
+    ) -> impl Future<Output = Result<ModelView, Aborted>> + Send + use<> {
+        let waiter = fetched(&self.shared);
+        let shared = Arc::clone(&self.shared);
+        let cancel = cancel.cloned();
+        let row = row.clone();
+        async move {
+            let data = waiter.raced(cancel.as_ref()).await?;
+            let Some(data) = data else {
+                return Ok(unknown_view(&row));
+            };
+            let now = shared.deps.deps.scheduler.now_ms();
+            let views = join_parsed(
+                std::slice::from_ref(&row),
+                &data.entries,
+                &data.endpoints,
+                now,
+                use_,
+                true,
+            );
+            Ok(views
+                .into_iter()
+                .next()
+                .unwrap_or_else(|| unknown_view(&row)))
+        }
     }
 
-    pub async fn entry(
+    pub fn entry(
         &self,
         id: &str,
         cancel: Option<&CancelToken>,
-    ) -> Result<Option<ModelEntry>, Aborted> {
-        let data = self.fetched().raced(cancel).await?;
-        Ok(data.and_then(|held| held.entries.get(id).cloned()))
+    ) -> impl Future<Output = Result<Option<ModelEntry>, Aborted>> + Send + use<> {
+        let waiter = fetched(&self.shared);
+        let cancel = cancel.cloned();
+        let id = id.to_owned();
+        async move {
+            let data = waiter.raced(cancel.as_ref()).await?;
+            Ok(data.and_then(|held| held.entries.get(&id).cloned()))
+        }
     }
 
     /// None if fetching has never succeeded.
-    pub async fn listing(
+    pub fn listing(
         &self,
         cancel: Option<&CancelToken>,
         retry: bool,
-    ) -> Result<Option<CatalogListing>, Aborted> {
+    ) -> impl Future<Output = Result<Option<CatalogListing>, Aborted>> + Send + use<> {
         if retry {
             self.shared.fetcher.retry();
         }
-        let data = self.fetched().raced(cancel).await?;
-        Ok(data.map(|fetched| CatalogListing { fetched }))
+        let waiter = fetched(&self.shared);
+        let cancel = cancel.cloned();
+        async move {
+            let data = waiter.raced(cancel.as_ref()).await?;
+            Ok(data.map(|fetched| CatalogListing { fetched }))
+        }
     }
+}
 
-    fn fetched(&self) -> crate::kinds::fetcher::Waiter<Arc<Fetched>> {
-        let shared = Arc::clone(&self.shared);
-        let deps = &self.shared.deps;
-        let now = deps.deps.scheduler.now_ms();
-        self.shared
-            .fetcher
-            .fetched(now, deps.ttl_ms.unwrap_or(TTL_MS), move || {
-                let limit = deadline(&*shared.deps.deps.scheduler, FETCH_MS, &CancelToken::new());
-                Box::pin(async move { refresh(&shared, limit).await })
-            })
-    }
+fn fetched(shared: &Arc<Shared>) -> Wait {
+    let now = shared.deps.deps.scheduler.now_ms();
+    let held = Arc::clone(shared);
+    shared
+        .fetcher
+        .fetched(now, shared.deps.ttl_ms.unwrap_or(TTL_MS), move || {
+            let limit = deadline(&*held.deps.deps.scheduler, FETCH_MS, &CancelToken::new());
+            Box::pin(refresh(held, limit))
+        })
+}
 
-    /// Reuses the views until the rows, the data, the flag or a removal date changes.
-    fn join(&self, data: Option<Arc<Fetched>>, use_: ModelUse, zdr_only: bool) -> Vec<ModelView> {
-        let shared = &self.shared;
-        let now = shared.deps.deps.scheduler.now_ms();
-        let held: MutexGuard<'_, HashMap<ModelUse, Joined>> = shared
-            .joined
-            .lock()
-            .unwrap_or_else(|poisoned| poisoned.into_inner());
-        let mut held = held;
-        let version = shared.version.load(Ordering::SeqCst);
+/// Reuses the views until the rows, the data, the flag or a removal date changes.
+fn join(
+    shared: &Shared,
+    data: Option<Arc<Fetched>>,
+    use_: ModelUse,
+    zdr_only: bool,
+) -> Vec<ModelView> {
+    let now = shared.deps.deps.scheduler.now_ms();
+    let version = shared.version.load(Ordering::SeqCst);
+    {
+        let held = locked(&shared.joined);
         if let Some(known) = held.get(&use_)
             && known.version == version
             && same_data(&known.data, &data)
@@ -763,115 +797,101 @@ impl ModelCatalog {
         {
             return known.views.clone();
         }
-        let rows = shared.deps.deps.rows.rows();
-        let views = match &data {
-            None => rows
-                .iter()
-                .filter(|row| is_bound(row))
-                .map(unknown_view)
-                .collect(),
-            Some(fetched) => join_parsed(
-                &rows,
-                &fetched.entries,
-                &fetched.endpoints,
-                now,
-                use_,
-                zdr_only,
-            ),
-        };
-        let until = views
-            .iter()
-            .filter_map(|view| view.retired_on.as_deref().or(Some("")).and_then(expiry_of))
-            .filter(|at| *at > now)
-            .map(|at| at as f64)
-            .fold(f64::INFINITY, f64::min);
-        held.insert(
-            use_,
-            Joined {
-                version,
-                data,
-                zdr_only,
-                views: views.clone(),
-                until,
-            },
-        );
-        views
     }
+    // The registry is asked with no lock held.
+    let rows = shared.deps.deps.rows.rows();
+    let views = match &data {
+        None => rows
+            .iter()
+            .filter(|row| is_bound(row))
+            .map(unknown_view)
+            .collect(),
+        Some(fetched) => join_parsed(
+            &rows,
+            &fetched.entries,
+            &fetched.endpoints,
+            now,
+            use_,
+            zdr_only,
+        ),
+    };
+    let until = views
+        .iter()
+        .filter_map(|view| view.retired_on.as_deref().or(Some("")).and_then(expiry_of))
+        .filter(|at| *at > now)
+        .map(|at| at as f64)
+        .fold(f64::INFINITY, f64::min);
+    locked(&shared.joined).insert(
+        use_,
+        Joined {
+            version,
+            data,
+            zdr_only,
+            views: views.clone(),
+            until,
+        },
+    );
+    views
+}
+
+fn locked<T>(held: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
+    held.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
+}
+
+/// One read of the catalog's own paths.
+async fn read(
+    transport: &Transport,
+    path: &str,
+    token: &CancelToken,
+) -> Result<Value, TransportError> {
+    transport.get_json(path, token, &KeyAuth::None).await
 }
 
 async fn refresh(
-    shared: &Shared,
+    shared: Arc<Shared>,
     limit: nyaaai_contract::time::Deadline,
 ) -> Refreshed<Arc<Fetched>> {
     let scheduler = &shared.deps.deps.scheduler;
     let transport = &shared.deps.transport;
-    let (models, zdr) = {
-        let first = transport.get_json("/models", limit.token(), &KeyAuth::None);
-        let second = transport.get_json("/endpoints/zdr", limit.token(), &KeyAuth::None);
-        both(first, second).await
-    };
-    let outcome = match (models, zdr) {
-        (Ok(models), Ok(zdr)) => {
-            let entries = parse_models(&models);
-            let endpoints = parse_endpoints(&zdr);
-            let listed = data_list(&models).map(<[Value]>::to_vec);
-            match (entries, endpoints, listed) {
-                (Some(entries), Some(endpoints), Some(raw)) => Some(Fetched {
-                    entries,
-                    endpoints,
-                    raw,
-                }),
-                _ => None,
-            }
-        }
-        _ => None,
-    };
+    let read_all = join_settled([
+        read(transport, "/models", limit.token()),
+        read(transport, "/endpoints/zdr", limit.token()),
+    ])
+    .await;
+    // The deadline bounds every read; it goes once all have settled.
     limit.clear();
+    let outcome = match read_all {
+        Ok(read) => match read.as_slice() {
+            [models, zdr] => {
+                let entries = parse_models(models);
+                let endpoints = parse_endpoints(zdr);
+                let listed = data_list(models).map(<[Value]>::to_vec);
+                match (entries, endpoints, listed) {
+                    (Some(entries), Some(endpoints), Some(raw)) => Some(Fetched {
+                        entries,
+                        endpoints,
+                        raw,
+                    }),
+                    _ => None,
+                }
+            }
+            _ => None,
+        },
+        Err(_) => None,
+    };
     match outcome {
         Some(fetched) => {
             let at = scheduler.now_ms();
-            (shared.deps.deps.refreshed)();
+            let told = Arc::clone(&shared);
             Refreshed::Good {
                 value: Arc::new(fetched),
                 at,
+                told: Some(Box::new(move || (told.deps.deps.refreshed)())),
             }
         }
         None => Refreshed::Failed {
             at: scheduler.now_ms(),
         },
-    }
-}
-
-/// Runs two reads at once, the first started first.
-pub(crate) async fn both<A, B>(
-    first: impl Future<Output = A>,
-    second: impl Future<Output = B>,
-) -> (A, B) {
-    let mut first = std::pin::pin!(first);
-    let mut second = std::pin::pin!(second);
-    let (mut a, mut b) = (None, None);
-    std::future::poll_fn(|context| {
-        use std::task::Poll;
-        if a.is_none()
-            && let Poll::Ready(held) = first.as_mut().poll(context)
-        {
-            a = Some(held);
-        }
-        if b.is_none()
-            && let Poll::Ready(held) = second.as_mut().poll(context)
-        {
-            b = Some(held);
-        }
-        if a.is_some() && b.is_some() {
-            Poll::Ready(())
-        } else {
-            Poll::Pending
-        }
-    })
-    .await;
-    match (a, b) {
-        (Some(a), Some(b)) => (a, b),
-        _ => unreachable!("both reads finished"),
     }
 }
 
@@ -882,8 +902,11 @@ impl crate::provider::kind::EntryCatalog for ModelCatalog {
         zdr_only: bool,
         cancel: Option<&CancelToken>,
     ) -> nyaaai_contract::future::BoxFuture<'_, Result<Vec<ModelView>, Aborted>> {
-        let cancel = cancel.cloned();
-        Box::pin(async move { ModelCatalog::views(self, use_, zdr_only, cancel.as_ref()).await })
+        Box::pin(ModelCatalog::views(self, use_, zdr_only, cancel))
+    }
+
+    fn idle(&self) -> nyaaai_contract::future::BoxFuture<'_, ()> {
+        Box::pin(ModelCatalog::idle(self))
     }
 
     fn dispose(&self) {

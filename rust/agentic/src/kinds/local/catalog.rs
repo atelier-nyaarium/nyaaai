@@ -2,6 +2,8 @@
 
 use std::any::Any;
 use std::collections::HashMap;
+use std::future::Future;
+use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::sync::{Arc, Mutex, MutexGuard};
 
 use nyaaai_contract::cancel::CancelToken;
@@ -15,6 +17,8 @@ use nyaaai_contract::shapes::model::{
 use nyaaai_contract::shapes::step::{ApiFacts, ApiFamily, Effort};
 use nyaaai_contract::text::{head_of, trim_text};
 use nyaaai_contract::time::{Scheduler, deadline};
+use tokio::runtime::Handle;
+use tokio::sync::watch;
 
 use crate::effort::EFFORTS;
 use crate::kinds::fetcher::{Aborted, Fetcher, Refreshed, Waiter};
@@ -162,10 +166,15 @@ fn api_of(model: &LocalModel) -> ApiFacts {
     }
 }
 
-/// Trained length caps context.
+/// A length that is finite and above zero; anything else is missing.
+pub fn positive(length: Option<f64>) -> Option<f64> {
+    length.filter(|held| held.is_finite() && *held > 0.0)
+}
+
+/// Trained length caps context; a length of zero or less is missing.
 pub fn context_of(model: &LocalModel, loaded: Option<f64>) -> Option<f64> {
-    let known = model.context.or(loaded)?;
-    Some(known.min(model.trained.unwrap_or(known)))
+    let known = positive(model.context).or_else(|| positive(loaded))?;
+    Some(known.min(positive(model.trained).unwrap_or(known)))
 }
 
 /// A model's view for a row under the entry's terms.
@@ -273,6 +282,8 @@ struct Shared {
     refreshed: Arc<dyn Fn() + Send + Sync>,
     fetcher: Fetcher<Models>,
     inner: Mutex<Inner>,
+    /// Loaded-context reads running.
+    work: watch::Sender<usize>,
 }
 
 impl Shared {
@@ -293,6 +304,32 @@ impl Shared {
             _ => None,
         }
     }
+}
+
+/// A loaded-context read that is running; its end, by a panic too, clears the mark.
+struct Reading {
+    shared: Arc<Shared>,
+}
+
+impl Reading {
+    fn begin(shared: &Arc<Shared>) -> Self {
+        shared.work.send_modify(|running| *running += 1);
+        Self {
+            shared: Arc::clone(shared),
+        }
+    }
+}
+
+impl Drop for Reading {
+    fn drop(&mut self) {
+        self.shared.locked().reading = false;
+        self.shared.work.send_modify(|running| *running -= 1);
+    }
+}
+
+/// Tells the owner; what it does changes nothing.
+fn tell(shared: &Shared) {
+    let _ = catch_unwind(AssertUnwindSafe(|| (shared.refreshed)()));
 }
 
 /// One refresh: the server's list, and the loaded contexts it carries.
@@ -317,10 +354,12 @@ fn refresh(shared: &Arc<Shared>, known: Vec<LocalModel>) -> BoxFuture<'static, R
                         }
                     }
                 }
-                (shared.refreshed)();
+                let at = shared.scheduler.now_ms();
+                let told = Arc::clone(&shared);
                 Refreshed::Good {
                     value: Arc::new(models),
-                    at: shared.scheduler.now_ms(),
+                    at,
+                    told: Some(Box::new(move || tell(&told))),
                 }
             }
             Err(_) => Refreshed::Failed {
@@ -374,6 +413,9 @@ fn settled(shared: &Arc<Shared>, tag: &str) {
     if !shared.server.reads_loaded() {
         return;
     }
+    let Ok(runtime) = Handle::try_current() else {
+        return;
+    };
     {
         let mut inner = shared.locked();
         if model.context.is_some()
@@ -384,11 +426,14 @@ fn settled(shared: &Arc<Shared>, tag: &str) {
         }
         inner.reading = true;
     }
+    let reading = Reading::begin(shared);
     let limit = deadline(&*shared.scheduler, DISCOVER_MS, &CancelToken::new());
     let shared = Arc::clone(shared);
     let tag = tag.to_owned();
-    tokio::spawn(async move {
+    runtime.spawn(async move {
+        let _reading = reading;
         let read = shared.server.loaded(&tag, limit.token()).await;
+        limit.clear();
         if let Ok(contexts) = read {
             let mut changed = false;
             {
@@ -402,11 +447,9 @@ fn settled(shared: &Arc<Shared>, tag: &str) {
                 }
             }
             if changed {
-                (shared.refreshed)();
+                tell(&shared);
             }
         }
-        limit.clear();
-        shared.locked().reading = false;
     });
 }
 
@@ -432,6 +475,7 @@ impl LocalCatalog {
                     reread: HashMap::new(),
                     reading: false,
                 }),
+                work: watch::channel(0).0,
             }),
         }
     }
@@ -459,118 +503,160 @@ impl LocalCatalog {
         let _ = discovering(&self.shared);
     }
 
-    /// Tested local model views.
-    pub async fn views(
+    /// Answers when no discovery or loaded read is running, having waited for whatever was.
+    pub fn idle(&self) -> impl Future<Output = ()> + Send + use<> {
+        let shared = Arc::clone(&self.shared);
+        async move {
+            loop {
+                shared.fetcher.idle().await;
+                let mut work = shared.work.subscribe();
+                let _ = work.wait_for(|running| *running == 0).await;
+                if !shared.fetcher.running() && *shared.work.borrow() == 0 {
+                    return;
+                }
+            }
+        }
+    }
+
+    /// Tested local model views. A discovery it needs starts at the call.
+    pub fn views(
         &self,
         zdr_only: bool,
         cancel: Option<&CancelToken>,
-    ) -> Result<Vec<ModelView>, Aborted> {
+    ) -> impl Future<Output = Result<Vec<ModelView>, Aborted>> + Send + use<> {
         let waiter = fetched(&self.shared);
-        let Some(found) = waiter.raced(cancel).await? else {
-            return Ok(Vec::new());
-        };
-        let rows = self.shared.rows.rows();
-        let mut tested: HashMap<&str, &ModelRow> = HashMap::new();
-        for row in &rows {
-            if let Some(tag) = self.shared.tag_of(row) {
-                tested.insert(tag, row);
-            }
+        let shared = Arc::clone(&self.shared);
+        let cancel = cancel.cloned();
+        async move {
+            let Some(found) = waiter.raced(cancel.as_ref()).await? else {
+                return Ok(Vec::new());
+            };
+            Ok(joined(&shared, &found, zdr_only))
         }
-        Ok(found
-            .iter()
-            .filter_map(|model| {
-                let row = tested.get(model.tag.as_str())?;
-                Some(local_view(
-                    row,
-                    model,
-                    self.shared.loaded_of(&model.tag),
-                    &self.shared.terms,
-                    zdr_only,
-                ))
-            })
-            .collect())
     }
 
     /// Refreshes server discovery.
-    pub async fn discovered(
+    pub fn discovered(
         &self,
         fresh: bool,
         cancel: Option<&CancelToken>,
-    ) -> Result<Option<Vec<Discovered>>, Aborted> {
+    ) -> impl Future<Output = Result<Option<Vec<Discovered>>, Aborted>> + Send + use<> {
         let waiter = if fresh {
             discovering(&self.shared)
         } else {
             fetched(&self.shared)
         };
-        let found = waiter.raced(cancel).await?;
-        Ok(found.map(|models| {
-            models
-                .iter()
-                .map(|model| {
-                    let context = context_of(model, self.shared.loaded_of(&model.tag));
-                    let identity = RowIdentity::Local(RowIdentityLocal {
-                        entry: self.shared.entry.clone(),
-                        tag: model.tag.clone(),
-                    });
-                    Discovered {
-                        key: row_key(&identity),
-                        display: shown_id(&identity),
-                        tag: model.tag.clone(),
-                        tools: model.tools,
-                        reasoning: model.thinking,
-                        context,
-                    }
-                })
-                .collect()
-        }))
+        let shared = Arc::clone(&self.shared);
+        let cancel = cancel.cloned();
+        async move {
+            let found = waiter.raced(cancel.as_ref()).await?;
+            Ok(found.map(|models| {
+                models
+                    .iter()
+                    .map(|model| {
+                        let context = context_of(model, shared.loaded_of(&model.tag));
+                        let identity = RowIdentity::Local(RowIdentityLocal {
+                            entry: shared.entry.clone(),
+                            tag: model.tag.clone(),
+                        });
+                        Discovered {
+                            key: row_key(&identity),
+                            display: shown_id(&identity),
+                            tag: model.tag.clone(),
+                            tools: model.tools,
+                            reasoning: model.thinking,
+                            context,
+                        }
+                    })
+                    .collect()
+            }))
+        }
     }
 
     /// Tester view; its prompts are synthetic.
-    pub async fn view_for(
+    pub fn view_for(
         &self,
         row: &ModelRow,
         cancel: Option<&CancelToken>,
-    ) -> Result<ModelView, KindError> {
+    ) -> impl Future<Output = Result<ModelView, KindError>> + Send + use<> {
         let waiter = fetched(&self.shared);
-        let found = waiter.raced(cancel).await?;
-        let tag = self.shared.tag_of(row);
-        let model = found
-            .as_ref()
-            .and_then(|models| models.iter().find(|each| Some(each.tag.as_str()) == tag));
-        let Some(model) = model else {
-            return Err(KindError::Message(format!(
-                "{} is not on the server.",
-                row.label
-            )));
-        };
-        // Synthetic prompts; no retention gate.
-        let terms = Terms {
-            kept: false,
-            ..self.shared.terms.clone()
-        };
-        Ok(local_view(
-            row,
-            model,
-            self.shared.loaded_of(&model.tag),
-            &terms,
-            false,
-        ))
+        let shared = Arc::clone(&self.shared);
+        let cancel = cancel.cloned();
+        let row = row.clone();
+        async move {
+            let found = waiter.raced(cancel.as_ref()).await?;
+            let tag = shared.tag_of(&row);
+            let model = found
+                .as_ref()
+                .and_then(|models| models.iter().find(|each| Some(each.tag.as_str()) == tag));
+            let Some(model) = model else {
+                return Err(KindError::Message(format!(
+                    "{} is not on the server.",
+                    row.label
+                )));
+            };
+            // Synthetic prompts; no retention gate.
+            let terms = Terms {
+                kept: false,
+                ..shared.terms.clone()
+            };
+            Ok(local_view(
+                &row,
+                model,
+                shared.loaded_of(&model.tag),
+                &terms,
+                false,
+            ))
+        }
     }
 
     /// Tests read real capabilities.
-    pub async fn warmed(&self, tag: &str, cancel: &CancelToken) -> Result<(), KindError> {
+    pub fn warmed(
+        &self,
+        tag: &str,
+        cancel: &CancelToken,
+    ) -> impl Future<Output = Result<(), KindError>> + Send + use<> {
         let waiter = fetched(&self.shared);
-        let found = waiter.raced(Some(cancel)).await?;
-        let unprobed = found
-            .and_then(|models| models.iter().find(|each| each.tag == tag).cloned())
-            .is_some_and(|model| model.unprobed);
-        if !self.shared.server.warms() || !unprobed {
-            return Ok(());
+        let shared = Arc::clone(&self.shared);
+        let cancel = cancel.clone();
+        let tag = tag.to_owned();
+        async move {
+            let found = waiter.raced(Some(&cancel)).await?;
+            let unprobed = found
+                .and_then(|models| models.iter().find(|each| each.tag == tag).cloned())
+                .is_some_and(|model| model.unprobed);
+            if !shared.server.warms() || !unprobed {
+                return Ok(());
+            }
+            shared.server.warm(&tag, &cancel).await?;
+            discovering(&shared).raced(Some(&cancel)).await?;
+            Ok(())
         }
-        self.shared.server.warm(tag, cancel).await?;
-        discovering(&self.shared).raced(Some(cancel)).await?;
-        Ok(())
     }
+}
+
+/// The views of the found models over the rows the registry holds.
+fn joined(shared: &Shared, found: &[LocalModel], zdr_only: bool) -> Vec<ModelView> {
+    let rows = shared.rows.rows();
+    let mut tested: HashMap<&str, &ModelRow> = HashMap::new();
+    for row in &rows {
+        if let Some(tag) = shared.tag_of(row) {
+            tested.insert(tag, row);
+        }
+    }
+    found
+        .iter()
+        .filter_map(|model| {
+            let row = tested.get(model.tag.as_str())?;
+            Some(local_view(
+                row,
+                model,
+                shared.loaded_of(&model.tag),
+                &shared.terms,
+                zdr_only,
+            ))
+        })
+        .collect()
 }
 
 impl EntryCatalog for LocalCatalog {
@@ -580,12 +666,15 @@ impl EntryCatalog for LocalCatalog {
         zdr_only: bool,
         cancel: Option<&CancelToken>,
     ) -> BoxFuture<'_, Result<Vec<ModelView>, Aborted>> {
-        let cancel = cancel.cloned();
-        Box::pin(async move { LocalCatalog::views(self, zdr_only, cancel.as_ref()).await })
+        Box::pin(LocalCatalog::views(self, zdr_only, cancel))
     }
 
     fn rediscover(&self) {
         LocalCatalog::rediscover(self);
+    }
+
+    fn idle(&self) -> BoxFuture<'_, ()> {
+        Box::pin(LocalCatalog::idle(self))
     }
 
     fn as_any(&self) -> &dyn Any {
@@ -610,9 +699,9 @@ pub fn local_browser(catalog: &LocalCatalog) -> LocalBrowser {
 
 impl Browser for LocalBrowser {
     fn list(&self, fresh: bool) -> BoxFuture<'_, Result<Option<Vec<BrowseModel>>, KindError>> {
+        let found = self.catalog.discovered(fresh, None);
         Box::pin(async move {
-            let found = self.catalog.discovered(fresh, None).await?;
-            Ok(found.map(|models| {
+            Ok(found.await?.map(|models| {
                 models
                     .iter()
                     .map(|model| browse_of(model, self.catalog.terms()))
@@ -656,8 +745,9 @@ impl Tester for LocalTester {
         id: &'a str,
         cancel: &'a CancelToken,
     ) -> BoxFuture<'a, Result<Option<Listed>, KindError>> {
+        let warmed = self.catalog.warmed(id, cancel);
         Box::pin(async move {
-            self.catalog.warmed(id, cancel).await?;
+            warmed.await?;
             let found = self.catalog.discovered(false, Some(cancel)).await?;
             Ok(found
                 .and_then(|models| models.into_iter().find(|each| each.tag == id))
@@ -674,7 +764,7 @@ impl Tester for LocalTester {
         _use: ModelUse,
         cancel: &'a CancelToken,
     ) -> BoxFuture<'a, Result<ModelView, KindError>> {
-        Box::pin(async move { self.catalog.view_for(row, Some(cancel)).await })
+        Box::pin(self.catalog.view_for(row, Some(cancel)))
     }
 }
 

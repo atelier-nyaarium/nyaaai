@@ -1,0 +1,49 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.reach",
+	"name": "compatible-the-base-is-the-origin-and-the-path-as-parsed",
+	"input": {
+		"kind": "compatible",
+		"entry": {
+			"label": "Lab",
+			"url": "HTTP://LAB.LOCAL:8000/a/./b/../c//"
+		},
+		"secret": null,
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "local-a",
+							"context_length": 32768
+						},
+						{
+							"id": "local-b"
+						},
+						{}
+					]
+				}
+			}
+		]
+	},
+	"expected": {
+		"state": {
+			"kind": "ok",
+			"models": 2
+		},
+		"thrown": null,
+		"facts": "http://lab.local:8000/a/c · 2 models",
+		"requests": [
+			{
+				"method": "GET",
+				"url": "http://lab.local:8000/a/c/models",
+				"authorization": null,
+				"body": null
+			}
+		],
+		"waiting": []
+	}
+}

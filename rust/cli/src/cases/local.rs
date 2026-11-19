@@ -1,7 +1,5 @@
 //! Local kind cases.
 
-use std::future::Future;
-use std::pin::Pin;
 use std::sync::atomic::{AtomicI64, Ordering};
 use std::sync::{Arc, Mutex};
 
@@ -52,8 +50,9 @@ use nyaaai_testkit::scheduler::{FakeScheduler, TimerWheel};
 use nyaaai_testkit::scripted_fetch::ScriptedFetch;
 use nyaaai_testkit::scripted_ports::ScriptedModelRegistry;
 
-use super::catalog::{CALLER_REASON, caller_token, exchange_of, join_all, view_line, view_lines};
+use super::catalog::{CALLER_REASON, Told, caller_token, exchange_of, view_line, view_lines};
 use super::shapes::*;
+use nyaaai_agentic::kinds::join::join_all;
 
 const USER_AGENT: &str = "cases/1.0";
 
@@ -141,13 +140,6 @@ fn category_of(error: &KindError) -> Option<String> {
     match error {
         KindError::Provider(held) => Some(held.failure.category.as_str().to_owned()),
         _ => None,
-    }
-}
-
-/// Background work runs until it waits for the wheel.
-async fn settle() {
-    for _ in 0..200 {
-        tokio::task::yield_now().await;
     }
 }
 
@@ -953,17 +945,34 @@ pub fn catalog_run(input: LocalCatalogRunInput) -> Outcome<LocalCatalogRunResult
         taken: Mutex::new([0; 3]),
         calls: Mutex::new(Vec::new()),
     });
-    let refreshed = Arc::new(AtomicI64::new(0));
-    let told = Arc::clone(&refreshed);
+    let told = Told::new(
+        input
+            .on_refreshed
+            .map(|held| held == LocalCatalogRunInputOnRefreshed::ReadsAndThrows),
+    );
     let catalog = LocalCatalog::new(LocalCatalogDeps {
         entry: input.entry.clone(),
         server: scripted.clone(),
         terms: terms_from(&input.terms),
         scheduler: scheduler.clone(),
         rows: registry.clone() as Arc<dyn ModelRegistry>,
-        refreshed: Arc::new(move || {
-            told.fetch_add(1, Ordering::SeqCst);
-        }),
+        refreshed: told.callback(),
+    });
+    told.reading({
+        let catalog = catalog.clone();
+        move || {
+            let read = catalog.discovered(false, None);
+            Some(Box::pin(async move {
+                match read.await {
+                    Ok(Some(held)) => held
+                        .iter()
+                        .map(|model| model.tag.as_str())
+                        .collect::<Vec<_>>()
+                        .join(" "),
+                    _ => "none".to_owned(),
+                }
+            }) as BoxFuture<'static, String>)
+        }
     });
     let mut tags = 0;
     let mut steps = Vec::new();
@@ -974,7 +983,7 @@ pub fn catalog_run(input: LocalCatalogRunInput) -> Outcome<LocalCatalogRunResult
                 .lock()
                 .unwrap_or_else(|held| held.into_inner())
                 .len();
-            let before = refreshed.load(Ordering::SeqCst);
+            let before = told.count();
             let mut answers = Vec::new();
             match step {
                 LocalCatalogRunInputStepsItem::Call(held) => {
@@ -995,11 +1004,7 @@ pub fn catalog_run(input: LocalCatalogRunInput) -> Outcome<LocalCatalogRunResult
                     answers = join_all(
                         calls
                             .iter()
-                            .map(|(call, token)| {
-                                Box::pin(answer_of(catalog, call, token))
-                                    as Pin<Box<dyn Future<Output = Answer> + '_>>
-                            })
-                            .collect(),
+                            .map(|(call, token)| answer_of(catalog, call, token)),
                     )
                     .await;
                 }
@@ -1018,7 +1023,7 @@ pub fn catalog_run(input: LocalCatalogRunInput) -> Outcome<LocalCatalogRunResult
                     }
                 }
             }
-            settle().await;
+            catalog.idle().await;
             let calls = scripted
                 .calls
                 .lock()
@@ -1037,16 +1042,18 @@ pub fn catalog_run(input: LocalCatalogRunInput) -> Outcome<LocalCatalogRunResult
                         aborted: call.aborted,
                     })
                     .collect(),
-                refreshed: refreshed.load(Ordering::SeqCst) - before,
+                refreshed: told.count() - before,
             });
         }
     })?;
     for tag in 1..=tags {
         wheel.cancel(&format!("caller-{tag}"));
     }
+    let saw = block_on(told.seen())?;
     Ok(LocalCatalogRunResult {
         steps,
         waiting: wheel.waiting(),
+        saw,
     })
 }
 
@@ -1203,7 +1210,7 @@ pub fn flow(input: LocalFlowInput) -> Outcome<LocalFlowResult> {
                     Flow::None(LocalFlowResultStepsItemAnswerNone {})
                 }
             };
-            settle().await;
+            catalog.idle().await;
             steps.push(LocalFlowResultStepsItem {
                 now_ms: net.wheel.now_ms(),
                 answer,

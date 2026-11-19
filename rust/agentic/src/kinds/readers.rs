@@ -23,6 +23,11 @@ pub fn number_field(fields: &Object, key: &str) -> Option<f64> {
         .filter(|number| number.is_finite())
 }
 
+/// A length: a finite number above zero.
+pub fn positive_field(fields: &Object, key: &str) -> Option<f64> {
+    number_field(fields, key).filter(|value| *value > 0.0)
+}
+
 pub fn boolean_field(fields: &Object, key: &str) -> Option<bool> {
     field_of(fields, key).and_then(Value::as_bool)
 }

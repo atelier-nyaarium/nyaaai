@@ -711,7 +711,7 @@ export const localDecodeCases: CaseSource[] = [
 			{ id: "e" },
 		),
 	}),
-	compatModels("compatible-a-zero-length-is-a-length", {
+	compatModels("compatible-a-zero-length-is-missing", {
 		body: listOf("data")({ id: "a", context_length: 0, max_model_len: 3 }),
 	}),
 	compatModels("compatible-id-omitted-drops", { body: listOf("data")({ context_length: 4 }, { id: "b" }) }),
@@ -826,5 +826,111 @@ export const localDecodeCases: CaseSource[] = [
 			"http://host.example:80/x",
 			"http://lab.local?x=1#y",
 		],
+	}),
+
+	// A length is a number above zero.
+	lmModels("lmstudio-a-zero-or-negative-trained-length-is-missing", {
+		body: listOf("models")(
+			setIn(LM_ITEM, ["max_context_length"], 0),
+			setIn(setIn(LM_ITEM, ["key"], "local-b"), ["max_context_length"], -1),
+		),
+	}),
+	lmModels("lmstudio-a-zero-or-negative-loaded-length-is-missing", {
+		body: listOf("models")(
+			setIn(LM_ITEM, ["loaded_instances"], [{ config: { context_length: 0 } }]),
+			setIn(setIn(LM_ITEM, ["key"], "local-b"), ["loaded_instances"], [{ config: { context_length: -8 } }]),
+		),
+	}),
+	lmLoaded("lmstudio-loaded-a-zero-length-is-left-out", {
+		body: listOf("models")(setIn(LM_ITEM, ["loaded_instances"], [{ config: { context_length: 0 } }])),
+	}),
+	compatModels("compatible-a-negative-length-lets-the-next-field-supply-it", {
+		body: listOf("data")({ id: "a", context_length: -1, max_context_length: 0, max_model_len: 3 }),
+	}),
+	compatModels("compatible-every-length-missing-with-zeros", {
+		body: listOf("data")({ id: "a", context_length: 0, max_context_length: -2, max_model_len: 0 }),
+	}),
+	llamaModels("llamacpp-a-zero-trained-length-lets-the-router-length-supply-it", {
+		body: listOf("data")({ id: "a", meta: { n_ctx_train: 0 }, context_length: 4096 }),
+	}),
+	llamaModels("llamacpp-zero-lengths-are-missing", {
+		body: listOf("data")({ id: "a", meta: { n_ctx_train: -1 }, context_length: 0 }),
+	}),
+	llamaProps("props-a-zero-or-negative-slot-length-is-missing", {
+		body: { default_generation_settings: { n_ctx: 0 }, chat_template_caps: {} },
+	}),
+	llamaProps("props-a-negative-slot-length-is-missing", {
+		body: { default_generation_settings: { n_ctx: -4 } },
+	}),
+	running("running-a-zero-or-negative-context-is-left-out", {
+		body: listOf("models")(
+			{ name: A, context_length: 0 },
+			{ name: B, context_length: -1 },
+			{ name: "c", context_length: 8 },
+		),
+	}),
+	view("view-a-zero-context-lets-the-loaded-one-supply-it", {
+		row: `local:lab/${A}`,
+		model: { tag: A, tools: true, thinking: false, efforts: [], context: 0 },
+		loaded: 4096,
+		terms: { kept: false, price: "free" },
+		zdrOnly: true,
+	}),
+	view("view-a-zero-trained-length-caps-nothing", {
+		row: `local:lab/${A}`,
+		model: { tag: A, tools: true, thinking: false, efforts: [], context: 8192, trained: 0 },
+		terms: { kept: false, price: "free" },
+		zdrOnly: true,
+	}),
+	view("view-no-positive-length-gives-no-limit", {
+		row: `local:lab/${A}`,
+		model: { tag: A, tools: true, thinking: false, efforts: [], context: -1, trained: 4096 },
+		loaded: 0,
+		terms: { kept: false, price: "free" },
+		zdrOnly: true,
+	}),
+
+	// The network of a host: unique-local is fc00::/7, link-local fe80::/10, a trailing dot is the same host.
+	compatTerms("hosts-ipv6-judged-on-the-first-piece-as-a-number", {
+		urls: [
+			"http://[fc::1]",
+			"http://[fd::1]",
+			"http://[fda::1]",
+			"http://[fe8::1]",
+			"http://[fc00::1]",
+			"http://[fdff:ffff::1]",
+			"http://[fe80::1]",
+			"http://[febf::1]",
+			"http://[fec0::1]",
+			"http://[fbff::1]",
+			"http://[fc00::]",
+			"http://[1fc0::1]",
+			"http://[fe8:0:0:0:0:0:0:1]",
+		],
+	}),
+	compatTerms("hosts-unspecified-addresses-are-this-machine", {
+		urls: [
+			"http://0.0.0.0",
+			"http://0.0.0.0:8000",
+			"http://[::]",
+			"http://[::]:8000",
+			"http://0",
+			"http://0.0.0.1",
+		],
+	}),
+	compatTerms("hosts-a-trailing-dot-is-the-same-host", {
+		urls: [
+			"http://localhost./",
+			"http://lab.local./",
+			"http://labhost./",
+			"http://lab.lan.",
+			"http://example.com./",
+			"http://api.example.com.",
+			"http://127.0.0.1./",
+			"http://8.8.8.8./",
+		],
+	}),
+	compatTerms("hosts-one-label-and-local-names-stay-private", {
+		urls: ["http://ai/", "http://labhost", "http://evil.com.local/", "http://a.b.internal", "http://example.com"],
 	}),
 ];

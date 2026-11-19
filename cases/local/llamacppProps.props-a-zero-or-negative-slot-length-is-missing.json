@@ -1,0 +1,20 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.llamacppProps",
+	"name": "props-a-zero-or-negative-slot-length-is-missing",
+	"input": {
+		"body": {
+			"default_generation_settings": {
+				"n_ctx": 0
+			},
+			"chat_template_caps": {}
+		}
+	},
+	"expected": {
+		"props": {
+			"context": null,
+			"efforts": []
+		}
+	}
+}

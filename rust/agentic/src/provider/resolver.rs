@@ -529,32 +529,36 @@ impl ModelResolver {
         let rows = self.d.registry.rows();
         let answers = crate::kinds::join::join_all(
             rows.iter()
-                .map(|row| {
-                    let reach = &reach;
-                    Box::pin(async move {
-                        let routed = self.routed(row, use_, zdr_only, reach, true, false).await?;
-                        Ok::<ResolvedOption, ResolveError>(match routed {
-                            Routed::Refused(unserved) => ResolvedOption {
-                                key: row.key.clone(),
-                                view: unserved.view.unwrap_or_else(|| unknown_view(row)),
-                                via: None,
-                            },
-                            Routed::Ok { candidates, .. } => {
-                                let first = &candidates[0];
-                                ResolvedOption {
-                                    key: row.key.clone(),
-                                    view: first.view.clone(),
-                                    via: Some(via_of(&first.entry)),
-                                }
-                            }
-                        })
-                    })
-                        as std::pin::Pin<Box<dyn std::future::Future<Output = _> + Send + '_>>
-                })
-                .collect(),
+                .map(|row| self.option_of(row, use_, zdr_only, &reach)),
         )
         .await;
         answers.into_iter().collect()
+    }
+
+    /// One row's option; it asks the entries as a Settings row does.
+    async fn option_of(
+        &self,
+        row: &ModelRow,
+        use_: ModelUse,
+        zdr_only: bool,
+        reach: &Reaches,
+    ) -> Result<ResolvedOption, ResolveError> {
+        let routed = self.routed(row, use_, zdr_only, reach, true, false).await?;
+        Ok(match routed {
+            Routed::Refused(unserved) => ResolvedOption {
+                key: row.key.clone(),
+                view: unserved.view.unwrap_or_else(|| unknown_view(row)),
+                via: None,
+            },
+            Routed::Ok { candidates, .. } => {
+                let first = &candidates[0];
+                ResolvedOption {
+                    key: row.key.clone(),
+                    view: first.view.clone(),
+                    via: Some(via_of(&first.entry)),
+                }
+            }
+        })
     }
 
     /// Resolvable keys with their serving entries.

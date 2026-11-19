@@ -1,3 +1,4 @@
+import { joinAll } from "@nyaaai/agentic/kinds/join";
 import { joinOpenCode, OpenCodeCatalog, parseOpenCode } from "@nyaaai/agentic/kinds/opencode/catalog";
 import {
 	chatStanding,
@@ -379,6 +380,8 @@ export const catalog = caseGroup("catalog", {
 				/** The registry's first rows, by key. */
 				rows: z.array(z.string()),
 				ttlMs: z.int().exactOptional(),
+				/** What the `refreshed` callback does: reads the catalog, and may throw after. */
+				onRefreshed: z.enum(["reads", "readsAndThrows"]).exactOptional(),
 				steps: z.array(Step(OrCall)).min(1),
 			}),
 			z.object({
@@ -391,17 +394,25 @@ export const catalog = caseGroup("catalog", {
 				waiting: z.array(z.string()),
 				/** Times the catalog said it refreshed. */
 				refreshed: z.int(),
+				/** What each `refreshed` callback read of the catalog: the data it saw, or `none`. */
+				saw: z.array(z.string()),
 			}),
 			async (input) => {
 				const net = networkOf(input.startMs, input.exchanges);
 				const registry = scriptedModelRegistry(rowsOfKeys(input.rows));
 				let refreshed = 0;
+				const saw: Array<Promise<string>> = [];
 				const catalogue = new ModelCatalog({
 					transport: net.transport,
 					scheduler: net.scheduler,
 					rows: registry,
 					refreshed: () => {
 						refreshed += 1;
+						if (input.onRefreshed === undefined) return;
+						saw.push(
+							catalogue.listing().then((held) => (held === undefined ? "none" : `${held.raw.length}`)),
+						);
+						if (input.onRefreshed === "readsAndThrows") throw new Error("told badly");
 					},
 					...(input.ttlMs === undefined ? {} : { ttlMs: input.ttlMs }),
 				});
@@ -455,9 +466,11 @@ export const catalog = caseGroup("catalog", {
 					const reads = registry.reads();
 					let answers: OrAnswerOf[] = [];
 					if (step.kind === "call") answers = [await answerOf(step.call)];
-					else if (step.kind === "together") answers = await Promise.all(step.calls.map(answerOf));
+					else if (step.kind === "together")
+						answers = await joinAll(step.calls.map((held) => () => answerOf(held)));
 					else if (step.kind === "advance") net.wheel.advance(step.ms);
 					else registry.setRows(rowsOfKeys(step.rows));
+					await catalogue.idle();
 					steps.push({ nowMs: net.wheel.nowMs(), answers, rowReads: registry.reads() - reads });
 				}
 				for (let tag = 1; tag <= tags; tag++) net.wheel.cancel(`caller-${tag}`);
@@ -468,6 +481,7 @@ export const catalog = caseGroup("catalog", {
 					read: net.played.read(),
 					waiting: net.wheel.waiting(),
 					refreshed,
+					saw: await joinAll(saw.map((held) => () => held)),
 				};
 			},
 		),
@@ -478,6 +492,7 @@ export const catalog = caseGroup("catalog", {
 				rows: z.array(z.string()),
 				plan: ProviderPlan,
 				ttlMs: z.int().exactOptional(),
+				onRefreshed: z.enum(["reads", "readsAndThrows"]).exactOptional(),
 				steps: z.array(Step(OcCall)).min(1),
 			}),
 			z.object({
@@ -486,11 +501,13 @@ export const catalog = caseGroup("catalog", {
 				read: z.array(z.int()),
 				waiting: z.array(z.string()),
 				refreshed: z.int(),
+				saw: z.array(z.string()),
 			}),
 			async (input) => {
 				const net = networkOf(input.startMs, input.exchanges);
 				const registry = scriptedModelRegistry(rowsOfKeys(input.rows));
 				let refreshed = 0;
+				const saw: Array<Promise<string>> = [];
 				const catalogue = new OpenCodeCatalog({
 					plan: input.plan,
 					transport: net.transport,
@@ -498,6 +515,13 @@ export const catalog = caseGroup("catalog", {
 					rows: registry,
 					refreshed: () => {
 						refreshed += 1;
+						if (input.onRefreshed === undefined) return;
+						saw.push(
+							catalogue
+								.models()
+								.then((held) => (held === undefined ? "none" : [...held.keys()].join(" "))),
+						);
+						if (input.onRefreshed === "readsAndThrows") throw new Error("told badly");
 					},
 					...(input.ttlMs === undefined ? {} : { ttlMs: input.ttlMs }),
 				});
@@ -527,9 +551,11 @@ export const catalog = caseGroup("catalog", {
 					const reads = registry.reads();
 					let answers: OcAnswerOf[] = [];
 					if (step.kind === "call") answers = [await answerOf(step.call)];
-					else if (step.kind === "together") answers = await Promise.all(step.calls.map(answerOf));
+					else if (step.kind === "together")
+						answers = await joinAll(step.calls.map((held) => () => answerOf(held)));
 					else if (step.kind === "advance") net.wheel.advance(step.ms);
 					else registry.setRows(rowsOfKeys(step.rows));
+					await catalogue.idle();
 					steps.push({ nowMs: net.wheel.nowMs(), answers, rowReads: registry.reads() - reads });
 				}
 				for (let tag = 1; tag <= tags; tag++) net.wheel.cancel(`caller-${tag}`);
@@ -539,6 +565,7 @@ export const catalog = caseGroup("catalog", {
 					read: net.played.read(),
 					waiting: net.wheel.waiting(),
 					refreshed,
+					saw: await joinAll(saw.map((held) => () => held)),
 				};
 			},
 		),

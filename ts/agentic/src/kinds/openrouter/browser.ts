@@ -1,5 +1,6 @@
 // OpenRouter model browser and tester.
 
+import { asciiLower, encodePathSegment, trimText } from "@nyaaai/contract/text";
 import type { Clock, Scheduler } from "@nyaaai/contract/time";
 import { deadline } from "@nyaaai/contract/time";
 import type { ChatRequest } from "../../chat/wire";
@@ -17,9 +18,20 @@ const DETAIL_MS = 30_000;
 ////////////////////////////////
 //  Functions & Helpers
 
-/** Provider filter tag. */
+/** Provider filter tag, the one rule for a tag and a host name. */
 function slugOf(tag: string): string {
-	return tag.split("/")[0] ?? tag;
+	return asciiLower(trimText(tag.split("/")[0] ?? tag));
+}
+
+/** A path segment; the dot segments are written out so none climbs a path. */
+function segmentOf(part: string): string {
+	if (part === ".") return "%2E";
+	return part === ".." ? "%2E%2E" : encodePathSegment(part);
+}
+
+/** An id's endpoints path, its slashes kept. */
+export function endpointsPath(id: string): `/${string}` {
+	return `/models/${id.split("/").map(segmentOf).join("/")}/endpoints`;
 }
 
 /** Catalog and provider endpoints. */
@@ -35,7 +47,7 @@ export function openRouterBrowser(
 		},
 		detail: async (id, signal) => {
 			const listing = await catalog.listing(signal);
-			const raw = await transport.getJson(`/models/${id}/endpoints`, signal, "none");
+			const raw = await transport.getJson(endpointsPath(id), signal, "none");
 			const hosts = parseProviders(raw, listing?.endpoints.get(id) ?? []);
 			return hosts === undefined ? undefined : { hosts };
 		},
@@ -71,13 +83,15 @@ function pinsOf(transport: Pick<Transport, "getJson">, scheduler: Scheduler): Pi
 			const limit = deadline(scheduler, DETAIL_MS, signal);
 			let raw: unknown;
 			try {
-				raw = await transport.getJson(`/models/${id}/endpoints`, limit.signal, "none");
+				raw = await transport.getJson(endpointsPath(id), limit.signal, "none");
 			} finally {
 				limit.clear();
 			}
 			const serving = parseProviders(raw, []) ?? [];
 			const zdr = new Set(view.hosts.map(slugOf));
-			const both = [...new Set(serving.map((provider) => slugOf(provider.tag)))].filter((slug) => zdr.has(slug));
+			const both = [...new Set(serving.map((provider) => slugOf(provider.tag)))].filter(
+				(slug) => slug.length > 0 && zdr.has(slug),
+			);
 			return both.length < 2 ? [] : both.slice(0, 2);
 		},
 		wrap: (base) =>

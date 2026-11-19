@@ -14,7 +14,7 @@ use super::local::catalog::{
     Loaded, LocalModel, LocalServer, Think, body_of, efforts_of, items_of, put_loaded,
 };
 use super::local::kind::{LocalKind, LocalKindSpec, local_kind};
-use super::readers::{field_of, fields_of, number_field, object_field, text_field, texts_field};
+use super::readers::{field_of, fields_of, object_field, positive_field, text_field, texts_field};
 use crate::dialects::local::LocalReplay;
 use crate::provider::kind::KindError;
 use crate::transport::{KeyAuth, Transport};
@@ -162,11 +162,28 @@ pub fn running_of(raw: &Value) -> Loaded {
         let Some(name) = text_field(fields, "name") else {
             continue;
         };
-        if let Some(context) = number_field(fields, "context_length") {
+        if let Some(context) = positive_field(fields, "context_length") {
             put_loaded(&mut contexts, name, context);
         }
     }
     contexts
+}
+
+/// One show answer; a failed read keeps the model known before.
+async fn show(
+    transport: &Transport,
+    tag: &str,
+    known: &[LocalModel],
+    cancel: &CancelToken,
+) -> Option<LocalModel> {
+    let body = body_of("model", tag);
+    match transport
+        .post_json("/api/show", Some(&body), cancel, &KeyAuth::None)
+        .await
+    {
+        Ok(raw) => model_of(tag, &raw),
+        Err(_) => known.iter().find(|each| each.tag == tag).cloned(),
+    }
 }
 
 struct OllamaServer {
@@ -191,22 +208,7 @@ impl LocalServer for OllamaServer {
             };
             let shown = join_all(
                 tags.iter()
-                    .map(|tag| {
-                        let transport = &self.transport;
-                        Box::pin(async move {
-                            let body = body_of("model", tag);
-                            match transport
-                                .post_json("/api/show", Some(&body), cancel, &KeyAuth::None)
-                                .await
-                            {
-                                Ok(raw) => model_of(tag, &raw),
-                                // Failed show retains prior.
-                                Err(_) => known.iter().find(|each| &each.tag == tag).cloned(),
-                            }
-                        })
-                            as std::pin::Pin<Box<dyn std::future::Future<Output = _> + Send>>
-                    })
-                    .collect(),
+                    .map(|tag| show(&self.transport, tag, known, cancel)),
             )
             .await;
             Ok(shown.into_iter().flatten().collect())

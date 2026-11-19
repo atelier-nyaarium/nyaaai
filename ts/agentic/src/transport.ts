@@ -92,20 +92,28 @@ export class Transport {
 		const encoded = encodedOf(codec, request, "stream");
 		this.checkHeaders(encoded);
 		const key = await this.requestKey();
+		if (signal.aborted) throw signal.reason;
 		const cut = new Cut(signal, this.d.scheduler, this.idleMs);
 		const seen: Seen = {};
 		try {
 			const response = await this.post(codec, encoded, key, cut.signal, "text/event-stream", seen);
 			cut.arm();
-			for await (const event of codec.stream(this.items(response.chunks, cut))) {
-				if (event.kind !== "serving") {
-					yield event;
-					continue;
+			const body = response.chunks[Symbol.asyncIterator]();
+			try {
+				const open: AsyncIterable<Uint8Array> = { [Symbol.asyncIterator]: () => body };
+				for await (const event of codec.stream(this.items(open, cut))) {
+					if (event.kind !== "serving") {
+						yield event;
+						continue;
+					}
+					const serving = scrubbedServing(event.serving, key);
+					seen.generation ??= serving.generationId;
+					seen.host ??= serving.host;
+					yield { kind: "serving", serving };
 				}
-				const serving = scrubbedServing(event.serving, key);
-				seen.generation ??= serving.generationId;
-				seen.host ??= serving.host;
-				yield { kind: "serving", serving };
+			} finally {
+				// A body the codec never pulled is still cancelled.
+				await body.return?.();
 			}
 		} catch (error) {
 			if (!signal.aborted) this.notify(request.model);
@@ -122,6 +130,7 @@ export class Transport {
 		const encoded = encodedOf(codec, request, "complete");
 		this.checkHeaders(encoded);
 		const key = await this.requestKey();
+		if (signal.aborted) throw signal.reason;
 		const cut = new Cut(signal, this.d.scheduler, this.idleMs);
 		const seen: Seen = {};
 		let result: StepResult;
@@ -164,6 +173,7 @@ export class Transport {
 		if (signal.aborted) throw signal.reason;
 		checkedHeaders([["User-Agent", this.d.userAgent]]);
 		const key = await this.keyFor(auth);
+		if (signal.aborted) throw signal.reason;
 		const headers: HeaderList = [
 			["Accept", "application/json"],
 			["User-Agent", this.d.userAgent],

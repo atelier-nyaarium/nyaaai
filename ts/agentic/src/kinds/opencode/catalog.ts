@@ -19,6 +19,7 @@ import { rowKey, shownId } from "../../models/rowKey";
 import { raced, unknownView } from "../../models/view";
 import type { Browser, EntryCatalog, Tester } from "../../provider/kind";
 import type { Transport } from "../../transport";
+import { told } from "../join";
 import {
 	booleanField,
 	dataList,
@@ -45,7 +46,7 @@ export interface OpenCodeApi {
 	strict: boolean | null;
 }
 
-/** `explicit` is whether the listing has one that is not null. */
+/** `explicit` is whether the listing holds an object or `true` for it. */
 export interface OpenCodeCache {
 	implicit: boolean | null;
 	explicit: boolean;
@@ -132,7 +133,10 @@ function cacheField(capabilities: Fields | null): OpenCodeCache | null {
 	const cache = into(capabilities, "cache");
 	if (cache === null) return null;
 	const explicit = fieldOf(cache, "explicit");
-	return { implicit: booleanField(cache, "implicit"), explicit: explicit !== undefined && explicit !== null };
+	return {
+		implicit: booleanField(cache, "implicit"),
+		explicit: explicit === true || fieldsOf(explicit) !== undefined,
+	};
 }
 
 /** An item with a text id; undefined drops the item. */
@@ -410,13 +414,18 @@ export class OpenCodeCatalog implements EntryCatalog {
 			if (models === undefined) throw new Error("The catalog did not parse.");
 			this.good = { models, at: this.d.scheduler.nowMs() };
 			this.failedAt = undefined;
-			this.d.refreshed?.();
-			return models;
 		} catch {
 			this.failedAt = this.d.scheduler.nowMs();
 			return this.good?.models;
 		} finally {
 			limit.clear();
 		}
+		told(this.d.refreshed);
+		return this.good?.models;
+	}
+
+	/** Answers when no refresh is running, having waited for the one that was. */
+	async idle(): Promise<void> {
+		while (this.inflight !== undefined) await this.inflight;
 	}
 }

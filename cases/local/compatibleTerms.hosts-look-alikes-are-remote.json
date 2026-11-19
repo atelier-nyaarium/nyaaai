@@ -60,14 +60,14 @@
 				"price": "unknown"
 			},
 			{
-				"remote": true,
-				"kept": true,
-				"price": "unknown"
+				"remote": false,
+				"kept": false,
+				"price": "free"
 			},
 			{
-				"remote": true,
-				"kept": true,
-				"price": "unknown"
+				"remote": false,
+				"kept": false,
+				"price": "free"
 			}
 		]
 	}

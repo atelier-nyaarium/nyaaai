@@ -74,6 +74,11 @@ pub trait EntryCatalog: Send + Sync {
     /// Stops what the catalog listens to; a route that goes calls it.
     fn dispose(&self) {}
 
+    /// Answers when no refresh, discovery or reread of this catalog is running.
+    fn idle(&self) -> BoxFuture<'_, ()> {
+        Box::pin(async {})
+    }
+
     /// The catalog as its own type, for a kind's browser.
     fn as_any(&self) -> &dyn Any;
 

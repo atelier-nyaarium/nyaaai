@@ -428,4 +428,21 @@ export const localCatalogCases: CaseSource[] = [
 		server: { models: [models()] },
 		steps: [views(), discovered()],
 	}),
+
+	// New data is stored before anyone is told.
+	run("run-refreshed-reads-the-new-list", {
+		onRefreshed: "reads",
+		server: { models: [models(MA), models(MA, MB)] },
+		steps: [views(), discovered({ fresh: true })],
+	}),
+	run("run-refreshed-that-throws-changes-nothing", {
+		onRefreshed: "readsAndThrows",
+		server: { models: [models(MA), models(MA, MB)] },
+		steps: [views(), views(), discovered({ fresh: true }), views()],
+	}),
+	run("run-refreshed-that-throws-after-a-loaded-read-keeps-the-context", {
+		onRefreshed: "readsAndThrows",
+		server: { ...READS, models: [models(MA, MB)], loads: [contexts([B, 65_536]), contexts([B, 2048])] },
+		steps: [views(), settled(B), views()],
+	}),
 ];

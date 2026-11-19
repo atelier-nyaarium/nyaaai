@@ -56,6 +56,10 @@ export interface EntryCatalog {
 	/** ZDR-scoped bound rows. */
 	views(use: ModelUse, zdrOnly: boolean, signal?: AbortSignal): Promise<ModelView[]>;
 	rediscover?(): void;
+	/** Answers when no refresh or read of this catalog is running, having waited for the one that was. */
+	idle(): Promise<void>;
+	/** Stops its listening. */
+	dispose?(): void;
 }
 
 /** An entry's model browser. */

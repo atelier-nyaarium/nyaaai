@@ -1,0 +1,29 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.compatibleModels",
+	"name": "compatible-a-negative-length-lets-the-next-field-supply-it",
+	"input": {
+		"body": {
+			"data": [
+				{
+					"id": "a",
+					"context_length": -1,
+					"max_context_length": 0,
+					"max_model_len": 3
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"tag": "a",
+				"tools": true,
+				"thinking": false,
+				"efforts": [],
+				"context": 3
+			}
+		]
+	}
+}

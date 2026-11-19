@@ -2,7 +2,7 @@
 	"format": 2,
 	"type": "function",
 	"kind": "local.compatibleModels",
-	"name": "compatible-a-zero-length-is-a-length",
+	"name": "compatible-a-zero-length-is-missing",
 	"input": {
 		"body": {
 			"data": [
@@ -21,7 +21,7 @@
 				"tools": true,
 				"thinking": false,
 				"efforts": [],
-				"context": 0
+				"context": 3
 			}
 		]
 	}

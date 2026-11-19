@@ -5,6 +5,7 @@ import {
 	remote,
 	termsOf,
 } from "@nyaaai/agentic/kinds/compatible";
+import { joinAll } from "@nyaaai/agentic/kinds/join";
 import { listed as llamacppListed, modelOf as llamacppModel, propsOfBody } from "@nyaaai/agentic/kinds/llamacpp";
 import { chatModels, modelOf as lmstudioModel, loadedContexts } from "@nyaaai/agentic/kinds/lmstudio";
 import {
@@ -209,9 +210,6 @@ export function factsOf(
 		return null;
 	}
 }
-
-/** Background work runs until it waits for the wheel. */
-export const settle = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
 
 export const contextsOf = (contexts: ReadonlyMap<string, number>) =>
 	[...contexts].map(([tag, context]) => ({ tag, context }));
@@ -559,6 +557,8 @@ export const local = caseGroup("local", {
 				}),
 				/** Row keys the registry holds. */
 				rows: z.array(z.string()),
+				/** What the `refreshed` callback does: reads the catalog, and may throw after. */
+				onRefreshed: z.enum(["reads", "readsAndThrows"]).exactOptional(),
 				steps: z.array(CatalogStep()).min(1),
 			}),
 			z.object({
@@ -573,6 +573,8 @@ export const local = caseGroup("local", {
 					}),
 				),
 				waiting: z.array(z.string()),
+				/** What each `refreshed` callback read of the catalog: the tags it saw, or `none`. */
+				saw: z.array(z.string()),
 			}),
 			async (input) => {
 				const wheel = new TimerWheel(input.startMs);
@@ -587,6 +589,7 @@ export const local = caseGroup("local", {
 					warms: input.server.warms,
 				});
 				let refreshed = 0;
+				const saw: Array<Promise<string>> = [];
 				const catalog = new LocalCatalog({
 					entry: input.entry,
 					server,
@@ -595,6 +598,15 @@ export const local = caseGroup("local", {
 					rows: registry,
 					refreshed: () => {
 						refreshed += 1;
+						if (input.onRefreshed === undefined) return;
+						saw.push(
+							catalog
+								.discovered()
+								.then((held) =>
+									held === undefined ? "none" : held.map((model) => model.tag).join(" "),
+								),
+						);
+						if (input.onRefreshed === "readsAndThrows") throw new Error("told badly");
 					},
 				});
 				let tags = 0;
@@ -634,13 +646,14 @@ export const local = caseGroup("local", {
 					const before = refreshed;
 					let answers: CatalogAnswerOf[] = [];
 					if (step.kind === "call") answers = [await answerOf(step.call)];
-					else if (step.kind === "together") answers = await Promise.all(step.calls.map(answerOf));
+					else if (step.kind === "together")
+						answers = await joinAll(step.calls.map((held) => () => answerOf(held)));
 					else if (step.kind === "settled")
 						for (let each = 0; each < (step.times ?? 1); each++) catalog.settled(step.tag);
 					else if (step.kind === "rediscover") catalog.rediscover();
 					else if (step.kind === "advance") wheel.advance(step.ms);
 					else registry.setRows(localRowsOf(step.rows));
-					await settle();
+					await catalog.idle();
 					steps.push({
 						nowMs: wheel.nowMs(),
 						answers,
@@ -649,7 +662,7 @@ export const local = caseGroup("local", {
 					});
 				}
 				for (let tag = 1; tag <= tags; tag++) wheel.cancel(`caller-${tag}`);
-				return { steps, waiting: wheel.waiting() };
+				return { steps, waiting: wheel.waiting(), saw: await joinAll(saw.map((held) => () => held)) };
 			},
 		),
 		/** A kind's transport, catalog, browser and tester over a scripted network. */
@@ -741,7 +754,7 @@ export const local = caseGroup("local", {
 				const steps: Array<{ nowMs: number; answer: FlowAnswerOf }> = [];
 				for (const step of input.steps) {
 					const answer = await answerOf(step);
-					await settle();
+					await catalog.idle();
 					steps.push({ nowMs: net.wheel.nowMs(), answer });
 				}
 				for (let tag = 1; tag <= tags; tag++) net.wheel.cancel(`caller-${tag}`);

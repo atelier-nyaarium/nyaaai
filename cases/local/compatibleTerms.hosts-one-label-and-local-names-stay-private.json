@@ -1,0 +1,44 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.compatibleTerms",
+	"name": "hosts-one-label-and-local-names-stay-private",
+	"input": {
+		"urls": [
+			"http://ai/",
+			"http://labhost",
+			"http://evil.com.local/",
+			"http://a.b.internal",
+			"http://example.com"
+		]
+	},
+	"expected": {
+		"terms": [
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": false,
+				"kept": false,
+				"price": "free"
+			},
+			{
+				"remote": true,
+				"kept": true,
+				"price": "unknown"
+			}
+		]
+	}
+}

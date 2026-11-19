@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.compatibleModels",
+	"name": "compatible-every-length-missing-with-zeros",
+	"input": {
+		"body": {
+			"data": [
+				{
+					"id": "a",
+					"context_length": 0,
+					"max_context_length": -2,
+					"max_model_len": 0
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"tag": "a",
+				"tools": true,
+				"thinking": false,
+				"efforts": []
+			}
+		]
+	}
+}

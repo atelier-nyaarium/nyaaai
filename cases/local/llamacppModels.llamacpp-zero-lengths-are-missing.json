@@ -1,0 +1,27 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.llamacppModels",
+	"name": "llamacpp-zero-lengths-are-missing",
+	"input": {
+		"body": {
+			"data": [
+				{
+					"id": "a",
+					"meta": {
+						"n_ctx_train": -1
+					},
+					"context_length": 0
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"id": "a",
+				"trained": null
+			}
+		]
+	}
+}

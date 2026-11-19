@@ -7615,6 +7615,13 @@
 					"minimum": -9007199254740991,
 					"maximum": 9007199254740991
 				},
+				"onRefreshed": {
+					"type": "string",
+					"enum": [
+						"reads",
+						"readsAndThrows"
+					]
+				},
 				"steps": {
 					"minItems": 1,
 					"type": "array",
@@ -8200,6 +8207,12 @@
 					"type": "integer",
 					"minimum": -9007199254740991,
 					"maximum": 9007199254740991
+				},
+				"saw": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
 				}
 			},
 			"required": [
@@ -8207,7 +8220,8 @@
 				"requests",
 				"read",
 				"waiting",
-				"refreshed"
+				"refreshed",
+				"saw"
 			],
 			"additionalProperties": false
 		},
@@ -8238,6 +8252,13 @@
 					"type": "integer",
 					"minimum": -9007199254740991,
 					"maximum": 9007199254740991
+				},
+				"onRefreshed": {
+					"type": "string",
+					"enum": [
+						"reads",
+						"readsAndThrows"
+					]
 				},
 				"steps": {
 					"minItems": 1,
@@ -8637,6 +8658,12 @@
 					"type": "integer",
 					"minimum": -9007199254740991,
 					"maximum": 9007199254740991
+				},
+				"saw": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
 				}
 			},
 			"required": [
@@ -8644,7 +8671,8 @@
 				"requests",
 				"read",
 				"waiting",
-				"refreshed"
+				"refreshed",
+				"saw"
 			],
 			"additionalProperties": false
 		},
@@ -11973,6 +12001,13 @@
 						"type": "string"
 					}
 				},
+				"onRefreshed": {
+					"type": "string",
+					"enum": [
+						"reads",
+						"readsAndThrows"
+					]
+				},
 				"steps": {
 					"minItems": 1,
 					"type": "array",
@@ -12530,11 +12565,18 @@
 					"items": {
 						"type": "string"
 					}
+				},
+				"saw": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
 				}
 			},
 			"required": [
 				"steps",
-				"waiting"
+				"waiting",
+				"saw"
 			],
 			"additionalProperties": false
 		},

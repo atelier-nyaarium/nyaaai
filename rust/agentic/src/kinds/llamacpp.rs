@@ -11,7 +11,7 @@ use nyaaai_contract::text::encode_path_segment;
 use super::join::join_all;
 use super::local::catalog::{Loaded, LocalModel, LocalServer, efforts_of_texts};
 use super::local::kind::{LocalKind, LocalKindSpec, local_kind};
-use super::readers::{data_list, fields_of, number_field, object_field, text_field, texts_field};
+use super::readers::{data_list, fields_of, object_field, positive_field, text_field, texts_field};
 use crate::dialects::local::LocalReplay;
 use crate::provider::kind::KindError;
 use crate::transport::{KeyAuth, Transport};
@@ -43,8 +43,8 @@ pub fn listed(raw: &Value) -> Option<Vec<ListedModel>> {
                 let meta = object_field(fields, "meta");
                 // Router lists, loaded or not.
                 let trained = meta
-                    .and_then(|meta| number_field(meta, "n_ctx_train"))
-                    .or_else(|| number_field(fields, "context_length"));
+                    .and_then(|meta| positive_field(meta, "n_ctx_train"))
+                    .or_else(|| positive_field(fields, "context_length"));
                 Some(ListedModel {
                     id: id.to_owned(),
                     trained,
@@ -60,7 +60,7 @@ pub fn props_of_body(raw: &Value) -> Option<Props> {
     let settings = object_field(fields, "default_generation_settings");
     let caps = object_field(fields, "chat_template_caps");
     Some(Props {
-        context: settings.and_then(|held| number_field(held, "n_ctx")),
+        context: settings.and_then(|held| positive_field(held, "n_ctx")),
         efforts: caps
             .and_then(|held| texts_field(held, "reasoning_effort_levels"))
             .unwrap_or_default(),
@@ -114,6 +114,22 @@ pub fn model_of(
     }
 }
 
+/// One listed model with its props.
+async fn one(
+    transport: &Transport,
+    model: &ListedModel,
+    known: &[LocalModel],
+    cancel: &CancelToken,
+) -> LocalModel {
+    let props = props_of(transport, &model.id, false, cancel).await;
+    model_of(
+        &model.id,
+        model.trained,
+        props.as_ref(),
+        known.iter().find(|each| each.tag == model.id),
+    )
+}
+
 struct LlamaCppServer {
     transport: Arc<Transport>,
 }
@@ -137,20 +153,7 @@ impl LocalServer for LlamaCppServer {
             Ok(join_all(
                 models
                     .iter()
-                    .map(|model| {
-                        let transport = &self.transport;
-                        Box::pin(async move {
-                            let props = props_of(transport, &model.id, false, cancel).await;
-                            model_of(
-                                &model.id,
-                                model.trained,
-                                props.as_ref(),
-                                known.iter().find(|each| each.tag == model.id),
-                            )
-                        })
-                            as std::pin::Pin<Box<dyn std::future::Future<Output = _> + Send>>
-                    })
-                    .collect(),
+                    .map(|model| one(&self.transport, model, known, cancel)),
             )
             .await)
         })

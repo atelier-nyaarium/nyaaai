@@ -42,14 +42,17 @@ it("a join is reused, not rebuilt, while rows, data, the flag and the removal da
 	const wheel = new TimerWheel(START);
 	const catalog = catalogOf(registry, wheel);
 	const first = await catalog.views();
-	expect(await catalog.views()).toBe(first);
+	expect(await catalog.views()).toEqual(first);
 	expect(registry.reads()).toBe(1);
-	expect(await catalog.views("chat", false)).not.toBe(first);
+	await catalog.views("chat", false);
+	expect(registry.reads()).toBe(2);
 	registry.setRows(ROWS);
-	const second = await catalog.views("chat", false);
-	expect(second).not.toBe(first);
-	expect(await catalog.views("chat", false)).toBe(second);
-	expect(await catalog.views("analysis")).not.toBe(second);
+	await catalog.views("chat", false);
+	expect(registry.reads()).toBe(3);
+	await catalog.views("chat", false);
+	expect(registry.reads()).toBe(3);
+	await catalog.views("analysis");
+	expect(registry.reads()).toBe(4);
 });
 
 it("a catalog that is disposed no longer hears the registry", async () => {
@@ -58,7 +61,8 @@ it("a catalog that is disposed no longer hears the registry", async () => {
 	const first = await catalog.views();
 	catalog.dispose();
 	registry.setRows(ROWS.slice(0, 1));
-	expect(await catalog.views()).toBe(first);
+	expect(await catalog.views()).toEqual(first);
+	expect(registry.reads()).toBe(1);
 });
 
 it("the browse list of one fetch is the same list until a removal day passes", () => {
@@ -83,4 +87,21 @@ it("a day or an ISO time reads as the platform reads it", () => {
 		"2026-12-31T23:59:59Z",
 	];
 	expect(spellings.map(expiryOf)).toEqual(spellings.map((text) => Date.parse(text)));
+});
+
+it("a caller's edit of its views never reaches the next caller", async () => {
+	const catalog = catalogOf(scriptedModelRegistry(ROWS), new TimerWheel(START));
+	const first = await catalog.views();
+	const pristine = JSON.stringify(await catalogOf(scriptedModelRegistry(ROWS), new TimerWheel(START)).views());
+	first.reverse();
+	for (const view of first) {
+		view.efforts.push("max");
+		view.hosts.length = 0;
+		view.status = "retired";
+	}
+	const second = await catalog.views();
+	expect(JSON.stringify(second)).toBe(pristine);
+	expect(second.map((view) => view.row.key)).toEqual(ROWS.map((row) => row.key));
+	expect(second.every((view) => view.status !== "retired")).toBe(true);
+	expect(second.some((view) => view.efforts.includes("max"))).toBe(false);
 });

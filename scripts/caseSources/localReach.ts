@@ -173,6 +173,26 @@ export const localReachCases: CaseSource[] = [
 		...at("http://b\u00fcro.local:8000"),
 		exchanges: [COMPAT_LIST],
 	}),
+	check("compatible-a-query-is-unreachable-and-asks-nothing", "compatible", {
+		...at("http://lab.local:8000?x=1"),
+		exchanges: [COMPAT_LIST],
+	}),
+	check("compatible-a-fragment-is-unreachable-and-asks-nothing", "compatible", {
+		...at("http://lab.local:8000/#f"),
+		exchanges: [COMPAT_LIST],
+	}),
+	check("compatible-credentials-are-unreachable-and-ask-nothing", "compatible", {
+		...at("http://user:pw@lab.local:8000"),
+		exchanges: [COMPAT_LIST],
+	}),
+	check("compatible-the-base-is-the-origin-and-the-path-as-parsed", "compatible", {
+		...at("HTTP://LAB.LOCAL:8000/a/./b/../c//"),
+		exchanges: [COMPAT_LIST],
+	}),
+	check("compatible-the-default-port-is-dropped-from-the-base", "compatible", {
+		...at("http://lab.local:80"),
+		exchanges: [COMPAT_LIST],
+	}),
 	...statuses("compatible", at("http://lab.local:8000")),
 	check("compatible-aborted-before-rethrows", "compatible", {
 		...at("http://lab.local:8000"),
