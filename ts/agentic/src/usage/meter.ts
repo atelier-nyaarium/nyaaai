@@ -13,7 +13,7 @@ import type { Incarnation } from "../provider/incarnation";
 export type Feature = string;
 
 export interface Meter {
-	/** The ticket the request held, if the gate gave one, and its route's incarnation. */
+	/** The ticket the request held, if any, and its route's incarnation; with no ticket a bill goes to the incarnation's current era. */
 	called(call: MeteredCall, ticket?: Ticket, incarnation?: Incarnation): void;
 }
 

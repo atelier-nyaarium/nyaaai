@@ -306,6 +306,10 @@ impl Core {
         let rows = rows_of(&*self.list);
         {
             let mut state = locked(&self.state);
+            // Dispose clears the order under this lock; test again after it.
+            if self.disposed.load(Ordering::SeqCst) {
+                return;
+            }
             // A newer read was applied first.
             if read < state.applied {
                 return;
@@ -366,6 +370,10 @@ impl Core {
         }
         {
             let mut state = locked(&self.state);
+            // Dispose clears the order under this lock; test again after it.
+            if self.disposed.load(Ordering::SeqCst) {
+                return;
+            }
             if let Some(incarnation) = state.order.iter().find(|each| each.id == id).cloned() {
                 let was = incarnation.era();
                 was.state().retired = true;

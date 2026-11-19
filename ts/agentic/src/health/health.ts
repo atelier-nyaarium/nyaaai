@@ -201,9 +201,11 @@ export class ProviderHealth implements Gate {
 
 	/** Accumulates reply billing; with no ticket, the route's incarnation must live. */
 	billed(id: string, reply: Billing, ticket?: Ticket, incarnation?: Incarnation): void {
+		if (incarnation !== undefined) this.owned({ incarnation });
 		let era: Era | undefined;
-		if (ticket !== undefined) era = this.d.entries.era(ticket.era);
-		else if (incarnation !== undefined) era = this.owned({ incarnation }).live ? incarnation.era : undefined;
+		if (ticket !== undefined)
+			era = incarnation === undefined ? this.d.entries.era(ticket.era) : this.eraFor(incarnation, ticket);
+		else if (incarnation !== undefined) era = incarnation.live ? incarnation.era : undefined;
 		else era = this.eraOf(id);
 		if (era === undefined) return;
 		const was = era.bill;
@@ -455,9 +457,12 @@ export class ProviderHealth implements Gate {
 		return route.incarnation;
 	}
 
-	/** The ticket's era, else the live one; none drops it. */
+	/** The ticket's era if it is the incarnation's; with no ticket, the live one. None drops it. */
 	private eraFor(incarnation: Incarnation, ticket: Ticket | undefined): Era | undefined {
-		if (ticket !== undefined) return this.d.entries.era(ticket.era);
+		if (ticket !== undefined) {
+			const era = this.d.entries.era(ticket.era);
+			return era?.incarnation === incarnation ? era : undefined;
+		}
 		return incarnation.live ? incarnation.era : undefined;
 	}
 

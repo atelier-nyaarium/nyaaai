@@ -77,6 +77,11 @@ pub trait Gate: Send + Sync {
         again: bool,
     ) -> BoxFuture<'static, Admission>;
 
+    /// Whether the route's incarnation ended, or is not of this gate's registry.
+    fn retired(&self, route: RouteRef<'_>) -> bool {
+        !route.incarnation.live()
+    }
+
     /// Never waits; none once its incarnation ended.
     fn try_admit(&self, route: RouteRef<'_>) -> Option<Ticket>;
 
@@ -361,10 +366,13 @@ impl Core {
         matches!(Self::status_of_era(era), KeyState::Rejected(_))
     }
 
-    /// The ticket's era, else the live one; none drops the report.
+    /// The ticket's era when it is this incarnation's; with no ticket, the live one. None drops the report.
     fn era_for(&self, incarnation: &Incarnation, ticket: Option<&Ticket>) -> Option<Arc<Era>> {
         match ticket {
-            Some(ticket) => self.entries.era(ticket.era),
+            Some(ticket) => self.entries.era(ticket.era).filter(|era| {
+                era.incarnation()
+                    .is_some_and(|held| std::ptr::eq(&*held, incarnation))
+            }),
             None => incarnation.live().then(|| incarnation.era()),
         }
     }
@@ -852,8 +860,8 @@ impl ProviderHealth {
             return;
         }
         let era = match (ticket, incarnation) {
-            (Some(ticket), _) => self.core.entries.era(ticket.era),
-            (None, Some(held)) => held.live().then(|| held.era()),
+            (_, Some(held)) => self.core.era_for(held, ticket),
+            (Some(ticket), None) => self.core.entries.era(ticket.era),
             (None, None) => self.core.era_of(id),
         };
         let Some(era) = era else {
@@ -993,6 +1001,10 @@ impl Gate for ProviderHealth {
                 ));
             }
         })
+    }
+
+    fn retired(&self, route: RouteRef<'_>) -> bool {
+        !route.incarnation.live() || !self.core.owned(route.incarnation)
     }
 
     fn try_admit(&self, route: RouteRef<'_>) -> Option<Ticket> {
@@ -1173,7 +1185,15 @@ mod tests {
             url: None,
             extra_usage: None,
         };
-        let list = Arc::new(ScriptedProviderList::new(vec![entry.clone()]));
+        let second = ProviderEntry {
+            id: "b".to_owned(),
+            label: "Second".to_owned(),
+            ..entry.clone()
+        };
+        let list = Arc::new(ScriptedProviderList::new(vec![
+            entry.clone(),
+            second.clone(),
+        ]));
         let keys = Arc::new(ScriptedEntryKeys::new());
         let own = Arc::new(EntryRegistry::new(list.clone(), &*keys));
         let other = EntryRegistry::new(list, &*keys);
@@ -1228,8 +1248,43 @@ mod tests {
         );
         assert!(health.blocked(foreign, None).is_none());
         assert!(health.served(foreign, None, None, None));
+        assert!(health.retired(foreign));
+        assert!(!health.retired(mine));
         assert!(health.failed(foreign, &failure, false, None));
         assert!(matches!(health.status("a"), KeyState::None(_)));
+        // A ticket of another entry's era drops the report; its own route applies it.
+        let ticket = health.try_admit(mine).expect("a ticket");
+        let b = own.incarnation("b").expect("listed");
+        let b_route = RouteRef {
+            entry: &second,
+            key: "lab/model-a",
+            incarnation: &b,
+        };
+        let usage = NormalizedUsage {
+            input: 1.0,
+            output: 1.0,
+            cached: None,
+            cache_write: None,
+            reasoning: None,
+            cost: None,
+            upstream_cost: None,
+            byok: None,
+            billing_source: Some("balance".to_owned()),
+            list_cost: None,
+            allowance: None,
+        };
+        assert!(health.failed(b_route, &failure, false, Some(&ticket)));
+        assert!(matches!(health.status("b"), KeyState::None(_)));
+        assert!(health.served(b_route, Some(&usage), None, Some(&ticket)));
+        let reply = Billing {
+            source: "balance".to_owned(),
+            allowance: None,
+            cost: Some(1.0),
+        };
+        health.billed("b", &reply, Some(&ticket), Some(&b));
+        assert!(health.bill("b").is_none());
+        assert!(!health.failed(mine, &failure, false, Some(&ticket)));
+        assert!(matches!(health.status("a"), KeyState::Rejected(_)));
         health.dispose();
         other.dispose();
         own.dispose();

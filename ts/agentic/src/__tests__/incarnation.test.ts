@@ -41,6 +41,44 @@ describe("ProviderHealth", () => {
 			() => health.billed("a", { source: "go" }, undefined, incarnation),
 		];
 		for (const door of doors) expect(door).toThrow();
+		const withTicket = () =>
+			health.billed(
+				"a",
+				{ source: "go" },
+				{ gate: "g", model: "m", era: 1, generation: 0, probe: false, serial: 1 },
+				incarnation,
+			);
+		expect(withTicket).toThrow();
+		health.dispose();
+	});
+
+	it("drops a report that pairs a route with another entry's ticket", () => {
+		const second = { id: "b", kind: "openrouter", label: "Second" } as const;
+		const keys = scriptedEntryKeys();
+		const entries = new EntryRegistry({ list: scriptedProviderList([FIRST, second]), keys });
+		const health = new ProviderHealth({
+			scheduler: fakeScheduler(new TimerWheel(0)),
+			ids: countedIds("gate-"),
+			entries,
+			keys,
+			kinds: KINDS,
+			kindDeps: () => {
+				throw new Error("Unreachable.");
+			},
+		});
+		const [first, other] = entries.incarnations();
+		if (first === undefined || other === undefined) throw new Error("Both entries are listed.");
+		const routeOf = (entry: typeof FIRST | typeof second, incarnation = entry === FIRST ? first : other) =>
+			({ entry, key: "m", incarnation }) as unknown as Resolved;
+		const ticket = health.tryAdmit(routeOf(FIRST));
+		if (ticket === null) throw new Error("The gate admits.");
+		const rejected = { category: "keyRejected", status: 401, message: "no" } as const;
+		expect(health.failed(routeOf(second), rejected, false, ticket)).toBe(true);
+		expect(health.status("b").kind).toBe("none");
+		health.billed("b", { source: "go", cost: 1 }, ticket, other);
+		expect(health.bill("a")).toBeUndefined();
+		expect(health.bill("b")).toBeUndefined();
+		expect(health.failed(routeOf(FIRST), rejected, false, ticket)).toBe(false);
 		health.dispose();
 	});
 });

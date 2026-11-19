@@ -40,7 +40,7 @@ impl Bills for ProviderHealth {
 
 /// Told each call a request made.
 pub trait Meter: Send + Sync {
-    /// The ticket the request held, if the gate gave one, and the incarnation it ran on.
+    /// The ticket the request held, if any, and its route's incarnation; with no ticket a bill goes to the incarnation's current era.
     fn called(
         &self,
         call: &MeteredCall,

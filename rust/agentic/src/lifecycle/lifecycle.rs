@@ -1022,7 +1022,7 @@ impl Inner {
             return Gated::Go(None);
         };
         let ticket = gate.try_admit(RouteRef::from(route));
-        let live = route.incarnation.live();
+        let live = !gate.retired(RouteRef::from(route));
         let admission = match &ticket {
             None if !live => {
                 Admission::Retired(nyaaai_contract::shapes::health::AdmissionRetired {})
