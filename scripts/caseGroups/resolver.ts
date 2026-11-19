@@ -95,7 +95,7 @@ const RouteStep = () =>
 		...CALLS,
 		/** The catalog of an entry's route says it refreshed. */
 		z.object({ kind: z.literal("refreshed"), entry: z.string() }),
-		/** A cold catalog answers from now on, and the views waiting on it. */
+		/** A cold catalog warms and answers the views waiting on it. */
 		z.object({ kind: z.literal("warm"), entry: z.string() }),
 		/** A `routes` call that meets a cold catalog, then the wheel runs this long. */
 		z.object({

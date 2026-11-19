@@ -108,7 +108,7 @@ const LifeChange = z.discriminatedUnion("kind", [
 
 const LifeStep = z.discriminatedUnion("kind", [
 	LifeSend,
-	/** A change made when the wheel reaches this much time from now, so it can land inside a request. */
+	/** A change made `ms` on, so it can land inside a request. */
 	z.object({ kind: z.literal("later"), ms: z.int().min(0), change: LifeChange }),
 	/** Resolves a model and holds the routes under a name. */
 	z.object({ kind: z.literal("plan"), name: z.string(), model: z.string(), use: ModelUse.exactOptional() }),
@@ -257,7 +257,7 @@ export const lifecycle = caseGroup("lifecycle", {
 		LifeSeen,
 	},
 	kinds: {
-		/** A request lifecycle over real health and gate, scripted ports and network; each step runs calls until ended or parked. */
+		/** A request lifecycle over real health and gate; each step runs calls until ended or parked. */
 		run: kind(
 			z.object({
 				startMs: z.int(),

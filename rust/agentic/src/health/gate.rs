@@ -620,7 +620,7 @@ impl ProviderGate {
         }
     }
 
-    /// A cancel of the caller removes its waiter on the gate's runtime, without waiting for the next call.
+    /// A cancel removes its waiter without waiting for the next call.
     fn watch(&self, cancel: &CancelToken, watched: oneshot::Receiver<()>) {
         let weak: Weak<Core> = Arc::downgrade(&self.core);
         let cancel = cancel.clone();
@@ -711,7 +711,7 @@ impl ProviderGate {
         });
     }
 
-    /// An earlier request's success resets the give-up count even while paused; another gate's ticket does nothing.
+    /// A success resets the give-up count even while paused; another gate's ticket does nothing.
     pub fn settle(
         &self,
         ticket: &Ticket,

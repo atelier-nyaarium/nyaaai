@@ -1,4 +1,4 @@
-// The request lifecycle over a real health, the real kinds and one scripted network. Every value is made up.
+// The request lifecycle over real health and kinds on a scripted network. Every value is made up.
 
 import { probeAt } from "@nyaaai/agentic/health/pool";
 import type { CaseSource } from "../caseAdapter";
@@ -455,7 +455,7 @@ const overload: CaseSource[] = [
 	}),
 ];
 
-/** Every failure a send can meet, with whether it retries: its disposition on a first and on a last route. */
+/** Every failure a send can meet, and whether it retries. */
 const FAILURES: Array<{ name: string; reply: Json; retries: boolean }> = [
 	{ name: "400", reply: failing(400), retries: false },
 	{ name: "401", reply: failing(401), retries: false },

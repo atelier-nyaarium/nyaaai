@@ -46,7 +46,7 @@ const overloaded = (trigger = "trigger", model = LUNA): Step[] => [
 	settle(trigger, "overloaded"),
 ];
 
-/** Rounds `from` to `to` of a probe that is refused again; the probe of each is named `p<round>`. */
+/** Probes `from` to `to`, each refused again and named `p<n>`. */
 function refusals(from: number, to: number): Step[] {
 	const steps: Step[] = [];
 	for (let round = from; round <= to; round++)

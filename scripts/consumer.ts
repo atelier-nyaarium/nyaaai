@@ -1,5 +1,4 @@
-// Consumer commands.
-// Run from consumer root: bun <submodule>/scripts/consumer.ts <command>
+// Consumer commands; run from the consumer root.
 
 import { spawnSync } from "node:child_process";
 import { existsSync, lstatSync, mkdirSync, readFileSync, realpathSync, rmSync, symlinkSync } from "node:fs";
@@ -134,7 +133,7 @@ function recordedCommit(listing: string | null, shaAt: number): string | undefin
 	return fields === undefined || fields === "" ? undefined : fields.split(" ")[shaAt];
 }
 
-/** Failures when the submodule is not at the commit the consumer records, in its HEAD and its index. */
+/** Failures when the submodule is not at the recorded commit, in HEAD or the index. */
 function recordedFailures(root: string, submodule: string): string[] {
 	const at = submoduleRelative(root, submodule);
 	const head = git(submodule, ["rev-parse", "HEAD"]);

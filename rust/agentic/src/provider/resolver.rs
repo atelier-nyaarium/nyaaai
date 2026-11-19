@@ -391,10 +391,10 @@ pub async fn served_by(d: &ServedByDeps, key: &str, use_: &ModelUse) -> Routes {
     }
 }
 
-/// A route with the deps it was made with.
 /// A later entry's view is waited for this long.
 const LATER_VIEW_MS: i64 = 2000;
 
+/// A route with the deps it was made with.
 #[derive(Clone)]
 struct Held {
     route: Route,

@@ -8,7 +8,7 @@ import { server as ollamaServer } from "../kinds/ollama";
 ////////////////////////////////
 //  Functions & Helpers
 
-/** A transport that lists these names and counts the reads of models, and how many ran at once. */
+/** A transport that lists names, counting model reads and how many ran at once. */
 function listing(names: string[], key: "models" | "data", field: "name" | "id") {
 	const log = { reads: 0, flying: 0, most: 0 };
 	const read = async (): Promise<unknown> => {

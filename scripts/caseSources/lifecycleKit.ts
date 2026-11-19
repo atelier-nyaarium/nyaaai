@@ -117,7 +117,7 @@ export const key = (id: string, answer: Json): Json => ({ kind: "key", id, answe
 
 export const list = (...entries: Json[]): Json => ({ kind: "list", entries });
 
-/** A change that lands when the wheel is `ms` on, so it can fall inside a request. */
+/** A change that lands `ms` on, so it can fall inside a request. */
 export const later = (ms: number, change: Json): Json => ({ kind: "later", ms, change });
 
 export const zdr = (on: boolean): Json => ({ kind: "zdr", on });

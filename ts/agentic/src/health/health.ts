@@ -45,7 +45,7 @@ export interface Gate {
 	deferred(route: Resolved, keep?: ReadonlySet<string>): SkipReason | undefined;
 	/** Last-route refusal. */
 	blocked(route: Resolved, keep?: ReadonlySet<string>): Blocked | undefined;
-	/** The ticket the request held; true when the report was dropped, its request began before the entry changed. */
+	/** True when the report was dropped: its request began before the entry changed. */
 	failed(route: Resolved, failure: Failure, onward: boolean, ticket?: Ticket): boolean;
 	/** Balance replies join `run`; true when the report was dropped as `failed` says. */
 	served(route: Resolved, usage: NormalizedUsage | undefined, run?: Set<string>, ticket?: Ticket): boolean;

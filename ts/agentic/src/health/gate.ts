@@ -178,7 +178,7 @@ export class ProviderGate {
 		});
 	}
 
-	/** Settles each ticket once; an earlier request's success resets the give-up count even while paused. */
+	/** Settles each ticket once; a success resets the give-up count even while paused. */
 	settle(ticket: Ticket, outcome: GateOutcome, retryAfterMs?: number): GateSettled {
 		if (this.disposed || ticket.gate !== this.id) return "done";
 		const gate = this.models.get(ticket.model);

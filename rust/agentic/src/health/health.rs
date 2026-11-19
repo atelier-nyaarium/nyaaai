@@ -87,8 +87,7 @@ pub trait Gate: Send + Sync {
     /// Last-route refusal.
     fn blocked(&self, route: RouteRef<'_>, keep: Option<&HashSet<String>>) -> Option<Blocked>;
 
-    /// The ticket the request held; true when the report was dropped, its request began before
-    /// the entry changed.
+    /// True when the report was dropped: its request began before the entry changed.
     fn failed(
         &self,
         route: RouteRef<'_>,

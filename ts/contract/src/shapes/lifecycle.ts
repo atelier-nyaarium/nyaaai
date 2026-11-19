@@ -9,7 +9,7 @@ import { MeteredCall } from "./usage";
 ////////////////////////////////
 //  Shapes
 
-/** One effect of a run, told to the sink in order; `entry` is an entry id, `model` a model key. */
+/** One effect of a run, told to the sink in order. */
 export const TraceEntry = z.discriminatedUnion("kind", [
 	/** A route passed over untried: dropped, deferred by the gate, or failed onward. */
 	z.object({

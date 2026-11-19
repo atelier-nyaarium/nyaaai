@@ -1,4 +1,4 @@
-// Provider health on scripted ports, kind checks on a scripted network, and the wheel. Every value is made up.
+// Provider health on scripted ports and network, and the wheel. Every value is made up.
 
 import type { CaseSource } from "../caseAdapter";
 import { caseOf, failing, reply } from "./catalogKit";
