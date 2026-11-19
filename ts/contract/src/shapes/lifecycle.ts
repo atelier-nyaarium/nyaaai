@@ -31,7 +31,7 @@ export const TraceEntry = z.discriminatedUnion("kind", [
 	z.object({ kind: z.literal("admitted"), entry: z.string(), admission: Admission }),
 	/** Zero retention came on after admission and the route keeps data: the route is not sent to. */
 	z.object({ kind: z.literal("kept"), entry: z.string(), model: z.string() }),
-	/** A send begins. `attempt` counts the route's tries; `again` is an admission after an overload. */
+	/** A send begins. `attempt` counts the route's tries; `again` is an admission after an overload; the count does not move when an overload is tried again. */
 	z.object({
 		kind: z.literal("attempt"),
 		entry: z.string(),

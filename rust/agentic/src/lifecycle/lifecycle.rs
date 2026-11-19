@@ -2,9 +2,12 @@
 
 use std::collections::HashSet;
 use std::error::Error;
+use std::future::Future;
 use std::panic::{AssertUnwindSafe, catch_unwind};
+use std::pin::Pin;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, MutexGuard};
+use std::task::{Context, Poll};
 
 use nyaaai_contract::cancel::CancelToken;
 use nyaaai_contract::future::BoxFuture;
@@ -21,12 +24,14 @@ use nyaaai_contract::shapes::lifecycle::{
     TraceEntryServed, TraceEntrySettled, TraceEntrySkip, TraceEntrySkipCause, TraceEntryStopped,
     TraceEntryThrew,
 };
-use nyaaai_contract::shapes::provider::{Disposition, NoticeKind, Passed, Skip, SkipReason};
+use nyaaai_contract::shapes::provider::{
+    Disposition, Limits, NoticeKind, Passed, Skip, SkipReason,
+};
 use nyaaai_contract::shapes::step::{
     Failure, FailureBilled, FailureCategory, FailureStatus, NormalizedUsage, StepResult,
 };
 use nyaaai_contract::shapes::usage::{CallTag, MeteredCall};
-use nyaaai_contract::time::Scheduler;
+use nyaaai_contract::time::{Scheduler, Slept, deadline};
 
 use super::retry::RetryPolicy;
 use crate::failure::failure_of;
@@ -167,6 +172,9 @@ enum Gated {
 
 const LIVE_TRIES: i64 = 2;
 
+/// The most a limits read may take.
+const LIMITS_MS: i64 = 5000;
+
 fn locked<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
     mutex
         .lock()
@@ -211,6 +219,74 @@ fn overloaded(route: &Resolved) -> Ended {
         model: Some(model),
         ..empty_notice(NoticeKind::ProviderOverloaded)
     })
+}
+
+/// The failure a gate's give-up stands for, so the route falls through as an overload does.
+fn gave_up_on(route: &Resolved) -> Failure {
+    Failure {
+        category: FailureCategory::Overloaded,
+        status: FailureStatus::Text("overloaded".to_owned()),
+        retry_after_ms: None,
+        resets_at: None,
+        message: overloaded_text(Some(&route.view.row.label)),
+        reasons: None,
+        billed: None,
+    }
+}
+
+/// Runs a closure when dropped.
+struct OnDrop<F: FnOnce()>(Option<F>);
+
+impl<F: FnOnce()> OnDrop<F> {
+    fn disarm(&mut self) {
+        self.0 = None;
+    }
+}
+
+impl<F: FnOnce()> Drop for OnDrop<F> {
+    fn drop(&mut self) {
+        if let Some(run) = self.0.take() {
+            run();
+        }
+    }
+}
+
+/// A future whose panic ends it with none.
+struct Caught<F>(Pin<Box<F>>);
+
+impl<F: Future> Future for Caught<F> {
+    type Output = Option<F::Output>;
+
+    fn poll(mut self: Pin<&mut Self>, context: &mut Context<'_>) -> Poll<Self::Output> {
+        match catch_unwind(AssertUnwindSafe(|| self.0.as_mut().poll(context))) {
+            Ok(Poll::Ready(held)) => Poll::Ready(Some(held)),
+            Ok(Poll::Pending) => Poll::Pending,
+            Err(_) => Poll::Ready(None),
+        }
+    }
+}
+
+/// A ticket a call holds: dropped unsettled, the call was cancelled, and the gate is told so.
+struct Holding {
+    gate: Option<Arc<dyn Gate>>,
+    ticket: Option<Ticket>,
+}
+
+impl Holding {
+    /// The ticket, to be settled once.
+    fn take(&mut self) -> Option<Ticket> {
+        self.ticket.take()
+    }
+}
+
+impl Drop for Holding {
+    fn drop(&mut self) {
+        if let (Some(gate), Some(ticket)) = (&self.gate, self.ticket.take()) {
+            let _ = catch_unwind(AssertUnwindSafe(|| {
+                gate.settle(&ticket, GateOutcome::Cancelled, None)
+            }));
+        }
+    }
 }
 
 fn empty_notice(kind: NoticeKind) -> Notice {
@@ -306,6 +382,8 @@ impl RequestLifecycle {
         }
     }
 
+    /// A caller may end a call by its token or by dropping the future: a dropped call is a call
+    /// that was cancelled, its ticket is settled `cancelled` and the meter gets its record.
     pub async fn run<'a, C: Call>(
         &self,
         candidates: &'a [Resolved],
@@ -505,12 +583,20 @@ impl Inner {
                     }));
                 }
                 Gated::GaveUp => {
+                    // A give-up ends a route that is not the last, not the request.
+                    if onward {
+                        return Ok(Tried::Onward(gave_up_on(route)));
+                    }
                     return Ok(Tried::Done(Attempt::Failed {
                         outcome: overloaded(route),
                         failure: None,
                     }));
                 }
                 Gated::Go(ticket) => ticket,
+            };
+            let mut holding = Holding {
+                gate: self.gate.clone(),
+                ticket,
             };
             // Recheck ZDR on admission.
             if route.zdr_only() && route.view.data_kept.is_some() {
@@ -520,7 +606,13 @@ impl Inner {
                         model: route.key.clone(),
                     })
                 });
-                self.settle(route, ticket.as_ref(), GateOutcome::Cancelled, None, o);
+                self.settle(
+                    route,
+                    holding.take().as_ref(),
+                    GateOutcome::Cancelled,
+                    None,
+                    o,
+                );
                 return Ok(Tried::Kept);
             }
             trace(o, || {
@@ -534,21 +626,27 @@ impl Inner {
             });
             let error = match self.metered(route, call, o).await {
                 Ok(value) => {
-                    self.settle(route, ticket.as_ref(), GateOutcome::Ok, None, o);
+                    self.settle(route, holding.take().as_ref(), GateOutcome::Ok, None, o);
                     self.served(route, C::usage(&value), run, TraceEntryBillingReply::Ok, o);
                     return Ok(Tried::Done(Attempt::Served { value, route }));
                 }
                 Err(error) => error,
             };
             if call.cancel().is_cancelled() {
-                self.settle(route, ticket.as_ref(), GateOutcome::Cancelled, None, o);
+                self.settle(
+                    route,
+                    holding.take().as_ref(),
+                    GateOutcome::Cancelled,
+                    None,
+                    o,
+                );
                 return Ok(Tried::Done(Attempt::Failed {
                     outcome: Ended::Stopped,
                     failure: None,
                 }));
             }
             let Some(failure) = failure_of(&*error).cloned() else {
-                self.settle(route, ticket.as_ref(), GateOutcome::Failed, None, o);
+                self.settle(route, holding.take().as_ref(), GateOutcome::Failed, None, o);
                 trace(o, || {
                     TraceEntry::Threw(TraceEntryThrew {
                         entry: route.entry.id.clone(),
@@ -579,7 +677,7 @@ impl Inner {
             if failure.category == FailureCategory::Overloaded {
                 let settled = self.settle(
                     route,
-                    ticket.as_ref(),
+                    holding.take().as_ref(),
                     GateOutcome::Overloaded,
                     failure.retry_after_ms,
                     o,
@@ -603,7 +701,7 @@ impl Inner {
                 again = true;
                 continue;
             }
-            self.settle(route, ticket.as_ref(), GateOutcome::Failed, None, o);
+            self.settle(route, holding.take().as_ref(), GateOutcome::Failed, None, o);
             let disposition = route.kind.failure(&failure, Some(&route.view));
             failed_at(Some(disposition.clone()));
             if !fresh {
@@ -660,7 +758,7 @@ impl Inner {
             attempt += 1;
             waited += wait_ms;
             let slept = self.scheduler.sleep(wait_ms as i64, call.cancel()).await;
-            if slept == nyaaai_contract::time::Slept::Cancelled {
+            if slept == Slept::Cancelled {
                 return Ok(Tried::Done(Attempt::Failed {
                     outcome: Ended::Stopped,
                     failure: None,
@@ -773,7 +871,22 @@ impl Inner {
                 *held = Some((self.scheduler.now_ms() - at) as f64);
             }
         };
+        // A call dropped while it sends was cancelled: the meter still gets its record.
+        let mut dropped = OnDrop(Some(|| {
+            record(&|| {
+                let spent = call.billed();
+                Metered {
+                    usage: spent.as_ref().and_then(|held| held.usage.clone()),
+                    provider: spent.as_ref().and_then(|held| held.host.clone()),
+                    generation_id: spent.as_ref().and_then(|held| held.generation_id.clone()),
+                    finish_reason: None,
+                    failure: None,
+                    cancelled: Some(true),
+                }
+            });
+        }));
         let sent = call.send(route, &first_token).await;
+        dropped.disarm();
         match sent {
             Err(error) => {
                 record(&|| {
@@ -866,9 +979,16 @@ impl Inner {
                 o.on_wait(Some(&waiting));
             })
         };
+        // A call dropped while it waits leaves the queue: its own token ends, the caller's stays.
+        let waiting = cancel.child();
+        let mut stop = OnDrop(Some({
+            let waiting = waiting.clone();
+            move || waiting.cancel()
+        }));
         let admission = gate
-            .admit(RouteRef::from(route), cancel, Some(on_wait), again)
+            .admit(RouteRef::from(route), &waiting, Some(on_wait), again)
             .await;
+        stop.disarm();
         trace(o, || {
             TraceEntry::Admitted(TraceEntryAdmitted {
                 entry: route.entry.id.clone(),
@@ -920,6 +1040,27 @@ impl Inner {
         Some(answer)
     }
 
+    /// The kind's limits, none when the read fails or outlives its bound.
+    async fn limits_of(&self, route: &Resolved, cancel: &CancelToken) -> Option<Limits> {
+        let bound = deadline(&*self.scheduler, LIMITS_MS, cancel);
+        let read = catch_unwind(AssertUnwindSafe(|| {
+            route
+                .kind
+                .limits(route.transport.transport(), bound.token())
+        }));
+        let found = match read {
+            Ok(read) => bound
+                .token()
+                .run_until(Caught(Box::pin(read)))
+                .await
+                .flatten()
+                .flatten(),
+            Err(_) => None,
+        };
+        bound.clear();
+        found
+    }
+
     async fn notice_for(
         &self,
         kind: NoticeKind,
@@ -942,7 +1083,7 @@ impl Inner {
         if kind == NoticeKind::SpendLimit {
             let has = route.kind.has_limits();
             let limits = if has {
-                route.kind.limits(route.transport.transport(), cancel).await
+                self.limits_of(route, cancel).await
             } else {
                 None
             };
@@ -978,7 +1119,8 @@ impl Inner {
     }
 }
 
-/// Tracks per-run route state.
+/// Tracks per-run route state: `keep` holds every entry that served a step of the run, whatever it
+/// billed.
 pub struct RunRoute {
     d: Arc<Inner>,
     keep: Mutex<HashSet<String>>,

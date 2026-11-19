@@ -903,6 +903,12 @@ async fn play(input: LifecycleRunInput) -> Outcome<LifecycleRunResult> {
                 break;
             }
         }
+        if played.waited() > 0 {
+            return Err(format!(
+                "step {} gave two calls the network at once",
+                steps.len() + 1
+            ));
+        }
         steps.push(LifecycleRunResultStepsItem {
             now_ms: wheel.now_ms(),
             answer,
@@ -1009,5 +1015,475 @@ async fn plan_of(
     match resolver.routes(model, use_.unwrap_or(&CHAT)).await {
         Planned::Routes(routes) => Ok(Arc::new(routes)),
         Planned::Unresolved(_) => Err(format!("No routes for {model}.")),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::task::{Context, Waker};
+
+    use nyaaai_agentic::failure::FailureExtra;
+    use nyaaai_agentic::usage::meter::Meter;
+    use nyaaai_contract::shapes::health::{
+        Admission, AdmissionGaveUp, AdmissionGo, GateOutcome, GateSettled, Ticket,
+    };
+    use nyaaai_contract::shapes::lifecycle::TraceEntrySkipCause;
+    use nyaaai_contract::shapes::provider::{NoticeKind, SkipReason};
+    use nyaaai_contract::shapes::step::{FailureStatus, Serving};
+
+    use super::*;
+
+    const ROW: &str = "openai/gpt-6-luna";
+
+    #[derive(Clone, Copy)]
+    enum Admits {
+        GaveUp,
+        Go,
+        Never,
+    }
+
+    /// A gate that answers as told and notes what it was asked.
+    struct Fake {
+        admits: Admits,
+        tokens: Mutex<Vec<CancelToken>>,
+        settled: Mutex<Vec<(Ticket, GateOutcome)>>,
+        failed: Mutex<Vec<(String, Failure, bool)>>,
+    }
+
+    impl Fake {
+        fn new(admits: Admits) -> Arc<Self> {
+            Arc::new(Self {
+                admits,
+                tokens: Mutex::default(),
+                settled: Mutex::default(),
+                failed: Mutex::default(),
+            })
+        }
+    }
+
+    impl Gate for Fake {
+        fn admit(
+            &self,
+            route: nyaaai_agentic::health::health::RouteRef<'_>,
+            cancel: &CancelToken,
+            _on_wait: Option<nyaaai_agentic::health::gate::WaitFn>,
+            _again: bool,
+        ) -> BoxFuture<'static, Admission> {
+            locked(&self.tokens).push(cancel.clone());
+            let model = route.key.to_owned();
+            match self.admits {
+                Admits::GaveUp => Box::pin(async { Admission::GaveUp(AdmissionGaveUp {}) }),
+                Admits::Go => Box::pin(async move {
+                    Admission::Go(AdmissionGo {
+                        ticket: Ticket {
+                            gate: "gate-1".to_owned(),
+                            model,
+                            generation: 0,
+                            probe: false,
+                            serial: 1,
+                        },
+                    })
+                }),
+                Admits::Never => Box::pin(std::future::pending()),
+            }
+        }
+
+        fn try_admit(
+            &self,
+            _route: nyaaai_agentic::health::health::RouteRef<'_>,
+        ) -> Option<Ticket> {
+            None
+        }
+
+        fn settle(
+            &self,
+            ticket: &Ticket,
+            outcome: GateOutcome,
+            _retry_after_ms: Option<i64>,
+        ) -> GateSettled {
+            locked(&self.settled).push((ticket.clone(), outcome));
+            GateSettled::Done
+        }
+
+        fn deferred(
+            &self,
+            _route: nyaaai_agentic::health::health::RouteRef<'_>,
+            _keep: Option<&std::collections::HashSet<String>>,
+        ) -> Option<SkipReason> {
+            None
+        }
+
+        fn blocked(
+            &self,
+            _route: nyaaai_agentic::health::health::RouteRef<'_>,
+            _keep: Option<&std::collections::HashSet<String>>,
+        ) -> Option<nyaaai_contract::shapes::health::Blocked> {
+            None
+        }
+
+        fn failed(
+            &self,
+            route: nyaaai_agentic::health::health::RouteRef<'_>,
+            failure: &Failure,
+            onward: bool,
+        ) {
+            locked(&self.failed).push((route.entry.id.clone(), failure.clone(), onward));
+        }
+
+        fn served(
+            &self,
+            _route: nyaaai_agentic::health::health::RouteRef<'_>,
+            _usage: Option<&NormalizedUsage>,
+            _run: Option<&mut std::collections::HashSet<String>>,
+        ) {
+        }
+    }
+
+    #[derive(Default)]
+    struct Records(Mutex<Vec<MeteredCall>>);
+
+    impl Meter for Records {
+        fn called(&self, call: &MeteredCall) {
+            locked(&self.0).push(call.clone());
+        }
+    }
+
+    #[derive(Default)]
+    struct Told(Mutex<Vec<TraceEntry>>);
+
+    impl Observer for Told {
+        fn traces(&self) -> bool {
+            true
+        }
+
+        fn on_trace(&self, entry: TraceEntry) {
+            locked(&self.0).push(entry);
+        }
+    }
+
+    #[derive(Clone, Copy)]
+    enum Sends {
+        Reply,
+        Never,
+        Down,
+    }
+
+    struct Probe {
+        cancel: CancelToken,
+        sends: Sends,
+    }
+
+    impl Call for Probe {
+        type Value = StepResult;
+
+        fn tag(&self) -> &CallTag {
+            static TAG: std::sync::LazyLock<CallTag> = std::sync::LazyLock::new(|| CallTag {
+                feature: "chat".to_owned(),
+                lane: None,
+                folder: None,
+            });
+            &TAG
+        }
+
+        fn cancel(&self) -> &CancelToken {
+            &self.cancel
+        }
+
+        fn send<'a>(
+            &'a self,
+            _route: &'a Resolved,
+            _first_token: &'a (dyn Fn() + Send + Sync),
+        ) -> BoxFuture<'a, Result<StepResult, SendError>> {
+            match self.sends {
+                Sends::Reply => Box::pin(async {
+                    Ok(StepResult {
+                        parts: Vec::new(),
+                        finish: FinishReason::Stop,
+                        usage: None,
+                        serving: Serving {
+                            host: None,
+                            generation_id: None,
+                        },
+                    })
+                }),
+                Sends::Never => Box::pin(std::future::pending()),
+                Sends::Down => Box::pin(async {
+                    Err(Box::new(failed(
+                        FailureCategory::Unavailable,
+                        "down",
+                        FailureExtra {
+                            status: Some(FailureStatus::Number(503.0)),
+                            ..FailureExtra::default()
+                        },
+                    )) as SendError)
+                }),
+            }
+        }
+
+        fn read(&self, value: &StepResult) -> Metered {
+            metered_of(value)
+        }
+
+        fn usage(value: &StepResult) -> Option<&NormalizedUsage> {
+            value.usage.as_ref()
+        }
+    }
+
+    fn entry(id: &str) -> ProviderEntry {
+        ProviderEntry {
+            id: id.to_owned(),
+            kind: ProviderKindName::Openrouter,
+            label: id.to_owned(),
+            plan: None,
+            url: None,
+            extra_usage: None,
+        }
+    }
+
+    struct Rig {
+        resolver: ModelResolver,
+        wheel: Arc<TimerWheel>,
+        scheduler: Arc<FakeScheduler>,
+    }
+
+    fn rig(ids: &[&str]) -> Rig {
+        let wheel = Arc::new(TimerWheel::new(0));
+        let scheduler = Arc::new(FakeScheduler::new(Arc::clone(&wheel)));
+        let deps = KindDeps {
+            fetch: Arc::new(ScriptedFetch::new(Vec::new(), Arc::clone(&wheel))),
+            scheduler: scheduler.clone(),
+            log: Arc::new(|_| {}),
+            user_agent: "cases/1.0".to_owned(),
+            base_url: None,
+        };
+        let keys = Arc::new(ScriptedEntryKeys::new());
+        for id in ids {
+            keys.set(id, KeyAnswer::Key("key-0123456789abcdef".to_owned()));
+        }
+        let registry = Arc::new(ScriptedModelRegistry::empty());
+        registry.set_rows(vec![row_of_key(ROW).expect("a curated row")]);
+        let stub = Kind {
+            real: real_of(ProviderKindName::Openrouter).expect("a kind"),
+            stub: Some(Stub {
+                rows: registry.clone(),
+                listings: Arc::new(Listings::new()),
+                zdr: Arc::new(AtomicBool::new(false)),
+            }),
+            checked: false,
+        };
+        let resolver = ModelResolver::new(ResolverDeps {
+            list: Arc::new(ScriptedProviderList::new(
+                ids.iter().map(|id| entry(id)).collect(),
+            )),
+            keys,
+            registry: registry as Arc<dyn ModelRegistry>,
+            kinds: vec![Arc::new(stub)],
+            kind_deps: Arc::new(move |_| deps.clone()),
+            zdr_only: Arc::new(|| false),
+            refreshed: None,
+        });
+        Rig {
+            resolver,
+            wheel,
+            scheduler,
+        }
+    }
+
+    fn lifecycle_of(rig: &Rig, gate: &Arc<Fake>, records: &Arc<Records>) -> RequestLifecycle {
+        RequestLifecycle::new(LifecycleDeps {
+            gate: Some(gate.clone() as Arc<dyn Gate>),
+            meter: Some(records.clone() as Arc<dyn Meter>),
+            retry: None,
+            scheduler: rig.scheduler.clone(),
+        })
+    }
+
+    async fn routes_of(rig: &Rig) -> Routes {
+        match rig.resolver.routes(ROW, &CHAT).await {
+            Planned::Routes(routes) => routes,
+            Planned::Unresolved(_) => panic!("no routes"),
+        }
+    }
+
+    fn kinds_of(told: &Told) -> Vec<&'static str> {
+        locked(&told.0)
+            .iter()
+            .map(|entry| match entry {
+                TraceEntry::Admitted(_) => "admitted",
+                TraceEntry::GateFailed(_) => "gateFailed",
+                TraceEntry::Skip(_) => "skip",
+                TraceEntry::Notice(_) => "notice",
+                TraceEntry::Attempt(_) => "attempt",
+                TraceEntry::Settled(_) => "settled",
+                TraceEntry::Metered(_) => "metered",
+                _ => "other",
+            })
+            .collect()
+    }
+
+    #[test]
+    fn a_give_up_on_a_first_route_falls_through_and_on_the_last_ends_the_request() {
+        block_on(async {
+            let rig = rig(&["a", "b"]);
+            let routes = routes_of(&rig).await;
+            let gate = Fake::new(Admits::GaveUp);
+            let records = Arc::new(Records::default());
+            let told = Arc::new(Told::default());
+            let observer: Arc<dyn Observer> = told.clone();
+            let call = Probe {
+                cancel: CancelToken::new(),
+                sends: Sends::Reply,
+            };
+            let result = lifecycle_of(&rig, &gate, &records)
+                .run(&routes.candidates, &call, &observer)
+                .await;
+            let Ok(Attempt::Failed {
+                outcome: Ended::Notice(notice),
+                ..
+            }) = result
+            else {
+                panic!("the request should end on a notice");
+            };
+            assert_eq!(notice.kind, NoticeKind::ProviderOverloaded);
+            assert_eq!(
+                kinds_of(&told),
+                ["admitted", "gateFailed", "skip", "admitted", "notice"]
+            );
+            let skip = locked(&told.0)
+                .iter()
+                .find_map(|entry| match entry {
+                    TraceEntry::Skip(held) => Some((held.cause, held.reason)),
+                    _ => None,
+                })
+                .expect("a skip");
+            assert_eq!(
+                skip,
+                (TraceEntrySkipCause::FellThrough, SkipReason::Overloaded)
+            );
+            let failed = locked(&gate.failed).clone();
+            assert_eq!(failed.len(), 1);
+            assert_eq!(failed[0].0, "a");
+            assert_eq!(failed[0].1.category, FailureCategory::Overloaded);
+            assert_eq!(
+                failed[0].1.status,
+                FailureStatus::Text("overloaded".to_owned())
+            );
+            assert!(failed[0].2);
+        })
+        .expect("ran");
+    }
+
+    fn poll_once<F: Future>(run: &mut Pin<Box<F>>) -> bool {
+        run.as_mut()
+            .poll(&mut Context::from_waker(Waker::noop()))
+            .is_pending()
+    }
+
+    #[test]
+    fn a_call_dropped_at_the_admission_wait_leaves_the_queue() {
+        block_on(async {
+            let rig = rig(&["a"]);
+            let routes = routes_of(&rig).await;
+            let gate = Fake::new(Admits::Never);
+            let records = Arc::new(Records::default());
+            let observer: Arc<dyn Observer> = Arc::new(Told::default());
+            let call = Probe {
+                cancel: CancelToken::new(),
+                sends: Sends::Reply,
+            };
+            let lifecycle = lifecycle_of(&rig, &gate, &records);
+            let mut run = Box::pin(lifecycle.run(&routes.candidates, &call, &observer));
+            assert!(poll_once(&mut run));
+            let waiting = locked(&gate.tokens)[0].clone();
+            assert!(!waiting.is_cancelled());
+            drop(run);
+            assert!(waiting.is_cancelled());
+            assert!(!call.cancel.is_cancelled());
+            assert!(locked(&gate.settled).is_empty());
+            assert!(locked(&records.0).is_empty());
+        })
+        .expect("ran");
+    }
+
+    #[test]
+    fn a_call_dropped_at_the_send_is_settled_cancelled_and_recorded() {
+        block_on(async {
+            let rig = rig(&["a"]);
+            let routes = routes_of(&rig).await;
+            let gate = Fake::new(Admits::Go);
+            let records = Arc::new(Records::default());
+            let observer: Arc<dyn Observer> = Arc::new(Told::default());
+            let call = Probe {
+                cancel: CancelToken::new(),
+                sends: Sends::Never,
+            };
+            let lifecycle = lifecycle_of(&rig, &gate, &records);
+            let mut run = Box::pin(lifecycle.run(&routes.candidates, &call, &observer));
+            assert!(poll_once(&mut run));
+            assert!(locked(&gate.settled).is_empty());
+            drop(run);
+            let settled = locked(&gate.settled).clone();
+            assert_eq!(settled.len(), 1);
+            assert_eq!(settled[0].1, GateOutcome::Cancelled);
+            let records = locked(&records.0).clone();
+            assert_eq!(records.len(), 1);
+            assert_eq!(records[0].cancelled, Some(true));
+            assert_eq!(records[0].failure, None);
+        })
+        .expect("ran");
+    }
+
+    #[test]
+    fn a_call_dropped_at_a_retry_sleep_is_settled_and_recorded_once() {
+        block_on(async {
+            let rig = rig(&["a"]);
+            let routes = routes_of(&rig).await;
+            let gate = Fake::new(Admits::Go);
+            let records = Arc::new(Records::default());
+            let observer: Arc<dyn Observer> = Arc::new(Told::default());
+            let call = Probe {
+                cancel: CancelToken::new(),
+                sends: Sends::Down,
+            };
+            let lifecycle = lifecycle_of(&rig, &gate, &records);
+            let mut run = Box::pin(lifecycle.run(&routes.candidates, &call, &observer));
+            assert!(poll_once(&mut run));
+            assert_eq!(rig.wheel.waiting().len(), 1);
+            drop(run);
+            let settled = locked(&gate.settled).clone();
+            assert_eq!(settled.len(), 1);
+            assert_eq!(settled[0].1, GateOutcome::Failed);
+            let records = locked(&records.0).clone();
+            assert_eq!(records.len(), 1);
+            assert_eq!(records[0].cancelled, None);
+            assert!(records[0].failure.is_some());
+        })
+        .expect("ran");
+    }
+
+    #[test]
+    fn a_call_that_ends_normally_is_settled_and_recorded_once() {
+        block_on(async {
+            let rig = rig(&["a"]);
+            let routes = routes_of(&rig).await;
+            let gate = Fake::new(Admits::Go);
+            let records = Arc::new(Records::default());
+            let observer: Arc<dyn Observer> = Arc::new(Told::default());
+            let call = Probe {
+                cancel: CancelToken::new(),
+                sends: Sends::Reply,
+            };
+            let lifecycle = lifecycle_of(&rig, &gate, &records);
+            let result = lifecycle.run(&routes.candidates, &call, &observer).await;
+            assert!(matches!(result, Ok(Attempt::Served { .. })));
+            let settled = locked(&gate.settled).clone();
+            assert_eq!(settled.len(), 1);
+            assert_eq!(settled[0].1, GateOutcome::Ok);
+            let records = locked(&records.0).clone();
+            assert_eq!(records.len(), 1);
+            assert_eq!(records[0].cancelled, None);
+            assert_eq!(records[0].failure, None);
+        })
+        .expect("ran");
     }
 }

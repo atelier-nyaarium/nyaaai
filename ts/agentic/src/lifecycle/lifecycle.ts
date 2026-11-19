@@ -15,10 +15,11 @@ import type { TraceEntry } from "@nyaaai/contract/shapes/lifecycle";
 import type { NoticeKind, Passed, Skip, SkipReason } from "@nyaaai/contract/shapes/provider";
 import type { Failure, NormalizedUsage, StepResult } from "@nyaaai/contract/shapes/step";
 import type { CallTag, MeteredCall } from "@nyaaai/contract/shapes/usage";
-import type { Scheduler } from "@nyaaai/contract/time";
+import { deadline, type Scheduler } from "@nyaaai/contract/time";
 import { failureOf } from "../failure";
 import type { Gate } from "../health/health";
 import { told } from "../kinds/join";
+import { raced } from "../models/view";
 import { overloadedText, unavailableText } from "../noticeText";
 import { skipReasonOf } from "../provider/disposition";
 import type { Candidates, Resolved, Routes } from "../provider/resolver";
@@ -105,6 +106,9 @@ export const STOPPED: Ended = { kind: "stopped" };
 
 const LIVE_TRIES = 2;
 
+/** The most a limits read may take. */
+const LIMITS_MS = 5000;
+
 ////////////////////////////////
 //  Functions & Helpers
 
@@ -123,6 +127,11 @@ export function notice(kind: NoticeKind, failure?: Failure, route?: Resolved): E
 function overloaded(route: Resolved): Ended {
 	const model = route.view.row.label;
 	return { kind: "notice", notice: { kind: "providerOverloaded", model, message: overloadedText(model) } };
+}
+
+/** The failure a gate's give-up stands for, so the route falls through as an overload does. */
+function gaveUpOn(route: Resolved): Failure {
+	return { category: "overloaded", status: "overloaded", message: overloadedText(route.view.row.label) };
 }
 
 /** Tells the sink one entry; nothing is built without a sink, and a throwing sink changes nothing. */
@@ -188,7 +197,7 @@ export class RequestLifecycle {
 		});
 	}
 
-	/** Balance replies extend `keep`; the run's end is the last entry told. */
+	/** Entries that serve a step join `keep`; the run's end is the last entry told. */
 	private async attempt<T extends Billing>(
 		candidates: Candidates,
 		passed: readonly Passed[],
@@ -294,7 +303,11 @@ export class RequestLifecycle {
 				call.live === true ? this.admitLive(route, call.signal, o) : await this.admit(route, call, o, again);
 			again = false;
 			if (admission.kind === "stopped") return { ok: false, outcome: STOPPED };
-			if (admission.kind === "gaveUp") return { ok: false, outcome: overloaded(route) };
+			if (admission.kind === "gaveUp") {
+				// A give-up ends a route that is not the last, not the request.
+				if (onward) return { onward: gaveUpOn(route) };
+				return { ok: false, outcome: overloaded(route) };
+			}
 			const { ticket } = admission;
 			// Recheck ZDR on admission.
 			if (route.zdrOnly && route.view.dataKept === true) {
@@ -529,6 +542,19 @@ export class RequestLifecycle {
 		return answer;
 	}
 
+	/** The kind's limits, none when the read fails or outlives its bound. */
+	private async limitsOf(route: Resolved, signal: AbortSignal) {
+		if (route.kind.limits === undefined) return undefined;
+		const bound = deadline(this.d.scheduler, LIMITS_MS, signal);
+		try {
+			return await raced(route.kind.limits(route.transport, bound.signal), bound.signal);
+		} catch {
+			return undefined;
+		} finally {
+			bound.clear();
+		}
+	}
+
 	private async noticeFor(
 		kind: NoticeKind,
 		failure: Failure,
@@ -544,7 +570,7 @@ export class RequestLifecycle {
 			ended.notice.message = unavailableText(ended.notice.model, ended.notice.entry);
 		}
 		if (kind === "spendLimit") {
-			const limits = await route.kind.limits?.(route.transport, signal).catch(() => undefined);
+			const limits = await this.limitsOf(route, signal);
 			if (route.kind.limits !== undefined)
 				trace(o, () => ({
 					kind: "limits",
@@ -564,7 +590,7 @@ export class RequestLifecycle {
 	}
 }
 
-/** Tracks per-run route state. */
+/** Tracks per-run route state: `keep` holds every entry that served a step of the run, whatever it billed. */
 export class RunRoute {
 	private readonly keep = new Set<string>();
 	private readonly skipped = new Set<string>();

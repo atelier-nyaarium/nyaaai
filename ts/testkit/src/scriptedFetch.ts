@@ -33,6 +33,8 @@ export interface ScriptedFetch {
 	requests: FetchRequest[];
 	/** Chunks handed out, per exchange of the script. */
 	read: () => number[];
+	/** Requests that found the lane held and had to wait for it. */
+	waited: () => number;
 }
 
 ////////////////////////////////
@@ -50,6 +52,7 @@ export function scriptedFetch(exchanges: readonly ScriptedExchange[], wheel: Tim
 	const served = exchanges.map(() => 0);
 	let next = 0;
 	let busy = false;
+	let waits = 0;
 	const line: Array<{ signal: AbortSignal; go: () => void; refuse: () => void }> = [];
 
 	/** The lane goes to the first waiter whose signal has not ended; the others are refused unseen. */
@@ -138,9 +141,12 @@ export function scriptedFetch(exchanges: readonly ScriptedExchange[], wheel: Tim
 	return {
 		requests,
 		read: () => [...served],
+		waited: () => waits,
 		fetch: async (request, signal) => {
-			if (busy) await wait(signal);
-			else busy = true;
+			if (busy) {
+				waits += 1;
+				await wait(signal);
+			} else busy = true;
 			try {
 				requests.push(request);
 				if (signal.aborted) throw signal.reason;

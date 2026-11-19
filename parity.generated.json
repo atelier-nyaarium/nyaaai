@@ -3487,6 +3487,8 @@
 		"cases/lifecycle/run.a-key-replaced-clears-rejected-the-cooldowns-and-the-bill.json",
 		"cases/lifecycle/run.a-key-replaced-while-a-call-is-held-releases-it.json",
 		"cases/lifecycle/run.a-known-reset-wins-over-a-balance-cooldown.json",
+		"cases/lifecycle/run.a-limits-read-inside-its-bound-is-told.json",
+		"cases/lifecycle/run.a-limits-read-that-outlives-its-bound-gives-the-notice-without-limits.json",
 		"cases/lifecycle/run.a-live-call-gets-two-tries-and-no-more.json",
 		"cases/lifecycle/run.a-live-call-is-never-held-by-a-paused-gate.json",
 		"cases/lifecycle/run.a-live-call-served-by-its-first-try-never-waits.json",

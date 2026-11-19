@@ -642,6 +642,8 @@ export const lifecycle = caseGroup("lifecycle", {
 					}
 					await health.idle();
 					await quiesce();
+					if (played.waited() > 0)
+						throw new Error(`step ${stepOuts.length + 1} gave two calls the network at once`);
 					stepOuts.push({
 						nowMs: wheel.nowMs(),
 						answer,

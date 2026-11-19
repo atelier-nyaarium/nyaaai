@@ -32,6 +32,17 @@ async function drain(chunks: AsyncIterable<Uint8Array>): Promise<string[]> {
 //  Tests
 
 describe("the scripted fetch", () => {
+	it("counts the requests that had to wait for the lane", async () => {
+		const played = scriptedFetch([exchange(), exchange()], new TimerWheel(0));
+		const signal = new AbortController().signal;
+		const first = await played.fetch(REQUEST, signal);
+		expect(played.waited()).toBe(0);
+		const second = played.fetch(REQUEST, signal);
+		await drain(first.chunks);
+		await drain((await second).chunks);
+		expect(played.waited()).toBe(1);
+	});
+
 	it("plays its exchanges in order and records each request and each chunk handed out", async () => {
 		const wheel = new TimerWheel(100);
 		const played = scriptedFetch([exchange(), exchange({ status: 404, chunks: [] })], wheel);

@@ -653,6 +653,16 @@ const notices: CaseSource[] = [
 		exchanges: [failing(402), json({ data: { usage: 49, limit: 50, limit_reset: "monthly" } })],
 		steps: [send("first")],
 	}),
+	run("a-limits-read-that-outlives-its-bound-gives-the-notice-without-limits", {
+		...ALONE,
+		exchanges: [failing(402), json({ data: { usage: 49, limit: 50 } }, 200, [], { headMs: 6000 })],
+		steps: [send("first")],
+	}),
+	run("a-limits-read-inside-its-bound-is-told", {
+		...ALONE,
+		exchanges: [failing(402), json({ data: { usage: 49, limit: 50 } }, 200, [], { headMs: 4000 })],
+		steps: [send("first")],
+	}),
 	run("a-spend-limit-notice-with-no-limits-read-still-ends-the-run", {
 		...ALONE,
 		exchanges: [failing(402), failing(500)],

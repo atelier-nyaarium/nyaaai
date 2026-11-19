@@ -61,6 +61,8 @@ struct LaneState {
     busy: bool,
     line: VecDeque<Waiter>,
     ids: u64,
+    /// Requests that found the lane held.
+    waits: usize,
 }
 
 /// The one lane the network serves on.
@@ -141,6 +143,7 @@ async fn enter(lane: &Arc<Lane>, cancel: &CancelToken) -> Result<Held, FetchErro
                 lane: Arc::clone(lane),
             });
         }
+        state.waits += 1;
         if cancel.is_cancelled() {
             return Err(FetchError::Cancelled);
         }
@@ -208,6 +211,7 @@ impl ScriptedFetch {
                     busy: false,
                     line: VecDeque::new(),
                     ids: 0,
+                    waits: 0,
                 }),
             }),
         }
@@ -216,6 +220,11 @@ impl ScriptedFetch {
     /// Every request given, in order.
     pub fn requests(&self) -> Vec<FetchRequest> {
         locked(&self.state).requests.clone()
+    }
+
+    /// Requests that found the lane held and had to wait for it.
+    pub fn waited(&self) -> usize {
+        lane_locked(&self.lane).waits
     }
 
     /// Chunks handed out, per exchange of the script.
@@ -422,6 +431,7 @@ mod tests {
             assert_eq!(urls(&played), ["a", "b"]);
             assert_eq!(wheel.now_ms(), 20);
             assert_eq!(played.read(), [1, 1]);
+            assert_eq!(played.waited(), 1);
         });
     }
 

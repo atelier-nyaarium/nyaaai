@@ -152,4 +152,31 @@ describe("the lifecycle's trace", () => {
 		expect(result.ok).toBe(true);
 		expect(told.map((entry) => entry.kind)).toEqual(["attempt", "metered", "served"]);
 	});
+
+	it("falls through a route the gate gave the request up on when a route follows, and ends on the last", async () => {
+		const told: TraceEntry[] = [];
+		const [route] = routeOf({ label: 0 });
+		const second = { ...route, entry: { id: "b", kind: "openrouter", label: "Beta" } } as unknown as Resolved;
+		const gate = {
+			admit: async () => ({ kind: "gaveUp" as const }),
+			tryAdmit: () => null,
+			settle: () => "done" as const,
+			deferred: () => undefined,
+			blocked: () => undefined,
+			failed: () => {},
+			served: () => {},
+		};
+		const lifecycle = new RequestLifecycle({ scheduler, gate });
+		const result = await lifecycle.run(
+			[route as Resolved, second],
+			callOf(async () => ({})),
+			{ onTrace: (entry) => told.push(entry) },
+		);
+		expect(result.ok).toBe(false);
+		expect(
+			told.map((entry) => (entry.kind === "skip" ? `skip:${entry.cause}:${entry.reason}` : entry.kind)),
+		).toEqual(["admitted", "gateFailed", "skip:fellThrough:overloaded", "admitted", "notice"]);
+		const live = await lifecycle.run([route as Resolved, second], { ...callOf(async () => ({})), live: true });
+		expect(live.ok).toBe(false);
+	});
 });
