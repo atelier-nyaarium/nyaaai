@@ -1,0 +1,61 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "extra-usage-off-keeps-a-window",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 0,
+							"probe": false,
+							"serial": 1
+						},
+						"at": 59940000
+					}
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "extraUsage",
+							"on": false,
+							"lastBill": "balance"
+						},
+						"nowMs": 60000000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 63000000,
+						"probe": {
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							},
+							"at": 59940000
+						}
+					}
+				]
+			}
+		]
+	}
+}

@@ -1,0 +1,45 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "retry-after-replaces-backoff",
+	"input": {
+		"options": {},
+		"draws": [
+			0
+		],
+		"rows": [
+			{
+				"attempt": 1,
+				"waitedMs": 0,
+				"retryAfterMs": 7
+			},
+			{
+				"attempt": 2,
+				"waitedMs": 0,
+				"retryAfterMs": 7
+			},
+			{
+				"attempt": 3,
+				"waitedMs": 0,
+				"retryAfterMs": 7
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": 7,
+				"draws": 1
+			},
+			{
+				"waitMs": 7,
+				"draws": 1
+			},
+			{
+				"waitMs": 7,
+				"draws": 1
+			}
+		]
+	}
+}

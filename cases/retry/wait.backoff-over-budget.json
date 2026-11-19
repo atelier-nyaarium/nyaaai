@@ -1,0 +1,37 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "backoff-over-budget",
+	"input": {
+		"options": {
+			"baseMs": 100000,
+			"capMs": 200000
+		},
+		"draws": [
+			1
+		],
+		"rows": [
+			{
+				"attempt": 1,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 2,
+				"waitedMs": 0
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": null,
+				"draws": 1
+			},
+			{
+				"waitMs": null,
+				"draws": 1
+			}
+		]
+	}
+}

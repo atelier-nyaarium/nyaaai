@@ -1,0 +1,79 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "known-reset-holds-against-a-balance-bill",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance",
+							"resetsAt": 61800000
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 60600000
+					},
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 61799999
+					},
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 61800000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "reset",
+						"at": 61800000
+					},
+					{
+						"kind": "reset",
+						"at": 61800000
+					},
+					{
+						"kind": "reset",
+						"at": 61800000
+					},
+					{
+						"kind": "balance",
+						"eta": 79800000,
+						"next": 70800000,
+						"probe": null
+					}
+				]
+			}
+		]
+	}
+}

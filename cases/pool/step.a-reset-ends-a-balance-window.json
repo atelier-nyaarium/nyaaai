@@ -1,0 +1,50 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "a-reset-ends-a-balance-window",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 0,
+							"probe": false,
+							"serial": 1
+						},
+						"at": 59940000
+					}
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance",
+							"resetsAt": 63000000
+						},
+						"nowMs": 60000000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "reset",
+						"at": 63000000
+					}
+				]
+			}
+		]
+	}
+}

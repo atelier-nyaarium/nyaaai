@@ -1,0 +1,25 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.stats",
+	"name": "stats-a-non-ascii-id",
+	"input": {
+		"stats": {
+			"provider": "Läb"
+		},
+		"nonFinite": [],
+		"id": "中"
+	},
+	"expected": {
+		"line": {
+			"stats": {
+				"id": "中",
+				"of": {
+					"provider": "Läb"
+				}
+			}
+		},
+		"refusedAt": null,
+		"text": "{\"stats\":{\"id\":\"中\",\"of\":{\"provider\":\"Läb\"}}}\n"
+	}
+}

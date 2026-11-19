@@ -1,0 +1,25 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.stats",
+	"name": "stats-an-empty-id",
+	"input": {
+		"stats": {
+			"provider": "Lab"
+		},
+		"nonFinite": [],
+		"id": ""
+	},
+	"expected": {
+		"line": {
+			"stats": {
+				"id": "",
+				"of": {
+					"provider": "Lab"
+				}
+			}
+		},
+		"refusedAt": null,
+		"text": "{\"stats\":{\"id\":\"\",\"of\":{\"provider\":\"Lab\"}}}\n"
+	}
+}

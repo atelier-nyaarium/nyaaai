@@ -1,0 +1,52 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "capped-high",
+	"input": {
+		"options": {
+			"capMs": 3000
+		},
+		"draws": [
+			1
+		],
+		"rows": [
+			{
+				"attempt": 1,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 2,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 3,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 4,
+				"waitedMs": 0
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": 1000,
+				"draws": 1
+			},
+			{
+				"waitMs": 2000,
+				"draws": 1
+			},
+			{
+				"waitMs": 3000,
+				"draws": 1
+			},
+			{
+				"waitMs": null,
+				"draws": 0
+			}
+		]
+	}
+}

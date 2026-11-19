@@ -1,0 +1,2606 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "matrix-a-day-later",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": true
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "go",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "payg",
+							"extraUsage": false
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance"
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance",
+							"resetsAt": 61800000
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "extraUsage",
+							"on": true
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "extraUsage",
+							"on": false,
+							"lastBill": "balance"
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "admitted",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 1,
+								"probe": false,
+								"serial": 2
+							}
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "settled",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "settled",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 1,
+								"probe": false,
+								"serial": 2
+							}
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "paused",
+					"reason": "credit",
+					"until": 60600000
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "paused",
+					"reason": "credit",
+					"until": 60600000
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": true
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "paused",
+					"reason": "credit",
+					"until": 60600000
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "go",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "paused",
+					"reason": "credit",
+					"until": 60600000
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "payg",
+							"extraUsage": false
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "paused",
+					"reason": "credit",
+					"until": 60600000
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance"
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "paused",
+					"reason": "credit",
+					"until": 60600000
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance",
+							"resetsAt": 61800000
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "paused",
+					"reason": "credit",
+					"until": 60600000
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "extraUsage",
+							"on": true
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "paused",
+					"reason": "credit",
+					"until": 60600000
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "extraUsage",
+							"on": false,
+							"lastBill": "balance"
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "paused",
+					"reason": "credit",
+					"until": 60600000
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "admitted",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 1,
+								"probe": false,
+								"serial": 2
+							}
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "paused",
+					"reason": "credit",
+					"until": 60600000
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "settled",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "paused",
+					"reason": "credit",
+					"until": 60600000
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "settled",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 1,
+								"probe": false,
+								"serial": 2
+							}
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "reset",
+					"at": 63600000
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "reset",
+					"at": 63600000
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": true
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "reset",
+					"at": 63600000
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "go",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "reset",
+					"at": 63600000
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "payg",
+							"extraUsage": false
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "reset",
+					"at": 63600000
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance"
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "reset",
+					"at": 63600000
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance",
+							"resetsAt": 61800000
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "reset",
+					"at": 63600000
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "extraUsage",
+							"on": true
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "reset",
+					"at": 63600000
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "extraUsage",
+							"on": false,
+							"lastBill": "balance"
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "reset",
+					"at": 63600000
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "admitted",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 1,
+								"probe": false,
+								"serial": 2
+							}
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "reset",
+					"at": 63600000
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "settled",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "reset",
+					"at": 63600000
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "settled",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 1,
+								"probe": false,
+								"serial": 2
+							}
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": true
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "go",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "payg",
+							"extraUsage": false
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance"
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance",
+							"resetsAt": 61800000
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "extraUsage",
+							"on": true
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "extraUsage",
+							"on": false,
+							"lastBill": "balance"
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "admitted",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 1,
+								"probe": false,
+								"serial": 2
+							}
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "settled",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "settled",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 1,
+								"probe": false,
+								"serial": 2
+							}
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": true
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "go",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "payg",
+							"extraUsage": false
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance"
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance",
+							"resetsAt": 61800000
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "extraUsage",
+							"on": true
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "extraUsage",
+							"on": false,
+							"lastBill": "balance"
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "admitted",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 1,
+								"probe": false,
+								"serial": 2
+							}
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "settled",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "settled",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 1,
+								"probe": false,
+								"serial": 2
+							}
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 0,
+							"probe": false,
+							"serial": 1
+						},
+						"at": 59940000
+					}
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 0,
+							"probe": false,
+							"serial": 1
+						},
+						"at": 59940000
+					}
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": true
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 0,
+							"probe": false,
+							"serial": 1
+						},
+						"at": 59940000
+					}
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "go",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 0,
+							"probe": false,
+							"serial": 1
+						},
+						"at": 59940000
+					}
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "payg",
+							"extraUsage": false
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 0,
+							"probe": false,
+							"serial": 1
+						},
+						"at": 59940000
+					}
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance"
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 0,
+							"probe": false,
+							"serial": 1
+						},
+						"at": 59940000
+					}
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance",
+							"resetsAt": 61800000
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 0,
+							"probe": false,
+							"serial": 1
+						},
+						"at": 59940000
+					}
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "extraUsage",
+							"on": true
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 0,
+							"probe": false,
+							"serial": 1
+						},
+						"at": 59940000
+					}
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "extraUsage",
+							"on": false,
+							"lastBill": "balance"
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 0,
+							"probe": false,
+							"serial": 1
+						},
+						"at": 59940000
+					}
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "admitted",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 1,
+								"probe": false,
+								"serial": 2
+							}
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 0,
+							"probe": false,
+							"serial": 1
+						},
+						"at": 59940000
+					}
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "settled",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 0,
+							"probe": false,
+							"serial": 1
+						},
+						"at": 59940000
+					}
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "settled",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 1,
+								"probe": false,
+								"serial": 2
+							}
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 59880000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 59880000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": true
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 59880000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "go",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 59880000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "payg",
+							"extraUsage": false
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 59880000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance"
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 59880000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance",
+							"resetsAt": 61800000
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 59880000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "extraUsage",
+							"on": true
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 59880000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "extraUsage",
+							"on": false,
+							"lastBill": "balance"
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 59880000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "admitted",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 1,
+								"probe": false,
+								"serial": 2
+							}
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 59880000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "settled",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 59880000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "settled",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 1,
+								"probe": false,
+								"serial": 2
+							}
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 60240000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 60240000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": true
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 60240000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "go",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 60240000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "payg",
+							"extraUsage": false
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 60240000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance"
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 60240000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance",
+							"resetsAt": 61800000
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 60240000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "extraUsage",
+							"on": true
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 60240000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "extraUsage",
+							"on": false,
+							"lastBill": "balance"
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 60240000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "admitted",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 1,
+								"probe": false,
+								"serial": 2
+							}
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 60240000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "settled",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						},
+						"nowMs": 146400000
+					}
+				]
+			},
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 60240000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "settled",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 1,
+								"probe": false,
+								"serial": 2
+							}
+						},
+						"nowMs": 146400000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 164400000,
+						"next": 155400000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "clear"
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "clear"
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "clear"
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "paused",
+						"reason": "allowance",
+						"until": 146460000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "reset",
+						"at": 61800000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "clear"
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 164400000,
+						"next": 155400000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "clear"
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "clear"
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "clear"
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 164400000,
+						"next": 155400000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 60600000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 60600000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 60600000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "paused",
+						"reason": "allowance",
+						"until": 146460000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "reset",
+						"at": 61800000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 60600000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 164400000,
+						"next": 155400000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 60600000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 60600000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 60600000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 164400000,
+						"next": 155400000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "reset",
+						"at": 63600000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "reset",
+						"at": 63600000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "reset",
+						"at": 63600000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "paused",
+						"reason": "allowance",
+						"until": 146460000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "reset",
+						"at": 61800000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "reset",
+						"at": 63600000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 164400000,
+						"next": 155400000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "reset",
+						"at": 63600000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "reset",
+						"at": 63600000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "reset",
+						"at": 63600000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 164400000,
+						"next": 155400000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 59940000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "clear"
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 59940000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "paused",
+						"reason": "allowance",
+						"until": 146460000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "reset",
+						"at": 61800000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "clear"
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 164400000,
+						"next": 155400000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 59940000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 59940000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 59940000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 164400000,
+						"next": 155400000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 60600000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "clear"
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 60600000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "paused",
+						"reason": "allowance",
+						"until": 146460000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "reset",
+						"at": 61800000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "clear"
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 164400000,
+						"next": 155400000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 60600000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 60600000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 60600000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 164400000,
+						"next": 155400000,
+						"probe": {
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							},
+							"at": 59940000
+						}
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 59940000,
+						"probe": {
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							},
+							"at": 59940000
+						}
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "clear"
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 59940000,
+						"probe": {
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							},
+							"at": 59940000
+						}
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "paused",
+						"reason": "allowance",
+						"until": 146460000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "reset",
+						"at": 61800000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "clear"
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 164400000,
+						"next": 155400000,
+						"probe": {
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							},
+							"at": 59940000
+						}
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 59940000,
+						"probe": {
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							},
+							"at": 59940000
+						}
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 59940000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 59940000,
+						"probe": {
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							},
+							"at": 59940000
+						}
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 164400000,
+						"next": 155400000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 59940000,
+						"next": 59880000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "clear"
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 59940000,
+						"next": 59880000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "paused",
+						"reason": "allowance",
+						"until": 146460000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "reset",
+						"at": 61800000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "clear"
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 164400000,
+						"next": 155400000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 59940000,
+						"next": 59880000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 59940000,
+						"next": 59880000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 59940000,
+						"next": 59880000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 164400000,
+						"next": 155400000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 59940000,
+						"next": 60240000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "clear"
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 59940000,
+						"next": 60240000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "paused",
+						"reason": "allowance",
+						"until": 146460000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "reset",
+						"at": 61800000
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "clear"
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 164400000,
+						"next": 155400000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 59940000,
+						"next": 60240000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 59940000,
+						"next": 60240000,
+						"probe": null
+					}
+				]
+			},
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 59940000,
+						"next": 60240000,
+						"probe": null
+					}
+				]
+			}
+		]
+	}
+}

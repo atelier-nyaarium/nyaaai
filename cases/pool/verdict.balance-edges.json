@@ -1,0 +1,211 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.verdict",
+	"name": "balance-edges",
+	"input": {
+		"rows": [
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60000000,
+					"probe": null
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60000001,
+					"probe": null
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 60000000,
+					"next": 60300000,
+					"probe": null
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 60000001,
+					"next": 60300000,
+					"probe": null
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 60000000,
+					"next": 59999999,
+					"probe": null
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 60000000,
+					"next": 60000000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 0,
+							"probe": false,
+							"serial": 1
+						},
+						"at": 59940000
+					}
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 60000001,
+					"next": 60000000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 0,
+							"probe": false,
+							"serial": 1
+						},
+						"at": 59940000
+					}
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 0,
+							"probe": false,
+							"serial": 1
+						},
+						"at": 60000000
+					}
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 0,
+							"probe": false,
+							"serial": 1
+						},
+						"at": 54600000
+					}
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 60120000,
+					"next": 59940000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 0,
+							"probe": false,
+							"serial": 1
+						},
+						"at": 59940000
+					}
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			}
+		]
+	},
+	"expected": {
+		"verdicts": [
+			null,
+			{
+				"skip": "allowance",
+				"blocked": {
+					"kind": "spendLimit",
+					"nextTryAt": 60000001
+				}
+			},
+			{
+				"skip": "allowance",
+				"blocked": {
+					"kind": "spendLimit",
+					"nextTryAt": 60300000
+				}
+			},
+			{
+				"skip": "allowance",
+				"blocked": {
+					"kind": "spendLimit",
+					"nextTryAt": 60300000
+				}
+			},
+			null,
+			null,
+			{
+				"skip": "allowance",
+				"blocked": {
+					"kind": "spendLimit",
+					"nextTryAt": 60240000
+				}
+			},
+			{
+				"skip": "allowance",
+				"blocked": {
+					"kind": "spendLimit",
+					"nextTryAt": 63000000
+				}
+			},
+			{
+				"skip": "allowance",
+				"blocked": {
+					"kind": "spendLimit",
+					"nextTryAt": 60300000
+				}
+			},
+			{
+				"skip": "allowance",
+				"blocked": {
+					"kind": "spendLimit",
+					"nextTryAt": 60240000
+				}
+			}
+		]
+	}
+}

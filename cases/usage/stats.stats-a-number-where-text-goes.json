@@ -1,0 +1,18 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.stats",
+	"name": "stats-a-number-where-text-goes",
+	"input": {
+		"stats": {
+			"provider": 5
+		},
+		"nonFinite": [],
+		"id": "call-1"
+	},
+	"expected": {
+		"line": null,
+		"refusedAt": "provider",
+		"text": null
+	}
+}

@@ -18,6 +18,7 @@
 		"./fetch": "./src/fetch.ts",
 		"./gemini/codec": "./src/gemini/codec.ts",
 		"./gemini/wire": "./src/gemini/wire.ts",
+		"./health/pool": "./src/health/pool.ts",
 		"./hosts/opencode": "./src/hosts/opencode.ts",
 		"./kinds/compatible": "./src/kinds/compatible.ts",
 		"./kinds/join": "./src/kinds/join.ts",
@@ -35,6 +36,7 @@
 		"./kinds/openrouter/key": "./src/kinds/openrouter/key.ts",
 		"./kinds/openrouter/kind": "./src/kinds/openrouter/kind.ts",
 		"./kinds/readers": "./src/kinds/readers.ts",
+		"./lifecycle/retry": "./src/lifecycle/retry.ts",
 		"./messages/codec": "./src/messages/codec.ts",
 		"./messages/wire": "./src/messages/wire.ts",
 		"./models/curated": "./src/models/curated.ts",
@@ -53,6 +55,8 @@
 		"./schemaProjection": "./src/schemaProjection.ts",
 		"./sse": "./src/sse.ts",
 		"./step": "./src/step.ts",
-		"./transport": "./src/transport.ts"
+		"./transport": "./src/transport.ts",
+		"./usage/cost": "./src/usage/cost.ts",
+		"./usage/record": "./src/usage/record.ts"
 	}
 }

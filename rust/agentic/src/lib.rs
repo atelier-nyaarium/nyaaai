@@ -6,8 +6,10 @@ pub mod failure;
 #[cfg(feature = "http")]
 pub mod fetch;
 pub mod gemini;
+pub mod health;
 pub mod hosts;
 pub mod kinds;
+pub mod lifecycle;
 pub mod loose;
 pub mod messages;
 pub mod models;
@@ -19,3 +21,4 @@ pub mod schema_projection;
 pub mod sse;
 pub mod step;
 pub mod transport;
+pub mod usage;

@@ -1,0 +1,21 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.stats",
+	"name": "stats-empty",
+	"input": {
+		"stats": {},
+		"nonFinite": [],
+		"id": "call-1"
+	},
+	"expected": {
+		"line": {
+			"stats": {
+				"id": "call-1",
+				"of": {}
+			}
+		},
+		"refusedAt": null,
+		"text": "{\"stats\":{\"id\":\"call-1\",\"of\":{}}}\n"
+	}
+}

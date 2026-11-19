@@ -1,0 +1,115 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "bill-after-a-probe-settled",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "admitted",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 60060000
+					},
+					{
+						"event": {
+							"kind": "settled",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						},
+						"nowMs": 60120000
+					},
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 60180000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 59940000,
+						"probe": {
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							},
+							"at": 60000000
+						}
+					},
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 63030000,
+						"probe": {
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							},
+							"at": 60000000
+						}
+					},
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 63030000,
+						"probe": null
+					},
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 63090000,
+						"probe": null
+					}
+				]
+			}
+		]
+	}
+}

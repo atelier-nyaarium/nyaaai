@@ -1,0 +1,48 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "cost.step",
+	"name": "order-with-a-fee-two",
+	"input": {
+		"rows": [
+			{
+				"usage": {
+					"input": 194413,
+					"output": 4008,
+					"cached": 110203,
+					"cacheWrite": 36711,
+					"byok": true,
+					"cost": 0.1
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 0,
+							"prompt": 0.6,
+							"completion": 0.075,
+							"cacheRead": 3.75,
+							"cacheWrite": 0.3
+						}
+					]
+				},
+				"longCache": false
+			}
+		]
+	},
+	"expected": {
+		"costs": [
+			{
+				"usd": 0.5530745499999999,
+				"estimated": true
+			}
+		]
+	}
+}

@@ -1,0 +1,76 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "probe-admitted-before-the-window",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "admitted",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						},
+						"nowMs": 60599999
+					},
+					{
+						"event": {
+							"kind": "admitted",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						},
+						"nowMs": 60600000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 60600000,
+						"probe": null
+					},
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 60600000,
+						"probe": {
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							},
+							"at": 60600000
+						}
+					}
+				]
+			}
+		]
+	}
+}

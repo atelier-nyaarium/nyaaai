@@ -1,0 +1,36 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "retry-after-on-the-last-attempt",
+	"input": {
+		"options": {},
+		"draws": [
+			1
+		],
+		"rows": [
+			{
+				"attempt": 4,
+				"waitedMs": 0,
+				"retryAfterMs": 1
+			},
+			{
+				"attempt": 5,
+				"waitedMs": 0,
+				"retryAfterMs": 1
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": null,
+				"draws": 0
+			},
+			{
+				"waitMs": null,
+				"draws": 0
+			}
+		]
+	}
+}

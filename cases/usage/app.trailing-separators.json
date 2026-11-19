@@ -1,0 +1,44 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.app",
+	"name": "trailing-separators",
+	"input": {
+		"rows": [
+			{
+				"folder": "/a/b///",
+				"home": "/a"
+			},
+			{
+				"folder": "/a/b\\/\\",
+				"home": "/a"
+			},
+			{
+				"folder": "\\a\\b\\\\",
+				"home": "\\a"
+			},
+			{
+				"folder": "///",
+				"home": "/"
+			},
+			{
+				"folder": "\\\\\\",
+				"home": "\\"
+			},
+			{
+				"folder": "/home/me///",
+				"home": "/home/me///"
+			}
+		]
+	},
+	"expected": {
+		"apps": [
+			"~/b/",
+			"~/b/",
+			"~\\b\\",
+			"/",
+			"\\",
+			"~/"
+		]
+	}
+}

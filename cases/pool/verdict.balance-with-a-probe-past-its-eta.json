@@ -1,0 +1,60 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.verdict",
+	"name": "balance-with-a-probe-past-its-eta",
+	"input": {
+		"rows": [
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 60600000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 0,
+							"probe": false,
+							"serial": 1
+						},
+						"at": 59700000
+					}
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 59400000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 0,
+							"probe": false,
+							"serial": 1
+						},
+						"at": 59700000
+					}
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			}
+		]
+	},
+	"expected": {
+		"verdicts": [
+			{
+				"skip": "allowance",
+				"blocked": {
+					"kind": "spendLimit",
+					"nextTryAt": 60600000
+				}
+			},
+			null
+		]
+	}
+}

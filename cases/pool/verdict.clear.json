@@ -1,0 +1,30 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.verdict",
+	"name": "clear",
+	"input": {
+		"rows": [
+			{
+				"state": {
+					"kind": "clear"
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "clear"
+				},
+				"exempt": true,
+				"nowMs": 60000000
+			}
+		]
+	},
+	"expected": {
+		"verdicts": [
+			null,
+			null
+		]
+	}
+}

@@ -15468,6 +15468,820 @@
 				"keyReads"
 			],
 			"additionalProperties": false
+		},
+		"RetryWaitInput": {
+			"type": "object",
+			"properties": {
+				"options": {
+					"$ref": "health.output.json#/$defs/RetryOptions"
+				},
+				"draws": {
+					"minItems": 1,
+					"type": "array",
+					"items": {
+						"type": "number"
+					}
+				},
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"attempt": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"waitedMs": {
+								"type": "number"
+							},
+							"retryAfterMs": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							}
+						},
+						"required": [
+							"attempt",
+							"waitedMs"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"options",
+				"draws",
+				"rows"
+			],
+			"additionalProperties": false
+		},
+		"RetryWaitResult": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"waitMs": {
+								"type": [
+									"number",
+									"null"
+								]
+							},
+							"draws": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							}
+						},
+						"required": [
+							"waitMs",
+							"draws"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"rows"
+			],
+			"additionalProperties": false
+		},
+		"RetryLifetimeInput": {
+			"type": "object",
+			"properties": {},
+			"additionalProperties": false
+		},
+		"RetryLifetimeResult": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"notice": {
+								"$ref": "provider.output.json#/$defs/NoticeKind"
+							},
+							"lifetime": {
+								"type": "string",
+								"enum": [
+									"outcome",
+									"midTurn"
+								]
+							}
+						},
+						"required": [
+							"notice",
+							"lifetime"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"rows"
+			],
+			"additionalProperties": false
+		},
+		"PoolStepInput": {
+			"type": "object",
+			"properties": {
+				"pauseMs": {
+					"type": "number"
+				},
+				"runs": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"start": {
+								"$ref": "health.output.json#/$defs/PoolState"
+							},
+							"steps": {
+								"type": "array",
+								"items": {
+									"type": "object",
+									"properties": {
+										"event": {
+											"$ref": "health.output.json#/$defs/PoolEvent"
+										},
+										"nowMs": {
+											"type": "number"
+										}
+									},
+									"required": [
+										"event",
+										"nowMs"
+									],
+									"additionalProperties": false
+								}
+							}
+						},
+						"required": [
+							"start",
+							"steps"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"pauseMs",
+				"runs"
+			],
+			"additionalProperties": false
+		},
+		"PoolStepResult": {
+			"type": "object",
+			"properties": {
+				"runs": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"states": {
+								"type": "array",
+								"items": {
+									"$ref": "health.output.json#/$defs/PoolState"
+								}
+							}
+						},
+						"required": [
+							"states"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"runs"
+			],
+			"additionalProperties": false
+		},
+		"PoolVerdictInput": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"state": {
+								"$ref": "health.output.json#/$defs/PoolState"
+							},
+							"exempt": {
+								"type": "boolean"
+							},
+							"nowMs": {
+								"type": "number"
+							}
+						},
+						"required": [
+							"state",
+							"exempt",
+							"nowMs"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"rows"
+			],
+			"additionalProperties": false
+		},
+		"PoolVerdictResult": {
+			"type": "object",
+			"properties": {
+				"verdicts": {
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{
+								"$ref": "health.output.json#/$defs/PoolVerdict"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				}
+			},
+			"required": [
+				"verdicts"
+			],
+			"additionalProperties": false
+		},
+		"PoolProbeAtInput": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"nowMs": {
+								"type": "number"
+							},
+							"eta": {
+								"type": "number"
+							}
+						},
+						"required": [
+							"nowMs",
+							"eta"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"rows"
+			],
+			"additionalProperties": false
+		},
+		"PoolProbeAtResult": {
+			"type": "object",
+			"properties": {
+				"times": {
+					"type": "array",
+					"items": {
+						"type": "number"
+					}
+				},
+				"balanceCoolMs": {
+					"type": "number"
+				},
+				"probeFloorMs": {
+					"type": "number"
+				},
+				"allowanceSources": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"times",
+				"balanceCoolMs",
+				"probeFloorMs",
+				"allowanceSources"
+			],
+			"additionalProperties": false
+		},
+		"CostStepInput": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"usage": {
+								"$ref": "step.output.json#/$defs/NormalizedUsage"
+							},
+							"price": {
+								"anyOf": [
+									{
+										"$ref": "model.output.json#/$defs/Price"
+									},
+									{
+										"type": "string",
+										"const": "free"
+									},
+									{
+										"type": "string",
+										"const": "unknown"
+									}
+								]
+							},
+							"longCache": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"longCache"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"rows"
+			],
+			"additionalProperties": false
+		},
+		"CostStepResult": {
+			"type": "object",
+			"properties": {
+				"costs": {
+					"type": "array",
+					"items": {
+						"$ref": "usage.output.json#/$defs/Cost"
+					}
+				}
+			},
+			"required": [
+				"costs"
+			],
+			"additionalProperties": false
+		},
+		"CostPriceInput": {
+			"type": "object",
+			"properties": {
+				"values": {
+					"type": "array",
+					"items": {}
+				}
+			},
+			"required": [
+				"values"
+			],
+			"additionalProperties": false
+		},
+		"CostPriceResult": {
+			"type": "object",
+			"properties": {
+				"prices": {
+					"type": "array",
+					"items": {
+						"type": [
+							"number",
+							"null"
+						]
+					}
+				}
+			},
+			"required": [
+				"prices"
+			],
+			"additionalProperties": false
+		},
+		"CostReportedInput": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"cost": {
+								"type": "number"
+							},
+							"byok": {
+								"type": "boolean"
+							},
+							"upstreamCost": {
+								"type": "number"
+							}
+						},
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"rows"
+			],
+			"additionalProperties": false
+		},
+		"CostReportedResult": {
+			"type": "object",
+			"properties": {
+				"values": {
+					"type": "array",
+					"items": {
+						"type": [
+							"number",
+							"null"
+						]
+					}
+				}
+			},
+			"required": [
+				"values"
+			],
+			"additionalProperties": false
+		},
+		"CostLongCacheInput": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"tag": {
+								"$ref": "usage.output.json#/$defs/CallTag"
+							},
+							"view": {
+								"anyOf": [
+									{
+										"type": "object",
+										"properties": {
+											"cacheWrite1h": {
+												"type": "boolean",
+												"const": true
+											}
+										},
+										"additionalProperties": false
+									},
+									{
+										"type": "null"
+									}
+								]
+							}
+						},
+						"required": [
+							"tag",
+							"view"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"rows"
+			],
+			"additionalProperties": false
+		},
+		"CostLongCacheResult": {
+			"type": "object",
+			"properties": {
+				"values": {
+					"type": "array",
+					"items": {
+						"type": "boolean"
+					}
+				}
+			},
+			"required": [
+				"values"
+			],
+			"additionalProperties": false
+		},
+		"UsageRecordInput": {
+			"type": "object",
+			"properties": {
+				"call": {},
+				"nonFinite": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							},
+							"is": {
+								"type": "string",
+								"enum": [
+									"notANumber",
+									"plusInfinity",
+									"minusInfinity"
+								]
+							}
+						},
+						"required": [
+							"path",
+							"is"
+						],
+						"additionalProperties": false
+					}
+				},
+				"id": {
+					"type": "string"
+				},
+				"home": {
+					"type": "string"
+				},
+				"nowMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"offsets": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"fromMs": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"minutes": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							}
+						},
+						"required": [
+							"fromMs",
+							"minutes"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"call",
+				"nonFinite",
+				"id",
+				"home",
+				"nowMs",
+				"offsets"
+			],
+			"additionalProperties": false
+		},
+		"UsageRecordResult": {
+			"type": "object",
+			"properties": {
+				"record": {
+					"anyOf": [
+						{
+							"$ref": "usage.output.json#/$defs/CallRecord"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"refusedAt": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"line": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"day": {
+					"type": [
+						"string",
+						"null"
+					]
+				}
+			},
+			"required": [
+				"record",
+				"refusedAt",
+				"line",
+				"day"
+			],
+			"additionalProperties": false
+		},
+		"UsageStatsInput": {
+			"type": "object",
+			"properties": {
+				"stats": {},
+				"nonFinite": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							},
+							"is": {
+								"type": "string",
+								"enum": [
+									"notANumber",
+									"plusInfinity",
+									"minusInfinity"
+								]
+							}
+						},
+						"required": [
+							"path",
+							"is"
+						],
+						"additionalProperties": false
+					}
+				},
+				"id": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"stats",
+				"nonFinite",
+				"id"
+			],
+			"additionalProperties": false
+		},
+		"UsageStatsResult": {
+			"type": "object",
+			"properties": {
+				"line": {
+					"anyOf": [
+						{
+							"$ref": "usage.output.json#/$defs/StatsLine"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"refusedAt": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"text": {
+					"type": [
+						"string",
+						"null"
+					]
+				}
+			},
+			"required": [
+				"line",
+				"refusedAt",
+				"text"
+			],
+			"additionalProperties": false
+		},
+		"UsageLinesInput": {
+			"type": "object",
+			"properties": {
+				"text": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"text"
+			],
+			"additionalProperties": false
+		},
+		"UsageLinesResult": {
+			"type": "object",
+			"properties": {
+				"lines": {
+					"type": "array",
+					"items": {
+						"$ref": "usage.output.json#/$defs/UsageLine"
+					}
+				},
+				"dropped": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				}
+			},
+			"required": [
+				"lines",
+				"dropped"
+			],
+			"additionalProperties": false
+		},
+		"UsageAppInput": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"folder": {
+								"type": "string"
+							},
+							"home": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"folder",
+							"home"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"rows"
+			],
+			"additionalProperties": false
+		},
+		"UsageAppResult": {
+			"type": "object",
+			"properties": {
+				"apps": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"apps"
+			],
+			"additionalProperties": false
+		},
+		"UsageDayInput": {
+			"type": "object",
+			"properties": {
+				"offsets": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"fromMs": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"minutes": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							}
+						},
+						"required": [
+							"fromMs",
+							"minutes"
+						],
+						"additionalProperties": false
+					}
+				},
+				"instants": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"minimum": -9007199254740991,
+						"maximum": 9007199254740991
+					}
+				}
+			},
+			"required": [
+				"offsets",
+				"instants"
+			],
+			"additionalProperties": false
+		},
+		"UsageDayResult": {
+			"type": "object",
+			"properties": {
+				"days": {
+					"type": "array",
+					"items": {
+						"type": [
+							"string",
+							"null"
+						]
+					}
+				}
+			},
+			"required": [
+				"days"
+			],
+			"additionalProperties": false
 		}
 	}
 }

@@ -1,0 +1,31 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.record",
+	"name": "a-model-that-is-not-text",
+	"input": {
+		"call": {
+			"tag": {
+				"feature": "chat"
+			},
+			"model": 5,
+			"at": 1794528001000,
+			"ms": 1200,
+			"cost": {
+				"usd": 0.25,
+				"estimated": false
+			}
+		},
+		"nonFinite": [],
+		"id": "call-1",
+		"home": "/home/user",
+		"nowMs": 1791460800000,
+		"offsets": []
+	},
+	"expected": {
+		"record": null,
+		"refusedAt": "model",
+		"line": null,
+		"day": "2026-10-08"
+	}
+}

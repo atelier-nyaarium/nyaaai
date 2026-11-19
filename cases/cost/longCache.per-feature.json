@@ -1,0 +1,290 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "cost.longCache",
+	"name": "per-feature",
+	"input": {
+		"rows": [
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"view": null
+			},
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"view": {}
+			},
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"view": {
+					"cacheWrite1h": true
+				}
+			},
+			{
+				"tag": {
+					"feature": "analysis"
+				},
+				"view": null
+			},
+			{
+				"tag": {
+					"feature": "analysis"
+				},
+				"view": {}
+			},
+			{
+				"tag": {
+					"feature": "analysis"
+				},
+				"view": {
+					"cacheWrite1h": true
+				}
+			},
+			{
+				"tag": {
+					"feature": "wand"
+				},
+				"view": null
+			},
+			{
+				"tag": {
+					"feature": "wand"
+				},
+				"view": {}
+			},
+			{
+				"tag": {
+					"feature": "wand"
+				},
+				"view": {
+					"cacheWrite1h": true
+				}
+			},
+			{
+				"tag": {
+					"feature": "tester"
+				},
+				"view": null
+			},
+			{
+				"tag": {
+					"feature": "tester"
+				},
+				"view": {}
+			},
+			{
+				"tag": {
+					"feature": "tester"
+				},
+				"view": {
+					"cacheWrite1h": true
+				}
+			},
+			{
+				"tag": {
+					"feature": "prediction"
+				},
+				"view": null
+			},
+			{
+				"tag": {
+					"feature": "prediction"
+				},
+				"view": {}
+			},
+			{
+				"tag": {
+					"feature": "prediction"
+				},
+				"view": {
+					"cacheWrite1h": true
+				}
+			},
+			{
+				"tag": {
+					"feature": "compaction"
+				},
+				"view": null
+			},
+			{
+				"tag": {
+					"feature": "compaction"
+				},
+				"view": {}
+			},
+			{
+				"tag": {
+					"feature": "compaction"
+				},
+				"view": {
+					"cacheWrite1h": true
+				}
+			},
+			{
+				"tag": {
+					"feature": "Chat"
+				},
+				"view": null
+			},
+			{
+				"tag": {
+					"feature": "Chat"
+				},
+				"view": {}
+			},
+			{
+				"tag": {
+					"feature": "Chat"
+				},
+				"view": {
+					"cacheWrite1h": true
+				}
+			},
+			{
+				"tag": {
+					"feature": "CHAT"
+				},
+				"view": null
+			},
+			{
+				"tag": {
+					"feature": "CHAT"
+				},
+				"view": {}
+			},
+			{
+				"tag": {
+					"feature": "CHAT"
+				},
+				"view": {
+					"cacheWrite1h": true
+				}
+			},
+			{
+				"tag": {
+					"feature": " chat"
+				},
+				"view": null
+			},
+			{
+				"tag": {
+					"feature": " chat"
+				},
+				"view": {}
+			},
+			{
+				"tag": {
+					"feature": " chat"
+				},
+				"view": {
+					"cacheWrite1h": true
+				}
+			},
+			{
+				"tag": {
+					"feature": "chat "
+				},
+				"view": null
+			},
+			{
+				"tag": {
+					"feature": "chat "
+				},
+				"view": {}
+			},
+			{
+				"tag": {
+					"feature": "chat "
+				},
+				"view": {
+					"cacheWrite1h": true
+				}
+			},
+			{
+				"tag": {
+					"feature": ""
+				},
+				"view": null
+			},
+			{
+				"tag": {
+					"feature": ""
+				},
+				"view": {}
+			},
+			{
+				"tag": {
+					"feature": ""
+				},
+				"view": {
+					"cacheWrite1h": true
+				}
+			},
+			{
+				"tag": {
+					"feature": "chat\u0000"
+				},
+				"view": null
+			},
+			{
+				"tag": {
+					"feature": "chat\u0000"
+				},
+				"view": {}
+			},
+			{
+				"tag": {
+					"feature": "chat\u0000"
+				},
+				"view": {
+					"cacheWrite1h": true
+				}
+			}
+		]
+	},
+	"expected": {
+		"values": [
+			false,
+			false,
+			true,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false
+		]
+	}
+}

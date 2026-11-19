@@ -1,0 +1,31 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.record",
+	"name": "empty-feature",
+	"input": {
+		"call": {
+			"tag": {
+				"feature": ""
+			},
+			"model": "vendor/model-a",
+			"at": 1794528001000,
+			"ms": 1200,
+			"cost": {
+				"usd": 0.25,
+				"estimated": false
+			}
+		},
+		"nonFinite": [],
+		"id": "call-1",
+		"home": "/home/user",
+		"nowMs": 1791460800000,
+		"offsets": []
+	},
+	"expected": {
+		"record": null,
+		"refusedAt": "feature",
+		"line": null,
+		"day": "2026-10-08"
+	}
+}

@@ -1,0 +1,90 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "probe-admitted-outside-a-balance",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "admitted",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "credit"
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "admitted",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "settled",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						},
+						"nowMs": 60000000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "clear"
+					},
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 60060000
+					},
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 60060000
+					},
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 60060000
+					}
+				]
+			}
+		]
+	}
+}

@@ -1,0 +1,50 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "default-top-draw",
+	"input": {
+		"options": {},
+		"draws": [
+			0.9999999999999999
+		],
+		"rows": [
+			{
+				"attempt": 1,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 2,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 3,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 4,
+				"waitedMs": 0
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": 1000,
+				"draws": 1
+			},
+			{
+				"waitMs": 2000,
+				"draws": 1
+			},
+			{
+				"waitMs": 4000,
+				"draws": 1
+			},
+			{
+				"waitMs": null,
+				"draws": 0
+			}
+		]
+	}
+}

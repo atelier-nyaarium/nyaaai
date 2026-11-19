@@ -1,0 +1,32 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.lines",
+	"name": "an-unknown-key-is-dropped",
+	"input": {
+		"text": "{\"call\":{\"id\":\"x\",\"at\":1,\"feature\":\"chat\",\"model\":\"m\",\"ms\":1,\"cost\":0,\"mystery\":true,\"extra\":{\"a\":1}},\"outer\":1}\n{\"stats\":{\"id\":\"x\",\"of\":{\"provider\":\"Lab\",\"mystery\":1},\"extra\":2}}\n"
+	},
+	"expected": {
+		"lines": [
+			{
+				"call": {
+					"id": "x",
+					"at": 1,
+					"feature": "chat",
+					"model": "m",
+					"ms": 1,
+					"cost": 0
+				}
+			},
+			{
+				"stats": {
+					"id": "x",
+					"of": {
+						"provider": "Lab"
+					}
+				}
+			}
+		],
+		"dropped": 0
+	}
+}

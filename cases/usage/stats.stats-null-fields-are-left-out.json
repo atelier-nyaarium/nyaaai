@@ -1,0 +1,30 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.stats",
+	"name": "stats-null-fields-are-left-out",
+	"input": {
+		"stats": {
+			"provider": null,
+			"latencyMs": null,
+			"generationMs": 12,
+			"cost": null,
+			"byok": null,
+			"finish": null
+		},
+		"nonFinite": [],
+		"id": "call-1"
+	},
+	"expected": {
+		"line": {
+			"stats": {
+				"id": "call-1",
+				"of": {
+					"generationMs": 12
+				}
+			}
+		},
+		"refusedAt": null,
+		"text": "{\"stats\":{\"id\":\"call-1\",\"of\":{\"generationMs\":12}}}\n"
+	}
+}

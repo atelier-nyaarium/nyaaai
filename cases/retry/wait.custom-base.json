@@ -1,0 +1,61 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "custom-base",
+	"input": {
+		"options": {
+			"baseMs": 250,
+			"tries": 6
+		},
+		"draws": [
+			0.5
+		],
+		"rows": [
+			{
+				"attempt": 1,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 2,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 3,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 4,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 5,
+				"waitedMs": 0
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": 188,
+				"draws": 1
+			},
+			{
+				"waitMs": 375,
+				"draws": 1
+			},
+			{
+				"waitMs": 750,
+				"draws": 1
+			},
+			{
+				"waitMs": 1500,
+				"draws": 1
+			},
+			{
+				"waitMs": 3000,
+				"draws": 1
+			}
+		]
+	}
+}

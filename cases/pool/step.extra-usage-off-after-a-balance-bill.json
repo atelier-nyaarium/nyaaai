@@ -1,0 +1,54 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "extra-usage-off-after-a-balance-bill",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "extraUsage",
+							"on": false,
+							"lastBill": "balance"
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "extraUsage",
+							"on": false,
+							"lastBill": "balance"
+						},
+						"nowMs": 69000000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 78000000,
+						"next": 69000000,
+						"probe": null
+					},
+					{
+						"kind": "balance",
+						"eta": 78000000,
+						"next": 73500000,
+						"probe": null
+					}
+				]
+			}
+		]
+	}
+}

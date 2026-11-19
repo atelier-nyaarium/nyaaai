@@ -1,0 +1,13 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.lines",
+	"name": "only-blank-text",
+	"input": {
+		"text": "\n\n  \n\t\n"
+	},
+	"expected": {
+		"lines": [],
+		"dropped": 0
+	}
+}

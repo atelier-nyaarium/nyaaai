@@ -1,0 +1,24 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.lines",
+	"name": "a-call-that-does-not-fit-is-dropped",
+	"input": {
+		"text": "{\"call\":{\"id\":\"x\",\"at\":1,\"feature\":\"\",\"model\":\"m\",\"ms\":1,\"cost\":0}}\n{\"call\":{\"id\":\"x\",\"at\":\"1\",\"feature\":\"chat\",\"model\":\"m\",\"ms\":1,\"cost\":0}}\n{\"call\":{\"id\":\"x\",\"at\":1,\"feature\":\"chat\",\"model\":\"m\",\"ms\":1}}\n{\"call\":{\"id\":\"x\",\"at\":1,\"feature\":\"chat\",\"model\":\"m\",\"ms\":1,\"cost\":0,\"unpriced\":false}}\n{\"call\":{\"id\":\"x\",\"at\":1,\"feature\":\"chat\",\"model\":\"m\",\"ms\":1,\"cost\":null}}\n{\"call\":{\"id\":\"ok\",\"at\":1,\"feature\":\"chat\",\"model\":\"m\",\"ms\":1,\"cost\":0}}\n"
+	},
+	"expected": {
+		"lines": [
+			{
+				"call": {
+					"id": "ok",
+					"at": 1,
+					"feature": "chat",
+					"model": "m",
+					"ms": 1,
+					"cost": 0
+				}
+			}
+		],
+		"dropped": 5
+	}
+}

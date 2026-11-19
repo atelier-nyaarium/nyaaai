@@ -1,0 +1,50 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "reset-from-a-retry-after",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance",
+							"retryAfterMs": 300000
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance",
+							"retryAfterMs": 0
+						},
+						"nowMs": 60060000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "reset",
+						"at": 60300000
+					},
+					{
+						"kind": "reset",
+						"at": 60060000
+					}
+				]
+			}
+		]
+	}
+}

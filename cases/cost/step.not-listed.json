@@ -1,0 +1,108 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "cost.step",
+	"name": "not-listed",
+	"input": {
+		"rows": [
+			{
+				"usage": {
+					"input": 100000,
+					"output": 10000
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 100000,
+					"output": 10000
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": []
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 100000,
+					"output": 10000,
+					"byok": true,
+					"cost": 0.02
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 100000,
+					"output": 10000,
+					"byok": true,
+					"cost": 0.02
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": []
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 100000,
+					"output": 10000,
+					"byok": false,
+					"cost": -3
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 0,
+					"output": 0
+				},
+				"longCache": false
+			}
+		]
+	},
+	"expected": {
+		"costs": [
+			{
+				"usd": 0,
+				"estimated": true
+			},
+			{
+				"usd": 0,
+				"estimated": true
+			},
+			{
+				"usd": 0.02,
+				"estimated": true
+			},
+			{
+				"usd": 0.02,
+				"estimated": true
+			},
+			{
+				"usd": 0,
+				"estimated": true
+			},
+			{
+				"usd": 0,
+				"estimated": true
+			}
+		]
+	}
+}

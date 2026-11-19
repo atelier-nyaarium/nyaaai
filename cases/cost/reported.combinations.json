@@ -1,0 +1,101 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "cost.reported",
+	"name": "combinations",
+	"input": {
+		"rows": [
+			{},
+			{
+				"cost": 0.25
+			},
+			{
+				"cost": 0
+			},
+			{
+				"cost": -1
+			},
+			{
+				"byok": true
+			},
+			{
+				"byok": true,
+				"cost": 0.01
+			},
+			{
+				"byok": true,
+				"cost": 0.01,
+				"upstreamCost": 0.2
+			},
+			{
+				"byok": true,
+				"cost": 0.01,
+				"upstreamCost": 0
+			},
+			{
+				"byok": true,
+				"cost": 0,
+				"upstreamCost": 0
+			},
+			{
+				"byok": true,
+				"cost": 0.01,
+				"upstreamCost": -0.2
+			},
+			{
+				"byok": true,
+				"upstreamCost": 0.2
+			},
+			{
+				"byok": true,
+				"cost": -1,
+				"upstreamCost": 0.2
+			},
+			{
+				"byok": false,
+				"cost": 0.01,
+				"upstreamCost": 0.2
+			},
+			{
+				"cost": 0.01,
+				"upstreamCost": 0.2
+			},
+			{
+				"byok": true,
+				"cost": 0.1,
+				"upstreamCost": 0.2
+			},
+			{
+				"byok": true,
+				"cost": 0.1,
+				"upstreamCost": 0.7
+			},
+			{
+				"byok": true,
+				"cost": 1e+308,
+				"upstreamCost": 1e+308
+			}
+		]
+	},
+	"expected": {
+		"values": [
+			null,
+			0.25,
+			0,
+			null,
+			null,
+			null,
+			0.21000000000000002,
+			0.01,
+			0,
+			null,
+			null,
+			null,
+			0.01,
+			0.01,
+			0.30000000000000004,
+			0.7999999999999999,
+			null
+		]
+	}
+}

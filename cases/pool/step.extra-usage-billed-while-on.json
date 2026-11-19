@@ -1,0 +1,68 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "extra-usage-billed-while-on",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": true
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": true
+						},
+						"nowMs": 60060000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "clear"
+					},
+					{
+						"kind": "balance",
+						"eta": 78000000,
+						"next": 69000000,
+						"probe": null
+					},
+					{
+						"kind": "balance",
+						"eta": 78000000,
+						"next": 69000000,
+						"probe": null
+					}
+				]
+			}
+		]
+	}
+}

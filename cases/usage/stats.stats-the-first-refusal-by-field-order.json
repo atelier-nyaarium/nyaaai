@@ -1,0 +1,19 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.stats",
+	"name": "stats-the-first-refusal-by-field-order",
+	"input": {
+		"stats": {
+			"finish": 5,
+			"provider": 5
+		},
+		"nonFinite": [],
+		"id": "call-1"
+	},
+	"expected": {
+		"line": null,
+		"refusedAt": "provider",
+		"text": null
+	}
+}

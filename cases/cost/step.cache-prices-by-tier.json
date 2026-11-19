@@ -1,0 +1,94 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "cost.step",
+	"name": "cache-prices-by-tier",
+	"input": {
+		"rows": [
+			{
+				"usage": {
+					"input": 300000,
+					"output": 1000,
+					"cached": 100000,
+					"cacheWrite": 50000
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 0,
+							"prompt": 1,
+							"completion": 2,
+							"cacheRead": 0.1,
+							"cacheWrite": 1.25,
+							"cacheWrite1h": 2
+						},
+						{
+							"minPromptTokens": 200000,
+							"prompt": 2,
+							"completion": 4,
+							"cacheRead": 0.2,
+							"cacheWrite": 2.5
+						}
+					]
+				},
+				"longCache": true
+			},
+			{
+				"usage": {
+					"input": 150000,
+					"output": 1000,
+					"cached": 100000,
+					"cacheWrite": 50000
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 0,
+							"prompt": 1,
+							"completion": 2,
+							"cacheRead": 0.1,
+							"cacheWrite": 1.25,
+							"cacheWrite1h": 2
+						},
+						{
+							"minPromptTokens": 200000,
+							"prompt": 2,
+							"completion": 4,
+							"cacheRead": 0.2,
+							"cacheWrite": 2.5
+						}
+					]
+				},
+				"longCache": true
+			}
+		]
+	},
+	"expected": {
+		"costs": [
+			{
+				"usd": 0.424,
+				"estimated": true
+			},
+			{
+				"usd": 0.112,
+				"estimated": true
+			}
+		]
+	}
+}

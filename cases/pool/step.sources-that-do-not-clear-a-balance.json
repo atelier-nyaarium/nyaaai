@@ -1,0 +1,104 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "sources-that-do-not-clear-a-balance",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "free",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "billed",
+							"source": "payg",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "billed",
+							"source": "GO",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "billed",
+							"source": "",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "billed",
+							"source": "Balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 60000000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 60600000,
+						"probe": null
+					},
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 60600000,
+						"probe": null
+					},
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 60600000,
+						"probe": null
+					},
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 60600000,
+						"probe": null
+					},
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 60600000,
+						"probe": null
+					}
+				]
+			}
+		]
+	}
+}

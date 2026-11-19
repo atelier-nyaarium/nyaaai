@@ -1,0 +1,55 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "no-base-huge-attempt",
+	"input": {
+		"options": {
+			"baseMs": 0,
+			"tries": 5000,
+			"budgetMs": 10
+		},
+		"draws": [
+			0,
+			1
+		],
+		"rows": [
+			{
+				"attempt": 1,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 60,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 1100,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 4999,
+				"waitedMs": 0
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": 0,
+				"draws": 1
+			},
+			{
+				"waitMs": 0,
+				"draws": 1
+			},
+			{
+				"waitMs": 0,
+				"draws": 1
+			},
+			{
+				"waitMs": 0,
+				"draws": 1
+			}
+		]
+	}
+}

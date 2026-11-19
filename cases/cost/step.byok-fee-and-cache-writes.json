@@ -1,0 +1,84 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "cost.step",
+	"name": "byok-fee-and-cache-writes",
+	"input": {
+		"rows": [
+			{
+				"usage": {
+					"input": 1000000,
+					"output": 100000,
+					"cost": 0.01,
+					"byok": true,
+					"cached": 400000,
+					"cacheWrite": 200000
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 0,
+							"prompt": 2,
+							"completion": 10,
+							"cacheRead": 0.1,
+							"cacheWrite": 2.5,
+							"cacheWrite1h": 4
+						}
+					]
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 1000000,
+					"output": 100000,
+					"cost": 0.01,
+					"byok": true,
+					"cached": 400000,
+					"cacheWrite": 200000
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 0,
+							"prompt": 2,
+							"completion": 10,
+							"cacheRead": 0.1,
+							"cacheWrite": 2.5,
+							"cacheWrite1h": 4
+						}
+					]
+				},
+				"longCache": true
+			}
+		]
+	},
+	"expected": {
+		"costs": [
+			{
+				"usd": 2.3499999999999996,
+				"estimated": true
+			},
+			{
+				"usd": 2.65,
+				"estimated": true
+			}
+		]
+	}
+}

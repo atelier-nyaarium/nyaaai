@@ -1,0 +1,74 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.app",
+	"name": "posix",
+	"input": {
+		"rows": [
+			{
+				"folder": "/home/me/projects/app",
+				"home": "/home/me"
+			},
+			{
+				"folder": "/home/me",
+				"home": "/home/me"
+			},
+			{
+				"folder": "/srv/app/",
+				"home": "/home/me"
+			},
+			{
+				"folder": "/home/meadow/app",
+				"home": "/home/me"
+			},
+			{
+				"folder": "/home/me/",
+				"home": "/home/me/"
+			},
+			{
+				"folder": "/home/me//app//",
+				"home": "/home/me//"
+			},
+			{
+				"folder": "/home/me/app",
+				"home": ""
+			},
+			{
+				"folder": "/home/me/app",
+				"home": "/"
+			},
+			{
+				"folder": "/",
+				"home": "/home/me"
+			},
+			{
+				"folder": "",
+				"home": "/home/me"
+			},
+			{
+				"folder": "",
+				"home": ""
+			},
+			{
+				"folder": "/home/Me/app",
+				"home": "/home/me"
+			}
+		]
+	},
+	"expected": {
+		"apps": [
+			"~/projects/app/",
+			"~/",
+			"/srv/app/",
+			"/home/meadow/app/",
+			"~/",
+			"~//app/",
+			"/home/me/app/",
+			"/home/me/app/",
+			"/",
+			"/",
+			"/",
+			"/home/Me/app/"
+		]
+	}
+}

@@ -29074,3 +29074,1485 @@ impl Shape for ResolverRoutesResultStepsItemAnswerCandidatesServedItemStatus {
         Value::from(self.as_str())
     }
 }
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct RetryWaitInput {
+    pub options: nyaaai_contract::shapes::health::RetryOptions,
+    pub draws: Vec<f64>,
+    pub rows: Vec<RetryWaitInputRowsItem>,
+}
+
+impl Shape for RetryWaitInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let options = shape::required(
+            object,
+            "options",
+            at,
+            nyaaai_contract::shapes::health::RetryOptions::decode_at,
+        )?;
+        let draws = shape::required(object, "draws", at, |value, at| {
+            shape::list_within(value, at, Some(1), None, shape::number)
+        })?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, RetryWaitInputRowsItem::decode_at)
+        })?;
+        Ok(Self {
+            options,
+            draws,
+            rows,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("options", self.options.encode());
+        object.insert(
+            "draws",
+            Value::Array(self.draws.iter().map(|held| Value::Number(*held)).collect()),
+        );
+        object.insert(
+            "rows",
+            Value::Array(self.rows.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct RetryWaitInputRowsItem {
+    pub attempt: i64,
+    pub waited_ms: f64,
+    pub retry_after_ms: Option<i64>,
+}
+
+impl Shape for RetryWaitInputRowsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let attempt = shape::required(object, "attempt", at, shape::integer)?;
+        let waited_ms = shape::required(object, "waitedMs", at, shape::number)?;
+        let retry_after_ms = shape::optional(object, "retryAfterMs", at, shape::integer)?;
+        Ok(Self {
+            attempt,
+            waited_ms,
+            retry_after_ms,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("attempt", Value::Number(self.attempt as f64));
+        object.insert("waitedMs", Value::Number(self.waited_ms));
+        if let Some(held) = &self.retry_after_ms {
+            object.insert("retryAfterMs", Value::Number(*held as f64));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct RetryWaitResult {
+    pub rows: Vec<RetryWaitResultRowsItem>,
+}
+
+impl Shape for RetryWaitResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, RetryWaitResultRowsItem::decode_at)
+        })?;
+        Ok(Self { rows })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "rows",
+            Value::Array(self.rows.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct RetryWaitResultRowsItem {
+    pub wait_ms: Option<f64>,
+    pub draws: i64,
+}
+
+impl Shape for RetryWaitResultRowsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let wait_ms = shape::required(object, "waitMs", at, |value, at| {
+            shape::nullable(value, at, shape::number)
+        })?;
+        let draws = shape::required(object, "draws", at, shape::integer)?;
+        Ok(Self { wait_ms, draws })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "waitMs",
+            self.wait_ms
+                .as_ref()
+                .map_or(Value::Null, |held| Value::Number(*held)),
+        );
+        object.insert("draws", Value::Number(self.draws as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct RetryLifetimeInput {}
+
+impl Shape for RetryLifetimeInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        shape::object(value, at)?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        Value::Object(Object::new())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct RetryLifetimeResult {
+    pub rows: Vec<RetryLifetimeResultRowsItem>,
+}
+
+impl Shape for RetryLifetimeResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, RetryLifetimeResultRowsItem::decode_at)
+        })?;
+        Ok(Self { rows })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "rows",
+            Value::Array(self.rows.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct RetryLifetimeResultRowsItem {
+    pub notice: nyaaai_contract::shapes::provider::NoticeKind,
+    pub lifetime: RetryLifetimeResultRowsItemLifetime,
+}
+
+impl Shape for RetryLifetimeResultRowsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let notice = shape::required(
+            object,
+            "notice",
+            at,
+            nyaaai_contract::shapes::provider::NoticeKind::decode_at,
+        )?;
+        let lifetime = shape::required(
+            object,
+            "lifetime",
+            at,
+            RetryLifetimeResultRowsItemLifetime::decode_at,
+        )?;
+        Ok(Self { notice, lifetime })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("notice", self.notice.encode());
+        object.insert("lifetime", self.lifetime.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum RetryLifetimeResultRowsItemLifetime {
+    Outcome,
+    MidTurn,
+}
+
+impl RetryLifetimeResultRowsItemLifetime {
+    pub const ALL: [Self; 2] = [Self::Outcome, Self::MidTurn];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Outcome => "outcome",
+            Self::MidTurn => "midTurn",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for RetryLifetimeResultRowsItemLifetime {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct PoolStepInput {
+    pub pause_ms: f64,
+    pub runs: Vec<PoolStepInputRunsItem>,
+}
+
+impl Shape for PoolStepInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let pause_ms = shape::required(object, "pauseMs", at, shape::number)?;
+        let runs = shape::required(object, "runs", at, |value, at| {
+            shape::list(value, at, PoolStepInputRunsItem::decode_at)
+        })?;
+        Ok(Self { pause_ms, runs })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("pauseMs", Value::Number(self.pause_ms));
+        object.insert(
+            "runs",
+            Value::Array(self.runs.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct PoolStepInputRunsItem {
+    pub start: nyaaai_contract::shapes::health::PoolState,
+    pub steps: Vec<PoolStepInputRunsItemStepsItem>,
+}
+
+impl Shape for PoolStepInputRunsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let start = shape::required(
+            object,
+            "start",
+            at,
+            nyaaai_contract::shapes::health::PoolState::decode_at,
+        )?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list(value, at, PoolStepInputRunsItemStepsItem::decode_at)
+        })?;
+        Ok(Self { start, steps })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("start", self.start.encode());
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct PoolStepInputRunsItemStepsItem {
+    pub event: nyaaai_contract::shapes::health::PoolEvent,
+    pub now_ms: f64,
+}
+
+impl Shape for PoolStepInputRunsItemStepsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let event = shape::required(
+            object,
+            "event",
+            at,
+            nyaaai_contract::shapes::health::PoolEvent::decode_at,
+        )?;
+        let now_ms = shape::required(object, "nowMs", at, shape::number)?;
+        Ok(Self { event, now_ms })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("event", self.event.encode());
+        object.insert("nowMs", Value::Number(self.now_ms));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct PoolStepResult {
+    pub runs: Vec<PoolStepResultRunsItem>,
+}
+
+impl Shape for PoolStepResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let runs = shape::required(object, "runs", at, |value, at| {
+            shape::list(value, at, PoolStepResultRunsItem::decode_at)
+        })?;
+        Ok(Self { runs })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "runs",
+            Value::Array(self.runs.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct PoolStepResultRunsItem {
+    pub states: Vec<nyaaai_contract::shapes::health::PoolState>,
+}
+
+impl Shape for PoolStepResultRunsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let states = shape::required(object, "states", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::health::PoolState::decode_at,
+            )
+        })?;
+        Ok(Self { states })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "states",
+            Value::Array(self.states.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct PoolVerdictInput {
+    pub rows: Vec<PoolVerdictInputRowsItem>,
+}
+
+impl Shape for PoolVerdictInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, PoolVerdictInputRowsItem::decode_at)
+        })?;
+        Ok(Self { rows })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "rows",
+            Value::Array(self.rows.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct PoolVerdictInputRowsItem {
+    pub state: nyaaai_contract::shapes::health::PoolState,
+    pub exempt: bool,
+    pub now_ms: f64,
+}
+
+impl Shape for PoolVerdictInputRowsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let state = shape::required(
+            object,
+            "state",
+            at,
+            nyaaai_contract::shapes::health::PoolState::decode_at,
+        )?;
+        let exempt = shape::required(object, "exempt", at, shape::flag)?;
+        let now_ms = shape::required(object, "nowMs", at, shape::number)?;
+        Ok(Self {
+            state,
+            exempt,
+            now_ms,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("state", self.state.encode());
+        object.insert("exempt", Value::Bool(self.exempt));
+        object.insert("nowMs", Value::Number(self.now_ms));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct PoolVerdictResult {
+    pub verdicts: Vec<Option<nyaaai_contract::shapes::health::PoolVerdict>>,
+}
+
+impl Shape for PoolVerdictResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let verdicts = shape::required(object, "verdicts", at, |value, at| {
+            shape::list(value, at, |value, at| {
+                shape::nullable(
+                    value,
+                    at,
+                    nyaaai_contract::shapes::health::PoolVerdict::decode_at,
+                )
+            })
+        })?;
+        Ok(Self { verdicts })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "verdicts",
+            Value::Array(
+                self.verdicts
+                    .iter()
+                    .map(|held| held.as_ref().map_or(Value::Null, |held| held.encode()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct PoolProbeAtInput {
+    pub rows: Vec<PoolProbeAtInputRowsItem>,
+}
+
+impl Shape for PoolProbeAtInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, PoolProbeAtInputRowsItem::decode_at)
+        })?;
+        Ok(Self { rows })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "rows",
+            Value::Array(self.rows.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct PoolProbeAtInputRowsItem {
+    pub now_ms: f64,
+    pub eta: f64,
+}
+
+impl Shape for PoolProbeAtInputRowsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let now_ms = shape::required(object, "nowMs", at, shape::number)?;
+        let eta = shape::required(object, "eta", at, shape::number)?;
+        Ok(Self { now_ms, eta })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("nowMs", Value::Number(self.now_ms));
+        object.insert("eta", Value::Number(self.eta));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct PoolProbeAtResult {
+    pub times: Vec<f64>,
+    pub balance_cool_ms: f64,
+    pub probe_floor_ms: f64,
+    pub allowance_sources: Vec<String>,
+}
+
+impl Shape for PoolProbeAtResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let times = shape::required(object, "times", at, |value, at| {
+            shape::list(value, at, shape::number)
+        })?;
+        let balance_cool_ms = shape::required(object, "balanceCoolMs", at, shape::number)?;
+        let probe_floor_ms = shape::required(object, "probeFloorMs", at, shape::number)?;
+        let allowance_sources = shape::required(object, "allowanceSources", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self {
+            times,
+            balance_cool_ms,
+            probe_floor_ms,
+            allowance_sources,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "times",
+            Value::Array(self.times.iter().map(|held| Value::Number(*held)).collect()),
+        );
+        object.insert("balanceCoolMs", Value::Number(self.balance_cool_ms));
+        object.insert("probeFloorMs", Value::Number(self.probe_floor_ms));
+        object.insert(
+            "allowanceSources",
+            Value::Array(
+                self.allowance_sources
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CostStepInput {
+    pub rows: Vec<CostStepInputRowsItem>,
+}
+
+impl Shape for CostStepInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, CostStepInputRowsItem::decode_at)
+        })?;
+        Ok(Self { rows })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "rows",
+            Value::Array(self.rows.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CostStepInputRowsItem {
+    pub usage: Option<nyaaai_contract::shapes::step::NormalizedUsage>,
+    pub price: Option<CostStepInputRowsItemPrice>,
+    pub long_cache: bool,
+}
+
+impl Shape for CostStepInputRowsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let usage = shape::optional(
+            object,
+            "usage",
+            at,
+            nyaaai_contract::shapes::step::NormalizedUsage::decode_at,
+        )?;
+        let price = shape::optional(object, "price", at, CostStepInputRowsItemPrice::decode_at)?;
+        let long_cache = shape::required(object, "longCache", at, shape::flag)?;
+        Ok(Self {
+            usage,
+            price,
+            long_cache,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        if let Some(held) = &self.usage {
+            object.insert("usage", held.encode());
+        }
+        if let Some(held) = &self.price {
+            object.insert("price", held.encode());
+        }
+        object.insert("longCache", Value::Bool(self.long_cache));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum CostStepInputRowsItemPrice {
+    Price(nyaaai_contract::shapes::model::Price),
+    Free,
+    Unknown,
+}
+
+impl Shape for CostStepInputRowsItemPrice {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        if let Ok(held) = nyaaai_contract::shapes::model::Price::decode_at(value, at) {
+            return Ok(Self::Price(held));
+        }
+        if shape::is_text(value, at, "free").is_ok() {
+            return Ok(Self::Free);
+        }
+        if shape::is_text(value, at, "unknown").is_ok() {
+            return Ok(Self::Unknown);
+        }
+        Err(shape::refused(at, "no branch matches"))
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Price(held) => held.encode(),
+            Self::Free => Value::from("free"),
+            Self::Unknown => Value::from("unknown"),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CostStepResult {
+    pub costs: Vec<nyaaai_contract::shapes::usage::Cost>,
+}
+
+impl Shape for CostStepResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let costs = shape::required(object, "costs", at, |value, at| {
+            shape::list(value, at, nyaaai_contract::shapes::usage::Cost::decode_at)
+        })?;
+        Ok(Self { costs })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "costs",
+            Value::Array(self.costs.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CostPriceInput {
+    pub values: Vec<Value>,
+}
+
+impl Shape for CostPriceInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let values = shape::required(object, "values", at, |value, at| {
+            shape::list(value, at, shape::any)
+        })?;
+        Ok(Self { values })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("values", Value::Array(self.values.clone()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CostPriceResult {
+    pub prices: Vec<Option<f64>>,
+}
+
+impl Shape for CostPriceResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let prices = shape::required(object, "prices", at, |value, at| {
+            shape::list(value, at, |value, at| {
+                shape::nullable(value, at, shape::number)
+            })
+        })?;
+        Ok(Self { prices })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "prices",
+            Value::Array(
+                self.prices
+                    .iter()
+                    .map(|held| {
+                        held.as_ref()
+                            .map_or(Value::Null, |held| Value::Number(*held))
+                    })
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CostReportedInput {
+    pub rows: Vec<CostReportedInputRowsItem>,
+}
+
+impl Shape for CostReportedInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, CostReportedInputRowsItem::decode_at)
+        })?;
+        Ok(Self { rows })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "rows",
+            Value::Array(self.rows.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CostReportedInputRowsItem {
+    pub cost: Option<f64>,
+    pub byok: Option<bool>,
+    pub upstream_cost: Option<f64>,
+}
+
+impl Shape for CostReportedInputRowsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let cost = shape::optional(object, "cost", at, shape::number)?;
+        let byok = shape::optional(object, "byok", at, shape::flag)?;
+        let upstream_cost = shape::optional(object, "upstreamCost", at, shape::number)?;
+        Ok(Self {
+            cost,
+            byok,
+            upstream_cost,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        if let Some(held) = &self.cost {
+            object.insert("cost", Value::Number(*held));
+        }
+        if let Some(held) = &self.byok {
+            object.insert("byok", Value::Bool(*held));
+        }
+        if let Some(held) = &self.upstream_cost {
+            object.insert("upstreamCost", Value::Number(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CostReportedResult {
+    pub values: Vec<Option<f64>>,
+}
+
+impl Shape for CostReportedResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let values = shape::required(object, "values", at, |value, at| {
+            shape::list(value, at, |value, at| {
+                shape::nullable(value, at, shape::number)
+            })
+        })?;
+        Ok(Self { values })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "values",
+            Value::Array(
+                self.values
+                    .iter()
+                    .map(|held| {
+                        held.as_ref()
+                            .map_or(Value::Null, |held| Value::Number(*held))
+                    })
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CostLongCacheInput {
+    pub rows: Vec<CostLongCacheInputRowsItem>,
+}
+
+impl Shape for CostLongCacheInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, CostLongCacheInputRowsItem::decode_at)
+        })?;
+        Ok(Self { rows })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "rows",
+            Value::Array(self.rows.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CostLongCacheInputRowsItem {
+    pub tag: nyaaai_contract::shapes::usage::CallTag,
+    pub view: Option<CostLongCacheInputRowsItemView>,
+}
+
+impl Shape for CostLongCacheInputRowsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let tag = shape::required(
+            object,
+            "tag",
+            at,
+            nyaaai_contract::shapes::usage::CallTag::decode_at,
+        )?;
+        let view = shape::required(object, "view", at, |value, at| {
+            shape::nullable(value, at, CostLongCacheInputRowsItemView::decode_at)
+        })?;
+        Ok(Self { tag, view })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("tag", self.tag.encode());
+        object.insert(
+            "view",
+            self.view.as_ref().map_or(Value::Null, |held| held.encode()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CostLongCacheInputRowsItemView {
+    pub cache_write1h: Option<()>,
+}
+
+impl Shape for CostLongCacheInputRowsItemView {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let cache_write1h = shape::optional(object, "cacheWrite1h", at, |value, at| {
+            shape::is_flag(value, at, true)
+        })?;
+        Ok(Self { cache_write1h })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        if self.cache_write1h.is_some() {
+            object.insert("cacheWrite1h", Value::Bool(true));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CostLongCacheResult {
+    pub values: Vec<bool>,
+}
+
+impl Shape for CostLongCacheResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let values = shape::required(object, "values", at, |value, at| {
+            shape::list(value, at, shape::flag)
+        })?;
+        Ok(Self { values })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "values",
+            Value::Array(self.values.iter().map(|held| Value::Bool(*held)).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct UsageRecordInput {
+    pub call: Value,
+    pub non_finite: Vec<UsageRecordInputNonFiniteItem>,
+    pub id: String,
+    pub home: String,
+    pub now_ms: i64,
+    pub offsets: Vec<UsageRecordInputOffsetsItem>,
+}
+
+impl Shape for UsageRecordInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let call = shape::required(object, "call", at, shape::any)?;
+        let non_finite = shape::required(object, "nonFinite", at, |value, at| {
+            shape::list(value, at, UsageRecordInputNonFiniteItem::decode_at)
+        })?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let home = shape::required(object, "home", at, shape::text)?;
+        let now_ms = shape::required(object, "nowMs", at, shape::integer)?;
+        let offsets = shape::required(object, "offsets", at, |value, at| {
+            shape::list(value, at, UsageRecordInputOffsetsItem::decode_at)
+        })?;
+        Ok(Self {
+            call,
+            non_finite,
+            id,
+            home,
+            now_ms,
+            offsets,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("call", self.call.clone());
+        object.insert(
+            "nonFinite",
+            Value::Array(self.non_finite.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert("id", Value::from(self.id.as_str()));
+        object.insert("home", Value::from(self.home.as_str()));
+        object.insert("nowMs", Value::Number(self.now_ms as f64));
+        object.insert(
+            "offsets",
+            Value::Array(self.offsets.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct UsageRecordInputNonFiniteItem {
+    pub path: String,
+    pub is: UsageRecordInputNonFiniteItemIs,
+}
+
+impl Shape for UsageRecordInputNonFiniteItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let path = shape::required(object, "path", at, shape::text)?;
+        let is = shape::required(object, "is", at, UsageRecordInputNonFiniteItemIs::decode_at)?;
+        Ok(Self { path, is })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("path", Value::from(self.path.as_str()));
+        object.insert("is", self.is.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct UsageRecordInputOffsetsItem {
+    pub from_ms: i64,
+    pub minutes: i64,
+}
+
+impl Shape for UsageRecordInputOffsetsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let from_ms = shape::required(object, "fromMs", at, shape::integer)?;
+        let minutes = shape::required(object, "minutes", at, shape::integer)?;
+        Ok(Self { from_ms, minutes })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("fromMs", Value::Number(self.from_ms as f64));
+        object.insert("minutes", Value::Number(self.minutes as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum UsageRecordInputNonFiniteItemIs {
+    NotANumber,
+    PlusInfinity,
+    MinusInfinity,
+}
+
+impl UsageRecordInputNonFiniteItemIs {
+    pub const ALL: [Self; 3] = [Self::NotANumber, Self::PlusInfinity, Self::MinusInfinity];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::NotANumber => "notANumber",
+            Self::PlusInfinity => "plusInfinity",
+            Self::MinusInfinity => "minusInfinity",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for UsageRecordInputNonFiniteItemIs {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct UsageRecordResult {
+    pub record: Option<nyaaai_contract::shapes::usage::CallRecord>,
+    pub refused_at: Option<String>,
+    pub line: Option<String>,
+    pub day: Option<String>,
+}
+
+impl Shape for UsageRecordResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let record = shape::required(object, "record", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                nyaaai_contract::shapes::usage::CallRecord::decode_at,
+            )
+        })?;
+        let refused_at = shape::required(object, "refusedAt", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let line = shape::required(object, "line", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let day = shape::required(object, "day", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        Ok(Self {
+            record,
+            refused_at,
+            line,
+            day,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "record",
+            self.record
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert(
+            "refusedAt",
+            self.refused_at
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "line",
+            self.line
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "day",
+            self.day
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct UsageStatsInput {
+    pub stats: Value,
+    pub non_finite: Vec<UsageStatsInputNonFiniteItem>,
+    pub id: String,
+}
+
+impl Shape for UsageStatsInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let stats = shape::required(object, "stats", at, shape::any)?;
+        let non_finite = shape::required(object, "nonFinite", at, |value, at| {
+            shape::list(value, at, UsageStatsInputNonFiniteItem::decode_at)
+        })?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        Ok(Self {
+            stats,
+            non_finite,
+            id,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("stats", self.stats.clone());
+        object.insert(
+            "nonFinite",
+            Value::Array(self.non_finite.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert("id", Value::from(self.id.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct UsageStatsInputNonFiniteItem {
+    pub path: String,
+    pub is: UsageStatsInputNonFiniteItemIs,
+}
+
+impl Shape for UsageStatsInputNonFiniteItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let path = shape::required(object, "path", at, shape::text)?;
+        let is = shape::required(object, "is", at, UsageStatsInputNonFiniteItemIs::decode_at)?;
+        Ok(Self { path, is })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("path", Value::from(self.path.as_str()));
+        object.insert("is", self.is.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum UsageStatsInputNonFiniteItemIs {
+    NotANumber,
+    PlusInfinity,
+    MinusInfinity,
+}
+
+impl UsageStatsInputNonFiniteItemIs {
+    pub const ALL: [Self; 3] = [Self::NotANumber, Self::PlusInfinity, Self::MinusInfinity];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::NotANumber => "notANumber",
+            Self::PlusInfinity => "plusInfinity",
+            Self::MinusInfinity => "minusInfinity",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for UsageStatsInputNonFiniteItemIs {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct UsageStatsResult {
+    pub line: Option<nyaaai_contract::shapes::usage::StatsLine>,
+    pub refused_at: Option<String>,
+    pub text: Option<String>,
+}
+
+impl Shape for UsageStatsResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let line = shape::required(object, "line", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                nyaaai_contract::shapes::usage::StatsLine::decode_at,
+            )
+        })?;
+        let refused_at = shape::required(object, "refusedAt", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let text = shape::required(object, "text", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        Ok(Self {
+            line,
+            refused_at,
+            text,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "line",
+            self.line.as_ref().map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert(
+            "refusedAt",
+            self.refused_at
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "text",
+            self.text
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct UsageLinesInput {
+    pub text: String,
+}
+
+impl Shape for UsageLinesInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let text = shape::required(object, "text", at, shape::text)?;
+        Ok(Self { text })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("text", Value::from(self.text.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct UsageLinesResult {
+    pub lines: Vec<nyaaai_contract::shapes::usage::UsageLine>,
+    pub dropped: i64,
+}
+
+impl Shape for UsageLinesResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let lines = shape::required(object, "lines", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::usage::UsageLine::decode_at,
+            )
+        })?;
+        let dropped = shape::required(object, "dropped", at, shape::integer)?;
+        Ok(Self { lines, dropped })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "lines",
+            Value::Array(self.lines.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert("dropped", Value::Number(self.dropped as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct UsageAppInput {
+    pub rows: Vec<UsageAppInputRowsItem>,
+}
+
+impl Shape for UsageAppInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, UsageAppInputRowsItem::decode_at)
+        })?;
+        Ok(Self { rows })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "rows",
+            Value::Array(self.rows.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct UsageAppInputRowsItem {
+    pub folder: String,
+    pub home: String,
+}
+
+impl Shape for UsageAppInputRowsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let folder = shape::required(object, "folder", at, shape::text)?;
+        let home = shape::required(object, "home", at, shape::text)?;
+        Ok(Self { folder, home })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("folder", Value::from(self.folder.as_str()));
+        object.insert("home", Value::from(self.home.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct UsageAppResult {
+    pub apps: Vec<String>,
+}
+
+impl Shape for UsageAppResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let apps = shape::required(object, "apps", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { apps })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "apps",
+            Value::Array(
+                self.apps
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct UsageDayInput {
+    pub offsets: Vec<UsageDayInputOffsetsItem>,
+    pub instants: Vec<i64>,
+}
+
+impl Shape for UsageDayInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let offsets = shape::required(object, "offsets", at, |value, at| {
+            shape::list(value, at, UsageDayInputOffsetsItem::decode_at)
+        })?;
+        let instants = shape::required(object, "instants", at, |value, at| {
+            shape::list(value, at, shape::integer)
+        })?;
+        Ok(Self { offsets, instants })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "offsets",
+            Value::Array(self.offsets.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "instants",
+            Value::Array(
+                self.instants
+                    .iter()
+                    .map(|held| Value::Number(*held as f64))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct UsageDayInputOffsetsItem {
+    pub from_ms: i64,
+    pub minutes: i64,
+}
+
+impl Shape for UsageDayInputOffsetsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let from_ms = shape::required(object, "fromMs", at, shape::integer)?;
+        let minutes = shape::required(object, "minutes", at, shape::integer)?;
+        Ok(Self { from_ms, minutes })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("fromMs", Value::Number(self.from_ms as f64));
+        object.insert("minutes", Value::Number(self.minutes as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct UsageDayResult {
+    pub days: Vec<Option<String>>,
+}
+
+impl Shape for UsageDayResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let days = shape::required(object, "days", at, |value, at| {
+            shape::list(value, at, |value, at| {
+                shape::nullable(value, at, shape::text)
+            })
+        })?;
+        Ok(Self { days })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "days",
+            Value::Array(
+                self.days
+                    .iter()
+                    .map(|held| {
+                        held.as_ref()
+                            .map_or(Value::Null, |held| Value::from(held.as_str()))
+                    })
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}

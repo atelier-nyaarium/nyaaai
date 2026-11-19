@@ -1,0 +1,69 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "extra-usage-off-after-another-bill",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "extraUsage",
+							"on": false,
+							"lastBill": "go"
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "extraUsage",
+							"on": false,
+							"lastBill": "payg"
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "extraUsage",
+							"on": false
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "extraUsage",
+							"on": false,
+							"lastBill": ""
+						},
+						"nowMs": 60000000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "clear"
+					},
+					{
+						"kind": "clear"
+					},
+					{
+						"kind": "clear"
+					},
+					{
+						"kind": "clear"
+					}
+				]
+			}
+		]
+	}
+}

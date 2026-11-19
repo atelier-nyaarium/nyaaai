@@ -1,0 +1,79 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "pause-inside-a-balance-window",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance"
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance",
+							"retryAfterMs": 1800000
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "credit",
+							"retryAfterMs": 12000000
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance",
+							"retryAfterMs": 1
+						},
+						"nowMs": 60000000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 60600000,
+						"probe": null
+					},
+					{
+						"kind": "reset",
+						"at": 61800000
+					},
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 72000000
+					},
+					{
+						"kind": "reset",
+						"at": 60000001
+					}
+				]
+			}
+		]
+	}
+}

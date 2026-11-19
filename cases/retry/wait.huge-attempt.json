@@ -1,0 +1,44 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "huge-attempt",
+	"input": {
+		"options": {
+			"tries": 5000
+		},
+		"draws": [
+			1
+		],
+		"rows": [
+			{
+				"attempt": 60,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 1100,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 4999,
+				"waitedMs": 0
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": 30000,
+				"draws": 1
+			},
+			{
+				"waitMs": 30000,
+				"draws": 1
+			},
+			{
+				"waitMs": 30000,
+				"draws": 1
+			}
+		]
+	}
+}

@@ -1,0 +1,53 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "extra-usage-off-under-a-known-reset",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "reset",
+					"at": 63600000
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "extraUsage",
+							"on": false,
+							"lastBill": "balance"
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "extraUsage",
+							"on": false,
+							"lastBill": "balance"
+						},
+						"nowMs": 63600000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "reset",
+						"at": 63600000
+					},
+					{
+						"kind": "balance",
+						"eta": 81600000,
+						"next": 72600000,
+						"probe": null
+					}
+				]
+			}
+		]
+	}
+}

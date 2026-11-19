@@ -1,0 +1,45 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "retry-after-over-budget",
+	"input": {
+		"options": {},
+		"draws": [
+			1
+		],
+		"rows": [
+			{
+				"attempt": 2,
+				"waitedMs": 45001,
+				"retryAfterMs": 45000
+			},
+			{
+				"attempt": 1,
+				"waitedMs": 0,
+				"retryAfterMs": 90001
+			},
+			{
+				"attempt": 1,
+				"waitedMs": 90000,
+				"retryAfterMs": 1
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": null,
+				"draws": 1
+			},
+			{
+				"waitMs": null,
+				"draws": 1
+			},
+			{
+				"waitMs": null,
+				"draws": 1
+			}
+		]
+	}
+}

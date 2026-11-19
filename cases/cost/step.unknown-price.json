@@ -1,0 +1,92 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "cost.step",
+	"name": "unknown-price",
+	"input": {
+		"rows": [
+			{
+				"usage": {
+					"input": 100000,
+					"output": 10000
+				},
+				"price": "unknown",
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 100000,
+					"output": 10000,
+					"cost": 0.25
+				},
+				"price": "unknown",
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 100000,
+					"output": 10000,
+					"billingSource": "balance"
+				},
+				"price": "unknown",
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 100000,
+					"output": 10000,
+					"billingSource": "go"
+				},
+				"price": "unknown",
+				"longCache": false
+			},
+			{
+				"price": "unknown",
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 100000,
+					"output": 10000,
+					"byok": true,
+					"cost": 0.1
+				},
+				"price": "unknown",
+				"longCache": false
+			}
+		]
+	},
+	"expected": {
+		"costs": [
+			{
+				"usd": 0,
+				"estimated": false,
+				"unpriced": true
+			},
+			{
+				"usd": 0.25,
+				"estimated": false
+			},
+			{
+				"usd": 0,
+				"estimated": false,
+				"unpriced": true
+			},
+			{
+				"usd": 0,
+				"estimated": false,
+				"unpriced": true
+			},
+			{
+				"usd": 0,
+				"estimated": false,
+				"unpriced": true
+			},
+			{
+				"usd": 0,
+				"estimated": false,
+				"unpriced": true
+			}
+		]
+	}
+}

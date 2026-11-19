@@ -1,0 +1,45 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "no-cap",
+	"input": {
+		"options": {
+			"capMs": 0,
+			"tries": 4
+		},
+		"draws": [
+			1
+		],
+		"rows": [
+			{
+				"attempt": 1,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 2,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 3,
+				"waitedMs": 0
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": 0,
+				"draws": 1
+			},
+			{
+				"waitMs": 0,
+				"draws": 1
+			},
+			{
+				"waitMs": 0,
+				"draws": 1
+			}
+		]
+	}
+}

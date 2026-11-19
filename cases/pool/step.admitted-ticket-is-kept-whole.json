@@ -1,0 +1,57 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "admitted-ticket-is-kept-whole",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "admitted",
+							"ticket": {
+								"gate": "g",
+								"model": "m",
+								"generation": 3,
+								"probe": true,
+								"serial": 5
+							}
+						},
+						"nowMs": 60000000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 59940000,
+						"probe": {
+							"ticket": {
+								"gate": "g",
+								"model": "m",
+								"generation": 3,
+								"probe": true,
+								"serial": 5
+							},
+							"at": 60000000
+						}
+					}
+				]
+			}
+		]
+	}
+}

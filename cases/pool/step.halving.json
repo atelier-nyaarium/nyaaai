@@ -1,0 +1,146 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "halving",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 69000000
+					},
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 73500000
+					},
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 75750000
+					},
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 76875000
+					},
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 77400000
+					},
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 77700000
+					},
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 77940000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 78000000,
+						"next": 69000000,
+						"probe": null
+					},
+					{
+						"kind": "balance",
+						"eta": 78000000,
+						"next": 73500000,
+						"probe": null
+					},
+					{
+						"kind": "balance",
+						"eta": 78000000,
+						"next": 75750000,
+						"probe": null
+					},
+					{
+						"kind": "balance",
+						"eta": 78000000,
+						"next": 76875000,
+						"probe": null
+					},
+					{
+						"kind": "balance",
+						"eta": 78000000,
+						"next": 77437500,
+						"probe": null
+					},
+					{
+						"kind": "balance",
+						"eta": 78000000,
+						"next": 77700000,
+						"probe": null
+					},
+					{
+						"kind": "balance",
+						"eta": 78000000,
+						"next": 78000000,
+						"probe": null
+					},
+					{
+						"kind": "balance",
+						"eta": 78000000,
+						"next": 78240000,
+						"probe": null
+					}
+				]
+			}
+		]
+	}
+}

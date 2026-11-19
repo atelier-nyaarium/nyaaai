@@ -1,0 +1,38 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "retry-after-past-cap",
+	"input": {
+		"options": {
+			"capMs": 1000
+		},
+		"draws": [
+			1
+		],
+		"rows": [
+			{
+				"attempt": 1,
+				"waitedMs": 0,
+				"retryAfterMs": 60000
+			},
+			{
+				"attempt": 2,
+				"waitedMs": 0,
+				"retryAfterMs": 5000
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": 60000,
+				"draws": 1
+			},
+			{
+				"waitMs": 5000,
+				"draws": 1
+			}
+		]
+	}
+}

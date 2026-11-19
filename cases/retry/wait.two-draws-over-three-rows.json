@@ -1,0 +1,43 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "two-draws-over-three-rows",
+	"input": {
+		"options": {},
+		"draws": [
+			0.25,
+			0.75
+		],
+		"rows": [
+			{
+				"attempt": 1,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 2,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 3,
+				"waitedMs": 0
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": 625,
+				"draws": 1
+			},
+			{
+				"waitMs": 1750,
+				"draws": 1
+			},
+			{
+				"waitMs": 2500,
+				"draws": 1
+			}
+		]
+	}
+}

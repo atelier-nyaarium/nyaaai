@@ -1,0 +1,92 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.verdict",
+	"name": "balance-probe-bounded-by-a-pause",
+	"input": {
+		"rows": [
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 64800000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 0,
+							"probe": false,
+							"serial": 1
+						},
+						"at": 59940000
+					}
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 62400000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 0,
+							"probe": false,
+							"serial": 1
+						},
+						"at": 59940000
+					}
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 63000000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 0,
+							"probe": false,
+							"serial": 1
+						},
+						"at": 59940000
+					}
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			}
+		]
+	},
+	"expected": {
+		"verdicts": [
+			{
+				"skip": "allowance",
+				"blocked": {
+					"kind": "spendLimit",
+					"nextTryAt": 64800000
+				}
+			},
+			{
+				"skip": "allowance",
+				"blocked": {
+					"kind": "spendLimit",
+					"nextTryAt": 62970000
+				}
+			},
+			{
+				"skip": "allowance",
+				"blocked": {
+					"kind": "spendLimit",
+					"nextTryAt": 63000000
+				}
+			}
+		]
+	}
+}

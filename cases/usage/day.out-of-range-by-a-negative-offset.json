@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.day",
+	"name": "out-of-range-by-a-negative-offset",
+	"input": {
+		"offsets": [
+			{
+				"fromMs": 0,
+				"minutes": -60
+			}
+		],
+		"instants": [
+			-62167219200000,
+			-62167215600000,
+			-62167215599999
+		]
+	},
+	"expected": {
+		"days": [
+			"0000-01-01",
+			"0000-01-01",
+			"0000-01-01"
+		]
+	}
+}

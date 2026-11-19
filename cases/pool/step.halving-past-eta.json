@@ -1,0 +1,86 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "halving-past-eta",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 77999999
+					},
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 78000000
+					},
+					{
+						"event": {
+							"kind": "billed",
+							"source": "balance",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 78000001
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 78000000,
+						"next": 69000000,
+						"probe": null
+					},
+					{
+						"kind": "balance",
+						"eta": 78000000,
+						"next": 78299999,
+						"probe": null
+					},
+					{
+						"kind": "balance",
+						"eta": 96000000,
+						"next": 87000000,
+						"probe": null
+					},
+					{
+						"kind": "balance",
+						"eta": 96000000,
+						"next": 87000000.5,
+						"probe": null
+					}
+				]
+			}
+		]
+	}
+}

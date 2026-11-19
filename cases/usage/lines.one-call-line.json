@@ -1,0 +1,41 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.lines",
+	"name": "one-call-line",
+	"input": {
+		"text": "{\"call\":{\"id\":\"call-1\",\"at\":1794528001000,\"feature\":\"chat\",\"lane\":\"title\",\"model\":\"vendor/model-a\",\"entry\":\"e1\",\"label\":\"Main\",\"app\":\"~/work/app/\",\"ms\":1234,\"first\":321,\"in\":1000,\"out\":200,\"cached\":300,\"cacheWrite\":50,\"reasoning\":40,\"cost\":0.0165,\"accountCost\":0.0125,\"upstreamCost\":0.004,\"byok\":true,\"billingSource\":\"balance\",\"provider\":\"Lab\",\"gen\":\"gen-a1\",\"finish\":\"stop\"}}\n"
+	},
+	"expected": {
+		"lines": [
+			{
+				"call": {
+					"id": "call-1",
+					"at": 1794528001000,
+					"feature": "chat",
+					"lane": "title",
+					"model": "vendor/model-a",
+					"entry": "e1",
+					"label": "Main",
+					"app": "~/work/app/",
+					"ms": 1234,
+					"first": 321,
+					"in": 1000,
+					"out": 200,
+					"cached": 300,
+					"cacheWrite": 50,
+					"reasoning": 40,
+					"cost": 0.0165,
+					"accountCost": 0.0125,
+					"upstreamCost": 0.004,
+					"byok": true,
+					"billingSource": "balance",
+					"provider": "Lab",
+					"gen": "gen-a1",
+					"finish": "stop"
+				}
+			}
+		],
+		"dropped": 0
+	}
+}

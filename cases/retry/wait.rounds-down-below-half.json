@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "rounds-down-below-half",
+	"input": {
+		"options": {
+			"baseMs": 2.5
+		},
+		"draws": [
+			0
+		],
+		"rows": [
+			{
+				"attempt": 1,
+				"waitedMs": 0
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": 1,
+				"draws": 1
+			}
+		]
+	}
+}

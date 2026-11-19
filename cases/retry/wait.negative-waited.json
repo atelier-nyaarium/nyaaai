@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "negative-waited",
+	"input": {
+		"options": {
+			"budgetMs": 1000
+		},
+		"draws": [
+			1
+		],
+		"rows": [
+			{
+				"attempt": 1,
+				"waitedMs": -5000
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": 1000,
+				"draws": 1
+			}
+		]
+	}
+}

@@ -1,0 +1,49 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.app",
+	"name": "windows",
+	"input": {
+		"rows": [
+			{
+				"folder": "C:\\Users\\me\\projects\\app",
+				"home": "C:\\Users\\me"
+			},
+			{
+				"folder": "C:\\Users\\me",
+				"home": "C:\\Users\\me"
+			},
+			{
+				"folder": "C:\\Users\\me\\",
+				"home": "C:\\Users\\me\\"
+			},
+			{
+				"folder": "C:\\Users\\meadow\\app",
+				"home": "C:\\Users\\me"
+			},
+			{
+				"folder": "D:\\work\\app\\",
+				"home": "C:\\Users\\me"
+			},
+			{
+				"folder": "c:\\users\\me\\app",
+				"home": "C:\\Users\\me"
+			},
+			{
+				"folder": "C:\\Users\\me\\app\\\\",
+				"home": "C:\\Users\\me"
+			}
+		]
+	},
+	"expected": {
+		"apps": [
+			"~\\projects\\app\\",
+			"~\\",
+			"~\\",
+			"C:\\Users\\meadow\\app\\",
+			"D:\\work\\app\\",
+			"c:\\users\\me\\app\\",
+			"~\\app\\"
+		]
+	}
+}

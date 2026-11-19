@@ -1,0 +1,50 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "budget-spent-by-waits",
+	"input": {
+		"options": {},
+		"draws": [
+			1
+		],
+		"rows": [
+			{
+				"attempt": 3,
+				"waitedMs": 85000
+			},
+			{
+				"attempt": 3,
+				"waitedMs": 86000
+			},
+			{
+				"attempt": 3,
+				"waitedMs": 86001
+			},
+			{
+				"attempt": 3,
+				"waitedMs": 90000
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": 4000,
+				"draws": 1
+			},
+			{
+				"waitMs": 4000,
+				"draws": 1
+			},
+			{
+				"waitMs": null,
+				"draws": 1
+			},
+			{
+				"waitMs": null,
+				"draws": 1
+			}
+		]
+	}
+}

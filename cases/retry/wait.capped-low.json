@@ -1,0 +1,52 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "capped-low",
+	"input": {
+		"options": {
+			"capMs": 3000
+		},
+		"draws": [
+			0
+		],
+		"rows": [
+			{
+				"attempt": 1,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 2,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 3,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 4,
+				"waitedMs": 0
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": 500,
+				"draws": 1
+			},
+			{
+				"waitMs": 1000,
+				"draws": 1
+			},
+			{
+				"waitMs": 1500,
+				"draws": 1
+			},
+			{
+				"waitMs": null,
+				"draws": 0
+			}
+		]
+	}
+}

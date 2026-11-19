@@ -1,0 +1,40 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.lines",
+	"name": "a-stats-line",
+	"input": {
+		"text": "{\"stats\":{\"id\":\"call-1\",\"of\":{\"provider\":\"Lab\",\"latencyMs\":210,\"generationMs\":1100,\"cost\":0.0165,\"accountCost\":0.0125,\"upstreamCost\":0.004,\"byok\":true,\"in\":1000,\"out\":200,\"finish\":\"stop\"}}}\n{\"stats\":{\"id\":\"call-2\",\"of\":{\"provider\":\"Lab\",\"latencyMs\":5}}}\n"
+	},
+	"expected": {
+		"lines": [
+			{
+				"stats": {
+					"id": "call-1",
+					"of": {
+						"provider": "Lab",
+						"latencyMs": 210,
+						"generationMs": 1100,
+						"cost": 0.0165,
+						"accountCost": 0.0125,
+						"upstreamCost": 0.004,
+						"byok": true,
+						"in": 1000,
+						"out": 200,
+						"finish": "stop"
+					}
+				}
+			},
+			{
+				"stats": {
+					"id": "call-2",
+					"of": {
+						"provider": "Lab",
+						"latencyMs": 5
+					}
+				}
+			}
+		],
+		"dropped": 0
+	}
+}

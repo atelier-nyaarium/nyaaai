@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "rounds-half-up",
+	"input": {
+		"options": {
+			"baseMs": 3
+		},
+		"draws": [
+			0
+		],
+		"rows": [
+			{
+				"attempt": 1,
+				"waitedMs": 0
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": 2,
+				"draws": 1
+			}
+		]
+	}
+}

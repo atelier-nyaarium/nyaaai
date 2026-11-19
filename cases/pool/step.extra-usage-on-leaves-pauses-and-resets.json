@@ -1,0 +1,73 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "extra-usage-on-leaves-pauses-and-resets",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "credit"
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "extraUsage",
+							"on": true
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance",
+							"resetsAt": 61800000
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "extraUsage",
+							"on": true
+						},
+						"nowMs": 60000000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 60060000
+					},
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 60060000
+					},
+					{
+						"kind": "reset",
+						"at": 61800000
+					},
+					{
+						"kind": "reset",
+						"at": 61800000
+					}
+				]
+			}
+		]
+	}
+}

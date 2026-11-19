@@ -1,0 +1,101 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "default-cap-reached",
+	"input": {
+		"options": {
+			"tries": 10,
+			"budgetMs": 1000000
+		},
+		"draws": [
+			1
+		],
+		"rows": [
+			{
+				"attempt": 1,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 2,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 3,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 4,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 5,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 6,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 7,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 8,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 9,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 10,
+				"waitedMs": 0
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": 1000,
+				"draws": 1
+			},
+			{
+				"waitMs": 2000,
+				"draws": 1
+			},
+			{
+				"waitMs": 4000,
+				"draws": 1
+			},
+			{
+				"waitMs": 8000,
+				"draws": 1
+			},
+			{
+				"waitMs": 16000,
+				"draws": 1
+			},
+			{
+				"waitMs": 30000,
+				"draws": 1
+			},
+			{
+				"waitMs": 30000,
+				"draws": 1
+			},
+			{
+				"waitMs": 30000,
+				"draws": 1
+			},
+			{
+				"waitMs": 30000,
+				"draws": 1
+			},
+			{
+				"waitMs": null,
+				"draws": 0
+			}
+		]
+	}
+}

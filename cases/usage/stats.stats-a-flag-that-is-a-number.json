@@ -1,0 +1,18 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.stats",
+	"name": "stats-a-flag-that-is-a-number",
+	"input": {
+		"stats": {
+			"byok": 1
+		},
+		"nonFinite": [],
+		"id": "call-1"
+	},
+	"expected": {
+		"line": null,
+		"refusedAt": "byok",
+		"text": null
+	}
+}

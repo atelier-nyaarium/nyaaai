@@ -1,0 +1,76 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "draws-cycle",
+	"input": {
+		"options": {},
+		"draws": [
+			0,
+			1,
+			0.5
+		],
+		"rows": [
+			{
+				"attempt": 1,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 1,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 1,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 1,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 1,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 1,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 1,
+				"waitedMs": 0
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": 500,
+				"draws": 1
+			},
+			{
+				"waitMs": 1000,
+				"draws": 1
+			},
+			{
+				"waitMs": 750,
+				"draws": 1
+			},
+			{
+				"waitMs": 500,
+				"draws": 1
+			},
+			{
+				"waitMs": 1000,
+				"draws": 1
+			},
+			{
+				"waitMs": 750,
+				"draws": 1
+			},
+			{
+				"waitMs": 500,
+				"draws": 1
+			}
+		]
+	}
+}

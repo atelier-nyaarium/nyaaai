@@ -1,0 +1,16 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "no-rows",
+	"input": {
+		"options": {},
+		"draws": [
+			0
+		],
+		"rows": []
+	},
+	"expected": {
+		"rows": []
+	}
+}

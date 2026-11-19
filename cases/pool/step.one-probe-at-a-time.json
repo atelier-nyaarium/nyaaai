@@ -1,0 +1,160 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "one-probe-at-a-time",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "admitted",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "admitted",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 1,
+								"probe": false,
+								"serial": 2
+							}
+						},
+						"nowMs": 60060000
+					},
+					{
+						"event": {
+							"kind": "settled",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 1,
+								"probe": false,
+								"serial": 2
+							}
+						},
+						"nowMs": 60120000
+					},
+					{
+						"event": {
+							"kind": "settled",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						},
+						"nowMs": 60180000
+					},
+					{
+						"event": {
+							"kind": "admitted",
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 1,
+								"probe": false,
+								"serial": 2
+							}
+						},
+						"nowMs": 60240000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 59940000,
+						"probe": {
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							},
+							"at": 60000000
+						}
+					},
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 59940000,
+						"probe": {
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							},
+							"at": 60000000
+						}
+					},
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 59940000,
+						"probe": {
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							},
+							"at": 60000000
+						}
+					},
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 59940000,
+						"probe": null
+					},
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 59940000,
+						"probe": {
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 1,
+								"probe": false,
+								"serial": 2
+							},
+							"at": 60240000
+						}
+					}
+				]
+			}
+		]
+	}
+}

@@ -1,0 +1,48 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.record",
+	"name": "false-flags-are-kept",
+	"input": {
+		"call": {
+			"tag": {
+				"feature": "chat"
+			},
+			"model": "vendor/model-a",
+			"at": 1794528001000,
+			"ms": 1200,
+			"cost": {
+				"usd": 0.25,
+				"estimated": false
+			},
+			"usage": {
+				"input": 1,
+				"output": 1,
+				"byok": false
+			},
+			"cancelled": false
+		},
+		"nonFinite": [],
+		"id": "call-1",
+		"home": "/home/user",
+		"nowMs": 1791460800000,
+		"offsets": []
+	},
+	"expected": {
+		"record": {
+			"id": "call-1",
+			"at": 1794528001000,
+			"feature": "chat",
+			"model": "vendor/model-a",
+			"ms": 1200,
+			"in": 1,
+			"out": 1,
+			"cost": 0.25,
+			"byok": false,
+			"cancelled": false
+		},
+		"refusedAt": null,
+		"line": "{\"call\":{\"id\":\"call-1\",\"at\":1794528001000,\"feature\":\"chat\",\"model\":\"vendor/model-a\",\"ms\":1200,\"in\":1,\"out\":1,\"cost\":0.25,\"byok\":false,\"cancelled\":false}}\n",
+		"day": "2026-10-08"
+	}
+}

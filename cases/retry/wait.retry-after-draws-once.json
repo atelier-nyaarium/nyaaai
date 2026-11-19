@@ -1,0 +1,53 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "retry-after-draws-once",
+	"input": {
+		"options": {},
+		"draws": [
+			0,
+			1
+		],
+		"rows": [
+			{
+				"attempt": 1,
+				"waitedMs": 0,
+				"retryAfterMs": 100
+			},
+			{
+				"attempt": 1,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 1,
+				"waitedMs": 0,
+				"retryAfterMs": 100
+			},
+			{
+				"attempt": 1,
+				"waitedMs": 0
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": 100,
+				"draws": 1
+			},
+			{
+				"waitMs": 1000,
+				"draws": 1
+			},
+			{
+				"waitMs": 100,
+				"draws": 1
+			},
+			{
+				"waitMs": 1000,
+				"draws": 1
+			}
+		]
+	}
+}

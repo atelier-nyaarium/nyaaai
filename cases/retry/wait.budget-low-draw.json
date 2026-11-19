@@ -1,0 +1,36 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "budget-low-draw",
+	"input": {
+		"options": {
+			"budgetMs": 500
+		},
+		"draws": [
+			0
+		],
+		"rows": [
+			{
+				"attempt": 1,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 1,
+				"waitedMs": 1
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": 500,
+				"draws": 1
+			},
+			{
+				"waitMs": null,
+				"draws": 1
+			}
+		]
+	}
+}

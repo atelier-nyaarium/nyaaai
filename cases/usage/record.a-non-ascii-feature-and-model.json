@@ -1,0 +1,38 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.record",
+	"name": "a-non-ascii-feature-and-model",
+	"input": {
+		"call": {
+			"tag": {
+				"feature": "é中"
+			},
+			"model": "m😀",
+			"at": 1794528001000,
+			"ms": 1200,
+			"cost": {
+				"usd": 0.25,
+				"estimated": false
+			}
+		},
+		"nonFinite": [],
+		"id": "call-1",
+		"home": "/home/user",
+		"nowMs": 1791460800000,
+		"offsets": []
+	},
+	"expected": {
+		"record": {
+			"id": "call-1",
+			"at": 1794528001000,
+			"feature": "é中",
+			"model": "m😀",
+			"ms": 1200,
+			"cost": 0.25
+		},
+		"refusedAt": null,
+		"line": "{\"call\":{\"id\":\"call-1\",\"at\":1794528001000,\"feature\":\"é中\",\"model\":\"m😀\",\"ms\":1200,\"cost\":0.25}}\n",
+		"day": "2026-10-08"
+	}
+}

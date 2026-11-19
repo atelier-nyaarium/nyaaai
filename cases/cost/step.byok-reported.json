@@ -1,0 +1,146 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "cost.step",
+	"name": "byok-reported",
+	"input": {
+		"rows": [
+			{
+				"usage": {
+					"input": 1000,
+					"output": 50,
+					"byok": true,
+					"cost": 0.01,
+					"upstreamCost": 0.2,
+					"cached": 400,
+					"cacheWrite": 100
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 1000,
+					"output": 50,
+					"byok": false,
+					"cost": 0.2,
+					"upstreamCost": 0.2,
+					"cached": 400,
+					"cacheWrite": 100
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 1000,
+					"output": 50,
+					"cost": 0.2,
+					"upstreamCost": 0.2
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 1000,
+					"output": 50,
+					"byok": true,
+					"cost": 0.01,
+					"upstreamCost": 0
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 1000,
+					"output": 50,
+					"byok": true,
+					"cost": 0,
+					"upstreamCost": 0.5
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 1000,
+					"output": 50,
+					"byok": true,
+					"cost": 0,
+					"upstreamCost": 0
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 3000,
+					"output": 150,
+					"byok": true,
+					"cost": 0.22000000000000003,
+					"upstreamCost": 0.4,
+					"cached": 1200,
+					"cacheWrite": 300
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 1000,
+					"output": 50,
+					"byok": true,
+					"cost": 0.1,
+					"upstreamCost": 0.2
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 1000,
+					"output": 50,
+					"byok": true,
+					"cost": 0.1,
+					"upstreamCost": 0.2
+				},
+				"price": "unknown",
+				"longCache": false
+			}
+		]
+	},
+	"expected": {
+		"costs": [
+			{
+				"usd": 0.21000000000000002,
+				"estimated": false
+			},
+			{
+				"usd": 0.2,
+				"estimated": false
+			},
+			{
+				"usd": 0.2,
+				"estimated": false
+			},
+			{
+				"usd": 0.01,
+				"estimated": false
+			},
+			{
+				"usd": 0.5,
+				"estimated": false
+			},
+			{
+				"usd": 0,
+				"estimated": false
+			},
+			{
+				"usd": 0.6200000000000001,
+				"estimated": false
+			},
+			{
+				"usd": 0.30000000000000004,
+				"estimated": false
+			},
+			{
+				"usd": 0.30000000000000004,
+				"estimated": false
+			}
+		]
+	}
+}

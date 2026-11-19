@@ -1,0 +1,48 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "cost.step",
+	"name": "order-with-a-fee-three",
+	"input": {
+		"rows": [
+			{
+				"usage": {
+					"input": 139459,
+					"output": 10735,
+					"cached": 53602,
+					"cacheWrite": 704,
+					"byok": true,
+					"cost": 0.1
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 0,
+							"prompt": 0.6,
+							"completion": 0.28,
+							"cacheRead": 2.5,
+							"cacheWrite": 1.1
+						}
+					]
+				},
+				"longCache": false
+			}
+		]
+	},
+	"expected": {
+		"costs": [
+			{
+				"usd": 0.28887699999999994,
+				"estimated": true
+			}
+		]
+	}
+}

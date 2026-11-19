@@ -1,0 +1,50 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.record",
+	"name": "reported-cost-is-kept-beside-the-total",
+	"input": {
+		"call": {
+			"tag": {
+				"feature": "chat"
+			},
+			"model": "vendor/model-a",
+			"at": 1794528001000,
+			"ms": 1200,
+			"cost": {
+				"usd": 0.12,
+				"estimated": false
+			},
+			"usage": {
+				"input": 1000,
+				"output": 10,
+				"cost": 0,
+				"byok": true,
+				"upstreamCost": 0.12
+			}
+		},
+		"nonFinite": [],
+		"id": "call-1",
+		"home": "/home/user",
+		"nowMs": 1791460800000,
+		"offsets": []
+	},
+	"expected": {
+		"record": {
+			"id": "call-1",
+			"at": 1794528001000,
+			"feature": "chat",
+			"model": "vendor/model-a",
+			"ms": 1200,
+			"in": 1000,
+			"out": 10,
+			"cost": 0.12,
+			"accountCost": 0,
+			"upstreamCost": 0.12,
+			"byok": true
+		},
+		"refusedAt": null,
+		"line": "{\"call\":{\"id\":\"call-1\",\"at\":1794528001000,\"feature\":\"chat\",\"model\":\"vendor/model-a\",\"ms\":1200,\"in\":1000,\"out\":10,\"cost\":0.12,\"accountCost\":0,\"upstreamCost\":0.12,\"byok\":true}}\n",
+		"day": "2026-10-08"
+	}
+}

@@ -1,0 +1,36 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.stats",
+	"name": "stats-a-field-that-is-not-a-number-is-left-out",
+	"input": {
+		"stats": {
+			"latencyMs": 1,
+			"generationMs": 1,
+			"cost": 1
+		},
+		"nonFinite": [
+			{
+				"path": "latencyMs",
+				"is": "notANumber"
+			},
+			{
+				"path": "cost",
+				"is": "notANumber"
+			}
+		],
+		"id": "call-1"
+	},
+	"expected": {
+		"line": {
+			"stats": {
+				"id": "call-1",
+				"of": {
+					"generationMs": 1
+				}
+			}
+		},
+		"refusedAt": null,
+		"text": "{\"stats\":{\"id\":\"call-1\",\"of\":{\"generationMs\":1}}}\n"
+	}
+}

@@ -651,6 +651,51 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
             input,
             super::resolver::routes,
         ),
+        "retry.wait" => {
+            run::<shapes::RetryWaitInput, shapes::RetryWaitResult>(input, super::retry::wait)
+        }
+        "retry.lifetime" => run::<shapes::RetryLifetimeInput, shapes::RetryLifetimeResult>(
+            input,
+            super::retry::lifetime,
+        ),
+        "pool.step" => {
+            run::<shapes::PoolStepInput, shapes::PoolStepResult>(input, super::pool::step)
+        }
+        "pool.verdict" => {
+            run::<shapes::PoolVerdictInput, shapes::PoolVerdictResult>(input, super::pool::verdict)
+        }
+        "pool.probeAt" => {
+            run::<shapes::PoolProbeAtInput, shapes::PoolProbeAtResult>(input, super::pool::probe_at)
+        }
+        "cost.step" => {
+            run::<shapes::CostStepInput, shapes::CostStepResult>(input, super::cost::step)
+        }
+        "cost.price" => {
+            run::<shapes::CostPriceInput, shapes::CostPriceResult>(input, super::cost::price)
+        }
+        "cost.reported" => run::<shapes::CostReportedInput, shapes::CostReportedResult>(
+            input,
+            super::cost::reported,
+        ),
+        "cost.longCache" => run::<shapes::CostLongCacheInput, shapes::CostLongCacheResult>(
+            input,
+            super::cost::long_cache,
+        ),
+        "usage.record" => {
+            run::<shapes::UsageRecordInput, shapes::UsageRecordResult>(input, super::usage::record)
+        }
+        "usage.stats" => {
+            run::<shapes::UsageStatsInput, shapes::UsageStatsResult>(input, super::usage::stats)
+        }
+        "usage.lines" => {
+            run::<shapes::UsageLinesInput, shapes::UsageLinesResult>(input, super::usage::lines)
+        }
+        "usage.app" => {
+            run::<shapes::UsageAppInput, shapes::UsageAppResult>(input, super::usage::app)
+        }
+        "usage.day" => {
+            run::<shapes::UsageDayInput, shapes::UsageDayResult>(input, super::usage::day)
+        }
         _ => return None,
     })
 }

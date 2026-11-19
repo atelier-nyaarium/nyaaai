@@ -1,0 +1,23 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.stats",
+	"name": "stats-an-infinite-field-is-refused",
+	"input": {
+		"stats": {
+			"latencyMs": 1
+		},
+		"nonFinite": [
+			{
+				"path": "latencyMs",
+				"is": "plusInfinity"
+			}
+		],
+		"id": "call-1"
+	},
+	"expected": {
+		"line": null,
+		"refusedAt": "latencyMs",
+		"text": null
+	}
+}

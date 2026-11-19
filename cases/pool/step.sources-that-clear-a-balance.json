@@ -1,0 +1,41 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "sources-that-clear-a-balance",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "billed",
+							"source": "go-plus",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 60000000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "clear"
+					}
+				]
+			}
+		]
+	}
+}

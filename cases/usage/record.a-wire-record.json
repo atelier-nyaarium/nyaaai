@@ -1,0 +1,56 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.record",
+	"name": "a-wire-record",
+	"input": {
+		"call": {
+			"tag": {
+				"feature": "prediction",
+				"lane": "ghost",
+				"folder": "/home/me/projects/app"
+			},
+			"model": "vendor/model-a",
+			"at": 1794528001000,
+			"ms": 1200,
+			"cost": {
+				"usd": 0.25,
+				"estimated": false
+			},
+			"usage": {
+				"input": 10,
+				"output": 2,
+				"cached": null
+			},
+			"provider": null
+		},
+		"nonFinite": [
+			{
+				"path": "cost.usd",
+				"is": "notANumber"
+			}
+		],
+		"id": "call-1",
+		"home": "/home/me",
+		"nowMs": 1791460800000,
+		"offsets": []
+	},
+	"expected": {
+		"record": {
+			"id": "call-1",
+			"at": 1794528001000,
+			"feature": "prediction",
+			"lane": "ghost",
+			"model": "vendor/model-a",
+			"app": "~/projects/app/",
+			"ms": 1200,
+			"in": 10,
+			"out": 2,
+			"cost": 0,
+			"estimated": true
+		},
+		"refusedAt": null,
+		"line": "{\"call\":{\"id\":\"call-1\",\"at\":1794528001000,\"feature\":\"prediction\",\"lane\":\"ghost\",\"model\":\"vendor/model-a\",\"app\":\"~/projects/app/\",\"ms\":1200,\"in\":10,\"out\":2,\"cost\":0,\"estimated\":true}}\n",
+		"day": "2026-10-08"
+	}
+}

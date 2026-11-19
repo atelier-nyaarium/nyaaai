@@ -22,6 +22,7 @@ import { catalog } from "./scripts/caseGroups/catalog";
 import { claude } from "./scripts/caseGroups/claude";
 import { codec } from "./scripts/caseGroups/codec";
 import { contract } from "./scripts/caseGroups/contract";
+import { cost } from "./scripts/caseGroups/cost";
 import { curated } from "./scripts/caseGroups/curated";
 import { disposition } from "./scripts/caseGroups/disposition";
 import { effort } from "./scripts/caseGroups/effort";
@@ -38,9 +39,11 @@ import { number } from "./scripts/caseGroups/number";
 import { order } from "./scripts/caseGroups/order";
 import { paths } from "./scripts/caseGroups/paths";
 import { pattern } from "./scripts/caseGroups/pattern";
+import { pool } from "./scripts/caseGroups/pool";
 import { registry } from "./scripts/caseGroups/registry";
 import { resolver } from "./scripts/caseGroups/resolver";
 import { retention } from "./scripts/caseGroups/retention";
+import { retry } from "./scripts/caseGroups/retry";
 import { rowKeyGroup } from "./scripts/caseGroups/rowKey";
 import { schemaProjection } from "./scripts/caseGroups/schemaProjection";
 import { secret } from "./scripts/caseGroups/secret";
@@ -55,6 +58,7 @@ import { text } from "./scripts/caseGroups/text";
 import { time } from "./scripts/caseGroups/time";
 import { transport } from "./scripts/caseGroups/transport";
 import { url } from "./scripts/caseGroups/url";
+import { usage } from "./scripts/caseGroups/usage";
 import { view } from "./scripts/caseGroups/view";
 import { adapterCases } from "./scripts/caseSources/adapter";
 import { curatedTableRust } from "./scripts/curatedTable";
@@ -209,6 +213,10 @@ export default project({
 		kindGroup,
 		local,
 		resolver,
+		retry,
+		pool,
+		cost,
+		usage,
 	],
 	runs: adapterCases,
 	cases: { crate: "nyaaai_cli", module: "cases", dir: "rust/cli/src/cases" },

@@ -1,0 +1,71 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.lifetime",
+	"name": "every-kind",
+	"input": {},
+	"expected": {
+		"rows": [
+			{
+				"notice": "keyMissing",
+				"lifetime": "outcome"
+			},
+			{
+				"notice": "keyRejected",
+				"lifetime": "outcome"
+			},
+			{
+				"notice": "spendLimit",
+				"lifetime": "outcome"
+			},
+			{
+				"notice": "refused",
+				"lifetime": "outcome"
+			},
+			{
+				"notice": "noZdrHost",
+				"lifetime": "outcome"
+			},
+			{
+				"notice": "modelRetired",
+				"lifetime": "outcome"
+			},
+			{
+				"notice": "modelUnavailable",
+				"lifetime": "outcome"
+			},
+			{
+				"notice": "unreachable",
+				"lifetime": "outcome"
+			},
+			{
+				"notice": "badRequest",
+				"lifetime": "outcome"
+			},
+			{
+				"notice": "retriesExhausted",
+				"lifetime": "outcome"
+			},
+			{
+				"notice": "providerOverloaded",
+				"lifetime": "outcome"
+			},
+			{
+				"notice": "streamFailed",
+				"lifetime": "outcome"
+			},
+			{
+				"notice": "outputCut",
+				"lifetime": "outcome"
+			},
+			{
+				"notice": "noModel",
+				"lifetime": "outcome"
+			},
+			{
+				"notice": "historyDropped",
+				"lifetime": "midTurn"
+			}
+		]
+	}
+}

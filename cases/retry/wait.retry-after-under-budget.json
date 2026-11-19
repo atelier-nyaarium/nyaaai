@@ -1,0 +1,27 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "retry-after-under-budget",
+	"input": {
+		"options": {},
+		"draws": [
+			1
+		],
+		"rows": [
+			{
+				"attempt": 1,
+				"waitedMs": 0,
+				"retryAfterMs": 45000
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": 45000,
+				"draws": 1
+			}
+		]
+	}
+}

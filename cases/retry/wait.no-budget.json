@@ -1,0 +1,37 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "no-budget",
+	"input": {
+		"options": {
+			"budgetMs": 0
+		},
+		"draws": [
+			1
+		],
+		"rows": [
+			{
+				"attempt": 1,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 1,
+				"waitedMs": 0,
+				"retryAfterMs": 0
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": null,
+				"draws": 1
+			},
+			{
+				"waitMs": 0,
+				"draws": 1
+			}
+		]
+	}
+}

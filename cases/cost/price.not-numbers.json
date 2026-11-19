@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "cost.price",
+	"name": "not-numbers",
+	"input": {
+		"values": [
+			"0",
+			"1.5",
+			"",
+			"NaN",
+			"Infinity",
+			null,
+			true,
+			false,
+			[],
+			[
+				1
+			],
+			{},
+			{
+				"value": 1
+			},
+			"-1",
+			" 1"
+		]
+	},
+	"expected": {
+		"prices": [
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null
+		]
+	}
+}

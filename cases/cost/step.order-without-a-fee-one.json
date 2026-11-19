@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "cost.step",
+	"name": "order-without-a-fee-one",
+	"input": {
+		"rows": [
+			{
+				"usage": {
+					"input": 237822,
+					"output": 16807,
+					"cached": 76181,
+					"cacheWrite": 437
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 0,
+							"prompt": 0.3,
+							"completion": 0.0375,
+							"cacheRead": 7.5,
+							"cacheWrite": 0.3
+						}
+					]
+				},
+				"longCache": false
+			}
+		]
+	},
+	"expected": {
+		"costs": [
+			{
+				"usd": 0.6204800624999999,
+				"estimated": true
+			}
+		]
+	}
+}

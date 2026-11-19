@@ -1,0 +1,55 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "pause-at-the-end-of-a-balance-window",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance"
+						},
+						"nowMs": 65999999
+					},
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance"
+						},
+						"nowMs": 66000000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 66059999,
+						"probe": null
+					},
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 66060000,
+						"probe": null
+					}
+				]
+			}
+		]
+	}
+}

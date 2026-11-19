@@ -1,0 +1,149 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.verdict",
+	"name": "balance",
+	"input": {
+		"rows": [
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": null
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 0,
+							"probe": false,
+							"serial": 1
+						},
+						"at": 59940000
+					}
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 59880000,
+					"probe": null
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 60240000,
+					"probe": null
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": null
+				},
+				"exempt": true,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 60600000,
+					"probe": null
+				},
+				"exempt": true,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 0,
+							"probe": false,
+							"serial": 1
+						},
+						"at": 59940000
+					}
+				},
+				"exempt": true,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "balance",
+					"eta": 59940000,
+					"next": 60240000,
+					"probe": null
+				},
+				"exempt": true,
+				"nowMs": 60000000
+			}
+		]
+	},
+	"expected": {
+		"verdicts": [
+			null,
+			{
+				"skip": "allowance",
+				"blocked": {
+					"kind": "spendLimit",
+					"nextTryAt": 60600000
+				}
+			},
+			{
+				"skip": "allowance",
+				"blocked": {
+					"kind": "spendLimit",
+					"nextTryAt": 62970000
+				}
+			},
+			null,
+			{
+				"skip": "allowance",
+				"blocked": {
+					"kind": "spendLimit",
+					"nextTryAt": 60240000
+				}
+			},
+			null,
+			null,
+			null,
+			null
+		]
+	}
+}

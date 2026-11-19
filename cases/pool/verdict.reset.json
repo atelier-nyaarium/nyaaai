@@ -1,0 +1,77 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.verdict",
+	"name": "reset",
+	"input": {
+		"rows": [
+			{
+				"state": {
+					"kind": "reset",
+					"at": 63600000
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "reset",
+					"at": 63600000
+				},
+				"exempt": true,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "reset",
+					"at": 60000000
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "reset",
+					"at": 60000001
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "reset",
+					"at": 59940000
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			}
+		]
+	},
+	"expected": {
+		"verdicts": [
+			{
+				"skip": "allowance",
+				"blocked": {
+					"kind": "spendLimit",
+					"resetsAt": 63600000
+				}
+			},
+			{
+				"skip": "allowance",
+				"blocked": {
+					"kind": "spendLimit",
+					"resetsAt": 63600000
+				}
+			},
+			null,
+			{
+				"skip": "allowance",
+				"blocked": {
+					"kind": "spendLimit",
+					"resetsAt": 60000001
+				}
+			},
+			null
+		]
+	}
+}

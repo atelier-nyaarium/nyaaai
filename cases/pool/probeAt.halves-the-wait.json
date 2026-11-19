@@ -1,0 +1,60 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.probeAt",
+	"name": "halves-the-wait",
+	"input": {
+		"rows": [
+			{
+				"nowMs": 60000000,
+				"eta": 66000000
+			},
+			{
+				"nowMs": 60000000,
+				"eta": 60600000
+			},
+			{
+				"nowMs": 60000000,
+				"eta": 60540000
+			},
+			{
+				"nowMs": 60000000,
+				"eta": 60000000
+			},
+			{
+				"nowMs": 60000000,
+				"eta": 57000000
+			},
+			{
+				"nowMs": 60000000,
+				"eta": 60000001
+			},
+			{
+				"nowMs": 0,
+				"eta": 0
+			},
+			{
+				"nowMs": 1,
+				"eta": 4
+			}
+		]
+	},
+	"expected": {
+		"times": [
+			63000000,
+			60300000,
+			60300000,
+			60300000,
+			60300000,
+			60300000,
+			300000,
+			300001
+		],
+		"balanceCoolMs": 18000000,
+		"probeFloorMs": 600000,
+		"allowanceSources": [
+			"go",
+			"go-plus"
+		]
+	}
+}

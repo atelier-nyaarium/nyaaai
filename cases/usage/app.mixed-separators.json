@@ -1,0 +1,54 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.app",
+	"name": "mixed-separators",
+	"input": {
+		"rows": [
+			{
+				"folder": "C:/Users/me/projects/app",
+				"home": "C:\\Users\\me"
+			},
+			{
+				"folder": "C:/Users/me/app",
+				"home": "C:/Users/me"
+			},
+			{
+				"folder": "C:\\Users\\me/app",
+				"home": "C:\\Users\\me"
+			},
+			{
+				"folder": "C:\\Users\\me\\app/",
+				"home": "C:\\Users\\me"
+			},
+			{
+				"folder": "/home/me/a\\b",
+				"home": "/home/me"
+			},
+			{
+				"folder": "\\home\\me\\app",
+				"home": "/home/me"
+			},
+			{
+				"folder": "\\\\server\\share\\app",
+				"home": "\\\\server\\share"
+			},
+			{
+				"folder": "//server/share/app",
+				"home": "//server/share"
+			}
+		]
+	},
+	"expected": {
+		"apps": [
+			"C:/Users/me/projects/app/",
+			"~/app/",
+			"~/app/",
+			"C:\\Users\\me\\app/",
+			"~/a\\b/",
+			"\\home\\me\\app\\",
+			"~\\app\\",
+			"~/app/"
+		]
+	}
+}

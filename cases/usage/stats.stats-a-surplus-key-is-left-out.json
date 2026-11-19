@@ -1,0 +1,29 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.stats",
+	"name": "stats-a-surplus-key-is-left-out",
+	"input": {
+		"stats": {
+			"provider": "Lab",
+			"extra": 1,
+			"nested": {
+				"a": 1
+			}
+		},
+		"nonFinite": [],
+		"id": "call-1"
+	},
+	"expected": {
+		"line": {
+			"stats": {
+				"id": "call-1",
+				"of": {
+					"provider": "Lab"
+				}
+			}
+		},
+		"refusedAt": null,
+		"text": "{\"stats\":{\"id\":\"call-1\",\"of\":{\"provider\":\"Lab\"}}}\n"
+	}
+}

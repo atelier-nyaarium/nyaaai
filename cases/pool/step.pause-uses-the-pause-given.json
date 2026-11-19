@@ -1,0 +1,50 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "pause-uses-the-pause-given",
+	"input": {
+		"pauseMs": 300000,
+		"runs": [
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance"
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "credit"
+						},
+						"nowMs": 60000000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "paused",
+						"reason": "allowance",
+						"until": 60300000
+					},
+					{
+						"kind": "paused",
+						"reason": "credit",
+						"until": 60300000
+					}
+				]
+			}
+		]
+	}
+}

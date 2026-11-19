@@ -1,0 +1,29 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.app",
+	"name": "non-ascii",
+	"input": {
+		"rows": [
+			{
+				"folder": "/home/mé/中文",
+				"home": "/home/mé"
+			},
+			{
+				"folder": "/home/😀/app",
+				"home": "/home/😀"
+			},
+			{
+				"folder": "/home/😀x/app",
+				"home": "/home/😀"
+			}
+		]
+	},
+	"expected": {
+		"apps": [
+			"~/中文/",
+			"~/app/",
+			"/home/😀x/app/"
+		]
+	}
+}

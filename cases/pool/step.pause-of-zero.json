@@ -1,0 +1,38 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "pause-of-zero",
+	"input": {
+		"pauseMs": 0,
+		"runs": [
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance"
+						},
+						"nowMs": 60000000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "paused",
+						"reason": "allowance",
+						"until": 60000000
+					}
+				]
+			}
+		]
+	}
+}

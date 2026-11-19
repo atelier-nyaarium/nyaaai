@@ -1,0 +1,42 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.lines",
+	"name": "both-keys-read-as-a-call",
+	"input": {
+		"text": "{\"call\":{\"id\":\"c\",\"at\":1,\"feature\":\"chat\",\"model\":\"m\",\"ms\":1,\"cost\":0},\"stats\":{\"id\":\"c\",\"of\":{\"provider\":\"Lab\"}}}\n{\"stats\":{\"id\":\"c\",\"of\":{\"provider\":\"Lab\"}},\"call\":{\"id\":\"c\",\"at\":1,\"feature\":\"chat\",\"model\":\"m\",\"ms\":1,\"cost\":0}}\n{\"call\":5,\"stats\":{\"id\":\"c\",\"of\":{\"provider\":\"Lab\"}}}\n"
+	},
+	"expected": {
+		"lines": [
+			{
+				"call": {
+					"id": "c",
+					"at": 1,
+					"feature": "chat",
+					"model": "m",
+					"ms": 1,
+					"cost": 0
+				}
+			},
+			{
+				"call": {
+					"id": "c",
+					"at": 1,
+					"feature": "chat",
+					"model": "m",
+					"ms": 1,
+					"cost": 0
+				}
+			},
+			{
+				"stats": {
+					"id": "c",
+					"of": {
+						"provider": "Lab"
+					}
+				}
+			}
+		],
+		"dropped": 0
+	}
+}

@@ -1,0 +1,94 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "cost.step",
+	"name": "free-model",
+	"input": {
+		"rows": [
+			{
+				"usage": {
+					"input": 10,
+					"output": 5
+				},
+				"price": "free",
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 10,
+					"output": 5,
+					"cost": 0
+				},
+				"price": "free",
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 10,
+					"output": 5,
+					"cost": 0.25
+				},
+				"price": "free",
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 10,
+					"output": 5,
+					"cost": 0.25,
+					"byok": true,
+					"upstreamCost": 1
+				},
+				"price": "free",
+				"longCache": false
+			},
+			{
+				"price": "free",
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 10,
+					"output": 5,
+					"billingSource": "balance"
+				},
+				"price": "free",
+				"longCache": true
+			}
+		]
+	},
+	"expected": {
+		"costs": [
+			{
+				"usd": 0,
+				"estimated": false,
+				"unpriced": true
+			},
+			{
+				"usd": 0,
+				"estimated": false,
+				"unpriced": true
+			},
+			{
+				"usd": 0,
+				"estimated": false,
+				"unpriced": true
+			},
+			{
+				"usd": 0,
+				"estimated": false,
+				"unpriced": true
+			},
+			{
+				"usd": 0,
+				"estimated": false,
+				"unpriced": true
+			},
+			{
+				"usd": 0,
+				"estimated": false,
+				"unpriced": true
+			}
+		]
+	}
+}

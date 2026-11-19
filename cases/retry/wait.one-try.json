@@ -1,0 +1,44 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "one-try",
+	"input": {
+		"options": {
+			"tries": 1
+		},
+		"draws": [
+			0.5
+		],
+		"rows": [
+			{
+				"attempt": 0,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 1,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 2,
+				"waitedMs": 0
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": 375,
+				"draws": 1
+			},
+			{
+				"waitMs": null,
+				"draws": 0
+			},
+			{
+				"waitMs": null,
+				"draws": 0
+			}
+		]
+	}
+}

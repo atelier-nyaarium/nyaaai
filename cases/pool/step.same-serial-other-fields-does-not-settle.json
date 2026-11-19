@@ -1,0 +1,66 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "same-serial-other-fields-does-not-settle",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "balance",
+					"eta": 66000000,
+					"next": 59940000,
+					"probe": {
+						"ticket": {
+							"gate": "go",
+							"model": "go\nm",
+							"generation": 0,
+							"probe": false,
+							"serial": 1
+						},
+						"at": 59940000
+					}
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "settled",
+							"ticket": {
+								"gate": "other",
+								"model": "x",
+								"generation": 9,
+								"probe": true,
+								"serial": 1
+							}
+						},
+						"nowMs": 60000000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "balance",
+						"eta": 66000000,
+						"next": 59940000,
+						"probe": {
+							"ticket": {
+								"gate": "go",
+								"model": "go\nm",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							},
+							"at": 59940000
+						}
+					}
+				]
+			}
+		]
+	}
+}

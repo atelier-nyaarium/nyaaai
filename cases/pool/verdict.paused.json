@@ -1,0 +1,82 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.verdict",
+	"name": "paused",
+	"input": {
+		"rows": [
+			{
+				"state": {
+					"kind": "paused",
+					"reason": "credit",
+					"until": 60600000
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "paused",
+					"reason": "allowance",
+					"until": 60600000
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "paused",
+					"reason": "credit",
+					"until": 60600000
+				},
+				"exempt": true,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "paused",
+					"reason": "credit",
+					"until": 60000000
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "paused",
+					"reason": "credit",
+					"until": 60000001
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			},
+			{
+				"state": {
+					"kind": "paused",
+					"reason": "credit",
+					"until": 59940000
+				},
+				"exempt": false,
+				"nowMs": 60000000
+			}
+		]
+	},
+	"expected": {
+		"verdicts": [
+			{
+				"skip": "credit"
+			},
+			{
+				"skip": "allowance"
+			},
+			{
+				"skip": "credit"
+			},
+			null,
+			{
+				"skip": "credit"
+			},
+			null
+		]
+	}
+}

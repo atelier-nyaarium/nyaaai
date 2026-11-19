@@ -1,0 +1,36 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "retry-after-zero",
+	"input": {
+		"options": {},
+		"draws": [
+			1
+		],
+		"rows": [
+			{
+				"attempt": 1,
+				"waitedMs": 0,
+				"retryAfterMs": 0
+			},
+			{
+				"attempt": 3,
+				"waitedMs": 90000,
+				"retryAfterMs": 0
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": 0,
+				"draws": 1
+			},
+			{
+				"waitMs": 0,
+				"draws": 1
+			}
+		]
+	}
+}

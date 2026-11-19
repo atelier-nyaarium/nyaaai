@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.lines",
+	"name": "a-line-that-is-not-json-is-dropped",
+	"input": {
+		"text": "{not json\n{\"call\":{\"id\":\"call-2\",\"at\":1794528002000,\"feature\":\"wand\",\"model\":\"local-a:27b\",\"ms\":90,\"cost\":0,\"estimated\":true,\"unpriced\":true,\"failure\":\"overloaded\",\"cancelled\":true}}\n"
+	},
+	"expected": {
+		"lines": [
+			{
+				"call": {
+					"id": "call-2",
+					"at": 1794528002000,
+					"feature": "wand",
+					"model": "local-a:27b",
+					"ms": 90,
+					"cost": 0,
+					"estimated": true,
+					"unpriced": true,
+					"failure": "overloaded",
+					"cancelled": true
+				}
+			}
+		],
+		"dropped": 1
+	}
+}

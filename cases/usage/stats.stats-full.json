@@ -1,0 +1,43 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.stats",
+	"name": "stats-full",
+	"input": {
+		"stats": {
+			"provider": "Lab",
+			"latencyMs": 210,
+			"generationMs": 1100,
+			"cost": 0.0165,
+			"accountCost": 0.0125,
+			"upstreamCost": 0.004,
+			"byok": true,
+			"in": 1000,
+			"out": 200,
+			"finish": "stop"
+		},
+		"nonFinite": [],
+		"id": "call-1"
+	},
+	"expected": {
+		"line": {
+			"stats": {
+				"id": "call-1",
+				"of": {
+					"provider": "Lab",
+					"latencyMs": 210,
+					"generationMs": 1100,
+					"cost": 0.0165,
+					"accountCost": 0.0125,
+					"upstreamCost": 0.004,
+					"byok": true,
+					"in": 1000,
+					"out": 200,
+					"finish": "stop"
+				}
+			}
+		},
+		"refusedAt": null,
+		"text": "{\"stats\":{\"id\":\"call-1\",\"of\":{\"provider\":\"Lab\",\"latencyMs\":210,\"generationMs\":1100,\"cost\":0.0165,\"accountCost\":0.0125,\"upstreamCost\":0.004,\"byok\":true,\"in\":1000,\"out\":200,\"finish\":\"stop\"}}}\n"
+	}
+}

@@ -1,0 +1,39 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "all-zero",
+	"input": {
+		"options": {
+			"tries": 0,
+			"budgetMs": 0,
+			"capMs": 0,
+			"baseMs": 0
+		},
+		"draws": [
+			0
+		],
+		"rows": [
+			{
+				"attempt": 0,
+				"waitedMs": 0
+			},
+			{
+				"attempt": 1,
+				"waitedMs": 0
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": null,
+				"draws": 0
+			},
+			{
+				"waitMs": null,
+				"draws": 0
+			}
+		]
+	}
+}

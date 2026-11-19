@@ -1,0 +1,38 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.record",
+	"name": "huge-price",
+	"input": {
+		"call": {
+			"tag": {
+				"feature": "chat"
+			},
+			"model": "vendor/model-a",
+			"at": 1794528001000,
+			"ms": 1200,
+			"cost": {
+				"usd": 1e+300,
+				"estimated": false
+			}
+		},
+		"nonFinite": [],
+		"id": "call-1",
+		"home": "/home/user",
+		"nowMs": 1791460800000,
+		"offsets": []
+	},
+	"expected": {
+		"record": {
+			"id": "call-1",
+			"at": 1794528001000,
+			"feature": "chat",
+			"model": "vendor/model-a",
+			"ms": 1200,
+			"cost": 1e+300
+		},
+		"refusedAt": null,
+		"line": "{\"call\":{\"id\":\"call-1\",\"at\":1794528001000,\"feature\":\"chat\",\"model\":\"vendor/model-a\",\"ms\":1200,\"cost\":1e+300}}\n",
+		"day": "2026-10-08"
+	}
+}

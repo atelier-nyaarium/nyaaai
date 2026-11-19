@@ -1,0 +1,47 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "cost.longCache",
+	"name": "chat-with-a-lane-and-a-folder",
+	"input": {
+		"rows": [
+			{
+				"tag": {
+					"feature": "chat",
+					"lane": "title",
+					"folder": "/work/app"
+				},
+				"view": {
+					"cacheWrite1h": true
+				}
+			},
+			{
+				"tag": {
+					"feature": "chat",
+					"lane": "",
+					"folder": ""
+				},
+				"view": {
+					"cacheWrite1h": true
+				}
+			},
+			{
+				"tag": {
+					"feature": "analysis",
+					"lane": "chat",
+					"folder": "chat"
+				},
+				"view": {
+					"cacheWrite1h": true
+				}
+			}
+		]
+	},
+	"expected": {
+		"values": [
+			true,
+			true,
+			false
+		]
+	}
+}

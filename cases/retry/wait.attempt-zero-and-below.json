@@ -1,0 +1,44 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "retry.wait",
+	"name": "attempt-zero-and-below",
+	"input": {
+		"options": {
+			"tries": 4
+		},
+		"draws": [
+			1
+		],
+		"rows": [
+			{
+				"attempt": 0,
+				"waitedMs": 0
+			},
+			{
+				"attempt": -1,
+				"waitedMs": 0
+			},
+			{
+				"attempt": -2,
+				"waitedMs": 0
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"waitMs": 500,
+				"draws": 1
+			},
+			{
+				"waitMs": 250,
+				"draws": 1
+			},
+			{
+				"waitMs": 125,
+				"draws": 1
+			}
+		]
+	}
+}

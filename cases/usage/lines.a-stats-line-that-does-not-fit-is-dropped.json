@@ -1,0 +1,20 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.lines",
+	"name": "a-stats-line-that-does-not-fit-is-dropped",
+	"input": {
+		"text": "{\"stats\":{\"id\":5,\"of\":{}}}\n{\"stats\":{\"id\":\"x\"}}\n{\"stats\":{\"id\":\"x\",\"of\":{\"latencyMs\":\"1\"}}}\n{\"stats\":{\"id\":\"x\",\"of\":5}}\n{\"stats\":{\"id\":\"ok\",\"of\":{}}}\n"
+	},
+	"expected": {
+		"lines": [
+			{
+				"stats": {
+					"id": "ok",
+					"of": {}
+				}
+			}
+		],
+		"dropped": 4
+	}
+}

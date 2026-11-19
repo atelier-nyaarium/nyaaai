@@ -1,0 +1,33 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.stats",
+	"name": "stats-zero-and-false",
+	"input": {
+		"stats": {
+			"cost": 0,
+			"byok": false,
+			"in": 0,
+			"out": 0,
+			"generationMs": 0
+		},
+		"nonFinite": [],
+		"id": "call-1"
+	},
+	"expected": {
+		"line": {
+			"stats": {
+				"id": "call-1",
+				"of": {
+					"generationMs": 0,
+					"cost": 0,
+					"byok": false,
+					"in": 0,
+					"out": 0
+				}
+			}
+		},
+		"refusedAt": null,
+		"text": "{\"stats\":{\"id\":\"call-1\",\"of\":{\"generationMs\":0,\"cost\":0,\"byok\":false,\"in\":0,\"out\":0}}}\n"
+	}
+}

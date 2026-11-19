@@ -1,0 +1,51 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "pool.step",
+	"name": "known-reset-then-pool-bill",
+	"input": {
+		"pauseMs": 60000,
+		"runs": [
+			{
+				"start": {
+					"kind": "clear"
+				},
+				"steps": [
+					{
+						"event": {
+							"kind": "refused",
+							"reason": "allowance",
+							"resetsAt": 61800000
+						},
+						"nowMs": 60000000
+					},
+					{
+						"event": {
+							"kind": "billed",
+							"source": "go",
+							"plan": "go",
+							"extraUsage": false
+						},
+						"nowMs": 60600000
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"runs": [
+			{
+				"states": [
+					{
+						"kind": "reset",
+						"at": 61800000
+					},
+					{
+						"kind": "reset",
+						"at": 61800000
+					}
+				]
+			}
+		]
+	}
+}

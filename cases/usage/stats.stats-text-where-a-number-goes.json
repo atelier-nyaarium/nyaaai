@@ -1,0 +1,18 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "usage.stats",
+	"name": "stats-text-where-a-number-goes",
+	"input": {
+		"stats": {
+			"latencyMs": "12"
+		},
+		"nonFinite": [],
+		"id": "call-1"
+	},
+	"expected": {
+		"line": null,
+		"refusedAt": "latencyMs",
+		"text": null
+	}
+}

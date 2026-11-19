@@ -1,0 +1,232 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "cost.step",
+	"name": "tiers-out-of-order",
+	"input": {
+		"rows": [
+			{
+				"usage": {
+					"input": 300000,
+					"output": 1000
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 272000,
+							"prompt": 0.2,
+							"completion": 0.75
+						},
+						{
+							"minPromptTokens": 0,
+							"prompt": 0.1,
+							"completion": 0.5
+						}
+					]
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 300000,
+					"output": 1000
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 0,
+							"prompt": 0.1,
+							"completion": 0.5
+						},
+						{
+							"minPromptTokens": 272000,
+							"prompt": 0.2,
+							"completion": 0.75
+						}
+					]
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 300000,
+					"output": 1000
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 200000,
+							"prompt": 3,
+							"completion": 3
+						},
+						{
+							"minPromptTokens": 100000,
+							"prompt": 2,
+							"completion": 2
+						},
+						{
+							"minPromptTokens": 0,
+							"prompt": 1,
+							"completion": 1
+						}
+					]
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 150000,
+					"output": 1000
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 200000,
+							"prompt": 3,
+							"completion": 3
+						},
+						{
+							"minPromptTokens": 100000,
+							"prompt": 2,
+							"completion": 2
+						},
+						{
+							"minPromptTokens": 0,
+							"prompt": 1,
+							"completion": 1
+						}
+					]
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 150000,
+					"output": 1000
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 100000,
+							"prompt": 2,
+							"completion": 2
+						},
+						{
+							"minPromptTokens": 100000,
+							"prompt": 5,
+							"completion": 5
+						},
+						{
+							"minPromptTokens": 0,
+							"prompt": 1,
+							"completion": 1
+						}
+					]
+				},
+				"longCache": false
+			},
+			{
+				"usage": {
+					"input": 150000,
+					"output": 1000
+				},
+				"price": {
+					"prompt": [
+						0,
+						0
+					],
+					"completion": [
+						0,
+						0
+					],
+					"tiers": [
+						{
+							"minPromptTokens": 100000,
+							"prompt": 2,
+							"completion": 2
+						},
+						{
+							"minPromptTokens": 100000,
+							"prompt": 5,
+							"completion": 5
+						},
+						{
+							"minPromptTokens": 300000,
+							"prompt": 1,
+							"completion": 1
+						}
+					]
+				},
+				"longCache": false
+			}
+		]
+	},
+	"expected": {
+		"costs": [
+			{
+				"usd": 0.0305,
+				"estimated": true
+			},
+			{
+				"usd": 0.06075,
+				"estimated": true
+			},
+			{
+				"usd": 0.301,
+				"estimated": true
+			},
+			{
+				"usd": 0.151,
+				"estimated": true
+			},
+			{
+				"usd": 0.151,
+				"estimated": true
+			},
+			{
+				"usd": 0.755,
+				"estimated": true
+			}
+		]
+	}
+}
