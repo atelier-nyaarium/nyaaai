@@ -1,0 +1,38 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.decode",
+	"name": "tokens_completion-zero-and-negative",
+	"input": {
+		"bodies": [
+			{
+				"data": {
+					"tokens_completion": 0
+				}
+			},
+			{
+				"data": {
+					"tokens_completion": -1
+				}
+			},
+			{
+				"data": {
+					"tokens_completion": 1.5
+				}
+			}
+		]
+	},
+	"expected": {
+		"stats": [
+			{
+				"out": 0
+			},
+			{
+				"out": -1
+			},
+			{
+				"out": 1.5
+			}
+		]
+	}
+}

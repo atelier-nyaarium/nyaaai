@@ -1,0 +1,48 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.decode",
+	"name": "no-data",
+	"input": {
+		"bodies": [
+			{},
+			{
+				"other": {
+					"provider_name": "Acme",
+					"latency": 812,
+					"generation_time": 430,
+					"total_cost": 0.004,
+					"is_byok": false,
+					"upstream_inference_cost": 0.001,
+					"tokens_prompt": 100,
+					"tokens_completion": 40,
+					"native_tokens_prompt": 120,
+					"native_tokens_completion": 50,
+					"finish_reason": "stop"
+				}
+			},
+			{
+				"Data": {
+					"provider_name": "Acme",
+					"latency": 812,
+					"generation_time": 430,
+					"total_cost": 0.004,
+					"is_byok": false,
+					"upstream_inference_cost": 0.001,
+					"tokens_prompt": 100,
+					"tokens_completion": 40,
+					"native_tokens_prompt": 120,
+					"native_tokens_completion": 50,
+					"finish_reason": "stop"
+				}
+			}
+		]
+	},
+	"expected": {
+		"stats": [
+			null,
+			null,
+			null
+		]
+	}
+}

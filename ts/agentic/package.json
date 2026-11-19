@@ -62,6 +62,7 @@
 		"./transport": "./src/transport.ts",
 		"./usage/cost": "./src/usage/cost.ts",
 		"./usage/meter": "./src/usage/meter.ts",
-		"./usage/record": "./src/usage/record.ts"
+		"./usage/record": "./src/usage/record.ts",
+		"./usage/stats": "./src/usage/stats.ts"
 	}
 }

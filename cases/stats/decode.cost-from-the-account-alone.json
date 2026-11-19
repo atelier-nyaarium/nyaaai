@@ -1,0 +1,56 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.decode",
+	"name": "cost-from-the-account-alone",
+	"input": {
+		"bodies": [
+			{
+				"data": {
+					"total_cost": 0.25
+				}
+			},
+			{
+				"data": {
+					"total_cost": 0
+				}
+			},
+			{
+				"data": {
+					"total_cost": 0,
+					"is_byok": false
+				}
+			},
+			{
+				"data": {
+					"total_cost": 0.25,
+					"is_byok": false,
+					"upstream_inference_cost": 9
+				}
+			}
+		]
+	},
+	"expected": {
+		"stats": [
+			{
+				"cost": 0.25,
+				"accountCost": 0.25
+			},
+			{
+				"cost": 0,
+				"accountCost": 0
+			},
+			{
+				"cost": 0,
+				"accountCost": 0,
+				"byok": false
+			},
+			{
+				"cost": 0.25,
+				"accountCost": 0.25,
+				"upstreamCost": 9,
+				"byok": false
+			}
+		]
+	}
+}

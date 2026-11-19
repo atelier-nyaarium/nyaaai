@@ -1,0 +1,101 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.run",
+	"name": "filled-failing-reads-the-record",
+	"input": {
+		"startMs": 0,
+		"known": [
+			{
+				"id": "a",
+				"at": 0
+			}
+		],
+		"fails": {
+			"filled": [
+				"a"
+			]
+		},
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"provider_name": "Acme",
+						"latency": 800,
+						"generation_time": 400,
+						"native_tokens_prompt": 3900
+					}
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "add",
+				"id": "a",
+				"generationId": "gen-a"
+			},
+			{
+				"kind": "advance",
+				"ms": 480000
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 0,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "a",
+						"generationId": "gen-a",
+						"at": 0,
+						"tries": 0,
+						"due": 420000
+					}
+				],
+				"armedAt": 420000
+			},
+			{
+				"nowMs": 480000,
+				"reads": [
+					{
+						"atMs": 420000,
+						"endedMs": 420000,
+						"path": "/generation?id=gen-a",
+						"failed": false
+					}
+				],
+				"fills": [
+					{
+						"id": "a",
+						"stats": {
+							"provider": "Acme",
+							"latencyMs": 800,
+							"generationMs": 400,
+							"in": 3900
+						}
+					}
+				],
+				"waiting": [],
+				"armedAt": null
+			}
+		],
+		"requests": [
+			"/generation?id=gen-a"
+		],
+		"read": [
+			1
+		],
+		"filledAsks": [
+			{
+				"id": "a",
+				"at": 0
+			}
+		],
+		"unfilledAsks": [],
+		"timers": []
+	}
+}

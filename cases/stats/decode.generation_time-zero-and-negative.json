@@ -1,0 +1,38 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.decode",
+	"name": "generation_time-zero-and-negative",
+	"input": {
+		"bodies": [
+			{
+				"data": {
+					"generation_time": 0
+				}
+			},
+			{
+				"data": {
+					"generation_time": -1
+				}
+			},
+			{
+				"data": {
+					"generation_time": 1.5
+				}
+			}
+		]
+	},
+	"expected": {
+		"stats": [
+			{
+				"generationMs": 0
+			},
+			{
+				"generationMs": -1
+			},
+			{
+				"generationMs": 1.5
+			}
+		]
+	}
+}

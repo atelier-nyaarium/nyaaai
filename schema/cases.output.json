@@ -18789,6 +18789,551 @@
 				"calls"
 			],
 			"additionalProperties": false
+		},
+		"StatsDecodeInput": {
+			"type": "object",
+			"properties": {
+				"bodies": {
+					"type": "array",
+					"items": {}
+				}
+			},
+			"required": [
+				"bodies"
+			],
+			"additionalProperties": false
+		},
+		"StatsDecodeResult": {
+			"type": "object",
+			"properties": {
+				"stats": {
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{
+								"$ref": "usage.output.json#/$defs/GenerationStats"
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				}
+			},
+			"required": [
+				"stats"
+			],
+			"additionalProperties": false
+		},
+		"StatsRunInput": {
+			"type": "object",
+			"properties": {
+				"startMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"exchanges": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/NetExchange"
+					}
+				},
+				"known": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"id": {
+								"type": "string"
+							},
+							"at": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							}
+						},
+						"required": [
+							"id",
+							"at"
+						],
+						"additionalProperties": false
+					}
+				},
+				"unfilled": {
+					"type": "array",
+					"items": {
+						"$ref": "usage.output.json#/$defs/UnfilledRecord"
+					}
+				},
+				"fails": {
+					"type": "object",
+					"properties": {
+						"filled": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						},
+						"fill": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						},
+						"unfilled": {
+							"type": "boolean"
+						}
+					},
+					"additionalProperties": false
+				},
+				"holdFilled": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"id": {
+								"type": "string"
+							},
+							"ms": {
+								"type": "integer",
+								"minimum": 0,
+								"maximum": 9007199254740991
+							}
+						},
+						"required": [
+							"id"
+						],
+						"additionalProperties": false
+					}
+				},
+				"late": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"generationId": {
+								"type": "string"
+							},
+							"ms": {
+								"type": "integer",
+								"minimum": 0,
+								"maximum": 9007199254740991
+							},
+							"body": {}
+						},
+						"required": [
+							"generationId",
+							"ms",
+							"body"
+						],
+						"additionalProperties": false
+					}
+				},
+				"steps": {
+					"minItems": 1,
+					"type": "array",
+					"items": {
+						"oneOf": [
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "add"
+									},
+									"id": {
+										"type": "string"
+									},
+									"generationId": {
+										"type": "string"
+									},
+									"at": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991
+									},
+									"entry": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"kind",
+									"id",
+									"generationId"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "addMany"
+									},
+									"count": {
+										"type": "integer",
+										"minimum": 1,
+										"maximum": 9007199254740991
+									},
+									"at": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991
+									},
+									"entry": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"kind",
+									"count"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "advance"
+									},
+									"ms": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740991
+									},
+									"during": {
+										"type": "array",
+										"items": {
+											"type": "object",
+											"properties": {
+												"afterMs": {
+													"type": "integer",
+													"minimum": 0,
+													"maximum": 9007199254740991
+												},
+												"do": {
+													"oneOf": [
+														{
+															"type": "object",
+															"properties": {
+																"kind": {
+																	"type": "string",
+																	"const": "add"
+																},
+																"id": {
+																	"type": "string"
+																},
+																"generationId": {
+																	"type": "string"
+																},
+																"at": {
+																	"type": "integer",
+																	"minimum": -9007199254740991,
+																	"maximum": 9007199254740991
+																},
+																"entry": {
+																	"type": "string"
+																}
+															},
+															"required": [
+																"kind",
+																"id",
+																"generationId"
+															],
+															"additionalProperties": false
+														},
+														{
+															"type": "object",
+															"properties": {
+																"kind": {
+																	"type": "string",
+																	"const": "addMany"
+																},
+																"count": {
+																	"type": "integer",
+																	"minimum": 1,
+																	"maximum": 9007199254740991
+																},
+																"at": {
+																	"type": "integer",
+																	"minimum": -9007199254740991,
+																	"maximum": 9007199254740991
+																},
+																"entry": {
+																	"type": "string"
+																}
+															},
+															"required": [
+																"kind",
+																"count"
+															],
+															"additionalProperties": false
+														},
+														{
+															"type": "object",
+															"properties": {
+																"kind": {
+																	"type": "string",
+																	"const": "dispose"
+																}
+															},
+															"required": [
+																"kind"
+															],
+															"additionalProperties": false
+														}
+													],
+													"x-tag": "kind"
+												}
+											},
+											"required": [
+												"afterMs",
+												"do"
+											],
+											"additionalProperties": false
+										}
+									}
+								},
+								"required": [
+									"kind",
+									"ms"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "restore"
+									},
+									"skip": {
+										"type": "array",
+										"items": {
+											"type": "string"
+										}
+									}
+								},
+								"required": [
+									"kind"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "dispose"
+									}
+								},
+								"required": [
+									"kind"
+								],
+								"additionalProperties": false
+							}
+						],
+						"x-tag": "kind"
+					}
+				}
+			},
+			"required": [
+				"startMs",
+				"exchanges",
+				"steps"
+			],
+			"additionalProperties": false
+		},
+		"StatsRunResult": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"nowMs": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"reads": {
+								"type": "array",
+								"items": {
+									"type": "object",
+									"properties": {
+										"atMs": {
+											"type": "integer",
+											"minimum": -9007199254740991,
+											"maximum": 9007199254740991
+										},
+										"endedMs": {
+											"type": "integer",
+											"minimum": -9007199254740991,
+											"maximum": 9007199254740991
+										},
+										"entry": {
+											"type": "string"
+										},
+										"path": {
+											"type": "string"
+										},
+										"failed": {
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"atMs",
+										"endedMs",
+										"path",
+										"failed"
+									],
+									"additionalProperties": false
+								}
+							},
+							"fills": {
+								"type": "array",
+								"items": {
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "string"
+										},
+										"stats": {
+											"$ref": "usage.output.json#/$defs/GenerationStats"
+										}
+									},
+									"required": [
+										"id",
+										"stats"
+									],
+									"additionalProperties": false
+								}
+							},
+							"waiting": {
+								"type": "array",
+								"items": {
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "string"
+										},
+										"generationId": {
+											"type": "string"
+										},
+										"entry": {
+											"type": "string"
+										},
+										"at": {
+											"type": "integer",
+											"minimum": -9007199254740991,
+											"maximum": 9007199254740991
+										},
+										"tries": {
+											"type": "integer",
+											"minimum": -9007199254740991,
+											"maximum": 9007199254740991
+										},
+										"due": {
+											"type": "integer",
+											"minimum": -9007199254740991,
+											"maximum": 9007199254740991
+										}
+									},
+									"required": [
+										"id",
+										"generationId",
+										"at",
+										"tries",
+										"due"
+									],
+									"additionalProperties": false
+								}
+							},
+							"armedAt": {
+								"anyOf": [
+									{
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991
+									},
+									{
+										"type": "null"
+									}
+								]
+							}
+						},
+						"required": [
+							"nowMs",
+							"reads",
+							"fills",
+							"waiting",
+							"armedAt"
+						],
+						"additionalProperties": false
+					}
+				},
+				"requests": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"read": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"minimum": -9007199254740991,
+						"maximum": 9007199254740991
+					}
+				},
+				"filledAsks": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"id": {
+								"type": "string"
+							},
+							"at": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							}
+						},
+						"required": [
+							"id",
+							"at"
+						],
+						"additionalProperties": false
+					}
+				},
+				"unfilledAsks": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"minimum": -9007199254740991,
+						"maximum": 9007199254740991
+					}
+				},
+				"timers": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"steps",
+				"requests",
+				"read",
+				"filledAsks",
+				"unfilledAsks",
+				"timers"
+			],
+			"additionalProperties": false
 		}
 	}
 }

@@ -1,0 +1,153 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.run",
+	"name": "restore-leaves-out-the-entries-named",
+	"input": {
+		"startMs": 10800000,
+		"unfilled": [
+			{
+				"id": "u1",
+				"generationId": "gen-u1",
+				"at": 10740000,
+				"entry": "entry-1"
+			},
+			{
+				"id": "u2",
+				"generationId": "gen-u2",
+				"at": 10740000,
+				"entry": "entry-2"
+			},
+			{
+				"id": "u3",
+				"generationId": "gen-u3",
+				"at": 10740000
+			}
+		],
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"provider_name": "Acme",
+						"latency": 800,
+						"generation_time": 400,
+						"native_tokens_prompt": 3900
+					}
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"provider_name": "Acme",
+						"latency": 800,
+						"generation_time": 400,
+						"native_tokens_prompt": 3900
+					}
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "restore",
+				"skip": [
+					"entry-2"
+				]
+			},
+			{
+				"kind": "advance",
+				"ms": 480000
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 10800000,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "u1",
+						"generationId": "gen-u1",
+						"entry": "entry-1",
+						"at": 10740000,
+						"tries": 0,
+						"due": 11160000
+					},
+					{
+						"id": "u3",
+						"generationId": "gen-u3",
+						"at": 10740000,
+						"tries": 0,
+						"due": 11160000
+					}
+				],
+				"armedAt": 11160000
+			},
+			{
+				"nowMs": 11280000,
+				"reads": [
+					{
+						"atMs": 11160000,
+						"endedMs": 11160000,
+						"entry": "entry-1",
+						"path": "/generation?id=gen-u1",
+						"failed": false
+					},
+					{
+						"atMs": 11160250,
+						"endedMs": 11160250,
+						"path": "/generation?id=gen-u3",
+						"failed": false
+					}
+				],
+				"fills": [
+					{
+						"id": "u1",
+						"stats": {
+							"provider": "Acme",
+							"latencyMs": 800,
+							"generationMs": 400,
+							"in": 3900
+						}
+					},
+					{
+						"id": "u3",
+						"stats": {
+							"provider": "Acme",
+							"latencyMs": 800,
+							"generationMs": 400,
+							"in": 3900
+						}
+					}
+				],
+				"waiting": [],
+				"armedAt": null
+			}
+		],
+		"requests": [
+			"/generation?id=gen-u1",
+			"/generation?id=gen-u3"
+		],
+		"read": [
+			1,
+			1
+		],
+		"filledAsks": [
+			{
+				"id": "u1",
+				"at": 10740000
+			},
+			{
+				"id": "u3",
+				"at": 10740000
+			}
+		],
+		"unfilledAsks": [
+			3600000
+		],
+		"timers": []
+	}
+}

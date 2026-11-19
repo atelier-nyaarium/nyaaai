@@ -44,6 +44,7 @@ pub mod session_cut;
 pub mod session_file;
 pub mod shape;
 pub mod sse;
+pub mod stats;
 pub mod step;
 pub mod strict_schema;
 pub mod testkit;

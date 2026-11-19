@@ -717,6 +717,12 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
         "meter.called" => {
             run::<shapes::MeterCalledInput, shapes::MeterCalledResult>(input, super::meter::called)
         }
+        "stats.decode" => {
+            run::<shapes::StatsDecodeInput, shapes::StatsDecodeResult>(input, super::stats::decode)
+        }
+        "stats.run" => {
+            run::<shapes::StatsRunInput, shapes::StatsRunResult>(input, super::stats::run)
+        }
         _ => return None,
     })
 }

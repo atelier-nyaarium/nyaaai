@@ -1,0 +1,38 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.decode",
+	"name": "native_tokens_prompt-zero-and-negative",
+	"input": {
+		"bodies": [
+			{
+				"data": {
+					"native_tokens_prompt": 0
+				}
+			},
+			{
+				"data": {
+					"native_tokens_prompt": -1
+				}
+			},
+			{
+				"data": {
+					"native_tokens_prompt": 1.5
+				}
+			}
+		]
+	},
+	"expected": {
+		"stats": [
+			{
+				"in": 0
+			},
+			{
+				"in": -1
+			},
+			{
+				"in": 1.5
+			}
+		]
+	}
+}

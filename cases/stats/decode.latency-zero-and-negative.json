@@ -1,0 +1,38 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.decode",
+	"name": "latency-zero-and-negative",
+	"input": {
+		"bodies": [
+			{
+				"data": {
+					"latency": 0
+				}
+			},
+			{
+				"data": {
+					"latency": -1
+				}
+			},
+			{
+				"data": {
+					"latency": 1.5
+				}
+			}
+		]
+	},
+	"expected": {
+		"stats": [
+			{
+				"latencyMs": 0
+			},
+			{
+				"latencyMs": -1
+			},
+			{
+				"latencyMs": 1.5
+			}
+		]
+	}
+}

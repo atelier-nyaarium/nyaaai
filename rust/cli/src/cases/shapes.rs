@@ -34907,3 +34907,909 @@ impl Shape for MeterCalledResultCallsItemStats {
         Value::Object(object)
     }
 }
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct StatsDecodeInput {
+    pub bodies: Vec<Value>,
+}
+
+impl Shape for StatsDecodeInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let bodies = shape::required(object, "bodies", at, |value, at| {
+            shape::list(value, at, shape::any)
+        })?;
+        Ok(Self { bodies })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("bodies", Value::Array(self.bodies.clone()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct StatsDecodeResult {
+    pub stats: Vec<Option<nyaaai_contract::shapes::usage::GenerationStats>>,
+}
+
+impl Shape for StatsDecodeResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let stats = shape::required(object, "stats", at, |value, at| {
+            shape::list(value, at, |value, at| {
+                shape::nullable(
+                    value,
+                    at,
+                    nyaaai_contract::shapes::usage::GenerationStats::decode_at,
+                )
+            })
+        })?;
+        Ok(Self { stats })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "stats",
+            Value::Array(
+                self.stats
+                    .iter()
+                    .map(|held| held.as_ref().map_or(Value::Null, |held| held.encode()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct StatsRunInput {
+    pub start_ms: i64,
+    pub exchanges: Vec<NetExchange>,
+    pub known: Option<Vec<StatsRunInputKnownItem>>,
+    pub unfilled: Option<Vec<nyaaai_contract::shapes::usage::UnfilledRecord>>,
+    pub fails: Option<StatsRunInputFails>,
+    pub hold_filled: Option<Vec<StatsRunInputHoldFilledItem>>,
+    pub late: Option<Vec<StatsRunInputLateItem>>,
+    pub steps: Vec<StatsRunInputStepsItem>,
+}
+
+impl Shape for StatsRunInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let start_ms = shape::required(object, "startMs", at, shape::integer)?;
+        let exchanges = shape::required(object, "exchanges", at, |value, at| {
+            shape::list(value, at, NetExchange::decode_at)
+        })?;
+        let known = shape::optional(object, "known", at, |value, at| {
+            shape::list(value, at, StatsRunInputKnownItem::decode_at)
+        })?;
+        let unfilled = shape::optional(object, "unfilled", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::usage::UnfilledRecord::decode_at,
+            )
+        })?;
+        let fails = shape::optional(object, "fails", at, StatsRunInputFails::decode_at)?;
+        let hold_filled = shape::optional(object, "holdFilled", at, |value, at| {
+            shape::list(value, at, StatsRunInputHoldFilledItem::decode_at)
+        })?;
+        let late = shape::optional(object, "late", at, |value, at| {
+            shape::list(value, at, StatsRunInputLateItem::decode_at)
+        })?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list_within(value, at, Some(1), None, StatsRunInputStepsItem::decode_at)
+        })?;
+        Ok(Self {
+            start_ms,
+            exchanges,
+            known,
+            unfilled,
+            fails,
+            hold_filled,
+            late,
+            steps,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("startMs", Value::Number(self.start_ms as f64));
+        object.insert(
+            "exchanges",
+            Value::Array(self.exchanges.iter().map(|held| held.encode()).collect()),
+        );
+        if let Some(held) = &self.known {
+            object.insert(
+                "known",
+                Value::Array(held.iter().map(|held| held.encode()).collect()),
+            );
+        }
+        if let Some(held) = &self.unfilled {
+            object.insert(
+                "unfilled",
+                Value::Array(held.iter().map(|held| held.encode()).collect()),
+            );
+        }
+        if let Some(held) = &self.fails {
+            object.insert("fails", held.encode());
+        }
+        if let Some(held) = &self.hold_filled {
+            object.insert(
+                "holdFilled",
+                Value::Array(held.iter().map(|held| held.encode()).collect()),
+            );
+        }
+        if let Some(held) = &self.late {
+            object.insert(
+                "late",
+                Value::Array(held.iter().map(|held| held.encode()).collect()),
+            );
+        }
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct StatsRunInputKnownItem {
+    pub id: String,
+    pub at: i64,
+}
+
+impl Shape for StatsRunInputKnownItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let at_field = shape::required(object, "at", at, shape::integer)?;
+        Ok(Self { id, at: at_field })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("id", Value::from(self.id.as_str()));
+        object.insert("at", Value::Number(self.at as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct StatsRunInputFails {
+    pub filled: Option<Vec<String>>,
+    pub fill: Option<Vec<String>>,
+    pub unfilled: Option<bool>,
+}
+
+impl Shape for StatsRunInputFails {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let filled = shape::optional(object, "filled", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let fill = shape::optional(object, "fill", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let unfilled = shape::optional(object, "unfilled", at, shape::flag)?;
+        Ok(Self {
+            filled,
+            fill,
+            unfilled,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        if let Some(held) = &self.filled {
+            object.insert(
+                "filled",
+                Value::Array(held.iter().map(|held| Value::from(held.as_str())).collect()),
+            );
+        }
+        if let Some(held) = &self.fill {
+            object.insert(
+                "fill",
+                Value::Array(held.iter().map(|held| Value::from(held.as_str())).collect()),
+            );
+        }
+        if let Some(held) = &self.unfilled {
+            object.insert("unfilled", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct StatsRunInputHoldFilledItem {
+    pub id: String,
+    pub ms: Option<u64>,
+}
+
+impl Shape for StatsRunInputHoldFilledItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let ms = shape::optional(object, "ms", at, shape::natural)?;
+        Ok(Self { id, ms })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("id", Value::from(self.id.as_str()));
+        if let Some(held) = &self.ms {
+            object.insert("ms", Value::Number(*held as f64));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct StatsRunInputLateItem {
+    pub generation_id: String,
+    pub ms: u64,
+    pub body: Value,
+}
+
+impl Shape for StatsRunInputLateItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let generation_id = shape::required(object, "generationId", at, shape::text)?;
+        let ms = shape::required(object, "ms", at, shape::natural)?;
+        let body = shape::required(object, "body", at, shape::any)?;
+        Ok(Self {
+            generation_id,
+            ms,
+            body,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("generationId", Value::from(self.generation_id.as_str()));
+        object.insert("ms", Value::Number(self.ms as f64));
+        object.insert("body", self.body.clone());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum StatsRunInputStepsItem {
+    Add(StatsRunInputStepsItemAdd),
+    AddMany(StatsRunInputStepsItemAddMany),
+    Advance(StatsRunInputStepsItemAdvance),
+    Restore(StatsRunInputStepsItemRestore),
+    Dispose(StatsRunInputStepsItemDispose),
+}
+
+impl Shape for StatsRunInputStepsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "add" => StatsRunInputStepsItemAdd::decode_at(value, at).map(Self::Add),
+            "addMany" => StatsRunInputStepsItemAddMany::decode_at(value, at).map(Self::AddMany),
+            "advance" => StatsRunInputStepsItemAdvance::decode_at(value, at).map(Self::Advance),
+            "restore" => StatsRunInputStepsItemRestore::decode_at(value, at).map(Self::Restore),
+            "dispose" => StatsRunInputStepsItemDispose::decode_at(value, at).map(Self::Dispose),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Add(held) => held.encode(),
+            Self::AddMany(held) => held.encode(),
+            Self::Advance(held) => held.encode(),
+            Self::Restore(held) => held.encode(),
+            Self::Dispose(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct StatsRunInputStepsItemAdd {
+    pub id: String,
+    pub generation_id: String,
+    pub at: Option<i64>,
+    pub entry: Option<String>,
+}
+
+impl Shape for StatsRunInputStepsItemAdd {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "add")
+        })?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let generation_id = shape::required(object, "generationId", at, shape::text)?;
+        let at_field = shape::optional(object, "at", at, shape::integer)?;
+        let entry = shape::optional(object, "entry", at, shape::text)?;
+        Ok(Self {
+            id,
+            generation_id,
+            at: at_field,
+            entry,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("add"));
+        object.insert("id", Value::from(self.id.as_str()));
+        object.insert("generationId", Value::from(self.generation_id.as_str()));
+        if let Some(held) = &self.at {
+            object.insert("at", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.entry {
+            object.insert("entry", Value::from(held.as_str()));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct StatsRunInputStepsItemAddMany {
+    pub count: u64,
+    pub at: Option<i64>,
+    pub entry: Option<String>,
+}
+
+impl Shape for StatsRunInputStepsItemAddMany {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "addMany")
+        })?;
+        let count = shape::required(object, "count", at, |value, at| {
+            shape::natural(value, at).and_then(|held| shape::at_least(held, 1, at))
+        })?;
+        let at_field = shape::optional(object, "at", at, shape::integer)?;
+        let entry = shape::optional(object, "entry", at, shape::text)?;
+        Ok(Self {
+            count,
+            at: at_field,
+            entry,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("addMany"));
+        object.insert("count", Value::Number(self.count as f64));
+        if let Some(held) = &self.at {
+            object.insert("at", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.entry {
+            object.insert("entry", Value::from(held.as_str()));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct StatsRunInputStepsItemAdvance {
+    pub ms: u64,
+    pub during: Option<Vec<StatsRunInputStepsItemAdvanceDuringItem>>,
+}
+
+impl Shape for StatsRunInputStepsItemAdvance {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "advance")
+        })?;
+        let ms = shape::required(object, "ms", at, shape::natural)?;
+        let during = shape::optional(object, "during", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                StatsRunInputStepsItemAdvanceDuringItem::decode_at,
+            )
+        })?;
+        Ok(Self { ms, during })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("advance"));
+        object.insert("ms", Value::Number(self.ms as f64));
+        if let Some(held) = &self.during {
+            object.insert(
+                "during",
+                Value::Array(held.iter().map(|held| held.encode()).collect()),
+            );
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct StatsRunInputStepsItemRestore {
+    pub skip: Option<Vec<String>>,
+}
+
+impl Shape for StatsRunInputStepsItemRestore {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "restore")
+        })?;
+        let skip = shape::optional(object, "skip", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { skip })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("restore"));
+        if let Some(held) = &self.skip {
+            object.insert(
+                "skip",
+                Value::Array(held.iter().map(|held| Value::from(held.as_str())).collect()),
+            );
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct StatsRunInputStepsItemDispose {}
+
+impl Shape for StatsRunInputStepsItemDispose {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "dispose")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("dispose"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct StatsRunInputStepsItemAdvanceDuringItem {
+    pub after_ms: u64,
+    pub do_: StatsRunInputStepsItemAdvanceDuringItemDo,
+}
+
+impl Shape for StatsRunInputStepsItemAdvanceDuringItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let after_ms = shape::required(object, "afterMs", at, shape::natural)?;
+        let do_ = shape::required(
+            object,
+            "do",
+            at,
+            StatsRunInputStepsItemAdvanceDuringItemDo::decode_at,
+        )?;
+        Ok(Self { after_ms, do_ })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("afterMs", Value::Number(self.after_ms as f64));
+        object.insert("do", self.do_.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum StatsRunInputStepsItemAdvanceDuringItemDo {
+    Add(StatsRunInputStepsItemAdvanceDuringItemDoAdd),
+    AddMany(StatsRunInputStepsItemAdvanceDuringItemDoAddMany),
+    Dispose(StatsRunInputStepsItemAdvanceDuringItemDoDispose),
+}
+
+impl Shape for StatsRunInputStepsItemAdvanceDuringItemDo {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "add" => {
+                StatsRunInputStepsItemAdvanceDuringItemDoAdd::decode_at(value, at).map(Self::Add)
+            }
+            "addMany" => StatsRunInputStepsItemAdvanceDuringItemDoAddMany::decode_at(value, at)
+                .map(Self::AddMany),
+            "dispose" => StatsRunInputStepsItemAdvanceDuringItemDoDispose::decode_at(value, at)
+                .map(Self::Dispose),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Add(held) => held.encode(),
+            Self::AddMany(held) => held.encode(),
+            Self::Dispose(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct StatsRunInputStepsItemAdvanceDuringItemDoAdd {
+    pub id: String,
+    pub generation_id: String,
+    pub at: Option<i64>,
+    pub entry: Option<String>,
+}
+
+impl Shape for StatsRunInputStepsItemAdvanceDuringItemDoAdd {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "add")
+        })?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let generation_id = shape::required(object, "generationId", at, shape::text)?;
+        let at_field = shape::optional(object, "at", at, shape::integer)?;
+        let entry = shape::optional(object, "entry", at, shape::text)?;
+        Ok(Self {
+            id,
+            generation_id,
+            at: at_field,
+            entry,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("add"));
+        object.insert("id", Value::from(self.id.as_str()));
+        object.insert("generationId", Value::from(self.generation_id.as_str()));
+        if let Some(held) = &self.at {
+            object.insert("at", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.entry {
+            object.insert("entry", Value::from(held.as_str()));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct StatsRunInputStepsItemAdvanceDuringItemDoAddMany {
+    pub count: u64,
+    pub at: Option<i64>,
+    pub entry: Option<String>,
+}
+
+impl Shape for StatsRunInputStepsItemAdvanceDuringItemDoAddMany {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "addMany")
+        })?;
+        let count = shape::required(object, "count", at, |value, at| {
+            shape::natural(value, at).and_then(|held| shape::at_least(held, 1, at))
+        })?;
+        let at_field = shape::optional(object, "at", at, shape::integer)?;
+        let entry = shape::optional(object, "entry", at, shape::text)?;
+        Ok(Self {
+            count,
+            at: at_field,
+            entry,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("addMany"));
+        object.insert("count", Value::Number(self.count as f64));
+        if let Some(held) = &self.at {
+            object.insert("at", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.entry {
+            object.insert("entry", Value::from(held.as_str()));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct StatsRunInputStepsItemAdvanceDuringItemDoDispose {}
+
+impl Shape for StatsRunInputStepsItemAdvanceDuringItemDoDispose {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "dispose")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("dispose"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct StatsRunResult {
+    pub steps: Vec<StatsRunResultStepsItem>,
+    pub requests: Vec<String>,
+    pub read: Vec<i64>,
+    pub filled_asks: Vec<StatsRunResultFilledAsksItem>,
+    pub unfilled_asks: Vec<i64>,
+    pub timers: Vec<String>,
+}
+
+impl Shape for StatsRunResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list(value, at, StatsRunResultStepsItem::decode_at)
+        })?;
+        let requests = shape::required(object, "requests", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let read = shape::required(object, "read", at, |value, at| {
+            shape::list(value, at, shape::integer)
+        })?;
+        let filled_asks = shape::required(object, "filledAsks", at, |value, at| {
+            shape::list(value, at, StatsRunResultFilledAsksItem::decode_at)
+        })?;
+        let unfilled_asks = shape::required(object, "unfilledAsks", at, |value, at| {
+            shape::list(value, at, shape::integer)
+        })?;
+        let timers = shape::required(object, "timers", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self {
+            steps,
+            requests,
+            read,
+            filled_asks,
+            unfilled_asks,
+            timers,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "requests",
+            Value::Array(
+                self.requests
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "read",
+            Value::Array(
+                self.read
+                    .iter()
+                    .map(|held| Value::Number(*held as f64))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "filledAsks",
+            Value::Array(self.filled_asks.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "unfilledAsks",
+            Value::Array(
+                self.unfilled_asks
+                    .iter()
+                    .map(|held| Value::Number(*held as f64))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "timers",
+            Value::Array(
+                self.timers
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct StatsRunResultStepsItem {
+    pub now_ms: i64,
+    pub reads: Vec<StatsRunResultStepsItemReadsItem>,
+    pub fills: Vec<StatsRunResultStepsItemFillsItem>,
+    pub waiting: Vec<StatsRunResultStepsItemWaitingItem>,
+    pub armed_at: Option<i64>,
+}
+
+impl Shape for StatsRunResultStepsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let now_ms = shape::required(object, "nowMs", at, shape::integer)?;
+        let reads = shape::required(object, "reads", at, |value, at| {
+            shape::list(value, at, StatsRunResultStepsItemReadsItem::decode_at)
+        })?;
+        let fills = shape::required(object, "fills", at, |value, at| {
+            shape::list(value, at, StatsRunResultStepsItemFillsItem::decode_at)
+        })?;
+        let waiting = shape::required(object, "waiting", at, |value, at| {
+            shape::list(value, at, StatsRunResultStepsItemWaitingItem::decode_at)
+        })?;
+        let armed_at = shape::required(object, "armedAt", at, |value, at| {
+            shape::nullable(value, at, shape::integer)
+        })?;
+        Ok(Self {
+            now_ms,
+            reads,
+            fills,
+            waiting,
+            armed_at,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("nowMs", Value::Number(self.now_ms as f64));
+        object.insert(
+            "reads",
+            Value::Array(self.reads.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "fills",
+            Value::Array(self.fills.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "waiting",
+            Value::Array(self.waiting.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "armedAt",
+            self.armed_at
+                .as_ref()
+                .map_or(Value::Null, |held| Value::Number(*held as f64)),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct StatsRunResultFilledAsksItem {
+    pub id: String,
+    pub at: i64,
+}
+
+impl Shape for StatsRunResultFilledAsksItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let at_field = shape::required(object, "at", at, shape::integer)?;
+        Ok(Self { id, at: at_field })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("id", Value::from(self.id.as_str()));
+        object.insert("at", Value::Number(self.at as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct StatsRunResultStepsItemReadsItem {
+    pub at_ms: i64,
+    pub ended_ms: i64,
+    pub entry: Option<String>,
+    pub path: String,
+    pub failed: bool,
+}
+
+impl Shape for StatsRunResultStepsItemReadsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let at_ms = shape::required(object, "atMs", at, shape::integer)?;
+        let ended_ms = shape::required(object, "endedMs", at, shape::integer)?;
+        let entry = shape::optional(object, "entry", at, shape::text)?;
+        let path = shape::required(object, "path", at, shape::text)?;
+        let failed = shape::required(object, "failed", at, shape::flag)?;
+        Ok(Self {
+            at_ms,
+            ended_ms,
+            entry,
+            path,
+            failed,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("atMs", Value::Number(self.at_ms as f64));
+        object.insert("endedMs", Value::Number(self.ended_ms as f64));
+        if let Some(held) = &self.entry {
+            object.insert("entry", Value::from(held.as_str()));
+        }
+        object.insert("path", Value::from(self.path.as_str()));
+        object.insert("failed", Value::Bool(self.failed));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct StatsRunResultStepsItemFillsItem {
+    pub id: String,
+    pub stats: nyaaai_contract::shapes::usage::GenerationStats,
+}
+
+impl Shape for StatsRunResultStepsItemFillsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let stats = shape::required(
+            object,
+            "stats",
+            at,
+            nyaaai_contract::shapes::usage::GenerationStats::decode_at,
+        )?;
+        Ok(Self { id, stats })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("id", Value::from(self.id.as_str()));
+        object.insert("stats", self.stats.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct StatsRunResultStepsItemWaitingItem {
+    pub id: String,
+    pub generation_id: String,
+    pub entry: Option<String>,
+    pub at: i64,
+    pub tries: i64,
+    pub due: i64,
+}
+
+impl Shape for StatsRunResultStepsItemWaitingItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let generation_id = shape::required(object, "generationId", at, shape::text)?;
+        let entry = shape::optional(object, "entry", at, shape::text)?;
+        let at_field = shape::required(object, "at", at, shape::integer)?;
+        let tries = shape::required(object, "tries", at, shape::integer)?;
+        let due = shape::required(object, "due", at, shape::integer)?;
+        Ok(Self {
+            id,
+            generation_id,
+            entry,
+            at: at_field,
+            tries,
+            due,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("id", Value::from(self.id.as_str()));
+        object.insert("generationId", Value::from(self.generation_id.as_str()));
+        if let Some(held) = &self.entry {
+            object.insert("entry", Value::from(held.as_str()));
+        }
+        object.insert("at", Value::Number(self.at as f64));
+        object.insert("tries", Value::Number(self.tries as f64));
+        object.insert("due", Value::Number(self.due as f64));
+        Value::Object(object)
+    }
+}

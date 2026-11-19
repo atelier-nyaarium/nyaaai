@@ -1,0 +1,129 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.run",
+	"name": "a-record-filled-elsewhere-costs-no-spacing",
+	"input": {
+		"startMs": 480000,
+		"known": [
+			{
+				"id": "e",
+				"at": 0
+			}
+		],
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"provider_name": "Acme",
+						"latency": 800,
+						"generation_time": 400,
+						"native_tokens_prompt": 3900
+					}
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "add",
+				"id": "e",
+				"generationId": "gen-e",
+				"at": 0
+			},
+			{
+				"kind": "add",
+				"id": "f",
+				"generationId": "gen-f",
+				"at": 0
+			},
+			{
+				"kind": "advance",
+				"ms": 60000
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 480000,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "e",
+						"generationId": "gen-e",
+						"at": 0,
+						"tries": 0,
+						"due": 480000
+					}
+				],
+				"armedAt": 480000
+			},
+			{
+				"nowMs": 480000,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "e",
+						"generationId": "gen-e",
+						"at": 0,
+						"tries": 0,
+						"due": 480000
+					},
+					{
+						"id": "f",
+						"generationId": "gen-f",
+						"at": 0,
+						"tries": 0,
+						"due": 480000
+					}
+				],
+				"armedAt": 480000
+			},
+			{
+				"nowMs": 540000,
+				"reads": [
+					{
+						"atMs": 480000,
+						"endedMs": 480000,
+						"path": "/generation?id=gen-f",
+						"failed": false
+					}
+				],
+				"fills": [
+					{
+						"id": "f",
+						"stats": {
+							"provider": "Acme",
+							"latencyMs": 800,
+							"generationMs": 400,
+							"in": 3900
+						}
+					}
+				],
+				"waiting": [],
+				"armedAt": null
+			}
+		],
+		"requests": [
+			"/generation?id=gen-f"
+		],
+		"read": [
+			1
+		],
+		"filledAsks": [
+			{
+				"id": "e",
+				"at": 0
+			},
+			{
+				"id": "f",
+				"at": 0
+			}
+		],
+		"unfilledAsks": [],
+		"timers": []
+	}
+}

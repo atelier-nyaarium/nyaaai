@@ -1,0 +1,98 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.decode",
+	"name": "native-counts-beside-plain-ones",
+	"input": {
+		"bodies": [
+			{
+				"data": {
+					"native_tokens_prompt": 11,
+					"native_tokens_completion": 12
+				}
+			},
+			{
+				"data": {
+					"tokens_prompt": 21,
+					"tokens_completion": 22
+				}
+			},
+			{
+				"data": {
+					"tokens_prompt": 21,
+					"tokens_completion": 22,
+					"native_tokens_prompt": 11,
+					"native_tokens_completion": 12
+				}
+			},
+			{
+				"data": {
+					"tokens_prompt": 21,
+					"tokens_completion": 22,
+					"native_tokens_prompt": null,
+					"native_tokens_completion": null
+				}
+			},
+			{
+				"data": {
+					"tokens_prompt": 21,
+					"tokens_completion": 22,
+					"native_tokens_prompt": 0,
+					"native_tokens_completion": 0
+				}
+			},
+			{
+				"data": {
+					"tokens_prompt": 21,
+					"native_tokens_completion": 12
+				}
+			},
+			{
+				"data": {
+					"native_tokens_prompt": 11,
+					"tokens_completion": 22
+				}
+			},
+			{
+				"data": {
+					"tokens_prompt": 0
+				}
+			}
+		]
+	},
+	"expected": {
+		"stats": [
+			{
+				"in": 11,
+				"out": 12
+			},
+			{
+				"in": 21,
+				"out": 22
+			},
+			{
+				"in": 11,
+				"out": 12
+			},
+			{
+				"in": 21,
+				"out": 22
+			},
+			{
+				"in": 0,
+				"out": 0
+			},
+			{
+				"in": 21,
+				"out": 12
+			},
+			{
+				"in": 11,
+				"out": 22
+			},
+			{
+				"in": 0
+			}
+		]
+	}
+}

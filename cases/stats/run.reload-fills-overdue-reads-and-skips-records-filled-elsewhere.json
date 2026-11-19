@@ -1,0 +1,154 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.run",
+	"name": "reload-fills-overdue-reads-and-skips-records-filled-elsewhere",
+	"input": {
+		"startMs": 1200000,
+		"known": [
+			{
+				"id": "e",
+				"at": 0
+			}
+		],
+		"exchanges": [
+			{
+				"status": 404,
+				"json": {
+					"error": {
+						"message": "No such generation."
+					}
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"provider_name": "Acme",
+						"latency": 800,
+						"generation_time": 400,
+						"native_tokens_prompt": 3900
+					}
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "add",
+				"id": "d",
+				"generationId": "gen-d",
+				"at": 0,
+				"entry": "entry-1"
+			},
+			{
+				"kind": "add",
+				"id": "e",
+				"generationId": "gen-e",
+				"at": 0
+			},
+			{
+				"kind": "advance",
+				"ms": 2400000
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1200000,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "d",
+						"generationId": "gen-d",
+						"entry": "entry-1",
+						"at": 0,
+						"tries": 1,
+						"due": 1200000
+					}
+				],
+				"armedAt": 1200000
+			},
+			{
+				"nowMs": 1200000,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "d",
+						"generationId": "gen-d",
+						"entry": "entry-1",
+						"at": 0,
+						"tries": 1,
+						"due": 1200000
+					},
+					{
+						"id": "e",
+						"generationId": "gen-e",
+						"at": 0,
+						"tries": 1,
+						"due": 1200000
+					}
+				],
+				"armedAt": 1200000
+			},
+			{
+				"nowMs": 3600000,
+				"reads": [
+					{
+						"atMs": 1200000,
+						"endedMs": 1200000,
+						"entry": "entry-1",
+						"path": "/generation?id=gen-d",
+						"failed": true
+					},
+					{
+						"atMs": 1800000,
+						"endedMs": 1800000,
+						"entry": "entry-1",
+						"path": "/generation?id=gen-d",
+						"failed": false
+					}
+				],
+				"fills": [
+					{
+						"id": "d",
+						"stats": {
+							"provider": "Acme",
+							"latencyMs": 800,
+							"generationMs": 400,
+							"in": 3900
+						}
+					}
+				],
+				"waiting": [],
+				"armedAt": null
+			}
+		],
+		"requests": [
+			"/generation?id=gen-d",
+			"/generation?id=gen-d"
+		],
+		"read": [
+			1,
+			1
+		],
+		"filledAsks": [
+			{
+				"id": "d",
+				"at": 0
+			},
+			{
+				"id": "e",
+				"at": 0
+			},
+			{
+				"id": "d",
+				"at": 0
+			}
+		],
+		"unfilledAsks": [],
+		"timers": []
+	}
+}

@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.decode",
+	"name": "a-native-count-of-the-wrong-type-spoils-the-body",
+	"input": {
+		"bodies": [
+			{
+				"data": {
+					"tokens_prompt": 21,
+					"native_tokens_prompt": "11"
+				}
+			},
+			{
+				"data": {
+					"tokens_completion": 22,
+					"native_tokens_completion": true
+				}
+			}
+		]
+	},
+	"expected": {
+		"stats": [
+			null,
+			null
+		]
+	}
+}

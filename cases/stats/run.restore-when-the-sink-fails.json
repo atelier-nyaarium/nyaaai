@@ -1,0 +1,68 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.run",
+	"name": "restore-when-the-sink-fails",
+	"input": {
+		"startMs": 10800000,
+		"fails": {
+			"unfilled": true
+		},
+		"unfilled": [
+			{
+				"id": "u1",
+				"generationId": "gen-u1",
+				"at": 10740000
+			}
+		],
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"provider_name": "Acme",
+						"latency": 800,
+						"generation_time": 400,
+						"native_tokens_prompt": 3900
+					}
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "restore"
+			},
+			{
+				"kind": "advance",
+				"ms": 3600000
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 10800000,
+				"reads": [],
+				"fills": [],
+				"waiting": [],
+				"armedAt": null
+			},
+			{
+				"nowMs": 14400000,
+				"reads": [],
+				"fills": [],
+				"waiting": [],
+				"armedAt": null
+			}
+		],
+		"requests": [],
+		"read": [
+			0
+		],
+		"filledAsks": [],
+		"unfilledAsks": [
+			3600000
+		],
+		"timers": []
+	}
+}

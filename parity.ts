@@ -57,6 +57,7 @@ import { sessionCut } from "./scripts/caseGroups/sessionCut";
 import { sessionFile } from "./scripts/caseGroups/sessionFile";
 import { shape } from "./scripts/caseGroups/shape";
 import { sse } from "./scripts/caseGroups/sse";
+import { stats } from "./scripts/caseGroups/stats";
 import { step } from "./scripts/caseGroups/step";
 import { strictSchema } from "./scripts/caseGroups/strictSchema";
 import { testkit } from "./scripts/caseGroups/testkit";
@@ -233,6 +234,7 @@ export default project({
 		health,
 		lifecycle,
 		meter,
+		stats,
 	],
 	runs: adapterCases,
 	cases: { crate: "nyaaai_cli", module: "cases", dir: "rust/cli/src/cases" },

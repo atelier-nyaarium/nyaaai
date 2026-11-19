@@ -1,0 +1,189 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.run",
+	"name": "ids-that-are-no-generation-id",
+	"input": {
+		"startMs": 0,
+		"exchanges": [],
+		"steps": [
+			{
+				"kind": "add",
+				"id": "r0",
+				"generationId": "not-a-generation"
+			},
+			{
+				"kind": "add",
+				"id": "r1",
+				"generationId": "gen-"
+			},
+			{
+				"kind": "add",
+				"id": "r2",
+				"generationId": "GEN-a"
+			},
+			{
+				"kind": "add",
+				"id": "r3",
+				"generationId": "gen-a_b"
+			},
+			{
+				"kind": "add",
+				"id": "r4",
+				"generationId": "gen-a b"
+			},
+			{
+				"kind": "add",
+				"id": "r5",
+				"generationId": "gen-a\n"
+			},
+			{
+				"kind": "add",
+				"id": "r6",
+				"generationId": " gen-a"
+			},
+			{
+				"kind": "add",
+				"id": "r7",
+				"generationId": "gen-a.b"
+			},
+			{
+				"kind": "add",
+				"id": "r8",
+				"generationId": "gen-café"
+			},
+			{
+				"kind": "add",
+				"id": "r9",
+				"generationId": "gen-😀"
+			},
+			{
+				"kind": "add",
+				"id": "r10",
+				"generationId": "gen-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			{
+				"kind": "add",
+				"id": "r11",
+				"generationId": ""
+			},
+			{
+				"kind": "add",
+				"id": "r12",
+				"generationId": "gen"
+			},
+			{
+				"kind": "add",
+				"id": "r13",
+				"generationId": "gen_a"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 0,
+				"reads": [],
+				"fills": [],
+				"waiting": [],
+				"armedAt": null
+			},
+			{
+				"nowMs": 0,
+				"reads": [],
+				"fills": [],
+				"waiting": [],
+				"armedAt": null
+			},
+			{
+				"nowMs": 0,
+				"reads": [],
+				"fills": [],
+				"waiting": [],
+				"armedAt": null
+			},
+			{
+				"nowMs": 0,
+				"reads": [],
+				"fills": [],
+				"waiting": [],
+				"armedAt": null
+			},
+			{
+				"nowMs": 0,
+				"reads": [],
+				"fills": [],
+				"waiting": [],
+				"armedAt": null
+			},
+			{
+				"nowMs": 0,
+				"reads": [],
+				"fills": [],
+				"waiting": [],
+				"armedAt": null
+			},
+			{
+				"nowMs": 0,
+				"reads": [],
+				"fills": [],
+				"waiting": [],
+				"armedAt": null
+			},
+			{
+				"nowMs": 0,
+				"reads": [],
+				"fills": [],
+				"waiting": [],
+				"armedAt": null
+			},
+			{
+				"nowMs": 0,
+				"reads": [],
+				"fills": [],
+				"waiting": [],
+				"armedAt": null
+			},
+			{
+				"nowMs": 0,
+				"reads": [],
+				"fills": [],
+				"waiting": [],
+				"armedAt": null
+			},
+			{
+				"nowMs": 0,
+				"reads": [],
+				"fills": [],
+				"waiting": [],
+				"armedAt": null
+			},
+			{
+				"nowMs": 0,
+				"reads": [],
+				"fills": [],
+				"waiting": [],
+				"armedAt": null
+			},
+			{
+				"nowMs": 0,
+				"reads": [],
+				"fills": [],
+				"waiting": [],
+				"armedAt": null
+			},
+			{
+				"nowMs": 0,
+				"reads": [],
+				"fills": [],
+				"waiting": [],
+				"armedAt": null
+			}
+		],
+		"requests": [],
+		"read": [],
+		"filledAsks": [],
+		"unfilledAsks": [],
+		"timers": []
+	}
+}

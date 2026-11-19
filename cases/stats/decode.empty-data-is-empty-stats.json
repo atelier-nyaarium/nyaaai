@@ -1,0 +1,18 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.decode",
+	"name": "empty-data-is-empty-stats",
+	"input": {
+		"bodies": [
+			{
+				"data": {}
+			}
+		]
+	},
+	"expected": {
+		"stats": [
+			{}
+		]
+	}
+}

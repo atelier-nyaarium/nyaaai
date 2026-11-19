@@ -1,0 +1,147 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.run",
+	"name": "an-add-during-a-read",
+	"input": {
+		"startMs": 0,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"provider_name": "Acme",
+						"latency": 800,
+						"generation_time": 400,
+						"native_tokens_prompt": 3900
+					}
+				},
+				"headMs": 2000
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"provider_name": "Acme",
+						"latency": 800,
+						"generation_time": 400,
+						"native_tokens_prompt": 3900
+					}
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"provider_name": "Acme",
+						"latency": 800,
+						"generation_time": 400,
+						"native_tokens_prompt": 3900
+					}
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "add",
+				"id": "a",
+				"generationId": "gen-a"
+			},
+			{
+				"kind": "advance",
+				"ms": 3600000,
+				"during": [
+					{
+						"afterMs": 420500,
+						"do": {
+							"kind": "add",
+							"id": "b",
+							"generationId": "gen-b",
+							"entry": "entry-2"
+						}
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 0,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "a",
+						"generationId": "gen-a",
+						"at": 0,
+						"tries": 0,
+						"due": 420000
+					}
+				],
+				"armedAt": 420000
+			},
+			{
+				"nowMs": 3600000,
+				"reads": [
+					{
+						"atMs": 420000,
+						"endedMs": 422000,
+						"path": "/generation?id=gen-a",
+						"failed": false
+					},
+					{
+						"atMs": 840500,
+						"endedMs": 840500,
+						"entry": "entry-2",
+						"path": "/generation?id=gen-b",
+						"failed": false
+					}
+				],
+				"fills": [
+					{
+						"id": "a",
+						"stats": {
+							"provider": "Acme",
+							"latencyMs": 800,
+							"generationMs": 400,
+							"in": 3900
+						}
+					},
+					{
+						"id": "b",
+						"stats": {
+							"provider": "Acme",
+							"latencyMs": 800,
+							"generationMs": 400,
+							"in": 3900
+						}
+					}
+				],
+				"waiting": [],
+				"armedAt": null
+			}
+		],
+		"requests": [
+			"/generation?id=gen-a",
+			"/generation?id=gen-b"
+		],
+		"read": [
+			1,
+			1,
+			0
+		],
+		"filledAsks": [
+			{
+				"id": "a",
+				"at": 0
+			},
+			{
+				"id": "b",
+				"at": 420500
+			}
+		],
+		"unfilledAsks": [],
+		"timers": []
+	}
+}

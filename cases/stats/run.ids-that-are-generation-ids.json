@@ -1,0 +1,193 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.run",
+	"name": "ids-that-are-generation-ids",
+	"input": {
+		"startMs": 0,
+		"exchanges": [],
+		"steps": [
+			{
+				"kind": "add",
+				"id": "r0",
+				"generationId": "gen-a"
+			},
+			{
+				"kind": "add",
+				"id": "r1",
+				"generationId": "gen--"
+			},
+			{
+				"kind": "add",
+				"id": "r2",
+				"generationId": "gen-A-z-0-9"
+			},
+			{
+				"kind": "add",
+				"id": "r3",
+				"generationId": "gen-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			{
+				"kind": "add",
+				"id": "r4",
+				"generationId": "gen-1234567890abcdef"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 0,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "r0",
+						"generationId": "gen-a",
+						"at": 0,
+						"tries": 0,
+						"due": 420000
+					}
+				],
+				"armedAt": 420000
+			},
+			{
+				"nowMs": 0,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "r0",
+						"generationId": "gen-a",
+						"at": 0,
+						"tries": 0,
+						"due": 420000
+					},
+					{
+						"id": "r1",
+						"generationId": "gen--",
+						"at": 0,
+						"tries": 0,
+						"due": 420000
+					}
+				],
+				"armedAt": 420000
+			},
+			{
+				"nowMs": 0,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "r0",
+						"generationId": "gen-a",
+						"at": 0,
+						"tries": 0,
+						"due": 420000
+					},
+					{
+						"id": "r1",
+						"generationId": "gen--",
+						"at": 0,
+						"tries": 0,
+						"due": 420000
+					},
+					{
+						"id": "r2",
+						"generationId": "gen-A-z-0-9",
+						"at": 0,
+						"tries": 0,
+						"due": 420000
+					}
+				],
+				"armedAt": 420000
+			},
+			{
+				"nowMs": 0,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "r0",
+						"generationId": "gen-a",
+						"at": 0,
+						"tries": 0,
+						"due": 420000
+					},
+					{
+						"id": "r1",
+						"generationId": "gen--",
+						"at": 0,
+						"tries": 0,
+						"due": 420000
+					},
+					{
+						"id": "r2",
+						"generationId": "gen-A-z-0-9",
+						"at": 0,
+						"tries": 0,
+						"due": 420000
+					},
+					{
+						"id": "r3",
+						"generationId": "gen-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+						"at": 0,
+						"tries": 0,
+						"due": 420000
+					}
+				],
+				"armedAt": 420000
+			},
+			{
+				"nowMs": 0,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "r0",
+						"generationId": "gen-a",
+						"at": 0,
+						"tries": 0,
+						"due": 420000
+					},
+					{
+						"id": "r1",
+						"generationId": "gen--",
+						"at": 0,
+						"tries": 0,
+						"due": 420000
+					},
+					{
+						"id": "r2",
+						"generationId": "gen-A-z-0-9",
+						"at": 0,
+						"tries": 0,
+						"due": 420000
+					},
+					{
+						"id": "r3",
+						"generationId": "gen-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+						"at": 0,
+						"tries": 0,
+						"due": 420000
+					},
+					{
+						"id": "r4",
+						"generationId": "gen-1234567890abcdef",
+						"at": 0,
+						"tries": 0,
+						"due": 420000
+					}
+				],
+				"armedAt": 420000
+			}
+		],
+		"requests": [],
+		"read": [],
+		"filledAsks": [],
+		"unfilledAsks": [],
+		"timers": [
+			"schedule-1"
+		]
+	}
+}

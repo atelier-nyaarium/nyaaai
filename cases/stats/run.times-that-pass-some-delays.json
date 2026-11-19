@@ -1,0 +1,737 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.run",
+	"name": "times-that-pass-some-delays",
+	"input": {
+		"startMs": 6000000,
+		"exchanges": [],
+		"steps": [
+			{
+				"kind": "add",
+				"id": "t0",
+				"generationId": "gen-t0",
+				"at": 5580001
+			},
+			{
+				"kind": "add",
+				"id": "t1",
+				"generationId": "gen-t1",
+				"at": 5580000
+			},
+			{
+				"kind": "add",
+				"id": "t2",
+				"generationId": "gen-t2",
+				"at": 5579999
+			},
+			{
+				"kind": "add",
+				"id": "t3",
+				"generationId": "gen-t3",
+				"at": 5100001
+			},
+			{
+				"kind": "add",
+				"id": "t4",
+				"generationId": "gen-t4",
+				"at": 5100000
+			},
+			{
+				"kind": "add",
+				"id": "t5",
+				"generationId": "gen-t5",
+				"at": 4200001
+			},
+			{
+				"kind": "add",
+				"id": "t6",
+				"generationId": "gen-t6",
+				"at": 4200000
+			},
+			{
+				"kind": "add",
+				"id": "t7",
+				"generationId": "gen-t7",
+				"at": 2400001
+			},
+			{
+				"kind": "add",
+				"id": "t8",
+				"generationId": "gen-t8",
+				"at": 2400000
+			},
+			{
+				"kind": "add",
+				"id": "t9",
+				"generationId": "gen-t9",
+				"at": -80400000
+			},
+			{
+				"kind": "add",
+				"id": "t10",
+				"generationId": "gen-t10",
+				"at": 9600000
+			},
+			{
+				"kind": "add",
+				"id": "t11",
+				"generationId": "gen-t11",
+				"at": 6000000
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 6000000,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "t0",
+						"generationId": "gen-t0",
+						"at": 5580001,
+						"tries": 0,
+						"due": 6000001
+					}
+				],
+				"armedAt": 6000001
+			},
+			{
+				"nowMs": 6000000,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "t0",
+						"generationId": "gen-t0",
+						"at": 5580001,
+						"tries": 0,
+						"due": 6000001
+					},
+					{
+						"id": "t1",
+						"generationId": "gen-t1",
+						"at": 5580000,
+						"tries": 0,
+						"due": 6000000
+					}
+				],
+				"armedAt": 6000000
+			},
+			{
+				"nowMs": 6000000,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "t0",
+						"generationId": "gen-t0",
+						"at": 5580001,
+						"tries": 0,
+						"due": 6000001
+					},
+					{
+						"id": "t1",
+						"generationId": "gen-t1",
+						"at": 5580000,
+						"tries": 0,
+						"due": 6000000
+					},
+					{
+						"id": "t2",
+						"generationId": "gen-t2",
+						"at": 5579999,
+						"tries": 0,
+						"due": 6000000
+					}
+				],
+				"armedAt": 6000000
+			},
+			{
+				"nowMs": 6000000,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "t0",
+						"generationId": "gen-t0",
+						"at": 5580001,
+						"tries": 0,
+						"due": 6000001
+					},
+					{
+						"id": "t1",
+						"generationId": "gen-t1",
+						"at": 5580000,
+						"tries": 0,
+						"due": 6000000
+					},
+					{
+						"id": "t2",
+						"generationId": "gen-t2",
+						"at": 5579999,
+						"tries": 0,
+						"due": 6000000
+					},
+					{
+						"id": "t3",
+						"generationId": "gen-t3",
+						"at": 5100001,
+						"tries": 0,
+						"due": 6000000
+					}
+				],
+				"armedAt": 6000000
+			},
+			{
+				"nowMs": 6000000,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "t0",
+						"generationId": "gen-t0",
+						"at": 5580001,
+						"tries": 0,
+						"due": 6000001
+					},
+					{
+						"id": "t1",
+						"generationId": "gen-t1",
+						"at": 5580000,
+						"tries": 0,
+						"due": 6000000
+					},
+					{
+						"id": "t2",
+						"generationId": "gen-t2",
+						"at": 5579999,
+						"tries": 0,
+						"due": 6000000
+					},
+					{
+						"id": "t3",
+						"generationId": "gen-t3",
+						"at": 5100001,
+						"tries": 0,
+						"due": 6000000
+					},
+					{
+						"id": "t4",
+						"generationId": "gen-t4",
+						"at": 5100000,
+						"tries": 1,
+						"due": 6000000
+					}
+				],
+				"armedAt": 6000000
+			},
+			{
+				"nowMs": 6000000,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "t0",
+						"generationId": "gen-t0",
+						"at": 5580001,
+						"tries": 0,
+						"due": 6000001
+					},
+					{
+						"id": "t1",
+						"generationId": "gen-t1",
+						"at": 5580000,
+						"tries": 0,
+						"due": 6000000
+					},
+					{
+						"id": "t2",
+						"generationId": "gen-t2",
+						"at": 5579999,
+						"tries": 0,
+						"due": 6000000
+					},
+					{
+						"id": "t3",
+						"generationId": "gen-t3",
+						"at": 5100001,
+						"tries": 0,
+						"due": 6000000
+					},
+					{
+						"id": "t4",
+						"generationId": "gen-t4",
+						"at": 5100000,
+						"tries": 1,
+						"due": 6000000
+					},
+					{
+						"id": "t5",
+						"generationId": "gen-t5",
+						"at": 4200001,
+						"tries": 1,
+						"due": 6000000
+					}
+				],
+				"armedAt": 6000000
+			},
+			{
+				"nowMs": 6000000,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "t0",
+						"generationId": "gen-t0",
+						"at": 5580001,
+						"tries": 0,
+						"due": 6000001
+					},
+					{
+						"id": "t1",
+						"generationId": "gen-t1",
+						"at": 5580000,
+						"tries": 0,
+						"due": 6000000
+					},
+					{
+						"id": "t2",
+						"generationId": "gen-t2",
+						"at": 5579999,
+						"tries": 0,
+						"due": 6000000
+					},
+					{
+						"id": "t3",
+						"generationId": "gen-t3",
+						"at": 5100001,
+						"tries": 0,
+						"due": 6000000
+					},
+					{
+						"id": "t4",
+						"generationId": "gen-t4",
+						"at": 5100000,
+						"tries": 1,
+						"due": 6000000
+					},
+					{
+						"id": "t5",
+						"generationId": "gen-t5",
+						"at": 4200001,
+						"tries": 1,
+						"due": 6000000
+					},
+					{
+						"id": "t6",
+						"generationId": "gen-t6",
+						"at": 4200000,
+						"tries": 2,
+						"due": 6000000
+					}
+				],
+				"armedAt": 6000000
+			},
+			{
+				"nowMs": 6000000,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "t0",
+						"generationId": "gen-t0",
+						"at": 5580001,
+						"tries": 0,
+						"due": 6000001
+					},
+					{
+						"id": "t1",
+						"generationId": "gen-t1",
+						"at": 5580000,
+						"tries": 0,
+						"due": 6000000
+					},
+					{
+						"id": "t2",
+						"generationId": "gen-t2",
+						"at": 5579999,
+						"tries": 0,
+						"due": 6000000
+					},
+					{
+						"id": "t3",
+						"generationId": "gen-t3",
+						"at": 5100001,
+						"tries": 0,
+						"due": 6000000
+					},
+					{
+						"id": "t4",
+						"generationId": "gen-t4",
+						"at": 5100000,
+						"tries": 1,
+						"due": 6000000
+					},
+					{
+						"id": "t5",
+						"generationId": "gen-t5",
+						"at": 4200001,
+						"tries": 1,
+						"due": 6000000
+					},
+					{
+						"id": "t6",
+						"generationId": "gen-t6",
+						"at": 4200000,
+						"tries": 2,
+						"due": 6000000
+					},
+					{
+						"id": "t7",
+						"generationId": "gen-t7",
+						"at": 2400001,
+						"tries": 2,
+						"due": 6000000
+					}
+				],
+				"armedAt": 6000000
+			},
+			{
+				"nowMs": 6000000,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "t0",
+						"generationId": "gen-t0",
+						"at": 5580001,
+						"tries": 0,
+						"due": 6000001
+					},
+					{
+						"id": "t1",
+						"generationId": "gen-t1",
+						"at": 5580000,
+						"tries": 0,
+						"due": 6000000
+					},
+					{
+						"id": "t2",
+						"generationId": "gen-t2",
+						"at": 5579999,
+						"tries": 0,
+						"due": 6000000
+					},
+					{
+						"id": "t3",
+						"generationId": "gen-t3",
+						"at": 5100001,
+						"tries": 0,
+						"due": 6000000
+					},
+					{
+						"id": "t4",
+						"generationId": "gen-t4",
+						"at": 5100000,
+						"tries": 1,
+						"due": 6000000
+					},
+					{
+						"id": "t5",
+						"generationId": "gen-t5",
+						"at": 4200001,
+						"tries": 1,
+						"due": 6000000
+					},
+					{
+						"id": "t6",
+						"generationId": "gen-t6",
+						"at": 4200000,
+						"tries": 2,
+						"due": 6000000
+					},
+					{
+						"id": "t7",
+						"generationId": "gen-t7",
+						"at": 2400001,
+						"tries": 2,
+						"due": 6000000
+					},
+					{
+						"id": "t8",
+						"generationId": "gen-t8",
+						"at": 2400000,
+						"tries": 3,
+						"due": 6000000
+					}
+				],
+				"armedAt": 6000000
+			},
+			{
+				"nowMs": 6000000,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "t0",
+						"generationId": "gen-t0",
+						"at": 5580001,
+						"tries": 0,
+						"due": 6000001
+					},
+					{
+						"id": "t1",
+						"generationId": "gen-t1",
+						"at": 5580000,
+						"tries": 0,
+						"due": 6000000
+					},
+					{
+						"id": "t2",
+						"generationId": "gen-t2",
+						"at": 5579999,
+						"tries": 0,
+						"due": 6000000
+					},
+					{
+						"id": "t3",
+						"generationId": "gen-t3",
+						"at": 5100001,
+						"tries": 0,
+						"due": 6000000
+					},
+					{
+						"id": "t4",
+						"generationId": "gen-t4",
+						"at": 5100000,
+						"tries": 1,
+						"due": 6000000
+					},
+					{
+						"id": "t5",
+						"generationId": "gen-t5",
+						"at": 4200001,
+						"tries": 1,
+						"due": 6000000
+					},
+					{
+						"id": "t6",
+						"generationId": "gen-t6",
+						"at": 4200000,
+						"tries": 2,
+						"due": 6000000
+					},
+					{
+						"id": "t7",
+						"generationId": "gen-t7",
+						"at": 2400001,
+						"tries": 2,
+						"due": 6000000
+					},
+					{
+						"id": "t8",
+						"generationId": "gen-t8",
+						"at": 2400000,
+						"tries": 3,
+						"due": 6000000
+					},
+					{
+						"id": "t9",
+						"generationId": "gen-t9",
+						"at": -80400000,
+						"tries": 3,
+						"due": 6000000
+					}
+				],
+				"armedAt": 6000000
+			},
+			{
+				"nowMs": 6000000,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "t0",
+						"generationId": "gen-t0",
+						"at": 5580001,
+						"tries": 0,
+						"due": 6000001
+					},
+					{
+						"id": "t1",
+						"generationId": "gen-t1",
+						"at": 5580000,
+						"tries": 0,
+						"due": 6000000
+					},
+					{
+						"id": "t2",
+						"generationId": "gen-t2",
+						"at": 5579999,
+						"tries": 0,
+						"due": 6000000
+					},
+					{
+						"id": "t3",
+						"generationId": "gen-t3",
+						"at": 5100001,
+						"tries": 0,
+						"due": 6000000
+					},
+					{
+						"id": "t4",
+						"generationId": "gen-t4",
+						"at": 5100000,
+						"tries": 1,
+						"due": 6000000
+					},
+					{
+						"id": "t5",
+						"generationId": "gen-t5",
+						"at": 4200001,
+						"tries": 1,
+						"due": 6000000
+					},
+					{
+						"id": "t6",
+						"generationId": "gen-t6",
+						"at": 4200000,
+						"tries": 2,
+						"due": 6000000
+					},
+					{
+						"id": "t7",
+						"generationId": "gen-t7",
+						"at": 2400001,
+						"tries": 2,
+						"due": 6000000
+					},
+					{
+						"id": "t8",
+						"generationId": "gen-t8",
+						"at": 2400000,
+						"tries": 3,
+						"due": 6000000
+					},
+					{
+						"id": "t9",
+						"generationId": "gen-t9",
+						"at": -80400000,
+						"tries": 3,
+						"due": 6000000
+					},
+					{
+						"id": "t10",
+						"generationId": "gen-t10",
+						"at": 9600000,
+						"tries": 0,
+						"due": 10020000
+					}
+				],
+				"armedAt": 6000000
+			},
+			{
+				"nowMs": 6000000,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "t0",
+						"generationId": "gen-t0",
+						"at": 5580001,
+						"tries": 0,
+						"due": 6000001
+					},
+					{
+						"id": "t1",
+						"generationId": "gen-t1",
+						"at": 5580000,
+						"tries": 0,
+						"due": 6000000
+					},
+					{
+						"id": "t2",
+						"generationId": "gen-t2",
+						"at": 5579999,
+						"tries": 0,
+						"due": 6000000
+					},
+					{
+						"id": "t3",
+						"generationId": "gen-t3",
+						"at": 5100001,
+						"tries": 0,
+						"due": 6000000
+					},
+					{
+						"id": "t4",
+						"generationId": "gen-t4",
+						"at": 5100000,
+						"tries": 1,
+						"due": 6000000
+					},
+					{
+						"id": "t5",
+						"generationId": "gen-t5",
+						"at": 4200001,
+						"tries": 1,
+						"due": 6000000
+					},
+					{
+						"id": "t6",
+						"generationId": "gen-t6",
+						"at": 4200000,
+						"tries": 2,
+						"due": 6000000
+					},
+					{
+						"id": "t7",
+						"generationId": "gen-t7",
+						"at": 2400001,
+						"tries": 2,
+						"due": 6000000
+					},
+					{
+						"id": "t8",
+						"generationId": "gen-t8",
+						"at": 2400000,
+						"tries": 3,
+						"due": 6000000
+					},
+					{
+						"id": "t9",
+						"generationId": "gen-t9",
+						"at": -80400000,
+						"tries": 3,
+						"due": 6000000
+					},
+					{
+						"id": "t10",
+						"generationId": "gen-t10",
+						"at": 9600000,
+						"tries": 0,
+						"due": 10020000
+					},
+					{
+						"id": "t11",
+						"generationId": "gen-t11",
+						"at": 6000000,
+						"tries": 0,
+						"due": 6420000
+					}
+				],
+				"armedAt": 6000000
+			}
+		],
+		"requests": [],
+		"read": [],
+		"filledAsks": [],
+		"unfilledAsks": [],
+		"timers": [
+			"schedule-2"
+		]
+	}
+}

@@ -1,0 +1,208 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.run",
+	"name": "a-record-that-misses-at-each-delay-is-dropped",
+	"input": {
+		"startMs": 0,
+		"exchanges": [
+			{
+				"status": 404,
+				"json": {
+					"error": {
+						"message": "No such generation."
+					}
+				}
+			},
+			{
+				"status": 404,
+				"json": {
+					"error": {
+						"message": "No such generation."
+					}
+				}
+			},
+			{
+				"status": 404,
+				"json": {
+					"error": {
+						"message": "No such generation."
+					}
+				}
+			},
+			{
+				"status": 404,
+				"json": {
+					"error": {
+						"message": "No such generation."
+					}
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "add",
+				"id": "a",
+				"generationId": "gen-a"
+			},
+			{
+				"kind": "advance",
+				"ms": 420000
+			},
+			{
+				"kind": "advance",
+				"ms": 480000
+			},
+			{
+				"kind": "advance",
+				"ms": 900000
+			},
+			{
+				"kind": "advance",
+				"ms": 1800000
+			},
+			{
+				"kind": "advance",
+				"ms": 3600000
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 0,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "a",
+						"generationId": "gen-a",
+						"at": 0,
+						"tries": 0,
+						"due": 420000
+					}
+				],
+				"armedAt": 420000
+			},
+			{
+				"nowMs": 420000,
+				"reads": [
+					{
+						"atMs": 420000,
+						"endedMs": 420000,
+						"path": "/generation?id=gen-a",
+						"failed": true
+					}
+				],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "a",
+						"generationId": "gen-a",
+						"at": 0,
+						"tries": 1,
+						"due": 900000
+					}
+				],
+				"armedAt": 900000
+			},
+			{
+				"nowMs": 900000,
+				"reads": [
+					{
+						"atMs": 900000,
+						"endedMs": 900000,
+						"path": "/generation?id=gen-a",
+						"failed": true
+					}
+				],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "a",
+						"generationId": "gen-a",
+						"at": 0,
+						"tries": 2,
+						"due": 1800000
+					}
+				],
+				"armedAt": 1800000
+			},
+			{
+				"nowMs": 1800000,
+				"reads": [
+					{
+						"atMs": 1800000,
+						"endedMs": 1800000,
+						"path": "/generation?id=gen-a",
+						"failed": true
+					}
+				],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "a",
+						"generationId": "gen-a",
+						"at": 0,
+						"tries": 3,
+						"due": 3600000
+					}
+				],
+				"armedAt": 3600000
+			},
+			{
+				"nowMs": 3600000,
+				"reads": [
+					{
+						"atMs": 3600000,
+						"endedMs": 3600000,
+						"path": "/generation?id=gen-a",
+						"failed": true
+					}
+				],
+				"fills": [],
+				"waiting": [],
+				"armedAt": null
+			},
+			{
+				"nowMs": 7200000,
+				"reads": [],
+				"fills": [],
+				"waiting": [],
+				"armedAt": null
+			}
+		],
+		"requests": [
+			"/generation?id=gen-a",
+			"/generation?id=gen-a",
+			"/generation?id=gen-a",
+			"/generation?id=gen-a"
+		],
+		"read": [
+			1,
+			1,
+			1,
+			1
+		],
+		"filledAsks": [
+			{
+				"id": "a",
+				"at": 0
+			},
+			{
+				"id": "a",
+				"at": 0
+			},
+			{
+				"id": "a",
+				"at": 0
+			},
+			{
+				"id": "a",
+				"at": 0
+			}
+		],
+		"unfilledAsks": [],
+		"timers": []
+	}
+}

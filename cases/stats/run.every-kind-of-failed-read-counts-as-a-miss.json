@@ -1,0 +1,138 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.run",
+	"name": "every-kind-of-failed-read-counts-as-a-miss",
+	"input": {
+		"startMs": 0,
+		"exchanges": [
+			{
+				"status": 500,
+				"json": {
+					"error": {
+						"message": "Server error."
+					}
+				}
+			},
+			{
+				"status": 200,
+				"json": {},
+				"end": "refused"
+			},
+			{
+				"status": 401,
+				"json": {
+					"error": {
+						"message": "Bad key."
+					}
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"provider_name": "Acme",
+						"latency": 800,
+						"generation_time": 400,
+						"native_tokens_prompt": 3900
+					}
+				},
+				"end": "dropped"
+			}
+		],
+		"steps": [
+			{
+				"kind": "add",
+				"id": "a",
+				"generationId": "gen-a"
+			},
+			{
+				"kind": "advance",
+				"ms": 7200000
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 0,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "a",
+						"generationId": "gen-a",
+						"at": 0,
+						"tries": 0,
+						"due": 420000
+					}
+				],
+				"armedAt": 420000
+			},
+			{
+				"nowMs": 7200000,
+				"reads": [
+					{
+						"atMs": 420000,
+						"endedMs": 420000,
+						"path": "/generation?id=gen-a",
+						"failed": true
+					},
+					{
+						"atMs": 900000,
+						"endedMs": 900000,
+						"path": "/generation?id=gen-a",
+						"failed": true
+					},
+					{
+						"atMs": 1800000,
+						"endedMs": 1800000,
+						"path": "/generation?id=gen-a",
+						"failed": true
+					},
+					{
+						"atMs": 3600000,
+						"endedMs": 3600000,
+						"path": "/generation?id=gen-a",
+						"failed": true
+					}
+				],
+				"fills": [],
+				"waiting": [],
+				"armedAt": null
+			}
+		],
+		"requests": [
+			"/generation?id=gen-a",
+			"/generation?id=gen-a",
+			"/generation?id=gen-a",
+			"/generation?id=gen-a"
+		],
+		"read": [
+			1,
+			0,
+			1,
+			1
+		],
+		"filledAsks": [
+			{
+				"id": "a",
+				"at": 0
+			},
+			{
+				"id": "a",
+				"at": 0
+			},
+			{
+				"id": "a",
+				"at": 0
+			},
+			{
+				"id": "a",
+				"at": 0
+			}
+		],
+		"unfilledAsks": [],
+		"timers": []
+	}
+}

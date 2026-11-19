@@ -1,0 +1,40 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.decode",
+	"name": "total_cost-zero-and-negative",
+	"input": {
+		"bodies": [
+			{
+				"data": {
+					"total_cost": 0
+				}
+			},
+			{
+				"data": {
+					"total_cost": -1
+				}
+			},
+			{
+				"data": {
+					"total_cost": 1.5
+				}
+			}
+		]
+	},
+	"expected": {
+		"stats": [
+			{
+				"cost": 0,
+				"accountCost": 0
+			},
+			{
+				"accountCost": -1
+			},
+			{
+				"cost": 1.5,
+				"accountCost": 1.5
+			}
+		]
+	}
+}

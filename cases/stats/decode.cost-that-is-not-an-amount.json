@@ -1,0 +1,54 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.decode",
+	"name": "cost-that-is-not-an-amount",
+	"input": {
+		"bodies": [
+			{
+				"data": {
+					"total_cost": -1
+				}
+			},
+			{
+				"data": {
+					"total_cost": -1,
+					"is_byok": true,
+					"upstream_inference_cost": 1
+				}
+			},
+			{
+				"data": {
+					"total_cost": 1,
+					"is_byok": true,
+					"upstream_inference_cost": -1
+				}
+			},
+			{
+				"data": {
+					"upstream_inference_cost": 0.5
+				}
+			}
+		]
+	},
+	"expected": {
+		"stats": [
+			{
+				"accountCost": -1
+			},
+			{
+				"accountCost": -1,
+				"upstreamCost": 1,
+				"byok": true
+			},
+			{
+				"accountCost": 1,
+				"upstreamCost": -1,
+				"byok": true
+			},
+			{
+				"upstreamCost": 0.5
+			}
+		]
+	}
+}

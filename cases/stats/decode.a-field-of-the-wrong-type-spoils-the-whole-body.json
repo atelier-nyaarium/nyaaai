@@ -1,0 +1,22 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.decode",
+	"name": "a-field-of-the-wrong-type-spoils-the-whole-body",
+	"input": {
+		"bodies": [
+			{
+				"data": {
+					"provider_name": "Acme",
+					"latency": "fast",
+					"finish_reason": "stop"
+				}
+			}
+		]
+	},
+	"expected": {
+		"stats": [
+			null
+		]
+	}
+}

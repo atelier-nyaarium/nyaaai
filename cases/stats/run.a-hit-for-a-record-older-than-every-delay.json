@@ -1,0 +1,94 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.run",
+	"name": "a-hit-for-a-record-older-than-every-delay",
+	"input": {
+		"startMs": 10800000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"provider_name": "Acme",
+						"latency": 800,
+						"generation_time": 400,
+						"native_tokens_prompt": 3900
+					}
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "add",
+				"id": "a",
+				"generationId": "gen-a",
+				"at": 0,
+				"entry": "entry-1"
+			},
+			{
+				"kind": "advance",
+				"ms": 60000
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 10800000,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "a",
+						"generationId": "gen-a",
+						"entry": "entry-1",
+						"at": 0,
+						"tries": 3,
+						"due": 10800000
+					}
+				],
+				"armedAt": 10800000
+			},
+			{
+				"nowMs": 10860000,
+				"reads": [
+					{
+						"atMs": 10800000,
+						"endedMs": 10800000,
+						"entry": "entry-1",
+						"path": "/generation?id=gen-a",
+						"failed": false
+					}
+				],
+				"fills": [
+					{
+						"id": "a",
+						"stats": {
+							"provider": "Acme",
+							"latencyMs": 800,
+							"generationMs": 400,
+							"in": 3900
+						}
+					}
+				],
+				"waiting": [],
+				"armedAt": null
+			}
+		],
+		"requests": [
+			"/generation?id=gen-a"
+		],
+		"read": [
+			1
+		],
+		"filledAsks": [
+			{
+				"id": "a",
+				"at": 0
+			}
+		],
+		"unfilledAsks": [],
+		"timers": []
+	}
+}

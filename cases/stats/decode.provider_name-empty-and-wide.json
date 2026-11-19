@@ -1,0 +1,30 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.decode",
+	"name": "provider_name-empty-and-wide",
+	"input": {
+		"bodies": [
+			{
+				"data": {
+					"provider_name": ""
+				}
+			},
+			{
+				"data": {
+					"provider_name": "café 😀"
+				}
+			}
+		]
+	},
+	"expected": {
+		"stats": [
+			{
+				"provider": ""
+			},
+			{
+				"provider": "café 😀"
+			}
+		]
+	}
+}

@@ -1,0 +1,168 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.run",
+	"name": "a-later-add-leaves-the-timer",
+	"input": {
+		"startMs": 0,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"provider_name": "Acme",
+						"latency": 800,
+						"generation_time": 400,
+						"native_tokens_prompt": 3900
+					}
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"provider_name": "Acme",
+						"latency": 800,
+						"generation_time": 400,
+						"native_tokens_prompt": 3900
+					}
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "add",
+				"id": "a",
+				"generationId": "gen-a"
+			},
+			{
+				"kind": "advance",
+				"ms": 60000
+			},
+			{
+				"kind": "add",
+				"id": "b",
+				"generationId": "gen-b"
+			},
+			{
+				"kind": "advance",
+				"ms": 3600000
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 0,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "a",
+						"generationId": "gen-a",
+						"at": 0,
+						"tries": 0,
+						"due": 420000
+					}
+				],
+				"armedAt": 420000
+			},
+			{
+				"nowMs": 60000,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "a",
+						"generationId": "gen-a",
+						"at": 0,
+						"tries": 0,
+						"due": 420000
+					}
+				],
+				"armedAt": 420000
+			},
+			{
+				"nowMs": 60000,
+				"reads": [],
+				"fills": [],
+				"waiting": [
+					{
+						"id": "a",
+						"generationId": "gen-a",
+						"at": 0,
+						"tries": 0,
+						"due": 420000
+					},
+					{
+						"id": "b",
+						"generationId": "gen-b",
+						"at": 60000,
+						"tries": 0,
+						"due": 480000
+					}
+				],
+				"armedAt": 420000
+			},
+			{
+				"nowMs": 3660000,
+				"reads": [
+					{
+						"atMs": 420000,
+						"endedMs": 420000,
+						"path": "/generation?id=gen-a",
+						"failed": false
+					},
+					{
+						"atMs": 480000,
+						"endedMs": 480000,
+						"path": "/generation?id=gen-b",
+						"failed": false
+					}
+				],
+				"fills": [
+					{
+						"id": "a",
+						"stats": {
+							"provider": "Acme",
+							"latencyMs": 800,
+							"generationMs": 400,
+							"in": 3900
+						}
+					},
+					{
+						"id": "b",
+						"stats": {
+							"provider": "Acme",
+							"latencyMs": 800,
+							"generationMs": 400,
+							"in": 3900
+						}
+					}
+				],
+				"waiting": [],
+				"armedAt": null
+			}
+		],
+		"requests": [
+			"/generation?id=gen-a",
+			"/generation?id=gen-b"
+		],
+		"read": [
+			1,
+			1
+		],
+		"filledAsks": [
+			{
+				"id": "a",
+				"at": 0
+			},
+			{
+				"id": "b",
+				"at": 60000
+			}
+		],
+		"unfilledAsks": [],
+		"timers": []
+	}
+}

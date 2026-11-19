@@ -1,0 +1,30 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.decode",
+	"name": "finish_reason-empty-and-wide",
+	"input": {
+		"bodies": [
+			{
+				"data": {
+					"finish_reason": ""
+				}
+			},
+			{
+				"data": {
+					"finish_reason": "café 😀"
+				}
+			}
+		]
+	},
+	"expected": {
+		"stats": [
+			{
+				"finish": ""
+			},
+			{
+				"finish": "café 😀"
+			}
+		]
+	}
+}

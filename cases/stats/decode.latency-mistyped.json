@@ -1,0 +1,78 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.decode",
+	"name": "latency-mistyped",
+	"input": {
+		"bodies": [
+			{
+				"data": {
+					"provider_name": "Acme",
+					"latency": "7",
+					"generation_time": 430,
+					"total_cost": 0.004,
+					"is_byok": false,
+					"upstream_inference_cost": 0.001,
+					"tokens_prompt": 100,
+					"tokens_completion": 40,
+					"native_tokens_prompt": 120,
+					"native_tokens_completion": 50,
+					"finish_reason": "stop"
+				}
+			},
+			{
+				"data": {
+					"provider_name": "Acme",
+					"latency": true,
+					"generation_time": 430,
+					"total_cost": 0.004,
+					"is_byok": false,
+					"upstream_inference_cost": 0.001,
+					"tokens_prompt": 100,
+					"tokens_completion": 40,
+					"native_tokens_prompt": 120,
+					"native_tokens_completion": 50,
+					"finish_reason": "stop"
+				}
+			},
+			{
+				"data": {
+					"provider_name": "Acme",
+					"latency": [],
+					"generation_time": 430,
+					"total_cost": 0.004,
+					"is_byok": false,
+					"upstream_inference_cost": 0.001,
+					"tokens_prompt": 100,
+					"tokens_completion": 40,
+					"native_tokens_prompt": 120,
+					"native_tokens_completion": 50,
+					"finish_reason": "stop"
+				}
+			},
+			{
+				"data": {
+					"provider_name": "Acme",
+					"latency": {},
+					"generation_time": 430,
+					"total_cost": 0.004,
+					"is_byok": false,
+					"upstream_inference_cost": 0.001,
+					"tokens_prompt": 100,
+					"tokens_completion": 40,
+					"native_tokens_prompt": 120,
+					"native_tokens_completion": 50,
+					"finish_reason": "stop"
+				}
+			}
+		]
+	},
+	"expected": {
+		"stats": [
+			null,
+			null,
+			null,
+			null
+		]
+	}
+}

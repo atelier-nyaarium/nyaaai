@@ -1,0 +1,39 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.decode",
+	"name": "a-byok-sum-that-overflows-holds-no-cost",
+	"input": {
+		"bodies": [
+			{
+				"data": {
+					"total_cost": 1.7e+308,
+					"is_byok": true,
+					"upstream_inference_cost": 1.7e+308
+				}
+			},
+			{
+				"data": {
+					"total_cost": 1.7e+308,
+					"is_byok": false,
+					"upstream_inference_cost": 1.7e+308
+				}
+			}
+		]
+	},
+	"expected": {
+		"stats": [
+			{
+				"accountCost": 1.7e+308,
+				"upstreamCost": 1.7e+308,
+				"byok": true
+			},
+			{
+				"cost": 1.7e+308,
+				"accountCost": 1.7e+308,
+				"upstreamCost": 1.7e+308,
+				"byok": false
+			}
+		]
+	}
+}

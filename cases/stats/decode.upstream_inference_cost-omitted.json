@@ -1,0 +1,39 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.decode",
+	"name": "upstream_inference_cost-omitted",
+	"input": {
+		"bodies": [
+			{
+				"data": {
+					"provider_name": "Acme",
+					"latency": 812,
+					"generation_time": 430,
+					"total_cost": 0.004,
+					"is_byok": false,
+					"tokens_prompt": 100,
+					"tokens_completion": 40,
+					"native_tokens_prompt": 120,
+					"native_tokens_completion": 50,
+					"finish_reason": "stop"
+				}
+			}
+		]
+	},
+	"expected": {
+		"stats": [
+			{
+				"provider": "Acme",
+				"latencyMs": 812,
+				"generationMs": 430,
+				"cost": 0.004,
+				"accountCost": 0.004,
+				"byok": false,
+				"in": 120,
+				"out": 50,
+				"finish": "stop"
+			}
+		]
+	}
+}

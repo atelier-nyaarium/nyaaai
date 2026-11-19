@@ -1,0 +1,51 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "stats.decode",
+	"name": "byok-adds-provider-charges-and-a-missing-one-leaves-the-estimate-out",
+	"input": {
+		"bodies": [
+			{
+				"data": {
+					"total_cost": 0.01,
+					"is_byok": true,
+					"upstream_inference_cost": 0.2
+				}
+			},
+			{
+				"data": {
+					"total_cost": 0.01,
+					"is_byok": false,
+					"upstream_inference_cost": 0.2
+				}
+			},
+			{
+				"data": {
+					"total_cost": 0.01,
+					"is_byok": true,
+					"upstream_inference_cost": null
+				}
+			}
+		]
+	},
+	"expected": {
+		"stats": [
+			{
+				"cost": 0.21000000000000002,
+				"accountCost": 0.01,
+				"upstreamCost": 0.2,
+				"byok": true
+			},
+			{
+				"cost": 0.01,
+				"accountCost": 0.01,
+				"upstreamCost": 0.2,
+				"byok": false
+			},
+			{
+				"accountCost": 0.01,
+				"byok": true
+			}
+		]
+	}
+}
