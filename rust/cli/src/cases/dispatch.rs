@@ -699,6 +699,17 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
         "usage.day" => {
             run::<shapes::UsageDayInput, shapes::UsageDayResult>(input, super::usage::day)
         }
+        "gate.run" => run::<shapes::GateRunInput, shapes::GateRunResult>(input, super::gate::run),
+        "keyReader.run" => run::<shapes::KeyReaderRunInput, shapes::KeyReaderRunResult>(
+            input,
+            super::key_reader::run,
+        ),
+        "health.run" => {
+            run::<shapes::HealthRunInput, shapes::HealthRunResult>(input, super::health::run)
+        }
+        "health.keys" => {
+            run::<shapes::HealthKeysInput, shapes::HealthKeysResult>(input, super::health::keys)
+        }
         _ => return None,
     })
 }

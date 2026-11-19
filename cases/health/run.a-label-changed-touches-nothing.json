@@ -1,0 +1,158 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.run",
+	"name": "a-label-changed-touches-nothing",
+	"input": {
+		"startMs": 2000000,
+		"entries": [
+			{
+				"id": "main",
+				"kind": "openrouter",
+				"label": "Main"
+			}
+		],
+		"keys": {
+			"main": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"usage": 1
+					}
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "check",
+				"id": "main"
+			},
+			{
+				"kind": "billed",
+				"id": "main",
+				"reply": {
+					"source": "go",
+					"allowance": 1
+				}
+			},
+			{
+				"kind": "list",
+				"entries": [
+					{
+						"id": "main",
+						"kind": "openrouter",
+						"label": "Renamed"
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "main",
+						"changed": [
+							"key"
+						]
+					},
+					{
+						"entry": "main",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "ok",
+							"usage": 1
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 1
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "main",
+						"changed": [
+							"billed"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "ok",
+							"usage": 1
+						},
+						"billed": {
+							"billing": "go",
+							"allowance": 1
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 1
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "ok",
+							"usage": 1
+						},
+						"billed": {
+							"billing": "go",
+							"allowance": 1
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 1
+			}
+		],
+		"requests": [
+			"https://openrouter.ai/api/v1/key"
+		],
+		"waiting": []
+	}
+}

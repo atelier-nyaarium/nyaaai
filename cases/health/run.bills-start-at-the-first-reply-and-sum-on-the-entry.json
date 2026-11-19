@@ -1,0 +1,342 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.run",
+	"name": "bills-start-at-the-first-reply-and-sum-on-the-entry",
+	"input": {
+		"startMs": 2000000,
+		"entries": [
+			{
+				"id": "main",
+				"kind": "openrouter",
+				"label": "Main"
+			},
+			{
+				"id": "gone",
+				"kind": "openrouter",
+				"label": "Gone"
+			}
+		],
+		"keys": {},
+		"exchanges": [],
+		"steps": [
+			{
+				"kind": "billed",
+				"id": "main",
+				"reply": {
+					"source": "go",
+					"allowance": 0.25,
+					"cost": 0
+				}
+			},
+			{
+				"kind": "billed",
+				"id": "main",
+				"reply": {
+					"source": "go",
+					"allowance": 0.5,
+					"cost": 0
+				}
+			},
+			{
+				"kind": "billed",
+				"id": "main",
+				"reply": {
+					"source": "balance",
+					"cost": 0.1
+				}
+			},
+			{
+				"kind": "billed",
+				"id": "main",
+				"reply": {
+					"source": "balance"
+				}
+			},
+			{
+				"kind": "billed",
+				"id": "gone",
+				"reply": {
+					"source": "go",
+					"allowance": 1
+				}
+			},
+			{
+				"kind": "billed",
+				"id": "unlisted",
+				"reply": {
+					"source": "go",
+					"allowance": 1
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "main",
+						"changed": [
+							"billed"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "go",
+							"allowance": 0.25,
+							"cost": 0
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					},
+					{
+						"entry": "gone",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "main",
+						"changed": [
+							"billed"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "go",
+							"allowance": 0.75,
+							"cost": 0
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					},
+					{
+						"entry": "gone",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "main",
+						"changed": [
+							"billed"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"allowance": 0.75,
+							"cost": 0.1
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					},
+					{
+						"entry": "gone",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"allowance": 0.75,
+							"cost": 0.1
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					},
+					{
+						"entry": "gone",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "gone",
+						"changed": [
+							"billed"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"allowance": 0.75,
+							"cost": 0.1
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					},
+					{
+						"entry": "gone",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "go",
+							"allowance": 1
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "balance",
+							"allowance": 0.75,
+							"cost": 0.1
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					},
+					{
+						"entry": "gone",
+						"key": {
+							"kind": "none"
+						},
+						"billed": {
+							"billing": "go",
+							"allowance": 1
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					},
+					{
+						"entry": "unlisted",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0
+			}
+		],
+		"requests": [],
+		"waiting": []
+	}
+}

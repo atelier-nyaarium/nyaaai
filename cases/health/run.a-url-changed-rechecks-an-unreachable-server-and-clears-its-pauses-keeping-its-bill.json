@@ -1,0 +1,338 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.run",
+	"name": "a-url-changed-rechecks-an-unreachable-server-and-clears-its-pauses-keeping-its-bill",
+	"input": {
+		"startMs": 2000000,
+		"entries": [
+			{
+				"id": "box",
+				"kind": "ollama",
+				"label": "Box",
+				"url": "http://lab.local:11434"
+			}
+		],
+		"keys": {},
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"models": [
+						{
+							"name": "local-a:27b"
+						},
+						{
+							"name": "local-b:9b"
+						}
+					]
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "failed",
+				"route": {
+					"entry": {
+						"id": "box",
+						"kind": "ollama",
+						"label": "Box",
+						"url": "http://lab.local:11434"
+					},
+					"key": "lab/model-a"
+				},
+				"failure": {
+					"category": "network",
+					"status": "network",
+					"message": "network"
+				},
+				"onward": false
+			},
+			{
+				"kind": "tryAdmit",
+				"request": "a",
+				"route": {
+					"entry": {
+						"id": "box",
+						"kind": "ollama",
+						"label": "Box",
+						"url": "http://lab.local:11434"
+					},
+					"key": "box/qwen"
+				}
+			},
+			{
+				"kind": "settle",
+				"request": "a",
+				"outcome": "overloaded"
+			},
+			{
+				"kind": "billed",
+				"id": "box",
+				"reply": {
+					"source": "local",
+					"cost": 0
+				}
+			},
+			{
+				"kind": "deferred",
+				"route": {
+					"entry": {
+						"id": "box",
+						"kind": "ollama",
+						"label": "Box",
+						"url": "http://lab.local:11434"
+					},
+					"key": "box/qwen"
+				}
+			},
+			{
+				"kind": "list",
+				"entries": [
+					{
+						"id": "box",
+						"kind": "ollama",
+						"label": "Box",
+						"url": "http://lab.local:11500"
+					}
+				]
+			},
+			{
+				"kind": "deferred",
+				"route": {
+					"entry": {
+						"id": "box",
+						"kind": "ollama",
+						"label": "Box",
+						"url": "http://lab.local:11434"
+					},
+					"key": "box/qwen"
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "box",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "box",
+						"key": {
+							"kind": "unreachable"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "ticket",
+					"ticket": {
+						"gate": "gate-1",
+						"model": "box\nbox/qwen",
+						"generation": 0,
+						"probe": false,
+						"serial": 1
+					}
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "box",
+						"key": {
+							"kind": "unreachable"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "settled",
+					"settled": "again"
+				},
+				"changes": [
+					{
+						"entry": "box",
+						"changed": [
+							"waiting"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "box",
+						"key": {
+							"kind": "unreachable"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": [
+							"box/qwen"
+						]
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "box",
+						"changed": [
+							"billed"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "box",
+						"key": {
+							"kind": "unreachable"
+						},
+						"billed": {
+							"billing": "local",
+							"cost": 0
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": [
+							"box/qwen"
+						]
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "skip",
+					"skip": "paused"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "box",
+						"key": {
+							"kind": "unreachable"
+						},
+						"billed": {
+							"billing": "local",
+							"cost": 0
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": [
+							"box/qwen"
+						]
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "box",
+						"changed": [
+							"key",
+							"waiting"
+						]
+					},
+					{
+						"entry": "box",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "box",
+						"key": {
+							"kind": "ok",
+							"models": 2
+						},
+						"billed": {
+							"billing": "local",
+							"cost": 0
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 1
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "skip",
+					"skip": null
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "box",
+						"key": {
+							"kind": "ok",
+							"models": 2
+						},
+						"billed": {
+							"billing": "local",
+							"cost": 0
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 1
+			}
+		],
+		"requests": [
+			"http://lab.local:11500/api/tags"
+		],
+		"waiting": []
+	}
+}

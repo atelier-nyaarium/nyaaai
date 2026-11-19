@@ -1,0 +1,78 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "keyReader.run",
+	"name": "a-check-answering-just-before-the-deadline-is-shown",
+	"input": {
+		"startMs": 5000000,
+		"steps": [
+			{
+				"kind": "read"
+			},
+			{
+				"kind": "advance",
+				"ms": 29999
+			},
+			{
+				"kind": "answer",
+				"check": 1,
+				"state": {
+					"kind": "ok",
+					"usage": 4.12,
+					"limit": 20
+				}
+			},
+			{
+				"kind": "advance",
+				"ms": 1
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 5000000,
+				"shown": [
+					{
+						"kind": "checking"
+					}
+				],
+				"signalled": [],
+				"open": [
+					1
+				],
+				"busy": true
+			},
+			{
+				"nowMs": 5029999,
+				"shown": [],
+				"signalled": [],
+				"open": [
+					1
+				],
+				"busy": true
+			},
+			{
+				"nowMs": 5029999,
+				"shown": [
+					{
+						"kind": "ok",
+						"usage": 4.12,
+						"limit": 20
+					}
+				],
+				"signalled": [],
+				"open": [],
+				"busy": false
+			},
+			{
+				"nowMs": 5030000,
+				"shown": [],
+				"signalled": [],
+				"open": [],
+				"busy": false
+			}
+		],
+		"waiting": []
+	}
+}

@@ -1,0 +1,576 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "gate.run",
+	"name": "repeated-overloads-exhaust-the-waiters",
+	"input": {
+		"startMs": 1000000,
+		"steps": [
+			{
+				"kind": "admit",
+				"request": "first",
+				"model": "lab/model-a"
+			},
+			{
+				"kind": "settle",
+				"request": "first",
+				"outcome": "overloaded"
+			},
+			{
+				"kind": "admit",
+				"request": "p1",
+				"model": "lab/model-a"
+			},
+			{
+				"kind": "admit",
+				"request": "waiter",
+				"model": "lab/model-a"
+			},
+			{
+				"kind": "advance",
+				"ms": 60000
+			},
+			{
+				"kind": "settle",
+				"request": "p1",
+				"outcome": "overloaded"
+			},
+			{
+				"kind": "admit",
+				"request": "p2",
+				"model": "lab/model-a",
+				"again": true
+			},
+			{
+				"kind": "advance",
+				"ms": 60000
+			},
+			{
+				"kind": "settle",
+				"request": "p2",
+				"outcome": "overloaded"
+			},
+			{
+				"kind": "admit",
+				"request": "p3",
+				"model": "lab/model-a",
+				"again": true
+			},
+			{
+				"kind": "advance",
+				"ms": 60000
+			},
+			{
+				"kind": "settle",
+				"request": "p3",
+				"outcome": "overloaded"
+			},
+			{
+				"kind": "admit",
+				"request": "after",
+				"model": "lab/model-a"
+			}
+		],
+		"maxPauses": 3
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1000000,
+				"settled": null,
+				"ticket": null,
+				"resolved": [
+					{
+						"request": "first",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "lab/model-a",
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						}
+					}
+				],
+				"waits": [],
+				"told": [],
+				"gates": [
+					{
+						"model": "lab/model-a",
+						"gate": {
+							"phase": "open",
+							"generation": 0,
+							"pauses": 0,
+							"resumeAt": 0,
+							"probe": null,
+							"queued": 0
+						}
+					}
+				],
+				"holding": []
+			},
+			{
+				"nowMs": 1000000,
+				"settled": "again",
+				"ticket": null,
+				"resolved": [],
+				"waits": [],
+				"told": [
+					"lab/model-a"
+				],
+				"gates": [
+					{
+						"model": "lab/model-a",
+						"gate": {
+							"phase": "paused",
+							"generation": 0,
+							"pauses": 1,
+							"resumeAt": 1060000,
+							"probe": null,
+							"queued": 0
+						}
+					}
+				],
+				"holding": [
+					"lab/model-a"
+				]
+			},
+			{
+				"nowMs": 1000000,
+				"settled": null,
+				"ticket": null,
+				"resolved": [],
+				"waits": [
+					{
+						"request": "p1",
+						"waiting": {
+							"model": "lab/model-a",
+							"resumeAt": 1060000,
+							"pause": 1,
+							"of": 3
+						}
+					}
+				],
+				"told": [],
+				"gates": [
+					{
+						"model": "lab/model-a",
+						"gate": {
+							"phase": "paused",
+							"generation": 0,
+							"pauses": 1,
+							"resumeAt": 1060000,
+							"probe": null,
+							"queued": 1
+						}
+					}
+				],
+				"holding": [
+					"lab/model-a"
+				]
+			},
+			{
+				"nowMs": 1000000,
+				"settled": null,
+				"ticket": null,
+				"resolved": [],
+				"waits": [
+					{
+						"request": "waiter",
+						"waiting": {
+							"model": "lab/model-a",
+							"resumeAt": 1060000,
+							"pause": 1,
+							"of": 3
+						}
+					}
+				],
+				"told": [],
+				"gates": [
+					{
+						"model": "lab/model-a",
+						"gate": {
+							"phase": "paused",
+							"generation": 0,
+							"pauses": 1,
+							"resumeAt": 1060000,
+							"probe": null,
+							"queued": 2
+						}
+					}
+				],
+				"holding": [
+					"lab/model-a"
+				]
+			},
+			{
+				"nowMs": 1060000,
+				"settled": null,
+				"ticket": null,
+				"resolved": [
+					{
+						"request": "p1",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "lab/model-a",
+								"generation": 0,
+								"probe": true,
+								"serial": 2
+							}
+						}
+					}
+				],
+				"waits": [
+					{
+						"request": "waiter",
+						"waiting": {
+							"model": "lab/model-a",
+							"resumeAt": null,
+							"pause": 1,
+							"of": 3
+						}
+					}
+				],
+				"told": [],
+				"gates": [
+					{
+						"model": "lab/model-a",
+						"gate": {
+							"phase": "probing",
+							"generation": 0,
+							"pauses": 1,
+							"resumeAt": 1060000,
+							"probe": {
+								"gate": "gate-1",
+								"model": "lab/model-a",
+								"generation": 0,
+								"probe": true,
+								"serial": 2
+							},
+							"queued": 1
+						}
+					}
+				],
+				"holding": [
+					"lab/model-a"
+				]
+			},
+			{
+				"nowMs": 1060000,
+				"settled": "again",
+				"ticket": null,
+				"resolved": [],
+				"waits": [
+					{
+						"request": "waiter",
+						"waiting": {
+							"model": "lab/model-a",
+							"resumeAt": 1120000,
+							"pause": 2,
+							"of": 3
+						}
+					}
+				],
+				"told": [],
+				"gates": [
+					{
+						"model": "lab/model-a",
+						"gate": {
+							"phase": "paused",
+							"generation": 0,
+							"pauses": 2,
+							"resumeAt": 1120000,
+							"probe": null,
+							"queued": 1
+						}
+					}
+				],
+				"holding": [
+					"lab/model-a"
+				]
+			},
+			{
+				"nowMs": 1060000,
+				"settled": null,
+				"ticket": null,
+				"resolved": [],
+				"waits": [
+					{
+						"request": "p2",
+						"waiting": {
+							"model": "lab/model-a",
+							"resumeAt": 1120000,
+							"pause": 2,
+							"of": 3
+						}
+					}
+				],
+				"told": [],
+				"gates": [
+					{
+						"model": "lab/model-a",
+						"gate": {
+							"phase": "paused",
+							"generation": 0,
+							"pauses": 2,
+							"resumeAt": 1120000,
+							"probe": null,
+							"queued": 2
+						}
+					}
+				],
+				"holding": [
+					"lab/model-a"
+				]
+			},
+			{
+				"nowMs": 1120000,
+				"settled": null,
+				"ticket": null,
+				"resolved": [
+					{
+						"request": "p2",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "lab/model-a",
+								"generation": 0,
+								"probe": true,
+								"serial": 3
+							}
+						}
+					}
+				],
+				"waits": [
+					{
+						"request": "waiter",
+						"waiting": {
+							"model": "lab/model-a",
+							"resumeAt": null,
+							"pause": 2,
+							"of": 3
+						}
+					}
+				],
+				"told": [],
+				"gates": [
+					{
+						"model": "lab/model-a",
+						"gate": {
+							"phase": "probing",
+							"generation": 0,
+							"pauses": 2,
+							"resumeAt": 1120000,
+							"probe": {
+								"gate": "gate-1",
+								"model": "lab/model-a",
+								"generation": 0,
+								"probe": true,
+								"serial": 3
+							},
+							"queued": 1
+						}
+					}
+				],
+				"holding": [
+					"lab/model-a"
+				]
+			},
+			{
+				"nowMs": 1120000,
+				"settled": "again",
+				"ticket": null,
+				"resolved": [],
+				"waits": [
+					{
+						"request": "waiter",
+						"waiting": {
+							"model": "lab/model-a",
+							"resumeAt": 1180000,
+							"pause": 3,
+							"of": 3
+						}
+					}
+				],
+				"told": [],
+				"gates": [
+					{
+						"model": "lab/model-a",
+						"gate": {
+							"phase": "paused",
+							"generation": 0,
+							"pauses": 3,
+							"resumeAt": 1180000,
+							"probe": null,
+							"queued": 1
+						}
+					}
+				],
+				"holding": [
+					"lab/model-a"
+				]
+			},
+			{
+				"nowMs": 1120000,
+				"settled": null,
+				"ticket": null,
+				"resolved": [],
+				"waits": [
+					{
+						"request": "p3",
+						"waiting": {
+							"model": "lab/model-a",
+							"resumeAt": 1180000,
+							"pause": 3,
+							"of": 3
+						}
+					}
+				],
+				"told": [],
+				"gates": [
+					{
+						"model": "lab/model-a",
+						"gate": {
+							"phase": "paused",
+							"generation": 0,
+							"pauses": 3,
+							"resumeAt": 1180000,
+							"probe": null,
+							"queued": 2
+						}
+					}
+				],
+				"holding": [
+					"lab/model-a"
+				]
+			},
+			{
+				"nowMs": 1180000,
+				"settled": null,
+				"ticket": null,
+				"resolved": [
+					{
+						"request": "p3",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "lab/model-a",
+								"generation": 0,
+								"probe": true,
+								"serial": 4
+							}
+						}
+					}
+				],
+				"waits": [
+					{
+						"request": "waiter",
+						"waiting": {
+							"model": "lab/model-a",
+							"resumeAt": null,
+							"pause": 3,
+							"of": 3
+						}
+					}
+				],
+				"told": [],
+				"gates": [
+					{
+						"model": "lab/model-a",
+						"gate": {
+							"phase": "probing",
+							"generation": 0,
+							"pauses": 3,
+							"resumeAt": 1180000,
+							"probe": {
+								"gate": "gate-1",
+								"model": "lab/model-a",
+								"generation": 0,
+								"probe": true,
+								"serial": 4
+							},
+							"queued": 1
+						}
+					}
+				],
+				"holding": [
+					"lab/model-a"
+				]
+			},
+			{
+				"nowMs": 1180000,
+				"settled": "gaveUp",
+				"ticket": null,
+				"resolved": [
+					{
+						"request": "waiter",
+						"admission": {
+							"kind": "gaveUp"
+						}
+					}
+				],
+				"waits": [],
+				"told": [
+					"lab/model-a"
+				],
+				"gates": [
+					{
+						"model": "lab/model-a",
+						"gate": {
+							"phase": "open",
+							"generation": 1,
+							"pauses": 0,
+							"resumeAt": 1180000,
+							"probe": null,
+							"queued": 0
+						}
+					}
+				],
+				"holding": []
+			},
+			{
+				"nowMs": 1180000,
+				"settled": null,
+				"ticket": null,
+				"resolved": [
+					{
+						"request": "after",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "lab/model-a",
+								"generation": 1,
+								"probe": false,
+								"serial": 5
+							}
+						}
+					}
+				],
+				"waits": [],
+				"told": [],
+				"gates": [
+					{
+						"model": "lab/model-a",
+						"gate": {
+							"phase": "open",
+							"generation": 1,
+							"pauses": 0,
+							"resumeAt": 1180000,
+							"probe": null,
+							"queued": 0
+						}
+					}
+				],
+				"holding": []
+			}
+		],
+		"waiting": []
+	}
+}

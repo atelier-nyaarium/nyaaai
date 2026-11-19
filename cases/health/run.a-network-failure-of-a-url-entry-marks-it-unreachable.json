@@ -1,0 +1,107 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.run",
+	"name": "a-network-failure-of-a-url-entry-marks-it-unreachable",
+	"input": {
+		"startMs": 2000000,
+		"entries": [
+			{
+				"id": "box",
+				"kind": "ollama",
+				"label": "Box",
+				"url": "http://lab.local:11434"
+			}
+		],
+		"keys": {},
+		"exchanges": [],
+		"steps": [
+			{
+				"kind": "failed",
+				"route": {
+					"entry": {
+						"id": "box",
+						"kind": "ollama",
+						"label": "Box",
+						"url": "http://lab.local:11434"
+					},
+					"key": "lab/model-a"
+				},
+				"failure": {
+					"category": "network",
+					"status": "network",
+					"message": "network"
+				},
+				"onward": true
+			},
+			{
+				"kind": "deferred",
+				"route": {
+					"entry": {
+						"id": "box",
+						"kind": "ollama",
+						"label": "Box",
+						"url": "http://lab.local:11434"
+					},
+					"key": "lab/model-a"
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "box",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "box",
+						"key": {
+							"kind": "unreachable"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "skip",
+					"skip": null
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "box",
+						"key": {
+							"kind": "unreachable"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0
+			}
+		],
+		"requests": [],
+		"waiting": []
+	}
+}

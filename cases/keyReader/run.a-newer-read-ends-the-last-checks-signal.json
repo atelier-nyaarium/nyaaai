@@ -1,0 +1,74 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "keyReader.run",
+	"name": "a-newer-read-ends-the-last-checks-signal",
+	"input": {
+		"startMs": 5000000,
+		"steps": [
+			{
+				"kind": "read"
+			},
+			{
+				"kind": "read"
+			},
+			{
+				"kind": "read"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 5000000,
+				"shown": [
+					{
+						"kind": "checking"
+					}
+				],
+				"signalled": [],
+				"open": [
+					1
+				],
+				"busy": true
+			},
+			{
+				"nowMs": 5000000,
+				"shown": [
+					{
+						"kind": "checking"
+					}
+				],
+				"signalled": [
+					{
+						"check": 1,
+						"by": "caller"
+					}
+				],
+				"open": [
+					2
+				],
+				"busy": true
+			},
+			{
+				"nowMs": 5000000,
+				"shown": [
+					{
+						"kind": "checking"
+					}
+				],
+				"signalled": [
+					{
+						"check": 2,
+						"by": "caller"
+					}
+				],
+				"open": [
+					3
+				],
+				"busy": true
+			}
+		],
+		"waiting": []
+	}
+}

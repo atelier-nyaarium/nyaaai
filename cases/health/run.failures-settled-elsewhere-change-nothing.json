@@ -1,0 +1,222 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.run",
+	"name": "failures-settled-elsewhere-change-nothing",
+	"input": {
+		"startMs": 2000000,
+		"entries": [
+			{
+				"id": "go",
+				"kind": "opencode",
+				"plan": "go",
+				"label": "Go"
+			}
+		],
+		"keys": {},
+		"exchanges": [],
+		"steps": [
+			{
+				"kind": "failed",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go"
+					},
+					"key": "lab/overloaded"
+				},
+				"failure": {
+					"category": "overloaded",
+					"status": "overloaded",
+					"message": "overloaded"
+				},
+				"onward": true
+			},
+			{
+				"kind": "failed",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go"
+					},
+					"key": "lab/keyMissing"
+				},
+				"failure": {
+					"category": "keyMissing",
+					"status": "keyMissing",
+					"message": "keyMissing"
+				},
+				"onward": true
+			},
+			{
+				"kind": "failed",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go"
+					},
+					"key": "lab/refused"
+				},
+				"failure": {
+					"category": "refused",
+					"status": "refused",
+					"message": "refused"
+				},
+				"onward": true
+			},
+			{
+				"kind": "failed",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go"
+					},
+					"key": "lab/badRequest"
+				},
+				"failure": {
+					"category": "badRequest",
+					"status": "badRequest",
+					"message": "badRequest"
+				},
+				"onward": true
+			},
+			{
+				"kind": "failed",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go"
+					},
+					"key": "lab/replayRejected"
+				},
+				"failure": {
+					"category": "replayRejected",
+					"status": "replayRejected",
+					"message": "replayRejected"
+				},
+				"onward": true
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0
+			}
+		],
+		"requests": [],
+		"waiting": []
+	}
+}

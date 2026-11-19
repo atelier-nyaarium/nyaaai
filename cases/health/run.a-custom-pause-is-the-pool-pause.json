@@ -1,0 +1,202 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.run",
+	"name": "a-custom-pause-is-the-pool-pause",
+	"input": {
+		"startMs": 2000000,
+		"entries": [
+			{
+				"id": "go",
+				"kind": "opencode",
+				"plan": "go",
+				"label": "Go"
+			}
+		],
+		"keys": {},
+		"exchanges": [],
+		"pauseMs": 5000,
+		"steps": [
+			{
+				"kind": "failed",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go"
+					},
+					"key": "lab/model-a"
+				},
+				"failure": {
+					"category": "outOfCredit",
+					"status": "outOfCredit",
+					"message": "outOfCredit"
+				},
+				"onward": false
+			},
+			{
+				"kind": "advance",
+				"ms": 4999
+			},
+			{
+				"kind": "deferred",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go"
+					},
+					"key": "lab/model-a"
+				}
+			},
+			{
+				"kind": "advance",
+				"ms": 1
+			},
+			{
+				"kind": "deferred",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go"
+					},
+					"key": "lab/model-a"
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "go",
+						"changed": [
+							"pool"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "paused",
+							"reason": "credit",
+							"until": 2005000
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2004999,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "paused",
+							"reason": "credit",
+							"until": 2005000
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2004999,
+				"answer": {
+					"kind": "skip",
+					"skip": "credit"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "paused",
+							"reason": "credit",
+							"until": 2005000
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2005000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "paused",
+							"reason": "credit",
+							"until": 2005000
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2005000,
+				"answer": {
+					"kind": "skip",
+					"skip": null
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "paused",
+							"reason": "credit",
+							"until": 2005000
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0
+			}
+		],
+		"requests": [],
+		"waiting": []
+	}
+}

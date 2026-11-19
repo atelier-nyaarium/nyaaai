@@ -1,0 +1,57 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "keyReader.run",
+	"name": "a-dispose-twice",
+	"input": {
+		"startMs": 5000000,
+		"steps": [
+			{
+				"kind": "read"
+			},
+			{
+				"kind": "dispose"
+			},
+			{
+				"kind": "dispose"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 5000000,
+				"shown": [
+					{
+						"kind": "checking"
+					}
+				],
+				"signalled": [],
+				"open": [
+					1
+				],
+				"busy": true
+			},
+			{
+				"nowMs": 5000000,
+				"shown": [],
+				"signalled": [
+					{
+						"check": 1,
+						"by": "caller"
+					}
+				],
+				"open": [],
+				"busy": false
+			},
+			{
+				"nowMs": 5000000,
+				"shown": [],
+				"signalled": [],
+				"open": [],
+				"busy": false
+			}
+		],
+		"waiting": []
+	}
+}

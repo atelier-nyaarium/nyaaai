@@ -1,0 +1,156 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.keys",
+	"name": "an-unreachable-server-asked-twice-rechecks-once-and-stays-out-meanwhile",
+	"input": {
+		"rows": [
+			{
+				"entry": {
+					"id": "box",
+					"kind": "ollama",
+					"label": "Box",
+					"url": "http://lab.local:11434"
+				},
+				"prepare": "unreachable",
+				"exchanges": [
+					{
+						"status": 200,
+						"json": {
+							"models": [
+								{
+									"name": "local-a:27b"
+								},
+								{
+									"name": "local-b:9b"
+								}
+							]
+						}
+					}
+				],
+				"stored": {
+					"kind": "none"
+				},
+				"asks": 2
+			},
+			{
+				"entry": {
+					"id": "box",
+					"kind": "ollama",
+					"label": "Box",
+					"url": "http://lab.local:11434"
+				},
+				"prepare": "unreachable",
+				"exchanges": [
+					{
+						"status": 200,
+						"json": {
+							"models": [
+								{
+									"name": "local-a:27b"
+								},
+								{
+									"name": "local-b:9b"
+								}
+							]
+						},
+						"headMs": 20000
+					}
+				],
+				"stored": {
+					"kind": "none"
+				},
+				"asks": 3
+			},
+			{
+				"entry": {
+					"id": "box",
+					"kind": "ollama",
+					"label": "Box",
+					"url": "http://lab.local:11434"
+				},
+				"prepare": "unreachable",
+				"exchanges": [
+					{
+						"status": 503,
+						"json": {
+							"error": {
+								"message": "Down."
+							}
+						}
+					}
+				],
+				"stored": {
+					"kind": "none"
+				},
+				"asks": 2
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"status": {
+					"kind": "unreachable"
+				},
+				"answers": [
+					{
+						"kind": "unready"
+					},
+					{
+						"kind": "unready"
+					}
+				],
+				"statusAfter": {
+					"kind": "ok",
+					"models": 2
+				},
+				"told": [],
+				"toldAfter": [],
+				"requests": 1
+			},
+			{
+				"status": {
+					"kind": "unreachable"
+				},
+				"answers": [
+					{
+						"kind": "unready"
+					},
+					{
+						"kind": "unready"
+					},
+					{
+						"kind": "unready"
+					}
+				],
+				"statusAfter": {
+					"kind": "ok",
+					"models": 2
+				},
+				"told": [],
+				"toldAfter": [],
+				"requests": 1
+			},
+			{
+				"status": {
+					"kind": "unreachable"
+				},
+				"answers": [
+					{
+						"kind": "unready"
+					},
+					{
+						"kind": "unready"
+					}
+				],
+				"statusAfter": {
+					"kind": "unreachable"
+				},
+				"told": [],
+				"toldAfter": [],
+				"requests": 1
+			}
+		]
+	}
+}

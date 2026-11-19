@@ -1,0 +1,62 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.keys",
+	"name": "a-first-check-in-flight-does-not-hold-a-url-server-out",
+	"input": {
+		"rows": [
+			{
+				"entry": {
+					"id": "box",
+					"kind": "ollama",
+					"label": "Box",
+					"url": "http://lab.local:11434"
+				},
+				"prepare": "checking",
+				"exchanges": [
+					{
+						"status": 200,
+						"json": {
+							"models": [
+								{
+									"name": "local-a:27b"
+								},
+								{
+									"name": "local-b:9b"
+								}
+							]
+						}
+					}
+				],
+				"stored": {
+					"kind": "none"
+				},
+				"asks": 2
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"status": {
+					"kind": "checking"
+				},
+				"answers": [
+					{
+						"kind": "none"
+					},
+					{
+						"kind": "none"
+					}
+				],
+				"statusAfter": {
+					"kind": "ok",
+					"models": 2
+				},
+				"told": [],
+				"toldAfter": [],
+				"requests": 1
+			}
+		]
+	}
+}

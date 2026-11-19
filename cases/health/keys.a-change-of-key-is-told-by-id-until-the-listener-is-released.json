@@ -1,0 +1,81 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.keys",
+	"name": "a-change-of-key-is-told-by-id-until-the-listener-is-released",
+	"input": {
+		"rows": [
+			{
+				"entry": {
+					"id": "main",
+					"kind": "openrouter",
+					"label": "Main"
+				},
+				"prepare": "none",
+				"exchanges": [],
+				"stored": {
+					"kind": "none"
+				},
+				"tell": [
+					"main",
+					"elsewhere"
+				],
+				"tellAfter": [
+					"main",
+					"later"
+				]
+			},
+			{
+				"entry": {
+					"id": "main",
+					"kind": "openrouter",
+					"label": "Main"
+				},
+				"prepare": "none",
+				"exchanges": [],
+				"stored": {
+					"kind": "none"
+				}
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"status": {
+					"kind": "none"
+				},
+				"answers": [
+					{
+						"kind": "none"
+					}
+				],
+				"statusAfter": {
+					"kind": "none"
+				},
+				"told": [
+					"main",
+					"elsewhere"
+				],
+				"toldAfter": [],
+				"requests": 0
+			},
+			{
+				"status": {
+					"kind": "none"
+				},
+				"answers": [
+					{
+						"kind": "none"
+					}
+				],
+				"statusAfter": {
+					"kind": "none"
+				},
+				"told": [],
+				"toldAfter": [],
+				"requests": 0
+			}
+		]
+	}
+}

@@ -1,0 +1,65 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "keyReader.run",
+	"name": "the-deadline-leaves-no-timer-after-an-answer",
+	"input": {
+		"startMs": 5000000,
+		"steps": [
+			{
+				"kind": "read"
+			},
+			{
+				"kind": "answer",
+				"check": 1,
+				"state": {
+					"kind": "ok",
+					"usage": 4.12,
+					"limit": 20
+				}
+			},
+			{
+				"kind": "advance",
+				"ms": 60000
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 5000000,
+				"shown": [
+					{
+						"kind": "checking"
+					}
+				],
+				"signalled": [],
+				"open": [
+					1
+				],
+				"busy": true
+			},
+			{
+				"nowMs": 5000000,
+				"shown": [
+					{
+						"kind": "ok",
+						"usage": 4.12,
+						"limit": 20
+					}
+				],
+				"signalled": [],
+				"open": [],
+				"busy": false
+			},
+			{
+				"nowMs": 5060000,
+				"shown": [],
+				"signalled": [],
+				"open": [],
+				"busy": false
+			}
+		],
+		"waiting": []
+	}
+}

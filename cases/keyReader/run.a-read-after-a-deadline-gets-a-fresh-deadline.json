@@ -1,0 +1,101 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "keyReader.run",
+	"name": "a-read-after-a-deadline-gets-a-fresh-deadline",
+	"input": {
+		"startMs": 5000000,
+		"steps": [
+			{
+				"kind": "read"
+			},
+			{
+				"kind": "advance",
+				"ms": 30000
+			},
+			{
+				"kind": "read"
+			},
+			{
+				"kind": "advance",
+				"ms": 29999
+			},
+			{
+				"kind": "advance",
+				"ms": 1
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 5000000,
+				"shown": [
+					{
+						"kind": "checking"
+					}
+				],
+				"signalled": [],
+				"open": [
+					1
+				],
+				"busy": true
+			},
+			{
+				"nowMs": 5030000,
+				"shown": [
+					{
+						"kind": "unreachable"
+					}
+				],
+				"signalled": [
+					{
+						"check": 1,
+						"by": "deadline"
+					}
+				],
+				"open": [],
+				"busy": false
+			},
+			{
+				"nowMs": 5030000,
+				"shown": [
+					{
+						"kind": "checking"
+					}
+				],
+				"signalled": [],
+				"open": [
+					2
+				],
+				"busy": true
+			},
+			{
+				"nowMs": 5059999,
+				"shown": [],
+				"signalled": [],
+				"open": [
+					2
+				],
+				"busy": true
+			},
+			{
+				"nowMs": 5060000,
+				"shown": [
+					{
+						"kind": "unreachable"
+					}
+				],
+				"signalled": [
+					{
+						"check": 2,
+						"by": "deadline"
+					}
+				],
+				"open": [],
+				"busy": false
+			}
+		],
+		"waiting": []
+	}
+}

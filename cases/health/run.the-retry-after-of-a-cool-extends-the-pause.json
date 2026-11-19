@@ -1,0 +1,217 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.run",
+	"name": "the-retry-after-of-a-cool-extends-the-pause",
+	"input": {
+		"startMs": 2000000,
+		"entries": [
+			{
+				"id": "main",
+				"kind": "openrouter",
+				"label": "Main"
+			}
+		],
+		"keys": {},
+		"exchanges": [],
+		"steps": [
+			{
+				"kind": "failed",
+				"route": {
+					"entry": {
+						"id": "main",
+						"kind": "openrouter",
+						"label": "Main"
+					},
+					"key": "lab/model-a"
+				},
+				"failure": {
+					"category": "unavailable",
+					"status": "unavailable",
+					"message": "unavailable",
+					"retryAfterMs": 180000
+				},
+				"onward": true
+			},
+			{
+				"kind": "advance",
+				"ms": 120000
+			},
+			{
+				"kind": "deferred",
+				"route": {
+					"entry": {
+						"id": "main",
+						"kind": "openrouter",
+						"label": "Main"
+					},
+					"key": "lab/model-a"
+				}
+			},
+			{
+				"kind": "advance",
+				"ms": 60000
+			},
+			{
+				"kind": "tryAdmit",
+				"request": "probe",
+				"route": {
+					"entry": {
+						"id": "main",
+						"kind": "openrouter",
+						"label": "Main"
+					},
+					"key": "lab/model-a"
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "main",
+						"changed": [
+							"waiting"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": [
+							"lab/model-a"
+						]
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2120000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": [
+							"lab/model-a"
+						]
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2120000,
+				"answer": {
+					"kind": "skip",
+					"skip": "paused"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": [
+							"lab/model-a"
+						]
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2180000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "main",
+						"changed": [
+							"waiting"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2180000,
+				"answer": {
+					"kind": "ticket",
+					"ticket": {
+						"gate": "gate-1",
+						"model": "main\nlab/model-a",
+						"generation": 0,
+						"probe": true,
+						"serial": 1
+					}
+				},
+				"changes": [
+					{
+						"entry": "main",
+						"changed": [
+							"waiting"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": [
+							"lab/model-a"
+						]
+					}
+				],
+				"run": [],
+				"requests": 0
+			}
+		],
+		"requests": [],
+		"waiting": []
+	}
+}

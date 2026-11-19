@@ -1,0 +1,59 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "keyReader.run",
+	"name": "the-deadline-leaves-no-timer-after-a-failure",
+	"input": {
+		"startMs": 5000000,
+		"steps": [
+			{
+				"kind": "read"
+			},
+			{
+				"kind": "fail",
+				"check": 1,
+				"message": "down"
+			},
+			{
+				"kind": "advance",
+				"ms": 60000
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 5000000,
+				"shown": [
+					{
+						"kind": "checking"
+					}
+				],
+				"signalled": [],
+				"open": [
+					1
+				],
+				"busy": true
+			},
+			{
+				"nowMs": 5000000,
+				"shown": [
+					{
+						"kind": "unreachable"
+					}
+				],
+				"signalled": [],
+				"open": [],
+				"busy": false
+			},
+			{
+				"nowMs": 5060000,
+				"shown": [],
+				"signalled": [],
+				"open": [],
+				"busy": false
+			}
+		],
+		"waiting": []
+	}
+}

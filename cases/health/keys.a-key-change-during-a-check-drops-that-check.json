@@ -1,0 +1,113 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.keys",
+	"name": "a-key-change-during-a-check-drops-that-check",
+	"input": {
+		"rows": [
+			{
+				"entry": {
+					"id": "main",
+					"kind": "openrouter",
+					"label": "Main"
+				},
+				"prepare": "checking",
+				"exchanges": [
+					{
+						"status": 200,
+						"json": {
+							"data": {
+								"usage": 2
+							}
+						}
+					}
+				],
+				"stored": {
+					"kind": "key",
+					"key": "key-0123456789abcdef"
+				},
+				"tell": [
+					"main"
+				]
+			},
+			{
+				"entry": {
+					"id": "main",
+					"kind": "openrouter",
+					"label": "Main"
+				},
+				"prepare": "ok",
+				"exchanges": [
+					{
+						"status": 200,
+						"json": {
+							"data": {
+								"usage": 1
+							}
+						}
+					},
+					{
+						"status": 200,
+						"json": {
+							"data": {
+								"usage": 3
+							}
+						}
+					}
+				],
+				"stored": {
+					"kind": "key",
+					"key": "key-0123456789abcdef"
+				},
+				"tell": [
+					"main"
+				]
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"status": {
+					"kind": "checking"
+				},
+				"answers": [
+					{
+						"kind": "key",
+						"key": "key-0123456789abcdef"
+					}
+				],
+				"statusAfter": {
+					"kind": "ok",
+					"usage": 2
+				},
+				"told": [
+					"main"
+				],
+				"toldAfter": [],
+				"requests": 1
+			},
+			{
+				"status": {
+					"kind": "ok",
+					"usage": 1
+				},
+				"answers": [
+					{
+						"kind": "key",
+						"key": "key-0123456789abcdef"
+					}
+				],
+				"statusAfter": {
+					"kind": "ok",
+					"usage": 3
+				},
+				"told": [
+					"main"
+				],
+				"toldAfter": [],
+				"requests": 2
+			}
+		]
+	}
+}

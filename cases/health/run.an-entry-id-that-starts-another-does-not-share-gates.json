@@ -1,0 +1,219 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.run",
+	"name": "an-entry-id-that-starts-another-does-not-share-gates",
+	"input": {
+		"startMs": 2000000,
+		"entries": [
+			{
+				"id": "ma",
+				"kind": "openrouter",
+				"label": "Main"
+			},
+			{
+				"id": "main",
+				"kind": "openrouter",
+				"label": "Main"
+			}
+		],
+		"keys": {
+			"ma": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"usage": 1
+					}
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "failed",
+				"route": {
+					"entry": {
+						"id": "main",
+						"kind": "openrouter",
+						"label": "Main"
+					},
+					"key": "lab/model-a"
+				},
+				"failure": {
+					"category": "unavailable",
+					"status": "unavailable",
+					"message": "unavailable"
+				},
+				"onward": true
+			},
+			{
+				"kind": "failed",
+				"route": {
+					"entry": {
+						"id": "ma",
+						"kind": "openrouter",
+						"label": "Main"
+					},
+					"key": "lab/model-a"
+				},
+				"failure": {
+					"category": "unavailable",
+					"status": "unavailable",
+					"message": "unavailable"
+				},
+				"onward": true
+			},
+			{
+				"kind": "key",
+				"id": "ma",
+				"answer": {
+					"kind": "key",
+					"key": "key-0123456789abcdef"
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "main",
+						"changed": [
+							"waiting"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "ma",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					},
+					{
+						"entry": "main",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": [
+							"lab/model-a"
+						]
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "ma",
+						"changed": [
+							"waiting"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "ma",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": [
+							"lab/model-a"
+						]
+					},
+					{
+						"entry": "main",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": [
+							"lab/model-a"
+						]
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "ma",
+						"changed": [
+							"key",
+							"waiting"
+						]
+					},
+					{
+						"entry": "ma",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "ma",
+						"key": {
+							"kind": "ok",
+							"usage": 1
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					},
+					{
+						"entry": "main",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": [
+							"lab/model-a"
+						]
+					}
+				],
+				"run": [],
+				"requests": 1
+			}
+		],
+		"requests": [
+			"https://openrouter.ai/api/v1/key"
+		],
+		"waiting": []
+	}
+}

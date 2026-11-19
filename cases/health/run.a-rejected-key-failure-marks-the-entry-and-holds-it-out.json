@@ -1,0 +1,210 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.run",
+	"name": "a-rejected-key-failure-marks-the-entry-and-holds-it-out",
+	"input": {
+		"startMs": 2000000,
+		"entries": [
+			{
+				"id": "main",
+				"kind": "openrouter",
+				"label": "Main"
+			}
+		],
+		"keys": {
+			"main": {
+				"kind": "key",
+				"key": "key-0123456789abcdef"
+			}
+		},
+		"exchanges": [],
+		"steps": [
+			{
+				"kind": "failed",
+				"route": {
+					"entry": {
+						"id": "main",
+						"kind": "openrouter",
+						"label": "Main"
+					},
+					"key": "lab/model-a"
+				},
+				"failure": {
+					"category": "keyRejected",
+					"status": "keyRejected",
+					"message": "keyRejected"
+				},
+				"onward": false
+			},
+			{
+				"kind": "failed",
+				"route": {
+					"entry": {
+						"id": "main",
+						"kind": "openrouter",
+						"label": "Main"
+					},
+					"key": "lab/model-a"
+				},
+				"failure": {
+					"category": "keyRejected",
+					"status": "keyRejected",
+					"message": "keyRejected"
+				},
+				"onward": false
+			},
+			{
+				"kind": "keys",
+				"id": "main"
+			},
+			{
+				"kind": "deferred",
+				"route": {
+					"entry": {
+						"id": "main",
+						"kind": "openrouter",
+						"label": "Main"
+					},
+					"key": "lab/model-a"
+				}
+			},
+			{
+				"kind": "blocked",
+				"route": {
+					"entry": {
+						"id": "main",
+						"kind": "openrouter",
+						"label": "Main"
+					},
+					"key": "lab/model-a"
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "main",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "rejected"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "rejected"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "keys",
+					"answer": {
+						"kind": "refused"
+					}
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "rejected"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "skip",
+					"skip": "keyRejected"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "rejected"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "blocked",
+					"blocked": {
+						"kind": "keyRejected"
+					}
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "rejected"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0
+			}
+		],
+		"requests": [],
+		"waiting": []
+	}
+}

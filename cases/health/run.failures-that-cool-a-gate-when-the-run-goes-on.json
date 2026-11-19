@@ -1,0 +1,440 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.run",
+	"name": "failures-that-cool-a-gate-when-the-run-goes-on",
+	"input": {
+		"startMs": 2000000,
+		"entries": [
+			{
+				"id": "go",
+				"kind": "opencode",
+				"plan": "go",
+				"label": "Go"
+			}
+		],
+		"keys": {},
+		"exchanges": [],
+		"steps": [
+			{
+				"kind": "failed",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go"
+					},
+					"key": "lab/rateLimited"
+				},
+				"failure": {
+					"category": "rateLimited",
+					"status": "rateLimited",
+					"message": "rateLimited",
+					"retryAfterMs": 180000
+				},
+				"onward": true
+			},
+			{
+				"kind": "failed",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go"
+					},
+					"key": "lab/notFound"
+				},
+				"failure": {
+					"category": "notFound",
+					"status": "notFound",
+					"message": "notFound"
+				},
+				"onward": true
+			},
+			{
+				"kind": "failed",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go"
+					},
+					"key": "lab/unavailable"
+				},
+				"failure": {
+					"category": "unavailable",
+					"status": "unavailable",
+					"message": "unavailable"
+				},
+				"onward": true
+			},
+			{
+				"kind": "failed",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go"
+					},
+					"key": "lab/stream"
+				},
+				"failure": {
+					"category": "stream",
+					"status": "stream",
+					"message": "stream"
+				},
+				"onward": true
+			},
+			{
+				"kind": "failed",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go"
+					},
+					"key": "lab/empty"
+				},
+				"failure": {
+					"category": "empty",
+					"status": "empty",
+					"message": "empty"
+				},
+				"onward": true
+			},
+			{
+				"kind": "failed",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go"
+					},
+					"key": "lab/truncated"
+				},
+				"failure": {
+					"category": "truncated",
+					"status": "truncated",
+					"message": "truncated"
+				},
+				"onward": true
+			},
+			{
+				"kind": "failed",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go"
+					},
+					"key": "lab/idle"
+				},
+				"failure": {
+					"category": "idle",
+					"status": "idle",
+					"message": "idle"
+				},
+				"onward": true
+			},
+			{
+				"kind": "failed",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go"
+					},
+					"key": "lab/network"
+				},
+				"failure": {
+					"category": "network",
+					"status": "network",
+					"message": "network"
+				},
+				"onward": true
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "go",
+						"changed": [
+							"waiting"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": [
+							"lab/rateLimited"
+						]
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "go",
+						"changed": [
+							"waiting"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": [
+							"lab/notFound",
+							"lab/rateLimited"
+						]
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "go",
+						"changed": [
+							"waiting"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": [
+							"lab/notFound",
+							"lab/rateLimited",
+							"lab/unavailable"
+						]
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "go",
+						"changed": [
+							"waiting"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": [
+							"lab/notFound",
+							"lab/rateLimited",
+							"lab/stream",
+							"lab/unavailable"
+						]
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "go",
+						"changed": [
+							"waiting"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": [
+							"lab/empty",
+							"lab/notFound",
+							"lab/rateLimited",
+							"lab/stream",
+							"lab/unavailable"
+						]
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "go",
+						"changed": [
+							"waiting"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": [
+							"lab/empty",
+							"lab/notFound",
+							"lab/rateLimited",
+							"lab/stream",
+							"lab/truncated",
+							"lab/unavailable"
+						]
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "go",
+						"changed": [
+							"waiting"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": [
+							"lab/empty",
+							"lab/idle",
+							"lab/notFound",
+							"lab/rateLimited",
+							"lab/stream",
+							"lab/truncated",
+							"lab/unavailable"
+						]
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "go",
+						"changed": [
+							"waiting"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": [
+							"lab/empty",
+							"lab/idle",
+							"lab/network",
+							"lab/notFound",
+							"lab/rateLimited",
+							"lab/stream",
+							"lab/truncated",
+							"lab/unavailable"
+						]
+					}
+				],
+				"run": [],
+				"requests": 0
+			}
+		],
+		"requests": [],
+		"waiting": []
+	}
+}

@@ -1,0 +1,228 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.run",
+	"name": "an-unreachable-server-that-is-still-down-stays-out",
+	"input": {
+		"startMs": 2000000,
+		"entries": [
+			{
+				"id": "box",
+				"kind": "ollama",
+				"label": "Box",
+				"url": "http://lab.local:11434"
+			}
+		],
+		"keys": {},
+		"exchanges": [
+			{
+				"status": 503,
+				"json": {
+					"error": {
+						"message": "Down."
+					}
+				}
+			},
+			{
+				"status": 503,
+				"json": {
+					"error": {
+						"message": "Down."
+					}
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "failed",
+				"route": {
+					"entry": {
+						"id": "box",
+						"kind": "ollama",
+						"label": "Box",
+						"url": "http://lab.local:11434"
+					},
+					"key": "lab/model-a"
+				},
+				"failure": {
+					"category": "network",
+					"status": "network",
+					"message": "network"
+				},
+				"onward": false
+			},
+			{
+				"kind": "keys",
+				"id": "box"
+			},
+			{
+				"kind": "keys",
+				"id": "box"
+			},
+			{
+				"kind": "advance",
+				"ms": 60000
+			},
+			{
+				"kind": "keys",
+				"id": "box"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "box",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "box",
+						"key": {
+							"kind": "unreachable"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "keys",
+					"answer": {
+						"kind": "unready"
+					}
+				},
+				"changes": [
+					{
+						"entry": "box",
+						"changed": [
+							"key"
+						]
+					},
+					{
+						"entry": "box",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "box",
+						"key": {
+							"kind": "unreachable"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 1
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "keys",
+					"answer": {
+						"kind": "unready"
+					}
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "box",
+						"key": {
+							"kind": "unreachable"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 1
+			},
+			{
+				"nowMs": 2060000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "box",
+						"key": {
+							"kind": "unreachable"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 1
+			},
+			{
+				"nowMs": 2060000,
+				"answer": {
+					"kind": "keys",
+					"answer": {
+						"kind": "unready"
+					}
+				},
+				"changes": [
+					{
+						"entry": "box",
+						"changed": [
+							"key"
+						]
+					},
+					{
+						"entry": "box",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "box",
+						"key": {
+							"kind": "unreachable"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 2
+			}
+		],
+		"requests": [
+			"http://lab.local:11434/api/tags",
+			"http://lab.local:11434/api/tags"
+		],
+		"waiting": []
+	}
+}

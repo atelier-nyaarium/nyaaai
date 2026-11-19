@@ -25,7 +25,7 @@ nyaaai-contract.workspace = true
 nyaaai-operator.workspace = true
 nyaaai-process.workspace = true
 nyaaai-testkit = { workspace = true, optional = true }
-tokio = { workspace = true, features = ["rt"] }
+tokio = { workspace = true, features = ["rt", "sync"] }
 
 [dev-dependencies]
 nyaaai-testkit.workspace = true

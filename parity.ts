@@ -28,9 +28,12 @@ import { disposition } from "./scripts/caseGroups/disposition";
 import { effort } from "./scripts/caseGroups/effort";
 import { entry } from "./scripts/caseGroups/entry";
 import { failure } from "./scripts/caseGroups/failure";
+import { gate } from "./scripts/caseGroups/gate";
 import { headers } from "./scripts/caseGroups/headers";
+import { health } from "./scripts/caseGroups/health";
 import { js } from "./scripts/caseGroups/js";
 import { json } from "./scripts/caseGroups/json";
+import { keyReader } from "./scripts/caseGroups/keyReader";
 import { kindGroup } from "./scripts/caseGroups/kind";
 import { local } from "./scripts/caseGroups/local";
 import { native } from "./scripts/caseGroups/native";
@@ -217,6 +220,9 @@ export default project({
 		pool,
 		cost,
 		usage,
+		gate,
+		keyReader,
+		health,
 	],
 	runs: adapterCases,
 	cases: { crate: "nyaaai_cli", module: "cases", dir: "rust/cli/src/cases" },

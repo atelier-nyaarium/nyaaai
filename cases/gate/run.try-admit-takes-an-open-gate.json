@@ -1,0 +1,136 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "gate.run",
+	"name": "try-admit-takes-an-open-gate",
+	"input": {
+		"startMs": 1000000,
+		"steps": [
+			{
+				"kind": "tryAdmit",
+				"request": "a",
+				"model": "lab/model-a"
+			},
+			{
+				"kind": "tryAdmit",
+				"request": "b",
+				"model": "lab/model-a"
+			},
+			{
+				"kind": "settle",
+				"request": "a",
+				"outcome": "ok"
+			},
+			{
+				"kind": "settle",
+				"request": "b",
+				"outcome": "ok"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1000000,
+				"settled": null,
+				"ticket": {
+					"gate": "gate-1",
+					"model": "lab/model-a",
+					"generation": 0,
+					"probe": false,
+					"serial": 1
+				},
+				"resolved": [],
+				"waits": [],
+				"told": [],
+				"gates": [
+					{
+						"model": "lab/model-a",
+						"gate": {
+							"phase": "open",
+							"generation": 0,
+							"pauses": 0,
+							"resumeAt": 0,
+							"probe": null,
+							"queued": 0
+						}
+					}
+				],
+				"holding": []
+			},
+			{
+				"nowMs": 1000000,
+				"settled": null,
+				"ticket": {
+					"gate": "gate-1",
+					"model": "lab/model-a",
+					"generation": 0,
+					"probe": false,
+					"serial": 2
+				},
+				"resolved": [],
+				"waits": [],
+				"told": [],
+				"gates": [
+					{
+						"model": "lab/model-a",
+						"gate": {
+							"phase": "open",
+							"generation": 0,
+							"pauses": 0,
+							"resumeAt": 0,
+							"probe": null,
+							"queued": 0
+						}
+					}
+				],
+				"holding": []
+			},
+			{
+				"nowMs": 1000000,
+				"settled": "done",
+				"ticket": null,
+				"resolved": [],
+				"waits": [],
+				"told": [],
+				"gates": [
+					{
+						"model": "lab/model-a",
+						"gate": {
+							"phase": "open",
+							"generation": 0,
+							"pauses": 0,
+							"resumeAt": 0,
+							"probe": null,
+							"queued": 0
+						}
+					}
+				],
+				"holding": []
+			},
+			{
+				"nowMs": 1000000,
+				"settled": "done",
+				"ticket": null,
+				"resolved": [],
+				"waits": [],
+				"told": [],
+				"gates": [
+					{
+						"model": "lab/model-a",
+						"gate": {
+							"phase": "open",
+							"generation": 0,
+							"pauses": 0,
+							"resumeAt": 0,
+							"probe": null,
+							"queued": 0
+						}
+					}
+				],
+				"holding": []
+			}
+		],
+		"waiting": []
+	}
+}

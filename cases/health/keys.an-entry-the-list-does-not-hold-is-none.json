@@ -1,0 +1,74 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.keys",
+	"name": "an-entry-the-list-does-not-hold-is-none",
+	"input": {
+		"rows": [
+			{
+				"entry": {
+					"id": "main",
+					"kind": "openrouter",
+					"label": "Main"
+				},
+				"prepare": "none",
+				"exchanges": [],
+				"listed": false,
+				"stored": {
+					"kind": "key",
+					"key": "key-0123456789abcdef"
+				}
+			},
+			{
+				"entry": {
+					"id": "box",
+					"kind": "ollama",
+					"label": "Box",
+					"url": "http://lab.local:11434"
+				},
+				"prepare": "none",
+				"exchanges": [],
+				"listed": false,
+				"stored": {
+					"kind": "unready"
+				}
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"status": {
+					"kind": "none"
+				},
+				"answers": [
+					{
+						"kind": "none"
+					}
+				],
+				"statusAfter": {
+					"kind": "none"
+				},
+				"told": [],
+				"toldAfter": [],
+				"requests": 0
+			},
+			{
+				"status": {
+					"kind": "none"
+				},
+				"answers": [
+					{
+						"kind": "none"
+					}
+				],
+				"statusAfter": {
+					"kind": "none"
+				},
+				"told": [],
+				"toldAfter": [],
+				"requests": 0
+			}
+		]
+	}
+}

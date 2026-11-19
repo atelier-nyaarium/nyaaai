@@ -1,0 +1,235 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.run",
+	"name": "a-kept-balance-entry-serves-the-rest-of-its-run",
+	"input": {
+		"startMs": 2000000,
+		"entries": [
+			{
+				"id": "go",
+				"kind": "opencode",
+				"plan": "go",
+				"label": "Go"
+			}
+		],
+		"keys": {},
+		"exchanges": [],
+		"steps": [
+			{
+				"kind": "served",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go"
+					},
+					"key": "lab/model-a"
+				},
+				"billingSource": "balance",
+				"keep": true
+			},
+			{
+				"kind": "deferred",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go"
+					},
+					"key": "lab/model-a"
+				}
+			},
+			{
+				"kind": "deferred",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go"
+					},
+					"key": "lab/model-a"
+				},
+				"keep": true
+			},
+			{
+				"kind": "blocked",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go"
+					},
+					"key": "lab/model-a"
+				}
+			},
+			{
+				"kind": "blocked",
+				"route": {
+					"entry": {
+						"id": "go",
+						"kind": "opencode",
+						"plan": "go",
+						"label": "Go"
+					},
+					"key": "lab/model-a"
+				},
+				"keep": true
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "go",
+						"changed": [
+							"pool"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 20000000,
+							"next": 11000000,
+							"probe": null
+						},
+						"waiting": []
+					}
+				],
+				"run": [
+					"go"
+				],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "skip",
+					"skip": "allowance"
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 20000000,
+							"next": 11000000,
+							"probe": null
+						},
+						"waiting": []
+					}
+				],
+				"run": [
+					"go"
+				],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "skip",
+					"skip": null
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 20000000,
+							"next": 11000000,
+							"probe": null
+						},
+						"waiting": []
+					}
+				],
+				"run": [
+					"go"
+				],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "blocked",
+					"blocked": {
+						"kind": "spendLimit",
+						"nextTryAt": 11000000
+					}
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 20000000,
+							"next": 11000000,
+							"probe": null
+						},
+						"waiting": []
+					}
+				],
+				"run": [
+					"go"
+				],
+				"requests": 0
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "blocked",
+					"blocked": null
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "balance",
+							"eta": 20000000,
+							"next": 11000000,
+							"probe": null
+						},
+						"waiting": []
+					}
+				],
+				"run": [
+					"go"
+				],
+				"requests": 0
+			}
+		],
+		"requests": [],
+		"waiting": []
+	}
+}

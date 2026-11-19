@@ -1,0 +1,29 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "gate.run",
+	"name": "dispose-with-no-gate-open",
+	"input": {
+		"startMs": 1000000,
+		"steps": [
+			{
+				"kind": "dispose"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1000000,
+				"settled": null,
+				"ticket": null,
+				"resolved": [],
+				"waits": [],
+				"told": [],
+				"gates": [],
+				"holding": []
+			}
+		],
+		"waiting": []
+	}
+}

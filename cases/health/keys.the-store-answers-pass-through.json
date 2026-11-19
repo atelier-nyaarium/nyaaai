@@ -1,0 +1,128 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.keys",
+	"name": "the-store-answers-pass-through",
+	"input": {
+		"rows": [
+			{
+				"entry": {
+					"id": "main",
+					"kind": "openrouter",
+					"label": "Main"
+				},
+				"prepare": "none",
+				"exchanges": [],
+				"stored": {
+					"kind": "unready"
+				}
+			},
+			{
+				"entry": {
+					"id": "main",
+					"kind": "openrouter",
+					"label": "Main"
+				},
+				"prepare": "none",
+				"exchanges": [],
+				"stored": {
+					"kind": "refused"
+				}
+			},
+			{
+				"entry": {
+					"id": "box",
+					"kind": "ollama",
+					"label": "Box",
+					"url": "http://lab.local:11434"
+				},
+				"prepare": "none",
+				"exchanges": [],
+				"stored": {
+					"kind": "unready"
+				}
+			},
+			{
+				"entry": {
+					"id": "box",
+					"kind": "ollama",
+					"label": "Box",
+					"url": "http://lab.local:11434"
+				},
+				"prepare": "none",
+				"exchanges": [],
+				"stored": {
+					"kind": "refused"
+				}
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"status": {
+					"kind": "none"
+				},
+				"answers": [
+					{
+						"kind": "unready"
+					}
+				],
+				"statusAfter": {
+					"kind": "none"
+				},
+				"told": [],
+				"toldAfter": [],
+				"requests": 0
+			},
+			{
+				"status": {
+					"kind": "none"
+				},
+				"answers": [
+					{
+						"kind": "refused"
+					}
+				],
+				"statusAfter": {
+					"kind": "none"
+				},
+				"told": [],
+				"toldAfter": [],
+				"requests": 0
+			},
+			{
+				"status": {
+					"kind": "none"
+				},
+				"answers": [
+					{
+						"kind": "unready"
+					}
+				],
+				"statusAfter": {
+					"kind": "none"
+				},
+				"told": [],
+				"toldAfter": [],
+				"requests": 0
+			},
+			{
+				"status": {
+					"kind": "none"
+				},
+				"answers": [
+					{
+						"kind": "refused"
+					}
+				],
+				"statusAfter": {
+					"kind": "none"
+				},
+				"told": [],
+				"toldAfter": [],
+				"requests": 0
+			}
+		]
+	}
+}

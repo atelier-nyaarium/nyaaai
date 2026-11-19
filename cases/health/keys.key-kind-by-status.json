@@ -1,0 +1,283 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.keys",
+	"name": "key-kind-by-status",
+	"input": {
+		"rows": [
+			{
+				"entry": {
+					"id": "main",
+					"kind": "openrouter",
+					"label": "Main"
+				},
+				"prepare": "none",
+				"exchanges": [],
+				"stored": {
+					"kind": "key",
+					"key": "key-0123456789abcdef"
+				}
+			},
+			{
+				"entry": {
+					"id": "main",
+					"kind": "openrouter",
+					"label": "Main"
+				},
+				"prepare": "none",
+				"exchanges": [],
+				"stored": {
+					"kind": "none"
+				}
+			},
+			{
+				"entry": {
+					"id": "main",
+					"kind": "openrouter",
+					"label": "Main"
+				},
+				"prepare": "checking",
+				"exchanges": [
+					{
+						"status": 200,
+						"json": {
+							"data": {
+								"usage": 1
+							}
+						}
+					}
+				],
+				"stored": {
+					"kind": "key",
+					"key": "key-0123456789abcdef"
+				}
+			},
+			{
+				"entry": {
+					"id": "main",
+					"kind": "openrouter",
+					"label": "Main"
+				},
+				"prepare": "ok",
+				"exchanges": [
+					{
+						"status": 200,
+						"json": {
+							"data": {
+								"usage": 1
+							}
+						}
+					}
+				],
+				"stored": {
+					"kind": "key",
+					"key": "key-0123456789abcdef"
+				}
+			},
+			{
+				"entry": {
+					"id": "main",
+					"kind": "openrouter",
+					"label": "Main"
+				},
+				"prepare": "ok",
+				"exchanges": [
+					{
+						"status": 200,
+						"json": {
+							"data": {
+								"usage": 1
+							}
+						}
+					}
+				],
+				"stored": {
+					"kind": "key",
+					"key": "key-0123456789abcdef"
+				},
+				"storedThen": {
+					"kind": "none"
+				}
+			},
+			{
+				"entry": {
+					"id": "main",
+					"kind": "openrouter",
+					"label": "Main"
+				},
+				"prepare": "rejected",
+				"exchanges": [],
+				"stored": {
+					"kind": "key",
+					"key": "key-0123456789abcdef"
+				}
+			},
+			{
+				"entry": {
+					"id": "main",
+					"kind": "openrouter",
+					"label": "Main"
+				},
+				"prepare": "rejected",
+				"exchanges": [],
+				"stored": {
+					"kind": "none"
+				}
+			},
+			{
+				"entry": {
+					"id": "main",
+					"kind": "openrouter",
+					"label": "Main"
+				},
+				"prepare": "unreachable",
+				"exchanges": [],
+				"stored": {
+					"kind": "key",
+					"key": "key-0123456789abcdef"
+				}
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"status": {
+					"kind": "none"
+				},
+				"answers": [
+					{
+						"kind": "key",
+						"key": "key-0123456789abcdef"
+					}
+				],
+				"statusAfter": {
+					"kind": "none"
+				},
+				"told": [],
+				"toldAfter": [],
+				"requests": 0
+			},
+			{
+				"status": {
+					"kind": "none"
+				},
+				"answers": [
+					{
+						"kind": "none"
+					}
+				],
+				"statusAfter": {
+					"kind": "none"
+				},
+				"told": [],
+				"toldAfter": [],
+				"requests": 0
+			},
+			{
+				"status": {
+					"kind": "checking"
+				},
+				"answers": [
+					{
+						"kind": "key",
+						"key": "key-0123456789abcdef"
+					}
+				],
+				"statusAfter": {
+					"kind": "ok",
+					"usage": 1
+				},
+				"told": [],
+				"toldAfter": [],
+				"requests": 1
+			},
+			{
+				"status": {
+					"kind": "ok",
+					"usage": 1
+				},
+				"answers": [
+					{
+						"kind": "key",
+						"key": "key-0123456789abcdef"
+					}
+				],
+				"statusAfter": {
+					"kind": "ok",
+					"usage": 1
+				},
+				"told": [],
+				"toldAfter": [],
+				"requests": 1
+			},
+			{
+				"status": {
+					"kind": "ok",
+					"usage": 1
+				},
+				"answers": [
+					{
+						"kind": "none"
+					}
+				],
+				"statusAfter": {
+					"kind": "ok",
+					"usage": 1
+				},
+				"told": [],
+				"toldAfter": [],
+				"requests": 1
+			},
+			{
+				"status": {
+					"kind": "rejected"
+				},
+				"answers": [
+					{
+						"kind": "refused"
+					}
+				],
+				"statusAfter": {
+					"kind": "rejected"
+				},
+				"told": [],
+				"toldAfter": [],
+				"requests": 0
+			},
+			{
+				"status": {
+					"kind": "rejected"
+				},
+				"answers": [
+					{
+						"kind": "refused"
+					}
+				],
+				"statusAfter": {
+					"kind": "rejected"
+				},
+				"told": [],
+				"toldAfter": [],
+				"requests": 0
+			},
+			{
+				"status": {
+					"kind": "none"
+				},
+				"answers": [
+					{
+						"kind": "key",
+						"key": "key-0123456789abcdef"
+					}
+				],
+				"statusAfter": {
+					"kind": "none"
+				},
+				"told": [],
+				"toldAfter": [],
+				"requests": 0
+			}
+		]
+	}
+}

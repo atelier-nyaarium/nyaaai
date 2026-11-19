@@ -1,0 +1,152 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "keyReader.run",
+	"name": "every-state-a-check-may-answer",
+	"input": {
+		"startMs": 5000000,
+		"steps": [
+			{
+				"kind": "read"
+			},
+			{
+				"kind": "answer",
+				"check": 1,
+				"state": {
+					"kind": "none"
+				}
+			},
+			{
+				"kind": "read"
+			},
+			{
+				"kind": "answer",
+				"check": 2,
+				"state": {
+					"kind": "unreachable"
+				}
+			},
+			{
+				"kind": "read"
+			},
+			{
+				"kind": "answer",
+				"check": 3,
+				"state": {
+					"kind": "invalid"
+				}
+			},
+			{
+				"kind": "read"
+			},
+			{
+				"kind": "answer",
+				"check": 4,
+				"state": {
+					"kind": "ok"
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 5000000,
+				"shown": [
+					{
+						"kind": "checking"
+					}
+				],
+				"signalled": [],
+				"open": [
+					1
+				],
+				"busy": true
+			},
+			{
+				"nowMs": 5000000,
+				"shown": [
+					{
+						"kind": "none"
+					}
+				],
+				"signalled": [],
+				"open": [],
+				"busy": false
+			},
+			{
+				"nowMs": 5000000,
+				"shown": [
+					{
+						"kind": "checking"
+					}
+				],
+				"signalled": [],
+				"open": [
+					2
+				],
+				"busy": true
+			},
+			{
+				"nowMs": 5000000,
+				"shown": [
+					{
+						"kind": "unreachable"
+					}
+				],
+				"signalled": [],
+				"open": [],
+				"busy": false
+			},
+			{
+				"nowMs": 5000000,
+				"shown": [
+					{
+						"kind": "checking"
+					}
+				],
+				"signalled": [],
+				"open": [
+					3
+				],
+				"busy": true
+			},
+			{
+				"nowMs": 5000000,
+				"shown": [
+					{
+						"kind": "invalid"
+					}
+				],
+				"signalled": [],
+				"open": [],
+				"busy": false
+			},
+			{
+				"nowMs": 5000000,
+				"shown": [
+					{
+						"kind": "checking"
+					}
+				],
+				"signalled": [],
+				"open": [
+					4
+				],
+				"busy": true
+			},
+			{
+				"nowMs": 5000000,
+				"shown": [
+					{
+						"kind": "ok"
+					}
+				],
+				"signalled": [],
+				"open": [],
+				"busy": false
+			}
+		],
+		"waiting": []
+	}
+}

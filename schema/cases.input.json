@@ -15611,6 +15611,1300 @@
 			"required": [
 				"days"
 			]
+		},
+		"GateRunInput": {
+			"type": "object",
+			"properties": {
+				"startMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"pauseMs": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				},
+				"maxPauses": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				},
+				"steps": {
+					"minItems": 1,
+					"type": "array",
+					"items": {
+						"oneOf": [
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "admit"
+									},
+									"request": {
+										"type": "string"
+									},
+									"model": {
+										"type": "string"
+									},
+									"again": {
+										"type": "boolean"
+									},
+									"abortAfterMs": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740991
+									},
+									"abortedBefore": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"kind",
+									"request",
+									"model"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "tryAdmit"
+									},
+									"request": {
+										"type": "string"
+									},
+									"model": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"kind",
+									"request",
+									"model"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "settle"
+									},
+									"request": {
+										"type": "string"
+									},
+									"outcome": {
+										"$ref": "health.input.json#/$defs/GateOutcome"
+									},
+									"retryAfterMs": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740991
+									}
+								},
+								"required": [
+									"kind",
+									"request",
+									"outcome"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "cool"
+									},
+									"model": {
+										"type": "string"
+									},
+									"retryAfterMs": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740991
+									}
+								},
+								"required": [
+									"kind",
+									"model"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "clear"
+									},
+									"prefix": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"kind",
+									"prefix"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "advance"
+									},
+									"ms": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740991
+									}
+								},
+								"required": [
+									"kind",
+									"ms"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "abort"
+									},
+									"request": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"kind",
+									"request"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "dispose"
+									}
+								},
+								"required": [
+									"kind"
+								]
+							}
+						],
+						"x-tag": "kind"
+					}
+				}
+			},
+			"required": [
+				"startMs",
+				"steps"
+			]
+		},
+		"GateRunResult": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"nowMs": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"settled": {
+								"anyOf": [
+									{
+										"$ref": "health.input.json#/$defs/GateSettled"
+									},
+									{
+										"type": "null"
+									}
+								]
+							},
+							"ticket": {
+								"anyOf": [
+									{
+										"$ref": "health.input.json#/$defs/Ticket"
+									},
+									{
+										"type": "null"
+									}
+								]
+							},
+							"resolved": {
+								"type": "array",
+								"items": {
+									"type": "object",
+									"properties": {
+										"request": {
+											"type": "string"
+										},
+										"admission": {
+											"$ref": "health.input.json#/$defs/Admission"
+										}
+									},
+									"required": [
+										"request",
+										"admission"
+									]
+								}
+							},
+							"waits": {
+								"type": "array",
+								"items": {
+									"type": "object",
+									"properties": {
+										"request": {
+											"type": "string"
+										},
+										"waiting": {
+											"$ref": "health.input.json#/$defs/GateWaiting"
+										}
+									},
+									"required": [
+										"request",
+										"waiting"
+									]
+								}
+							},
+							"told": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"gates": {
+								"type": "array",
+								"items": {
+									"type": "object",
+									"properties": {
+										"model": {
+											"type": "string"
+										},
+										"gate": {
+											"anyOf": [
+												{
+													"type": "object",
+													"properties": {
+														"phase": {
+															"type": "string",
+															"enum": [
+																"open",
+																"paused",
+																"probing"
+															]
+														},
+														"generation": {
+															"type": "integer",
+															"minimum": -9007199254740991,
+															"maximum": 9007199254740991
+														},
+														"pauses": {
+															"type": "integer",
+															"minimum": -9007199254740991,
+															"maximum": 9007199254740991
+														},
+														"resumeAt": {
+															"type": "number"
+														},
+														"probe": {
+															"anyOf": [
+																{
+																	"$ref": "health.input.json#/$defs/Ticket"
+																},
+																{
+																	"type": "null"
+																}
+															]
+														},
+														"queued": {
+															"type": "integer",
+															"minimum": -9007199254740991,
+															"maximum": 9007199254740991
+														}
+													},
+													"required": [
+														"phase",
+														"generation",
+														"pauses",
+														"resumeAt",
+														"probe",
+														"queued"
+													]
+												},
+												{
+													"type": "null"
+												}
+											]
+										}
+									},
+									"required": [
+										"model",
+										"gate"
+									]
+								}
+							},
+							"holding": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							}
+						},
+						"required": [
+							"nowMs",
+							"settled",
+							"ticket",
+							"resolved",
+							"waits",
+							"told",
+							"gates",
+							"holding"
+						]
+					}
+				},
+				"waiting": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"steps",
+				"waiting"
+			]
+		},
+		"KeyReaderRunInput": {
+			"type": "object",
+			"properties": {
+				"startMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"steps": {
+					"minItems": 1,
+					"type": "array",
+					"items": {
+						"oneOf": [
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "read"
+									}
+								},
+								"required": [
+									"kind"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "answer"
+									},
+									"check": {
+										"type": "integer",
+										"minimum": 1,
+										"maximum": 9007199254740991
+									},
+									"state": {
+										"$ref": "provider.input.json#/$defs/KeyState"
+									}
+								},
+								"required": [
+									"kind",
+									"check",
+									"state"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "fail"
+									},
+									"check": {
+										"type": "integer",
+										"minimum": 1,
+										"maximum": 9007199254740991
+									},
+									"message": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"kind",
+									"check",
+									"message"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "advance"
+									},
+									"ms": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740991
+									}
+								},
+								"required": [
+									"kind",
+									"ms"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "dispose"
+									}
+								},
+								"required": [
+									"kind"
+								]
+							}
+						],
+						"x-tag": "kind"
+					}
+				}
+			},
+			"required": [
+				"startMs",
+				"steps"
+			]
+		},
+		"KeyReaderRunResult": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"nowMs": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"shown": {
+								"type": "array",
+								"items": {
+									"$ref": "provider.input.json#/$defs/KeyState"
+								}
+							},
+							"signalled": {
+								"type": "array",
+								"items": {
+									"type": "object",
+									"properties": {
+										"check": {
+											"type": "integer",
+											"minimum": -9007199254740991,
+											"maximum": 9007199254740991
+										},
+										"by": {
+											"type": "string",
+											"enum": [
+												"deadline",
+												"caller"
+											]
+										}
+									},
+									"required": [
+										"check",
+										"by"
+									]
+								}
+							},
+							"open": {
+								"type": "array",
+								"items": {
+									"type": "integer",
+									"minimum": -9007199254740991,
+									"maximum": 9007199254740991
+								}
+							},
+							"busy": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"nowMs",
+							"shown",
+							"signalled",
+							"open",
+							"busy"
+						]
+					}
+				},
+				"waiting": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"steps",
+				"waiting"
+			]
+		},
+		"HealthKeyAnswer": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "key"
+						},
+						"key": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"kind",
+						"key"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "none"
+						}
+					},
+					"required": [
+						"kind"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "refused"
+						}
+					},
+					"required": [
+						"kind"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "unready"
+						}
+					},
+					"required": [
+						"kind"
+					]
+				}
+			],
+			"x-tag": "kind"
+		},
+		"HealthRoute": {
+			"type": "object",
+			"properties": {
+				"entry": {
+					"$ref": "provider.input.json#/$defs/ProviderEntry"
+				},
+				"key": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"entry",
+				"key"
+			]
+		},
+		"HealthRunInput": {
+			"type": "object",
+			"properties": {
+				"startMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"pauseMs": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				},
+				"entries": {
+					"type": "array",
+					"items": {
+						"$ref": "provider.input.json#/$defs/ProviderEntry"
+					}
+				},
+				"keys": {
+					"type": "object",
+					"propertyNames": {
+						"type": "string"
+					},
+					"additionalProperties": {
+						"$ref": "#/$defs/HealthKeyAnswer"
+					}
+				},
+				"exchanges": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/NetExchange"
+					}
+				},
+				"steps": {
+					"minItems": 1,
+					"type": "array",
+					"items": {
+						"oneOf": [
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "list"
+									},
+									"entries": {
+										"type": "array",
+										"items": {
+											"$ref": "provider.input.json#/$defs/ProviderEntry"
+										}
+									}
+								},
+								"required": [
+									"kind",
+									"entries"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "key"
+									},
+									"id": {
+										"type": "string"
+									},
+									"answer": {
+										"$ref": "#/$defs/HealthKeyAnswer"
+									}
+								},
+								"required": [
+									"kind",
+									"id",
+									"answer"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "check"
+									},
+									"id": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"kind",
+									"id"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "checkUnread"
+									}
+								},
+								"required": [
+									"kind"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "keys"
+									},
+									"id": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"kind",
+									"id"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "served"
+									},
+									"route": {
+										"$ref": "#/$defs/HealthRoute"
+									},
+									"billingSource": {
+										"type": "string"
+									},
+									"keep": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"kind",
+									"route"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "failed"
+									},
+									"route": {
+										"$ref": "#/$defs/HealthRoute"
+									},
+									"failure": {
+										"$ref": "step.input.json#/$defs/Failure"
+									},
+									"onward": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"kind",
+									"route",
+									"failure",
+									"onward"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "billed"
+									},
+									"id": {
+										"type": "string"
+									},
+									"reply": {
+										"type": "object",
+										"properties": {
+											"source": {
+												"type": "string"
+											},
+											"allowance": {
+												"type": "number"
+											},
+											"cost": {
+												"type": "number"
+											}
+										},
+										"required": [
+											"source"
+										]
+									}
+								},
+								"required": [
+									"kind",
+									"id",
+									"reply"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "deferred"
+									},
+									"route": {
+										"$ref": "#/$defs/HealthRoute"
+									},
+									"keep": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"kind",
+									"route"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "blocked"
+									},
+									"route": {
+										"$ref": "#/$defs/HealthRoute"
+									},
+									"keep": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"kind",
+									"route"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "tryAdmit"
+									},
+									"request": {
+										"type": "string"
+									},
+									"route": {
+										"$ref": "#/$defs/HealthRoute"
+									}
+								},
+								"required": [
+									"kind",
+									"request",
+									"route"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "admit"
+									},
+									"request": {
+										"type": "string"
+									},
+									"route": {
+										"$ref": "#/$defs/HealthRoute"
+									}
+								},
+								"required": [
+									"kind",
+									"request",
+									"route"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "settle"
+									},
+									"request": {
+										"type": "string"
+									},
+									"outcome": {
+										"$ref": "health.input.json#/$defs/GateOutcome"
+									},
+									"retryAfterMs": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740991
+									}
+								},
+								"required": [
+									"kind",
+									"request",
+									"outcome"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "advance"
+									},
+									"ms": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740991
+									}
+								},
+								"required": [
+									"kind",
+									"ms"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "dispose"
+									}
+								},
+								"required": [
+									"kind"
+								]
+							}
+						],
+						"x-tag": "kind"
+					}
+				}
+			},
+			"required": [
+				"startMs",
+				"entries",
+				"keys",
+				"exchanges",
+				"steps"
+			]
+		},
+		"HealthRunResult": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"nowMs": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"answer": {
+								"oneOf": [
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "none"
+											}
+										},
+										"required": [
+											"kind"
+										]
+									},
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "keys"
+											},
+											"answer": {
+												"$ref": "#/$defs/HealthKeyAnswer"
+											}
+										},
+										"required": [
+											"kind",
+											"answer"
+										]
+									},
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "skip"
+											},
+											"skip": {
+												"anyOf": [
+													{
+														"$ref": "provider.input.json#/$defs/SkipReason"
+													},
+													{
+														"type": "null"
+													}
+												]
+											}
+										},
+										"required": [
+											"kind",
+											"skip"
+										]
+									},
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "blocked"
+											},
+											"blocked": {
+												"anyOf": [
+													{
+														"$ref": "health.input.json#/$defs/Blocked"
+													},
+													{
+														"type": "null"
+													}
+												]
+											}
+										},
+										"required": [
+											"kind",
+											"blocked"
+										]
+									},
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "ticket"
+											},
+											"ticket": {
+												"anyOf": [
+													{
+														"$ref": "health.input.json#/$defs/Ticket"
+													},
+													{
+														"type": "null"
+													}
+												]
+											}
+										},
+										"required": [
+											"kind",
+											"ticket"
+										]
+									},
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "admission"
+											},
+											"admission": {
+												"$ref": "health.input.json#/$defs/Admission"
+											}
+										},
+										"required": [
+											"kind",
+											"admission"
+										]
+									},
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "settled"
+											},
+											"settled": {
+												"$ref": "health.input.json#/$defs/GateSettled"
+											}
+										},
+										"required": [
+											"kind",
+											"settled"
+										]
+									}
+								],
+								"x-tag": "kind"
+							},
+							"changes": {
+								"type": "array",
+								"items": {
+									"$ref": "health.input.json#/$defs/HealthChange"
+								}
+							},
+							"entries": {
+								"type": "array",
+								"items": {
+									"$ref": "health.input.json#/$defs/EntryHealth"
+								}
+							},
+							"run": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"requests": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							}
+						},
+						"required": [
+							"nowMs",
+							"answer",
+							"changes",
+							"entries",
+							"run",
+							"requests"
+						]
+					}
+				},
+				"requests": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"waiting": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"steps",
+				"requests",
+				"waiting"
+			]
+		},
+		"HealthKeysInput": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"entry": {
+								"$ref": "provider.input.json#/$defs/ProviderEntry"
+							},
+							"listed": {
+								"type": "boolean"
+							},
+							"stored": {
+								"$ref": "#/$defs/HealthKeyAnswer"
+							},
+							"storedThen": {
+								"$ref": "#/$defs/HealthKeyAnswer"
+							},
+							"prepare": {
+								"type": "string",
+								"enum": [
+									"none",
+									"checking",
+									"ok",
+									"rejected",
+									"unreachable"
+								]
+							},
+							"exchanges": {
+								"type": "array",
+								"items": {
+									"$ref": "#/$defs/NetExchange"
+								}
+							},
+							"asks": {
+								"type": "integer",
+								"minimum": 1,
+								"maximum": 9007199254740991
+							},
+							"tell": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"tellAfter": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							}
+						},
+						"required": [
+							"entry",
+							"stored",
+							"prepare",
+							"exchanges"
+						]
+					}
+				}
+			},
+			"required": [
+				"rows"
+			]
+		},
+		"HealthKeysResult": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"status": {
+								"$ref": "provider.input.json#/$defs/KeyState"
+							},
+							"answers": {
+								"type": "array",
+								"items": {
+									"$ref": "#/$defs/HealthKeyAnswer"
+								}
+							},
+							"statusAfter": {
+								"$ref": "provider.input.json#/$defs/KeyState"
+							},
+							"told": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"toldAfter": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"requests": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							}
+						},
+						"required": [
+							"status",
+							"answers",
+							"statusAfter",
+							"told",
+							"toldAfter",
+							"requests"
+						]
+					}
+				}
+			},
+			"required": [
+				"rows"
+			]
 		}
 	}
 }

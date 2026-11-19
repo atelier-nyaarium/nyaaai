@@ -1,0 +1,85 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "keyReader.run",
+	"name": "a-read-after-a-dispose-works",
+	"input": {
+		"startMs": 5000000,
+		"steps": [
+			{
+				"kind": "read"
+			},
+			{
+				"kind": "dispose"
+			},
+			{
+				"kind": "read"
+			},
+			{
+				"kind": "answer",
+				"check": 2,
+				"state": {
+					"kind": "ok",
+					"usage": 4.12,
+					"limit": 20
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 5000000,
+				"shown": [
+					{
+						"kind": "checking"
+					}
+				],
+				"signalled": [],
+				"open": [
+					1
+				],
+				"busy": true
+			},
+			{
+				"nowMs": 5000000,
+				"shown": [],
+				"signalled": [
+					{
+						"check": 1,
+						"by": "caller"
+					}
+				],
+				"open": [],
+				"busy": false
+			},
+			{
+				"nowMs": 5000000,
+				"shown": [
+					{
+						"kind": "checking"
+					}
+				],
+				"signalled": [],
+				"open": [
+					2
+				],
+				"busy": true
+			},
+			{
+				"nowMs": 5000000,
+				"shown": [
+					{
+						"kind": "ok",
+						"usage": 4.12,
+						"limit": 20
+					}
+				],
+				"signalled": [],
+				"open": [],
+				"busy": false
+			}
+		],
+		"waiting": []
+	}
+}

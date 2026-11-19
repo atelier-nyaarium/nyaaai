@@ -1,0 +1,275 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.keys",
+	"name": "url-kind-by-status",
+	"input": {
+		"rows": [
+			{
+				"entry": {
+					"id": "box",
+					"kind": "ollama",
+					"label": "Box",
+					"url": "http://lab.local:11434"
+				},
+				"prepare": "none",
+				"exchanges": [],
+				"stored": {
+					"kind": "none"
+				}
+			},
+			{
+				"entry": {
+					"id": "box",
+					"kind": "ollama",
+					"label": "Box",
+					"url": "http://lab.local:11434"
+				},
+				"prepare": "none",
+				"exchanges": [],
+				"stored": {
+					"kind": "key",
+					"key": "key-0123456789abcdef"
+				}
+			},
+			{
+				"entry": {
+					"id": "box",
+					"kind": "ollama",
+					"label": "Box",
+					"url": "http://lab.local:11434"
+				},
+				"prepare": "checking",
+				"exchanges": [
+					{
+						"status": 200,
+						"json": {
+							"models": [
+								{
+									"name": "local-a:27b"
+								},
+								{
+									"name": "local-b:9b"
+								}
+							]
+						}
+					}
+				],
+				"stored": {
+					"kind": "none"
+				}
+			},
+			{
+				"entry": {
+					"id": "box",
+					"kind": "ollama",
+					"label": "Box",
+					"url": "http://lab.local:11434"
+				},
+				"prepare": "ok",
+				"exchanges": [
+					{
+						"status": 200,
+						"json": {
+							"models": [
+								{
+									"name": "local-a:27b"
+								},
+								{
+									"name": "local-b:9b"
+								}
+							]
+						}
+					}
+				],
+				"stored": {
+					"kind": "none"
+				}
+			},
+			{
+				"entry": {
+					"id": "box",
+					"kind": "ollama",
+					"label": "Box",
+					"url": "http://lab.local:11434"
+				},
+				"prepare": "rejected",
+				"exchanges": [],
+				"stored": {
+					"kind": "key",
+					"key": "key-0123456789abcdef"
+				}
+			},
+			{
+				"entry": {
+					"id": "box",
+					"kind": "ollama",
+					"label": "Box",
+					"url": "http://lab.local:11434"
+				},
+				"prepare": "unreachable",
+				"exchanges": [
+					{
+						"status": 200,
+						"json": {
+							"models": [
+								{
+									"name": "local-a:27b"
+								},
+								{
+									"name": "local-b:9b"
+								}
+							]
+						}
+					}
+				],
+				"stored": {
+					"kind": "none"
+				}
+			},
+			{
+				"entry": {
+					"id": "box",
+					"kind": "ollama",
+					"label": "Box",
+					"url": "http://lab.local:11434"
+				},
+				"prepare": "unreachable",
+				"exchanges": [
+					{
+						"status": 503,
+						"json": {
+							"error": {
+								"message": "Down."
+							}
+						}
+					}
+				],
+				"stored": {
+					"kind": "none"
+				}
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"status": {
+					"kind": "none"
+				},
+				"answers": [
+					{
+						"kind": "none"
+					}
+				],
+				"statusAfter": {
+					"kind": "none"
+				},
+				"told": [],
+				"toldAfter": [],
+				"requests": 0
+			},
+			{
+				"status": {
+					"kind": "none"
+				},
+				"answers": [
+					{
+						"kind": "key",
+						"key": "key-0123456789abcdef"
+					}
+				],
+				"statusAfter": {
+					"kind": "none"
+				},
+				"told": [],
+				"toldAfter": [],
+				"requests": 0
+			},
+			{
+				"status": {
+					"kind": "checking"
+				},
+				"answers": [
+					{
+						"kind": "none"
+					}
+				],
+				"statusAfter": {
+					"kind": "ok",
+					"models": 2
+				},
+				"told": [],
+				"toldAfter": [],
+				"requests": 1
+			},
+			{
+				"status": {
+					"kind": "ok",
+					"models": 2
+				},
+				"answers": [
+					{
+						"kind": "none"
+					}
+				],
+				"statusAfter": {
+					"kind": "ok",
+					"models": 2
+				},
+				"told": [],
+				"toldAfter": [],
+				"requests": 1
+			},
+			{
+				"status": {
+					"kind": "rejected"
+				},
+				"answers": [
+					{
+						"kind": "refused"
+					}
+				],
+				"statusAfter": {
+					"kind": "rejected"
+				},
+				"told": [],
+				"toldAfter": [],
+				"requests": 0
+			},
+			{
+				"status": {
+					"kind": "unreachable"
+				},
+				"answers": [
+					{
+						"kind": "unready"
+					}
+				],
+				"statusAfter": {
+					"kind": "ok",
+					"models": 2
+				},
+				"told": [],
+				"toldAfter": [],
+				"requests": 1
+			},
+			{
+				"status": {
+					"kind": "unreachable"
+				},
+				"answers": [
+					{
+						"kind": "unready"
+					}
+				],
+				"statusAfter": {
+					"kind": "unreachable"
+				},
+				"told": [],
+				"toldAfter": [],
+				"requests": 1
+			}
+		]
+	}
+}
