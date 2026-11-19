@@ -1,0 +1,25 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterProviders",
+	"name": "providers-empty-item-is-a-provider-without-a-name",
+	"input": {
+		"raw": {
+			"data": {
+				"endpoints": [
+					{}
+				]
+			}
+		},
+		"zdr": null
+	},
+	"expected": {
+		"providers": [
+			{
+				"name": "",
+				"tag": "",
+				"zdr": false
+			}
+		]
+	}
+}

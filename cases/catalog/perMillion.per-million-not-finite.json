@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.perMillion",
+	"name": "per-million-not-finite",
+	"input": {
+		"values": [
+			"Infinity",
+			"-Infinity",
+			"NaN",
+			"inf",
+			"1e999",
+			"1e309"
+		]
+	},
+	"expected": {
+		"prices": [
+			null,
+			null,
+			null,
+			null,
+			null,
+			null
+		]
+	}
+}

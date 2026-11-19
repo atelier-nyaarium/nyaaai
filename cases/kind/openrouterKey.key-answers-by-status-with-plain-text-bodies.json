@@ -1,0 +1,97 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.openrouterKey",
+	"name": "key-answers-by-status-with-plain-text-bodies",
+	"input": {
+		"startMs": 1790337600000,
+		"stored": "key-0123456789abcdef",
+		"exchanges": [
+			{
+				"status": 401,
+				"text": "gateway text"
+			},
+			{
+				"status": 403,
+				"text": "gateway text"
+			},
+			{
+				"status": 429,
+				"text": "gateway text"
+			},
+			{
+				"status": 500,
+				"text": "gateway text"
+			}
+		],
+		"checks": [
+			{
+				"auth": "stored"
+			},
+			{
+				"auth": "stored"
+			},
+			{
+				"auth": "stored"
+			},
+			{
+				"auth": "stored"
+			}
+		]
+	},
+	"expected": {
+		"checks": [
+			{
+				"ok": false,
+				"reason": "rejected",
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			},
+			{
+				"ok": false,
+				"reason": "rejected",
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			},
+			{
+				"ok": false,
+				"reason": "unreachable",
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			},
+			{
+				"ok": false,
+				"reason": "unreachable",
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			}
+		],
+		"requests": [
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			},
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			},
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			},
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			}
+		],
+		"waiting": []
+	}
+}

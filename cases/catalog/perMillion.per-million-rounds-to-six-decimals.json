@@ -1,0 +1,24 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.perMillion",
+	"name": "per-million-rounds-to-six-decimals",
+	"input": {
+		"values": [
+			"0.00000012345",
+			"0.00000099999",
+			"0.0000004999999",
+			"0.0000005",
+			"0.00000051"
+		]
+	},
+	"expected": {
+		"prices": [
+			0.12345,
+			0.99999,
+			0.5,
+			0.5,
+			0.51
+		]
+	}
+}

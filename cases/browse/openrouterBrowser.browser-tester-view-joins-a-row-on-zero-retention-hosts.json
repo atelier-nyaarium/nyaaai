@@ -1,0 +1,131 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterBrowser",
+	"name": "browser-tester-view-joins-a-row-on-zero-retention-hosts",
+	"input": {
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "lab/made-up",
+							"supported_parameters": [
+								"tools",
+								"reasoning"
+							],
+							"reasoning": {
+								"supported_efforts": [
+									"low"
+								]
+							}
+						},
+						{
+							"id": "lab/other"
+						}
+					]
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"model_id": "lab/made-up",
+							"tag": "h",
+							"supported_parameters": [
+								"tools",
+								"reasoning"
+							],
+							"pricing": {
+								"prompt": "0.000001",
+								"completion": "0.000002"
+							}
+						}
+					]
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "view",
+				"row": "openrouter:lab/made-up"
+			},
+			{
+				"kind": "view",
+				"row": "openrouter:lab/other",
+				"use": "analysis"
+			},
+			{
+				"kind": "view",
+				"row": "openrouter:lab/gone"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "view",
+					"view": {
+						"key": "openrouter:lab/made-up",
+						"status": "ok",
+						"efforts": [
+							"low"
+						],
+						"price": {
+							"prompt": [
+								1,
+								1
+							],
+							"completion": [
+								2,
+								2
+							],
+							"tiers": []
+						},
+						"hosts": [
+							"h"
+						]
+					}
+				}
+			},
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "view",
+					"view": {
+						"key": "openrouter:lab/other",
+						"status": "noZdrHost",
+						"efforts": [],
+						"hosts": []
+					}
+				}
+			},
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "view",
+					"view": {
+						"key": "openrouter:lab/gone",
+						"status": "retired",
+						"efforts": [],
+						"hosts": []
+					}
+				}
+			}
+		],
+		"requests": [
+			"/models",
+			"/endpoints/zdr"
+		],
+		"read": [
+			1,
+			1
+		],
+		"waiting": []
+	}
+}

@@ -15,6 +15,7 @@ http = ["dep:reqwest"]
 
 [dependencies]
 nyaaai-contract.workspace = true
+tokio = { workspace = true, features = ["rt", "sync"] }
 reqwest = { version = "0.13.5", optional = true, default-features = false, features = ["rustls"] }
 
 [dev-dependencies]

@@ -1,0 +1,32 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.perMillion",
+	"name": "per-million-not-a-number-or-text",
+	"input": {
+		"values": [
+			null,
+			true,
+			false,
+			[],
+			[
+				1
+			],
+			{},
+			{
+				"price": 1
+			}
+		]
+	},
+	"expected": {
+		"prices": [
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null
+		]
+	}
+}

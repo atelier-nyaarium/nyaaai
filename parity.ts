@@ -15,6 +15,8 @@ import { pascal, quote } from "@nyaaai/testkit/rustNames";
 import "@nyaaai/testkit/tortureShapes";
 import "@nyaaai/testkit/trace";
 import { base64 } from "./scripts/caseGroups/base64";
+import { browse } from "./scripts/caseGroups/browse";
+import { catalog } from "./scripts/caseGroups/catalog";
 import { claude } from "./scripts/caseGroups/claude";
 import { codec } from "./scripts/caseGroups/codec";
 import { contract } from "./scripts/caseGroups/contract";
@@ -26,6 +28,7 @@ import { failure } from "./scripts/caseGroups/failure";
 import { headers } from "./scripts/caseGroups/headers";
 import { js } from "./scripts/caseGroups/js";
 import { json } from "./scripts/caseGroups/json";
+import { kindGroup } from "./scripts/caseGroups/kind";
 import { native } from "./scripts/caseGroups/native";
 import { noticeText } from "./scripts/caseGroups/noticeText";
 import { number } from "./scripts/caseGroups/number";
@@ -195,6 +198,9 @@ export default project({
 		view,
 		retention,
 		disposition,
+		catalog,
+		browse,
+		kindGroup,
 	],
 	runs: adapterCases,
 	cases: { crate: "nyaaai_cli", module: "cases", dir: "rust/cli/src/cases" },

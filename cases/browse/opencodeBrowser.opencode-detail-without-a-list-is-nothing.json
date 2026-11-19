@@ -1,0 +1,44 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.opencodeBrowser",
+	"name": "opencode-detail-without-a-list-is-nothing",
+	"input": {
+		"startMs": 1790337600000,
+		"plan": "go",
+		"exchanges": [
+			{
+				"status": 500,
+				"json": {
+					"error": {
+						"message": "Down."
+					}
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "detail",
+				"id": "deepseek-v4.1-flash"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "detail",
+					"detail": null
+				}
+			}
+		],
+		"requests": [
+			"/v1/models"
+		],
+		"read": [
+			1
+		],
+		"waiting": []
+	}
+}

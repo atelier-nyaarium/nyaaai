@@ -1,0 +1,707 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.opencodeJoin",
+	"name": "join-go-base-prices-context-efforts-family-and-cache",
+	"input": {
+		"rows": [
+			"openai/gpt-6-luna",
+			"deepseek/deepseek-v4.1-flash",
+			"minimax/minimax-m3",
+			"x-ai/grok-4.7",
+			"anthropic/claude-haiku-5.5",
+			"google/gemini-3.8-flash",
+			"mistralai/mistral-large-2512"
+		],
+		"plan": "go",
+		"models": {
+			"data": [
+				{
+					"id": "gpt-6-luna",
+					"name": "gpt-6-luna",
+					"capabilities": {
+						"tools": {
+							"supported": true
+						},
+						"reasoning": {
+							"supported": true,
+							"effort": [
+								"none",
+								"low",
+								"medium",
+								"high",
+								"xhigh",
+								"max"
+							]
+						},
+						"structured_output": true
+					},
+					"limit": {
+						"context": 1050000,
+						"input": 922000,
+						"output": 128000
+					},
+					"cost": {
+						"text": {
+							"input": {
+								"price": 0.1
+							},
+							"output": {
+								"price": 0.5
+							}
+						}
+					},
+					"api": {
+						"responses": {
+							"capabilities": {
+								"tools": {
+									"choice": [
+										"auto",
+										"none",
+										"required",
+										"tool"
+									]
+								}
+							}
+						}
+					}
+				},
+				{
+					"id": "deepseek-v4.1-flash",
+					"name": "deepseek-v4.1-flash",
+					"capabilities": {
+						"tools": {
+							"supported": true
+						},
+						"reasoning": {
+							"supported": true,
+							"effort": [
+								"low",
+								"high",
+								"max"
+							],
+							"toggle": true
+						},
+						"structured_output": true
+					},
+					"limit": {
+						"context": 1000000,
+						"output": 384000
+					},
+					"cost": {
+						"text": {
+							"input": {
+								"price": 0.15
+							},
+							"output": {
+								"price": 0.6
+							}
+						}
+					},
+					"api": {
+						"chat-completions": {
+							"compatibility": {
+								"reasoning_field": "reasoning_content"
+							},
+							"capabilities": {
+								"tools": {
+									"choice": [
+										"auto",
+										"none",
+										"required",
+										"tool"
+									]
+								}
+							}
+						}
+					}
+				},
+				{
+					"id": "minimax-m3",
+					"name": "minimax-m3",
+					"capabilities": {
+						"tools": {
+							"supported": true
+						}
+					},
+					"limit": {
+						"context": 1000000,
+						"output": 64000
+					},
+					"cost": {
+						"text": {
+							"input": {
+								"price": 0.5
+							},
+							"output": {
+								"price": 2
+							}
+						}
+					},
+					"api": {
+						"messages": {
+							"capabilities": {
+								"tools": {
+									"choice": [
+										"auto",
+										"none"
+									],
+									"strict": true
+								}
+							}
+						}
+					}
+				},
+				{
+					"id": "grok-4.7",
+					"name": "grok-4.7",
+					"capabilities": {
+						"tools": {
+							"supported": true
+						},
+						"reasoning": {
+							"supported": true,
+							"effort": [
+								"low",
+								"medium",
+								"high",
+								"xhigh"
+							]
+						},
+						"cache": {
+							"implicit": true
+						}
+					},
+					"limit": {
+						"context": 500000,
+						"output": 500000
+					},
+					"cost": {
+						"text": {
+							"input": {
+								"price": 2
+							},
+							"output": {
+								"price": 6
+							}
+						}
+					},
+					"api": {
+						"responses": {}
+					}
+				},
+				{
+					"id": "claude-haiku-5-5",
+					"name": "claude-haiku-5-5",
+					"capabilities": {
+						"tools": {
+							"supported": true
+						},
+						"reasoning": {
+							"supported": true,
+							"effort": [
+								"low",
+								"medium",
+								"high",
+								"xhigh",
+								"max"
+							]
+						},
+						"cache": {
+							"explicit": {
+								"read": 0.1
+							}
+						}
+					},
+					"limit": {
+						"context": 1000000,
+						"output": 128000
+					},
+					"cost": {
+						"text": {
+							"input": {
+								"price": 0.5
+							},
+							"output": {
+								"price": 2
+							}
+						}
+					},
+					"api": {
+						"messages": {}
+					}
+				},
+				{
+					"id": "gemini-3.8-flash",
+					"capabilities": {
+						"tools": {
+							"supported": true
+						}
+					},
+					"api": {
+						"generate-content": {}
+					}
+				}
+			]
+		},
+		"nowMs": 1790337600000,
+		"passes": [
+			{
+				"use": "chat",
+				"zdrOnly": false
+			},
+			{
+				"use": "analysis",
+				"zdrOnly": false
+			}
+		]
+	},
+	"expected": {
+		"passes": [
+			[
+				{
+					"key": "openai/gpt-6-luna",
+					"status": "ok",
+					"efforts": [
+						"none",
+						"low",
+						"medium",
+						"high",
+						"xhigh",
+						"max"
+					],
+					"promptLimit": 922000,
+					"outputLimit": 128000,
+					"price": {
+						"prompt": [
+							0.1,
+							0.1
+						],
+						"completion": [
+							0.5,
+							0.5
+						],
+						"tiers": [
+							{
+								"minPromptTokens": 0,
+								"prompt": 0.1,
+								"completion": 0.5
+							}
+						]
+					},
+					"hosts": [],
+					"dataKept": true,
+					"api": {
+						"family": "responses",
+						"structured": true,
+						"choice": [
+							"auto",
+							"none",
+							"required",
+							"tool"
+						],
+						"strict": false
+					},
+					"cache": "implicit"
+				},
+				{
+					"key": "deepseek/deepseek-v4.1-flash",
+					"status": "ok",
+					"efforts": [
+						"low",
+						"high",
+						"max"
+					],
+					"promptLimit": 1000000,
+					"outputLimit": 384000,
+					"price": {
+						"prompt": [
+							0.15,
+							0.15
+						],
+						"completion": [
+							0.6,
+							0.6
+						],
+						"tiers": [
+							{
+								"minPromptTokens": 0,
+								"prompt": 0.15,
+								"completion": 0.6
+							}
+						]
+					},
+					"hosts": [],
+					"api": {
+						"family": "chat-completions",
+						"structured": true,
+						"choice": [
+							"auto",
+							"none",
+							"required",
+							"tool"
+						],
+						"strict": false,
+						"reasoning": "reasoning_content",
+						"toggle": true
+					},
+					"cache": "implicit"
+				},
+				{
+					"key": "minimax/minimax-m3",
+					"status": "ok",
+					"efforts": [],
+					"promptLimit": 1000000,
+					"outputLimit": 64000,
+					"price": {
+						"prompt": [
+							0.5,
+							0.5
+						],
+						"completion": [
+							2,
+							2
+						],
+						"tiers": [
+							{
+								"minPromptTokens": 0,
+								"prompt": 0.5,
+								"completion": 2
+							}
+						]
+					},
+					"hosts": [],
+					"api": {
+						"family": "messages",
+						"structured": false,
+						"choice": [
+							"auto",
+							"none"
+						],
+						"strict": true
+					},
+					"cache": "explicit"
+				},
+				{
+					"key": "x-ai/grok-4.7",
+					"status": "ok",
+					"efforts": [
+						"low",
+						"medium",
+						"high",
+						"xhigh"
+					],
+					"promptLimit": 500000,
+					"outputLimit": 500000,
+					"price": {
+						"prompt": [
+							2,
+							2
+						],
+						"completion": [
+							6,
+							6
+						],
+						"tiers": [
+							{
+								"minPromptTokens": 0,
+								"prompt": 2,
+								"completion": 6
+							}
+						]
+					},
+					"hosts": [],
+					"dataKept": true,
+					"api": {
+						"family": "responses",
+						"structured": false,
+						"choice": [
+							"auto"
+						],
+						"strict": false
+					},
+					"cache": "implicit"
+				},
+				{
+					"key": "anthropic/claude-haiku-5.5",
+					"status": "ok",
+					"efforts": [
+						"low",
+						"medium",
+						"high",
+						"xhigh",
+						"max"
+					],
+					"promptLimit": 1000000,
+					"outputLimit": 128000,
+					"price": {
+						"prompt": [
+							0.5,
+							0.5
+						],
+						"completion": [
+							2,
+							2
+						],
+						"tiers": [
+							{
+								"minPromptTokens": 0,
+								"prompt": 0.5,
+								"completion": 2
+							}
+						]
+					},
+					"hosts": [],
+					"dataKept": true,
+					"api": {
+						"family": "messages",
+						"structured": false,
+						"choice": [
+							"auto"
+						],
+						"strict": false
+					},
+					"cache": "explicit"
+				},
+				{
+					"key": "google/gemini-3.8-flash",
+					"status": "ok",
+					"efforts": [],
+					"hosts": [],
+					"dataKept": true,
+					"api": {
+						"family": "generate-content",
+						"structured": false,
+						"choice": [
+							"auto"
+						],
+						"strict": false
+					},
+					"cache": "implicit"
+				}
+			],
+			[
+				{
+					"key": "openai/gpt-6-luna",
+					"status": "ok",
+					"efforts": [
+						"none",
+						"low",
+						"medium",
+						"high",
+						"xhigh",
+						"max"
+					],
+					"promptLimit": 922000,
+					"outputLimit": 128000,
+					"price": {
+						"prompt": [
+							0.1,
+							0.1
+						],
+						"completion": [
+							0.5,
+							0.5
+						],
+						"tiers": [
+							{
+								"minPromptTokens": 0,
+								"prompt": 0.1,
+								"completion": 0.5
+							}
+						]
+					},
+					"hosts": [],
+					"dataKept": true,
+					"api": {
+						"family": "responses",
+						"structured": true,
+						"choice": [
+							"auto",
+							"none",
+							"required",
+							"tool"
+						],
+						"strict": false
+					},
+					"cache": "implicit"
+				},
+				{
+					"key": "deepseek/deepseek-v4.1-flash",
+					"status": "ok",
+					"efforts": [
+						"low",
+						"high",
+						"max"
+					],
+					"promptLimit": 1000000,
+					"outputLimit": 384000,
+					"price": {
+						"prompt": [
+							0.15,
+							0.15
+						],
+						"completion": [
+							0.6,
+							0.6
+						],
+						"tiers": [
+							{
+								"minPromptTokens": 0,
+								"prompt": 0.15,
+								"completion": 0.6
+							}
+						]
+					},
+					"hosts": [],
+					"api": {
+						"family": "chat-completions",
+						"structured": true,
+						"choice": [
+							"auto",
+							"none",
+							"required",
+							"tool"
+						],
+						"strict": false,
+						"reasoning": "reasoning_content",
+						"toggle": true
+					},
+					"cache": "implicit"
+				},
+				{
+					"key": "minimax/minimax-m3",
+					"status": "ok",
+					"efforts": [],
+					"promptLimit": 1000000,
+					"outputLimit": 64000,
+					"price": {
+						"prompt": [
+							0.5,
+							0.5
+						],
+						"completion": [
+							2,
+							2
+						],
+						"tiers": [
+							{
+								"minPromptTokens": 0,
+								"prompt": 0.5,
+								"completion": 2
+							}
+						]
+					},
+					"hosts": [],
+					"api": {
+						"family": "messages",
+						"structured": false,
+						"choice": [
+							"auto",
+							"none"
+						],
+						"strict": true
+					},
+					"cache": "explicit"
+				},
+				{
+					"key": "x-ai/grok-4.7",
+					"status": "ok",
+					"efforts": [
+						"low",
+						"medium",
+						"high",
+						"xhigh"
+					],
+					"promptLimit": 500000,
+					"outputLimit": 500000,
+					"price": {
+						"prompt": [
+							2,
+							2
+						],
+						"completion": [
+							6,
+							6
+						],
+						"tiers": [
+							{
+								"minPromptTokens": 0,
+								"prompt": 2,
+								"completion": 6
+							}
+						]
+					},
+					"hosts": [],
+					"dataKept": true,
+					"api": {
+						"family": "responses",
+						"structured": false,
+						"choice": [
+							"auto"
+						],
+						"strict": false
+					},
+					"cache": "implicit"
+				},
+				{
+					"key": "anthropic/claude-haiku-5.5",
+					"status": "ok",
+					"efforts": [
+						"low",
+						"medium",
+						"high",
+						"xhigh",
+						"max"
+					],
+					"promptLimit": 1000000,
+					"outputLimit": 128000,
+					"price": {
+						"prompt": [
+							0.5,
+							0.5
+						],
+						"completion": [
+							2,
+							2
+						],
+						"tiers": [
+							{
+								"minPromptTokens": 0,
+								"prompt": 0.5,
+								"completion": 2
+							}
+						]
+					},
+					"hosts": [],
+					"dataKept": true,
+					"api": {
+						"family": "messages",
+						"structured": false,
+						"choice": [
+							"auto"
+						],
+						"strict": false
+					},
+					"cache": "explicit"
+				},
+				{
+					"key": "google/gemini-3.8-flash",
+					"status": "ok",
+					"efforts": [],
+					"hosts": [],
+					"dataKept": true,
+					"api": {
+						"family": "generate-content",
+						"structured": false,
+						"choice": [
+							"auto"
+						],
+						"strict": false
+					},
+					"cache": "implicit"
+				}
+			]
+		]
+	}
+}

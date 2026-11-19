@@ -1,0 +1,69 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.opencodeJoin",
+	"name": "join-no-limits-and-no-cost",
+	"input": {
+		"rows": [
+			"openai/gpt-6-luna"
+		],
+		"plan": "go",
+		"models": {
+			"data": [
+				{
+					"id": "gpt-6-luna",
+					"name": "gpt-6-luna",
+					"capabilities": {
+						"tools": {
+							"supported": true
+						},
+						"reasoning": {
+							"supported": true,
+							"effort": [
+								"low",
+								"high"
+							]
+						}
+					},
+					"limit": null,
+					"cost": null,
+					"api": {
+						"chat-completions": {}
+					}
+				}
+			]
+		},
+		"nowMs": 1790337600000,
+		"passes": [
+			{
+				"use": "chat",
+				"zdrOnly": false
+			}
+		]
+	},
+	"expected": {
+		"passes": [
+			[
+				{
+					"key": "openai/gpt-6-luna",
+					"status": "ok",
+					"efforts": [
+						"low",
+						"high"
+					],
+					"hosts": [],
+					"dataKept": true,
+					"api": {
+						"family": "chat-completions",
+						"structured": false,
+						"choice": [
+							"auto"
+						],
+						"strict": false
+					},
+					"cache": "implicit"
+				}
+			]
+		]
+	}
+}

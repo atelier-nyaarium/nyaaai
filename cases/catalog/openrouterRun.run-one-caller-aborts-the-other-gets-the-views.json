@@ -1,0 +1,174 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.openrouterRun",
+	"name": "run-one-caller-aborts-the-other-gets-the-views",
+	"input": {
+		"startMs": 1790337600000,
+		"rows": [
+			"openai/gpt-6-luna",
+			"anthropic/claude-opus-5.5",
+			"mistralai/mistral-large-2512"
+		],
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "openai/gpt-6-luna",
+							"context_length": 1000000,
+							"pricing": {
+								"prompt": "0.00000012",
+								"completion": "0.0000006"
+							},
+							"reasoning": {
+								"supported_efforts": [
+									"high",
+									"low"
+								]
+							}
+						},
+						{
+							"id": "anthropic/claude-opus-5.5",
+							"pricing": {
+								"prompt": "0.000005",
+								"completion": "0.000025"
+							}
+						},
+						{
+							"id": "mistralai/mistral-large-2512"
+						}
+					]
+				},
+				"headMs": 10
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"model_id": "openai/gpt-6-luna",
+							"tag": "alpha",
+							"supported_parameters": [
+								"tools",
+								"reasoning",
+								"response_format",
+								"structured_outputs"
+							],
+							"pricing": {
+								"prompt": "0.00000012",
+								"completion": "0.0000006"
+							}
+						},
+						{
+							"model_id": "anthropic/claude-opus-5.5",
+							"tag": "beta",
+							"supported_parameters": [
+								"tools",
+								"reasoning",
+								"response_format",
+								"structured_outputs"
+							]
+						},
+						{
+							"model_id": "mistralai/mistral-large-2512",
+							"tag": "gamma",
+							"supported_parameters": [
+								"tools"
+							]
+						}
+					]
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "together",
+				"calls": [
+					{
+						"kind": "views",
+						"abortAfterMs": 3
+					},
+					{
+						"kind": "views"
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600010,
+				"answers": [
+					{
+						"kind": "thrown",
+						"message": "caller aborted"
+					},
+					{
+						"kind": "views",
+						"views": [
+							{
+								"key": "openai/gpt-6-luna",
+								"status": "ok",
+								"efforts": [
+									"low",
+									"high"
+								],
+								"promptLimit": 1000000,
+								"price": {
+									"prompt": [
+										0.12,
+										0.12
+									],
+									"completion": [
+										0.6,
+										0.6
+									],
+									"tiers": [
+										{
+											"minPromptTokens": 0,
+											"prompt": 0.12,
+											"completion": 0.6
+										}
+									]
+								},
+								"hosts": [
+									"alpha"
+								]
+							},
+							{
+								"key": "anthropic/claude-opus-5.5",
+								"status": "ok",
+								"efforts": [],
+								"hosts": [
+									"beta"
+								]
+							},
+							{
+								"key": "mistralai/mistral-large-2512",
+								"status": "ok",
+								"efforts": [],
+								"hosts": [
+									"gamma"
+								]
+							}
+						]
+					}
+				],
+				"rowReads": 1
+			}
+		],
+		"requests": [
+			"/models",
+			"/endpoints/zdr"
+		],
+		"read": [
+			1,
+			1
+		],
+		"waiting": [],
+		"refreshed": 1
+	}
+}

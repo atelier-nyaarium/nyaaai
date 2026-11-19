@@ -1,0 +1,41 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterHop",
+	"name": "hop-a-slow-read-ends-at-the-deadline",
+	"input": {
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"endpoints": [
+							{
+								"tag": "a"
+							},
+							{
+								"tag": "b"
+							}
+						]
+					}
+				},
+				"headMs": 30001
+			}
+		],
+		"id": "lab/glm",
+		"viewHosts": [
+			"a",
+			"b"
+		]
+	},
+	"expected": {
+		"hosts": null,
+		"thrown": "The operation timed out.",
+		"requests": [
+			"/models/lab/glm/endpoints"
+		],
+		"waiting": [],
+		"nowMs": 1790337630001
+	}
+}

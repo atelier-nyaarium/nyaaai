@@ -1,0 +1,33 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.openrouterEndpoints",
+	"name": "endpoints-minimal",
+	"input": {
+		"body": {
+			"data": [
+				{
+					"model_id": "lab/bare"
+				}
+			]
+		}
+	},
+	"expected": {
+		"endpoints": [
+			{
+				"model": "lab/bare",
+				"hosts": [
+					{
+						"model_id": "lab/bare",
+						"tag": null,
+						"provider_name": null,
+						"context_length": null,
+						"max_prompt_tokens": null,
+						"supported_parameters": null,
+						"pricing": null
+					}
+				]
+			}
+		]
+	}
+}

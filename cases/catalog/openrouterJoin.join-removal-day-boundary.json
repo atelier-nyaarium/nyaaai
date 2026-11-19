@@ -1,0 +1,99 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.openrouterJoin",
+	"name": "join-removal-day-boundary",
+	"input": {
+		"rows": [
+			"openai/gpt-6-luna",
+			"anthropic/claude-opus-5.5",
+			"openai/gpt-6.1-sol"
+		],
+		"models": {
+			"data": [
+				{
+					"id": "openai/gpt-6-luna",
+					"expiration_date": "2026-09-25"
+				},
+				{
+					"id": "anthropic/claude-opus-5.5",
+					"expiration_date": "2026-09-26"
+				},
+				{
+					"id": "openai/gpt-6.1-sol",
+					"expiration_date": "2026-09-25T12:00:00Z"
+				}
+			]
+		},
+		"zdr": {
+			"data": [
+				{
+					"model_id": "openai/gpt-6-luna",
+					"tag": "h",
+					"supported_parameters": [
+						"tools",
+						"reasoning",
+						"response_format",
+						"structured_outputs"
+					]
+				},
+				{
+					"model_id": "anthropic/claude-opus-5.5",
+					"tag": "h",
+					"supported_parameters": [
+						"tools",
+						"reasoning",
+						"response_format",
+						"structured_outputs"
+					]
+				},
+				{
+					"model_id": "openai/gpt-6.1-sol",
+					"tag": "h",
+					"supported_parameters": [
+						"tools",
+						"reasoning",
+						"response_format",
+						"structured_outputs"
+					]
+				}
+			]
+		},
+		"nowMs": 1790337600000,
+		"passes": [
+			{
+				"use": "chat",
+				"zdrOnly": true
+			}
+		]
+	},
+	"expected": {
+		"passes": [
+			[
+				{
+					"key": "openai/gpt-6-luna",
+					"status": "retired",
+					"retiredOn": "2026-09-25",
+					"efforts": [],
+					"hosts": []
+				},
+				{
+					"key": "anthropic/claude-opus-5.5",
+					"status": "ok",
+					"retiredOn": "2026-09-26",
+					"efforts": [],
+					"hosts": [
+						"h"
+					]
+				},
+				{
+					"key": "openai/gpt-6.1-sol",
+					"status": "retired",
+					"retiredOn": "2026-09-25T12:00:00Z",
+					"efforts": [],
+					"hosts": []
+				}
+			]
+		]
+	}
+}

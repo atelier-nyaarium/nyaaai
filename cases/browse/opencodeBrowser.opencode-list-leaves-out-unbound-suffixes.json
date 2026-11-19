@@ -1,0 +1,286 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.opencodeBrowser",
+	"name": "opencode-list-leaves-out-unbound-suffixes",
+	"input": {
+		"startMs": 1790337600000,
+		"plan": "go",
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "beam-free",
+							"name": "beam-free",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								},
+								"reasoning": {
+									"supported": true,
+									"effort": [
+										"low",
+										"high"
+									]
+								}
+							},
+							"limit": {
+								"context": 100000,
+								"output": 32000
+							},
+							"cost": {
+								"text": {
+									"input": {
+										"price": 0.5
+									},
+									"output": {
+										"price": 2
+									}
+								}
+							},
+							"api": {
+								"chat-completions": {}
+							}
+						},
+						{
+							"id": "glm-latest",
+							"name": "glm-latest",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								},
+								"reasoning": {
+									"supported": true,
+									"effort": [
+										"low",
+										"high"
+									]
+								}
+							},
+							"limit": {
+								"context": 100000,
+								"output": 32000
+							},
+							"cost": {
+								"text": {
+									"input": {
+										"price": 0.5
+									},
+									"output": {
+										"price": 2
+									}
+								}
+							},
+							"api": {
+								"chat-completions": {}
+							}
+						},
+						{
+							"id": "glm-5.3-flash",
+							"name": "glm-5.3-flash",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								},
+								"reasoning": {
+									"supported": true,
+									"effort": [
+										"low",
+										"high"
+									]
+								}
+							},
+							"limit": {
+								"context": 100000,
+								"output": 32000
+							},
+							"cost": {
+								"text": {
+									"input": {
+										"price": 0.5
+									},
+									"output": {
+										"price": 2
+									}
+								}
+							},
+							"api": {
+								"chat-completions": {}
+							}
+						},
+						{
+							"id": "free-glm",
+							"name": "free-glm",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								},
+								"reasoning": {
+									"supported": true,
+									"effort": [
+										"low",
+										"high"
+									]
+								}
+							},
+							"limit": {
+								"context": 100000,
+								"output": 32000
+							},
+							"cost": {
+								"text": {
+									"input": {
+										"price": 0.5
+									},
+									"output": {
+										"price": 2
+									}
+								}
+							},
+							"api": {
+								"chat-completions": {}
+							}
+						},
+						{
+							"id": "glm-free-2",
+							"name": "glm-free-2",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								},
+								"reasoning": {
+									"supported": true,
+									"effort": [
+										"low",
+										"high"
+									]
+								}
+							},
+							"limit": {
+								"context": 100000,
+								"output": 32000
+							},
+							"cost": {
+								"text": {
+									"input": {
+										"price": 0.5
+									},
+									"output": {
+										"price": 2
+									}
+								}
+							},
+							"api": {
+								"chat-completions": {}
+							}
+						}
+					]
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "list"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "list",
+					"models": [
+						{
+							"id": "opencode:glm-5.3-flash",
+							"display": "opencode/glm-5.3-flash",
+							"label": "glm-5.3-flash",
+							"curated": false,
+							"description": "",
+							"context": 100000,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools",
+								"reasoning"
+							],
+							"price": {
+								"prompt": [
+									0.5,
+									0.5
+								],
+								"completion": [
+									2,
+									2
+								]
+							},
+							"tools": "ok",
+							"family": "chat-completions"
+						},
+						{
+							"id": "opencode:free-glm",
+							"display": "opencode/free-glm",
+							"label": "free-glm",
+							"curated": false,
+							"description": "",
+							"context": 100000,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools",
+								"reasoning"
+							],
+							"price": {
+								"prompt": [
+									0.5,
+									0.5
+								],
+								"completion": [
+									2,
+									2
+								]
+							},
+							"tools": "noZdrHost",
+							"family": "chat-completions"
+						},
+						{
+							"id": "opencode:glm-free-2",
+							"display": "opencode/glm-free-2",
+							"label": "glm-free-2",
+							"curated": false,
+							"description": "",
+							"context": 100000,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools",
+								"reasoning"
+							],
+							"price": {
+								"prompt": [
+									0.5,
+									0.5
+								],
+								"completion": [
+									2,
+									2
+								]
+							},
+							"tools": "ok",
+							"family": "chat-completions"
+						}
+					]
+				}
+			}
+		],
+		"requests": [
+			"/v1/models"
+		],
+		"read": [
+			1
+		],
+		"waiting": []
+	}
+}

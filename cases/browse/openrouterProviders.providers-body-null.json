@@ -1,0 +1,13 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterProviders",
+	"name": "providers-body-null",
+	"input": {
+		"raw": null,
+		"zdr": null
+	},
+	"expected": {
+		"providers": null
+	}
+}

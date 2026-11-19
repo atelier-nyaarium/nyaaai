@@ -1,0 +1,1141 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.opencodeBrowser",
+	"name": "opencode-list-reads-once-in-twelve-hours",
+	"input": {
+		"startMs": 1790337600000,
+		"plan": "go",
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "gpt-6-luna",
+							"name": "gpt-6-luna",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								},
+								"reasoning": {
+									"supported": true,
+									"effort": [
+										"none",
+										"low",
+										"medium",
+										"high",
+										"xhigh",
+										"max"
+									]
+								},
+								"structured_output": true
+							},
+							"limit": {
+								"context": 1050000,
+								"input": 922000,
+								"output": 128000
+							},
+							"cost": {
+								"text": {
+									"input": {
+										"price": 0.1
+									},
+									"output": {
+										"price": 0.5
+									}
+								}
+							},
+							"api": {
+								"responses": {
+									"capabilities": {
+										"tools": {
+											"choice": [
+												"auto",
+												"none",
+												"required",
+												"tool"
+											]
+										}
+									}
+								}
+							}
+						},
+						{
+							"id": "deepseek-v4.1-flash",
+							"name": "deepseek-v4.1-flash",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								},
+								"reasoning": {
+									"supported": true,
+									"effort": [
+										"low",
+										"high",
+										"max"
+									],
+									"toggle": true
+								},
+								"structured_output": true
+							},
+							"limit": {
+								"context": 1000000,
+								"output": 384000
+							},
+							"cost": {
+								"text": {
+									"input": {
+										"price": 0.15
+									},
+									"output": {
+										"price": 0.6
+									}
+								}
+							},
+							"api": {
+								"chat-completions": {
+									"compatibility": {
+										"reasoning_field": "reasoning_content"
+									},
+									"capabilities": {
+										"tools": {
+											"choice": [
+												"auto",
+												"none",
+												"required",
+												"tool"
+											]
+										}
+									}
+								}
+							}
+						},
+						{
+							"id": "minimax-m3",
+							"name": "minimax-m3",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								}
+							},
+							"limit": {
+								"context": 1000000,
+								"output": 64000
+							},
+							"cost": {
+								"text": {
+									"input": {
+										"price": 0.5
+									},
+									"output": {
+										"price": 2
+									}
+								}
+							},
+							"api": {
+								"messages": {
+									"capabilities": {
+										"tools": {
+											"choice": [
+												"auto",
+												"none"
+											],
+											"strict": true
+										}
+									}
+								}
+							}
+						},
+						{
+							"id": "grok-4.7",
+							"name": "grok-4.7",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								},
+								"reasoning": {
+									"supported": true,
+									"effort": [
+										"low",
+										"medium",
+										"high",
+										"xhigh"
+									]
+								},
+								"cache": {
+									"implicit": true
+								}
+							},
+							"limit": {
+								"context": 500000,
+								"output": 500000
+							},
+							"cost": {
+								"text": {
+									"input": {
+										"price": 2
+									},
+									"output": {
+										"price": 6
+									}
+								}
+							},
+							"api": {
+								"responses": {}
+							}
+						},
+						{
+							"id": "claude-haiku-5-5",
+							"name": "claude-haiku-5-5",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								},
+								"reasoning": {
+									"supported": true,
+									"effort": [
+										"low",
+										"medium",
+										"high",
+										"xhigh",
+										"max"
+									]
+								},
+								"cache": {
+									"explicit": {
+										"read": 0.1
+									}
+								}
+							},
+							"limit": {
+								"context": 1000000,
+								"output": 128000
+							},
+							"cost": {
+								"text": {
+									"input": {
+										"price": 0.5
+									},
+									"output": {
+										"price": 2
+									}
+								}
+							},
+							"api": {
+								"messages": {}
+							}
+						},
+						{
+							"id": "gemini-3.8-flash",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								}
+							},
+							"api": {
+								"generate-content": {}
+							}
+						}
+					]
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "gpt-6-luna",
+							"name": "gpt-6-luna",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								},
+								"reasoning": {
+									"supported": true,
+									"effort": [
+										"none",
+										"low",
+										"medium",
+										"high",
+										"xhigh",
+										"max"
+									]
+								},
+								"structured_output": true
+							},
+							"limit": {
+								"context": 1050000,
+								"input": 922000,
+								"output": 128000
+							},
+							"cost": {
+								"text": {
+									"input": {
+										"price": 0.1
+									},
+									"output": {
+										"price": 0.5
+									}
+								}
+							},
+							"api": {
+								"responses": {
+									"capabilities": {
+										"tools": {
+											"choice": [
+												"auto",
+												"none",
+												"required",
+												"tool"
+											]
+										}
+									}
+								}
+							}
+						},
+						{
+							"id": "deepseek-v4.1-flash",
+							"name": "deepseek-v4.1-flash",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								},
+								"reasoning": {
+									"supported": true,
+									"effort": [
+										"low",
+										"high",
+										"max"
+									],
+									"toggle": true
+								},
+								"structured_output": true
+							},
+							"limit": {
+								"context": 1000000,
+								"output": 384000
+							},
+							"cost": {
+								"text": {
+									"input": {
+										"price": 0.15
+									},
+									"output": {
+										"price": 0.6
+									}
+								}
+							},
+							"api": {
+								"chat-completions": {
+									"compatibility": {
+										"reasoning_field": "reasoning_content"
+									},
+									"capabilities": {
+										"tools": {
+											"choice": [
+												"auto",
+												"none",
+												"required",
+												"tool"
+											]
+										}
+									}
+								}
+							}
+						},
+						{
+							"id": "minimax-m3",
+							"name": "minimax-m3",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								}
+							},
+							"limit": {
+								"context": 1000000,
+								"output": 64000
+							},
+							"cost": {
+								"text": {
+									"input": {
+										"price": 0.5
+									},
+									"output": {
+										"price": 2
+									}
+								}
+							},
+							"api": {
+								"messages": {
+									"capabilities": {
+										"tools": {
+											"choice": [
+												"auto",
+												"none"
+											],
+											"strict": true
+										}
+									}
+								}
+							}
+						},
+						{
+							"id": "grok-4.7",
+							"name": "grok-4.7",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								},
+								"reasoning": {
+									"supported": true,
+									"effort": [
+										"low",
+										"medium",
+										"high",
+										"xhigh"
+									]
+								},
+								"cache": {
+									"implicit": true
+								}
+							},
+							"limit": {
+								"context": 500000,
+								"output": 500000
+							},
+							"cost": {
+								"text": {
+									"input": {
+										"price": 2
+									},
+									"output": {
+										"price": 6
+									}
+								}
+							},
+							"api": {
+								"responses": {}
+							}
+						},
+						{
+							"id": "claude-haiku-5-5",
+							"name": "claude-haiku-5-5",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								},
+								"reasoning": {
+									"supported": true,
+									"effort": [
+										"low",
+										"medium",
+										"high",
+										"xhigh",
+										"max"
+									]
+								},
+								"cache": {
+									"explicit": {
+										"read": 0.1
+									}
+								}
+							},
+							"limit": {
+								"context": 1000000,
+								"output": 128000
+							},
+							"cost": {
+								"text": {
+									"input": {
+										"price": 0.5
+									},
+									"output": {
+										"price": 2
+									}
+								}
+							},
+							"api": {
+								"messages": {}
+							}
+						},
+						{
+							"id": "gemini-3.8-flash",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								}
+							},
+							"api": {
+								"generate-content": {}
+							}
+						}
+					]
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "list"
+			},
+			{
+				"kind": "list"
+			},
+			{
+				"kind": "advance",
+				"ms": 43199999
+			},
+			{
+				"kind": "list"
+			},
+			{
+				"kind": "advance",
+				"ms": 1
+			},
+			{
+				"kind": "list"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "list",
+					"models": [
+						{
+							"id": "opencode:gpt-6-luna",
+							"display": "opencode/gpt-6-luna",
+							"label": "gpt-6-luna",
+							"curated": true,
+							"description": "",
+							"context": 1050000,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools",
+								"reasoning",
+								"structured_output"
+							],
+							"price": {
+								"prompt": [
+									0.1,
+									0.1
+								],
+								"completion": [
+									0.5,
+									0.5
+								]
+							},
+							"tools": "noZdrHost",
+							"family": "responses"
+						},
+						{
+							"id": "opencode:deepseek-v4.1-flash",
+							"display": "opencode/deepseek-v4.1-flash",
+							"label": "deepseek-v4.1-flash",
+							"curated": true,
+							"description": "",
+							"context": 1000000,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools",
+								"reasoning",
+								"structured_output"
+							],
+							"price": {
+								"prompt": [
+									0.15,
+									0.15
+								],
+								"completion": [
+									0.6,
+									0.6
+								]
+							},
+							"tools": "ok",
+							"family": "chat-completions"
+						},
+						{
+							"id": "opencode:minimax-m3",
+							"display": "opencode/minimax-m3",
+							"label": "minimax-m3",
+							"curated": true,
+							"description": "",
+							"context": 1000000,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools"
+							],
+							"price": {
+								"prompt": [
+									0.5,
+									0.5
+								],
+								"completion": [
+									2,
+									2
+								]
+							},
+							"tools": "ok",
+							"family": "messages"
+						},
+						{
+							"id": "opencode:grok-4.7",
+							"display": "opencode/grok-4.7",
+							"label": "grok-4.7",
+							"curated": true,
+							"description": "",
+							"context": 500000,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools",
+								"reasoning"
+							],
+							"price": {
+								"prompt": [
+									2,
+									2
+								],
+								"completion": [
+									6,
+									6
+								]
+							},
+							"tools": "noZdrHost",
+							"family": "responses"
+						},
+						{
+							"id": "opencode:claude-haiku-5-5",
+							"display": "opencode/claude-haiku-5-5",
+							"label": "claude-haiku-5-5",
+							"curated": true,
+							"description": "",
+							"context": 1000000,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools",
+								"reasoning"
+							],
+							"price": {
+								"prompt": [
+									0.5,
+									0.5
+								],
+								"completion": [
+									2,
+									2
+								]
+							},
+							"tools": "noZdrHost",
+							"family": "messages"
+						},
+						{
+							"id": "opencode:gemini-3.8-flash",
+							"display": "opencode/gemini-3.8-flash",
+							"label": "gemini-3.8-flash",
+							"curated": true,
+							"description": "",
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools"
+							],
+							"price": "unknown",
+							"tools": "noZdrHost",
+							"family": "generate-content"
+						}
+					]
+				}
+			},
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "list",
+					"models": [
+						{
+							"id": "opencode:gpt-6-luna",
+							"display": "opencode/gpt-6-luna",
+							"label": "gpt-6-luna",
+							"curated": true,
+							"description": "",
+							"context": 1050000,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools",
+								"reasoning",
+								"structured_output"
+							],
+							"price": {
+								"prompt": [
+									0.1,
+									0.1
+								],
+								"completion": [
+									0.5,
+									0.5
+								]
+							},
+							"tools": "noZdrHost",
+							"family": "responses"
+						},
+						{
+							"id": "opencode:deepseek-v4.1-flash",
+							"display": "opencode/deepseek-v4.1-flash",
+							"label": "deepseek-v4.1-flash",
+							"curated": true,
+							"description": "",
+							"context": 1000000,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools",
+								"reasoning",
+								"structured_output"
+							],
+							"price": {
+								"prompt": [
+									0.15,
+									0.15
+								],
+								"completion": [
+									0.6,
+									0.6
+								]
+							},
+							"tools": "ok",
+							"family": "chat-completions"
+						},
+						{
+							"id": "opencode:minimax-m3",
+							"display": "opencode/minimax-m3",
+							"label": "minimax-m3",
+							"curated": true,
+							"description": "",
+							"context": 1000000,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools"
+							],
+							"price": {
+								"prompt": [
+									0.5,
+									0.5
+								],
+								"completion": [
+									2,
+									2
+								]
+							},
+							"tools": "ok",
+							"family": "messages"
+						},
+						{
+							"id": "opencode:grok-4.7",
+							"display": "opencode/grok-4.7",
+							"label": "grok-4.7",
+							"curated": true,
+							"description": "",
+							"context": 500000,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools",
+								"reasoning"
+							],
+							"price": {
+								"prompt": [
+									2,
+									2
+								],
+								"completion": [
+									6,
+									6
+								]
+							},
+							"tools": "noZdrHost",
+							"family": "responses"
+						},
+						{
+							"id": "opencode:claude-haiku-5-5",
+							"display": "opencode/claude-haiku-5-5",
+							"label": "claude-haiku-5-5",
+							"curated": true,
+							"description": "",
+							"context": 1000000,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools",
+								"reasoning"
+							],
+							"price": {
+								"prompt": [
+									0.5,
+									0.5
+								],
+								"completion": [
+									2,
+									2
+								]
+							},
+							"tools": "noZdrHost",
+							"family": "messages"
+						},
+						{
+							"id": "opencode:gemini-3.8-flash",
+							"display": "opencode/gemini-3.8-flash",
+							"label": "gemini-3.8-flash",
+							"curated": true,
+							"description": "",
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools"
+							],
+							"price": "unknown",
+							"tools": "noZdrHost",
+							"family": "generate-content"
+						}
+					]
+				}
+			},
+			{
+				"nowMs": 1790380799999,
+				"answer": {
+					"kind": "advanced"
+				}
+			},
+			{
+				"nowMs": 1790380799999,
+				"answer": {
+					"kind": "list",
+					"models": [
+						{
+							"id": "opencode:gpt-6-luna",
+							"display": "opencode/gpt-6-luna",
+							"label": "gpt-6-luna",
+							"curated": true,
+							"description": "",
+							"context": 1050000,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools",
+								"reasoning",
+								"structured_output"
+							],
+							"price": {
+								"prompt": [
+									0.1,
+									0.1
+								],
+								"completion": [
+									0.5,
+									0.5
+								]
+							},
+							"tools": "noZdrHost",
+							"family": "responses"
+						},
+						{
+							"id": "opencode:deepseek-v4.1-flash",
+							"display": "opencode/deepseek-v4.1-flash",
+							"label": "deepseek-v4.1-flash",
+							"curated": true,
+							"description": "",
+							"context": 1000000,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools",
+								"reasoning",
+								"structured_output"
+							],
+							"price": {
+								"prompt": [
+									0.15,
+									0.15
+								],
+								"completion": [
+									0.6,
+									0.6
+								]
+							},
+							"tools": "ok",
+							"family": "chat-completions"
+						},
+						{
+							"id": "opencode:minimax-m3",
+							"display": "opencode/minimax-m3",
+							"label": "minimax-m3",
+							"curated": true,
+							"description": "",
+							"context": 1000000,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools"
+							],
+							"price": {
+								"prompt": [
+									0.5,
+									0.5
+								],
+								"completion": [
+									2,
+									2
+								]
+							},
+							"tools": "ok",
+							"family": "messages"
+						},
+						{
+							"id": "opencode:grok-4.7",
+							"display": "opencode/grok-4.7",
+							"label": "grok-4.7",
+							"curated": true,
+							"description": "",
+							"context": 500000,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools",
+								"reasoning"
+							],
+							"price": {
+								"prompt": [
+									2,
+									2
+								],
+								"completion": [
+									6,
+									6
+								]
+							},
+							"tools": "noZdrHost",
+							"family": "responses"
+						},
+						{
+							"id": "opencode:claude-haiku-5-5",
+							"display": "opencode/claude-haiku-5-5",
+							"label": "claude-haiku-5-5",
+							"curated": true,
+							"description": "",
+							"context": 1000000,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools",
+								"reasoning"
+							],
+							"price": {
+								"prompt": [
+									0.5,
+									0.5
+								],
+								"completion": [
+									2,
+									2
+								]
+							},
+							"tools": "noZdrHost",
+							"family": "messages"
+						},
+						{
+							"id": "opencode:gemini-3.8-flash",
+							"display": "opencode/gemini-3.8-flash",
+							"label": "gemini-3.8-flash",
+							"curated": true,
+							"description": "",
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools"
+							],
+							"price": "unknown",
+							"tools": "noZdrHost",
+							"family": "generate-content"
+						}
+					]
+				}
+			},
+			{
+				"nowMs": 1790380800000,
+				"answer": {
+					"kind": "advanced"
+				}
+			},
+			{
+				"nowMs": 1790380800000,
+				"answer": {
+					"kind": "list",
+					"models": [
+						{
+							"id": "opencode:gpt-6-luna",
+							"display": "opencode/gpt-6-luna",
+							"label": "gpt-6-luna",
+							"curated": true,
+							"description": "",
+							"context": 1050000,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools",
+								"reasoning",
+								"structured_output"
+							],
+							"price": {
+								"prompt": [
+									0.1,
+									0.1
+								],
+								"completion": [
+									0.5,
+									0.5
+								]
+							},
+							"tools": "noZdrHost",
+							"family": "responses"
+						},
+						{
+							"id": "opencode:deepseek-v4.1-flash",
+							"display": "opencode/deepseek-v4.1-flash",
+							"label": "deepseek-v4.1-flash",
+							"curated": true,
+							"description": "",
+							"context": 1000000,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools",
+								"reasoning",
+								"structured_output"
+							],
+							"price": {
+								"prompt": [
+									0.15,
+									0.15
+								],
+								"completion": [
+									0.6,
+									0.6
+								]
+							},
+							"tools": "ok",
+							"family": "chat-completions"
+						},
+						{
+							"id": "opencode:minimax-m3",
+							"display": "opencode/minimax-m3",
+							"label": "minimax-m3",
+							"curated": true,
+							"description": "",
+							"context": 1000000,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools"
+							],
+							"price": {
+								"prompt": [
+									0.5,
+									0.5
+								],
+								"completion": [
+									2,
+									2
+								]
+							},
+							"tools": "ok",
+							"family": "messages"
+						},
+						{
+							"id": "opencode:grok-4.7",
+							"display": "opencode/grok-4.7",
+							"label": "grok-4.7",
+							"curated": true,
+							"description": "",
+							"context": 500000,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools",
+								"reasoning"
+							],
+							"price": {
+								"prompt": [
+									2,
+									2
+								],
+								"completion": [
+									6,
+									6
+								]
+							},
+							"tools": "noZdrHost",
+							"family": "responses"
+						},
+						{
+							"id": "opencode:claude-haiku-5-5",
+							"display": "opencode/claude-haiku-5-5",
+							"label": "claude-haiku-5-5",
+							"curated": true,
+							"description": "",
+							"context": 1000000,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools",
+								"reasoning"
+							],
+							"price": {
+								"prompt": [
+									0.5,
+									0.5
+								],
+								"completion": [
+									2,
+									2
+								]
+							},
+							"tools": "noZdrHost",
+							"family": "messages"
+						},
+						{
+							"id": "opencode:gemini-3.8-flash",
+							"display": "opencode/gemini-3.8-flash",
+							"label": "gemini-3.8-flash",
+							"curated": true,
+							"description": "",
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools"
+							],
+							"price": "unknown",
+							"tools": "noZdrHost",
+							"family": "generate-content"
+						}
+					]
+				}
+			}
+		],
+		"requests": [
+			"/v1/models",
+			"/v1/models"
+		],
+		"read": [
+			1,
+			1
+		],
+		"waiting": []
+	}
+}

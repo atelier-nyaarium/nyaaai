@@ -1,0 +1,48 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterModels",
+	"name": "models-curated-flag",
+	"input": {
+		"raw": [
+			{
+				"id": "openai/gpt-6-luna"
+			},
+			{
+				"id": "lab/model-a"
+			}
+		],
+		"zdr": {
+			"data": []
+		},
+		"nowMs": 1777593600000
+	},
+	"expected": {
+		"models": [
+			{
+				"id": "openrouter:openai/gpt-6-luna",
+				"display": "openai/gpt-6-luna",
+				"label": "openai/gpt-6-luna",
+				"curated": true,
+				"description": "",
+				"inputs": [],
+				"outputs": [],
+				"parameters": [],
+				"price": "unknown",
+				"tools": "noZdrHost"
+			},
+			{
+				"id": "openrouter:lab/model-a",
+				"display": "lab/model-a",
+				"label": "lab/model-a",
+				"curated": false,
+				"description": "",
+				"inputs": [],
+				"outputs": [],
+				"parameters": [],
+				"price": "unknown",
+				"tools": "noZdrHost"
+			}
+		]
+	}
+}

@@ -1,0 +1,60 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.opencodeBrowser",
+	"name": "opencode-tester-without-a-list-is-unknown",
+	"input": {
+		"startMs": 1790337600000,
+		"plan": "go",
+		"exchanges": [
+			{
+				"status": 500,
+				"json": {
+					"error": {
+						"message": "Down."
+					}
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "listed",
+				"id": "glm-5.3-flash"
+			},
+			{
+				"kind": "view",
+				"row": "opencode:glm-5.3-flash"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "listed",
+					"listed": null
+				}
+			},
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "view",
+					"view": {
+						"key": "opencode:glm-5.3-flash",
+						"status": "unknown",
+						"efforts": [],
+						"hosts": []
+					}
+				}
+			}
+		],
+		"requests": [
+			"/v1/models"
+		],
+		"read": [
+			1
+		],
+		"waiting": []
+	}
+}

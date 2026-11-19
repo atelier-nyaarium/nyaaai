@@ -1,0 +1,51 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterProviders",
+	"name": "providers-context_length-wrong-type",
+	"input": {
+		"raw": {
+			"data": {
+				"endpoints": [
+					{
+						"provider_name": "Host A",
+						"name": "Host A name",
+						"tag": "host-a",
+						"context_length": "7",
+						"max_completion_tokens": 118000,
+						"quantization": "fp8",
+						"uptime_last_30m": 99.5,
+						"pricing": {
+							"prompt": "0.00000049",
+							"completion": "0.00000154",
+							"input_cache_read": "0.00000009"
+						}
+					}
+				]
+			}
+		},
+		"zdr": {
+			"data": [
+				{
+					"model_id": "lab/model-a",
+					"tag": "host-a"
+				}
+			]
+		}
+	},
+	"expected": {
+		"providers": [
+			{
+				"name": "Host A",
+				"tag": "host-a",
+				"maxOutput": 118000,
+				"quantization": "fp8",
+				"prompt": 0.49,
+				"completion": 1.54,
+				"cacheRead": 0.09,
+				"uptime": 99.5,
+				"zdr": true
+			}
+		]
+	}
+}

@@ -1,0 +1,43 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterProviders",
+	"name": "providers-pricing-prompt-text-spelling",
+	"input": {
+		"raw": {
+			"data": {
+				"endpoints": [
+					{
+						"provider_name": "Host A",
+						"name": "Host A name",
+						"tag": "host-a",
+						"context_length": 131000,
+						"max_completion_tokens": 118000,
+						"quantization": "fp8",
+						"uptime_last_30m": 99.5,
+						"pricing": {
+							"prompt": 0.000001,
+							"completion": " 0.5 ",
+							"input_cache_read": "-1"
+						}
+					}
+				]
+			}
+		},
+		"zdr": null
+	},
+	"expected": {
+		"providers": [
+			{
+				"name": "Host A",
+				"tag": "host-a",
+				"context": 131000,
+				"maxOutput": 118000,
+				"quantization": "fp8",
+				"prompt": 1,
+				"uptime": 99.5,
+				"zdr": false
+			}
+		]
+	}
+}

@@ -1,0 +1,45 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.openrouterKey",
+	"name": "key-given-and-sent",
+	"input": {
+		"startMs": 1790337600000,
+		"stored": "key-0123456789abcdef",
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"usage": 1
+					}
+				}
+			}
+		],
+		"checks": [
+			{
+				"auth": "key",
+				"key": "key-fedcba9876543210"
+			}
+		]
+	},
+	"expected": {
+		"checks": [
+			{
+				"ok": true,
+				"reason": null,
+				"usage": 1,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			}
+		],
+		"requests": [
+			{
+				"path": "/key",
+				"authorization": "Bearer key-fedcba9876543210"
+			}
+		],
+		"waiting": []
+	}
+}

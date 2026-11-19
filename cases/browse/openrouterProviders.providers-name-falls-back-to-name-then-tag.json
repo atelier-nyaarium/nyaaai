@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterProviders",
+	"name": "providers-name-falls-back-to-name-then-tag",
+	"input": {
+		"raw": {
+			"data": {
+				"endpoints": [
+					{
+						"name": "Only name",
+						"tag": "t"
+					},
+					{
+						"tag": "only-tag"
+					},
+					{
+						"provider_name": "P",
+						"name": "N",
+						"tag": "t"
+					}
+				]
+			}
+		},
+		"zdr": null
+	},
+	"expected": {
+		"providers": [
+			{
+				"name": "Only name",
+				"tag": "t",
+				"zdr": false
+			},
+			{
+				"name": "only-tag",
+				"tag": "only-tag",
+				"zdr": false
+			},
+			{
+				"name": "P",
+				"tag": "t",
+				"zdr": false
+			}
+		]
+	}
+}

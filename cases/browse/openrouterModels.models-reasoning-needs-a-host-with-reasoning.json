@@ -1,0 +1,73 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterModels",
+	"name": "models-reasoning-needs-a-host-with-reasoning",
+	"input": {
+		"raw": [
+			{
+				"id": "lab/model-a",
+				"name": "Model A",
+				"description": "A model for cases.",
+				"context_length": 128000,
+				"architecture": {
+					"input_modalities": [
+						"text",
+						"image"
+					],
+					"output_modalities": [
+						"text"
+					]
+				},
+				"supported_parameters": [
+					"tools",
+					"reasoning"
+				],
+				"expiration_date": null,
+				"reasoning": {
+					"supported_efforts": [
+						"low",
+						"high"
+					]
+				}
+			}
+		],
+		"zdr": {
+			"data": [
+				{
+					"model_id": "lab/model-a",
+					"tag": "a",
+					"supported_parameters": [
+						"tools"
+					]
+				}
+			]
+		},
+		"nowMs": 1777593600000
+	},
+	"expected": {
+		"models": [
+			{
+				"id": "openrouter:lab/model-a",
+				"display": "lab/model-a",
+				"label": "Model A",
+				"curated": false,
+				"description": "A model for cases.",
+				"context": 128000,
+				"inputs": [
+					"text",
+					"image"
+				],
+				"outputs": [
+					"text"
+				],
+				"parameters": [
+					"tools",
+					"reasoning"
+				],
+				"price": "unknown",
+				"tools": "noZdrHost"
+			}
+		]
+	}
+}

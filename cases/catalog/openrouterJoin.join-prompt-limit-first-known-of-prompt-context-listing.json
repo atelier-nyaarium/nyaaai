@@ -1,0 +1,74 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.openrouterJoin",
+	"name": "join-prompt-limit-first-known-of-prompt-context-listing",
+	"input": {
+		"rows": [
+			"openai/gpt-6-luna"
+		],
+		"models": {
+			"data": [
+				{
+					"id": "openai/gpt-6-luna",
+					"context_length": 700
+				}
+			]
+		},
+		"zdr": {
+			"data": [
+				{
+					"model_id": "openai/gpt-6-luna",
+					"supported_parameters": [
+						"tools",
+						"reasoning"
+					],
+					"tag": "a",
+					"max_prompt_tokens": 500,
+					"context_length": 600
+				},
+				{
+					"model_id": "openai/gpt-6-luna",
+					"supported_parameters": [
+						"tools",
+						"reasoning"
+					],
+					"tag": "b",
+					"context_length": 400
+				},
+				{
+					"model_id": "openai/gpt-6-luna",
+					"supported_parameters": [
+						"tools",
+						"reasoning"
+					],
+					"tag": "c"
+				}
+			]
+		},
+		"nowMs": 1790337600000,
+		"passes": [
+			{
+				"use": "chat",
+				"zdrOnly": true
+			}
+		]
+	},
+	"expected": {
+		"passes": [
+			[
+				{
+					"key": "openai/gpt-6-luna",
+					"status": "ok",
+					"efforts": [],
+					"promptLimit": 400,
+					"hosts": [
+						"a",
+						"b",
+						"c"
+					]
+				}
+			]
+		]
+	}
+}

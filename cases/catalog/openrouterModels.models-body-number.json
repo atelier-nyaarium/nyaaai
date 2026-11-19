@@ -1,0 +1,12 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.openrouterModels",
+	"name": "models-body-number",
+	"input": {
+		"body": 7
+	},
+	"expected": {
+		"models": null
+	}
+}

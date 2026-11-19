@@ -1,0 +1,213 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterPins",
+	"name": "pins-a-complete-request-is-not-pinned-nor-noted",
+	"input": {
+		"calls": [
+			{
+				"kind": "pin",
+				"hosts": [
+					"a",
+					"b"
+				]
+			},
+			{
+				"kind": "encode",
+				"request": {
+					"model": "openai/gpt-6-luna",
+					"system": [
+						"Rules."
+					],
+					"history": [
+						{
+							"role": "user",
+							"text": "Hi"
+						},
+						{
+							"role": "step",
+							"producer": {
+								"model": "openai/gpt-6-luna"
+							},
+							"parts": [
+								{
+									"kind": "thought",
+									"type": "reasoning.text",
+									"segments": [
+										{
+											"kind": "content",
+											"text": "Thinking."
+										}
+									],
+									"opaque": "sig",
+									"index": 0
+								},
+								{
+									"kind": "text",
+									"text": "Done."
+								}
+							]
+						},
+						{
+							"role": "user",
+							"text": "More"
+						}
+					],
+					"cache": {
+						"kind": "none"
+					},
+					"session": "s-1",
+					"zdrOnly": true
+				},
+				"mode": "complete"
+			},
+			{
+				"kind": "encode",
+				"request": {
+					"model": "openai/gpt-6-luna",
+					"system": [
+						"Rules."
+					],
+					"history": [
+						{
+							"role": "user",
+							"text": "Hi"
+						},
+						{
+							"role": "step",
+							"producer": {
+								"model": "openai/gpt-6-luna"
+							},
+							"parts": [
+								{
+									"kind": "thought",
+									"type": "reasoning.text",
+									"segments": [
+										{
+											"kind": "content",
+											"text": "Thinking."
+										}
+									],
+									"opaque": "sig",
+									"index": 0
+								},
+								{
+									"kind": "text",
+									"text": "Done."
+								}
+							]
+						},
+						{
+							"role": "user",
+							"text": "More"
+						}
+					],
+					"cache": {
+						"kind": "none"
+					},
+					"session": "s-1",
+					"zdrOnly": true
+				},
+				"mode": "complete"
+			},
+			{
+				"kind": "passedBack"
+			},
+			{
+				"kind": "encode",
+				"request": {
+					"model": "openai/gpt-6-luna",
+					"system": [
+						"Rules."
+					],
+					"history": [
+						{
+							"role": "user",
+							"text": "Hi"
+						}
+					],
+					"cache": {
+						"kind": "none"
+					},
+					"session": "s-1",
+					"zdrOnly": true
+				},
+				"mode": "stream"
+			},
+			{
+				"kind": "encode",
+				"request": {
+					"model": "openai/gpt-6-luna",
+					"system": [
+						"Rules."
+					],
+					"history": [
+						{
+							"role": "user",
+							"text": "Hi"
+						}
+					],
+					"cache": {
+						"kind": "none"
+					},
+					"session": "s-1",
+					"zdrOnly": true
+				},
+				"mode": "stream"
+			}
+		]
+	},
+	"expected": {
+		"answers": [
+			{
+				"kind": "pinned"
+			},
+			{
+				"kind": "encoded",
+				"provider": {
+					"zdr": true,
+					"data_collection": "deny",
+					"require_parameters": true
+				},
+				"replayed": true
+			},
+			{
+				"kind": "encoded",
+				"provider": {
+					"zdr": true,
+					"data_collection": "deny",
+					"require_parameters": true
+				},
+				"replayed": true
+			},
+			{
+				"kind": "passedBack",
+				"value": false
+			},
+			{
+				"kind": "encoded",
+				"provider": {
+					"require_parameters": true,
+					"zdr": true,
+					"data_collection": "deny",
+					"only": [
+						"a"
+					]
+				},
+				"replayed": false
+			},
+			{
+				"kind": "encoded",
+				"provider": {
+					"require_parameters": true,
+					"zdr": true,
+					"data_collection": "deny",
+					"only": [
+						"b"
+					]
+				},
+				"replayed": false
+			}
+		]
+	}
+}

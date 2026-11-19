@@ -1,0 +1,312 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.openrouterJoin",
+	"name": "join-by-use",
+	"input": {
+		"rows": [
+			"openai/gpt-6-luna",
+			"mistralai/mistral-large-2512"
+		],
+		"models": {
+			"data": [
+				{
+					"id": "openai/gpt-6-luna",
+					"context_length": 1000000,
+					"expiration_date": null,
+					"pricing": {
+						"prompt": "0.00000012",
+						"completion": "0.0000006",
+						"input_cache_read": "0.000000012",
+						"overrides": [
+							{
+								"min_prompt_tokens": 250000,
+								"prompt": "0.00000024",
+								"completion": "0.0000009",
+								"input_cache_read": "0.000000024"
+							}
+						]
+					},
+					"reasoning": {
+						"supported_efforts": [
+							"max",
+							"xhigh",
+							"high",
+							"medium",
+							"low",
+							"none"
+						]
+					}
+				},
+				{
+					"id": "anthropic/claude-opus-5.5",
+					"expiration_date": "2026-10-01",
+					"pricing": {
+						"prompt": "0.000005",
+						"completion": "0.000025"
+					}
+				},
+				{
+					"id": "openai/gpt-6.1-sol",
+					"expiration_date": "2026-09-01"
+				},
+				{
+					"id": "mistralai/mistral-large-2512",
+					"pricing": {
+						"prompt": "0.0000004",
+						"completion": "0.0000012"
+					}
+				},
+				{
+					"id": "google/gemini-3.8-flash",
+					"reasoning": {
+						"supported_efforts": [
+							"high",
+							"low"
+						]
+					}
+				},
+				{
+					"unexpected": true
+				}
+			]
+		},
+		"zdr": {
+			"data": [
+				{
+					"model_id": "openai/gpt-6-luna",
+					"tag": "schema",
+					"supported_parameters": [
+						"reasoning",
+						"response_format",
+						"structured_outputs"
+					],
+					"pricing": {
+						"prompt": "0.000001",
+						"completion": "0.000002"
+					}
+				},
+				{
+					"model_id": "openai/gpt-6-luna",
+					"tag": "tools",
+					"supported_parameters": [
+						"tools",
+						"reasoning"
+					],
+					"pricing": {
+						"prompt": "0.000001",
+						"completion": "0.000002"
+					}
+				},
+				{
+					"model_id": "openai/gpt-6-luna",
+					"tag": "agentic",
+					"supported_parameters": [
+						"tools",
+						"reasoning",
+						"response_format",
+						"structured_outputs"
+					],
+					"pricing": {
+						"prompt": "0.000001",
+						"completion": "0.000002"
+					}
+				},
+				{
+					"model_id": "mistralai/mistral-large-2512",
+					"tag": "tools",
+					"supported_parameters": [
+						"tools"
+					],
+					"pricing": {
+						"prompt": "0.000001",
+						"completion": "0.000002"
+					}
+				}
+			]
+		},
+		"nowMs": 1790337600000,
+		"passes": [
+			{
+				"use": "chat",
+				"zdrOnly": true
+			},
+			{
+				"use": "compaction",
+				"zdrOnly": true
+			},
+			{
+				"use": "analysis",
+				"zdrOnly": true
+			}
+		]
+	},
+	"expected": {
+		"passes": [
+			[
+				{
+					"key": "openai/gpt-6-luna",
+					"status": "ok",
+					"efforts": [
+						"none",
+						"low",
+						"medium",
+						"high",
+						"xhigh",
+						"max"
+					],
+					"promptLimit": 1000000,
+					"price": {
+						"prompt": [
+							1,
+							1
+						],
+						"completion": [
+							2,
+							2
+						],
+						"tiers": [
+							{
+								"minPromptTokens": 0,
+								"prompt": 0.12,
+								"completion": 0.6,
+								"cacheRead": 0.012
+							},
+							{
+								"minPromptTokens": 250000,
+								"prompt": 0.24,
+								"completion": 0.9,
+								"cacheRead": 0.024
+							}
+						]
+					},
+					"hosts": [
+						"tools",
+						"agentic"
+					]
+				},
+				{
+					"key": "mistralai/mistral-large-2512",
+					"status": "ok",
+					"efforts": [],
+					"price": {
+						"prompt": [
+							1,
+							1
+						],
+						"completion": [
+							2,
+							2
+						],
+						"tiers": [
+							{
+								"minPromptTokens": 0,
+								"prompt": 0.4,
+								"completion": 1.2
+							}
+						]
+					},
+					"hosts": [
+						"tools"
+					]
+				}
+			],
+			[
+				{
+					"key": "openai/gpt-6-luna",
+					"status": "ok",
+					"efforts": [
+						"none",
+						"low",
+						"medium",
+						"high",
+						"xhigh",
+						"max"
+					],
+					"promptLimit": 1000000,
+					"price": {
+						"prompt": [
+							1,
+							1
+						],
+						"completion": [
+							2,
+							2
+						],
+						"tiers": [
+							{
+								"minPromptTokens": 0,
+								"prompt": 0.12,
+								"completion": 0.6,
+								"cacheRead": 0.012
+							},
+							{
+								"minPromptTokens": 250000,
+								"prompt": 0.24,
+								"completion": 0.9,
+								"cacheRead": 0.024
+							}
+						]
+					},
+					"hosts": [
+						"agentic"
+					]
+				},
+				{
+					"key": "mistralai/mistral-large-2512",
+					"status": "noZdrHost",
+					"efforts": [],
+					"hosts": []
+				}
+			],
+			[
+				{
+					"key": "openai/gpt-6-luna",
+					"status": "ok",
+					"efforts": [
+						"none",
+						"low",
+						"medium",
+						"high",
+						"xhigh",
+						"max"
+					],
+					"promptLimit": 1000000,
+					"price": {
+						"prompt": [
+							1,
+							1
+						],
+						"completion": [
+							2,
+							2
+						],
+						"tiers": [
+							{
+								"minPromptTokens": 0,
+								"prompt": 0.12,
+								"completion": 0.6,
+								"cacheRead": 0.012
+							},
+							{
+								"minPromptTokens": 250000,
+								"prompt": 0.24,
+								"completion": 0.9,
+								"cacheRead": 0.024
+							}
+						]
+					},
+					"hosts": [
+						"agentic"
+					]
+				},
+				{
+					"key": "mistralai/mistral-large-2512",
+					"status": "noZdrHost",
+					"efforts": [],
+					"hosts": []
+				}
+			]
+		]
+	}
+}

@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.openrouterKey",
+	"name": "key-caller-aborts-after-the-read-starts",
+	"input": {
+		"startMs": 1790337600000,
+		"stored": "key-0123456789abcdef",
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"usage": 1
+					}
+				},
+				"headMs": 100
+			}
+		],
+		"checks": [
+			{
+				"auth": "stored",
+				"abortAfterMs": 50
+			}
+		]
+	},
+	"expected": {
+		"checks": [
+			{
+				"ok": null,
+				"reason": null,
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": "caller aborted"
+			}
+		],
+		"requests": [
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			}
+		],
+		"waiting": []
+	}
+}

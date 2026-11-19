@@ -1,0 +1,44 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterProviders",
+	"name": "providers-pricing-any-json-passes-as-no-price",
+	"input": {
+		"raw": {
+			"data": {
+				"endpoints": [
+					{
+						"provider_name": "Host A",
+						"name": "Host A name",
+						"tag": "host-a",
+						"context_length": 131000,
+						"max_completion_tokens": 118000,
+						"quantization": "fp8",
+						"uptime_last_30m": 99.5,
+						"pricing": {
+							"prompt": null,
+							"completion": {},
+							"input_cache_read": [
+								1
+							]
+						}
+					}
+				]
+			}
+		},
+		"zdr": null
+	},
+	"expected": {
+		"providers": [
+			{
+				"name": "Host A",
+				"tag": "host-a",
+				"context": 131000,
+				"maxOutput": 118000,
+				"quantization": "fp8",
+				"uptime": 99.5,
+				"zdr": false
+			}
+		]
+	}
+}

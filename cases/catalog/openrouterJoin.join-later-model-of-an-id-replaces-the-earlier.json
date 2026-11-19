@@ -1,0 +1,56 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.openrouterJoin",
+	"name": "join-later-model-of-an-id-replaces-the-earlier",
+	"input": {
+		"rows": [
+			"openai/gpt-6-luna"
+		],
+		"models": {
+			"data": [
+				{
+					"id": "openai/gpt-6-luna",
+					"expiration_date": "2026-09-01"
+				},
+				{
+					"id": "openai/gpt-6-luna",
+					"name": "Again"
+				}
+			]
+		},
+		"zdr": {
+			"data": [
+				{
+					"model_id": "openai/gpt-6-luna",
+					"supported_parameters": [
+						"tools",
+						"reasoning"
+					],
+					"tag": "h"
+				}
+			]
+		},
+		"nowMs": 1790337600000,
+		"passes": [
+			{
+				"use": "chat",
+				"zdrOnly": true
+			}
+		]
+	},
+	"expected": {
+		"passes": [
+			[
+				{
+					"key": "openai/gpt-6-luna",
+					"status": "ok",
+					"efforts": [],
+					"hosts": [
+						"h"
+					]
+				}
+			]
+		]
+	}
+}

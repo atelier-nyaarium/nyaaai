@@ -1,0 +1,126 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterModels",
+	"name": "models-ids-the-host-accepts",
+	"input": {
+		"raw": [
+			{
+				"id": "lab/model"
+			},
+			{
+				"id": "lab/model:free"
+			},
+			{
+				"id": "lab/a/b"
+			},
+			{
+				"id": "a.b/c-d"
+			},
+			{
+				"id": "~lab/model"
+			},
+			{
+				"id": "lab"
+			},
+			{
+				"id": "lab/"
+			},
+			{
+				"id": "/model"
+			},
+			{
+				"id": "lab//x"
+			},
+			{
+				"id": "-lab/model"
+			},
+			{
+				"id": "lab/mod el"
+			},
+			{
+				"id": "lab/mødel"
+			},
+			{
+				"id": ""
+			},
+			{
+				"id": "lab/model:batch"
+			},
+			{
+				"id": "lab/model:Batch"
+			},
+			{
+				"id": "lab/x:batch:batch"
+			}
+		],
+		"zdr": {
+			"data": []
+		},
+		"nowMs": 1777593600000
+	},
+	"expected": {
+		"models": [
+			{
+				"id": "openrouter:lab/model",
+				"display": "lab/model",
+				"label": "lab/model",
+				"curated": false,
+				"description": "",
+				"inputs": [],
+				"outputs": [],
+				"parameters": [],
+				"price": "unknown",
+				"tools": "noZdrHost"
+			},
+			{
+				"id": "openrouter:lab/model:free",
+				"display": "lab/model:free",
+				"label": "lab/model:free",
+				"curated": false,
+				"description": "",
+				"inputs": [],
+				"outputs": [],
+				"parameters": [],
+				"price": "unknown",
+				"tools": "noZdrHost"
+			},
+			{
+				"id": "openrouter:lab/a/b",
+				"display": "lab/a/b",
+				"label": "lab/a/b",
+				"curated": false,
+				"description": "",
+				"inputs": [],
+				"outputs": [],
+				"parameters": [],
+				"price": "unknown",
+				"tools": "noZdrHost"
+			},
+			{
+				"id": "openrouter:a.b/c-d",
+				"display": "a.b/c-d",
+				"label": "a.b/c-d",
+				"curated": false,
+				"description": "",
+				"inputs": [],
+				"outputs": [],
+				"parameters": [],
+				"price": "unknown",
+				"tools": "noZdrHost"
+			},
+			{
+				"id": "openrouter:lab/model:Batch",
+				"display": "lab/model:Batch",
+				"label": "lab/model:Batch",
+				"curated": false,
+				"description": "",
+				"inputs": [],
+				"outputs": [],
+				"parameters": [],
+				"price": "unknown",
+				"tools": "noZdrHost"
+			}
+		]
+	}
+}

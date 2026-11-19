@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterBrowser",
+	"name": "browser-refused-connections",
+	"input": {
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"text": "",
+				"end": "refused"
+			},
+			{
+				"status": 200,
+				"text": "",
+				"end": "refused"
+			}
+		],
+		"steps": [
+			{
+				"kind": "list"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "list",
+					"models": null
+				}
+			}
+		],
+		"requests": [
+			"/models",
+			"/endpoints/zdr"
+		],
+		"read": [
+			0,
+			0
+		],
+		"waiting": []
+	}
+}

@@ -1,0 +1,44 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterHop",
+	"name": "hop-a-read-just-inside-the-deadline-lands",
+	"input": {
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"endpoints": [
+							{
+								"tag": "a"
+							},
+							{
+								"tag": "b"
+							}
+						]
+					}
+				},
+				"headMs": 29999
+			}
+		],
+		"id": "lab/glm",
+		"viewHosts": [
+			"a",
+			"b"
+		]
+	},
+	"expected": {
+		"hosts": [
+			"a",
+			"b"
+		],
+		"thrown": null,
+		"requests": [
+			"/models/lab/glm/endpoints"
+		],
+		"waiting": [],
+		"nowMs": 1790337629999
+	}
+}

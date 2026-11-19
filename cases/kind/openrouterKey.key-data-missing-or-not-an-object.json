@@ -1,0 +1,200 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.openrouterKey",
+	"name": "key-data-missing-or-not-an-object",
+	"input": {
+		"startMs": 1790337600000,
+		"stored": "key-0123456789abcdef",
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": null
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": "x"
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": []
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": 5
+				}
+			},
+			{
+				"status": 200,
+				"json": []
+			},
+			{
+				"status": 200,
+				"json": "x"
+			},
+			{
+				"status": 200,
+				"json": 5
+			},
+			{
+				"status": 200,
+				"json": true
+			}
+		],
+		"checks": [
+			{
+				"auth": "stored"
+			},
+			{
+				"auth": "stored"
+			},
+			{
+				"auth": "stored"
+			},
+			{
+				"auth": "stored"
+			},
+			{
+				"auth": "stored"
+			},
+			{
+				"auth": "stored"
+			},
+			{
+				"auth": "stored"
+			},
+			{
+				"auth": "stored"
+			},
+			{
+				"auth": "stored"
+			}
+		]
+	},
+	"expected": {
+		"checks": [
+			{
+				"ok": true,
+				"reason": null,
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			},
+			{
+				"ok": true,
+				"reason": null,
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			},
+			{
+				"ok": true,
+				"reason": null,
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			},
+			{
+				"ok": true,
+				"reason": null,
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			},
+			{
+				"ok": true,
+				"reason": null,
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			},
+			{
+				"ok": true,
+				"reason": null,
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			},
+			{
+				"ok": true,
+				"reason": null,
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			},
+			{
+				"ok": true,
+				"reason": null,
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			},
+			{
+				"ok": true,
+				"reason": null,
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			}
+		],
+		"requests": [
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			},
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			},
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			},
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			},
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			},
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			},
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			},
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			},
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			}
+		],
+		"waiting": []
+	}
+}

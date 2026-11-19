@@ -1,0 +1,134 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.opencodeModels",
+	"name": "models-cost-null",
+	"input": {
+		"body": {
+			"data": [
+				{
+					"id": "model-a",
+					"name": "Model A",
+					"description": "A model for cases.",
+					"modalities": {
+						"input": [
+							"text",
+							"image/png"
+						],
+						"output": [
+							"text"
+						]
+					},
+					"capabilities": {
+						"tools": {
+							"supported": true
+						},
+						"reasoning": {
+							"supported": true,
+							"effort": [
+								"low",
+								"high"
+							],
+							"toggle": true
+						},
+						"structured_output": true,
+						"cache": {
+							"implicit": false,
+							"explicit": {
+								"read": 0.1
+							}
+						}
+					},
+					"limit": {
+						"context": 200000,
+						"input": 190000,
+						"output": 64000
+					},
+					"cost": null,
+					"api": {
+						"chat-completions": {
+							"compatibility": {
+								"reasoning_field": "reasoning_content"
+							},
+							"capabilities": {
+								"tools": {
+									"choice": [
+										"auto",
+										"none"
+									],
+									"strict": true
+								}
+							}
+						},
+						"messages": {
+							"compatibility": {
+								"reasoning_field": "reasoning_content"
+							},
+							"capabilities": {
+								"tools": {
+									"choice": [
+										"auto",
+										"none"
+									],
+									"strict": true
+								}
+							}
+						}
+					}
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"id": "model-a",
+				"name": "Model A",
+				"description": "A model for cases.",
+				"input": [
+					"text",
+					"image/png"
+				],
+				"output": [
+					"text"
+				],
+				"tools": true,
+				"reasoning": true,
+				"efforts": [
+					"low",
+					"high"
+				],
+				"toggle": true,
+				"structured_output": true,
+				"cache": {
+					"implicit": false,
+					"explicit": true
+				},
+				"context": 200000,
+				"input_limit": 190000,
+				"output_limit": 64000,
+				"price": null,
+				"api": [
+					{
+						"family": "chat-completions",
+						"reasoning_field": "reasoning_content",
+						"choice": [
+							"auto",
+							"none"
+						],
+						"strict": true
+					},
+					{
+						"family": "messages",
+						"reasoning_field": "reasoning_content",
+						"choice": [
+							"auto",
+							"none"
+						],
+						"strict": true
+					}
+				]
+			}
+		]
+	}
+}

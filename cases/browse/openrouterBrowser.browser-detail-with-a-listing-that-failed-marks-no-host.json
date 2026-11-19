@@ -1,0 +1,97 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterBrowser",
+	"name": "browser-detail-with-a-listing-that-failed-marks-no-host",
+	"input": {
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 500,
+				"json": {
+					"error": {
+						"message": "Down."
+					}
+				}
+			},
+			{
+				"status": 500,
+				"json": {
+					"error": {
+						"message": "Down."
+					}
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"endpoints": [
+							{
+								"provider_name": "Decart",
+								"tag": "decart",
+								"context_length": 131000,
+								"pricing": {
+									"prompt": "0.00000049",
+									"completion": "0.00000154"
+								}
+							},
+							{
+								"provider_name": "Novita",
+								"tag": "novita/fp8",
+								"pricing": {
+									"prompt": "0.00000065"
+								}
+							}
+						]
+					}
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "detail",
+				"id": "lab/glm"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "detail",
+					"detail": {
+						"hosts": [
+							{
+								"name": "Decart",
+								"tag": "decart",
+								"context": 131000,
+								"prompt": 0.49,
+								"completion": 1.54,
+								"zdr": false
+							},
+							{
+								"name": "Novita",
+								"tag": "novita/fp8",
+								"prompt": 0.65,
+								"zdr": false
+							}
+						]
+					}
+				}
+			}
+		],
+		"requests": [
+			"/models",
+			"/endpoints/zdr",
+			"/models/lab/glm/endpoints"
+		],
+		"read": [
+			1,
+			1,
+			1
+		],
+		"waiting": []
+	}
+}

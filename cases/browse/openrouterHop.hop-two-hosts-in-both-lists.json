@@ -1,0 +1,50 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterHop",
+	"name": "hop-two-hosts-in-both-lists",
+	"input": {
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"endpoints": [
+							{
+								"tag": "a/fp8"
+							},
+							{
+								"tag": "b"
+							},
+							{
+								"tag": "c"
+							},
+							{
+								"tag": "a/fp4"
+							}
+						]
+					}
+				}
+			}
+		],
+		"id": "lab/glm",
+		"viewHosts": [
+			"a",
+			"b/us",
+			"c"
+		]
+	},
+	"expected": {
+		"hosts": [
+			"a",
+			"b"
+		],
+		"thrown": null,
+		"requests": [
+			"/models/lab/glm/endpoints"
+		],
+		"waiting": [],
+		"nowMs": 1790337600000
+	}
+}

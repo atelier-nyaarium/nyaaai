@@ -6272,6 +6272,3086 @@
 				"reasons",
 				"all"
 			]
+		},
+		"NetExchange": {
+			"type": "object",
+			"properties": {
+				"status": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"json": {},
+				"text": {
+					"type": "string"
+				},
+				"headMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"end": {
+					"type": "string",
+					"enum": [
+						"closed",
+						"dropped",
+						"refused"
+					]
+				}
+			},
+			"required": [
+				"status"
+			]
+		},
+		"ViewLine": {
+			"type": "object",
+			"properties": {
+				"key": {
+					"type": "string"
+				},
+				"status": {
+					"type": "string",
+					"enum": [
+						"ok",
+						"retired",
+						"noZdrHost",
+						"noTools",
+						"unknown"
+					]
+				},
+				"retiredOn": {
+					"type": "string"
+				},
+				"efforts": {
+					"type": "array",
+					"items": {
+						"$ref": "step.input.json#/$defs/Effort"
+					}
+				},
+				"promptLimit": {
+					"type": "number"
+				},
+				"outputLimit": {
+					"type": "number"
+				},
+				"price": {
+					"anyOf": [
+						{
+							"$ref": "model.input.json#/$defs/Price"
+						},
+						{
+							"type": "string",
+							"const": "free"
+						},
+						{
+							"type": "string",
+							"const": "unknown"
+						}
+					]
+				},
+				"cacheWrite1h": {
+					"type": "boolean",
+					"const": true
+				},
+				"hosts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"dataKept": {
+					"type": "boolean",
+					"const": true
+				},
+				"api": {
+					"$ref": "step.input.json#/$defs/ApiFacts"
+				},
+				"cache": {
+					"type": "string",
+					"enum": [
+						"implicit",
+						"explicit"
+					]
+				}
+			},
+			"required": [
+				"key",
+				"status",
+				"efforts",
+				"hosts"
+			]
+		},
+		"CatalogOpenrouterModelsInput": {
+			"type": "object",
+			"properties": {
+				"body": {}
+			},
+			"required": [
+				"body"
+			]
+		},
+		"CatalogOpenrouterModelsResult": {
+			"type": "object",
+			"properties": {
+				"models": {
+					"anyOf": [
+						{
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"id": {
+										"type": "string"
+									},
+									"name": {
+										"type": [
+											"string",
+											"null"
+										]
+									},
+									"created": {
+										"type": [
+											"number",
+											"null"
+										]
+									},
+									"context_length": {
+										"type": [
+											"number",
+											"null"
+										]
+									},
+									"expiration_date": {
+										"type": [
+											"string",
+											"null"
+										]
+									},
+									"pricing": {
+										"anyOf": [
+											{
+												"type": "object",
+												"properties": {
+													"prompt": {},
+													"completion": {},
+													"input_cache_read": {},
+													"input_cache_write": {},
+													"input_cache_write_1h": {},
+													"overrides": {
+														"anyOf": [
+															{
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"min_prompt_tokens": {
+																			"type": "number"
+																		},
+																		"prompt": {},
+																		"completion": {},
+																		"input_cache_read": {},
+																		"input_cache_write": {},
+																		"input_cache_write_1h": {}
+																	},
+																	"required": [
+																		"min_prompt_tokens",
+																		"prompt",
+																		"completion",
+																		"input_cache_read",
+																		"input_cache_write",
+																		"input_cache_write_1h"
+																	]
+																}
+															},
+															{
+																"type": "null"
+															}
+														]
+													}
+												},
+												"required": [
+													"prompt",
+													"completion",
+													"input_cache_read",
+													"input_cache_write",
+													"input_cache_write_1h",
+													"overrides"
+												]
+											},
+											{
+												"type": "null"
+											}
+										]
+									},
+									"reasoning": {
+										"anyOf": [
+											{
+												"type": "object",
+												"properties": {
+													"supported_efforts": {
+														"anyOf": [
+															{
+																"type": "array",
+																"items": {
+																	"type": "string"
+																}
+															},
+															{
+																"type": "null"
+															}
+														]
+													}
+												},
+												"required": [
+													"supported_efforts"
+												]
+											},
+											{
+												"type": "null"
+											}
+										]
+									},
+									"supported_parameters": {
+										"anyOf": [
+											{
+												"type": "array",
+												"items": {
+													"type": "string"
+												}
+											},
+											{
+												"type": "null"
+											}
+										]
+									}
+								},
+								"required": [
+									"id",
+									"name",
+									"created",
+									"context_length",
+									"expiration_date",
+									"pricing",
+									"reasoning",
+									"supported_parameters"
+								]
+							}
+						},
+						{
+							"type": "null"
+						}
+					]
+				}
+			},
+			"required": [
+				"models"
+			]
+		},
+		"CatalogOpenrouterEndpointsInput": {
+			"type": "object",
+			"properties": {
+				"body": {}
+			},
+			"required": [
+				"body"
+			]
+		},
+		"CatalogOpenrouterEndpointsResult": {
+			"type": "object",
+			"properties": {
+				"endpoints": {
+					"anyOf": [
+						{
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"model": {
+										"type": "string"
+									},
+									"hosts": {
+										"type": "array",
+										"items": {
+											"type": "object",
+											"properties": {
+												"model_id": {
+													"type": "string"
+												},
+												"tag": {
+													"type": [
+														"string",
+														"null"
+													]
+												},
+												"provider_name": {
+													"type": [
+														"string",
+														"null"
+													]
+												},
+												"context_length": {
+													"type": [
+														"number",
+														"null"
+													]
+												},
+												"max_prompt_tokens": {
+													"type": [
+														"number",
+														"null"
+													]
+												},
+												"supported_parameters": {
+													"anyOf": [
+														{
+															"type": "array",
+															"items": {
+																"type": "string"
+															}
+														},
+														{
+															"type": "null"
+														}
+													]
+												},
+												"pricing": {
+													"anyOf": [
+														{
+															"type": "object",
+															"properties": {
+																"prompt": {},
+																"completion": {},
+																"input_cache_read": {},
+																"input_cache_write": {},
+																"input_cache_write_1h": {},
+																"overrides": {
+																	"anyOf": [
+																		{
+																			"type": "array",
+																			"items": {
+																				"type": "object",
+																				"properties": {
+																					"min_prompt_tokens": {
+																						"type": "number"
+																					},
+																					"prompt": {},
+																					"completion": {},
+																					"input_cache_read": {},
+																					"input_cache_write": {},
+																					"input_cache_write_1h": {}
+																				},
+																				"required": [
+																					"min_prompt_tokens",
+																					"prompt",
+																					"completion",
+																					"input_cache_read",
+																					"input_cache_write",
+																					"input_cache_write_1h"
+																				]
+																			}
+																		},
+																		{
+																			"type": "null"
+																		}
+																	]
+																}
+															},
+															"required": [
+																"prompt",
+																"completion",
+																"input_cache_read",
+																"input_cache_write",
+																"input_cache_write_1h",
+																"overrides"
+															]
+														},
+														{
+															"type": "null"
+														}
+													]
+												}
+											},
+											"required": [
+												"model_id",
+												"tag",
+												"provider_name",
+												"context_length",
+												"max_prompt_tokens",
+												"supported_parameters",
+												"pricing"
+											]
+										}
+									}
+								},
+								"required": [
+									"model",
+									"hosts"
+								]
+							}
+						},
+						{
+							"type": "null"
+						}
+					]
+				}
+			},
+			"required": [
+				"endpoints"
+			]
+		},
+		"CatalogOpencodeModelsInput": {
+			"type": "object",
+			"properties": {
+				"body": {}
+			},
+			"required": [
+				"body"
+			]
+		},
+		"CatalogOpencodeModelsResult": {
+			"type": "object",
+			"properties": {
+				"models": {
+					"anyOf": [
+						{
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"id": {
+										"type": "string"
+									},
+									"name": {
+										"type": [
+											"string",
+											"null"
+										]
+									},
+									"description": {
+										"type": [
+											"string",
+											"null"
+										]
+									},
+									"input": {
+										"anyOf": [
+											{
+												"type": "array",
+												"items": {
+													"type": "string"
+												}
+											},
+											{
+												"type": "null"
+											}
+										]
+									},
+									"output": {
+										"anyOf": [
+											{
+												"type": "array",
+												"items": {
+													"type": "string"
+												}
+											},
+											{
+												"type": "null"
+											}
+										]
+									},
+									"tools": {
+										"type": [
+											"boolean",
+											"null"
+										]
+									},
+									"reasoning": {
+										"type": [
+											"boolean",
+											"null"
+										]
+									},
+									"efforts": {
+										"anyOf": [
+											{
+												"type": "array",
+												"items": {
+													"type": "string"
+												}
+											},
+											{
+												"type": "null"
+											}
+										]
+									},
+									"toggle": {
+										"type": [
+											"boolean",
+											"null"
+										]
+									},
+									"structured_output": {
+										"type": [
+											"boolean",
+											"null"
+										]
+									},
+									"cache": {
+										"anyOf": [
+											{
+												"type": "object",
+												"properties": {
+													"implicit": {
+														"type": [
+															"boolean",
+															"null"
+														]
+													},
+													"explicit": {
+														"type": "boolean"
+													}
+												},
+												"required": [
+													"implicit",
+													"explicit"
+												]
+											},
+											{
+												"type": "null"
+											}
+										]
+									},
+									"context": {
+										"type": [
+											"number",
+											"null"
+										]
+									},
+									"input_limit": {
+										"type": [
+											"number",
+											"null"
+										]
+									},
+									"output_limit": {
+										"type": [
+											"number",
+											"null"
+										]
+									},
+									"price": {
+										"anyOf": [
+											{
+												"type": "object",
+												"properties": {
+													"input": {
+														"type": "number"
+													},
+													"output": {
+														"type": "number"
+													}
+												},
+												"required": [
+													"input",
+													"output"
+												]
+											},
+											{
+												"type": "null"
+											}
+										]
+									},
+									"api": {
+										"type": "array",
+										"items": {
+											"type": "object",
+											"properties": {
+												"family": {
+													"$ref": "step.input.json#/$defs/ApiFamily"
+												},
+												"reasoning_field": {
+													"type": [
+														"string",
+														"null"
+													]
+												},
+												"choice": {
+													"anyOf": [
+														{
+															"type": "array",
+															"items": {
+																"type": "string"
+															}
+														},
+														{
+															"type": "null"
+														}
+													]
+												},
+												"strict": {
+													"type": [
+														"boolean",
+														"null"
+													]
+												}
+											},
+											"required": [
+												"family",
+												"reasoning_field",
+												"choice",
+												"strict"
+											]
+										}
+									}
+								},
+								"required": [
+									"id",
+									"name",
+									"description",
+									"input",
+									"output",
+									"tools",
+									"reasoning",
+									"efforts",
+									"toggle",
+									"structured_output",
+									"cache",
+									"context",
+									"input_limit",
+									"output_limit",
+									"price",
+									"api"
+								]
+							}
+						},
+						{
+							"type": "null"
+						}
+					]
+				}
+			},
+			"required": [
+				"models"
+			]
+		},
+		"CatalogOpenrouterJoinInput": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"models": {},
+				"zdr": {},
+				"nowMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"passes": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"use": {
+								"$ref": "model.input.json#/$defs/ModelUse"
+							},
+							"zdrOnly": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"use",
+							"zdrOnly"
+						]
+					}
+				}
+			},
+			"required": [
+				"rows",
+				"models",
+				"zdr",
+				"nowMs",
+				"passes"
+			]
+		},
+		"CatalogOpenrouterJoinResult": {
+			"type": "object",
+			"properties": {
+				"passes": {
+					"type": "array",
+					"items": {
+						"type": "array",
+						"items": {
+							"$ref": "#/$defs/ViewLine"
+						}
+					}
+				}
+			},
+			"required": [
+				"passes"
+			]
+		},
+		"CatalogOpencodeJoinInput": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"plan": {
+					"$ref": "provider.input.json#/$defs/ProviderPlan"
+				},
+				"models": {},
+				"nowMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"passes": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"use": {
+								"$ref": "model.input.json#/$defs/ModelUse"
+							},
+							"zdrOnly": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"use",
+							"zdrOnly"
+						]
+					}
+				}
+			},
+			"required": [
+				"rows",
+				"plan",
+				"models",
+				"nowMs",
+				"passes"
+			]
+		},
+		"CatalogOpencodeJoinResult": {
+			"type": "object",
+			"properties": {
+				"passes": {
+					"type": "array",
+					"items": {
+						"type": "array",
+						"items": {
+							"$ref": "#/$defs/ViewLine"
+						}
+					}
+				}
+			},
+			"required": [
+				"passes"
+			]
+		},
+		"CatalogPerMillionInput": {
+			"type": "object",
+			"properties": {
+				"values": {
+					"type": "array",
+					"items": {}
+				}
+			},
+			"required": [
+				"values"
+			]
+		},
+		"CatalogPerMillionResult": {
+			"type": "object",
+			"properties": {
+				"prices": {
+					"type": "array",
+					"items": {
+						"type": [
+							"number",
+							"null"
+						]
+					}
+				}
+			},
+			"required": [
+				"prices"
+			]
+		},
+		"CatalogExpiryInput": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			]
+		},
+		"CatalogExpiryResult": {
+			"type": "object",
+			"properties": {
+				"ms": {
+					"type": "array",
+					"items": {
+						"anyOf": [
+							{
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				}
+			},
+			"required": [
+				"ms"
+			]
+		},
+		"CatalogStandingInput": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"expiration": {
+								"type": [
+									"string",
+									"null"
+								]
+							},
+							"hosts": {
+								"type": "array",
+								"items": {
+									"type": "object",
+									"properties": {
+										"params": {
+											"anyOf": [
+												{
+													"type": "array",
+													"items": {
+														"type": "string"
+													}
+												},
+												{
+													"type": "null"
+												}
+											]
+										}
+									},
+									"required": [
+										"params"
+									]
+								}
+							},
+							"needs": {
+								"type": "array",
+								"items": {
+									"anyOf": [
+										{
+											"type": "string"
+										},
+										{
+											"type": "array",
+											"items": {
+												"type": "string"
+											}
+										}
+									]
+								}
+							},
+							"nowMs": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							}
+						},
+						"required": [
+							"expiration",
+							"hosts",
+							"needs",
+							"nowMs"
+						]
+					}
+				}
+			},
+			"required": [
+				"rows"
+			]
+		},
+		"CatalogStandingResult": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"standing": {
+								"type": "string",
+								"enum": [
+									"ok",
+									"retired",
+									"noZdrHost"
+								]
+							},
+							"usable": {
+								"type": "array",
+								"items": {
+									"type": "integer",
+									"minimum": -9007199254740991,
+									"maximum": 9007199254740991
+								}
+							}
+						},
+						"required": [
+							"standing",
+							"usable"
+						]
+					}
+				}
+			},
+			"required": [
+				"rows"
+			]
+		},
+		"CatalogOpenrouterRunInput": {
+			"type": "object",
+			"properties": {
+				"startMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"exchanges": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/NetExchange"
+					}
+				},
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"ttlMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"steps": {
+					"minItems": 1,
+					"type": "array",
+					"items": {
+						"oneOf": [
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "call"
+									},
+									"call": {
+										"oneOf": [
+											{
+												"type": "object",
+												"properties": {
+													"kind": {
+														"type": "string",
+														"const": "views"
+													},
+													"use": {
+														"$ref": "model.input.json#/$defs/ModelUse"
+													},
+													"zdrOnly": {
+														"type": "boolean"
+													},
+													"abortAfterMs": {
+														"type": "integer",
+														"minimum": -9007199254740991,
+														"maximum": 9007199254740991
+													},
+													"abortedBefore": {
+														"type": "boolean"
+													}
+												},
+												"required": [
+													"kind"
+												]
+											},
+											{
+												"type": "object",
+												"properties": {
+													"kind": {
+														"type": "string",
+														"const": "view"
+													},
+													"key": {
+														"type": "string"
+													},
+													"use": {
+														"$ref": "model.input.json#/$defs/ModelUse"
+													},
+													"zdrOnly": {
+														"type": "boolean"
+													},
+													"abortAfterMs": {
+														"type": "integer",
+														"minimum": -9007199254740991,
+														"maximum": 9007199254740991
+													},
+													"abortedBefore": {
+														"type": "boolean"
+													}
+												},
+												"required": [
+													"kind",
+													"key"
+												]
+											},
+											{
+												"type": "object",
+												"properties": {
+													"kind": {
+														"type": "string",
+														"const": "viewFor"
+													},
+													"row": {
+														"type": "string"
+													},
+													"use": {
+														"$ref": "model.input.json#/$defs/ModelUse"
+													},
+													"abortAfterMs": {
+														"type": "integer",
+														"minimum": -9007199254740991,
+														"maximum": 9007199254740991
+													},
+													"abortedBefore": {
+														"type": "boolean"
+													}
+												},
+												"required": [
+													"kind",
+													"row"
+												]
+											},
+											{
+												"type": "object",
+												"properties": {
+													"kind": {
+														"type": "string",
+														"const": "entry"
+													},
+													"id": {
+														"type": "string"
+													},
+													"abortAfterMs": {
+														"type": "integer",
+														"minimum": -9007199254740991,
+														"maximum": 9007199254740991
+													},
+													"abortedBefore": {
+														"type": "boolean"
+													}
+												},
+												"required": [
+													"kind",
+													"id"
+												]
+											},
+											{
+												"type": "object",
+												"properties": {
+													"kind": {
+														"type": "string",
+														"const": "listing"
+													},
+													"retry": {
+														"type": "boolean"
+													},
+													"abortAfterMs": {
+														"type": "integer",
+														"minimum": -9007199254740991,
+														"maximum": 9007199254740991
+													},
+													"abortedBefore": {
+														"type": "boolean"
+													}
+												},
+												"required": [
+													"kind"
+												]
+											}
+										],
+										"x-tag": "kind"
+									}
+								},
+								"required": [
+									"kind",
+									"call"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "together"
+									},
+									"calls": {
+										"minItems": 2,
+										"type": "array",
+										"items": {
+											"oneOf": [
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"type": "string",
+															"const": "views"
+														},
+														"use": {
+															"$ref": "model.input.json#/$defs/ModelUse"
+														},
+														"zdrOnly": {
+															"type": "boolean"
+														},
+														"abortAfterMs": {
+															"type": "integer",
+															"minimum": -9007199254740991,
+															"maximum": 9007199254740991
+														},
+														"abortedBefore": {
+															"type": "boolean"
+														}
+													},
+													"required": [
+														"kind"
+													]
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"type": "string",
+															"const": "view"
+														},
+														"key": {
+															"type": "string"
+														},
+														"use": {
+															"$ref": "model.input.json#/$defs/ModelUse"
+														},
+														"zdrOnly": {
+															"type": "boolean"
+														},
+														"abortAfterMs": {
+															"type": "integer",
+															"minimum": -9007199254740991,
+															"maximum": 9007199254740991
+														},
+														"abortedBefore": {
+															"type": "boolean"
+														}
+													},
+													"required": [
+														"kind",
+														"key"
+													]
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"type": "string",
+															"const": "viewFor"
+														},
+														"row": {
+															"type": "string"
+														},
+														"use": {
+															"$ref": "model.input.json#/$defs/ModelUse"
+														},
+														"abortAfterMs": {
+															"type": "integer",
+															"minimum": -9007199254740991,
+															"maximum": 9007199254740991
+														},
+														"abortedBefore": {
+															"type": "boolean"
+														}
+													},
+													"required": [
+														"kind",
+														"row"
+													]
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"type": "string",
+															"const": "entry"
+														},
+														"id": {
+															"type": "string"
+														},
+														"abortAfterMs": {
+															"type": "integer",
+															"minimum": -9007199254740991,
+															"maximum": 9007199254740991
+														},
+														"abortedBefore": {
+															"type": "boolean"
+														}
+													},
+													"required": [
+														"kind",
+														"id"
+													]
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"type": "string",
+															"const": "listing"
+														},
+														"retry": {
+															"type": "boolean"
+														},
+														"abortAfterMs": {
+															"type": "integer",
+															"minimum": -9007199254740991,
+															"maximum": 9007199254740991
+														},
+														"abortedBefore": {
+															"type": "boolean"
+														}
+													},
+													"required": [
+														"kind"
+													]
+												}
+											],
+											"x-tag": "kind"
+										}
+									}
+								},
+								"required": [
+									"kind",
+									"calls"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "advance"
+									},
+									"ms": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740991
+									}
+								},
+								"required": [
+									"kind",
+									"ms"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "rows"
+									},
+									"rows": {
+										"type": "array",
+										"items": {
+											"type": "string"
+										}
+									}
+								},
+								"required": [
+									"kind",
+									"rows"
+								]
+							}
+						],
+						"x-tag": "kind"
+					}
+				}
+			},
+			"required": [
+				"startMs",
+				"exchanges",
+				"rows",
+				"steps"
+			]
+		},
+		"CatalogOpenrouterRunResult": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"nowMs": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"answers": {
+								"type": "array",
+								"items": {
+									"oneOf": [
+										{
+											"type": "object",
+											"properties": {
+												"kind": {
+													"type": "string",
+													"const": "views"
+												},
+												"views": {
+													"type": "array",
+													"items": {
+														"$ref": "#/$defs/ViewLine"
+													}
+												}
+											},
+											"required": [
+												"kind",
+												"views"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"kind": {
+													"type": "string",
+													"const": "view"
+												},
+												"view": {
+													"anyOf": [
+														{
+															"$ref": "#/$defs/ViewLine"
+														},
+														{
+															"type": "null"
+														}
+													]
+												}
+											},
+											"required": [
+												"kind",
+												"view"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"kind": {
+													"type": "string",
+													"const": "entry"
+												},
+												"entry": {
+													"anyOf": [
+														{
+															"type": "object",
+															"properties": {
+																"id": {
+																	"type": "string"
+																},
+																"name": {
+																	"type": [
+																		"string",
+																		"null"
+																	]
+																},
+																"efforts": {
+																	"anyOf": [
+																		{
+																			"type": "array",
+																			"items": {
+																				"type": "string"
+																			}
+																		},
+																		{
+																			"type": "null"
+																		}
+																	]
+																}
+															},
+															"required": [
+																"id",
+																"name",
+																"efforts"
+															]
+														},
+														{
+															"type": "null"
+														}
+													]
+												}
+											},
+											"required": [
+												"kind",
+												"entry"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"kind": {
+													"type": "string",
+													"const": "listing"
+												},
+												"listing": {
+													"anyOf": [
+														{
+															"type": "object",
+															"properties": {
+																"raw": {
+																	"type": "integer",
+																	"minimum": -9007199254740991,
+																	"maximum": 9007199254740991
+																},
+																"endpoints": {
+																	"type": "array",
+																	"items": {
+																		"type": "string"
+																	}
+																}
+															},
+															"required": [
+																"raw",
+																"endpoints"
+															]
+														},
+														{
+															"type": "null"
+														}
+													]
+												}
+											},
+											"required": [
+												"kind",
+												"listing"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"kind": {
+													"type": "string",
+													"const": "thrown"
+												},
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"kind",
+												"message"
+											]
+										}
+									],
+									"x-tag": "kind"
+								}
+							},
+							"rowReads": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							}
+						},
+						"required": [
+							"nowMs",
+							"answers",
+							"rowReads"
+						]
+					}
+				},
+				"requests": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"read": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"minimum": -9007199254740991,
+						"maximum": 9007199254740991
+					}
+				},
+				"waiting": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"refreshed": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				}
+			},
+			"required": [
+				"steps",
+				"requests",
+				"read",
+				"waiting",
+				"refreshed"
+			]
+		},
+		"CatalogOpencodeRunInput": {
+			"type": "object",
+			"properties": {
+				"startMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"exchanges": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/NetExchange"
+					}
+				},
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"plan": {
+					"$ref": "provider.input.json#/$defs/ProviderPlan"
+				},
+				"ttlMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"steps": {
+					"minItems": 1,
+					"type": "array",
+					"items": {
+						"oneOf": [
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "call"
+									},
+									"call": {
+										"oneOf": [
+											{
+												"type": "object",
+												"properties": {
+													"kind": {
+														"type": "string",
+														"const": "views"
+													},
+													"use": {
+														"$ref": "model.input.json#/$defs/ModelUse"
+													},
+													"zdrOnly": {
+														"type": "boolean"
+													},
+													"abortAfterMs": {
+														"type": "integer",
+														"minimum": -9007199254740991,
+														"maximum": 9007199254740991
+													},
+													"abortedBefore": {
+														"type": "boolean"
+													}
+												},
+												"required": [
+													"kind"
+												]
+											},
+											{
+												"type": "object",
+												"properties": {
+													"kind": {
+														"type": "string",
+														"const": "viewFor"
+													},
+													"row": {
+														"type": "string"
+													},
+													"use": {
+														"$ref": "model.input.json#/$defs/ModelUse"
+													},
+													"abortAfterMs": {
+														"type": "integer",
+														"minimum": -9007199254740991,
+														"maximum": 9007199254740991
+													},
+													"abortedBefore": {
+														"type": "boolean"
+													}
+												},
+												"required": [
+													"kind",
+													"row"
+												]
+											},
+											{
+												"type": "object",
+												"properties": {
+													"kind": {
+														"type": "string",
+														"const": "models"
+													},
+													"fresh": {
+														"type": "boolean"
+													},
+													"abortAfterMs": {
+														"type": "integer",
+														"minimum": -9007199254740991,
+														"maximum": 9007199254740991
+													},
+													"abortedBefore": {
+														"type": "boolean"
+													}
+												},
+												"required": [
+													"kind"
+												]
+											}
+										],
+										"x-tag": "kind"
+									}
+								},
+								"required": [
+									"kind",
+									"call"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "together"
+									},
+									"calls": {
+										"minItems": 2,
+										"type": "array",
+										"items": {
+											"oneOf": [
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"type": "string",
+															"const": "views"
+														},
+														"use": {
+															"$ref": "model.input.json#/$defs/ModelUse"
+														},
+														"zdrOnly": {
+															"type": "boolean"
+														},
+														"abortAfterMs": {
+															"type": "integer",
+															"minimum": -9007199254740991,
+															"maximum": 9007199254740991
+														},
+														"abortedBefore": {
+															"type": "boolean"
+														}
+													},
+													"required": [
+														"kind"
+													]
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"type": "string",
+															"const": "viewFor"
+														},
+														"row": {
+															"type": "string"
+														},
+														"use": {
+															"$ref": "model.input.json#/$defs/ModelUse"
+														},
+														"abortAfterMs": {
+															"type": "integer",
+															"minimum": -9007199254740991,
+															"maximum": 9007199254740991
+														},
+														"abortedBefore": {
+															"type": "boolean"
+														}
+													},
+													"required": [
+														"kind",
+														"row"
+													]
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": {
+															"type": "string",
+															"const": "models"
+														},
+														"fresh": {
+															"type": "boolean"
+														},
+														"abortAfterMs": {
+															"type": "integer",
+															"minimum": -9007199254740991,
+															"maximum": 9007199254740991
+														},
+														"abortedBefore": {
+															"type": "boolean"
+														}
+													},
+													"required": [
+														"kind"
+													]
+												}
+											],
+											"x-tag": "kind"
+										}
+									}
+								},
+								"required": [
+									"kind",
+									"calls"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "advance"
+									},
+									"ms": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740991
+									}
+								},
+								"required": [
+									"kind",
+									"ms"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "rows"
+									},
+									"rows": {
+										"type": "array",
+										"items": {
+											"type": "string"
+										}
+									}
+								},
+								"required": [
+									"kind",
+									"rows"
+								]
+							}
+						],
+						"x-tag": "kind"
+					}
+				}
+			},
+			"required": [
+				"startMs",
+				"exchanges",
+				"rows",
+				"plan",
+				"steps"
+			]
+		},
+		"CatalogOpencodeRunResult": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"nowMs": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"answers": {
+								"type": "array",
+								"items": {
+									"oneOf": [
+										{
+											"type": "object",
+											"properties": {
+												"kind": {
+													"type": "string",
+													"const": "views"
+												},
+												"views": {
+													"type": "array",
+													"items": {
+														"$ref": "#/$defs/ViewLine"
+													}
+												}
+											},
+											"required": [
+												"kind",
+												"views"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"kind": {
+													"type": "string",
+													"const": "view"
+												},
+												"view": {
+													"$ref": "#/$defs/ViewLine"
+												}
+											},
+											"required": [
+												"kind",
+												"view"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"kind": {
+													"type": "string",
+													"const": "models"
+												},
+												"models": {
+													"anyOf": [
+														{
+															"type": "array",
+															"items": {
+																"type": "string"
+															}
+														},
+														{
+															"type": "null"
+														}
+													]
+												}
+											},
+											"required": [
+												"kind",
+												"models"
+											]
+										},
+										{
+											"type": "object",
+											"properties": {
+												"kind": {
+													"type": "string",
+													"const": "thrown"
+												},
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"kind",
+												"message"
+											]
+										}
+									],
+									"x-tag": "kind"
+								}
+							},
+							"rowReads": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							}
+						},
+						"required": [
+							"nowMs",
+							"answers",
+							"rowReads"
+						]
+					}
+				},
+				"requests": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"read": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"minimum": -9007199254740991,
+						"maximum": 9007199254740991
+					}
+				},
+				"waiting": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"refreshed": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				}
+			},
+			"required": [
+				"steps",
+				"requests",
+				"read",
+				"waiting",
+				"refreshed"
+			]
+		},
+		"BrowseOpenrouterModelsInput": {
+			"type": "object",
+			"properties": {
+				"raw": {
+					"type": "array",
+					"items": {}
+				},
+				"zdr": {},
+				"nowMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				}
+			},
+			"required": [
+				"raw",
+				"zdr",
+				"nowMs"
+			]
+		},
+		"BrowseOpenrouterModelsResult": {
+			"type": "object",
+			"properties": {
+				"models": {
+					"type": "array",
+					"items": {
+						"$ref": "model.input.json#/$defs/BrowseModel"
+					}
+				}
+			},
+			"required": [
+				"models"
+			]
+		},
+		"BrowseOpenrouterProvidersInput": {
+			"type": "object",
+			"properties": {
+				"raw": {},
+				"zdr": {}
+			},
+			"required": [
+				"raw",
+				"zdr"
+			]
+		},
+		"BrowseOpenrouterProvidersResult": {
+			"type": "object",
+			"properties": {
+				"providers": {
+					"anyOf": [
+						{
+							"type": "array",
+							"items": {
+								"$ref": "model.input.json#/$defs/ProviderRow"
+							}
+						},
+						{
+							"type": "null"
+						}
+					]
+				}
+			},
+			"required": [
+				"providers"
+			]
+		},
+		"BrowseOpenrouterBrowserInput": {
+			"type": "object",
+			"properties": {
+				"startMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"exchanges": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/NetExchange"
+					}
+				},
+				"steps": {
+					"minItems": 1,
+					"type": "array",
+					"items": {
+						"oneOf": [
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "list"
+									},
+									"fresh": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"kind"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "detail"
+									},
+									"id": {
+										"type": "string"
+									},
+									"abortAfterMs": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991
+									},
+									"abortedBefore": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"kind",
+									"id"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "listed"
+									},
+									"id": {
+										"type": "string"
+									},
+									"abortAfterMs": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991
+									},
+									"abortedBefore": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"kind",
+									"id"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "view"
+									},
+									"row": {
+										"type": "string"
+									},
+									"use": {
+										"$ref": "model.input.json#/$defs/ModelUse"
+									},
+									"abortAfterMs": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991
+									},
+									"abortedBefore": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"kind",
+									"row"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "advance"
+									},
+									"ms": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740991
+									}
+								},
+								"required": [
+									"kind",
+									"ms"
+								]
+							}
+						],
+						"x-tag": "kind"
+					}
+				}
+			},
+			"required": [
+				"startMs",
+				"exchanges",
+				"steps"
+			]
+		},
+		"BrowseOpenrouterBrowserResult": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"nowMs": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"answer": {
+								"oneOf": [
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "list"
+											},
+											"models": {
+												"anyOf": [
+													{
+														"type": "array",
+														"items": {
+															"$ref": "model.input.json#/$defs/BrowseModel"
+														}
+													},
+													{
+														"type": "null"
+													}
+												]
+											}
+										},
+										"required": [
+											"kind",
+											"models"
+										]
+									},
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "detail"
+											},
+											"detail": {
+												"anyOf": [
+													{
+														"$ref": "model.input.json#/$defs/BrowseDetail"
+													},
+													{
+														"type": "null"
+													}
+												]
+											}
+										},
+										"required": [
+											"kind",
+											"detail"
+										]
+									},
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "listed"
+											},
+											"listed": {
+												"anyOf": [
+													{
+														"type": "object",
+														"properties": {
+															"label": {
+																"type": "string"
+															},
+															"reasoning": {
+																"type": "boolean"
+															}
+														},
+														"required": [
+															"label",
+															"reasoning"
+														]
+													},
+													{
+														"type": "null"
+													}
+												]
+											}
+										},
+										"required": [
+											"kind",
+											"listed"
+										]
+									},
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "view"
+											},
+											"view": {
+												"$ref": "#/$defs/ViewLine"
+											}
+										},
+										"required": [
+											"kind",
+											"view"
+										]
+									},
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "advanced"
+											}
+										},
+										"required": [
+											"kind"
+										]
+									},
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "thrown"
+											},
+											"message": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"kind",
+											"message"
+										]
+									}
+								],
+								"x-tag": "kind"
+							}
+						},
+						"required": [
+							"nowMs",
+							"answer"
+						]
+					}
+				},
+				"requests": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"read": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"minimum": -9007199254740991,
+						"maximum": 9007199254740991
+					}
+				},
+				"waiting": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"steps",
+				"requests",
+				"read",
+				"waiting"
+			]
+		},
+		"BrowseOpenrouterHopInput": {
+			"type": "object",
+			"properties": {
+				"startMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"exchanges": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/NetExchange"
+					}
+				},
+				"id": {
+					"type": "string"
+				},
+				"viewHosts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"abortAfterMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"abortedBefore": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"startMs",
+				"exchanges",
+				"id",
+				"viewHosts"
+			]
+		},
+		"BrowseOpenrouterHopResult": {
+			"type": "object",
+			"properties": {
+				"hosts": {
+					"anyOf": [
+						{
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"thrown": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"requests": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"waiting": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"nowMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				}
+			},
+			"required": [
+				"hosts",
+				"thrown",
+				"requests",
+				"waiting",
+				"nowMs"
+			]
+		},
+		"BrowseOpenrouterPinsInput": {
+			"type": "object",
+			"properties": {
+				"calls": {
+					"type": "array",
+					"items": {
+						"oneOf": [
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "pin"
+									},
+									"hosts": {
+										"type": "array",
+										"items": {
+											"type": "string"
+										}
+									}
+								},
+								"required": [
+									"kind",
+									"hosts"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "encode"
+									},
+									"request": {
+										"$ref": "step.input.json#/$defs/CanonicalRequest"
+									},
+									"mode": {
+										"type": "string",
+										"enum": [
+											"stream",
+											"complete"
+										]
+									}
+								},
+								"required": [
+									"kind",
+									"request",
+									"mode"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "passedBack"
+									}
+								},
+								"required": [
+									"kind"
+								]
+							}
+						],
+						"x-tag": "kind"
+					}
+				}
+			},
+			"required": [
+				"calls"
+			]
+		},
+		"BrowseOpenrouterPinsResult": {
+			"type": "object",
+			"properties": {
+				"answers": {
+					"type": "array",
+					"items": {
+						"oneOf": [
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "pinned"
+									}
+								},
+								"required": [
+									"kind"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "encoded"
+									},
+									"provider": {},
+									"replayed": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"kind",
+									"provider",
+									"replayed"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "passedBack"
+									},
+									"value": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"kind",
+									"value"
+								]
+							}
+						],
+						"x-tag": "kind"
+					}
+				}
+			},
+			"required": [
+				"answers"
+			]
+		},
+		"BrowseOpencodeBrowserInput": {
+			"type": "object",
+			"properties": {
+				"startMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"plan": {
+					"$ref": "provider.input.json#/$defs/ProviderPlan"
+				},
+				"exchanges": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/NetExchange"
+					}
+				},
+				"steps": {
+					"minItems": 1,
+					"type": "array",
+					"items": {
+						"oneOf": [
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "list"
+									},
+									"fresh": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"kind"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "detail"
+									},
+									"id": {
+										"type": "string"
+									},
+									"abortAfterMs": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991
+									},
+									"abortedBefore": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"kind",
+									"id"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "listed"
+									},
+									"id": {
+										"type": "string"
+									},
+									"abortAfterMs": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991
+									},
+									"abortedBefore": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"kind",
+									"id"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "view"
+									},
+									"row": {
+										"type": "string"
+									},
+									"use": {
+										"$ref": "model.input.json#/$defs/ModelUse"
+									},
+									"abortAfterMs": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991
+									},
+									"abortedBefore": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"kind",
+									"row"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "advance"
+									},
+									"ms": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740991
+									}
+								},
+								"required": [
+									"kind",
+									"ms"
+								]
+							}
+						],
+						"x-tag": "kind"
+					}
+				}
+			},
+			"required": [
+				"startMs",
+				"plan",
+				"exchanges",
+				"steps"
+			]
+		},
+		"BrowseOpencodeBrowserResult": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"nowMs": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"answer": {
+								"oneOf": [
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "list"
+											},
+											"models": {
+												"anyOf": [
+													{
+														"type": "array",
+														"items": {
+															"$ref": "model.input.json#/$defs/BrowseModel"
+														}
+													},
+													{
+														"type": "null"
+													}
+												]
+											}
+										},
+										"required": [
+											"kind",
+											"models"
+										]
+									},
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "detail"
+											},
+											"detail": {
+												"anyOf": [
+													{
+														"$ref": "model.input.json#/$defs/BrowseDetail"
+													},
+													{
+														"type": "null"
+													}
+												]
+											}
+										},
+										"required": [
+											"kind",
+											"detail"
+										]
+									},
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "listed"
+											},
+											"listed": {
+												"anyOf": [
+													{
+														"type": "object",
+														"properties": {
+															"label": {
+																"type": "string"
+															},
+															"reasoning": {
+																"type": "boolean"
+															}
+														},
+														"required": [
+															"label",
+															"reasoning"
+														]
+													},
+													{
+														"type": "null"
+													}
+												]
+											}
+										},
+										"required": [
+											"kind",
+											"listed"
+										]
+									},
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "view"
+											},
+											"view": {
+												"$ref": "#/$defs/ViewLine"
+											}
+										},
+										"required": [
+											"kind",
+											"view"
+										]
+									},
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "advanced"
+											}
+										},
+										"required": [
+											"kind"
+										]
+									},
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "thrown"
+											},
+											"message": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"kind",
+											"message"
+										]
+									}
+								],
+								"x-tag": "kind"
+							}
+						},
+						"required": [
+							"nowMs",
+							"answer"
+						]
+					}
+				},
+				"requests": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"read": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"minimum": -9007199254740991,
+						"maximum": 9007199254740991
+					}
+				},
+				"waiting": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"steps",
+				"requests",
+				"read",
+				"waiting"
+			]
+		},
+		"KindOpenrouterKeyInput": {
+			"type": "object",
+			"properties": {
+				"startMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"exchanges": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/NetExchange"
+					}
+				},
+				"stored": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"checks": {
+					"type": "array",
+					"items": {
+						"oneOf": [
+							{
+								"type": "object",
+								"properties": {
+									"auth": {
+										"type": "string",
+										"const": "stored"
+									},
+									"abortAfterMs": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991
+									},
+									"abortedBefore": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"auth"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"auth": {
+										"type": "string",
+										"const": "key"
+									},
+									"key": {
+										"type": "string"
+									},
+									"abortAfterMs": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991
+									},
+									"abortedBefore": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"auth",
+									"key"
+								]
+							}
+						],
+						"x-tag": "auth"
+					}
+				}
+			},
+			"required": [
+				"startMs",
+				"exchanges",
+				"stored",
+				"checks"
+			]
+		},
+		"KindOpenrouterKeyResult": {
+			"type": "object",
+			"properties": {
+				"checks": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"ok": {
+								"type": [
+									"boolean",
+									"null"
+								]
+							},
+							"reason": {
+								"anyOf": [
+									{
+										"type": "string",
+										"enum": [
+											"rejected",
+											"unreachable"
+										]
+									},
+									{
+										"type": "null"
+									}
+								]
+							},
+							"usage": {
+								"type": [
+									"number",
+									"null"
+								]
+							},
+							"limit": {
+								"type": [
+									"number",
+									"null"
+								]
+							},
+							"reset": {
+								"type": [
+									"string",
+									"null"
+								]
+							},
+							"thrown": {
+								"type": [
+									"string",
+									"null"
+								]
+							}
+						},
+						"required": [
+							"ok",
+							"reason",
+							"usage",
+							"limit",
+							"reset",
+							"thrown"
+						]
+					}
+				},
+				"requests": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							},
+							"authorization": {
+								"type": [
+									"string",
+									"null"
+								]
+							}
+						},
+						"required": [
+							"path",
+							"authorization"
+						]
+					}
+				},
+				"waiting": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"checks",
+				"requests",
+				"waiting"
+			]
 		}
 	}
 }

@@ -1,0 +1,45 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.openrouterKey",
+	"name": "key-rejected-by-401",
+	"input": {
+		"startMs": 1790337600000,
+		"stored": "key-0123456789abcdef",
+		"exchanges": [
+			{
+				"status": 401,
+				"json": {
+					"error": {
+						"message": "No auth",
+						"code": 401
+					}
+				}
+			}
+		],
+		"checks": [
+			{
+				"auth": "stored"
+			}
+		]
+	},
+	"expected": {
+		"checks": [
+			{
+				"ok": false,
+				"reason": "rejected",
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			}
+		],
+		"requests": [
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			}
+		],
+		"waiting": []
+	}
+}

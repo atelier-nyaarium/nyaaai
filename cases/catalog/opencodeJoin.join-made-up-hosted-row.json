@@ -1,0 +1,224 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.opencodeJoin",
+	"name": "join-made-up-hosted-row",
+	"input": {
+		"rows": [
+			"opencode:glm-5.3-flash",
+			"opencode:grok-4.7",
+			"opencode:gone"
+		],
+		"plan": "go",
+		"models": {
+			"data": [
+				{
+					"id": "glm-5.3-flash",
+					"name": "glm-5.3-flash",
+					"capabilities": {
+						"tools": {
+							"supported": true
+						},
+						"reasoning": {
+							"supported": true,
+							"effort": [
+								"low",
+								"high"
+							]
+						}
+					},
+					"limit": {
+						"context": 100000,
+						"output": 32000
+					},
+					"cost": {
+						"text": {
+							"input": {
+								"price": 0.5
+							},
+							"output": {
+								"price": 2
+							}
+						}
+					},
+					"api": {
+						"chat-completions": {}
+					}
+				},
+				{
+					"id": "grok-4.7",
+					"name": "grok-4.7",
+					"capabilities": {
+						"tools": {
+							"supported": true
+						},
+						"reasoning": {
+							"supported": true,
+							"effort": [
+								"low",
+								"high"
+							]
+						}
+					},
+					"limit": {
+						"context": 100000,
+						"output": 32000
+					},
+					"cost": {
+						"text": {
+							"input": {
+								"price": 0.5
+							},
+							"output": {
+								"price": 2
+							}
+						}
+					},
+					"api": {
+						"chat-completions": {}
+					}
+				}
+			]
+		},
+		"nowMs": 1790337600000,
+		"passes": [
+			{
+				"use": "chat",
+				"zdrOnly": true
+			},
+			{
+				"use": "chat",
+				"zdrOnly": false
+			}
+		]
+	},
+	"expected": {
+		"passes": [
+			[
+				{
+					"key": "opencode:glm-5.3-flash",
+					"status": "ok",
+					"efforts": [
+						"low",
+						"high"
+					],
+					"promptLimit": 100000,
+					"outputLimit": 32000,
+					"price": {
+						"prompt": [
+							0.5,
+							0.5
+						],
+						"completion": [
+							2,
+							2
+						],
+						"tiers": [
+							{
+								"minPromptTokens": 0,
+								"prompt": 0.5,
+								"completion": 2
+							}
+						]
+					},
+					"hosts": [],
+					"api": {
+						"family": "chat-completions",
+						"structured": false,
+						"choice": [
+							"auto"
+						],
+						"strict": false
+					},
+					"cache": "implicit"
+				},
+				{
+					"key": "opencode:grok-4.7",
+					"status": "noZdrHost",
+					"efforts": [
+						"low",
+						"high"
+					],
+					"hosts": []
+				}
+			],
+			[
+				{
+					"key": "opencode:glm-5.3-flash",
+					"status": "ok",
+					"efforts": [
+						"low",
+						"high"
+					],
+					"promptLimit": 100000,
+					"outputLimit": 32000,
+					"price": {
+						"prompt": [
+							0.5,
+							0.5
+						],
+						"completion": [
+							2,
+							2
+						],
+						"tiers": [
+							{
+								"minPromptTokens": 0,
+								"prompt": 0.5,
+								"completion": 2
+							}
+						]
+					},
+					"hosts": [],
+					"api": {
+						"family": "chat-completions",
+						"structured": false,
+						"choice": [
+							"auto"
+						],
+						"strict": false
+					},
+					"cache": "implicit"
+				},
+				{
+					"key": "opencode:grok-4.7",
+					"status": "ok",
+					"efforts": [
+						"low",
+						"high"
+					],
+					"promptLimit": 100000,
+					"outputLimit": 32000,
+					"price": {
+						"prompt": [
+							0.5,
+							0.5
+						],
+						"completion": [
+							2,
+							2
+						],
+						"tiers": [
+							{
+								"minPromptTokens": 0,
+								"prompt": 0.5,
+								"completion": 2
+							}
+						]
+					},
+					"hosts": [],
+					"dataKept": true,
+					"api": {
+						"family": "chat-completions",
+						"structured": false,
+						"choice": [
+							"auto"
+						],
+						"strict": false
+					},
+					"cache": "implicit"
+				}
+			]
+		]
+	}
+}

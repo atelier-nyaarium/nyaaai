@@ -1,0 +1,26 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.expiry",
+	"name": "expiry-nothing",
+	"input": {
+		"texts": [
+			"",
+			"soon",
+			"never",
+			"0",
+			"1790000000000",
+			"2026-10-01Tabc"
+		]
+	},
+	"expected": {
+		"ms": [
+			null,
+			null,
+			null,
+			null,
+			null,
+			null
+		]
+	}
+}

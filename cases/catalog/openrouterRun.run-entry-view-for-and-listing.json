@@ -1,0 +1,272 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.openrouterRun",
+	"name": "run-entry-view-for-and-listing",
+	"input": {
+		"startMs": 1790337600000,
+		"rows": [
+			"openai/gpt-6-luna",
+			"anthropic/claude-opus-5.5",
+			"mistralai/mistral-large-2512"
+		],
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "openai/gpt-6-luna",
+							"context_length": 1000000,
+							"pricing": {
+								"prompt": "0.00000012",
+								"completion": "0.0000006"
+							},
+							"reasoning": {
+								"supported_efforts": [
+									"high",
+									"low"
+								]
+							}
+						},
+						{
+							"id": "anthropic/claude-opus-5.5",
+							"pricing": {
+								"prompt": "0.000005",
+								"completion": "0.000025"
+							}
+						},
+						{
+							"id": "mistralai/mistral-large-2512"
+						}
+					]
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"model_id": "openai/gpt-6-luna",
+							"tag": "alpha",
+							"supported_parameters": [
+								"tools",
+								"reasoning",
+								"response_format",
+								"structured_outputs"
+							],
+							"pricing": {
+								"prompt": "0.00000012",
+								"completion": "0.0000006"
+							}
+						},
+						{
+							"model_id": "anthropic/claude-opus-5.5",
+							"tag": "beta",
+							"supported_parameters": [
+								"tools",
+								"reasoning",
+								"response_format",
+								"structured_outputs"
+							]
+						},
+						{
+							"model_id": "mistralai/mistral-large-2512",
+							"tag": "gamma",
+							"supported_parameters": [
+								"tools"
+							]
+						}
+					]
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "call",
+				"call": {
+					"kind": "entry",
+					"id": "openai/gpt-6-luna"
+				}
+			},
+			{
+				"kind": "call",
+				"call": {
+					"kind": "entry",
+					"id": "lab/none"
+				}
+			},
+			{
+				"kind": "call",
+				"call": {
+					"kind": "viewFor",
+					"row": "openai/gpt-6-luna"
+				}
+			},
+			{
+				"kind": "call",
+				"call": {
+					"kind": "viewFor",
+					"row": "openrouter:lab/made-up"
+				}
+			},
+			{
+				"kind": "call",
+				"call": {
+					"kind": "viewFor",
+					"row": "mistralai/mistral-large-2512",
+					"use": "analysis"
+				}
+			},
+			{
+				"kind": "call",
+				"call": {
+					"kind": "listing"
+				}
+			},
+			{
+				"kind": "call",
+				"call": {
+					"kind": "view",
+					"key": "lab/none"
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "entry",
+						"entry": {
+							"id": "openai/gpt-6-luna",
+							"name": null,
+							"efforts": [
+								"high",
+								"low"
+							]
+						}
+					}
+				],
+				"rowReads": 0
+			},
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "entry",
+						"entry": null
+					}
+				],
+				"rowReads": 0
+			},
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "view",
+						"view": {
+							"key": "openai/gpt-6-luna",
+							"status": "ok",
+							"efforts": [
+								"low",
+								"high"
+							],
+							"promptLimit": 1000000,
+							"price": {
+								"prompt": [
+									0.12,
+									0.12
+								],
+								"completion": [
+									0.6,
+									0.6
+								],
+								"tiers": [
+									{
+										"minPromptTokens": 0,
+										"prompt": 0.12,
+										"completion": 0.6
+									}
+								]
+							},
+							"hosts": [
+								"alpha"
+							]
+						}
+					}
+				],
+				"rowReads": 0
+			},
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "view",
+						"view": {
+							"key": "openrouter:lab/made-up",
+							"status": "retired",
+							"efforts": [],
+							"hosts": []
+						}
+					}
+				],
+				"rowReads": 0
+			},
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "view",
+						"view": {
+							"key": "mistralai/mistral-large-2512",
+							"status": "noZdrHost",
+							"efforts": [],
+							"hosts": []
+						}
+					}
+				],
+				"rowReads": 0
+			},
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "listing",
+						"listing": {
+							"raw": 3,
+							"endpoints": [
+								"openai/gpt-6-luna",
+								"anthropic/claude-opus-5.5",
+								"mistralai/mistral-large-2512"
+							]
+						}
+					}
+				],
+				"rowReads": 0
+			},
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "view",
+						"view": null
+					}
+				],
+				"rowReads": 1
+			}
+		],
+		"requests": [
+			"/models",
+			"/endpoints/zdr"
+		],
+		"read": [
+			1,
+			1
+		],
+		"waiting": [],
+		"refreshed": 1
+	}
+}

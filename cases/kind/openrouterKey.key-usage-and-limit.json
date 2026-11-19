@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.openrouterKey",
+	"name": "key-usage-and-limit",
+	"input": {
+		"startMs": 1790337600000,
+		"stored": "key-0123456789abcdef",
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"usage": 4.12,
+						"limit": 20,
+						"limit_reset": "monthly"
+					}
+				}
+			}
+		],
+		"checks": [
+			{
+				"auth": "stored"
+			}
+		]
+	},
+	"expected": {
+		"checks": [
+			{
+				"ok": true,
+				"reason": null,
+				"usage": 4.12,
+				"limit": 20,
+				"reset": "monthly",
+				"thrown": null
+			}
+		],
+		"requests": [
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			}
+		],
+		"waiting": []
+	}
+}

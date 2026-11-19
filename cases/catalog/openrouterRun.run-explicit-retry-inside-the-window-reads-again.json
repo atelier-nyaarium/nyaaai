@@ -1,0 +1,177 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.openrouterRun",
+	"name": "run-explicit-retry-inside-the-window-reads-again",
+	"input": {
+		"startMs": 1790337600000,
+		"rows": [
+			"openai/gpt-6-luna",
+			"anthropic/claude-opus-5.5",
+			"mistralai/mistral-large-2512"
+		],
+		"exchanges": [
+			{
+				"status": 500,
+				"json": {
+					"error": {
+						"message": "Down."
+					}
+				}
+			},
+			{
+				"status": 500,
+				"json": {
+					"error": {
+						"message": "Down."
+					}
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "openai/gpt-6-luna",
+							"context_length": 1000000,
+							"pricing": {
+								"prompt": "0.00000012",
+								"completion": "0.0000006"
+							},
+							"reasoning": {
+								"supported_efforts": [
+									"high",
+									"low"
+								]
+							}
+						},
+						{
+							"id": "anthropic/claude-opus-5.5",
+							"pricing": {
+								"prompt": "0.000005",
+								"completion": "0.000025"
+							}
+						},
+						{
+							"id": "mistralai/mistral-large-2512"
+						}
+					]
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"model_id": "openai/gpt-6-luna",
+							"tag": "alpha",
+							"supported_parameters": [
+								"tools",
+								"reasoning",
+								"response_format",
+								"structured_outputs"
+							],
+							"pricing": {
+								"prompt": "0.00000012",
+								"completion": "0.0000006"
+							}
+						},
+						{
+							"model_id": "anthropic/claude-opus-5.5",
+							"tag": "beta",
+							"supported_parameters": [
+								"tools",
+								"reasoning",
+								"response_format",
+								"structured_outputs"
+							]
+						},
+						{
+							"model_id": "mistralai/mistral-large-2512",
+							"tag": "gamma",
+							"supported_parameters": [
+								"tools"
+							]
+						}
+					]
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "call",
+				"call": {
+					"kind": "listing"
+				}
+			},
+			{
+				"kind": "call",
+				"call": {
+					"kind": "listing"
+				}
+			},
+			{
+				"kind": "call",
+				"call": {
+					"kind": "listing",
+					"retry": true
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "listing",
+						"listing": null
+					}
+				],
+				"rowReads": 0
+			},
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "listing",
+						"listing": null
+					}
+				],
+				"rowReads": 0
+			},
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "listing",
+						"listing": {
+							"raw": 3,
+							"endpoints": [
+								"openai/gpt-6-luna",
+								"anthropic/claude-opus-5.5",
+								"mistralai/mistral-large-2512"
+							]
+						}
+					}
+				],
+				"rowReads": 0
+			}
+		],
+		"requests": [
+			"/models",
+			"/endpoints/zdr",
+			"/models",
+			"/endpoints/zdr"
+		],
+		"read": [
+			1,
+			1,
+			1,
+			1
+		],
+		"waiting": [],
+		"refreshed": 1
+	}
+}

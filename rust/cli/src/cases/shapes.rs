@@ -12249,3 +12249,5774 @@ impl Shape for DispositionSkipReasonResult {
         Value::Object(object)
     }
 }
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NetExchange {
+    pub status: i64,
+    pub json: Option<Value>,
+    pub text: Option<String>,
+    pub head_ms: Option<i64>,
+    pub end: Option<NetExchangeEnd>,
+}
+
+impl Shape for NetExchange {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let status = shape::required(object, "status", at, shape::integer)?;
+        let json = shape::optional(object, "json", at, shape::any)?;
+        let text = shape::optional(object, "text", at, shape::text)?;
+        let head_ms = shape::optional(object, "headMs", at, shape::integer)?;
+        let end = shape::optional(object, "end", at, NetExchangeEnd::decode_at)?;
+        Ok(Self {
+            status,
+            json,
+            text,
+            head_ms,
+            end,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("status", Value::Number(self.status as f64));
+        if let Some(held) = &self.json {
+            object.insert("json", held.clone());
+        }
+        if let Some(held) = &self.text {
+            object.insert("text", Value::from(held.as_str()));
+        }
+        if let Some(held) = &self.head_ms {
+            object.insert("headMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.end {
+            object.insert("end", held.encode());
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum NetExchangeEnd {
+    Closed,
+    Dropped,
+    Refused,
+}
+
+impl NetExchangeEnd {
+    pub const ALL: [Self; 3] = [Self::Closed, Self::Dropped, Self::Refused];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Closed => "closed",
+            Self::Dropped => "dropped",
+            Self::Refused => "refused",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for NetExchangeEnd {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ViewLine {
+    pub key: String,
+    pub status: ViewLineStatus,
+    pub retired_on: Option<String>,
+    pub efforts: Vec<nyaaai_contract::shapes::step::Effort>,
+    pub prompt_limit: Option<f64>,
+    pub output_limit: Option<f64>,
+    pub price: Option<ViewLinePrice>,
+    pub cache_write1h: Option<()>,
+    pub hosts: Vec<String>,
+    pub data_kept: Option<()>,
+    pub api: Option<nyaaai_contract::shapes::step::ApiFacts>,
+    pub cache: Option<ViewLineCache>,
+}
+
+impl Shape for ViewLine {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let key = shape::required(object, "key", at, shape::text)?;
+        let status = shape::required(object, "status", at, ViewLineStatus::decode_at)?;
+        let retired_on = shape::optional(object, "retiredOn", at, shape::text)?;
+        let efforts = shape::required(object, "efforts", at, |value, at| {
+            shape::list(value, at, nyaaai_contract::shapes::step::Effort::decode_at)
+        })?;
+        let prompt_limit = shape::optional(object, "promptLimit", at, shape::number)?;
+        let output_limit = shape::optional(object, "outputLimit", at, shape::number)?;
+        let price = shape::optional(object, "price", at, ViewLinePrice::decode_at)?;
+        let cache_write1h = shape::optional(object, "cacheWrite1h", at, |value, at| {
+            shape::is_flag(value, at, true)
+        })?;
+        let hosts = shape::required(object, "hosts", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let data_kept = shape::optional(object, "dataKept", at, |value, at| {
+            shape::is_flag(value, at, true)
+        })?;
+        let api = shape::optional(
+            object,
+            "api",
+            at,
+            nyaaai_contract::shapes::step::ApiFacts::decode_at,
+        )?;
+        let cache = shape::optional(object, "cache", at, ViewLineCache::decode_at)?;
+        Ok(Self {
+            key,
+            status,
+            retired_on,
+            efforts,
+            prompt_limit,
+            output_limit,
+            price,
+            cache_write1h,
+            hosts,
+            data_kept,
+            api,
+            cache,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("key", Value::from(self.key.as_str()));
+        object.insert("status", self.status.encode());
+        if let Some(held) = &self.retired_on {
+            object.insert("retiredOn", Value::from(held.as_str()));
+        }
+        object.insert(
+            "efforts",
+            Value::Array(self.efforts.iter().map(|held| held.encode()).collect()),
+        );
+        if let Some(held) = &self.prompt_limit {
+            object.insert("promptLimit", Value::Number(*held));
+        }
+        if let Some(held) = &self.output_limit {
+            object.insert("outputLimit", Value::Number(*held));
+        }
+        if let Some(held) = &self.price {
+            object.insert("price", held.encode());
+        }
+        if self.cache_write1h.is_some() {
+            object.insert("cacheWrite1h", Value::Bool(true));
+        }
+        object.insert(
+            "hosts",
+            Value::Array(
+                self.hosts
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        if self.data_kept.is_some() {
+            object.insert("dataKept", Value::Bool(true));
+        }
+        if let Some(held) = &self.api {
+            object.insert("api", held.encode());
+        }
+        if let Some(held) = &self.cache {
+            object.insert("cache", held.encode());
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ViewLineStatus {
+    Ok,
+    Retired,
+    NoZdrHost,
+    NoTools,
+    Unknown,
+}
+
+impl ViewLineStatus {
+    pub const ALL: [Self; 5] = [
+        Self::Ok,
+        Self::Retired,
+        Self::NoZdrHost,
+        Self::NoTools,
+        Self::Unknown,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Ok => "ok",
+            Self::Retired => "retired",
+            Self::NoZdrHost => "noZdrHost",
+            Self::NoTools => "noTools",
+            Self::Unknown => "unknown",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for ViewLineStatus {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ViewLinePrice {
+    Price(nyaaai_contract::shapes::model::Price),
+    Free,
+    Unknown,
+}
+
+impl Shape for ViewLinePrice {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        if let Ok(held) = nyaaai_contract::shapes::model::Price::decode_at(value, at) {
+            return Ok(Self::Price(held));
+        }
+        if shape::is_text(value, at, "free").is_ok() {
+            return Ok(Self::Free);
+        }
+        if shape::is_text(value, at, "unknown").is_ok() {
+            return Ok(Self::Unknown);
+        }
+        Err(shape::refused(at, "no branch matches"))
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Price(held) => held.encode(),
+            Self::Free => Value::from("free"),
+            Self::Unknown => Value::from("unknown"),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ViewLineCache {
+    Implicit,
+    Explicit,
+}
+
+impl ViewLineCache {
+    pub const ALL: [Self; 2] = [Self::Implicit, Self::Explicit];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Implicit => "implicit",
+            Self::Explicit => "explicit",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for ViewLineCache {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterModelsInput {
+    pub body: Value,
+}
+
+impl Shape for CatalogOpenrouterModelsInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let body = shape::required(object, "body", at, shape::any)?;
+        Ok(Self { body })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("body", self.body.clone());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterModelsResult {
+    pub models: Option<Vec<CatalogOpenrouterModelsResultModelsItem>>,
+}
+
+impl Shape for CatalogOpenrouterModelsResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let models = shape::required(object, "models", at, |value, at| {
+            shape::nullable(value, at, |value, at| {
+                shape::list(
+                    value,
+                    at,
+                    CatalogOpenrouterModelsResultModelsItem::decode_at,
+                )
+            })
+        })?;
+        Ok(Self { models })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "models",
+            self.models.as_ref().map_or(Value::Null, |held| {
+                Value::Array(held.iter().map(|held| held.encode()).collect())
+            }),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterModelsResultModelsItem {
+    pub id: String,
+    pub name: Option<String>,
+    pub created: Option<f64>,
+    pub context_length: Option<f64>,
+    pub expiration_date: Option<String>,
+    pub pricing: Option<CatalogOpenrouterModelsResultModelsItemPricing>,
+    pub reasoning: Option<CatalogOpenrouterModelsResultModelsItemReasoning>,
+    pub supported_parameters: Option<Vec<String>>,
+}
+
+impl Shape for CatalogOpenrouterModelsResultModelsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let name = shape::required(object, "name", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let created = shape::required(object, "created", at, |value, at| {
+            shape::nullable(value, at, shape::number)
+        })?;
+        let context_length = shape::required(object, "context_length", at, |value, at| {
+            shape::nullable(value, at, shape::number)
+        })?;
+        let expiration_date = shape::required(object, "expiration_date", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let pricing = shape::required(object, "pricing", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                CatalogOpenrouterModelsResultModelsItemPricing::decode_at,
+            )
+        })?;
+        let reasoning = shape::required(object, "reasoning", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                CatalogOpenrouterModelsResultModelsItemReasoning::decode_at,
+            )
+        })?;
+        let supported_parameters =
+            shape::required(object, "supported_parameters", at, |value, at| {
+                shape::nullable(value, at, |value, at| shape::list(value, at, shape::text))
+            })?;
+        Ok(Self {
+            id,
+            name,
+            created,
+            context_length,
+            expiration_date,
+            pricing,
+            reasoning,
+            supported_parameters,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("id", Value::from(self.id.as_str()));
+        object.insert(
+            "name",
+            self.name
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "created",
+            self.created
+                .as_ref()
+                .map_or(Value::Null, |held| Value::Number(*held)),
+        );
+        object.insert(
+            "context_length",
+            self.context_length
+                .as_ref()
+                .map_or(Value::Null, |held| Value::Number(*held)),
+        );
+        object.insert(
+            "expiration_date",
+            self.expiration_date
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "pricing",
+            self.pricing
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert(
+            "reasoning",
+            self.reasoning
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert(
+            "supported_parameters",
+            self.supported_parameters
+                .as_ref()
+                .map_or(Value::Null, |held| {
+                    Value::Array(held.iter().map(|held| Value::from(held.as_str())).collect())
+                }),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterModelsResultModelsItemPricing {
+    pub prompt: Value,
+    pub completion: Value,
+    pub input_cache_read: Value,
+    pub input_cache_write: Value,
+    pub input_cache_write_1h: Value,
+    pub overrides: Option<Vec<CatalogOpenrouterModelsResultModelsItemPricingOverridesItem>>,
+}
+
+impl Shape for CatalogOpenrouterModelsResultModelsItemPricing {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let prompt = shape::required(object, "prompt", at, shape::any)?;
+        let completion = shape::required(object, "completion", at, shape::any)?;
+        let input_cache_read = shape::required(object, "input_cache_read", at, shape::any)?;
+        let input_cache_write = shape::required(object, "input_cache_write", at, shape::any)?;
+        let input_cache_write_1h = shape::required(object, "input_cache_write_1h", at, shape::any)?;
+        let overrides = shape::required(object, "overrides", at, |value, at| {
+            shape::nullable(value, at, |value, at| {
+                shape::list(
+                    value,
+                    at,
+                    CatalogOpenrouterModelsResultModelsItemPricingOverridesItem::decode_at,
+                )
+            })
+        })?;
+        Ok(Self {
+            prompt,
+            completion,
+            input_cache_read,
+            input_cache_write,
+            input_cache_write_1h,
+            overrides,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("prompt", self.prompt.clone());
+        object.insert("completion", self.completion.clone());
+        object.insert("input_cache_read", self.input_cache_read.clone());
+        object.insert("input_cache_write", self.input_cache_write.clone());
+        object.insert("input_cache_write_1h", self.input_cache_write_1h.clone());
+        object.insert(
+            "overrides",
+            self.overrides.as_ref().map_or(Value::Null, |held| {
+                Value::Array(held.iter().map(|held| held.encode()).collect())
+            }),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterModelsResultModelsItemReasoning {
+    pub supported_efforts: Option<Vec<String>>,
+}
+
+impl Shape for CatalogOpenrouterModelsResultModelsItemReasoning {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let supported_efforts = shape::required(object, "supported_efforts", at, |value, at| {
+            shape::nullable(value, at, |value, at| shape::list(value, at, shape::text))
+        })?;
+        Ok(Self { supported_efforts })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "supported_efforts",
+            self.supported_efforts.as_ref().map_or(Value::Null, |held| {
+                Value::Array(held.iter().map(|held| Value::from(held.as_str())).collect())
+            }),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterModelsResultModelsItemPricingOverridesItem {
+    pub min_prompt_tokens: f64,
+    pub prompt: Value,
+    pub completion: Value,
+    pub input_cache_read: Value,
+    pub input_cache_write: Value,
+    pub input_cache_write_1h: Value,
+}
+
+impl Shape for CatalogOpenrouterModelsResultModelsItemPricingOverridesItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let min_prompt_tokens = shape::required(object, "min_prompt_tokens", at, shape::number)?;
+        let prompt = shape::required(object, "prompt", at, shape::any)?;
+        let completion = shape::required(object, "completion", at, shape::any)?;
+        let input_cache_read = shape::required(object, "input_cache_read", at, shape::any)?;
+        let input_cache_write = shape::required(object, "input_cache_write", at, shape::any)?;
+        let input_cache_write_1h = shape::required(object, "input_cache_write_1h", at, shape::any)?;
+        Ok(Self {
+            min_prompt_tokens,
+            prompt,
+            completion,
+            input_cache_read,
+            input_cache_write,
+            input_cache_write_1h,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("min_prompt_tokens", Value::Number(self.min_prompt_tokens));
+        object.insert("prompt", self.prompt.clone());
+        object.insert("completion", self.completion.clone());
+        object.insert("input_cache_read", self.input_cache_read.clone());
+        object.insert("input_cache_write", self.input_cache_write.clone());
+        object.insert("input_cache_write_1h", self.input_cache_write_1h.clone());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterEndpointsInput {
+    pub body: Value,
+}
+
+impl Shape for CatalogOpenrouterEndpointsInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let body = shape::required(object, "body", at, shape::any)?;
+        Ok(Self { body })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("body", self.body.clone());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterEndpointsResult {
+    pub endpoints: Option<Vec<CatalogOpenrouterEndpointsResultEndpointsItem>>,
+}
+
+impl Shape for CatalogOpenrouterEndpointsResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let endpoints = shape::required(object, "endpoints", at, |value, at| {
+            shape::nullable(value, at, |value, at| {
+                shape::list(
+                    value,
+                    at,
+                    CatalogOpenrouterEndpointsResultEndpointsItem::decode_at,
+                )
+            })
+        })?;
+        Ok(Self { endpoints })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "endpoints",
+            self.endpoints.as_ref().map_or(Value::Null, |held| {
+                Value::Array(held.iter().map(|held| held.encode()).collect())
+            }),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterEndpointsResultEndpointsItem {
+    pub model: String,
+    pub hosts: Vec<CatalogOpenrouterEndpointsResultEndpointsItemHostsItem>,
+}
+
+impl Shape for CatalogOpenrouterEndpointsResultEndpointsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let model = shape::required(object, "model", at, shape::text)?;
+        let hosts = shape::required(object, "hosts", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                CatalogOpenrouterEndpointsResultEndpointsItemHostsItem::decode_at,
+            )
+        })?;
+        Ok(Self { model, hosts })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("model", Value::from(self.model.as_str()));
+        object.insert(
+            "hosts",
+            Value::Array(self.hosts.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterEndpointsResultEndpointsItemHostsItem {
+    pub model_id: String,
+    pub tag: Option<String>,
+    pub provider_name: Option<String>,
+    pub context_length: Option<f64>,
+    pub max_prompt_tokens: Option<f64>,
+    pub supported_parameters: Option<Vec<String>>,
+    pub pricing: Option<CatalogOpenrouterEndpointsResultEndpointsItemHostsItemPricing>,
+}
+
+impl Shape for CatalogOpenrouterEndpointsResultEndpointsItemHostsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let model_id = shape::required(object, "model_id", at, shape::text)?;
+        let tag = shape::required(object, "tag", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let provider_name = shape::required(object, "provider_name", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let context_length = shape::required(object, "context_length", at, |value, at| {
+            shape::nullable(value, at, shape::number)
+        })?;
+        let max_prompt_tokens = shape::required(object, "max_prompt_tokens", at, |value, at| {
+            shape::nullable(value, at, shape::number)
+        })?;
+        let supported_parameters =
+            shape::required(object, "supported_parameters", at, |value, at| {
+                shape::nullable(value, at, |value, at| shape::list(value, at, shape::text))
+            })?;
+        let pricing = shape::required(object, "pricing", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                CatalogOpenrouterEndpointsResultEndpointsItemHostsItemPricing::decode_at,
+            )
+        })?;
+        Ok(Self {
+            model_id,
+            tag,
+            provider_name,
+            context_length,
+            max_prompt_tokens,
+            supported_parameters,
+            pricing,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("model_id", Value::from(self.model_id.as_str()));
+        object.insert(
+            "tag",
+            self.tag
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "provider_name",
+            self.provider_name
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "context_length",
+            self.context_length
+                .as_ref()
+                .map_or(Value::Null, |held| Value::Number(*held)),
+        );
+        object.insert(
+            "max_prompt_tokens",
+            self.max_prompt_tokens
+                .as_ref()
+                .map_or(Value::Null, |held| Value::Number(*held)),
+        );
+        object.insert(
+            "supported_parameters",
+            self.supported_parameters
+                .as_ref()
+                .map_or(Value::Null, |held| {
+                    Value::Array(held.iter().map(|held| Value::from(held.as_str())).collect())
+                }),
+        );
+        object.insert(
+            "pricing",
+            self.pricing
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterEndpointsResultEndpointsItemHostsItemPricing {
+    pub prompt: Value,
+    pub completion: Value,
+    pub input_cache_read: Value,
+    pub input_cache_write: Value,
+    pub input_cache_write_1h: Value,
+    pub overrides:
+        Option<Vec<CatalogOpenrouterEndpointsResultEndpointsItemHostsItemPricingOverridesItem>>,
+}
+
+impl Shape for CatalogOpenrouterEndpointsResultEndpointsItemHostsItemPricing {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let prompt = shape::required(object, "prompt", at, shape::any)?;
+        let completion = shape::required(object, "completion", at, shape::any)?;
+        let input_cache_read = shape::required(object, "input_cache_read", at, shape::any)?;
+        let input_cache_write = shape::required(object, "input_cache_write", at, shape::any)?;
+        let input_cache_write_1h = shape::required(object, "input_cache_write_1h", at, shape::any)?;
+        let overrides = shape::required(object, "overrides", at, |value, at| {
+            shape::nullable(value, at, |value, at| {
+                shape::list(value, at, CatalogOpenrouterEndpointsResultEndpointsItemHostsItemPricingOverridesItem::decode_at)
+            })
+        })?;
+        Ok(Self {
+            prompt,
+            completion,
+            input_cache_read,
+            input_cache_write,
+            input_cache_write_1h,
+            overrides,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("prompt", self.prompt.clone());
+        object.insert("completion", self.completion.clone());
+        object.insert("input_cache_read", self.input_cache_read.clone());
+        object.insert("input_cache_write", self.input_cache_write.clone());
+        object.insert("input_cache_write_1h", self.input_cache_write_1h.clone());
+        object.insert(
+            "overrides",
+            self.overrides.as_ref().map_or(Value::Null, |held| {
+                Value::Array(held.iter().map(|held| held.encode()).collect())
+            }),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterEndpointsResultEndpointsItemHostsItemPricingOverridesItem {
+    pub min_prompt_tokens: f64,
+    pub prompt: Value,
+    pub completion: Value,
+    pub input_cache_read: Value,
+    pub input_cache_write: Value,
+    pub input_cache_write_1h: Value,
+}
+
+impl Shape for CatalogOpenrouterEndpointsResultEndpointsItemHostsItemPricingOverridesItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let min_prompt_tokens = shape::required(object, "min_prompt_tokens", at, shape::number)?;
+        let prompt = shape::required(object, "prompt", at, shape::any)?;
+        let completion = shape::required(object, "completion", at, shape::any)?;
+        let input_cache_read = shape::required(object, "input_cache_read", at, shape::any)?;
+        let input_cache_write = shape::required(object, "input_cache_write", at, shape::any)?;
+        let input_cache_write_1h = shape::required(object, "input_cache_write_1h", at, shape::any)?;
+        Ok(Self {
+            min_prompt_tokens,
+            prompt,
+            completion,
+            input_cache_read,
+            input_cache_write,
+            input_cache_write_1h,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("min_prompt_tokens", Value::Number(self.min_prompt_tokens));
+        object.insert("prompt", self.prompt.clone());
+        object.insert("completion", self.completion.clone());
+        object.insert("input_cache_read", self.input_cache_read.clone());
+        object.insert("input_cache_write", self.input_cache_write.clone());
+        object.insert("input_cache_write_1h", self.input_cache_write_1h.clone());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpencodeModelsInput {
+    pub body: Value,
+}
+
+impl Shape for CatalogOpencodeModelsInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let body = shape::required(object, "body", at, shape::any)?;
+        Ok(Self { body })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("body", self.body.clone());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpencodeModelsResult {
+    pub models: Option<Vec<CatalogOpencodeModelsResultModelsItem>>,
+}
+
+impl Shape for CatalogOpencodeModelsResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let models = shape::required(object, "models", at, |value, at| {
+            shape::nullable(value, at, |value, at| {
+                shape::list(value, at, CatalogOpencodeModelsResultModelsItem::decode_at)
+            })
+        })?;
+        Ok(Self { models })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "models",
+            self.models.as_ref().map_or(Value::Null, |held| {
+                Value::Array(held.iter().map(|held| held.encode()).collect())
+            }),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpencodeModelsResultModelsItem {
+    pub id: String,
+    pub name: Option<String>,
+    pub description: Option<String>,
+    pub input: Option<Vec<String>>,
+    pub output: Option<Vec<String>>,
+    pub tools: Option<bool>,
+    pub reasoning: Option<bool>,
+    pub efforts: Option<Vec<String>>,
+    pub toggle: Option<bool>,
+    pub structured_output: Option<bool>,
+    pub cache: Option<CatalogOpencodeModelsResultModelsItemCache>,
+    pub context: Option<f64>,
+    pub input_limit: Option<f64>,
+    pub output_limit: Option<f64>,
+    pub price: Option<CatalogOpencodeModelsResultModelsItemPrice>,
+    pub api: Vec<CatalogOpencodeModelsResultModelsItemApiItem>,
+}
+
+impl Shape for CatalogOpencodeModelsResultModelsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let name = shape::required(object, "name", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let description = shape::required(object, "description", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let input = shape::required(object, "input", at, |value, at| {
+            shape::nullable(value, at, |value, at| shape::list(value, at, shape::text))
+        })?;
+        let output = shape::required(object, "output", at, |value, at| {
+            shape::nullable(value, at, |value, at| shape::list(value, at, shape::text))
+        })?;
+        let tools = shape::required(object, "tools", at, |value, at| {
+            shape::nullable(value, at, shape::flag)
+        })?;
+        let reasoning = shape::required(object, "reasoning", at, |value, at| {
+            shape::nullable(value, at, shape::flag)
+        })?;
+        let efforts = shape::required(object, "efforts", at, |value, at| {
+            shape::nullable(value, at, |value, at| shape::list(value, at, shape::text))
+        })?;
+        let toggle = shape::required(object, "toggle", at, |value, at| {
+            shape::nullable(value, at, shape::flag)
+        })?;
+        let structured_output = shape::required(object, "structured_output", at, |value, at| {
+            shape::nullable(value, at, shape::flag)
+        })?;
+        let cache = shape::required(object, "cache", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                CatalogOpencodeModelsResultModelsItemCache::decode_at,
+            )
+        })?;
+        let context = shape::required(object, "context", at, |value, at| {
+            shape::nullable(value, at, shape::number)
+        })?;
+        let input_limit = shape::required(object, "input_limit", at, |value, at| {
+            shape::nullable(value, at, shape::number)
+        })?;
+        let output_limit = shape::required(object, "output_limit", at, |value, at| {
+            shape::nullable(value, at, shape::number)
+        })?;
+        let price = shape::required(object, "price", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                CatalogOpencodeModelsResultModelsItemPrice::decode_at,
+            )
+        })?;
+        let api = shape::required(object, "api", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                CatalogOpencodeModelsResultModelsItemApiItem::decode_at,
+            )
+        })?;
+        Ok(Self {
+            id,
+            name,
+            description,
+            input,
+            output,
+            tools,
+            reasoning,
+            efforts,
+            toggle,
+            structured_output,
+            cache,
+            context,
+            input_limit,
+            output_limit,
+            price,
+            api,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("id", Value::from(self.id.as_str()));
+        object.insert(
+            "name",
+            self.name
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "description",
+            self.description
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "input",
+            self.input.as_ref().map_or(Value::Null, |held| {
+                Value::Array(held.iter().map(|held| Value::from(held.as_str())).collect())
+            }),
+        );
+        object.insert(
+            "output",
+            self.output.as_ref().map_or(Value::Null, |held| {
+                Value::Array(held.iter().map(|held| Value::from(held.as_str())).collect())
+            }),
+        );
+        object.insert(
+            "tools",
+            self.tools
+                .as_ref()
+                .map_or(Value::Null, |held| Value::Bool(*held)),
+        );
+        object.insert(
+            "reasoning",
+            self.reasoning
+                .as_ref()
+                .map_or(Value::Null, |held| Value::Bool(*held)),
+        );
+        object.insert(
+            "efforts",
+            self.efforts.as_ref().map_or(Value::Null, |held| {
+                Value::Array(held.iter().map(|held| Value::from(held.as_str())).collect())
+            }),
+        );
+        object.insert(
+            "toggle",
+            self.toggle
+                .as_ref()
+                .map_or(Value::Null, |held| Value::Bool(*held)),
+        );
+        object.insert(
+            "structured_output",
+            self.structured_output
+                .as_ref()
+                .map_or(Value::Null, |held| Value::Bool(*held)),
+        );
+        object.insert(
+            "cache",
+            self.cache
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert(
+            "context",
+            self.context
+                .as_ref()
+                .map_or(Value::Null, |held| Value::Number(*held)),
+        );
+        object.insert(
+            "input_limit",
+            self.input_limit
+                .as_ref()
+                .map_or(Value::Null, |held| Value::Number(*held)),
+        );
+        object.insert(
+            "output_limit",
+            self.output_limit
+                .as_ref()
+                .map_or(Value::Null, |held| Value::Number(*held)),
+        );
+        object.insert(
+            "price",
+            self.price
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert(
+            "api",
+            Value::Array(self.api.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpencodeModelsResultModelsItemCache {
+    pub implicit: Option<bool>,
+    pub explicit: bool,
+}
+
+impl Shape for CatalogOpencodeModelsResultModelsItemCache {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let implicit = shape::required(object, "implicit", at, |value, at| {
+            shape::nullable(value, at, shape::flag)
+        })?;
+        let explicit = shape::required(object, "explicit", at, shape::flag)?;
+        Ok(Self { implicit, explicit })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "implicit",
+            self.implicit
+                .as_ref()
+                .map_or(Value::Null, |held| Value::Bool(*held)),
+        );
+        object.insert("explicit", Value::Bool(self.explicit));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpencodeModelsResultModelsItemPrice {
+    pub input: f64,
+    pub output: f64,
+}
+
+impl Shape for CatalogOpencodeModelsResultModelsItemPrice {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let input = shape::required(object, "input", at, shape::number)?;
+        let output = shape::required(object, "output", at, shape::number)?;
+        Ok(Self { input, output })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("input", Value::Number(self.input));
+        object.insert("output", Value::Number(self.output));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpencodeModelsResultModelsItemApiItem {
+    pub family: nyaaai_contract::shapes::step::ApiFamily,
+    pub reasoning_field: Option<String>,
+    pub choice: Option<Vec<String>>,
+    pub strict: Option<bool>,
+}
+
+impl Shape for CatalogOpencodeModelsResultModelsItemApiItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let family = shape::required(
+            object,
+            "family",
+            at,
+            nyaaai_contract::shapes::step::ApiFamily::decode_at,
+        )?;
+        let reasoning_field = shape::required(object, "reasoning_field", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let choice = shape::required(object, "choice", at, |value, at| {
+            shape::nullable(value, at, |value, at| shape::list(value, at, shape::text))
+        })?;
+        let strict = shape::required(object, "strict", at, |value, at| {
+            shape::nullable(value, at, shape::flag)
+        })?;
+        Ok(Self {
+            family,
+            reasoning_field,
+            choice,
+            strict,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("family", self.family.encode());
+        object.insert(
+            "reasoning_field",
+            self.reasoning_field
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "choice",
+            self.choice.as_ref().map_or(Value::Null, |held| {
+                Value::Array(held.iter().map(|held| Value::from(held.as_str())).collect())
+            }),
+        );
+        object.insert(
+            "strict",
+            self.strict
+                .as_ref()
+                .map_or(Value::Null, |held| Value::Bool(*held)),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterJoinInput {
+    pub rows: Vec<String>,
+    pub models: Value,
+    pub zdr: Value,
+    pub now_ms: i64,
+    pub passes: Vec<CatalogOpenrouterJoinInputPassesItem>,
+}
+
+impl Shape for CatalogOpenrouterJoinInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let models = shape::required(object, "models", at, shape::any)?;
+        let zdr = shape::required(object, "zdr", at, shape::any)?;
+        let now_ms = shape::required(object, "nowMs", at, shape::integer)?;
+        let passes = shape::required(object, "passes", at, |value, at| {
+            shape::list(value, at, CatalogOpenrouterJoinInputPassesItem::decode_at)
+        })?;
+        Ok(Self {
+            rows,
+            models,
+            zdr,
+            now_ms,
+            passes,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "rows",
+            Value::Array(
+                self.rows
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert("models", self.models.clone());
+        object.insert("zdr", self.zdr.clone());
+        object.insert("nowMs", Value::Number(self.now_ms as f64));
+        object.insert(
+            "passes",
+            Value::Array(self.passes.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterJoinInputPassesItem {
+    pub use_: nyaaai_contract::shapes::model::ModelUse,
+    pub zdr_only: bool,
+}
+
+impl Shape for CatalogOpenrouterJoinInputPassesItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let use_ = shape::required(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        let zdr_only = shape::required(object, "zdrOnly", at, shape::flag)?;
+        Ok(Self { use_, zdr_only })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("use", self.use_.encode());
+        object.insert("zdrOnly", Value::Bool(self.zdr_only));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterJoinResult {
+    pub passes: Vec<Vec<ViewLine>>,
+}
+
+impl Shape for CatalogOpenrouterJoinResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let passes = shape::required(object, "passes", at, |value, at| {
+            shape::list(value, at, |value, at| {
+                shape::list(value, at, ViewLine::decode_at)
+            })
+        })?;
+        Ok(Self { passes })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "passes",
+            Value::Array(
+                self.passes
+                    .iter()
+                    .map(|held| Value::Array(held.iter().map(|held| held.encode()).collect()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpencodeJoinInput {
+    pub rows: Vec<String>,
+    pub plan: nyaaai_contract::shapes::provider::ProviderPlan,
+    pub models: Value,
+    pub now_ms: i64,
+    pub passes: Vec<CatalogOpencodeJoinInputPassesItem>,
+}
+
+impl Shape for CatalogOpencodeJoinInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let plan = shape::required(
+            object,
+            "plan",
+            at,
+            nyaaai_contract::shapes::provider::ProviderPlan::decode_at,
+        )?;
+        let models = shape::required(object, "models", at, shape::any)?;
+        let now_ms = shape::required(object, "nowMs", at, shape::integer)?;
+        let passes = shape::required(object, "passes", at, |value, at| {
+            shape::list(value, at, CatalogOpencodeJoinInputPassesItem::decode_at)
+        })?;
+        Ok(Self {
+            rows,
+            plan,
+            models,
+            now_ms,
+            passes,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "rows",
+            Value::Array(
+                self.rows
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert("plan", self.plan.encode());
+        object.insert("models", self.models.clone());
+        object.insert("nowMs", Value::Number(self.now_ms as f64));
+        object.insert(
+            "passes",
+            Value::Array(self.passes.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpencodeJoinInputPassesItem {
+    pub use_: nyaaai_contract::shapes::model::ModelUse,
+    pub zdr_only: bool,
+}
+
+impl Shape for CatalogOpencodeJoinInputPassesItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let use_ = shape::required(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        let zdr_only = shape::required(object, "zdrOnly", at, shape::flag)?;
+        Ok(Self { use_, zdr_only })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("use", self.use_.encode());
+        object.insert("zdrOnly", Value::Bool(self.zdr_only));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpencodeJoinResult {
+    pub passes: Vec<Vec<ViewLine>>,
+}
+
+impl Shape for CatalogOpencodeJoinResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let passes = shape::required(object, "passes", at, |value, at| {
+            shape::list(value, at, |value, at| {
+                shape::list(value, at, ViewLine::decode_at)
+            })
+        })?;
+        Ok(Self { passes })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "passes",
+            Value::Array(
+                self.passes
+                    .iter()
+                    .map(|held| Value::Array(held.iter().map(|held| held.encode()).collect()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogPerMillionInput {
+    pub values: Vec<Value>,
+}
+
+impl Shape for CatalogPerMillionInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let values = shape::required(object, "values", at, |value, at| {
+            shape::list(value, at, shape::any)
+        })?;
+        Ok(Self { values })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("values", Value::Array(self.values.clone()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogPerMillionResult {
+    pub prices: Vec<Option<f64>>,
+}
+
+impl Shape for CatalogPerMillionResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let prices = shape::required(object, "prices", at, |value, at| {
+            shape::list(value, at, |value, at| {
+                shape::nullable(value, at, shape::number)
+            })
+        })?;
+        Ok(Self { prices })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "prices",
+            Value::Array(
+                self.prices
+                    .iter()
+                    .map(|held| {
+                        held.as_ref()
+                            .map_or(Value::Null, |held| Value::Number(*held))
+                    })
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogExpiryInput {
+    pub texts: Vec<String>,
+}
+
+impl Shape for CatalogExpiryInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let texts = shape::required(object, "texts", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { texts })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "texts",
+            Value::Array(
+                self.texts
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogExpiryResult {
+    pub ms: Vec<Option<i64>>,
+}
+
+impl Shape for CatalogExpiryResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let ms = shape::required(object, "ms", at, |value, at| {
+            shape::list(value, at, |value, at| {
+                shape::nullable(value, at, shape::integer)
+            })
+        })?;
+        Ok(Self { ms })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "ms",
+            Value::Array(
+                self.ms
+                    .iter()
+                    .map(|held| {
+                        held.as_ref()
+                            .map_or(Value::Null, |held| Value::Number(*held as f64))
+                    })
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogStandingInput {
+    pub rows: Vec<CatalogStandingInputRowsItem>,
+}
+
+impl Shape for CatalogStandingInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, CatalogStandingInputRowsItem::decode_at)
+        })?;
+        Ok(Self { rows })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "rows",
+            Value::Array(self.rows.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogStandingInputRowsItem {
+    pub expiration: Option<String>,
+    pub hosts: Vec<CatalogStandingInputRowsItemHostsItem>,
+    pub needs: Vec<CatalogStandingInputRowsItemNeedsItem>,
+    pub now_ms: i64,
+}
+
+impl Shape for CatalogStandingInputRowsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let expiration = shape::required(object, "expiration", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let hosts = shape::required(object, "hosts", at, |value, at| {
+            shape::list(value, at, CatalogStandingInputRowsItemHostsItem::decode_at)
+        })?;
+        let needs = shape::required(object, "needs", at, |value, at| {
+            shape::list(value, at, CatalogStandingInputRowsItemNeedsItem::decode_at)
+        })?;
+        let now_ms = shape::required(object, "nowMs", at, shape::integer)?;
+        Ok(Self {
+            expiration,
+            hosts,
+            needs,
+            now_ms,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "expiration",
+            self.expiration
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "hosts",
+            Value::Array(self.hosts.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "needs",
+            Value::Array(self.needs.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert("nowMs", Value::Number(self.now_ms as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogStandingInputRowsItemHostsItem {
+    pub params: Option<Vec<String>>,
+}
+
+impl Shape for CatalogStandingInputRowsItemHostsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let params = shape::required(object, "params", at, |value, at| {
+            shape::nullable(value, at, |value, at| shape::list(value, at, shape::text))
+        })?;
+        Ok(Self { params })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "params",
+            self.params.as_ref().map_or(Value::Null, |held| {
+                Value::Array(held.iter().map(|held| Value::from(held.as_str())).collect())
+            }),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum CatalogStandingInputRowsItemNeedsItem {
+    Text(String),
+    List(Vec<String>),
+}
+
+impl Shape for CatalogStandingInputRowsItemNeedsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        if let Ok(held) = shape::text(value, at) {
+            return Ok(Self::Text(held));
+        }
+        if let Ok(held) = shape::list(value, at, shape::text) {
+            return Ok(Self::List(held));
+        }
+        Err(shape::refused(at, "no branch matches"))
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Text(held) => Value::from(held.as_str()),
+            Self::List(held) => {
+                Value::Array(held.iter().map(|held| Value::from(held.as_str())).collect())
+            }
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogStandingResult {
+    pub rows: Vec<CatalogStandingResultRowsItem>,
+}
+
+impl Shape for CatalogStandingResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, CatalogStandingResultRowsItem::decode_at)
+        })?;
+        Ok(Self { rows })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "rows",
+            Value::Array(self.rows.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogStandingResultRowsItem {
+    pub standing: CatalogStandingResultRowsItemStanding,
+    pub usable: Vec<i64>,
+}
+
+impl Shape for CatalogStandingResultRowsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let standing = shape::required(
+            object,
+            "standing",
+            at,
+            CatalogStandingResultRowsItemStanding::decode_at,
+        )?;
+        let usable = shape::required(object, "usable", at, |value, at| {
+            shape::list(value, at, shape::integer)
+        })?;
+        Ok(Self { standing, usable })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("standing", self.standing.encode());
+        object.insert(
+            "usable",
+            Value::Array(
+                self.usable
+                    .iter()
+                    .map(|held| Value::Number(*held as f64))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum CatalogStandingResultRowsItemStanding {
+    Ok,
+    Retired,
+    NoZdrHost,
+}
+
+impl CatalogStandingResultRowsItemStanding {
+    pub const ALL: [Self; 3] = [Self::Ok, Self::Retired, Self::NoZdrHost];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Ok => "ok",
+            Self::Retired => "retired",
+            Self::NoZdrHost => "noZdrHost",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for CatalogStandingResultRowsItemStanding {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterRunInput {
+    pub start_ms: i64,
+    pub exchanges: Vec<NetExchange>,
+    pub rows: Vec<String>,
+    pub ttl_ms: Option<i64>,
+    pub steps: Vec<CatalogOpenrouterRunInputStepsItem>,
+}
+
+impl Shape for CatalogOpenrouterRunInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let start_ms = shape::required(object, "startMs", at, shape::integer)?;
+        let exchanges = shape::required(object, "exchanges", at, |value, at| {
+            shape::list(value, at, NetExchange::decode_at)
+        })?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let ttl_ms = shape::optional(object, "ttlMs", at, shape::integer)?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list_within(
+                value,
+                at,
+                Some(1),
+                None,
+                CatalogOpenrouterRunInputStepsItem::decode_at,
+            )
+        })?;
+        Ok(Self {
+            start_ms,
+            exchanges,
+            rows,
+            ttl_ms,
+            steps,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("startMs", Value::Number(self.start_ms as f64));
+        object.insert(
+            "exchanges",
+            Value::Array(self.exchanges.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "rows",
+            Value::Array(
+                self.rows
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        if let Some(held) = &self.ttl_ms {
+            object.insert("ttlMs", Value::Number(*held as f64));
+        }
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum CatalogOpenrouterRunInputStepsItem {
+    Call(CatalogOpenrouterRunInputStepsItemCall),
+    Together(CatalogOpenrouterRunInputStepsItemTogether),
+    Advance(CatalogOpenrouterRunInputStepsItemAdvance),
+    Rows(CatalogOpenrouterRunInputStepsItemRows),
+}
+
+impl Shape for CatalogOpenrouterRunInputStepsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "call" => CatalogOpenrouterRunInputStepsItemCall::decode_at(value, at).map(Self::Call),
+            "together" => {
+                CatalogOpenrouterRunInputStepsItemTogether::decode_at(value, at).map(Self::Together)
+            }
+            "advance" => {
+                CatalogOpenrouterRunInputStepsItemAdvance::decode_at(value, at).map(Self::Advance)
+            }
+            "rows" => CatalogOpenrouterRunInputStepsItemRows::decode_at(value, at).map(Self::Rows),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Call(held) => held.encode(),
+            Self::Together(held) => held.encode(),
+            Self::Advance(held) => held.encode(),
+            Self::Rows(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterRunInputStepsItemCall {
+    pub call: CatalogOpenrouterRunInputStepsItemCallCall,
+}
+
+impl Shape for CatalogOpenrouterRunInputStepsItemCall {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "call")
+        })?;
+        let call = shape::required(
+            object,
+            "call",
+            at,
+            CatalogOpenrouterRunInputStepsItemCallCall::decode_at,
+        )?;
+        Ok(Self { call })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("call"));
+        object.insert("call", self.call.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterRunInputStepsItemTogether {
+    pub calls: Vec<CatalogOpenrouterRunInputStepsItemTogetherCallsItem>,
+}
+
+impl Shape for CatalogOpenrouterRunInputStepsItemTogether {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "together")
+        })?;
+        let calls = shape::required(object, "calls", at, |value, at| {
+            shape::list_within(
+                value,
+                at,
+                Some(2),
+                None,
+                CatalogOpenrouterRunInputStepsItemTogetherCallsItem::decode_at,
+            )
+        })?;
+        Ok(Self { calls })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("together"));
+        object.insert(
+            "calls",
+            Value::Array(self.calls.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterRunInputStepsItemAdvance {
+    pub ms: u64,
+}
+
+impl Shape for CatalogOpenrouterRunInputStepsItemAdvance {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "advance")
+        })?;
+        let ms = shape::required(object, "ms", at, shape::natural)?;
+        Ok(Self { ms })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("advance"));
+        object.insert("ms", Value::Number(self.ms as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterRunInputStepsItemRows {
+    pub rows: Vec<String>,
+}
+
+impl Shape for CatalogOpenrouterRunInputStepsItemRows {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "rows")
+        })?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { rows })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("rows"));
+        object.insert(
+            "rows",
+            Value::Array(
+                self.rows
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum CatalogOpenrouterRunInputStepsItemCallCall {
+    Views(CatalogOpenrouterRunInputStepsItemCallCallViews),
+    View(CatalogOpenrouterRunInputStepsItemCallCallView),
+    ViewFor(CatalogOpenrouterRunInputStepsItemCallCallViewFor),
+    Entry(CatalogOpenrouterRunInputStepsItemCallCallEntry),
+    Listing(CatalogOpenrouterRunInputStepsItemCallCallListing),
+}
+
+impl Shape for CatalogOpenrouterRunInputStepsItemCallCall {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "views" => CatalogOpenrouterRunInputStepsItemCallCallViews::decode_at(value, at)
+                .map(Self::Views),
+            "view" => {
+                CatalogOpenrouterRunInputStepsItemCallCallView::decode_at(value, at).map(Self::View)
+            }
+            "viewFor" => CatalogOpenrouterRunInputStepsItemCallCallViewFor::decode_at(value, at)
+                .map(Self::ViewFor),
+            "entry" => CatalogOpenrouterRunInputStepsItemCallCallEntry::decode_at(value, at)
+                .map(Self::Entry),
+            "listing" => CatalogOpenrouterRunInputStepsItemCallCallListing::decode_at(value, at)
+                .map(Self::Listing),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Views(held) => held.encode(),
+            Self::View(held) => held.encode(),
+            Self::ViewFor(held) => held.encode(),
+            Self::Entry(held) => held.encode(),
+            Self::Listing(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum CatalogOpenrouterRunInputStepsItemTogetherCallsItem {
+    Views(CatalogOpenrouterRunInputStepsItemTogetherCallsItemViews),
+    View(CatalogOpenrouterRunInputStepsItemTogetherCallsItemView),
+    ViewFor(CatalogOpenrouterRunInputStepsItemTogetherCallsItemViewFor),
+    Entry(CatalogOpenrouterRunInputStepsItemTogetherCallsItemEntry),
+    Listing(CatalogOpenrouterRunInputStepsItemTogetherCallsItemListing),
+}
+
+impl Shape for CatalogOpenrouterRunInputStepsItemTogetherCallsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "views" => {
+                CatalogOpenrouterRunInputStepsItemTogetherCallsItemViews::decode_at(value, at)
+                    .map(Self::Views)
+            }
+            "view" => CatalogOpenrouterRunInputStepsItemTogetherCallsItemView::decode_at(value, at)
+                .map(Self::View),
+            "viewFor" => {
+                CatalogOpenrouterRunInputStepsItemTogetherCallsItemViewFor::decode_at(value, at)
+                    .map(Self::ViewFor)
+            }
+            "entry" => {
+                CatalogOpenrouterRunInputStepsItemTogetherCallsItemEntry::decode_at(value, at)
+                    .map(Self::Entry)
+            }
+            "listing" => {
+                CatalogOpenrouterRunInputStepsItemTogetherCallsItemListing::decode_at(value, at)
+                    .map(Self::Listing)
+            }
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Views(held) => held.encode(),
+            Self::View(held) => held.encode(),
+            Self::ViewFor(held) => held.encode(),
+            Self::Entry(held) => held.encode(),
+            Self::Listing(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterRunInputStepsItemCallCallViews {
+    pub use_: Option<nyaaai_contract::shapes::model::ModelUse>,
+    pub zdr_only: Option<bool>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for CatalogOpenrouterRunInputStepsItemCallCallViews {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "views")
+        })?;
+        let use_ = shape::optional(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        let zdr_only = shape::optional(object, "zdrOnly", at, shape::flag)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            use_,
+            zdr_only,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("views"));
+        if let Some(held) = &self.use_ {
+            object.insert("use", held.encode());
+        }
+        if let Some(held) = &self.zdr_only {
+            object.insert("zdrOnly", Value::Bool(*held));
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterRunInputStepsItemCallCallView {
+    pub key: String,
+    pub use_: Option<nyaaai_contract::shapes::model::ModelUse>,
+    pub zdr_only: Option<bool>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for CatalogOpenrouterRunInputStepsItemCallCallView {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "view")
+        })?;
+        let key = shape::required(object, "key", at, shape::text)?;
+        let use_ = shape::optional(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        let zdr_only = shape::optional(object, "zdrOnly", at, shape::flag)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            key,
+            use_,
+            zdr_only,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("view"));
+        object.insert("key", Value::from(self.key.as_str()));
+        if let Some(held) = &self.use_ {
+            object.insert("use", held.encode());
+        }
+        if let Some(held) = &self.zdr_only {
+            object.insert("zdrOnly", Value::Bool(*held));
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterRunInputStepsItemCallCallViewFor {
+    pub row: String,
+    pub use_: Option<nyaaai_contract::shapes::model::ModelUse>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for CatalogOpenrouterRunInputStepsItemCallCallViewFor {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "viewFor")
+        })?;
+        let row = shape::required(object, "row", at, shape::text)?;
+        let use_ = shape::optional(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            row,
+            use_,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("viewFor"));
+        object.insert("row", Value::from(self.row.as_str()));
+        if let Some(held) = &self.use_ {
+            object.insert("use", held.encode());
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterRunInputStepsItemCallCallEntry {
+    pub id: String,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for CatalogOpenrouterRunInputStepsItemCallCallEntry {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "entry")
+        })?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            id,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("entry"));
+        object.insert("id", Value::from(self.id.as_str()));
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterRunInputStepsItemCallCallListing {
+    pub retry: Option<bool>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for CatalogOpenrouterRunInputStepsItemCallCallListing {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "listing")
+        })?;
+        let retry = shape::optional(object, "retry", at, shape::flag)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            retry,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("listing"));
+        if let Some(held) = &self.retry {
+            object.insert("retry", Value::Bool(*held));
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterRunInputStepsItemTogetherCallsItemViews {
+    pub use_: Option<nyaaai_contract::shapes::model::ModelUse>,
+    pub zdr_only: Option<bool>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for CatalogOpenrouterRunInputStepsItemTogetherCallsItemViews {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "views")
+        })?;
+        let use_ = shape::optional(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        let zdr_only = shape::optional(object, "zdrOnly", at, shape::flag)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            use_,
+            zdr_only,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("views"));
+        if let Some(held) = &self.use_ {
+            object.insert("use", held.encode());
+        }
+        if let Some(held) = &self.zdr_only {
+            object.insert("zdrOnly", Value::Bool(*held));
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterRunInputStepsItemTogetherCallsItemView {
+    pub key: String,
+    pub use_: Option<nyaaai_contract::shapes::model::ModelUse>,
+    pub zdr_only: Option<bool>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for CatalogOpenrouterRunInputStepsItemTogetherCallsItemView {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "view")
+        })?;
+        let key = shape::required(object, "key", at, shape::text)?;
+        let use_ = shape::optional(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        let zdr_only = shape::optional(object, "zdrOnly", at, shape::flag)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            key,
+            use_,
+            zdr_only,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("view"));
+        object.insert("key", Value::from(self.key.as_str()));
+        if let Some(held) = &self.use_ {
+            object.insert("use", held.encode());
+        }
+        if let Some(held) = &self.zdr_only {
+            object.insert("zdrOnly", Value::Bool(*held));
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterRunInputStepsItemTogetherCallsItemViewFor {
+    pub row: String,
+    pub use_: Option<nyaaai_contract::shapes::model::ModelUse>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for CatalogOpenrouterRunInputStepsItemTogetherCallsItemViewFor {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "viewFor")
+        })?;
+        let row = shape::required(object, "row", at, shape::text)?;
+        let use_ = shape::optional(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            row,
+            use_,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("viewFor"));
+        object.insert("row", Value::from(self.row.as_str()));
+        if let Some(held) = &self.use_ {
+            object.insert("use", held.encode());
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterRunInputStepsItemTogetherCallsItemEntry {
+    pub id: String,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for CatalogOpenrouterRunInputStepsItemTogetherCallsItemEntry {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "entry")
+        })?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            id,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("entry"));
+        object.insert("id", Value::from(self.id.as_str()));
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterRunInputStepsItemTogetherCallsItemListing {
+    pub retry: Option<bool>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for CatalogOpenrouterRunInputStepsItemTogetherCallsItemListing {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "listing")
+        })?;
+        let retry = shape::optional(object, "retry", at, shape::flag)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            retry,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("listing"));
+        if let Some(held) = &self.retry {
+            object.insert("retry", Value::Bool(*held));
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterRunResult {
+    pub steps: Vec<CatalogOpenrouterRunResultStepsItem>,
+    pub requests: Vec<String>,
+    pub read: Vec<i64>,
+    pub waiting: Vec<String>,
+    pub refreshed: i64,
+}
+
+impl Shape for CatalogOpenrouterRunResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list(value, at, CatalogOpenrouterRunResultStepsItem::decode_at)
+        })?;
+        let requests = shape::required(object, "requests", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let read = shape::required(object, "read", at, |value, at| {
+            shape::list(value, at, shape::integer)
+        })?;
+        let waiting = shape::required(object, "waiting", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let refreshed = shape::required(object, "refreshed", at, shape::integer)?;
+        Ok(Self {
+            steps,
+            requests,
+            read,
+            waiting,
+            refreshed,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "requests",
+            Value::Array(
+                self.requests
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "read",
+            Value::Array(
+                self.read
+                    .iter()
+                    .map(|held| Value::Number(*held as f64))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "waiting",
+            Value::Array(
+                self.waiting
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert("refreshed", Value::Number(self.refreshed as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterRunResultStepsItem {
+    pub now_ms: i64,
+    pub answers: Vec<CatalogOpenrouterRunResultStepsItemAnswersItem>,
+    pub row_reads: i64,
+}
+
+impl Shape for CatalogOpenrouterRunResultStepsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let now_ms = shape::required(object, "nowMs", at, shape::integer)?;
+        let answers = shape::required(object, "answers", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                CatalogOpenrouterRunResultStepsItemAnswersItem::decode_at,
+            )
+        })?;
+        let row_reads = shape::required(object, "rowReads", at, shape::integer)?;
+        Ok(Self {
+            now_ms,
+            answers,
+            row_reads,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("nowMs", Value::Number(self.now_ms as f64));
+        object.insert(
+            "answers",
+            Value::Array(self.answers.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert("rowReads", Value::Number(self.row_reads as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum CatalogOpenrouterRunResultStepsItemAnswersItem {
+    Views(CatalogOpenrouterRunResultStepsItemAnswersItemViews),
+    View(CatalogOpenrouterRunResultStepsItemAnswersItemView),
+    Entry(CatalogOpenrouterRunResultStepsItemAnswersItemEntry),
+    Listing(CatalogOpenrouterRunResultStepsItemAnswersItemListing),
+    Thrown(CatalogOpenrouterRunResultStepsItemAnswersItemThrown),
+}
+
+impl Shape for CatalogOpenrouterRunResultStepsItemAnswersItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "views" => CatalogOpenrouterRunResultStepsItemAnswersItemViews::decode_at(value, at)
+                .map(Self::Views),
+            "view" => CatalogOpenrouterRunResultStepsItemAnswersItemView::decode_at(value, at)
+                .map(Self::View),
+            "entry" => CatalogOpenrouterRunResultStepsItemAnswersItemEntry::decode_at(value, at)
+                .map(Self::Entry),
+            "listing" => {
+                CatalogOpenrouterRunResultStepsItemAnswersItemListing::decode_at(value, at)
+                    .map(Self::Listing)
+            }
+            "thrown" => CatalogOpenrouterRunResultStepsItemAnswersItemThrown::decode_at(value, at)
+                .map(Self::Thrown),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Views(held) => held.encode(),
+            Self::View(held) => held.encode(),
+            Self::Entry(held) => held.encode(),
+            Self::Listing(held) => held.encode(),
+            Self::Thrown(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterRunResultStepsItemAnswersItemViews {
+    pub views: Vec<ViewLine>,
+}
+
+impl Shape for CatalogOpenrouterRunResultStepsItemAnswersItemViews {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "views")
+        })?;
+        let views = shape::required(object, "views", at, |value, at| {
+            shape::list(value, at, ViewLine::decode_at)
+        })?;
+        Ok(Self { views })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("views"));
+        object.insert(
+            "views",
+            Value::Array(self.views.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterRunResultStepsItemAnswersItemView {
+    pub view: Option<ViewLine>,
+}
+
+impl Shape for CatalogOpenrouterRunResultStepsItemAnswersItemView {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "view")
+        })?;
+        let view = shape::required(object, "view", at, |value, at| {
+            shape::nullable(value, at, ViewLine::decode_at)
+        })?;
+        Ok(Self { view })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("view"));
+        object.insert(
+            "view",
+            self.view.as_ref().map_or(Value::Null, |held| held.encode()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterRunResultStepsItemAnswersItemEntry {
+    pub entry: Option<CatalogOpenrouterRunResultStepsItemAnswersItemEntryEntry>,
+}
+
+impl Shape for CatalogOpenrouterRunResultStepsItemAnswersItemEntry {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "entry")
+        })?;
+        let entry = shape::required(object, "entry", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                CatalogOpenrouterRunResultStepsItemAnswersItemEntryEntry::decode_at,
+            )
+        })?;
+        Ok(Self { entry })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("entry"));
+        object.insert(
+            "entry",
+            self.entry
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterRunResultStepsItemAnswersItemListing {
+    pub listing: Option<CatalogOpenrouterRunResultStepsItemAnswersItemListingListing>,
+}
+
+impl Shape for CatalogOpenrouterRunResultStepsItemAnswersItemListing {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "listing")
+        })?;
+        let listing = shape::required(object, "listing", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                CatalogOpenrouterRunResultStepsItemAnswersItemListingListing::decode_at,
+            )
+        })?;
+        Ok(Self { listing })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("listing"));
+        object.insert(
+            "listing",
+            self.listing
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterRunResultStepsItemAnswersItemThrown {
+    pub message: String,
+}
+
+impl Shape for CatalogOpenrouterRunResultStepsItemAnswersItemThrown {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "thrown")
+        })?;
+        let message = shape::required(object, "message", at, shape::text)?;
+        Ok(Self { message })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("thrown"));
+        object.insert("message", Value::from(self.message.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterRunResultStepsItemAnswersItemEntryEntry {
+    pub id: String,
+    pub name: Option<String>,
+    pub efforts: Option<Vec<String>>,
+}
+
+impl Shape for CatalogOpenrouterRunResultStepsItemAnswersItemEntryEntry {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let name = shape::required(object, "name", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let efforts = shape::required(object, "efforts", at, |value, at| {
+            shape::nullable(value, at, |value, at| shape::list(value, at, shape::text))
+        })?;
+        Ok(Self { id, name, efforts })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("id", Value::from(self.id.as_str()));
+        object.insert(
+            "name",
+            self.name
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "efforts",
+            self.efforts.as_ref().map_or(Value::Null, |held| {
+                Value::Array(held.iter().map(|held| Value::from(held.as_str())).collect())
+            }),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpenrouterRunResultStepsItemAnswersItemListingListing {
+    pub raw: i64,
+    pub endpoints: Vec<String>,
+}
+
+impl Shape for CatalogOpenrouterRunResultStepsItemAnswersItemListingListing {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let raw = shape::required(object, "raw", at, shape::integer)?;
+        let endpoints = shape::required(object, "endpoints", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { raw, endpoints })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("raw", Value::Number(self.raw as f64));
+        object.insert(
+            "endpoints",
+            Value::Array(
+                self.endpoints
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpencodeRunInput {
+    pub start_ms: i64,
+    pub exchanges: Vec<NetExchange>,
+    pub rows: Vec<String>,
+    pub plan: nyaaai_contract::shapes::provider::ProviderPlan,
+    pub ttl_ms: Option<i64>,
+    pub steps: Vec<CatalogOpencodeRunInputStepsItem>,
+}
+
+impl Shape for CatalogOpencodeRunInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let start_ms = shape::required(object, "startMs", at, shape::integer)?;
+        let exchanges = shape::required(object, "exchanges", at, |value, at| {
+            shape::list(value, at, NetExchange::decode_at)
+        })?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let plan = shape::required(
+            object,
+            "plan",
+            at,
+            nyaaai_contract::shapes::provider::ProviderPlan::decode_at,
+        )?;
+        let ttl_ms = shape::optional(object, "ttlMs", at, shape::integer)?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list_within(
+                value,
+                at,
+                Some(1),
+                None,
+                CatalogOpencodeRunInputStepsItem::decode_at,
+            )
+        })?;
+        Ok(Self {
+            start_ms,
+            exchanges,
+            rows,
+            plan,
+            ttl_ms,
+            steps,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("startMs", Value::Number(self.start_ms as f64));
+        object.insert(
+            "exchanges",
+            Value::Array(self.exchanges.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "rows",
+            Value::Array(
+                self.rows
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert("plan", self.plan.encode());
+        if let Some(held) = &self.ttl_ms {
+            object.insert("ttlMs", Value::Number(*held as f64));
+        }
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum CatalogOpencodeRunInputStepsItem {
+    Call(CatalogOpencodeRunInputStepsItemCall),
+    Together(CatalogOpencodeRunInputStepsItemTogether),
+    Advance(CatalogOpencodeRunInputStepsItemAdvance),
+    Rows(CatalogOpencodeRunInputStepsItemRows),
+}
+
+impl Shape for CatalogOpencodeRunInputStepsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "call" => CatalogOpencodeRunInputStepsItemCall::decode_at(value, at).map(Self::Call),
+            "together" => {
+                CatalogOpencodeRunInputStepsItemTogether::decode_at(value, at).map(Self::Together)
+            }
+            "advance" => {
+                CatalogOpencodeRunInputStepsItemAdvance::decode_at(value, at).map(Self::Advance)
+            }
+            "rows" => CatalogOpencodeRunInputStepsItemRows::decode_at(value, at).map(Self::Rows),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Call(held) => held.encode(),
+            Self::Together(held) => held.encode(),
+            Self::Advance(held) => held.encode(),
+            Self::Rows(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpencodeRunInputStepsItemCall {
+    pub call: CatalogOpencodeRunInputStepsItemCallCall,
+}
+
+impl Shape for CatalogOpencodeRunInputStepsItemCall {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "call")
+        })?;
+        let call = shape::required(
+            object,
+            "call",
+            at,
+            CatalogOpencodeRunInputStepsItemCallCall::decode_at,
+        )?;
+        Ok(Self { call })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("call"));
+        object.insert("call", self.call.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpencodeRunInputStepsItemTogether {
+    pub calls: Vec<CatalogOpencodeRunInputStepsItemTogetherCallsItem>,
+}
+
+impl Shape for CatalogOpencodeRunInputStepsItemTogether {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "together")
+        })?;
+        let calls = shape::required(object, "calls", at, |value, at| {
+            shape::list_within(
+                value,
+                at,
+                Some(2),
+                None,
+                CatalogOpencodeRunInputStepsItemTogetherCallsItem::decode_at,
+            )
+        })?;
+        Ok(Self { calls })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("together"));
+        object.insert(
+            "calls",
+            Value::Array(self.calls.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpencodeRunInputStepsItemAdvance {
+    pub ms: u64,
+}
+
+impl Shape for CatalogOpencodeRunInputStepsItemAdvance {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "advance")
+        })?;
+        let ms = shape::required(object, "ms", at, shape::natural)?;
+        Ok(Self { ms })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("advance"));
+        object.insert("ms", Value::Number(self.ms as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpencodeRunInputStepsItemRows {
+    pub rows: Vec<String>,
+}
+
+impl Shape for CatalogOpencodeRunInputStepsItemRows {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "rows")
+        })?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { rows })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("rows"));
+        object.insert(
+            "rows",
+            Value::Array(
+                self.rows
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum CatalogOpencodeRunInputStepsItemCallCall {
+    Views(CatalogOpencodeRunInputStepsItemCallCallViews),
+    ViewFor(CatalogOpencodeRunInputStepsItemCallCallViewFor),
+    Models(CatalogOpencodeRunInputStepsItemCallCallModels),
+}
+
+impl Shape for CatalogOpencodeRunInputStepsItemCallCall {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "views" => {
+                CatalogOpencodeRunInputStepsItemCallCallViews::decode_at(value, at).map(Self::Views)
+            }
+            "viewFor" => CatalogOpencodeRunInputStepsItemCallCallViewFor::decode_at(value, at)
+                .map(Self::ViewFor),
+            "models" => CatalogOpencodeRunInputStepsItemCallCallModels::decode_at(value, at)
+                .map(Self::Models),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Views(held) => held.encode(),
+            Self::ViewFor(held) => held.encode(),
+            Self::Models(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum CatalogOpencodeRunInputStepsItemTogetherCallsItem {
+    Views(CatalogOpencodeRunInputStepsItemTogetherCallsItemViews),
+    ViewFor(CatalogOpencodeRunInputStepsItemTogetherCallsItemViewFor),
+    Models(CatalogOpencodeRunInputStepsItemTogetherCallsItemModels),
+}
+
+impl Shape for CatalogOpencodeRunInputStepsItemTogetherCallsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "views" => CatalogOpencodeRunInputStepsItemTogetherCallsItemViews::decode_at(value, at)
+                .map(Self::Views),
+            "viewFor" => {
+                CatalogOpencodeRunInputStepsItemTogetherCallsItemViewFor::decode_at(value, at)
+                    .map(Self::ViewFor)
+            }
+            "models" => {
+                CatalogOpencodeRunInputStepsItemTogetherCallsItemModels::decode_at(value, at)
+                    .map(Self::Models)
+            }
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Views(held) => held.encode(),
+            Self::ViewFor(held) => held.encode(),
+            Self::Models(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpencodeRunInputStepsItemCallCallViews {
+    pub use_: Option<nyaaai_contract::shapes::model::ModelUse>,
+    pub zdr_only: Option<bool>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for CatalogOpencodeRunInputStepsItemCallCallViews {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "views")
+        })?;
+        let use_ = shape::optional(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        let zdr_only = shape::optional(object, "zdrOnly", at, shape::flag)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            use_,
+            zdr_only,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("views"));
+        if let Some(held) = &self.use_ {
+            object.insert("use", held.encode());
+        }
+        if let Some(held) = &self.zdr_only {
+            object.insert("zdrOnly", Value::Bool(*held));
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpencodeRunInputStepsItemCallCallViewFor {
+    pub row: String,
+    pub use_: Option<nyaaai_contract::shapes::model::ModelUse>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for CatalogOpencodeRunInputStepsItemCallCallViewFor {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "viewFor")
+        })?;
+        let row = shape::required(object, "row", at, shape::text)?;
+        let use_ = shape::optional(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            row,
+            use_,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("viewFor"));
+        object.insert("row", Value::from(self.row.as_str()));
+        if let Some(held) = &self.use_ {
+            object.insert("use", held.encode());
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpencodeRunInputStepsItemCallCallModels {
+    pub fresh: Option<bool>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for CatalogOpencodeRunInputStepsItemCallCallModels {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "models")
+        })?;
+        let fresh = shape::optional(object, "fresh", at, shape::flag)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            fresh,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("models"));
+        if let Some(held) = &self.fresh {
+            object.insert("fresh", Value::Bool(*held));
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpencodeRunInputStepsItemTogetherCallsItemViews {
+    pub use_: Option<nyaaai_contract::shapes::model::ModelUse>,
+    pub zdr_only: Option<bool>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for CatalogOpencodeRunInputStepsItemTogetherCallsItemViews {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "views")
+        })?;
+        let use_ = shape::optional(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        let zdr_only = shape::optional(object, "zdrOnly", at, shape::flag)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            use_,
+            zdr_only,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("views"));
+        if let Some(held) = &self.use_ {
+            object.insert("use", held.encode());
+        }
+        if let Some(held) = &self.zdr_only {
+            object.insert("zdrOnly", Value::Bool(*held));
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpencodeRunInputStepsItemTogetherCallsItemViewFor {
+    pub row: String,
+    pub use_: Option<nyaaai_contract::shapes::model::ModelUse>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for CatalogOpencodeRunInputStepsItemTogetherCallsItemViewFor {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "viewFor")
+        })?;
+        let row = shape::required(object, "row", at, shape::text)?;
+        let use_ = shape::optional(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            row,
+            use_,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("viewFor"));
+        object.insert("row", Value::from(self.row.as_str()));
+        if let Some(held) = &self.use_ {
+            object.insert("use", held.encode());
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpencodeRunInputStepsItemTogetherCallsItemModels {
+    pub fresh: Option<bool>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for CatalogOpencodeRunInputStepsItemTogetherCallsItemModels {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "models")
+        })?;
+        let fresh = shape::optional(object, "fresh", at, shape::flag)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            fresh,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("models"));
+        if let Some(held) = &self.fresh {
+            object.insert("fresh", Value::Bool(*held));
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpencodeRunResult {
+    pub steps: Vec<CatalogOpencodeRunResultStepsItem>,
+    pub requests: Vec<String>,
+    pub read: Vec<i64>,
+    pub waiting: Vec<String>,
+    pub refreshed: i64,
+}
+
+impl Shape for CatalogOpencodeRunResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list(value, at, CatalogOpencodeRunResultStepsItem::decode_at)
+        })?;
+        let requests = shape::required(object, "requests", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let read = shape::required(object, "read", at, |value, at| {
+            shape::list(value, at, shape::integer)
+        })?;
+        let waiting = shape::required(object, "waiting", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let refreshed = shape::required(object, "refreshed", at, shape::integer)?;
+        Ok(Self {
+            steps,
+            requests,
+            read,
+            waiting,
+            refreshed,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "requests",
+            Value::Array(
+                self.requests
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "read",
+            Value::Array(
+                self.read
+                    .iter()
+                    .map(|held| Value::Number(*held as f64))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "waiting",
+            Value::Array(
+                self.waiting
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert("refreshed", Value::Number(self.refreshed as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpencodeRunResultStepsItem {
+    pub now_ms: i64,
+    pub answers: Vec<CatalogOpencodeRunResultStepsItemAnswersItem>,
+    pub row_reads: i64,
+}
+
+impl Shape for CatalogOpencodeRunResultStepsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let now_ms = shape::required(object, "nowMs", at, shape::integer)?;
+        let answers = shape::required(object, "answers", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                CatalogOpencodeRunResultStepsItemAnswersItem::decode_at,
+            )
+        })?;
+        let row_reads = shape::required(object, "rowReads", at, shape::integer)?;
+        Ok(Self {
+            now_ms,
+            answers,
+            row_reads,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("nowMs", Value::Number(self.now_ms as f64));
+        object.insert(
+            "answers",
+            Value::Array(self.answers.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert("rowReads", Value::Number(self.row_reads as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum CatalogOpencodeRunResultStepsItemAnswersItem {
+    Views(CatalogOpencodeRunResultStepsItemAnswersItemViews),
+    View(CatalogOpencodeRunResultStepsItemAnswersItemView),
+    Models(CatalogOpencodeRunResultStepsItemAnswersItemModels),
+    Thrown(CatalogOpencodeRunResultStepsItemAnswersItemThrown),
+}
+
+impl Shape for CatalogOpencodeRunResultStepsItemAnswersItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "views" => CatalogOpencodeRunResultStepsItemAnswersItemViews::decode_at(value, at)
+                .map(Self::Views),
+            "view" => CatalogOpencodeRunResultStepsItemAnswersItemView::decode_at(value, at)
+                .map(Self::View),
+            "models" => CatalogOpencodeRunResultStepsItemAnswersItemModels::decode_at(value, at)
+                .map(Self::Models),
+            "thrown" => CatalogOpencodeRunResultStepsItemAnswersItemThrown::decode_at(value, at)
+                .map(Self::Thrown),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Views(held) => held.encode(),
+            Self::View(held) => held.encode(),
+            Self::Models(held) => held.encode(),
+            Self::Thrown(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpencodeRunResultStepsItemAnswersItemViews {
+    pub views: Vec<ViewLine>,
+}
+
+impl Shape for CatalogOpencodeRunResultStepsItemAnswersItemViews {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "views")
+        })?;
+        let views = shape::required(object, "views", at, |value, at| {
+            shape::list(value, at, ViewLine::decode_at)
+        })?;
+        Ok(Self { views })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("views"));
+        object.insert(
+            "views",
+            Value::Array(self.views.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpencodeRunResultStepsItemAnswersItemView {
+    pub view: ViewLine,
+}
+
+impl Shape for CatalogOpencodeRunResultStepsItemAnswersItemView {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "view")
+        })?;
+        let view = shape::required(object, "view", at, ViewLine::decode_at)?;
+        Ok(Self { view })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("view"));
+        object.insert("view", self.view.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpencodeRunResultStepsItemAnswersItemModels {
+    pub models: Option<Vec<String>>,
+}
+
+impl Shape for CatalogOpencodeRunResultStepsItemAnswersItemModels {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "models")
+        })?;
+        let models = shape::required(object, "models", at, |value, at| {
+            shape::nullable(value, at, |value, at| shape::list(value, at, shape::text))
+        })?;
+        Ok(Self { models })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("models"));
+        object.insert(
+            "models",
+            self.models.as_ref().map_or(Value::Null, |held| {
+                Value::Array(held.iter().map(|held| Value::from(held.as_str())).collect())
+            }),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CatalogOpencodeRunResultStepsItemAnswersItemThrown {
+    pub message: String,
+}
+
+impl Shape for CatalogOpencodeRunResultStepsItemAnswersItemThrown {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "thrown")
+        })?;
+        let message = shape::required(object, "message", at, shape::text)?;
+        Ok(Self { message })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("thrown"));
+        object.insert("message", Value::from(self.message.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpenrouterModelsInput {
+    pub raw: Vec<Value>,
+    pub zdr: Value,
+    pub now_ms: i64,
+}
+
+impl Shape for BrowseOpenrouterModelsInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let raw = shape::required(object, "raw", at, |value, at| {
+            shape::list(value, at, shape::any)
+        })?;
+        let zdr = shape::required(object, "zdr", at, shape::any)?;
+        let now_ms = shape::required(object, "nowMs", at, shape::integer)?;
+        Ok(Self { raw, zdr, now_ms })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("raw", Value::Array(self.raw.clone()));
+        object.insert("zdr", self.zdr.clone());
+        object.insert("nowMs", Value::Number(self.now_ms as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpenrouterModelsResult {
+    pub models: Vec<nyaaai_contract::shapes::model::BrowseModel>,
+}
+
+impl Shape for BrowseOpenrouterModelsResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let models = shape::required(object, "models", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::model::BrowseModel::decode_at,
+            )
+        })?;
+        Ok(Self { models })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "models",
+            Value::Array(self.models.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpenrouterProvidersInput {
+    pub raw: Value,
+    pub zdr: Value,
+}
+
+impl Shape for BrowseOpenrouterProvidersInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let raw = shape::required(object, "raw", at, shape::any)?;
+        let zdr = shape::required(object, "zdr", at, shape::any)?;
+        Ok(Self { raw, zdr })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("raw", self.raw.clone());
+        object.insert("zdr", self.zdr.clone());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpenrouterProvidersResult {
+    pub providers: Option<Vec<nyaaai_contract::shapes::model::ProviderRow>>,
+}
+
+impl Shape for BrowseOpenrouterProvidersResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let providers = shape::required(object, "providers", at, |value, at| {
+            shape::nullable(value, at, |value, at| {
+                shape::list(
+                    value,
+                    at,
+                    nyaaai_contract::shapes::model::ProviderRow::decode_at,
+                )
+            })
+        })?;
+        Ok(Self { providers })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "providers",
+            self.providers.as_ref().map_or(Value::Null, |held| {
+                Value::Array(held.iter().map(|held| held.encode()).collect())
+            }),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpenrouterBrowserInput {
+    pub start_ms: i64,
+    pub exchanges: Vec<NetExchange>,
+    pub steps: Vec<BrowseOpenrouterBrowserInputStepsItem>,
+}
+
+impl Shape for BrowseOpenrouterBrowserInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let start_ms = shape::required(object, "startMs", at, shape::integer)?;
+        let exchanges = shape::required(object, "exchanges", at, |value, at| {
+            shape::list(value, at, NetExchange::decode_at)
+        })?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list_within(
+                value,
+                at,
+                Some(1),
+                None,
+                BrowseOpenrouterBrowserInputStepsItem::decode_at,
+            )
+        })?;
+        Ok(Self {
+            start_ms,
+            exchanges,
+            steps,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("startMs", Value::Number(self.start_ms as f64));
+        object.insert(
+            "exchanges",
+            Value::Array(self.exchanges.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum BrowseOpenrouterBrowserInputStepsItem {
+    List(BrowseOpenrouterBrowserInputStepsItemList),
+    Detail(BrowseOpenrouterBrowserInputStepsItemDetail),
+    Listed(BrowseOpenrouterBrowserInputStepsItemListed),
+    View(BrowseOpenrouterBrowserInputStepsItemView),
+    Advance(BrowseOpenrouterBrowserInputStepsItemAdvance),
+}
+
+impl Shape for BrowseOpenrouterBrowserInputStepsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "list" => {
+                BrowseOpenrouterBrowserInputStepsItemList::decode_at(value, at).map(Self::List)
+            }
+            "detail" => {
+                BrowseOpenrouterBrowserInputStepsItemDetail::decode_at(value, at).map(Self::Detail)
+            }
+            "listed" => {
+                BrowseOpenrouterBrowserInputStepsItemListed::decode_at(value, at).map(Self::Listed)
+            }
+            "view" => {
+                BrowseOpenrouterBrowserInputStepsItemView::decode_at(value, at).map(Self::View)
+            }
+            "advance" => BrowseOpenrouterBrowserInputStepsItemAdvance::decode_at(value, at)
+                .map(Self::Advance),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::List(held) => held.encode(),
+            Self::Detail(held) => held.encode(),
+            Self::Listed(held) => held.encode(),
+            Self::View(held) => held.encode(),
+            Self::Advance(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpenrouterBrowserInputStepsItemList {
+    pub fresh: Option<bool>,
+}
+
+impl Shape for BrowseOpenrouterBrowserInputStepsItemList {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "list")
+        })?;
+        let fresh = shape::optional(object, "fresh", at, shape::flag)?;
+        Ok(Self { fresh })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("list"));
+        if let Some(held) = &self.fresh {
+            object.insert("fresh", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpenrouterBrowserInputStepsItemDetail {
+    pub id: String,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for BrowseOpenrouterBrowserInputStepsItemDetail {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "detail")
+        })?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            id,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("detail"));
+        object.insert("id", Value::from(self.id.as_str()));
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpenrouterBrowserInputStepsItemListed {
+    pub id: String,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for BrowseOpenrouterBrowserInputStepsItemListed {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "listed")
+        })?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            id,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("listed"));
+        object.insert("id", Value::from(self.id.as_str()));
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpenrouterBrowserInputStepsItemView {
+    pub row: String,
+    pub use_: Option<nyaaai_contract::shapes::model::ModelUse>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for BrowseOpenrouterBrowserInputStepsItemView {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "view")
+        })?;
+        let row = shape::required(object, "row", at, shape::text)?;
+        let use_ = shape::optional(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            row,
+            use_,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("view"));
+        object.insert("row", Value::from(self.row.as_str()));
+        if let Some(held) = &self.use_ {
+            object.insert("use", held.encode());
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpenrouterBrowserInputStepsItemAdvance {
+    pub ms: u64,
+}
+
+impl Shape for BrowseOpenrouterBrowserInputStepsItemAdvance {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "advance")
+        })?;
+        let ms = shape::required(object, "ms", at, shape::natural)?;
+        Ok(Self { ms })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("advance"));
+        object.insert("ms", Value::Number(self.ms as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpenrouterBrowserResult {
+    pub steps: Vec<BrowseOpenrouterBrowserResultStepsItem>,
+    pub requests: Vec<String>,
+    pub read: Vec<i64>,
+    pub waiting: Vec<String>,
+}
+
+impl Shape for BrowseOpenrouterBrowserResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list(value, at, BrowseOpenrouterBrowserResultStepsItem::decode_at)
+        })?;
+        let requests = shape::required(object, "requests", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let read = shape::required(object, "read", at, |value, at| {
+            shape::list(value, at, shape::integer)
+        })?;
+        let waiting = shape::required(object, "waiting", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self {
+            steps,
+            requests,
+            read,
+            waiting,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "requests",
+            Value::Array(
+                self.requests
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "read",
+            Value::Array(
+                self.read
+                    .iter()
+                    .map(|held| Value::Number(*held as f64))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "waiting",
+            Value::Array(
+                self.waiting
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpenrouterBrowserResultStepsItem {
+    pub now_ms: i64,
+    pub answer: BrowseOpenrouterBrowserResultStepsItemAnswer,
+}
+
+impl Shape for BrowseOpenrouterBrowserResultStepsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let now_ms = shape::required(object, "nowMs", at, shape::integer)?;
+        let answer = shape::required(
+            object,
+            "answer",
+            at,
+            BrowseOpenrouterBrowserResultStepsItemAnswer::decode_at,
+        )?;
+        Ok(Self { now_ms, answer })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("nowMs", Value::Number(self.now_ms as f64));
+        object.insert("answer", self.answer.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum BrowseOpenrouterBrowserResultStepsItemAnswer {
+    List(BrowseOpenrouterBrowserResultStepsItemAnswerList),
+    Detail(BrowseOpenrouterBrowserResultStepsItemAnswerDetail),
+    Listed(BrowseOpenrouterBrowserResultStepsItemAnswerListed),
+    View(BrowseOpenrouterBrowserResultStepsItemAnswerView),
+    Advanced(BrowseOpenrouterBrowserResultStepsItemAnswerAdvanced),
+    Thrown(BrowseOpenrouterBrowserResultStepsItemAnswerThrown),
+}
+
+impl Shape for BrowseOpenrouterBrowserResultStepsItemAnswer {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "list" => BrowseOpenrouterBrowserResultStepsItemAnswerList::decode_at(value, at)
+                .map(Self::List),
+            "detail" => BrowseOpenrouterBrowserResultStepsItemAnswerDetail::decode_at(value, at)
+                .map(Self::Detail),
+            "listed" => BrowseOpenrouterBrowserResultStepsItemAnswerListed::decode_at(value, at)
+                .map(Self::Listed),
+            "view" => BrowseOpenrouterBrowserResultStepsItemAnswerView::decode_at(value, at)
+                .map(Self::View),
+            "advanced" => {
+                BrowseOpenrouterBrowserResultStepsItemAnswerAdvanced::decode_at(value, at)
+                    .map(Self::Advanced)
+            }
+            "thrown" => BrowseOpenrouterBrowserResultStepsItemAnswerThrown::decode_at(value, at)
+                .map(Self::Thrown),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::List(held) => held.encode(),
+            Self::Detail(held) => held.encode(),
+            Self::Listed(held) => held.encode(),
+            Self::View(held) => held.encode(),
+            Self::Advanced(held) => held.encode(),
+            Self::Thrown(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpenrouterBrowserResultStepsItemAnswerList {
+    pub models: Option<Vec<nyaaai_contract::shapes::model::BrowseModel>>,
+}
+
+impl Shape for BrowseOpenrouterBrowserResultStepsItemAnswerList {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "list")
+        })?;
+        let models = shape::required(object, "models", at, |value, at| {
+            shape::nullable(value, at, |value, at| {
+                shape::list(
+                    value,
+                    at,
+                    nyaaai_contract::shapes::model::BrowseModel::decode_at,
+                )
+            })
+        })?;
+        Ok(Self { models })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("list"));
+        object.insert(
+            "models",
+            self.models.as_ref().map_or(Value::Null, |held| {
+                Value::Array(held.iter().map(|held| held.encode()).collect())
+            }),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpenrouterBrowserResultStepsItemAnswerDetail {
+    pub detail: Option<nyaaai_contract::shapes::model::BrowseDetail>,
+}
+
+impl Shape for BrowseOpenrouterBrowserResultStepsItemAnswerDetail {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "detail")
+        })?;
+        let detail = shape::required(object, "detail", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                nyaaai_contract::shapes::model::BrowseDetail::decode_at,
+            )
+        })?;
+        Ok(Self { detail })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("detail"));
+        object.insert(
+            "detail",
+            self.detail
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpenrouterBrowserResultStepsItemAnswerListed {
+    pub listed: Option<BrowseOpenrouterBrowserResultStepsItemAnswerListedListed>,
+}
+
+impl Shape for BrowseOpenrouterBrowserResultStepsItemAnswerListed {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "listed")
+        })?;
+        let listed = shape::required(object, "listed", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                BrowseOpenrouterBrowserResultStepsItemAnswerListedListed::decode_at,
+            )
+        })?;
+        Ok(Self { listed })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("listed"));
+        object.insert(
+            "listed",
+            self.listed
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpenrouterBrowserResultStepsItemAnswerView {
+    pub view: ViewLine,
+}
+
+impl Shape for BrowseOpenrouterBrowserResultStepsItemAnswerView {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "view")
+        })?;
+        let view = shape::required(object, "view", at, ViewLine::decode_at)?;
+        Ok(Self { view })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("view"));
+        object.insert("view", self.view.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpenrouterBrowserResultStepsItemAnswerAdvanced {}
+
+impl Shape for BrowseOpenrouterBrowserResultStepsItemAnswerAdvanced {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "advanced")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("advanced"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpenrouterBrowserResultStepsItemAnswerThrown {
+    pub message: String,
+}
+
+impl Shape for BrowseOpenrouterBrowserResultStepsItemAnswerThrown {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "thrown")
+        })?;
+        let message = shape::required(object, "message", at, shape::text)?;
+        Ok(Self { message })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("thrown"));
+        object.insert("message", Value::from(self.message.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpenrouterBrowserResultStepsItemAnswerListedListed {
+    pub label: String,
+    pub reasoning: bool,
+}
+
+impl Shape for BrowseOpenrouterBrowserResultStepsItemAnswerListedListed {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let label = shape::required(object, "label", at, shape::text)?;
+        let reasoning = shape::required(object, "reasoning", at, shape::flag)?;
+        Ok(Self { label, reasoning })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("label", Value::from(self.label.as_str()));
+        object.insert("reasoning", Value::Bool(self.reasoning));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpenrouterHopInput {
+    pub start_ms: i64,
+    pub exchanges: Vec<NetExchange>,
+    pub id: String,
+    pub view_hosts: Vec<String>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for BrowseOpenrouterHopInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let start_ms = shape::required(object, "startMs", at, shape::integer)?;
+        let exchanges = shape::required(object, "exchanges", at, |value, at| {
+            shape::list(value, at, NetExchange::decode_at)
+        })?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let view_hosts = shape::required(object, "viewHosts", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            start_ms,
+            exchanges,
+            id,
+            view_hosts,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("startMs", Value::Number(self.start_ms as f64));
+        object.insert(
+            "exchanges",
+            Value::Array(self.exchanges.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert("id", Value::from(self.id.as_str()));
+        object.insert(
+            "viewHosts",
+            Value::Array(
+                self.view_hosts
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpenrouterHopResult {
+    pub hosts: Option<Vec<String>>,
+    pub thrown: Option<String>,
+    pub requests: Vec<String>,
+    pub waiting: Vec<String>,
+    pub now_ms: i64,
+}
+
+impl Shape for BrowseOpenrouterHopResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let hosts = shape::required(object, "hosts", at, |value, at| {
+            shape::nullable(value, at, |value, at| shape::list(value, at, shape::text))
+        })?;
+        let thrown = shape::required(object, "thrown", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let requests = shape::required(object, "requests", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let waiting = shape::required(object, "waiting", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let now_ms = shape::required(object, "nowMs", at, shape::integer)?;
+        Ok(Self {
+            hosts,
+            thrown,
+            requests,
+            waiting,
+            now_ms,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "hosts",
+            self.hosts.as_ref().map_or(Value::Null, |held| {
+                Value::Array(held.iter().map(|held| Value::from(held.as_str())).collect())
+            }),
+        );
+        object.insert(
+            "thrown",
+            self.thrown
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "requests",
+            Value::Array(
+                self.requests
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "waiting",
+            Value::Array(
+                self.waiting
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert("nowMs", Value::Number(self.now_ms as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpenrouterPinsInput {
+    pub calls: Vec<BrowseOpenrouterPinsInputCallsItem>,
+}
+
+impl Shape for BrowseOpenrouterPinsInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let calls = shape::required(object, "calls", at, |value, at| {
+            shape::list(value, at, BrowseOpenrouterPinsInputCallsItem::decode_at)
+        })?;
+        Ok(Self { calls })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "calls",
+            Value::Array(self.calls.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum BrowseOpenrouterPinsInputCallsItem {
+    Pin(BrowseOpenrouterPinsInputCallsItemPin),
+    Encode(BrowseOpenrouterPinsInputCallsItemEncode),
+    PassedBack(BrowseOpenrouterPinsInputCallsItemPassedBack),
+}
+
+impl Shape for BrowseOpenrouterPinsInputCallsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "pin" => BrowseOpenrouterPinsInputCallsItemPin::decode_at(value, at).map(Self::Pin),
+            "encode" => {
+                BrowseOpenrouterPinsInputCallsItemEncode::decode_at(value, at).map(Self::Encode)
+            }
+            "passedBack" => BrowseOpenrouterPinsInputCallsItemPassedBack::decode_at(value, at)
+                .map(Self::PassedBack),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Pin(held) => held.encode(),
+            Self::Encode(held) => held.encode(),
+            Self::PassedBack(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpenrouterPinsInputCallsItemPin {
+    pub hosts: Vec<String>,
+}
+
+impl Shape for BrowseOpenrouterPinsInputCallsItemPin {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "pin")
+        })?;
+        let hosts = shape::required(object, "hosts", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { hosts })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("pin"));
+        object.insert(
+            "hosts",
+            Value::Array(
+                self.hosts
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpenrouterPinsInputCallsItemEncode {
+    pub request: nyaaai_contract::shapes::step::CanonicalRequest,
+    pub mode: BrowseOpenrouterPinsInputCallsItemEncodeMode,
+}
+
+impl Shape for BrowseOpenrouterPinsInputCallsItemEncode {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "encode")
+        })?;
+        let request = shape::required(
+            object,
+            "request",
+            at,
+            nyaaai_contract::shapes::step::CanonicalRequest::decode_at,
+        )?;
+        let mode = shape::required(
+            object,
+            "mode",
+            at,
+            BrowseOpenrouterPinsInputCallsItemEncodeMode::decode_at,
+        )?;
+        Ok(Self { request, mode })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("encode"));
+        object.insert("request", self.request.encode());
+        object.insert("mode", self.mode.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpenrouterPinsInputCallsItemPassedBack {}
+
+impl Shape for BrowseOpenrouterPinsInputCallsItemPassedBack {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "passedBack")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("passedBack"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum BrowseOpenrouterPinsInputCallsItemEncodeMode {
+    Stream,
+    Complete,
+}
+
+impl BrowseOpenrouterPinsInputCallsItemEncodeMode {
+    pub const ALL: [Self; 2] = [Self::Stream, Self::Complete];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Stream => "stream",
+            Self::Complete => "complete",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for BrowseOpenrouterPinsInputCallsItemEncodeMode {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpenrouterPinsResult {
+    pub answers: Vec<BrowseOpenrouterPinsResultAnswersItem>,
+}
+
+impl Shape for BrowseOpenrouterPinsResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let answers = shape::required(object, "answers", at, |value, at| {
+            shape::list(value, at, BrowseOpenrouterPinsResultAnswersItem::decode_at)
+        })?;
+        Ok(Self { answers })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "answers",
+            Value::Array(self.answers.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum BrowseOpenrouterPinsResultAnswersItem {
+    Pinned(BrowseOpenrouterPinsResultAnswersItemPinned),
+    Encoded(BrowseOpenrouterPinsResultAnswersItemEncoded),
+    PassedBack(BrowseOpenrouterPinsResultAnswersItemPassedBack),
+}
+
+impl Shape for BrowseOpenrouterPinsResultAnswersItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "pinned" => {
+                BrowseOpenrouterPinsResultAnswersItemPinned::decode_at(value, at).map(Self::Pinned)
+            }
+            "encoded" => BrowseOpenrouterPinsResultAnswersItemEncoded::decode_at(value, at)
+                .map(Self::Encoded),
+            "passedBack" => BrowseOpenrouterPinsResultAnswersItemPassedBack::decode_at(value, at)
+                .map(Self::PassedBack),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Pinned(held) => held.encode(),
+            Self::Encoded(held) => held.encode(),
+            Self::PassedBack(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpenrouterPinsResultAnswersItemPinned {}
+
+impl Shape for BrowseOpenrouterPinsResultAnswersItemPinned {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "pinned")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("pinned"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpenrouterPinsResultAnswersItemEncoded {
+    pub provider: Value,
+    pub replayed: bool,
+}
+
+impl Shape for BrowseOpenrouterPinsResultAnswersItemEncoded {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "encoded")
+        })?;
+        let provider = shape::required(object, "provider", at, shape::any)?;
+        let replayed = shape::required(object, "replayed", at, shape::flag)?;
+        Ok(Self { provider, replayed })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("encoded"));
+        object.insert("provider", self.provider.clone());
+        object.insert("replayed", Value::Bool(self.replayed));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpenrouterPinsResultAnswersItemPassedBack {
+    pub value: bool,
+}
+
+impl Shape for BrowseOpenrouterPinsResultAnswersItemPassedBack {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "passedBack")
+        })?;
+        let value_field = shape::required(object, "value", at, shape::flag)?;
+        Ok(Self { value: value_field })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("passedBack"));
+        object.insert("value", Value::Bool(self.value));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpencodeBrowserInput {
+    pub start_ms: i64,
+    pub plan: nyaaai_contract::shapes::provider::ProviderPlan,
+    pub exchanges: Vec<NetExchange>,
+    pub steps: Vec<BrowseOpencodeBrowserInputStepsItem>,
+}
+
+impl Shape for BrowseOpencodeBrowserInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let start_ms = shape::required(object, "startMs", at, shape::integer)?;
+        let plan = shape::required(
+            object,
+            "plan",
+            at,
+            nyaaai_contract::shapes::provider::ProviderPlan::decode_at,
+        )?;
+        let exchanges = shape::required(object, "exchanges", at, |value, at| {
+            shape::list(value, at, NetExchange::decode_at)
+        })?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list_within(
+                value,
+                at,
+                Some(1),
+                None,
+                BrowseOpencodeBrowserInputStepsItem::decode_at,
+            )
+        })?;
+        Ok(Self {
+            start_ms,
+            plan,
+            exchanges,
+            steps,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("startMs", Value::Number(self.start_ms as f64));
+        object.insert("plan", self.plan.encode());
+        object.insert(
+            "exchanges",
+            Value::Array(self.exchanges.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum BrowseOpencodeBrowserInputStepsItem {
+    List(BrowseOpencodeBrowserInputStepsItemList),
+    Detail(BrowseOpencodeBrowserInputStepsItemDetail),
+    Listed(BrowseOpencodeBrowserInputStepsItemListed),
+    View(BrowseOpencodeBrowserInputStepsItemView),
+    Advance(BrowseOpencodeBrowserInputStepsItemAdvance),
+}
+
+impl Shape for BrowseOpencodeBrowserInputStepsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "list" => BrowseOpencodeBrowserInputStepsItemList::decode_at(value, at).map(Self::List),
+            "detail" => {
+                BrowseOpencodeBrowserInputStepsItemDetail::decode_at(value, at).map(Self::Detail)
+            }
+            "listed" => {
+                BrowseOpencodeBrowserInputStepsItemListed::decode_at(value, at).map(Self::Listed)
+            }
+            "view" => BrowseOpencodeBrowserInputStepsItemView::decode_at(value, at).map(Self::View),
+            "advance" => {
+                BrowseOpencodeBrowserInputStepsItemAdvance::decode_at(value, at).map(Self::Advance)
+            }
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::List(held) => held.encode(),
+            Self::Detail(held) => held.encode(),
+            Self::Listed(held) => held.encode(),
+            Self::View(held) => held.encode(),
+            Self::Advance(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpencodeBrowserInputStepsItemList {
+    pub fresh: Option<bool>,
+}
+
+impl Shape for BrowseOpencodeBrowserInputStepsItemList {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "list")
+        })?;
+        let fresh = shape::optional(object, "fresh", at, shape::flag)?;
+        Ok(Self { fresh })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("list"));
+        if let Some(held) = &self.fresh {
+            object.insert("fresh", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpencodeBrowserInputStepsItemDetail {
+    pub id: String,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for BrowseOpencodeBrowserInputStepsItemDetail {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "detail")
+        })?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            id,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("detail"));
+        object.insert("id", Value::from(self.id.as_str()));
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpencodeBrowserInputStepsItemListed {
+    pub id: String,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for BrowseOpencodeBrowserInputStepsItemListed {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "listed")
+        })?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            id,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("listed"));
+        object.insert("id", Value::from(self.id.as_str()));
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpencodeBrowserInputStepsItemView {
+    pub row: String,
+    pub use_: Option<nyaaai_contract::shapes::model::ModelUse>,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for BrowseOpencodeBrowserInputStepsItemView {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "view")
+        })?;
+        let row = shape::required(object, "row", at, shape::text)?;
+        let use_ = shape::optional(
+            object,
+            "use",
+            at,
+            nyaaai_contract::shapes::model::ModelUse::decode_at,
+        )?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            row,
+            use_,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("view"));
+        object.insert("row", Value::from(self.row.as_str()));
+        if let Some(held) = &self.use_ {
+            object.insert("use", held.encode());
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpencodeBrowserInputStepsItemAdvance {
+    pub ms: u64,
+}
+
+impl Shape for BrowseOpencodeBrowserInputStepsItemAdvance {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "advance")
+        })?;
+        let ms = shape::required(object, "ms", at, shape::natural)?;
+        Ok(Self { ms })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("advance"));
+        object.insert("ms", Value::Number(self.ms as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpencodeBrowserResult {
+    pub steps: Vec<BrowseOpencodeBrowserResultStepsItem>,
+    pub requests: Vec<String>,
+    pub read: Vec<i64>,
+    pub waiting: Vec<String>,
+}
+
+impl Shape for BrowseOpencodeBrowserResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list(value, at, BrowseOpencodeBrowserResultStepsItem::decode_at)
+        })?;
+        let requests = shape::required(object, "requests", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let read = shape::required(object, "read", at, |value, at| {
+            shape::list(value, at, shape::integer)
+        })?;
+        let waiting = shape::required(object, "waiting", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self {
+            steps,
+            requests,
+            read,
+            waiting,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "requests",
+            Value::Array(
+                self.requests
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "read",
+            Value::Array(
+                self.read
+                    .iter()
+                    .map(|held| Value::Number(*held as f64))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "waiting",
+            Value::Array(
+                self.waiting
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpencodeBrowserResultStepsItem {
+    pub now_ms: i64,
+    pub answer: BrowseOpencodeBrowserResultStepsItemAnswer,
+}
+
+impl Shape for BrowseOpencodeBrowserResultStepsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let now_ms = shape::required(object, "nowMs", at, shape::integer)?;
+        let answer = shape::required(
+            object,
+            "answer",
+            at,
+            BrowseOpencodeBrowserResultStepsItemAnswer::decode_at,
+        )?;
+        Ok(Self { now_ms, answer })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("nowMs", Value::Number(self.now_ms as f64));
+        object.insert("answer", self.answer.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum BrowseOpencodeBrowserResultStepsItemAnswer {
+    List(BrowseOpencodeBrowserResultStepsItemAnswerList),
+    Detail(BrowseOpencodeBrowserResultStepsItemAnswerDetail),
+    Listed(BrowseOpencodeBrowserResultStepsItemAnswerListed),
+    View(BrowseOpencodeBrowserResultStepsItemAnswerView),
+    Advanced(BrowseOpencodeBrowserResultStepsItemAnswerAdvanced),
+    Thrown(BrowseOpencodeBrowserResultStepsItemAnswerThrown),
+}
+
+impl Shape for BrowseOpencodeBrowserResultStepsItemAnswer {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "list" => {
+                BrowseOpencodeBrowserResultStepsItemAnswerList::decode_at(value, at).map(Self::List)
+            }
+            "detail" => BrowseOpencodeBrowserResultStepsItemAnswerDetail::decode_at(value, at)
+                .map(Self::Detail),
+            "listed" => BrowseOpencodeBrowserResultStepsItemAnswerListed::decode_at(value, at)
+                .map(Self::Listed),
+            "view" => {
+                BrowseOpencodeBrowserResultStepsItemAnswerView::decode_at(value, at).map(Self::View)
+            }
+            "advanced" => BrowseOpencodeBrowserResultStepsItemAnswerAdvanced::decode_at(value, at)
+                .map(Self::Advanced),
+            "thrown" => BrowseOpencodeBrowserResultStepsItemAnswerThrown::decode_at(value, at)
+                .map(Self::Thrown),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::List(held) => held.encode(),
+            Self::Detail(held) => held.encode(),
+            Self::Listed(held) => held.encode(),
+            Self::View(held) => held.encode(),
+            Self::Advanced(held) => held.encode(),
+            Self::Thrown(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpencodeBrowserResultStepsItemAnswerList {
+    pub models: Option<Vec<nyaaai_contract::shapes::model::BrowseModel>>,
+}
+
+impl Shape for BrowseOpencodeBrowserResultStepsItemAnswerList {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "list")
+        })?;
+        let models = shape::required(object, "models", at, |value, at| {
+            shape::nullable(value, at, |value, at| {
+                shape::list(
+                    value,
+                    at,
+                    nyaaai_contract::shapes::model::BrowseModel::decode_at,
+                )
+            })
+        })?;
+        Ok(Self { models })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("list"));
+        object.insert(
+            "models",
+            self.models.as_ref().map_or(Value::Null, |held| {
+                Value::Array(held.iter().map(|held| held.encode()).collect())
+            }),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpencodeBrowserResultStepsItemAnswerDetail {
+    pub detail: Option<nyaaai_contract::shapes::model::BrowseDetail>,
+}
+
+impl Shape for BrowseOpencodeBrowserResultStepsItemAnswerDetail {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "detail")
+        })?;
+        let detail = shape::required(object, "detail", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                nyaaai_contract::shapes::model::BrowseDetail::decode_at,
+            )
+        })?;
+        Ok(Self { detail })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("detail"));
+        object.insert(
+            "detail",
+            self.detail
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpencodeBrowserResultStepsItemAnswerListed {
+    pub listed: Option<BrowseOpencodeBrowserResultStepsItemAnswerListedListed>,
+}
+
+impl Shape for BrowseOpencodeBrowserResultStepsItemAnswerListed {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "listed")
+        })?;
+        let listed = shape::required(object, "listed", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                BrowseOpencodeBrowserResultStepsItemAnswerListedListed::decode_at,
+            )
+        })?;
+        Ok(Self { listed })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("listed"));
+        object.insert(
+            "listed",
+            self.listed
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpencodeBrowserResultStepsItemAnswerView {
+    pub view: ViewLine,
+}
+
+impl Shape for BrowseOpencodeBrowserResultStepsItemAnswerView {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "view")
+        })?;
+        let view = shape::required(object, "view", at, ViewLine::decode_at)?;
+        Ok(Self { view })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("view"));
+        object.insert("view", self.view.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpencodeBrowserResultStepsItemAnswerAdvanced {}
+
+impl Shape for BrowseOpencodeBrowserResultStepsItemAnswerAdvanced {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "advanced")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("advanced"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpencodeBrowserResultStepsItemAnswerThrown {
+    pub message: String,
+}
+
+impl Shape for BrowseOpencodeBrowserResultStepsItemAnswerThrown {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "thrown")
+        })?;
+        let message = shape::required(object, "message", at, shape::text)?;
+        Ok(Self { message })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("thrown"));
+        object.insert("message", Value::from(self.message.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrowseOpencodeBrowserResultStepsItemAnswerListedListed {
+    pub label: String,
+    pub reasoning: bool,
+}
+
+impl Shape for BrowseOpencodeBrowserResultStepsItemAnswerListedListed {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let label = shape::required(object, "label", at, shape::text)?;
+        let reasoning = shape::required(object, "reasoning", at, shape::flag)?;
+        Ok(Self { label, reasoning })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("label", Value::from(self.label.as_str()));
+        object.insert("reasoning", Value::Bool(self.reasoning));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindOpenrouterKeyInput {
+    pub start_ms: i64,
+    pub exchanges: Vec<NetExchange>,
+    pub stored: Option<String>,
+    pub checks: Vec<KindOpenrouterKeyInputChecksItem>,
+}
+
+impl Shape for KindOpenrouterKeyInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let start_ms = shape::required(object, "startMs", at, shape::integer)?;
+        let exchanges = shape::required(object, "exchanges", at, |value, at| {
+            shape::list(value, at, NetExchange::decode_at)
+        })?;
+        let stored = shape::required(object, "stored", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let checks = shape::required(object, "checks", at, |value, at| {
+            shape::list(value, at, KindOpenrouterKeyInputChecksItem::decode_at)
+        })?;
+        Ok(Self {
+            start_ms,
+            exchanges,
+            stored,
+            checks,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("startMs", Value::Number(self.start_ms as f64));
+        object.insert(
+            "exchanges",
+            Value::Array(self.exchanges.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "stored",
+            self.stored
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "checks",
+            Value::Array(self.checks.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum KindOpenrouterKeyInputChecksItem {
+    Stored(KindOpenrouterKeyInputChecksItemStored),
+    Key(KindOpenrouterKeyInputChecksItemKey),
+}
+
+impl Shape for KindOpenrouterKeyInputChecksItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "auth", at)? {
+            "stored" => {
+                KindOpenrouterKeyInputChecksItemStored::decode_at(value, at).map(Self::Stored)
+            }
+            "key" => KindOpenrouterKeyInputChecksItemKey::decode_at(value, at).map(Self::Key),
+            _ => Err(shape::no_branch(at, "auth")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Stored(held) => held.encode(),
+            Self::Key(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindOpenrouterKeyInputChecksItemStored {
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for KindOpenrouterKeyInputChecksItemStored {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "auth", at, |value, at| {
+            shape::is_text(value, at, "stored")
+        })?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("auth", Value::from("stored"));
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindOpenrouterKeyInputChecksItemKey {
+    pub key: String,
+    pub abort_after_ms: Option<i64>,
+    pub aborted_before: Option<bool>,
+}
+
+impl Shape for KindOpenrouterKeyInputChecksItemKey {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "auth", at, |value, at| {
+            shape::is_text(value, at, "key")
+        })?;
+        let key = shape::required(object, "key", at, shape::text)?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
+        Ok(Self {
+            key,
+            abort_after_ms,
+            aborted_before,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("auth", Value::from("key"));
+        object.insert("key", Value::from(self.key.as_str()));
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.aborted_before {
+            object.insert("abortedBefore", Value::Bool(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindOpenrouterKeyResult {
+    pub checks: Vec<KindOpenrouterKeyResultChecksItem>,
+    pub requests: Vec<KindOpenrouterKeyResultRequestsItem>,
+    pub waiting: Vec<String>,
+}
+
+impl Shape for KindOpenrouterKeyResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let checks = shape::required(object, "checks", at, |value, at| {
+            shape::list(value, at, KindOpenrouterKeyResultChecksItem::decode_at)
+        })?;
+        let requests = shape::required(object, "requests", at, |value, at| {
+            shape::list(value, at, KindOpenrouterKeyResultRequestsItem::decode_at)
+        })?;
+        let waiting = shape::required(object, "waiting", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self {
+            checks,
+            requests,
+            waiting,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "checks",
+            Value::Array(self.checks.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "requests",
+            Value::Array(self.requests.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "waiting",
+            Value::Array(
+                self.waiting
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindOpenrouterKeyResultChecksItem {
+    pub ok: Option<bool>,
+    pub reason: Option<KindOpenrouterKeyResultChecksItemReason>,
+    pub usage: Option<f64>,
+    pub limit: Option<f64>,
+    pub reset: Option<String>,
+    pub thrown: Option<String>,
+}
+
+impl Shape for KindOpenrouterKeyResultChecksItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let ok = shape::required(object, "ok", at, |value, at| {
+            shape::nullable(value, at, shape::flag)
+        })?;
+        let reason = shape::required(object, "reason", at, |value, at| {
+            shape::nullable(
+                value,
+                at,
+                KindOpenrouterKeyResultChecksItemReason::decode_at,
+            )
+        })?;
+        let usage = shape::required(object, "usage", at, |value, at| {
+            shape::nullable(value, at, shape::number)
+        })?;
+        let limit = shape::required(object, "limit", at, |value, at| {
+            shape::nullable(value, at, shape::number)
+        })?;
+        let reset = shape::required(object, "reset", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let thrown = shape::required(object, "thrown", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        Ok(Self {
+            ok,
+            reason,
+            usage,
+            limit,
+            reset,
+            thrown,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "ok",
+            self.ok
+                .as_ref()
+                .map_or(Value::Null, |held| Value::Bool(*held)),
+        );
+        object.insert(
+            "reason",
+            self.reason
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert(
+            "usage",
+            self.usage
+                .as_ref()
+                .map_or(Value::Null, |held| Value::Number(*held)),
+        );
+        object.insert(
+            "limit",
+            self.limit
+                .as_ref()
+                .map_or(Value::Null, |held| Value::Number(*held)),
+        );
+        object.insert(
+            "reset",
+            self.reset
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "thrown",
+            self.thrown
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KindOpenrouterKeyResultRequestsItem {
+    pub path: String,
+    pub authorization: Option<String>,
+}
+
+impl Shape for KindOpenrouterKeyResultRequestsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let path = shape::required(object, "path", at, shape::text)?;
+        let authorization = shape::required(object, "authorization", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        Ok(Self {
+            path,
+            authorization,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("path", Value::from(self.path.as_str()));
+        object.insert(
+            "authorization",
+            self.authorization
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum KindOpenrouterKeyResultChecksItemReason {
+    Rejected,
+    Unreachable,
+}
+
+impl KindOpenrouterKeyResultChecksItemReason {
+    pub const ALL: [Self; 2] = [Self::Rejected, Self::Unreachable];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Rejected => "rejected",
+            Self::Unreachable => "unreachable",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for KindOpenrouterKeyResultChecksItemReason {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}

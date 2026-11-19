@@ -1,0 +1,96 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.opencodeBrowser",
+	"name": "opencode-tester-listed-name-falls-back-to-id",
+	"input": {
+		"startMs": 1790337600000,
+		"plan": "go",
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "glm-a"
+						},
+						{
+							"id": "glm-b",
+							"name": "B",
+							"capabilities": {
+								"reasoning": {
+									"effort": []
+								}
+							}
+						},
+						{
+							"id": "glm-c",
+							"capabilities": {
+								"reasoning": {
+									"effort": [
+										"low"
+									]
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "listed",
+				"id": "glm-a"
+			},
+			{
+				"kind": "listed",
+				"id": "glm-b"
+			},
+			{
+				"kind": "listed",
+				"id": "glm-c"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "listed",
+					"listed": {
+						"label": "glm-a",
+						"reasoning": false
+					}
+				}
+			},
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "listed",
+					"listed": {
+						"label": "B",
+						"reasoning": false
+					}
+				}
+			},
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "listed",
+					"listed": {
+						"label": "glm-c",
+						"reasoning": true
+					}
+				}
+			}
+		],
+		"requests": [
+			"/v1/models"
+		],
+		"read": [
+			1
+		],
+		"waiting": []
+	}
+}

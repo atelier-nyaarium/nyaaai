@@ -1,0 +1,270 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.opencodeBrowser",
+	"name": "opencode-list-context-prefers-context-then-input",
+	"input": {
+		"startMs": 1790337600000,
+		"plan": "go",
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "glm-a",
+							"name": "glm-a",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								},
+								"reasoning": {
+									"supported": true,
+									"effort": [
+										"low",
+										"high"
+									]
+								}
+							},
+							"limit": {
+								"context": 10,
+								"input": 5
+							},
+							"cost": {
+								"text": {
+									"input": {
+										"price": 0.5
+									},
+									"output": {
+										"price": 2
+									}
+								}
+							},
+							"api": {
+								"chat-completions": {}
+							}
+						},
+						{
+							"id": "glm-b",
+							"name": "glm-b",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								},
+								"reasoning": {
+									"supported": true,
+									"effort": [
+										"low",
+										"high"
+									]
+								}
+							},
+							"limit": {
+								"input": 5
+							},
+							"cost": {
+								"text": {
+									"input": {
+										"price": 0.5
+									},
+									"output": {
+										"price": 2
+									}
+								}
+							},
+							"api": {
+								"chat-completions": {}
+							}
+						},
+						{
+							"id": "glm-c",
+							"name": "glm-c",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								},
+								"reasoning": {
+									"supported": true,
+									"effort": [
+										"low",
+										"high"
+									]
+								}
+							},
+							"limit": {},
+							"cost": {
+								"text": {
+									"input": {
+										"price": 0.5
+									},
+									"output": {
+										"price": 2
+									}
+								}
+							},
+							"api": {
+								"chat-completions": {}
+							}
+						},
+						{
+							"id": "glm-d",
+							"name": "glm-d",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								},
+								"reasoning": {
+									"supported": true,
+									"effort": [
+										"low",
+										"high"
+									]
+								}
+							},
+							"limit": null,
+							"cost": {
+								"text": {
+									"input": {
+										"price": 0.5
+									},
+									"output": {
+										"price": 2
+									}
+								}
+							},
+							"api": {
+								"chat-completions": {}
+							}
+						}
+					]
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "list"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "list",
+					"models": [
+						{
+							"id": "opencode:glm-a",
+							"display": "opencode/glm-a",
+							"label": "glm-a",
+							"curated": false,
+							"description": "",
+							"context": 10,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools",
+								"reasoning"
+							],
+							"price": {
+								"prompt": [
+									0.5,
+									0.5
+								],
+								"completion": [
+									2,
+									2
+								]
+							},
+							"tools": "ok",
+							"family": "chat-completions"
+						},
+						{
+							"id": "opencode:glm-b",
+							"display": "opencode/glm-b",
+							"label": "glm-b",
+							"curated": false,
+							"description": "",
+							"context": 5,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools",
+								"reasoning"
+							],
+							"price": {
+								"prompt": [
+									0.5,
+									0.5
+								],
+								"completion": [
+									2,
+									2
+								]
+							},
+							"tools": "ok",
+							"family": "chat-completions"
+						},
+						{
+							"id": "opencode:glm-c",
+							"display": "opencode/glm-c",
+							"label": "glm-c",
+							"curated": false,
+							"description": "",
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools",
+								"reasoning"
+							],
+							"price": {
+								"prompt": [
+									0.5,
+									0.5
+								],
+								"completion": [
+									2,
+									2
+								]
+							},
+							"tools": "ok",
+							"family": "chat-completions"
+						},
+						{
+							"id": "opencode:glm-d",
+							"display": "opencode/glm-d",
+							"label": "glm-d",
+							"curated": false,
+							"description": "",
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools",
+								"reasoning"
+							],
+							"price": {
+								"prompt": [
+									0.5,
+									0.5
+								],
+								"completion": [
+									2,
+									2
+								]
+							},
+							"tools": "ok",
+							"family": "chat-completions"
+						}
+					]
+				}
+			}
+		],
+		"requests": [
+			"/v1/models"
+		],
+		"read": [
+			1
+		],
+		"waiting": []
+	}
+}

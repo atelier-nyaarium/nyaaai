@@ -1,0 +1,115 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.opencodeJoin",
+	"name": "join-never-loaded-payg",
+	"input": {
+		"rows": [
+			"openai/gpt-6-luna",
+			"deepseek/deepseek-v4.1-flash",
+			"minimax/minimax-m3",
+			"x-ai/grok-4.7",
+			"anthropic/claude-haiku-5.5",
+			"google/gemini-3.8-flash",
+			"mistralai/mistral-large-2512"
+		],
+		"plan": "payg",
+		"models": {
+			"error": "down"
+		},
+		"nowMs": 1790337600000,
+		"passes": [
+			{
+				"use": "chat",
+				"zdrOnly": true
+			},
+			{
+				"use": "chat",
+				"zdrOnly": false
+			}
+		]
+	},
+	"expected": {
+		"passes": [
+			[
+				{
+					"key": "openai/gpt-6-luna",
+					"status": "noZdrHost",
+					"efforts": [],
+					"hosts": []
+				},
+				{
+					"key": "deepseek/deepseek-v4.1-flash",
+					"status": "unknown",
+					"efforts": [],
+					"hosts": []
+				},
+				{
+					"key": "minimax/minimax-m3",
+					"status": "unknown",
+					"efforts": [],
+					"hosts": []
+				},
+				{
+					"key": "x-ai/grok-4.7",
+					"status": "noZdrHost",
+					"efforts": [],
+					"hosts": []
+				},
+				{
+					"key": "anthropic/claude-haiku-5.5",
+					"status": "noZdrHost",
+					"efforts": [],
+					"hosts": []
+				},
+				{
+					"key": "google/gemini-3.8-flash",
+					"status": "unknown",
+					"efforts": [],
+					"hosts": []
+				}
+			],
+			[
+				{
+					"key": "openai/gpt-6-luna",
+					"status": "unknown",
+					"efforts": [],
+					"hosts": [],
+					"dataKept": true
+				},
+				{
+					"key": "deepseek/deepseek-v4.1-flash",
+					"status": "unknown",
+					"efforts": [],
+					"hosts": []
+				},
+				{
+					"key": "minimax/minimax-m3",
+					"status": "unknown",
+					"efforts": [],
+					"hosts": []
+				},
+				{
+					"key": "x-ai/grok-4.7",
+					"status": "unknown",
+					"efforts": [],
+					"hosts": [],
+					"dataKept": true
+				},
+				{
+					"key": "anthropic/claude-haiku-5.5",
+					"status": "unknown",
+					"efforts": [],
+					"hosts": [],
+					"dataKept": true
+				},
+				{
+					"key": "google/gemini-3.8-flash",
+					"status": "unknown",
+					"efforts": [],
+					"hosts": []
+				}
+			]
+		]
+	}
+}

@@ -1,0 +1,152 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterPins",
+	"name": "pins-a-reply-from-another-model-is-not-resent",
+	"input": {
+		"calls": [
+			{
+				"kind": "pin",
+				"hosts": [
+					"a"
+				]
+			},
+			{
+				"kind": "encode",
+				"request": {
+					"model": "openai/gpt-6-luna",
+					"system": [
+						"Rules."
+					],
+					"history": [
+						{
+							"role": "user",
+							"text": "Hi"
+						},
+						{
+							"role": "step",
+							"producer": {
+								"model": "lab/other"
+							},
+							"parts": [
+								{
+									"kind": "thought",
+									"type": "reasoning.text",
+									"segments": [
+										{
+											"kind": "content",
+											"text": "Thinking."
+										}
+									],
+									"opaque": "sig",
+									"index": 0
+								},
+								{
+									"kind": "text",
+									"text": "Done."
+								}
+							]
+						},
+						{
+							"role": "user",
+							"text": "More"
+						}
+					],
+					"cache": {
+						"kind": "none"
+					},
+					"session": "s-1",
+					"zdrOnly": true
+				},
+				"mode": "stream"
+			},
+			{
+				"kind": "encode",
+				"request": {
+					"model": "openai/gpt-6-luna",
+					"system": [
+						"Rules."
+					],
+					"history": [
+						{
+							"role": "user",
+							"text": "Hi"
+						},
+						{
+							"role": "step",
+							"producer": {
+								"model": "lab/other"
+							},
+							"parts": [
+								{
+									"kind": "thought",
+									"type": "reasoning.text",
+									"segments": [
+										{
+											"kind": "content",
+											"text": "Thinking."
+										}
+									],
+									"opaque": "sig",
+									"index": 0
+								},
+								{
+									"kind": "text",
+									"text": "Done."
+								}
+							]
+						},
+						{
+							"role": "user",
+							"text": "More"
+						}
+					],
+					"cache": {
+						"kind": "none"
+					},
+					"session": "s-1",
+					"zdrOnly": true
+				},
+				"mode": "stream"
+			},
+			{
+				"kind": "passedBack"
+			}
+		]
+	},
+	"expected": {
+		"answers": [
+			{
+				"kind": "pinned"
+			},
+			{
+				"kind": "encoded",
+				"provider": {
+					"require_parameters": true,
+					"zdr": true,
+					"data_collection": "deny",
+					"only": [
+						"a"
+					]
+				},
+				"replayed": false
+			},
+			{
+				"kind": "encoded",
+				"provider": {
+					"require_parameters": true,
+					"zdr": true,
+					"data_collection": "deny",
+					"only": [
+						"a"
+					]
+				},
+				"replayed": false
+			},
+			{
+				"kind": "passedBack",
+				"value": false
+			}
+		]
+	}
+}

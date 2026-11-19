@@ -1,0 +1,69 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.openrouterKey",
+	"name": "key-numbers",
+	"input": {
+		"startMs": 1790337600000,
+		"stored": "key-0123456789abcdef",
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"usage": 1e+21,
+						"limit": 1e-7
+					}
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"usage": 0.1,
+						"limit": 100
+					}
+				}
+			}
+		],
+		"checks": [
+			{
+				"auth": "stored"
+			},
+			{
+				"auth": "stored"
+			}
+		]
+	},
+	"expected": {
+		"checks": [
+			{
+				"ok": true,
+				"reason": null,
+				"usage": 1e+21,
+				"limit": 1e-7,
+				"reset": null,
+				"thrown": null
+			},
+			{
+				"ok": true,
+				"reason": null,
+				"usage": 0.1,
+				"limit": 100,
+				"reset": null,
+				"thrown": null
+			}
+		],
+		"requests": [
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			},
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			}
+		],
+		"waiting": []
+	}
+}

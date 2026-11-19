@@ -1,0 +1,14 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.openrouterModels",
+	"name": "models-empty-data",
+	"input": {
+		"body": {
+			"data": []
+		}
+	},
+	"expected": {
+		"models": []
+	}
+}

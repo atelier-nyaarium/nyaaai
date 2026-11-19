@@ -1,0 +1,229 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.opencodeRun",
+	"name": "run-opencode-failed-refresh-keeps-the-last-list",
+	"input": {
+		"startMs": 1790337600000,
+		"rows": [
+			"openai/gpt-6-luna",
+			"deepseek/deepseek-v4.1-flash"
+		],
+		"plan": "go",
+		"exchanges": [
+			{
+				"status": 500,
+				"json": {
+					"error": {
+						"message": "Down."
+					}
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "gpt-6-luna",
+							"name": "Luna",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								},
+								"reasoning": {
+									"effort": [
+										"low",
+										"high"
+									]
+								}
+							},
+							"limit": {
+								"context": 1000000,
+								"output": 100000
+							},
+							"cost": {
+								"text": {
+									"input": {
+										"price": 0.1
+									},
+									"output": {
+										"price": 0.5
+									}
+								}
+							},
+							"api": {
+								"responses": {}
+							}
+						},
+						{
+							"id": "deepseek-v4.1-flash",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								}
+							},
+							"api": {
+								"chat-completions": {}
+							}
+						}
+					]
+				}
+			},
+			{
+				"status": 500,
+				"json": {
+					"error": {
+						"message": "Down."
+					}
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "call",
+				"call": {
+					"kind": "views"
+				}
+			},
+			{
+				"kind": "advance",
+				"ms": 3600000
+			},
+			{
+				"kind": "call",
+				"call": {
+					"kind": "views"
+				}
+			},
+			{
+				"kind": "advance",
+				"ms": 46800000
+			},
+			{
+				"kind": "call",
+				"call": {
+					"kind": "views"
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "views",
+						"views": [
+							{
+								"key": "openai/gpt-6-luna",
+								"status": "noZdrHost",
+								"efforts": [],
+								"hosts": []
+							},
+							{
+								"key": "deepseek/deepseek-v4.1-flash",
+								"status": "unknown",
+								"efforts": [],
+								"hosts": []
+							}
+						]
+					}
+				],
+				"rowReads": 1
+			},
+			{
+				"nowMs": 1790341200000,
+				"answers": [],
+				"rowReads": 0
+			},
+			{
+				"nowMs": 1790341200000,
+				"answers": [
+					{
+						"kind": "views",
+						"views": [
+							{
+								"key": "openai/gpt-6-luna",
+								"status": "noZdrHost",
+								"efforts": [
+									"low",
+									"high"
+								],
+								"hosts": []
+							},
+							{
+								"key": "deepseek/deepseek-v4.1-flash",
+								"status": "ok",
+								"efforts": [],
+								"hosts": [],
+								"api": {
+									"family": "chat-completions",
+									"structured": false,
+									"choice": [
+										"auto"
+									],
+									"strict": false
+								},
+								"cache": "implicit"
+							}
+						]
+					}
+				],
+				"rowReads": 1
+			},
+			{
+				"nowMs": 1790388000000,
+				"answers": [],
+				"rowReads": 0
+			},
+			{
+				"nowMs": 1790388000000,
+				"answers": [
+					{
+						"kind": "views",
+						"views": [
+							{
+								"key": "openai/gpt-6-luna",
+								"status": "noZdrHost",
+								"efforts": [
+									"low",
+									"high"
+								],
+								"hosts": []
+							},
+							{
+								"key": "deepseek/deepseek-v4.1-flash",
+								"status": "ok",
+								"efforts": [],
+								"hosts": [],
+								"api": {
+									"family": "chat-completions",
+									"structured": false,
+									"choice": [
+										"auto"
+									],
+									"strict": false
+								},
+								"cache": "implicit"
+							}
+						]
+					}
+				],
+				"rowReads": 1
+			}
+		],
+		"requests": [
+			"/v1/models",
+			"/v1/models",
+			"/v1/models"
+		],
+		"read": [
+			1,
+			1,
+			1
+		],
+		"waiting": [],
+		"refreshed": 1
+	}
+}

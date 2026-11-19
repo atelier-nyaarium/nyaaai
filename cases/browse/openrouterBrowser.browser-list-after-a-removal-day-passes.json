@@ -1,0 +1,140 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterBrowser",
+	"name": "browser-list-after-a-removal-day-passes",
+	"input": {
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "x/retiring",
+							"expiration_date": "2026-09-25T13:00:00Z"
+						}
+					]
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"model_id": "x/retiring",
+							"tag": "host",
+							"supported_parameters": [
+								"tools"
+							]
+						}
+					]
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "list"
+			},
+			{
+				"kind": "advance",
+				"ms": 3599999
+			},
+			{
+				"kind": "list"
+			},
+			{
+				"kind": "advance",
+				"ms": 1
+			},
+			{
+				"kind": "list"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "list",
+					"models": [
+						{
+							"id": "openrouter:x/retiring",
+							"display": "x/retiring",
+							"label": "x/retiring",
+							"curated": false,
+							"description": "",
+							"inputs": [],
+							"outputs": [],
+							"parameters": [],
+							"price": "unknown",
+							"tools": "ok"
+						}
+					]
+				}
+			},
+			{
+				"nowMs": 1790341199999,
+				"answer": {
+					"kind": "advanced"
+				}
+			},
+			{
+				"nowMs": 1790341199999,
+				"answer": {
+					"kind": "list",
+					"models": [
+						{
+							"id": "openrouter:x/retiring",
+							"display": "x/retiring",
+							"label": "x/retiring",
+							"curated": false,
+							"description": "",
+							"inputs": [],
+							"outputs": [],
+							"parameters": [],
+							"price": "unknown",
+							"tools": "ok"
+						}
+					]
+				}
+			},
+			{
+				"nowMs": 1790341200000,
+				"answer": {
+					"kind": "advanced"
+				}
+			},
+			{
+				"nowMs": 1790341200000,
+				"answer": {
+					"kind": "list",
+					"models": [
+						{
+							"id": "openrouter:x/retiring",
+							"display": "x/retiring",
+							"label": "x/retiring",
+							"curated": false,
+							"description": "",
+							"inputs": [],
+							"outputs": [],
+							"parameters": [],
+							"price": "unknown",
+							"tools": "noZdrHost"
+						}
+					]
+				}
+			}
+		],
+		"requests": [
+			"/models",
+			"/endpoints/zdr"
+		],
+		"read": [
+			1,
+			1
+		],
+		"waiting": []
+	}
+}

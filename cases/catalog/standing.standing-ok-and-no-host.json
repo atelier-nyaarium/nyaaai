@@ -1,0 +1,106 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.standing",
+	"name": "standing-ok-and-no-host",
+	"input": {
+		"rows": [
+			{
+				"expiration": null,
+				"hosts": [
+					{
+						"params": [
+							"tools",
+							"reasoning"
+						]
+					},
+					{
+						"params": [
+							"tools"
+						]
+					},
+					{
+						"params": null
+					}
+				],
+				"needs": [
+					"tools",
+					"reasoning"
+				],
+				"nowMs": 1790337600000
+			},
+			{
+				"expiration": null,
+				"hosts": [],
+				"needs": [
+					"tools"
+				],
+				"nowMs": 1790337600000
+			},
+			{
+				"expiration": null,
+				"hosts": [
+					{
+						"params": [
+							"tools"
+						]
+					}
+				],
+				"needs": [],
+				"nowMs": 1790337600000
+			},
+			{
+				"expiration": null,
+				"hosts": [
+					{
+						"params": null
+					}
+				],
+				"needs": [
+					"tools"
+				],
+				"nowMs": 1790337600000
+			},
+			{
+				"expiration": null,
+				"hosts": [
+					{
+						"params": null
+					}
+				],
+				"needs": [],
+				"nowMs": 1790337600000
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"standing": "ok",
+				"usable": [
+					0
+				]
+			},
+			{
+				"standing": "noZdrHost",
+				"usable": []
+			},
+			{
+				"standing": "ok",
+				"usable": [
+					0
+				]
+			},
+			{
+				"standing": "noZdrHost",
+				"usable": []
+			},
+			{
+				"standing": "ok",
+				"usable": [
+					0
+				]
+			}
+		]
+	}
+}

@@ -1,0 +1,32 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.openrouterModels",
+	"name": "models-proto-key-ignored",
+	"input": {
+		"body": {
+			"data": [
+				{
+					"id": "lab/one",
+					"__proto__": {
+						"name": "x"
+					}
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"id": "lab/one",
+				"name": null,
+				"created": null,
+				"context_length": null,
+				"expiration_date": null,
+				"pricing": null,
+				"reasoning": null,
+				"supported_parameters": null
+			}
+		]
+	}
+}

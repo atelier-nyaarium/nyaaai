@@ -1,0 +1,29 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterProviders",
+	"name": "providers-zero-retention-tags-of-an-unreadable-body",
+	"input": {
+		"raw": {
+			"data": {
+				"endpoints": [
+					{
+						"tag": "a"
+					}
+				]
+			}
+		},
+		"zdr": {
+			"error": "down"
+		}
+	},
+	"expected": {
+		"providers": [
+			{
+				"name": "a",
+				"tag": "a",
+				"zdr": false
+			}
+		]
+	}
+}

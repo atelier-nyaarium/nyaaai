@@ -1,0 +1,45 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.openrouterModels",
+	"name": "models-bad-items-between-good",
+	"input": {
+		"body": {
+			"data": [
+				{
+					"id": "lab/one"
+				},
+				{
+					"unexpected": true
+				},
+				{
+					"id": "lab/two"
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"id": "lab/one",
+				"name": null,
+				"created": null,
+				"context_length": null,
+				"expiration_date": null,
+				"pricing": null,
+				"reasoning": null,
+				"supported_parameters": null
+			},
+			{
+				"id": "lab/two",
+				"name": null,
+				"created": null,
+				"context_length": null,
+				"expiration_date": null,
+				"pricing": null,
+				"reasoning": null,
+				"supported_parameters": null
+			}
+		]
+	}
+}

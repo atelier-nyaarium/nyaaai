@@ -1,0 +1,119 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.openrouterJoin",
+	"name": "join-removal-spellings-the-primitive-refuses-never-retire",
+	"input": {
+		"rows": [
+			"openai/gpt-6-luna",
+			"anthropic/claude-opus-5.5",
+			"openai/gpt-6.1-sol",
+			"mistralai/mistral-large-2512"
+		],
+		"models": {
+			"data": [
+				{
+					"id": "openai/gpt-6-luna",
+					"expiration_date": "2026-09"
+				},
+				{
+					"id": "anthropic/claude-opus-5.5",
+					"expiration_date": "2026"
+				},
+				{
+					"id": "openai/gpt-6.1-sol",
+					"expiration_date": "2026-09-25 00:00:00"
+				},
+				{
+					"id": "mistralai/mistral-large-2512",
+					"expiration_date": "Sep 25 2026"
+				}
+			]
+		},
+		"zdr": {
+			"data": [
+				{
+					"model_id": "openai/gpt-6-luna",
+					"supported_parameters": [
+						"tools",
+						"reasoning"
+					],
+					"tag": "h"
+				},
+				{
+					"model_id": "anthropic/claude-opus-5.5",
+					"supported_parameters": [
+						"tools",
+						"reasoning"
+					],
+					"tag": "h"
+				},
+				{
+					"model_id": "openai/gpt-6.1-sol",
+					"supported_parameters": [
+						"tools",
+						"reasoning"
+					],
+					"tag": "h"
+				},
+				{
+					"model_id": "mistralai/mistral-large-2512",
+					"supported_parameters": [
+						"tools",
+						"reasoning"
+					],
+					"tag": "h"
+				}
+			]
+		},
+		"nowMs": 1790337600000,
+		"passes": [
+			{
+				"use": "chat",
+				"zdrOnly": true
+			}
+		]
+	},
+	"expected": {
+		"passes": [
+			[
+				{
+					"key": "openai/gpt-6-luna",
+					"status": "ok",
+					"retiredOn": "2026-09",
+					"efforts": [],
+					"hosts": [
+						"h"
+					]
+				},
+				{
+					"key": "anthropic/claude-opus-5.5",
+					"status": "ok",
+					"retiredOn": "2026",
+					"efforts": [],
+					"hosts": [
+						"h"
+					]
+				},
+				{
+					"key": "openai/gpt-6.1-sol",
+					"status": "ok",
+					"retiredOn": "2026-09-25 00:00:00",
+					"efforts": [],
+					"hosts": [
+						"h"
+					]
+				},
+				{
+					"key": "mistralai/mistral-large-2512",
+					"status": "ok",
+					"retiredOn": "Sep 25 2026",
+					"efforts": [],
+					"hosts": [
+						"h"
+					]
+				}
+			]
+		]
+	}
+}

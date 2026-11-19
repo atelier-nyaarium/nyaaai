@@ -1,0 +1,77 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.openrouterEndpoints",
+	"name": "endpoints-provider_name-wrong-type",
+	"input": {
+		"body": {
+			"data": [
+				{
+					"model_id": "lab/model-a",
+					"tag": "host-a",
+					"provider_name": 7,
+					"context_length": 128000,
+					"max_prompt_tokens": 100000,
+					"supported_parameters": [
+						"tools",
+						"reasoning"
+					],
+					"pricing": {
+						"prompt": "0.000001",
+						"completion": "0.000002",
+						"input_cache_read": "0.0000001",
+						"input_cache_write": "0.00000125",
+						"input_cache_write_1h": "0.000002",
+						"overrides": [
+							{
+								"min_prompt_tokens": 200000,
+								"prompt": "0.000002",
+								"completion": "0.000004",
+								"input_cache_read": "0.0000002",
+								"input_cache_write": "0.0000025",
+								"input_cache_write_1h": "0.000004"
+							}
+						]
+					}
+				}
+			]
+		}
+	},
+	"expected": {
+		"endpoints": [
+			{
+				"model": "lab/model-a",
+				"hosts": [
+					{
+						"model_id": "lab/model-a",
+						"tag": "host-a",
+						"provider_name": null,
+						"context_length": 128000,
+						"max_prompt_tokens": 100000,
+						"supported_parameters": [
+							"tools",
+							"reasoning"
+						],
+						"pricing": {
+							"prompt": "0.000001",
+							"completion": "0.000002",
+							"input_cache_read": "0.0000001",
+							"input_cache_write": "0.00000125",
+							"input_cache_write_1h": "0.000002",
+							"overrides": [
+								{
+									"min_prompt_tokens": 200000,
+									"prompt": "0.000002",
+									"completion": "0.000004",
+									"input_cache_read": "0.0000002",
+									"input_cache_write": "0.0000025",
+									"input_cache_write_1h": "0.000004"
+								}
+							]
+						}
+					}
+				]
+			}
+		]
+	}
+}

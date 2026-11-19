@@ -1,0 +1,204 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterBrowser",
+	"name": "browser-detail-marks-zero-retention-hosts",
+	"input": {
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "lab/glm",
+							"name": "Lab: GLM",
+							"description": "A reasoning model.",
+							"context_length": 1000000,
+							"architecture": {
+								"input_modalities": [
+									"text"
+								],
+								"output_modalities": [
+									"text"
+								]
+							},
+							"supported_parameters": [
+								"tools",
+								"reasoning",
+								"structured_outputs"
+							],
+							"reasoning": {
+								"supported_efforts": [
+									"low",
+									"high"
+								]
+							}
+						},
+						{
+							"id": "lab/glm:batch",
+							"name": "Lab: GLM (batch)"
+						},
+						{
+							"id": "x/plain",
+							"supported_parameters": [
+								"tools"
+							]
+						},
+						{
+							"id": "x/thinker",
+							"reasoning": {
+								"supported_efforts": [
+									"high"
+								]
+							}
+						},
+						{
+							"id": "x/retiring",
+							"expiration_date": "2026-06-01"
+						},
+						{
+							"id": 7
+						},
+						{
+							"id": "../escape"
+						}
+					]
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"model_id": "lab/glm",
+							"tag": "decart",
+							"supported_parameters": [
+								"tools",
+								"reasoning"
+							],
+							"pricing": {
+								"prompt": "0.00000049",
+								"completion": "0.00000154"
+							}
+						},
+						{
+							"model_id": "lab/glm",
+							"tag": "relace",
+							"supported_parameters": [
+								"tools"
+							],
+							"pricing": {
+								"prompt": "0.0000002",
+								"completion": "0.000004"
+							}
+						},
+						{
+							"model_id": "x/plain",
+							"tag": "host",
+							"supported_parameters": [
+								"response_format"
+							],
+							"pricing": {
+								"prompt": "0.000001",
+								"completion": "0.000002"
+							}
+						},
+						{
+							"model_id": "x/thinker",
+							"tag": "host",
+							"supported_parameters": [
+								"tools"
+							],
+							"pricing": {
+								"prompt": "0.000001",
+								"completion": "0.000002"
+							}
+						},
+						{
+							"model_id": "x/retiring",
+							"tag": "host",
+							"supported_parameters": [
+								"tools"
+							],
+							"pricing": {
+								"prompt": "0.000001",
+								"completion": "0.000002"
+							}
+						}
+					]
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"endpoints": [
+							{
+								"provider_name": "Decart",
+								"tag": "decart",
+								"context_length": 131000,
+								"pricing": {
+									"prompt": "0.00000049",
+									"completion": "0.00000154"
+								}
+							},
+							{
+								"provider_name": "Novita",
+								"tag": "novita/fp8",
+								"pricing": {
+									"prompt": "0.00000065"
+								}
+							}
+						]
+					}
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "detail",
+				"id": "lab/glm"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "detail",
+					"detail": {
+						"hosts": [
+							{
+								"name": "Decart",
+								"tag": "decart",
+								"context": 131000,
+								"prompt": 0.49,
+								"completion": 1.54,
+								"zdr": true
+							},
+							{
+								"name": "Novita",
+								"tag": "novita/fp8",
+								"prompt": 0.65,
+								"zdr": false
+							}
+						]
+					}
+				}
+			}
+		],
+		"requests": [
+			"/models",
+			"/endpoints/zdr",
+			"/models/lab/glm/endpoints"
+		],
+		"read": [
+			1,
+			1,
+			1
+		],
+		"waiting": []
+	}
+}

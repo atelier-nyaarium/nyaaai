@@ -1,0 +1,90 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.openrouterJoin",
+	"name": "join-efforts-in-the-order-of-the-scale",
+	"input": {
+		"rows": [
+			"openai/gpt-6-luna",
+			"mistralai/mistral-large-2512"
+		],
+		"models": {
+			"data": [
+				{
+					"id": "openai/gpt-6-luna",
+					"reasoning": {
+						"supported_efforts": [
+							"max",
+							"bogus",
+							"low",
+							"xhigh",
+							"low"
+						]
+					}
+				},
+				{
+					"id": "mistralai/mistral-large-2512",
+					"reasoning": {
+						"supported_efforts": [
+							"low",
+							"high"
+						]
+					}
+				}
+			]
+		},
+		"zdr": {
+			"data": [
+				{
+					"model_id": "openai/gpt-6-luna",
+					"supported_parameters": [
+						"tools",
+						"reasoning"
+					],
+					"tag": "a"
+				},
+				{
+					"model_id": "mistralai/mistral-large-2512",
+					"supported_parameters": [
+						"tools",
+						"reasoning"
+					],
+					"tag": "a"
+				}
+			]
+		},
+		"nowMs": 1790337600000,
+		"passes": [
+			{
+				"use": "chat",
+				"zdrOnly": true
+			}
+		]
+	},
+	"expected": {
+		"passes": [
+			[
+				{
+					"key": "openai/gpt-6-luna",
+					"status": "ok",
+					"efforts": [
+						"low",
+						"xhigh",
+						"max"
+					],
+					"hosts": [
+						"a"
+					]
+				},
+				{
+					"key": "mistralai/mistral-large-2512",
+					"status": "ok",
+					"efforts": [],
+					"hosts": [
+						"a"
+					]
+				}
+			]
+		]
+	}
+}

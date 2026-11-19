@@ -1,0 +1,33 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterHop",
+	"name": "hop-a-failed-read-throws",
+	"input": {
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 500,
+				"json": {
+					"error": {
+						"message": "Down."
+					}
+				}
+			}
+		],
+		"id": "lab/glm",
+		"viewHosts": [
+			"a",
+			"b"
+		]
+	},
+	"expected": {
+		"hosts": null,
+		"thrown": "Down.",
+		"requests": [
+			"/models/lab/glm/endpoints"
+		],
+		"waiting": [],
+		"nowMs": 1790337600000
+	}
+}

@@ -1,0 +1,63 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.opencodeModels",
+	"name": "models-same-id-twice-later-replaces-in-place",
+	"input": {
+		"body": {
+			"data": [
+				{
+					"id": "one",
+					"name": "First"
+				},
+				{
+					"id": "two"
+				},
+				{
+					"id": "one",
+					"name": "Second"
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"id": "one",
+				"name": "Second",
+				"description": null,
+				"input": null,
+				"output": null,
+				"tools": null,
+				"reasoning": null,
+				"efforts": null,
+				"toggle": null,
+				"structured_output": null,
+				"cache": null,
+				"context": null,
+				"input_limit": null,
+				"output_limit": null,
+				"price": null,
+				"api": []
+			},
+			{
+				"id": "two",
+				"name": null,
+				"description": null,
+				"input": null,
+				"output": null,
+				"tools": null,
+				"reasoning": null,
+				"efforts": null,
+				"toggle": null,
+				"structured_output": null,
+				"cache": null,
+				"context": null,
+				"input_limit": null,
+				"output_limit": null,
+				"price": null,
+				"api": []
+			}
+		]
+	}
+}

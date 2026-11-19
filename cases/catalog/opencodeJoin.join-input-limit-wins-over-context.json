@@ -1,0 +1,101 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.opencodeJoin",
+	"name": "join-input-limit-wins-over-context",
+	"input": {
+		"rows": [
+			"openai/gpt-6-luna"
+		],
+		"plan": "go",
+		"models": {
+			"data": [
+				{
+					"id": "gpt-6-luna",
+					"name": "gpt-6-luna",
+					"capabilities": {
+						"tools": {
+							"supported": true
+						},
+						"reasoning": {
+							"supported": true,
+							"effort": [
+								"low",
+								"high"
+							]
+						}
+					},
+					"limit": {
+						"context": 10,
+						"input": 5,
+						"output": 3
+					},
+					"cost": {
+						"text": {
+							"input": {
+								"price": 0.5
+							},
+							"output": {
+								"price": 2
+							}
+						}
+					},
+					"api": {
+						"chat-completions": {}
+					}
+				}
+			]
+		},
+		"nowMs": 1790337600000,
+		"passes": [
+			{
+				"use": "chat",
+				"zdrOnly": false
+			}
+		]
+	},
+	"expected": {
+		"passes": [
+			[
+				{
+					"key": "openai/gpt-6-luna",
+					"status": "ok",
+					"efforts": [
+						"low",
+						"high"
+					],
+					"promptLimit": 5,
+					"outputLimit": 3,
+					"price": {
+						"prompt": [
+							0.5,
+							0.5
+						],
+						"completion": [
+							2,
+							2
+						],
+						"tiers": [
+							{
+								"minPromptTokens": 0,
+								"prompt": 0.5,
+								"completion": 2
+							}
+						]
+					},
+					"hosts": [],
+					"dataKept": true,
+					"api": {
+						"family": "chat-completions",
+						"structured": false,
+						"choice": [
+							"auto"
+						],
+						"strict": false
+					},
+					"cache": "implicit"
+				}
+			]
+		]
+	}
+}

@@ -1,0 +1,81 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.openrouterEndpoints",
+	"name": "endpoints-grouped-by-model-in-first-seen-order",
+	"input": {
+		"body": {
+			"data": [
+				{
+					"model_id": "lab/b",
+					"tag": "one"
+				},
+				{
+					"model_id": "lab/a",
+					"tag": "two"
+				},
+				{
+					"model_id": "lab/b",
+					"tag": "three"
+				},
+				{
+					"unexpected": true
+				},
+				{
+					"model_id": "lab/a",
+					"tag": "four"
+				}
+			]
+		}
+	},
+	"expected": {
+		"endpoints": [
+			{
+				"model": "lab/b",
+				"hosts": [
+					{
+						"model_id": "lab/b",
+						"tag": "one",
+						"provider_name": null,
+						"context_length": null,
+						"max_prompt_tokens": null,
+						"supported_parameters": null,
+						"pricing": null
+					},
+					{
+						"model_id": "lab/b",
+						"tag": "three",
+						"provider_name": null,
+						"context_length": null,
+						"max_prompt_tokens": null,
+						"supported_parameters": null,
+						"pricing": null
+					}
+				]
+			},
+			{
+				"model": "lab/a",
+				"hosts": [
+					{
+						"model_id": "lab/a",
+						"tag": "two",
+						"provider_name": null,
+						"context_length": null,
+						"max_prompt_tokens": null,
+						"supported_parameters": null,
+						"pricing": null
+					},
+					{
+						"model_id": "lab/a",
+						"tag": "four",
+						"provider_name": null,
+						"context_length": null,
+						"max_prompt_tokens": null,
+						"supported_parameters": null,
+						"pricing": null
+					}
+				]
+			}
+		]
+	}
+}

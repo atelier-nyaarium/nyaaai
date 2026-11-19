@@ -1,0 +1,37 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.opencodeModels",
+	"name": "models-minimal",
+	"input": {
+		"body": {
+			"data": [
+				{
+					"id": "bare"
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"id": "bare",
+				"name": null,
+				"description": null,
+				"input": null,
+				"output": null,
+				"tools": null,
+				"reasoning": null,
+				"efforts": null,
+				"toggle": null,
+				"structured_output": null,
+				"cache": null,
+				"context": null,
+				"input_limit": null,
+				"output_limit": null,
+				"price": null,
+				"api": []
+			}
+		]
+	}
+}

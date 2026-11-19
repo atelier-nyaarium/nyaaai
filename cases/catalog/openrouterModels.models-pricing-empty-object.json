@@ -1,0 +1,59 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.openrouterModels",
+	"name": "models-pricing-empty-object",
+	"input": {
+		"body": {
+			"data": [
+				{
+					"id": "lab/model-a",
+					"name": "Model A",
+					"created": 1790000000,
+					"context_length": 128000,
+					"expiration_date": "2027-01-15",
+					"pricing": {},
+					"reasoning": {
+						"supported_efforts": [
+							"low",
+							"high"
+						]
+					},
+					"supported_parameters": [
+						"tools",
+						"reasoning"
+					]
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"id": "lab/model-a",
+				"name": "Model A",
+				"created": 1790000000,
+				"context_length": 128000,
+				"expiration_date": "2027-01-15",
+				"pricing": {
+					"prompt": null,
+					"completion": null,
+					"input_cache_read": null,
+					"input_cache_write": null,
+					"input_cache_write_1h": null,
+					"overrides": null
+				},
+				"reasoning": {
+					"supported_efforts": [
+						"low",
+						"high"
+					]
+				},
+				"supported_parameters": [
+					"tools",
+					"reasoning"
+				]
+			}
+		]
+	}
+}

@@ -1,0 +1,142 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.opencodeRun",
+	"name": "run-opencode-fresh-retries-inside-the-window",
+	"input": {
+		"startMs": 1790337600000,
+		"rows": [
+			"openai/gpt-6-luna",
+			"deepseek/deepseek-v4.1-flash"
+		],
+		"plan": "go",
+		"exchanges": [
+			{
+				"status": 500,
+				"json": {
+					"error": {
+						"message": "Down."
+					}
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "gpt-6-luna",
+							"name": "Luna",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								},
+								"reasoning": {
+									"effort": [
+										"low",
+										"high"
+									]
+								}
+							},
+							"limit": {
+								"context": 1000000,
+								"output": 100000
+							},
+							"cost": {
+								"text": {
+									"input": {
+										"price": 0.1
+									},
+									"output": {
+										"price": 0.5
+									}
+								}
+							},
+							"api": {
+								"responses": {}
+							}
+						},
+						{
+							"id": "deepseek-v4.1-flash",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								}
+							},
+							"api": {
+								"chat-completions": {}
+							}
+						}
+					]
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "call",
+				"call": {
+					"kind": "models"
+				}
+			},
+			{
+				"kind": "call",
+				"call": {
+					"kind": "models"
+				}
+			},
+			{
+				"kind": "call",
+				"call": {
+					"kind": "models",
+					"fresh": true
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "models",
+						"models": null
+					}
+				],
+				"rowReads": 0
+			},
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "models",
+						"models": null
+					}
+				],
+				"rowReads": 0
+			},
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "models",
+						"models": [
+							"gpt-6-luna",
+							"deepseek-v4.1-flash"
+						]
+					}
+				],
+				"rowReads": 0
+			}
+		],
+		"requests": [
+			"/v1/models",
+			"/v1/models"
+		],
+		"read": [
+			1,
+			1
+		],
+		"waiting": [],
+		"refreshed": 1
+	}
+}

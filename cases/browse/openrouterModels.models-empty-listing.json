@@ -1,0 +1,73 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterModels",
+	"name": "models-empty-listing",
+	"input": {
+		"raw": [],
+		"zdr": {
+			"data": [
+				{
+					"model_id": "lab/glm",
+					"tag": "decart",
+					"supported_parameters": [
+						"tools",
+						"reasoning"
+					],
+					"pricing": {
+						"prompt": "0.00000049",
+						"completion": "0.00000154"
+					}
+				},
+				{
+					"model_id": "lab/glm",
+					"tag": "relace",
+					"supported_parameters": [
+						"tools"
+					],
+					"pricing": {
+						"prompt": "0.0000002",
+						"completion": "0.000004"
+					}
+				},
+				{
+					"model_id": "x/plain",
+					"tag": "host",
+					"supported_parameters": [
+						"response_format"
+					],
+					"pricing": {
+						"prompt": "0.000001",
+						"completion": "0.000002"
+					}
+				},
+				{
+					"model_id": "x/thinker",
+					"tag": "host",
+					"supported_parameters": [
+						"tools"
+					],
+					"pricing": {
+						"prompt": "0.000001",
+						"completion": "0.000002"
+					}
+				},
+				{
+					"model_id": "x/retiring",
+					"tag": "host",
+					"supported_parameters": [
+						"tools"
+					],
+					"pricing": {
+						"prompt": "0.000001",
+						"completion": "0.000002"
+					}
+				}
+			]
+		},
+		"nowMs": 1777593600000
+	},
+	"expected": {
+		"models": []
+	}
+}

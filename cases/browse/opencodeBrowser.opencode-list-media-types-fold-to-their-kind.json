@@ -1,0 +1,104 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.opencodeBrowser",
+	"name": "opencode-list-media-types-fold-to-their-kind",
+	"input": {
+		"startMs": 1790337600000,
+		"plan": "go",
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "glm-5.3-flash",
+							"name": "GLM Flash",
+							"description": "Fast.",
+							"modalities": {
+								"input": [
+									"text",
+									"image/png",
+									"image/jpeg",
+									"application/pdf",
+									"audio",
+									"image"
+								],
+								"output": [
+									"text",
+									"audio/wav"
+								]
+							},
+							"limit": {
+								"input": 50,
+								"context": null
+							},
+							"capabilities": {
+								"tools": {
+									"supported": true
+								},
+								"reasoning": {
+									"supported": true
+								},
+								"structured_output": true
+							},
+							"api": {
+								"messages": {}
+							}
+						}
+					]
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "list"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "list",
+					"models": [
+						{
+							"id": "opencode:glm-5.3-flash",
+							"display": "opencode/glm-5.3-flash",
+							"label": "GLM Flash",
+							"curated": false,
+							"description": "Fast.",
+							"context": 50,
+							"inputs": [
+								"text",
+								"image",
+								"application",
+								"audio"
+							],
+							"outputs": [
+								"text",
+								"audio"
+							],
+							"parameters": [
+								"tools",
+								"reasoning",
+								"structured_output"
+							],
+							"price": "unknown",
+							"tools": "ok",
+							"family": "messages"
+						}
+					]
+				}
+			}
+		],
+		"requests": [
+			"/v1/models"
+		],
+		"read": [
+			1
+		],
+		"waiting": []
+	}
+}

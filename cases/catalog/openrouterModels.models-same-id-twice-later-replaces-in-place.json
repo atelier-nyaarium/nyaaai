@@ -1,0 +1,47 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.openrouterModels",
+	"name": "models-same-id-twice-later-replaces-in-place",
+	"input": {
+		"body": {
+			"data": [
+				{
+					"id": "lab/one",
+					"name": "First"
+				},
+				{
+					"id": "lab/two"
+				},
+				{
+					"id": "lab/one",
+					"name": "Second"
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"id": "lab/one",
+				"name": "Second",
+				"created": null,
+				"context_length": null,
+				"expiration_date": null,
+				"pricing": null,
+				"reasoning": null,
+				"supported_parameters": null
+			},
+			{
+				"id": "lab/two",
+				"name": null,
+				"created": null,
+				"context_length": null,
+				"expiration_date": null,
+				"pricing": null,
+				"reasoning": null,
+				"supported_parameters": null
+			}
+		]
+	}
+}

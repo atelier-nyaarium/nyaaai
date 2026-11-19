@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.openrouterKey",
+	"name": "key-caller-aborts-while-the-server-fails",
+	"input": {
+		"startMs": 1790337600000,
+		"stored": "key-0123456789abcdef",
+		"exchanges": [
+			{
+				"status": 500,
+				"json": {
+					"error": {
+						"message": "Down."
+					}
+				},
+				"headMs": 100
+			}
+		],
+		"checks": [
+			{
+				"auth": "stored",
+				"abortAfterMs": 50
+			}
+		]
+	},
+	"expected": {
+		"checks": [
+			{
+				"ok": null,
+				"reason": null,
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": "caller aborted"
+			}
+		],
+		"requests": [
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			}
+		],
+		"waiting": []
+	}
+}

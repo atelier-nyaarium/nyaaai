@@ -1,0 +1,15 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterProviders",
+	"name": "providers-data-null",
+	"input": {
+		"raw": {
+			"data": null
+		},
+		"zdr": null
+	},
+	"expected": {
+		"providers": null
+	}
+}

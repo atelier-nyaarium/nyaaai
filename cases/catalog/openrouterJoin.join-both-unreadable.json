@@ -1,0 +1,109 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.openrouterJoin",
+	"name": "join-both-unreadable",
+	"input": {
+		"rows": [
+			"openai/gpt-6-luna",
+			"anthropic/claude-opus-5.5",
+			"openai/gpt-6.1-sol",
+			"mistralai/mistral-large-2512",
+			"google/gemini-3.8-flash",
+			"moonshotai/kimi-k3"
+		],
+		"models": null,
+		"zdr": "x",
+		"nowMs": 1790337600000,
+		"passes": [
+			{
+				"use": "chat",
+				"zdrOnly": true
+			},
+			{
+				"use": "chat",
+				"zdrOnly": false
+			}
+		]
+	},
+	"expected": {
+		"passes": [
+			[
+				{
+					"key": "openai/gpt-6-luna",
+					"status": "unknown",
+					"efforts": [],
+					"hosts": []
+				},
+				{
+					"key": "anthropic/claude-opus-5.5",
+					"status": "unknown",
+					"efforts": [],
+					"hosts": []
+				},
+				{
+					"key": "openai/gpt-6.1-sol",
+					"status": "unknown",
+					"efforts": [],
+					"hosts": []
+				},
+				{
+					"key": "mistralai/mistral-large-2512",
+					"status": "unknown",
+					"efforts": [],
+					"hosts": []
+				},
+				{
+					"key": "google/gemini-3.8-flash",
+					"status": "unknown",
+					"efforts": [],
+					"hosts": []
+				},
+				{
+					"key": "moonshotai/kimi-k3",
+					"status": "unknown",
+					"efforts": [],
+					"hosts": []
+				}
+			],
+			[
+				{
+					"key": "openai/gpt-6-luna",
+					"status": "unknown",
+					"efforts": [],
+					"hosts": []
+				},
+				{
+					"key": "anthropic/claude-opus-5.5",
+					"status": "unknown",
+					"efforts": [],
+					"hosts": []
+				},
+				{
+					"key": "openai/gpt-6.1-sol",
+					"status": "unknown",
+					"efforts": [],
+					"hosts": []
+				},
+				{
+					"key": "mistralai/mistral-large-2512",
+					"status": "unknown",
+					"efforts": [],
+					"hosts": []
+				},
+				{
+					"key": "google/gemini-3.8-flash",
+					"status": "unknown",
+					"efforts": [],
+					"hosts": []
+				},
+				{
+					"key": "moonshotai/kimi-k3",
+					"status": "unknown",
+					"efforts": [],
+					"hosts": []
+				}
+			]
+		]
+	}
+}

@@ -1,0 +1,14 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.openrouterModels",
+	"name": "models-data-text",
+	"input": {
+		"body": {
+			"data": "lab/one"
+		}
+	},
+	"expected": {
+		"models": null
+	}
+}

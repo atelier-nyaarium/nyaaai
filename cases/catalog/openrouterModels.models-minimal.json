@@ -1,0 +1,29 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.openrouterModels",
+	"name": "models-minimal",
+	"input": {
+		"body": {
+			"data": [
+				{
+					"id": "lab/bare"
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"id": "lab/bare",
+				"name": null,
+				"created": null,
+				"context_length": null,
+				"expiration_date": null,
+				"pricing": null,
+				"reasoning": null,
+				"supported_parameters": null
+			}
+		]
+	}
+}

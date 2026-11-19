@@ -1,0 +1,96 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.standing",
+	"name": "standing-any-of-a-list-suffices",
+	"input": {
+		"rows": [
+			{
+				"expiration": null,
+				"hosts": [
+					{
+						"params": [
+							"response_format"
+						]
+					},
+					{
+						"params": [
+							"structured_outputs"
+						]
+					},
+					{
+						"params": [
+							"tools"
+						]
+					}
+				],
+				"needs": [
+					[
+						"response_format",
+						"structured_outputs"
+					]
+				],
+				"nowMs": 1790337600000
+			},
+			{
+				"expiration": null,
+				"hosts": [
+					{
+						"params": [
+							"response_format",
+							"tools"
+						]
+					},
+					{
+						"params": [
+							"tools"
+						]
+					}
+				],
+				"needs": [
+					"tools",
+					[
+						"response_format",
+						"structured_outputs"
+					]
+				],
+				"nowMs": 1790337600000
+			},
+			{
+				"expiration": null,
+				"hosts": [
+					{
+						"params": [
+							"tools"
+						]
+					}
+				],
+				"needs": [
+					[]
+				],
+				"nowMs": 1790337600000
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"standing": "ok",
+				"usable": [
+					0,
+					1
+				]
+			},
+			{
+				"standing": "ok",
+				"usable": [
+					0
+				]
+			},
+			{
+				"standing": "noZdrHost",
+				"usable": []
+			}
+		]
+	}
+}

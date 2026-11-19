@@ -434,6 +434,74 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
             shapes::DispositionSkipReasonInput,
             shapes::DispositionSkipReasonResult,
         >(input, super::disposition::skip_reason),
+        "catalog.openrouterModels" => run::<
+            shapes::CatalogOpenrouterModelsInput,
+            shapes::CatalogOpenrouterModelsResult,
+        >(input, super::catalog::openrouter_models),
+        "catalog.openrouterEndpoints" => run::<
+            shapes::CatalogOpenrouterEndpointsInput,
+            shapes::CatalogOpenrouterEndpointsResult,
+        >(input, super::catalog::openrouter_endpoints),
+        "catalog.opencodeModels" => run::<
+            shapes::CatalogOpencodeModelsInput,
+            shapes::CatalogOpencodeModelsResult,
+        >(input, super::catalog::opencode_models),
+        "catalog.openrouterJoin" => run::<
+            shapes::CatalogOpenrouterJoinInput,
+            shapes::CatalogOpenrouterJoinResult,
+        >(input, super::catalog::openrouter_join),
+        "catalog.opencodeJoin" => run::<
+            shapes::CatalogOpencodeJoinInput,
+            shapes::CatalogOpencodeJoinResult,
+        >(input, super::catalog::opencode_join),
+        "catalog.perMillion" => run::<
+            shapes::CatalogPerMillionInput,
+            shapes::CatalogPerMillionResult,
+        >(input, super::catalog::per_million),
+        "catalog.expiry" => run::<shapes::CatalogExpiryInput, shapes::CatalogExpiryResult>(
+            input,
+            super::catalog::expiry,
+        ),
+        "catalog.standing" => run::<shapes::CatalogStandingInput, shapes::CatalogStandingResult>(
+            input,
+            super::catalog::standing,
+        ),
+        "catalog.openrouterRun" => run::<
+            shapes::CatalogOpenrouterRunInput,
+            shapes::CatalogOpenrouterRunResult,
+        >(input, super::catalog::openrouter_run),
+        "catalog.opencodeRun" => run::<
+            shapes::CatalogOpencodeRunInput,
+            shapes::CatalogOpencodeRunResult,
+        >(input, super::catalog::opencode_run),
+        "browse.openrouterModels" => run::<
+            shapes::BrowseOpenrouterModelsInput,
+            shapes::BrowseOpenrouterModelsResult,
+        >(input, super::browse::openrouter_models),
+        "browse.openrouterProviders" => run::<
+            shapes::BrowseOpenrouterProvidersInput,
+            shapes::BrowseOpenrouterProvidersResult,
+        >(input, super::browse::openrouter_providers),
+        "browse.openrouterBrowser" => run::<
+            shapes::BrowseOpenrouterBrowserInput,
+            shapes::BrowseOpenrouterBrowserResult,
+        >(input, super::browse::openrouter_browser),
+        "browse.openrouterHop" => run::<
+            shapes::BrowseOpenrouterHopInput,
+            shapes::BrowseOpenrouterHopResult,
+        >(input, super::browse::openrouter_hop),
+        "browse.openrouterPins" => run::<
+            shapes::BrowseOpenrouterPinsInput,
+            shapes::BrowseOpenrouterPinsResult,
+        >(input, super::browse::openrouter_pins),
+        "browse.opencodeBrowser" => run::<
+            shapes::BrowseOpencodeBrowserInput,
+            shapes::BrowseOpencodeBrowserResult,
+        >(input, super::browse::opencode_browser),
+        "kind.openrouterKey" => run::<
+            shapes::KindOpenrouterKeyInput,
+            shapes::KindOpenrouterKeyResult,
+        >(input, super::kind::openrouter_key),
         _ => return None,
     })
 }

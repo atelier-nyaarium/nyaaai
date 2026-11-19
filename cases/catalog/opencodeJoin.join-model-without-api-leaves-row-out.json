@@ -1,0 +1,59 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.opencodeJoin",
+	"name": "join-model-without-api-leaves-row-out",
+	"input": {
+		"rows": [
+			"openai/gpt-6-luna"
+		],
+		"plan": "go",
+		"models": {
+			"data": [
+				{
+					"id": "gpt-6-luna",
+					"name": "gpt-6-luna",
+					"capabilities": {
+						"tools": {
+							"supported": true
+						},
+						"reasoning": {
+							"supported": true,
+							"effort": [
+								"low",
+								"high"
+							]
+						}
+					},
+					"limit": {
+						"context": 100000,
+						"output": 32000
+					},
+					"cost": {
+						"text": {
+							"input": {
+								"price": 0.5
+							},
+							"output": {
+								"price": 2
+							}
+						}
+					},
+					"api": {}
+				}
+			]
+		},
+		"nowMs": 1790337600000,
+		"passes": [
+			{
+				"use": "chat",
+				"zdrOnly": false
+			}
+		]
+	},
+	"expected": {
+		"passes": [
+			[]
+		]
+	}
+}

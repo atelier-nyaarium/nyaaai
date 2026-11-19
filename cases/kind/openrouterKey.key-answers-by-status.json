@@ -1,0 +1,309 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.openrouterKey",
+	"name": "key-answers-by-status",
+	"input": {
+		"startMs": 1790337600000,
+		"stored": "key-0123456789abcdef",
+		"exchanges": [
+			{
+				"status": 400,
+				"json": {
+					"error": {
+						"message": "Failed.",
+						"code": 400
+					}
+				}
+			},
+			{
+				"status": 401,
+				"json": {
+					"error": {
+						"message": "Failed.",
+						"code": 401
+					}
+				}
+			},
+			{
+				"status": 402,
+				"json": {
+					"error": {
+						"message": "Failed.",
+						"code": 402
+					}
+				}
+			},
+			{
+				"status": 403,
+				"json": {
+					"error": {
+						"message": "Failed.",
+						"code": 403
+					}
+				}
+			},
+			{
+				"status": 404,
+				"json": {
+					"error": {
+						"message": "Failed.",
+						"code": 404
+					}
+				}
+			},
+			{
+				"status": 408,
+				"json": {
+					"error": {
+						"message": "Failed.",
+						"code": 408
+					}
+				}
+			},
+			{
+				"status": 422,
+				"json": {
+					"error": {
+						"message": "Failed.",
+						"code": 422
+					}
+				}
+			},
+			{
+				"status": 429,
+				"json": {
+					"error": {
+						"message": "Failed.",
+						"code": 429
+					}
+				}
+			},
+			{
+				"status": 500,
+				"json": {
+					"error": {
+						"message": "Failed.",
+						"code": 500
+					}
+				}
+			},
+			{
+				"status": 502,
+				"json": {
+					"error": {
+						"message": "Failed.",
+						"code": 502
+					}
+				}
+			},
+			{
+				"status": 503,
+				"json": {
+					"error": {
+						"message": "Failed.",
+						"code": 503
+					}
+				}
+			},
+			{
+				"status": 529,
+				"json": {
+					"error": {
+						"message": "Failed.",
+						"code": 529
+					}
+				}
+			}
+		],
+		"checks": [
+			{
+				"auth": "stored"
+			},
+			{
+				"auth": "stored"
+			},
+			{
+				"auth": "stored"
+			},
+			{
+				"auth": "stored"
+			},
+			{
+				"auth": "stored"
+			},
+			{
+				"auth": "stored"
+			},
+			{
+				"auth": "stored"
+			},
+			{
+				"auth": "stored"
+			},
+			{
+				"auth": "stored"
+			},
+			{
+				"auth": "stored"
+			},
+			{
+				"auth": "stored"
+			},
+			{
+				"auth": "stored"
+			}
+		]
+	},
+	"expected": {
+		"checks": [
+			{
+				"ok": false,
+				"reason": "unreachable",
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			},
+			{
+				"ok": false,
+				"reason": "rejected",
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			},
+			{
+				"ok": false,
+				"reason": "unreachable",
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			},
+			{
+				"ok": false,
+				"reason": "rejected",
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			},
+			{
+				"ok": false,
+				"reason": "unreachable",
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			},
+			{
+				"ok": false,
+				"reason": "unreachable",
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			},
+			{
+				"ok": false,
+				"reason": "unreachable",
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			},
+			{
+				"ok": false,
+				"reason": "unreachable",
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			},
+			{
+				"ok": false,
+				"reason": "unreachable",
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			},
+			{
+				"ok": false,
+				"reason": "unreachable",
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			},
+			{
+				"ok": false,
+				"reason": "unreachable",
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			},
+			{
+				"ok": false,
+				"reason": "unreachable",
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			}
+		],
+		"requests": [
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			},
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			},
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			},
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			},
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			},
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			},
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			},
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			},
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			},
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			},
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			},
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			}
+		],
+		"waiting": []
+	}
+}

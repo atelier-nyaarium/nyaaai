@@ -1,0 +1,69 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterBrowser",
+	"name": "browser-tester-without-a-listing-answers-nothing-and-unknown",
+	"input": {
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 500,
+				"json": {
+					"error": {
+						"message": "Down."
+					}
+				}
+			},
+			{
+				"status": 500,
+				"json": {
+					"error": {
+						"message": "Down."
+					}
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "listed",
+				"id": "lab/glm"
+			},
+			{
+				"kind": "view",
+				"row": "openrouter:lab/glm"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "listed",
+					"listed": null
+				}
+			},
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "view",
+					"view": {
+						"key": "openrouter:lab/glm",
+						"status": "unknown",
+						"efforts": [],
+						"hosts": []
+					}
+				}
+			}
+		],
+		"requests": [
+			"/models",
+			"/endpoints/zdr"
+		],
+		"read": [
+			1,
+			1
+		],
+		"waiting": []
+	}
+}

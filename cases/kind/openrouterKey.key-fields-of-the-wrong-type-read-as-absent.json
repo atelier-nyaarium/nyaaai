@@ -1,0 +1,123 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.openrouterKey",
+	"name": "key-fields-of-the-wrong-type-read-as-absent",
+	"input": {
+		"startMs": 1790337600000,
+		"stored": "key-0123456789abcdef",
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"usage": "4",
+						"limit": "20",
+						"limit_reset": 5
+					}
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"usage": null,
+						"limit": true,
+						"limit_reset": null
+					}
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"usage": {},
+						"limit": [
+							1
+						],
+						"limit_reset": {}
+					}
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"usage": -3.5,
+						"limit": 0,
+						"limit_reset": ""
+					}
+				}
+			}
+		],
+		"checks": [
+			{
+				"auth": "stored"
+			},
+			{
+				"auth": "stored"
+			},
+			{
+				"auth": "stored"
+			},
+			{
+				"auth": "stored"
+			}
+		]
+	},
+	"expected": {
+		"checks": [
+			{
+				"ok": true,
+				"reason": null,
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			},
+			{
+				"ok": true,
+				"reason": null,
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			},
+			{
+				"ok": true,
+				"reason": null,
+				"usage": null,
+				"limit": null,
+				"reset": null,
+				"thrown": null
+			},
+			{
+				"ok": true,
+				"reason": null,
+				"usage": -3.5,
+				"limit": 0,
+				"reset": "",
+				"thrown": null
+			}
+		],
+		"requests": [
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			},
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			},
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			},
+			{
+				"path": "/key",
+				"authorization": "Bearer key-0123456789abcdef"
+			}
+		],
+		"waiting": []
+	}
+}

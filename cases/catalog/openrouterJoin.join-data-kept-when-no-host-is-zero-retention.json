@@ -1,0 +1,70 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.openrouterJoin",
+	"name": "join-data-kept-when-no-host-is-zero-retention",
+	"input": {
+		"rows": [
+			"openai/gpt-6-luna",
+			"anthropic/claude-opus-5.5"
+		],
+		"models": {
+			"data": [
+				{
+					"id": "openai/gpt-6-luna",
+					"supported_parameters": [
+						"tools",
+						"reasoning",
+						"response_format",
+						"structured_outputs"
+					]
+				},
+				{
+					"id": "anthropic/claude-opus-5.5",
+					"supported_parameters": [
+						"tools",
+						"reasoning"
+					]
+				}
+			]
+		},
+		"zdr": {
+			"data": [
+				{
+					"model_id": "openai/gpt-6-luna",
+					"supported_parameters": [
+						"tools"
+					],
+					"tag": "a"
+				}
+			]
+		},
+		"nowMs": 1790337600000,
+		"passes": [
+			{
+				"use": "chat",
+				"zdrOnly": false
+			}
+		]
+	},
+	"expected": {
+		"passes": [
+			[
+				{
+					"key": "openai/gpt-6-luna",
+					"status": "ok",
+					"efforts": [],
+					"hosts": [],
+					"dataKept": true
+				},
+				{
+					"key": "anthropic/claude-opus-5.5",
+					"status": "ok",
+					"efforts": [],
+					"hosts": [],
+					"dataKept": true
+				}
+			]
+		]
+	}
+}

@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.expiry",
+	"name": "expiry-not-days",
+	"input": {
+		"texts": [
+			"2026-02-29",
+			"2026-02-30",
+			"2026-13-01",
+			"2026-00-10",
+			"2026-10-00",
+			"2026-10-32",
+			"abcdefghij"
+		]
+	},
+	"expected": {
+		"ms": [
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null
+		]
+	}
+}

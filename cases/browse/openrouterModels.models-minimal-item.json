@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterModels",
+	"name": "models-minimal-item",
+	"input": {
+		"raw": [
+			{
+				"id": "lab/bare"
+			}
+		],
+		"zdr": {
+			"data": [
+				{
+					"model_id": "lab/model-a",
+					"tag": "host-a",
+					"supported_parameters": [
+						"tools",
+						"reasoning"
+					],
+					"pricing": {
+						"prompt": "0.000001",
+						"completion": "0.000002"
+					}
+				}
+			]
+		},
+		"nowMs": 1777593600000
+	},
+	"expected": {
+		"models": [
+			{
+				"id": "openrouter:lab/bare",
+				"display": "lab/bare",
+				"label": "lab/bare",
+				"curated": false,
+				"description": "",
+				"inputs": [],
+				"outputs": [],
+				"parameters": [],
+				"price": "unknown",
+				"tools": "noZdrHost"
+			}
+		]
+	}
+}

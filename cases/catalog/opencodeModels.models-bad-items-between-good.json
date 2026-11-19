@@ -1,0 +1,61 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.opencodeModels",
+	"name": "models-bad-items-between-good",
+	"input": {
+		"body": {
+			"data": [
+				{
+					"id": "one"
+				},
+				{
+					"unexpected": true
+				},
+				{
+					"id": "two"
+				}
+			]
+		}
+	},
+	"expected": {
+		"models": [
+			{
+				"id": "one",
+				"name": null,
+				"description": null,
+				"input": null,
+				"output": null,
+				"tools": null,
+				"reasoning": null,
+				"efforts": null,
+				"toggle": null,
+				"structured_output": null,
+				"cache": null,
+				"context": null,
+				"input_limit": null,
+				"output_limit": null,
+				"price": null,
+				"api": []
+			},
+			{
+				"id": "two",
+				"name": null,
+				"description": null,
+				"input": null,
+				"output": null,
+				"tools": null,
+				"reasoning": null,
+				"efforts": null,
+				"toggle": null,
+				"structured_output": null,
+				"cache": null,
+				"context": null,
+				"input_limit": null,
+				"output_limit": null,
+				"price": null,
+				"api": []
+			}
+		]
+	}
+}

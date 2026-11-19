@@ -1,0 +1,67 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterProviders",
+	"name": "providers-zero-retention-only-by-exact-tag",
+	"input": {
+		"raw": {
+			"data": {
+				"endpoints": [
+					{
+						"tag": "a"
+					},
+					{
+						"tag": "A"
+					},
+					{
+						"tag": "a/b"
+					},
+					{}
+				]
+			}
+		},
+		"zdr": {
+			"data": [
+				{
+					"model_id": "m",
+					"tag": "a"
+				},
+				{
+					"model_id": "m",
+					"tag": null
+				},
+				{
+					"model_id": "m"
+				},
+				{
+					"model_id": "m",
+					"tag": ""
+				}
+			]
+		}
+	},
+	"expected": {
+		"providers": [
+			{
+				"name": "a",
+				"tag": "a",
+				"zdr": true
+			},
+			{
+				"name": "A",
+				"tag": "A",
+				"zdr": false
+			},
+			{
+				"name": "a/b",
+				"tag": "a/b",
+				"zdr": false
+			},
+			{
+				"name": "",
+				"tag": "",
+				"zdr": false
+			}
+		]
+	}
+}

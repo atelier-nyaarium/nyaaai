@@ -1,0 +1,172 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.opencodeJoin",
+	"name": "join-cache-by-family-when-unlisted",
+	"input": {
+		"rows": [
+			"openai/gpt-6-luna",
+			"anthropic/claude-haiku-5.5"
+		],
+		"plan": "go",
+		"models": {
+			"data": [
+				{
+					"id": "gpt-6-luna",
+					"name": "gpt-6-luna",
+					"capabilities": {
+						"tools": {
+							"supported": true
+						},
+						"reasoning": {
+							"supported": true,
+							"effort": [
+								"low",
+								"high"
+							]
+						}
+					},
+					"limit": {
+						"context": 100000,
+						"output": 32000
+					},
+					"cost": {
+						"text": {
+							"input": {
+								"price": 0.5
+							},
+							"output": {
+								"price": 2
+							}
+						}
+					},
+					"api": {
+						"messages": {}
+					}
+				},
+				{
+					"id": "claude-haiku-5-5",
+					"name": "claude-haiku-5-5",
+					"capabilities": {
+						"tools": {
+							"supported": true
+						},
+						"reasoning": {
+							"supported": true,
+							"effort": [
+								"low",
+								"high"
+							]
+						}
+					},
+					"limit": {
+						"context": 100000,
+						"output": 32000
+					},
+					"cost": {
+						"text": {
+							"input": {
+								"price": 0.5
+							},
+							"output": {
+								"price": 2
+							}
+						}
+					},
+					"api": {
+						"responses": {}
+					}
+				}
+			]
+		},
+		"nowMs": 1790337600000,
+		"passes": [
+			{
+				"use": "chat",
+				"zdrOnly": false
+			}
+		]
+	},
+	"expected": {
+		"passes": [
+			[
+				{
+					"key": "openai/gpt-6-luna",
+					"status": "ok",
+					"efforts": [
+						"low",
+						"high"
+					],
+					"promptLimit": 100000,
+					"outputLimit": 32000,
+					"price": {
+						"prompt": [
+							0.5,
+							0.5
+						],
+						"completion": [
+							2,
+							2
+						],
+						"tiers": [
+							{
+								"minPromptTokens": 0,
+								"prompt": 0.5,
+								"completion": 2
+							}
+						]
+					},
+					"hosts": [],
+					"dataKept": true,
+					"api": {
+						"family": "messages",
+						"structured": false,
+						"choice": [
+							"auto"
+						],
+						"strict": false
+					},
+					"cache": "explicit"
+				},
+				{
+					"key": "anthropic/claude-haiku-5.5",
+					"status": "ok",
+					"efforts": [
+						"low",
+						"high"
+					],
+					"promptLimit": 100000,
+					"outputLimit": 32000,
+					"price": {
+						"prompt": [
+							0.5,
+							0.5
+						],
+						"completion": [
+							2,
+							2
+						],
+						"tiers": [
+							{
+								"minPromptTokens": 0,
+								"prompt": 0.5,
+								"completion": 2
+							}
+						]
+					},
+					"hosts": [],
+					"dataKept": true,
+					"api": {
+						"family": "responses",
+						"structured": false,
+						"choice": [
+							"auto"
+						],
+						"strict": false
+					},
+					"cache": "implicit"
+				}
+			]
+		]
+	}
+}

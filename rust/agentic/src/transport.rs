@@ -506,6 +506,8 @@ impl Transport {
         }
         checked_headers(&[("User-Agent", self.d.user_agent.as_str())])?;
         let key = self.key_for(auth).await?;
+        // The TypeScript awaits its key, so a second call started at once passes its first checks here.
+        tokio::task::yield_now().await;
         let mut headers: HeaderList = vec![
             ("Accept".to_owned(), "application/json".to_owned()),
             ("User-Agent".to_owned(), self.d.user_agent.clone()),
@@ -524,6 +526,8 @@ impl Transport {
         };
         let run = async {
             let mut response = self.d.fetch.fetch(request, cancel.clone()).await?;
+            // The head is awaited in TypeScript; a body read starts after it.
+            tokio::task::yield_now().await;
             if !ok(&response) {
                 return Err(Fault::Provider(
                     self.failure(&*self.d.errors, response).await?,

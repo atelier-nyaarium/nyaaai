@@ -1,0 +1,82 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterModels",
+	"name": "models-reasoning.supported_efforts-omitted",
+	"input": {
+		"raw": [
+			{
+				"id": "lab/model-a",
+				"name": "Model A",
+				"description": "A model for cases.",
+				"context_length": 128000,
+				"architecture": {
+					"input_modalities": [
+						"text",
+						"image"
+					],
+					"output_modalities": [
+						"text"
+					]
+				},
+				"supported_parameters": [
+					"tools",
+					"reasoning"
+				],
+				"expiration_date": "2027-01-15",
+				"reasoning": {}
+			}
+		],
+		"zdr": {
+			"data": [
+				{
+					"model_id": "lab/model-a",
+					"tag": "host-a",
+					"supported_parameters": [
+						"tools",
+						"reasoning"
+					],
+					"pricing": {
+						"prompt": "0.000001",
+						"completion": "0.000002"
+					}
+				}
+			]
+		},
+		"nowMs": 1777593600000
+	},
+	"expected": {
+		"models": [
+			{
+				"id": "openrouter:lab/model-a",
+				"display": "lab/model-a",
+				"label": "Model A",
+				"curated": false,
+				"description": "A model for cases.",
+				"context": 128000,
+				"inputs": [
+					"text",
+					"image"
+				],
+				"outputs": [
+					"text"
+				],
+				"parameters": [
+					"tools",
+					"reasoning"
+				],
+				"price": {
+					"prompt": [
+						1,
+						1
+					],
+					"completion": [
+						2,
+						2
+					]
+				},
+				"tools": "ok"
+			}
+		]
+	}
+}

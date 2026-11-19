@@ -1,0 +1,85 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.openrouterJoin",
+	"name": "join-host-names",
+	"input": {
+		"rows": [
+			"openai/gpt-6-luna"
+		],
+		"models": {
+			"data": [
+				{
+					"id": "openai/gpt-6-luna"
+				}
+			]
+		},
+		"zdr": {
+			"data": [
+				{
+					"model_id": "openai/gpt-6-luna",
+					"supported_parameters": [
+						"tools",
+						"reasoning"
+					],
+					"tag": "tagged",
+					"provider_name": "Named"
+				},
+				{
+					"model_id": "openai/gpt-6-luna",
+					"supported_parameters": [
+						"tools",
+						"reasoning"
+					],
+					"provider_name": "Named only"
+				},
+				{
+					"model_id": "openai/gpt-6-luna",
+					"supported_parameters": [
+						"tools",
+						"reasoning"
+					],
+					"tag": "",
+					"provider_name": "Empty tag"
+				},
+				{
+					"model_id": "openai/gpt-6-luna",
+					"supported_parameters": [
+						"tools",
+						"reasoning"
+					],
+					"tag": ""
+				},
+				{
+					"model_id": "openai/gpt-6-luna",
+					"supported_parameters": [
+						"tools",
+						"reasoning"
+					]
+				}
+			]
+		},
+		"nowMs": 1790337600000,
+		"passes": [
+			{
+				"use": "chat",
+				"zdrOnly": true
+			}
+		]
+	},
+	"expected": {
+		"passes": [
+			[
+				{
+					"key": "openai/gpt-6-luna",
+					"status": "ok",
+					"efforts": [],
+					"hosts": [
+						"tagged",
+						"Named only"
+					]
+				}
+			]
+		]
+	}
+}

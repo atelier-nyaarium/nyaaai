@@ -1,0 +1,183 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.opencodeJoin",
+	"name": "join-api-facts-structured-choice-strict-and-thought-field",
+	"input": {
+		"rows": [
+			"deepseek/deepseek-v4.1-flash",
+			"minimax/minimax-m3"
+		],
+		"plan": "payg",
+		"models": {
+			"data": [
+				{
+					"id": "deepseek-v4.1-flash",
+					"name": "deepseek-v4.1-flash",
+					"capabilities": {
+						"tools": {
+							"supported": true
+						},
+						"reasoning": {
+							"supported": true,
+							"effort": [
+								"low"
+							],
+							"toggle": true
+						},
+						"structured_output": true
+					},
+					"limit": {
+						"context": 100000,
+						"output": 32000
+					},
+					"cost": {
+						"text": {
+							"input": {
+								"price": 0.5
+							},
+							"output": {
+								"price": 2
+							}
+						}
+					},
+					"api": {
+						"chat-completions": {
+							"compatibility": {
+								"reasoning_field": "reasoning_content"
+							},
+							"capabilities": {
+								"tools": {
+									"choice": [
+										"auto",
+										"required"
+									],
+									"strict": true
+								}
+							}
+						}
+					}
+				},
+				{
+					"id": "minimax-m3",
+					"name": "minimax-m3",
+					"capabilities": {
+						"tools": {
+							"supported": true
+						},
+						"reasoning": {
+							"toggle": false
+						}
+					},
+					"limit": {
+						"context": 100000,
+						"output": 32000
+					},
+					"cost": {
+						"text": {
+							"input": {
+								"price": 0.5
+							},
+							"output": {
+								"price": 2
+							}
+						}
+					},
+					"api": {
+						"chat-completions": {
+							"capabilities": {
+								"tools": {}
+							}
+						}
+					}
+				}
+			]
+		},
+		"nowMs": 1790337600000,
+		"passes": [
+			{
+				"use": "chat",
+				"zdrOnly": false
+			}
+		]
+	},
+	"expected": {
+		"passes": [
+			[
+				{
+					"key": "deepseek/deepseek-v4.1-flash",
+					"status": "ok",
+					"efforts": [
+						"low"
+					],
+					"promptLimit": 100000,
+					"outputLimit": 32000,
+					"price": {
+						"prompt": [
+							0.5,
+							0.5
+						],
+						"completion": [
+							2,
+							2
+						],
+						"tiers": [
+							{
+								"minPromptTokens": 0,
+								"prompt": 0.5,
+								"completion": 2
+							}
+						]
+					},
+					"hosts": [],
+					"api": {
+						"family": "chat-completions",
+						"structured": true,
+						"choice": [
+							"auto",
+							"required"
+						],
+						"strict": true,
+						"reasoning": "reasoning_content",
+						"toggle": true
+					},
+					"cache": "implicit"
+				},
+				{
+					"key": "minimax/minimax-m3",
+					"status": "ok",
+					"efforts": [],
+					"promptLimit": 100000,
+					"outputLimit": 32000,
+					"price": {
+						"prompt": [
+							0.5,
+							0.5
+						],
+						"completion": [
+							2,
+							2
+						],
+						"tiers": [
+							{
+								"minPromptTokens": 0,
+								"prompt": 0.5,
+								"completion": 2
+							}
+						]
+					},
+					"hosts": [],
+					"api": {
+						"family": "chat-completions",
+						"structured": false,
+						"choice": [
+							"auto"
+						],
+						"strict": false
+					},
+					"cache": "implicit"
+				}
+			]
+		]
+	}
+}

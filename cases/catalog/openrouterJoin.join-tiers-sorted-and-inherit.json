@@ -1,0 +1,116 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.openrouterJoin",
+	"name": "join-tiers-sorted-and-inherit",
+	"input": {
+		"rows": [
+			"openai/gpt-6-luna"
+		],
+		"models": {
+			"data": [
+				{
+					"id": "openai/gpt-6-luna",
+					"pricing": {
+						"prompt": "0.000001",
+						"completion": "0.000002",
+						"input_cache_read": "0.0000001",
+						"input_cache_write": "0.00000125",
+						"overrides": [
+							{
+								"min_prompt_tokens": 300000,
+								"prompt": "0.000003"
+							},
+							{
+								"min_prompt_tokens": 100000,
+								"completion": "0.000004",
+								"input_cache_read": "0.0000002"
+							},
+							{
+								"min_prompt_tokens": 200000,
+								"input_cache_write": "0.0000025",
+								"input_cache_write_1h": "0.000005"
+							}
+						]
+					}
+				}
+			]
+		},
+		"zdr": {
+			"data": [
+				{
+					"model_id": "openai/gpt-6-luna",
+					"supported_parameters": [
+						"tools",
+						"reasoning"
+					],
+					"tag": "a",
+					"pricing": {
+						"prompt": "0.000001",
+						"completion": "0.000002"
+					}
+				}
+			]
+		},
+		"nowMs": 1790337600000,
+		"passes": [
+			{
+				"use": "chat",
+				"zdrOnly": true
+			}
+		]
+	},
+	"expected": {
+		"passes": [
+			[
+				{
+					"key": "openai/gpt-6-luna",
+					"status": "ok",
+					"efforts": [],
+					"price": {
+						"prompt": [
+							1,
+							1
+						],
+						"completion": [
+							2,
+							2
+						],
+						"tiers": [
+							{
+								"minPromptTokens": 0,
+								"prompt": 1,
+								"completion": 2,
+								"cacheRead": 0.1,
+								"cacheWrite": 1.25
+							},
+							{
+								"minPromptTokens": 100000,
+								"prompt": 1,
+								"completion": 4,
+								"cacheRead": 0.2,
+								"cacheWrite": 1.25
+							},
+							{
+								"minPromptTokens": 200000,
+								"prompt": 1,
+								"completion": 2,
+								"cacheWrite": 2.5,
+								"cacheWrite1h": 5
+							},
+							{
+								"minPromptTokens": 300000,
+								"prompt": 3,
+								"completion": 2,
+								"cacheWrite": 1.25
+							}
+						]
+					},
+					"hosts": [
+						"a"
+					]
+				}
+			]
+		]
+	}
+}

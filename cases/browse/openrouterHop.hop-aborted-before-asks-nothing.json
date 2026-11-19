@@ -1,0 +1,39 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterHop",
+	"name": "hop-aborted-before-asks-nothing",
+	"input": {
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"endpoints": [
+							{
+								"tag": "a"
+							},
+							{
+								"tag": "b"
+							}
+						]
+					}
+				}
+			}
+		],
+		"id": "lab/glm",
+		"viewHosts": [
+			"a",
+			"b"
+		],
+		"abortedBefore": true
+	},
+	"expected": {
+		"hosts": null,
+		"thrown": "caller aborted",
+		"requests": [],
+		"waiting": [],
+		"nowMs": 1790337600000
+	}
+}

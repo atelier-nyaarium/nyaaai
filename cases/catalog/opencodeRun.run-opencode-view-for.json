@@ -1,0 +1,179 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.opencodeRun",
+	"name": "run-opencode-view-for",
+	"input": {
+		"startMs": 1790337600000,
+		"rows": [
+			"openai/gpt-6-luna"
+		],
+		"plan": "go",
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "gpt-6-luna",
+							"name": "Luna",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								},
+								"reasoning": {
+									"effort": [
+										"low",
+										"high"
+									]
+								}
+							},
+							"limit": {
+								"context": 1000000,
+								"output": 100000
+							},
+							"cost": {
+								"text": {
+									"input": {
+										"price": 0.1
+									},
+									"output": {
+										"price": 0.5
+									}
+								}
+							},
+							"api": {
+								"responses": {}
+							}
+						},
+						{
+							"id": "deepseek-v4.1-flash",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								}
+							},
+							"api": {
+								"chat-completions": {}
+							}
+						}
+					]
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "call",
+				"call": {
+					"kind": "viewFor",
+					"row": "openai/gpt-6-luna"
+				}
+			},
+			{
+				"kind": "call",
+				"call": {
+					"kind": "viewFor",
+					"row": "opencode:gone"
+				}
+			},
+			{
+				"kind": "call",
+				"call": {
+					"kind": "viewFor",
+					"row": "opencode:deepseek-v4.1-flash"
+				}
+			},
+			{
+				"kind": "call",
+				"call": {
+					"kind": "viewFor",
+					"row": "mistralai/mistral-large-2512"
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "view",
+						"view": {
+							"key": "openai/gpt-6-luna",
+							"status": "noZdrHost",
+							"efforts": [
+								"low",
+								"high"
+							],
+							"hosts": []
+						}
+					}
+				],
+				"rowReads": 0
+			},
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "view",
+						"view": {
+							"key": "opencode:gone",
+							"status": "retired",
+							"efforts": [],
+							"hosts": []
+						}
+					}
+				],
+				"rowReads": 0
+			},
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "view",
+						"view": {
+							"key": "opencode:deepseek-v4.1-flash",
+							"status": "ok",
+							"efforts": [],
+							"hosts": [],
+							"api": {
+								"family": "chat-completions",
+								"structured": false,
+								"choice": [
+									"auto"
+								],
+								"strict": false
+							},
+							"cache": "implicit"
+						}
+					}
+				],
+				"rowReads": 0
+			},
+			{
+				"nowMs": 1790337600000,
+				"answers": [
+					{
+						"kind": "view",
+						"view": {
+							"key": "mistralai/mistral-large-2512",
+							"status": "unknown",
+							"efforts": [],
+							"hosts": []
+						}
+					}
+				],
+				"rowReads": 0
+			}
+		],
+		"requests": [
+			"/v1/models"
+		],
+		"read": [
+			1
+		],
+		"waiting": [],
+		"refreshed": 1
+	}
+}

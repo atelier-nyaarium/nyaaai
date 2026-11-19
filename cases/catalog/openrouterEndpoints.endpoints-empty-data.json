@@ -1,0 +1,14 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.openrouterEndpoints",
+	"name": "endpoints-empty-data",
+	"input": {
+		"body": {
+			"data": []
+		}
+	},
+	"expected": {
+		"endpoints": []
+	}
+}

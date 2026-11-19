@@ -1,0 +1,45 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterProviders",
+	"name": "providers-pricing-wrong-type",
+	"input": {
+		"raw": {
+			"data": {
+				"endpoints": [
+					{
+						"provider_name": "Host A",
+						"name": "Host A name",
+						"tag": "host-a",
+						"context_length": 131000,
+						"max_completion_tokens": 118000,
+						"quantization": "fp8",
+						"uptime_last_30m": 99.5,
+						"pricing": "x"
+					}
+				]
+			}
+		},
+		"zdr": {
+			"data": [
+				{
+					"model_id": "lab/model-a",
+					"tag": "host-a"
+				}
+			]
+		}
+	},
+	"expected": {
+		"providers": [
+			{
+				"name": "Host A",
+				"tag": "host-a",
+				"context": 131000,
+				"maxOutput": 118000,
+				"quantization": "fp8",
+				"uptime": 99.5,
+				"zdr": true
+			}
+		]
+	}
+}

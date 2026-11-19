@@ -1,0 +1,220 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.opencodeBrowser",
+	"name": "opencode-list-a-model-is-curated-by-its-opencode-id",
+	"input": {
+		"startMs": 1790337600000,
+		"plan": "go",
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "gpt-6-luna",
+							"name": "gpt-6-luna",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								},
+								"reasoning": {
+									"supported": true,
+									"effort": [
+										"low",
+										"high"
+									]
+								}
+							},
+							"limit": {
+								"context": 100000,
+								"output": 32000
+							},
+							"cost": {
+								"text": {
+									"input": {
+										"price": 0.5
+									},
+									"output": {
+										"price": 2
+									}
+								}
+							},
+							"api": {
+								"chat-completions": {}
+							}
+						},
+						{
+							"id": "gpt-6.1-sol",
+							"name": "gpt-6.1-sol",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								},
+								"reasoning": {
+									"supported": true,
+									"effort": [
+										"low",
+										"high"
+									]
+								}
+							},
+							"limit": {
+								"context": 100000,
+								"output": 32000
+							},
+							"cost": {
+								"text": {
+									"input": {
+										"price": 0.5
+									},
+									"output": {
+										"price": 2
+									}
+								}
+							},
+							"api": {
+								"chat-completions": {}
+							}
+						},
+						{
+							"id": "openai/gpt-6-luna",
+							"name": "openai/gpt-6-luna",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								},
+								"reasoning": {
+									"supported": true,
+									"effort": [
+										"low",
+										"high"
+									]
+								}
+							},
+							"limit": {
+								"context": 100000,
+								"output": 32000
+							},
+							"cost": {
+								"text": {
+									"input": {
+										"price": 0.5
+									},
+									"output": {
+										"price": 2
+									}
+								}
+							},
+							"api": {
+								"chat-completions": {}
+							}
+						}
+					]
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "list"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "list",
+					"models": [
+						{
+							"id": "opencode:gpt-6-luna",
+							"display": "opencode/gpt-6-luna",
+							"label": "gpt-6-luna",
+							"curated": true,
+							"description": "",
+							"context": 100000,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools",
+								"reasoning"
+							],
+							"price": {
+								"prompt": [
+									0.5,
+									0.5
+								],
+								"completion": [
+									2,
+									2
+								]
+							},
+							"tools": "noZdrHost",
+							"family": "chat-completions"
+						},
+						{
+							"id": "opencode:gpt-6.1-sol",
+							"display": "opencode/gpt-6.1-sol",
+							"label": "gpt-6.1-sol",
+							"curated": true,
+							"description": "",
+							"context": 100000,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools",
+								"reasoning"
+							],
+							"price": {
+								"prompt": [
+									0.5,
+									0.5
+								],
+								"completion": [
+									2,
+									2
+								]
+							},
+							"tools": "noZdrHost",
+							"family": "chat-completions"
+						},
+						{
+							"id": "opencode:openai/gpt-6-luna",
+							"display": "openai/gpt-6-luna",
+							"label": "openai/gpt-6-luna",
+							"curated": false,
+							"description": "",
+							"context": 100000,
+							"inputs": [],
+							"outputs": [],
+							"parameters": [
+								"tools",
+								"reasoning"
+							],
+							"price": {
+								"prompt": [
+									0.5,
+									0.5
+								],
+								"completion": [
+									2,
+									2
+								]
+							},
+							"tools": "noZdrHost",
+							"family": "chat-completions"
+						}
+					]
+				}
+			}
+		],
+		"requests": [
+			"/v1/models"
+		],
+		"read": [
+			1
+		],
+		"waiting": []
+	}
+}

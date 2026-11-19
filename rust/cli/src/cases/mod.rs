@@ -5,6 +5,8 @@ pub mod normalizers;
 pub mod shapes;
 
 pub mod base64;
+pub mod browse;
+pub mod catalog;
 pub mod claude;
 pub mod codec;
 pub mod contract;
@@ -16,6 +18,7 @@ pub mod failure;
 pub mod headers;
 pub mod js;
 pub mod json;
+pub mod kind;
 pub mod native;
 pub mod notice_text;
 pub mod number;

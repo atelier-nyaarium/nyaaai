@@ -1,0 +1,17 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterProviders",
+	"name": "providers-endpoints-text",
+	"input": {
+		"raw": {
+			"data": {
+				"endpoints": "x"
+			}
+		},
+		"zdr": null
+	},
+	"expected": {
+		"providers": null
+	}
+}

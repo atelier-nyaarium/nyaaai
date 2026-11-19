@@ -1,0 +1,174 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.openrouterPins",
+	"name": "pins-no-hosts-leaves-the-request-alone",
+	"input": {
+		"calls": [
+			{
+				"kind": "encode",
+				"request": {
+					"model": "openai/gpt-6-luna",
+					"system": [
+						"Rules."
+					],
+					"history": [
+						{
+							"role": "user",
+							"text": "Hi"
+						}
+					],
+					"cache": {
+						"kind": "none"
+					},
+					"session": "s-1",
+					"zdrOnly": true
+				},
+				"mode": "stream"
+			},
+			{
+				"kind": "pin",
+				"hosts": []
+			},
+			{
+				"kind": "encode",
+				"request": {
+					"model": "openai/gpt-6-luna",
+					"system": [
+						"Rules."
+					],
+					"history": [
+						{
+							"role": "user",
+							"text": "Hi"
+						},
+						{
+							"role": "step",
+							"producer": {
+								"model": "openai/gpt-6-luna"
+							},
+							"parts": [
+								{
+									"kind": "thought",
+									"type": "reasoning.text",
+									"segments": [
+										{
+											"kind": "content",
+											"text": "Thinking."
+										}
+									],
+									"opaque": "sig",
+									"index": 0
+								},
+								{
+									"kind": "text",
+									"text": "Done."
+								}
+							]
+						},
+						{
+							"role": "user",
+							"text": "More"
+						}
+					],
+					"cache": {
+						"kind": "none"
+					},
+					"session": "s-1",
+					"zdrOnly": true
+				},
+				"mode": "stream"
+			},
+			{
+				"kind": "encode",
+				"request": {
+					"model": "openai/gpt-6-luna",
+					"system": [
+						"Rules."
+					],
+					"history": [
+						{
+							"role": "user",
+							"text": "Hi"
+						},
+						{
+							"role": "step",
+							"producer": {
+								"model": "openai/gpt-6-luna"
+							},
+							"parts": [
+								{
+									"kind": "thought",
+									"type": "reasoning.text",
+									"segments": [
+										{
+											"kind": "content",
+											"text": "Thinking."
+										}
+									],
+									"opaque": "sig",
+									"index": 0
+								},
+								{
+									"kind": "text",
+									"text": "Done."
+								}
+							]
+						},
+						{
+							"role": "user",
+							"text": "More"
+						}
+					],
+					"cache": {
+						"kind": "none"
+					},
+					"session": "s-1",
+					"zdrOnly": true
+				},
+				"mode": "stream"
+			},
+			{
+				"kind": "passedBack"
+			}
+		]
+	},
+	"expected": {
+		"answers": [
+			{
+				"kind": "encoded",
+				"provider": {
+					"zdr": true,
+					"data_collection": "deny",
+					"require_parameters": true
+				},
+				"replayed": false
+			},
+			{
+				"kind": "pinned"
+			},
+			{
+				"kind": "encoded",
+				"provider": {
+					"zdr": true,
+					"data_collection": "deny",
+					"require_parameters": true
+				},
+				"replayed": true
+			},
+			{
+				"kind": "encoded",
+				"provider": {
+					"zdr": true,
+					"data_collection": "deny",
+					"require_parameters": true
+				},
+				"replayed": true
+			},
+			{
+				"kind": "passedBack",
+				"value": true
+			}
+		]
+	}
+}

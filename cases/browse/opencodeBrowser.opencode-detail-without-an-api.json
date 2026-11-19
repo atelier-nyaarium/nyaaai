@@ -1,0 +1,79 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "browse.opencodeBrowser",
+	"name": "opencode-detail-without-an-api",
+	"input": {
+		"startMs": 1790337600000,
+		"plan": "go",
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "glm-5.3-flash",
+							"name": "glm-5.3-flash",
+							"capabilities": {
+								"tools": {
+									"supported": true
+								},
+								"reasoning": {
+									"supported": true,
+									"effort": [
+										"low",
+										"high"
+									]
+								}
+							},
+							"limit": null,
+							"cost": {
+								"text": {
+									"input": {
+										"price": 0.5
+									},
+									"output": {
+										"price": 2
+									}
+								}
+							},
+							"api": null
+						}
+					]
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "detail",
+				"id": "glm-5.3-flash"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1790337600000,
+				"answer": {
+					"kind": "detail",
+					"detail": {
+						"efforts": [
+							"low",
+							"high"
+						],
+						"retention": {
+							"zdr": true
+						}
+					}
+				}
+			}
+		],
+		"requests": [
+			"/v1/models"
+		],
+		"read": [
+			1
+		],
+		"waiting": []
+	}
+}

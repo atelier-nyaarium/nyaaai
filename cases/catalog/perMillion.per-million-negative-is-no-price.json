@@ -1,0 +1,24 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.perMillion",
+	"name": "per-million-negative-is-no-price",
+	"input": {
+		"values": [
+			-1,
+			"-1",
+			-0.000001,
+			"-0.000001",
+			-1e-30
+		]
+	},
+	"expected": {
+		"prices": [
+			null,
+			null,
+			null,
+			null,
+			null
+		]
+	}
+}

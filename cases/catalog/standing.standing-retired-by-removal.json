@@ -1,0 +1,148 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.standing",
+	"name": "standing-retired-by-removal",
+	"input": {
+		"rows": [
+			{
+				"expiration": "2026-09-25",
+				"hosts": [
+					{
+						"params": [
+							"tools"
+						]
+					}
+				],
+				"needs": [
+					"tools"
+				],
+				"nowMs": 1790337600000
+			},
+			{
+				"expiration": "2026-09-26",
+				"hosts": [
+					{
+						"params": [
+							"tools"
+						]
+					}
+				],
+				"needs": [
+					"tools"
+				],
+				"nowMs": 1790337600000
+			},
+			{
+				"expiration": "2026-09-25T12:00:00Z",
+				"hosts": [
+					{
+						"params": [
+							"tools"
+						]
+					}
+				],
+				"needs": [
+					"tools"
+				],
+				"nowMs": 1790337600000
+			},
+			{
+				"expiration": "2026-09-25T12:00:00Z",
+				"hosts": [
+					{
+						"params": [
+							"tools"
+						]
+					}
+				],
+				"needs": [
+					"tools"
+				],
+				"nowMs": 1790337599999
+			},
+			{
+				"expiration": "2026-09-25T12:00:00Z",
+				"hosts": [
+					{
+						"params": [
+							"tools"
+						]
+					}
+				],
+				"needs": [
+					"tools"
+				],
+				"nowMs": 1790341200000
+			},
+			{
+				"expiration": "never",
+				"hosts": [
+					{
+						"params": [
+							"tools"
+						]
+					}
+				],
+				"needs": [
+					"tools"
+				],
+				"nowMs": 1790337600000
+			},
+			{
+				"expiration": "",
+				"hosts": [
+					{
+						"params": [
+							"tools"
+						]
+					}
+				],
+				"needs": [
+					"tools"
+				],
+				"nowMs": 1790337600000
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"standing": "retired",
+				"usable": []
+			},
+			{
+				"standing": "ok",
+				"usable": [
+					0
+				]
+			},
+			{
+				"standing": "retired",
+				"usable": []
+			},
+			{
+				"standing": "ok",
+				"usable": [
+					0
+				]
+			},
+			{
+				"standing": "retired",
+				"usable": []
+			},
+			{
+				"standing": "ok",
+				"usable": [
+					0
+				]
+			},
+			{
+				"standing": "ok",
+				"usable": [
+					0
+				]
+			}
+		]
+	}
+}

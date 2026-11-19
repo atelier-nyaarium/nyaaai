@@ -1,0 +1,95 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.openrouterJoin",
+	"name": "join-made-up-hosted-row",
+	"input": {
+		"rows": [
+			"openrouter:lab/model-x",
+			"openai/gpt-6-luna"
+		],
+		"models": {
+			"data": [
+				{
+					"id": "lab/model-x",
+					"supported_parameters": [
+						"tools",
+						"reasoning"
+					]
+				}
+			]
+		},
+		"zdr": {
+			"data": [
+				{
+					"model_id": "lab/model-x",
+					"tag": "h",
+					"supported_parameters": [
+						"tools",
+						"reasoning"
+					],
+					"pricing": {
+						"prompt": "0.000001",
+						"completion": "0.000002"
+					}
+				}
+			]
+		},
+		"nowMs": 1790337600000,
+		"passes": [
+			{
+				"use": "chat",
+				"zdrOnly": true
+			},
+			{
+				"use": "analysis",
+				"zdrOnly": true
+			}
+		]
+	},
+	"expected": {
+		"passes": [
+			[
+				{
+					"key": "openrouter:lab/model-x",
+					"status": "ok",
+					"efforts": [],
+					"price": {
+						"prompt": [
+							1,
+							1
+						],
+						"completion": [
+							2,
+							2
+						],
+						"tiers": []
+					},
+					"hosts": [
+						"h"
+					]
+				},
+				{
+					"key": "openai/gpt-6-luna",
+					"status": "retired",
+					"efforts": [],
+					"hosts": []
+				}
+			],
+			[
+				{
+					"key": "openrouter:lab/model-x",
+					"status": "noZdrHost",
+					"efforts": [],
+					"hosts": []
+				},
+				{
+					"key": "openai/gpt-6-luna",
+					"status": "retired",
+					"efforts": [],
+					"hosts": []
+				}
+			]
+		]
+	}
+}

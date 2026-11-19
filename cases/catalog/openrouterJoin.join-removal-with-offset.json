@@ -1,0 +1,73 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "catalog.openrouterJoin",
+	"name": "join-removal-with-offset",
+	"input": {
+		"rows": [
+			"openai/gpt-6-luna",
+			"anthropic/claude-opus-5.5"
+		],
+		"models": {
+			"data": [
+				{
+					"id": "openai/gpt-6-luna",
+					"expiration_date": "2026-09-25T13:30:00+02:00"
+				},
+				{
+					"id": "anthropic/claude-opus-5.5",
+					"expiration_date": "2026-09-25T13:30:00-02:00"
+				}
+			]
+		},
+		"zdr": {
+			"data": [
+				{
+					"model_id": "openai/gpt-6-luna",
+					"supported_parameters": [
+						"tools",
+						"reasoning"
+					],
+					"tag": "h"
+				},
+				{
+					"model_id": "anthropic/claude-opus-5.5",
+					"supported_parameters": [
+						"tools",
+						"reasoning"
+					],
+					"tag": "h"
+				}
+			]
+		},
+		"nowMs": 1790337600000,
+		"passes": [
+			{
+				"use": "chat",
+				"zdrOnly": true
+			}
+		]
+	},
+	"expected": {
+		"passes": [
+			[
+				{
+					"key": "openai/gpt-6-luna",
+					"status": "retired",
+					"retiredOn": "2026-09-25T13:30:00+02:00",
+					"efforts": [],
+					"hosts": []
+				},
+				{
+					"key": "anthropic/claude-opus-5.5",
+					"status": "ok",
+					"retiredOn": "2026-09-25T13:30:00-02:00",
+					"efforts": [],
+					"hosts": [
+						"h"
+					]
+				}
+			]
+		]
+	}
+}
