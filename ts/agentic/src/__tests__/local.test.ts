@@ -8,7 +8,7 @@ import { numCtxOf } from "../kinds/ollama";
 ////////////////////////////////
 //  Fixtures
 
-/** The old line test, kept here as the platform reads it. */
+/** The platform's pattern, as an oracle. */
 const NUM_CTX = /^num_ctx\s+(\d+)\s*$/m;
 
 const PRIVATE_HOST =
