@@ -189,7 +189,9 @@ fn a_silent_body_ends_at_its_idle_bound_and_closes() {
     run(async {
         let mut held = played(200, &["first"]);
         held.hold = Hold::AfterChunks;
-        let server = Loopback::start(vec![held.clone(), held]).await.unwrap();
+        let server = Loopback::start(vec![held.clone(), held.clone(), held])
+            .await
+            .unwrap();
         let fetch = reqwest_fetch();
         let mut request = post(server.url("/"), "{}");
         request.budget.idle_ms = 50;
@@ -220,6 +222,17 @@ fn a_silent_body_ends_at_its_idle_bound_and_closes() {
             matches!(outcome, Err(FetchError::Cancelled))
                 && began.elapsed() < Duration::from_secs(5)
         );
+        // A cancel while the consumer holds a chunk closes the connection.
+        let cancel = CancelToken::new();
+        let mut held = fetch
+            .fetch(post(server.url("/"), "{}"), cancel.clone())
+            .await
+            .unwrap();
+        held.chunks.next().await.unwrap();
+        let closed = server.closed();
+        cancel.cancel();
+        assert!(server.wait_closed(closed + 1).await);
+        drop(held);
     });
 }
 

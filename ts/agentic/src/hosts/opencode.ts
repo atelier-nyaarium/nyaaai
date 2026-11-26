@@ -3,7 +3,7 @@
 import { headerOf } from "@nyaaai/contract/headers";
 import type { Failure, FailureCategory, HeaderList, NormalizedUsage } from "@nyaaai/contract/shapes/step";
 import { asciiLower } from "@nyaaai/contract/text";
-import { type Clock, resetStampMs } from "@nyaaai/contract/time";
+import { type Clock, resetStampMs, serverStamp, serverWait } from "@nyaaai/contract/time";
 import { messageOf, type WireError } from "../failure";
 import { type Host, isJson, numberOf } from "../native";
 
@@ -23,7 +23,13 @@ const SOURCES: ReadonlySet<string> = new Set(["free", "balance", "go", "go-plus"
 
 function untilReset(at: string | number | undefined, nowMs: number): number | undefined {
 	const ms = resetStampMs(at, nowMs);
-	return ms === undefined ? undefined : Math.max(0, ms - nowMs);
+	return ms === undefined ? undefined : serverWait(Math.max(0, ms - nowMs));
+}
+
+/** The reset stamp, bounded. */
+function resetOf(at: string | number | undefined, nowMs: number): number | undefined {
+	const ms = resetStampMs(at, nowMs);
+	return ms === undefined ? undefined : serverStamp(ms, nowMs);
 }
 
 /** A count or amount; negative is mistyped. */
@@ -68,7 +74,7 @@ export function opencodeFailure(
 	const waits =
 		category === "rateLimited" && (headers === undefined || headerOf(headers, "retry-after") === undefined);
 	const retryAfterMs = waits ? untilReset(error.resetsAt, clock.nowMs()) : undefined;
-	const resetsAt = category === "allowance" ? resetStampMs(error.resetsAt, clock.nowMs()) : undefined;
+	const resetsAt = category === "allowance" ? resetOf(error.resetsAt, clock.nowMs()) : undefined;
 	return {
 		category,
 		status,

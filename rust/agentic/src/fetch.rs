@@ -1,7 +1,7 @@
 //! The `reqwest` adapter of the Fetch port.
 
 use std::error::Error;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use nyaaai_contract::cancel::CancelToken;
 use nyaaai_contract::fetch::{
@@ -11,6 +11,8 @@ use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::headers::response_headers;
 use nyaaai_contract::time::Scheduler;
 use reqwest::header::{HeaderName, HeaderValue};
+use tokio::runtime::Handle;
+use tokio::sync::oneshot;
 
 /// No environment proxy, no redirects; bounded by each request's budget.
 pub struct ReqwestFetch {
@@ -74,18 +76,48 @@ fn header_of(name: &str, value: &str) -> Result<(HeaderName, HeaderValue), Fetch
     Ok((name, value))
 }
 
+/// The response between reads; a cancel takes it.
+type Slot = Arc<Mutex<Option<reqwest::Response>>>;
+
+fn taken(slot: &Slot) -> Option<reqwest::Response> {
+    slot.lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner())
+        .take()
+}
+
 struct Body {
-    response: Option<reqwest::Response>,
+    slot: Slot,
     cancel: CancelToken,
-    /// The body ended at the cancel.
-    cut: bool,
+    /// Dropped, it ends the cancel's watch.
+    watch: Option<oneshot::Sender<()>>,
+}
+
+impl Body {
+    /// Drops the response at the cancel, while it waits between reads too.
+    fn new(response: reqwest::Response, cancel: CancelToken) -> Self {
+        let slot: Slot = Arc::new(Mutex::new(Some(response)));
+        let (watch, ended) = oneshot::channel::<()>();
+        if let Ok(runtime) = Handle::try_current() {
+            let (held, token) = (Arc::clone(&slot), cancel.clone());
+            runtime.spawn(async move {
+                if token.run_until(ended).await.is_none() {
+                    drop(taken(&held));
+                }
+            });
+        }
+        Self {
+            slot,
+            cancel,
+            watch: Some(watch),
+        }
+    }
 }
 
 impl Chunks for Body {
     fn next(&mut self) -> BoxFuture<'_, Result<Option<Vec<u8>>, FetchError>> {
         Box::pin(async move {
-            let Some(response) = self.response.as_mut() else {
-                return if self.cut {
+            let Some(mut response) = taken(&self.slot) else {
+                return if self.cancel.is_cancelled() {
                     Err(FetchError::Cancelled)
                 } else {
                     Ok(None)
@@ -95,12 +127,21 @@ impl Chunks for Body {
             let outcome = match read {
                 None => Err(FetchError::Cancelled),
                 Some(Err(error)) => Err(FetchError::Failed(described(error))),
-                Some(Ok(Some(bytes))) => return Ok(Some(bytes.to_vec())),
+                Some(Ok(Some(bytes))) => {
+                    let mut slot = self
+                        .slot
+                        .lock()
+                        .unwrap_or_else(|poisoned| poisoned.into_inner());
+                    if !self.cancel.is_cancelled() {
+                        *slot = Some(response);
+                    }
+                    return Ok(Some(bytes.to_vec()));
+                }
                 Some(Ok(None)) => Ok(None),
             };
             // A finished or failed body releases the connection.
-            self.cut = matches!(outcome, Err(FetchError::Cancelled));
-            self.response = None;
+            drop(response);
+            self.watch = None;
             outcome
         })
     }
@@ -149,11 +190,7 @@ impl RawFetch for Raw {
             Ok(FetchResponse {
                 status: response.status().as_u16(),
                 headers: response_headers(&raw),
-                chunks: Box::new(Body {
-                    response: Some(response),
-                    cancel,
-                    cut: false,
-                }),
+                chunks: Box::new(Body::new(response, cancel)),
             })
         })
     }

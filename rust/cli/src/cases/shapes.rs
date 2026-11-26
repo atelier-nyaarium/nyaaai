@@ -10387,6 +10387,7 @@ pub struct BudgetFetchInput {
     pub exchange: TransportExchange,
     pub holds: Option<Vec<u64>>,
     pub abort_after_ms: Option<i64>,
+    pub abort_armed_at_ms: Option<i64>,
     pub after_ms: Option<u64>,
 }
 
@@ -10404,12 +10405,14 @@ impl Shape for BudgetFetchInput {
             shape::list(value, at, shape::natural)
         })?;
         let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let abort_armed_at_ms = shape::optional(object, "abortArmedAtMs", at, shape::integer)?;
         let after_ms = shape::optional(object, "afterMs", at, shape::natural)?;
         Ok(Self {
             budget,
             exchange,
             holds,
             abort_after_ms,
+            abort_armed_at_ms,
             after_ms,
         })
     }
@@ -10430,6 +10433,9 @@ impl Shape for BudgetFetchInput {
         }
         if let Some(held) = &self.abort_after_ms {
             object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.abort_armed_at_ms {
+            object.insert("abortArmedAtMs", Value::Number(*held as f64));
         }
         if let Some(held) = &self.after_ms {
             object.insert("afterMs", Value::Number(*held as f64));

@@ -585,7 +585,17 @@ pub fn parse_retry_after(header: Option<&str>, now_ms: i64) -> Option<i64> {
         Some(seconds) => whole_ms(seconds * 1000.0)?,
         None => whole_ms(parse_stamp(text, now_ms)?.saturating_sub(now_ms) as f64)?,
     };
-    Some(wait.clamp(0, MAX_SERVER_WAIT_MS))
+    Some(server_wait(wait.max(0)))
+}
+
+/// A server's wait, at most `MAX_SERVER_WAIT_MS`.
+pub fn server_wait(ms: i64) -> i64 {
+    ms.min(MAX_SERVER_WAIT_MS)
+}
+
+/// A server's reset, at most `MAX_SERVER_WAIT_MS` ahead; a past one stays.
+pub fn server_stamp(at_ms: i64, now_ms: i64) -> i64 {
+    at_ms.min(now_ms.saturating_add(MAX_SERVER_WAIT_MS))
 }
 
 /// Seconds, milliseconds, or dates.

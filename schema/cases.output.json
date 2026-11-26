@@ -5735,6 +5735,11 @@
 					"minimum": -9007199254740991,
 					"maximum": 9007199254740991
 				},
+				"abortArmedAtMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
 				"afterMs": {
 					"type": "integer",
 					"minimum": 0,

@@ -23,7 +23,7 @@ import type {
 	StepResult,
 } from "@nyaaai/contract/shapes/step";
 import { asciiLower, trimText, Utf8Decoder } from "@nyaaai/contract/text";
-import { MAX_SERVER_WAIT_MS, parseRetryAfter, type Scheduler } from "@nyaaai/contract/time";
+import { parseRetryAfter, type Scheduler } from "@nyaaai/contract/time";
 import type { Codec } from "./codec";
 import { failed, ProviderError } from "./failure";
 import { SseDecoder } from "./sse";
@@ -221,8 +221,7 @@ export class Transport {
 			return failed("network", `The reply is larger than ${error.limit} bytes.`);
 		}
 		if (signal.aborted) return signal.reason ?? error;
-		if (error instanceof ProviderError)
-			return new ProviderError(clamped(scrubbedFailure(error.failure, key), this.d.scheduler.nowMs()));
+		if (error instanceof ProviderError) return new ProviderError(scrubbedFailure(error.failure, key));
 		return failed("network", scrubbed(error instanceof Error ? error.message : jsString(error), key));
 	}
 
@@ -425,15 +424,5 @@ function scrubbedFailure(failure: Failure, key: string | undefined): Failure {
 		...(failure.billed === undefined
 			? {}
 			: { billed: { ...failure.billed, ...scrubbedServing(failure.billed, key) } }),
-	};
-}
-
-/** Caps a server's wait and reset. */
-function clamped(failure: Failure, nowMs: number): Failure {
-	const { retryAfterMs, resetsAt } = failure;
-	return {
-		...failure,
-		...(retryAfterMs === undefined ? {} : { retryAfterMs: Math.min(retryAfterMs, MAX_SERVER_WAIT_MS) }),
-		...(resetsAt === undefined ? {} : { resetsAt: Math.min(resetsAt, nowMs + MAX_SERVER_WAIT_MS) }),
 	};
 }

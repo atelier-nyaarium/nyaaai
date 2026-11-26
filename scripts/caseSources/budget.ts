@@ -86,6 +86,23 @@ const exchanges: CaseSource[] = [
 		exchange: body(1, "a", 0, { headMs: 150 }),
 		abortAfterMs: 100,
 	}),
+	fetched("fetch-tie-a-caller-abort-armed-after-the-start-wins-over-the-total", {
+		budget: budget(100, 200),
+		exchange: body(1, "a", 0, { headMs: 150 }),
+		abortArmedAtMs: 50,
+		abortAfterMs: 100,
+	}),
+	fetched("fetch-tie-a-caller-abort-armed-after-the-read-began-wins-over-the-idle", {
+		budget: budget(1000, 30),
+		exchange: { status: 200, headers: TEXT_HEAD, chunks: [piece("a", 10), piece("b", 50)] },
+		abortArmedAtMs: 20,
+		abortAfterMs: 41,
+	}),
+	fetched("fetch-tie-a-caller-abort-armed-before-the-read-wins-over-the-idle", {
+		budget: budget(1000, 30),
+		exchange: { status: 200, headers: TEXT_HEAD, chunks: [piece("a", 10), piece("b", 50)] },
+		abortAfterMs: 41,
+	}),
 	fetched("fetch-tie-the-total-wins-over-the-idle", {
 		budget: budget(100, 100),
 		exchange: body(1, "a", 0, { headMs: 150 }),

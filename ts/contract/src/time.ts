@@ -225,7 +225,17 @@ export function parseRetryAfter(header: string | null | undefined, nowMs: number
 	const wait = seconds === undefined ? parseStamp(text, nowMs) : wholeMs(seconds * 1000);
 	if (wait === undefined) return undefined;
 	const whole = wholeMs(Math.max(0, seconds === undefined ? wait - nowMs : wait));
-	return whole === undefined ? undefined : Math.min(whole, MAX_SERVER_WAIT_MS);
+	return whole === undefined ? undefined : serverWait(whole);
+}
+
+/** A server's wait, at most `MAX_SERVER_WAIT_MS`. */
+export function serverWait(ms: number): number {
+	return Math.min(ms, MAX_SERVER_WAIT_MS);
+}
+
+/** A server's reset, at most `MAX_SERVER_WAIT_MS` ahead; a past one stays. */
+export function serverStamp(atMs: number, nowMs: number): number {
+	return Math.min(atMs, nowMs + MAX_SERVER_WAIT_MS);
 }
 
 /** Seconds, milliseconds, or dates. */

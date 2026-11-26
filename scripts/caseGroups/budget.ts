@@ -84,6 +84,8 @@ export const budget = caseGroup("budget", {
 				holds: z.array(z.int().min(0)).exactOptional(),
 				/** The caller aborts at this wheel time. */
 				abortAfterMs: z.int().exactOptional(),
+				/** The caller arms that abort at this wheel time, not before the fetch. */
+				abortArmedAtMs: z.int().exactOptional(),
 				/** After the end, the consumer waits this long and reads once more. */
 				afterMs: z.int().min(0).exactOptional(),
 			}),
@@ -99,8 +101,12 @@ export const budget = caseGroup("budget", {
 				const scheduler = fakeScheduler(wheel);
 				const played = scriptedFetch([exchangeOf(input.exchange)], scheduler);
 				const caller = new AbortController();
-				if (input.abortAfterMs !== undefined)
-					wheel.after(input.abortAfterMs, "caller", () => caller.abort(new Error(CALLER_REASON)));
+				const abortAt = input.abortAfterMs;
+				const abort = () => caller.abort(new Error(CALLER_REASON));
+				if (abortAt !== undefined && input.abortArmedAtMs !== undefined) {
+					const armedAt = input.abortArmedAtMs;
+					wheel.after(armedAt, "arm", () => wheel.after(abortAt - armedAt, "caller", abort));
+				} else if (abortAt !== undefined) wheel.after(abortAt, "caller", abort);
 				const seen: Array<z.infer<typeof BudgetSeen>> = [];
 				const ended = (error: unknown) => {
 					const end: z.infer<typeof BudgetEnd> =
@@ -146,6 +152,7 @@ export const budget = caseGroup("budget", {
 					}
 				}
 				await reader?.return?.();
+				wheel.cancel("arm");
 				wheel.cancel("caller");
 				return { seen, served: played.read()[0] ?? 0, waiting: wheel.waiting(), nowMs: wheel.nowMs() };
 			},

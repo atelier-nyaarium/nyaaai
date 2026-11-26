@@ -6,7 +6,7 @@ use nyaaai_contract::shapes::step::{
     CanonicalRequest, Failure, FailureCategory, HeaderList, NormalizedUsage,
 };
 use nyaaai_contract::text::ascii_lower;
-use nyaaai_contract::time::{Clock, reset_stamp_ms};
+use nyaaai_contract::time::{Clock, reset_stamp_ms, server_stamp, server_wait};
 
 use crate::chat::codec::{code_of, failure_status, usable};
 use crate::chat::wire::{Billing, Usage, read_billing};
@@ -30,7 +30,13 @@ fn stamp_of(error: &WireError) -> Option<Value> {
 
 fn until_reset(error: &WireError, now_ms: i64) -> Option<i64> {
     let ms = reset_stamp_ms(&stamp_of(error)?, now_ms)?;
-    Some((ms - now_ms).max(0))
+    Some(server_wait(ms.saturating_sub(now_ms).max(0)))
+}
+
+/// The reset stamp, bounded.
+fn reset_of(error: &WireError, now_ms: i64) -> Option<i64> {
+    let ms = reset_stamp_ms(&stamp_of(error)?, now_ms)?;
+    Some(server_stamp(ms, now_ms))
 }
 
 fn amount_of(value: Option<f64>) -> Option<f64> {
@@ -100,7 +106,7 @@ pub fn opencode_failure(
         None
     };
     let resets_at = if category == FailureCategory::Allowance {
-        stamp_of(error).and_then(|at| reset_stamp_ms(&at, clock.now_ms()))
+        reset_of(error, clock.now_ms())
     } else {
         None
     };

@@ -1,7 +1,7 @@
 // Codec cases: the plan's host, seen through each native family.
 
 import type { CaseSource } from "../caseAdapter";
-import type { Json } from "./codecFixtures";
+import { type Json, opencode } from "./codecFixtures";
 import { completes, fails } from "./codecKit";
 import { gemini, messages, NOW, responses } from "./codecNativeFixtures";
 
@@ -191,7 +191,24 @@ const limits: CaseSource[] = [
 	}),
 ];
 
+/** Ten years past `NOW`, in seconds. */
+const FAR = SECONDS + 10 * 365 * 86_400;
+
+const FAR_FAMILIES: Array<[string, Json]> = [
+	["chat", opencode({ nowMs: NOW })],
+	["responses", responses({ nowMs: NOW })],
+	["messages", messages({ nowMs: NOW })],
+	["gemini", gemini({ nowMs: NOW })],
+];
+
+const far: CaseSource[] = FAR_FAMILIES.flatMap(([name, codec]) => [
+	fails(`host-${name}-429-allowance-reset-ten-years-away-is-clamped`, codec, 429, BODY(FAR)),
+	fails(`host-${name}-429-rate-limit-reset-ten-years-away-is-clamped`, codec, 429, {
+		error: { message: "Slow.", resetsAt: FAR },
+	}),
+]);
+
 ////////////////////////////////
 //  Cases
 
-export const hostCases: CaseSource[] = [...usages, ...own, ...limits];
+export const hostCases: CaseSource[] = [...usages, ...own, ...limits, ...far];

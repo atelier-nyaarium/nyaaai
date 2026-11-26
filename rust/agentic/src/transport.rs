@@ -21,7 +21,7 @@ use nyaaai_contract::shapes::step::{
     StepEvent, StepEventServing, StepResult,
 };
 use nyaaai_contract::text::{Utf8Decoder, ascii_lower, trim_text};
-use nyaaai_contract::time::{MAX_SERVER_WAIT_MS, Scheduler, parse_retry_after};
+use nyaaai_contract::time::{Scheduler, parse_retry_after};
 
 use crate::codec::{Codec, Mode, StreamDecoder};
 use crate::failure::{FailureExtra, ProviderError, failed};
@@ -744,10 +744,9 @@ impl Transport {
             return TransportError::Cancelled;
         }
         match fault {
-            Fault::Provider(error) => TransportError::Provider(ProviderError::new(clamped(
-                scrubbed_failure(*error.failure, key),
-                self.d.scheduler.now_ms(),
-            ))),
+            Fault::Provider(error) => {
+                TransportError::Provider(ProviderError::new(scrubbed_failure(*error.failure, key)))
+            }
             Fault::Fetch(error) => {
                 let message = match error {
                     FetchError::Failed(message) => message,
@@ -869,19 +868,6 @@ fn checked_headers(headers: &[(&str, &str)]) -> Result<(), ProviderError> {
 
 async fn read_all(chunks: &mut dyn Chunks) -> Result<String, Fault> {
     read_text(chunks, None).await.map_err(Fault::Fetch)
-}
-
-/// Caps a server's wait and reset.
-fn clamped(failure: Failure, now_ms: i64) -> Failure {
-    Failure {
-        retry_after_ms: failure
-            .retry_after_ms
-            .map(|wait| wait.min(MAX_SERVER_WAIT_MS)),
-        resets_at: failure
-            .resets_at
-            .map(|stamp| stamp.min(now_ms.saturating_add(MAX_SERVER_WAIT_MS))),
-        ..failure
-    }
 }
 
 /// Sanitize response-derived names.

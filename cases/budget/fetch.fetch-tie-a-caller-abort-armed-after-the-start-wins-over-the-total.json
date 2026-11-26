@@ -1,0 +1,46 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "budget.fetch",
+	"name": "fetch-tie-a-caller-abort-armed-after-the-start-wins-over-the-total",
+	"input": {
+		"budget": {
+			"totalMs": 100,
+			"idleMs": 200,
+			"maxBytes": 1000
+		},
+		"exchange": {
+			"status": 200,
+			"headers": [
+				[
+					"content-type",
+					"text/plain"
+				]
+			],
+			"chunks": [
+				{
+					"kind": "text",
+					"text": "a",
+					"delayMs": 0
+				}
+			],
+			"headMs": 150
+		},
+		"abortArmedAtMs": 50,
+		"abortAfterMs": 100
+	},
+	"expected": {
+		"seen": [
+			{
+				"kind": "ended",
+				"atMs": 150,
+				"end": {
+					"kind": "caller"
+				}
+			}
+		],
+		"served": 0,
+		"waiting": [],
+		"nowMs": 150
+	}
+}

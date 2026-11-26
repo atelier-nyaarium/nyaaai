@@ -1,0 +1,60 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "budget.fetch",
+	"name": "fetch-tie-a-caller-abort-armed-after-the-read-began-wins-over-the-idle",
+	"input": {
+		"budget": {
+			"totalMs": 1000,
+			"idleMs": 30,
+			"maxBytes": 1000
+		},
+		"exchange": {
+			"status": 200,
+			"headers": [
+				[
+					"content-type",
+					"text/plain"
+				]
+			],
+			"chunks": [
+				{
+					"kind": "text",
+					"text": "a",
+					"delayMs": 10
+				},
+				{
+					"kind": "text",
+					"text": "b",
+					"delayMs": 50
+				}
+			]
+		},
+		"abortArmedAtMs": 20,
+		"abortAfterMs": 41
+	},
+	"expected": {
+		"seen": [
+			{
+				"kind": "head",
+				"atMs": 0,
+				"status": 200
+			},
+			{
+				"kind": "chunk",
+				"atMs": 10,
+				"size": 1
+			},
+			{
+				"kind": "ended",
+				"atMs": 60,
+				"end": {
+					"kind": "caller"
+				}
+			}
+		],
+		"served": 1,
+		"waiting": [],
+		"nowMs": 60
+	}
+}

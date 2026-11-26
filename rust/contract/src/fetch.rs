@@ -396,7 +396,59 @@ impl Exchange {
         stop(late);
     }
 
-    fn on_total(&self) {
+    /// Whether a clock due now has nothing left to end.
+    fn ended_before(&self, number: Option<u64>) -> bool {
+        {
+            let state = self.locked();
+            let stale = number.is_some_and(|number| state.waiting != Some(number));
+            if state.end.is_some() || state.over || stale {
+                return true;
+            }
+        }
+        if self.caller.is_cancelled() {
+            self.finish(FetchError::Cancelled);
+            return true;
+        }
+        false
+    }
+
+    /// A clock yields to all else due at its instant; its timer becomes the clock's.
+    fn at_end(self: &Arc<Self>, number: Option<u64>, act: fn(&Self, Option<u64>)) {
+        if self.ended_before(number) {
+            return;
+        }
+        let weak = Arc::downgrade(self);
+        let timer = self.scheduler.schedule(
+            0,
+            Box::new(move || {
+                if let Some(exchange) = weak.upgrade() {
+                    act(&exchange, number);
+                }
+            }),
+        );
+        let late = {
+            let mut state = self.locked();
+            let stale = number.is_some_and(|number| state.waiting != Some(number));
+            if state.over || stale {
+                Some(timer)
+            } else {
+                let slot = if number.is_some() {
+                    &mut state.idle
+                } else {
+                    &mut state.total
+                };
+                *slot = Some(timer);
+                None
+            }
+        };
+        stop(late);
+    }
+
+    fn on_total(self: &Arc<Self>) {
+        self.at_end(None, |exchange, _| exchange.total_ends());
+    }
+
+    fn total_ends(&self) {
         {
             let mut state = self.locked();
             if state.end.is_some() || state.over {
@@ -410,7 +462,15 @@ impl Exchange {
         self.breach(BudgetBound::Total);
     }
 
-    fn on_idle(&self, number: u64) {
+    fn on_idle(self: &Arc<Self>, number: u64) {
+        self.at_end(Some(number), |exchange, number| {
+            if let Some(number) = number {
+                exchange.idle_ends(number);
+            }
+        });
+    }
+
+    fn idle_ends(&self, number: u64) {
         {
             let state = self.locked();
             if state.end.is_some() || state.waiting != Some(number) {

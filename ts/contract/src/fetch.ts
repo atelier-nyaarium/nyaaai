@@ -130,8 +130,10 @@ class Exchange {
 	start(): void {
 		this.caller.addEventListener("abort", this.onCaller, { once: true });
 		this.stopTotal = this.scheduler.schedule(this.budget.totalMs, () => {
-			if (this.refuse === undefined) this.overdue = true;
-			else this.breach("total");
+			this.stopTotal = this.atEnd(() => {
+				if (this.refuse === undefined) this.overdue = true;
+				else this.breach("total");
+			});
 		});
 	}
 
@@ -143,7 +145,9 @@ class Exchange {
 		return new Promise<T>((resolve, reject) => {
 			this.refuse = reject;
 			// A chunk at the bound counts.
-			this.stopIdle = this.scheduler.schedule(this.budget.idleMs + 1, () => this.breach("idle"));
+			this.stopIdle = this.scheduler.schedule(this.budget.idleMs + 1, () => {
+				this.stopIdle = this.atEnd(() => this.breach("idle"));
+			});
 			let pending: Promise<T>;
 			try {
 				pending = read();
@@ -191,6 +195,11 @@ class Exchange {
 				},
 			}),
 		};
+	}
+
+	/** A clock yields to all else due now. */
+	private atEnd(act: () => void): () => void {
+		return this.scheduler.schedule(0, act);
 	}
 
 	private readonly onCaller = () => {

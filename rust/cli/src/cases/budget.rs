@@ -104,9 +104,19 @@ pub fn fetch(input: BudgetFetchInput) -> Outcome<BudgetFetchResult> {
     let scheduler = Arc::new(FakeScheduler::new(Arc::clone(&wheel)));
     let played = ScriptedFetch::new(vec![exchange_of(&input.exchange)?], scheduler);
     let caller = CancelToken::new();
-    if let Some(ms) = input.abort_after_ms {
-        let held = caller.clone();
-        wheel.after_run(ms, "caller", Box::new(move || held.cancel()));
+    match (input.abort_after_ms, input.abort_armed_at_ms) {
+        (Some(at), Some(armed)) => {
+            // The abort is armed later, after the clocks.
+            let (held, later) = (caller.clone(), Arc::clone(&wheel));
+            let arm =
+                move || later.after_run(at - armed, "caller", Box::new(move || held.cancel()));
+            wheel.after_run(armed, "arm", Box::new(arm));
+        }
+        (Some(at), None) => {
+            let held = caller.clone();
+            wheel.after_run(at, "caller", Box::new(move || held.cancel()));
+        }
+        (None, _) => {}
     }
     let holds = input.holds.unwrap_or_default();
     let seen = block_on(async {
@@ -161,6 +171,7 @@ pub fn fetch(input: BudgetFetchInput) -> Outcome<BudgetFetchResult> {
         drop(chunks);
         seen
     })?;
+    wheel.cancel("arm");
     wheel.cancel("caller");
     Ok(BudgetFetchResult {
         seen,
