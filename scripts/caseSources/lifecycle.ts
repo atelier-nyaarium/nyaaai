@@ -55,6 +55,13 @@ const LATER = "2026-11-07T20:00:00Z";
 
 const GO_WITH_B = { entries: [GO, B], keys: GO_PAIR };
 
+const FOREIGN_KEY = { ...KEY, boundTo: "compatible https://other.example.test" };
+const COMPAT_ROW = "compatible:qwen";
+const COMPAT_RUN = { rows: [COMPAT_ROW], kinds: ["compatible"] };
+const PUBLIC_COMPAT = { id: "p", kind: "compatible", label: "Public", url: "http://api.example.test/v1" };
+const LAB_COMPAT = { id: "l", kind: "compatible", label: "Lab", url: "http://lab.local:8000/v1" };
+const SECURE_COMPAT = { id: "s", kind: "compatible", label: "Secure", url: "https://api.example.test/v1" };
+
 /** A balance-billed reply that fails with nothing streamed. */
 const failedBalance = sse([frame({ error: { code: 502, message: "Down" }, usage: BALANCE })]);
 
@@ -362,7 +369,7 @@ const extraUsage: CaseSource[] = [
 	run("a-plan-change-clears-the-balance-cooldown-and-the-bill", {
 		...GO_WITH_B,
 		exchanges: [says("Go", BALANCE), says("B"), says("Go")],
-		steps: [send("bill"), send("cooled"), list({ ...GO, plan: "payg" }, B), send("changed")],
+		steps: [send("bill"), send("cooled"), list({ ...GO, plan: "payg" }, B), key("go", KEY), send("changed")],
 	}),
 	run("a-known-reset-wins-over-a-balance-cooldown", {
 		...GO_WITH_B,
@@ -700,6 +707,48 @@ const sinks: CaseSource[] = [
 	}),
 ];
 
+/** A key that may not be sent: given for another binding, or over plain http to a public host. */
+const forbidden: CaseSource[] = [
+	run("bound-a-route-of-a-foreign-key-is-skipped-as-a-missing-key-and-the-next-serves", {
+		keys: { a: FOREIGN_KEY, b: KEY },
+		exchanges: [says("B")],
+		steps: [send("first")],
+	}),
+	run("insecure-a-route-over-http-to-a-public-host-is-skipped-and-a-route-of-this-network-gets-the-key", {
+		...COMPAT_RUN,
+		entries: [PUBLIC_COMPAT, LAB_COMPAT],
+		keys: { p: KEY, l: KEY },
+		exchanges: [says("Lab")],
+		steps: [send("first", { model: COMPAT_ROW })],
+	}),
+	run("insecure-a-route-over-https-gets-the-key", {
+		...COMPAT_RUN,
+		entries: [SECURE_COMPAT],
+		keys: { s: KEY },
+		exchanges: [says("Secure")],
+		steps: [send("first", { model: COMPAT_ROW })],
+	}),
+	run("insecure-a-public-host-over-http-with-no-key-runs-as-today", {
+		...COMPAT_RUN,
+		entries: [PUBLIC_COMPAT],
+		keys: {},
+		exchanges: [says("Public")],
+		steps: [send("first", { model: COMPAT_ROW })],
+	}),
+	run("held-a-route-whose-key-turned-foreign-sends-nothing", {
+		...COMPAT_RUN,
+		entries: [LAB_COMPAT],
+		keys: { l: KEY },
+		steps: [plan("held", COMPAT_ROW), key("l", FOREIGN_KEY), send("after", { model: COMPAT_ROW, plan: "held" })],
+	}),
+	run("held-a-keyless-route-whose-key-turned-foreign-sends-nothing", {
+		...COMPAT_RUN,
+		entries: [LAB_COMPAT],
+		keys: {},
+		steps: [plan("held", COMPAT_ROW), key("l", FOREIGN_KEY), send("after", { model: COMPAT_ROW, plan: "held" })],
+	}),
+];
+
 export const lifecycleCases: CaseSource[] = [
 	...fallThrough,
 	...zeroRetention,
@@ -715,4 +764,5 @@ export const lifecycleCases: CaseSource[] = [
 	...sinks,
 	...staleCases,
 	...incarnationCases,
+	...forbidden,
 ];

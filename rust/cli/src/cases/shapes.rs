@@ -4029,6 +4029,7 @@ pub struct TestkitEntryKeysInputStepsItem {
     pub id: Option<String>,
     pub answer: Option<TestkitEntryKeysInputStepsItemAnswer>,
     pub key: Option<String>,
+    pub bound_to: Option<String>,
     pub unlistens: Option<String>,
 }
 
@@ -4050,6 +4051,7 @@ impl Shape for TestkitEntryKeysInputStepsItem {
             TestkitEntryKeysInputStepsItemAnswer::decode_at,
         )?;
         let key = shape::optional(object, "key", at, shape::text)?;
+        let bound_to = shape::optional(object, "boundTo", at, shape::text)?;
         let unlistens = shape::optional(object, "unlistens", at, shape::text)?;
         Ok(Self {
             op,
@@ -4057,6 +4059,7 @@ impl Shape for TestkitEntryKeysInputStepsItem {
             id,
             answer,
             key,
+            bound_to,
             unlistens,
         })
     }
@@ -4075,6 +4078,9 @@ impl Shape for TestkitEntryKeysInputStepsItem {
         }
         if let Some(held) = &self.key {
             object.insert("key", Value::from(held.as_str()));
+        }
+        if let Some(held) = &self.bound_to {
+            object.insert("boundTo", Value::from(held.as_str()));
         }
         if let Some(held) = &self.unlistens {
             object.insert("unlistens", Value::from(held.as_str()));
@@ -4250,6 +4256,7 @@ impl Shape for TestkitEntryKeysResultStepsItemHeardItem {
 pub struct TestkitEntryKeysResultStepsItemGot {
     pub kind: String,
     pub key: Option<String>,
+    pub bound_to: Option<String>,
 }
 
 impl Shape for TestkitEntryKeysResultStepsItemGot {
@@ -4257,7 +4264,12 @@ impl Shape for TestkitEntryKeysResultStepsItemGot {
         let object = shape::object(value, at)?;
         let kind = shape::required(object, "kind", at, shape::text)?;
         let key = shape::optional(object, "key", at, shape::text)?;
-        Ok(Self { kind, key })
+        let bound_to = shape::optional(object, "boundTo", at, shape::text)?;
+        Ok(Self {
+            kind,
+            key,
+            bound_to,
+        })
     }
 
     fn encode(&self) -> Value {
@@ -4265,6 +4277,9 @@ impl Shape for TestkitEntryKeysResultStepsItemGot {
         object.insert("kind", Value::from(self.kind.as_str()));
         if let Some(held) = &self.key {
             object.insert("key", Value::from(held.as_str()));
+        }
+        if let Some(held) = &self.bound_to {
+            object.insert("boundTo", Value::from(held.as_str()));
         }
         Value::Object(object)
     }
@@ -11031,6 +11046,424 @@ impl Shape for EntrySecretKeyResult {
                     .map(|held| Value::from(held.as_str()))
                     .collect(),
             ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct EntryBindingInput {
+    pub rows: Vec<nyaaai_contract::shapes::provider::EntryFields>,
+}
+
+impl Shape for EntryBindingInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::EntryFields::decode_at,
+            )
+        })?;
+        Ok(Self { rows })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "rows",
+            Value::Array(self.rows.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct EntryBindingResult {
+    pub rows: Vec<EntryBindingResultRowsItem>,
+}
+
+impl Shape for EntryBindingResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, EntryBindingResultRowsItem::decode_at)
+        })?;
+        Ok(Self { rows })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "rows",
+            Value::Array(self.rows.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct EntryBindingResultRowsItem {
+    pub binding: Option<String>,
+    pub for_: Option<String>,
+}
+
+impl Shape for EntryBindingResultRowsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let binding = shape::required(object, "binding", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        let for_ = shape::required(object, "for", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        Ok(Self { binding, for_ })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "binding",
+            self.binding
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "for",
+            self.for_
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct EntryKeyForInput {
+    pub bindings: Vec<String>,
+    pub kinds: Vec<nyaaai_contract::shapes::provider::ProviderKindName>,
+}
+
+impl Shape for EntryKeyForInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let bindings = shape::required(object, "bindings", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let kinds = shape::required(object, "kinds", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::ProviderKindName::decode_at,
+            )
+        })?;
+        Ok(Self { bindings, kinds })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "bindings",
+            Value::Array(
+                self.bindings
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert(
+            "kinds",
+            Value::Array(self.kinds.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct EntryKeyForResult {
+    pub for_: Vec<String>,
+}
+
+impl Shape for EntryKeyForResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let for_ = shape::required(object, "for", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { for_ })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "for",
+            Value::Array(
+                self.for_
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct EntryBoundKeyInput {
+    pub rows: Vec<EntryBoundKeyInputRowsItem>,
+}
+
+impl Shape for EntryBoundKeyInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let rows = shape::required(object, "rows", at, |value, at| {
+            shape::list(value, at, EntryBoundKeyInputRowsItem::decode_at)
+        })?;
+        Ok(Self { rows })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "rows",
+            Value::Array(self.rows.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct EntryBoundKeyInputRowsItem {
+    pub fields: nyaaai_contract::shapes::provider::EntryFields,
+    pub key: String,
+}
+
+impl Shape for EntryBoundKeyInputRowsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let fields = shape::required(
+            object,
+            "fields",
+            at,
+            nyaaai_contract::shapes::provider::EntryFields::decode_at,
+        )?;
+        let key = shape::required(object, "key", at, shape::text)?;
+        Ok(Self { fields, key })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("fields", self.fields.encode());
+        object.insert("key", Value::from(self.key.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct EntryBoundKeyResult {
+    pub texts: Vec<Option<String>>,
+}
+
+impl Shape for EntryBoundKeyResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let texts = shape::required(object, "texts", at, |value, at| {
+            shape::list(value, at, |value, at| {
+                shape::nullable(value, at, shape::text)
+            })
+        })?;
+        Ok(Self { texts })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "texts",
+            Value::Array(
+                self.texts
+                    .iter()
+                    .map(|held| {
+                        held.as_ref()
+                            .map_or(Value::Null, |held| Value::from(held.as_str()))
+                    })
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct EntryReadBoundKeyInput {
+    pub texts: Vec<String>,
+}
+
+impl Shape for EntryReadBoundKeyInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let texts = shape::required(object, "texts", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { texts })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "texts",
+            Value::Array(
+                self.texts
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct EntryReadBoundKeyResult {
+    pub answers: Vec<EntryReadBoundKeyResultAnswersItem>,
+}
+
+impl Shape for EntryReadBoundKeyResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let answers = shape::required(object, "answers", at, |value, at| {
+            shape::list(value, at, EntryReadBoundKeyResultAnswersItem::decode_at)
+        })?;
+        Ok(Self { answers })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "answers",
+            Value::Array(self.answers.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum EntryReadBoundKeyResultAnswersItem {
+    Key(EntryReadBoundKeyResultAnswersItemKey),
+    None(EntryReadBoundKeyResultAnswersItemNone),
+}
+
+impl Shape for EntryReadBoundKeyResultAnswersItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "key" => EntryReadBoundKeyResultAnswersItemKey::decode_at(value, at).map(Self::Key),
+            "none" => EntryReadBoundKeyResultAnswersItemNone::decode_at(value, at).map(Self::None),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Key(held) => held.encode(),
+            Self::None(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct EntryReadBoundKeyResultAnswersItemKey {
+    pub key: String,
+    pub bound_to: String,
+}
+
+impl Shape for EntryReadBoundKeyResultAnswersItemKey {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "key")
+        })?;
+        let key = shape::required(object, "key", at, shape::text)?;
+        let bound_to = shape::required(object, "boundTo", at, shape::text)?;
+        Ok(Self { key, bound_to })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("key"));
+        object.insert("key", Value::from(self.key.as_str()));
+        object.insert("boundTo", Value::from(self.bound_to.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct EntryReadBoundKeyResultAnswersItemNone {}
+
+impl Shape for EntryReadBoundKeyResultAnswersItemNone {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "none")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("none"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct EntryTravelInput {
+    pub urls: Vec<String>,
+}
+
+impl Shape for EntryTravelInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let urls = shape::required(object, "urls", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { urls })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "urls",
+            Value::Array(
+                self.urls
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct EntryTravelResult {
+    pub travels: Vec<bool>,
+}
+
+impl Shape for EntryTravelResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let travels = shape::required(object, "travels", at, |value, at| {
+            shape::list(value, at, shape::flag)
+        })?;
+        Ok(Self { travels })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "travels",
+            Value::Array(self.travels.iter().map(|held| Value::Bool(*held)).collect()),
         );
         Value::Object(object)
     }
@@ -26566,6 +26999,8 @@ pub enum ResolverReachInputRowsItemAnswer {
     None(ResolverReachInputRowsItemAnswerNone),
     Refused(ResolverReachInputRowsItemAnswerRefused),
     Unready(ResolverReachInputRowsItemAnswerUnready),
+    Foreign(ResolverReachInputRowsItemAnswerForeign),
+    Insecure(ResolverReachInputRowsItemAnswerInsecure),
 }
 
 impl Shape for ResolverReachInputRowsItemAnswer {
@@ -26580,6 +27015,12 @@ impl Shape for ResolverReachInputRowsItemAnswer {
             "unready" => {
                 ResolverReachInputRowsItemAnswerUnready::decode_at(value, at).map(Self::Unready)
             }
+            "foreign" => {
+                ResolverReachInputRowsItemAnswerForeign::decode_at(value, at).map(Self::Foreign)
+            }
+            "insecure" => {
+                ResolverReachInputRowsItemAnswerInsecure::decode_at(value, at).map(Self::Insecure)
+            }
             _ => Err(shape::no_branch(at, "kind")),
         }
     }
@@ -26590,6 +27031,8 @@ impl Shape for ResolverReachInputRowsItemAnswer {
             Self::None(held) => held.encode(),
             Self::Refused(held) => held.encode(),
             Self::Unready(held) => held.encode(),
+            Self::Foreign(held) => held.encode(),
+            Self::Insecure(held) => held.encode(),
         }
     }
 }
@@ -26597,6 +27040,7 @@ impl Shape for ResolverReachInputRowsItemAnswer {
 #[derive(Debug, Clone, PartialEq)]
 pub struct ResolverReachInputRowsItemAnswerKey {
     pub key: String,
+    pub bound_to: String,
 }
 
 impl Shape for ResolverReachInputRowsItemAnswerKey {
@@ -26606,13 +27050,15 @@ impl Shape for ResolverReachInputRowsItemAnswerKey {
             shape::is_text(value, at, "key")
         })?;
         let key = shape::required(object, "key", at, shape::text)?;
-        Ok(Self { key })
+        let bound_to = shape::required(object, "boundTo", at, shape::text)?;
+        Ok(Self { key, bound_to })
     }
 
     fn encode(&self) -> Value {
         let mut object = Object::new();
         object.insert("kind", Value::from("key"));
         object.insert("key", Value::from(self.key.as_str()));
+        object.insert("boundTo", Value::from(self.bound_to.as_str()));
         Value::Object(object)
     }
 }
@@ -26670,6 +27116,48 @@ impl Shape for ResolverReachInputRowsItemAnswerUnready {
     fn encode(&self) -> Value {
         let mut object = Object::new();
         object.insert("kind", Value::from("unready"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverReachInputRowsItemAnswerForeign {
+    pub bound_to: String,
+}
+
+impl Shape for ResolverReachInputRowsItemAnswerForeign {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "foreign")
+        })?;
+        let bound_to = shape::required(object, "boundTo", at, shape::text)?;
+        Ok(Self { bound_to })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("foreign"));
+        object.insert("boundTo", Value::from(self.bound_to.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverReachInputRowsItemAnswerInsecure {}
+
+impl Shape for ResolverReachInputRowsItemAnswerInsecure {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "insecure")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("insecure"));
         Value::Object(object)
     }
 }
@@ -26882,6 +27370,7 @@ impl Shape for ResolverKeySourceInputStepsItem {
 #[derive(Debug, Clone, PartialEq)]
 pub struct ResolverKeySourceInputAnswersValueKey {
     pub key: String,
+    pub bound_to: Option<String>,
 }
 
 impl Shape for ResolverKeySourceInputAnswersValueKey {
@@ -26891,13 +27380,17 @@ impl Shape for ResolverKeySourceInputAnswersValueKey {
             shape::is_text(value, at, "key")
         })?;
         let key = shape::required(object, "key", at, shape::text)?;
-        Ok(Self { key })
+        let bound_to = shape::optional(object, "boundTo", at, shape::text)?;
+        Ok(Self { key, bound_to })
     }
 
     fn encode(&self) -> Value {
         let mut object = Object::new();
         object.insert("kind", Value::from("key"));
         object.insert("key", Value::from(self.key.as_str()));
+        if let Some(held) = &self.bound_to {
+            object.insert("boundTo", Value::from(held.as_str()));
+        }
         Value::Object(object)
     }
 }
@@ -27079,6 +27572,7 @@ impl Shape for ResolverKeySourceInputStepsItemAnswerAnswer {
 #[derive(Debug, Clone, PartialEq)]
 pub struct ResolverKeySourceInputStepsItemAnswerAnswerKey {
     pub key: String,
+    pub bound_to: Option<String>,
 }
 
 impl Shape for ResolverKeySourceInputStepsItemAnswerAnswerKey {
@@ -27088,13 +27582,17 @@ impl Shape for ResolverKeySourceInputStepsItemAnswerAnswerKey {
             shape::is_text(value, at, "key")
         })?;
         let key = shape::required(object, "key", at, shape::text)?;
-        Ok(Self { key })
+        let bound_to = shape::optional(object, "boundTo", at, shape::text)?;
+        Ok(Self { key, bound_to })
     }
 
     fn encode(&self) -> Value {
         let mut object = Object::new();
         object.insert("kind", Value::from("key"));
         object.insert("key", Value::from(self.key.as_str()));
+        if let Some(held) = &self.bound_to {
+            object.insert("boundTo", Value::from(held.as_str()));
+        }
         Value::Object(object)
     }
 }
@@ -27158,7 +27656,7 @@ impl Shape for ResolverKeySourceInputStepsItemAnswerAnswerUnready {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ResolverKeySourceResult {
-    pub gets: Vec<Option<String>>,
+    pub gets: Vec<Option<ResolverKeySourceResultGetsItem>>,
 }
 
 impl Shape for ResolverKeySourceResult {
@@ -27166,7 +27664,7 @@ impl Shape for ResolverKeySourceResult {
         let object = shape::object(value, at)?;
         let gets = shape::required(object, "gets", at, |value, at| {
             shape::list(value, at, |value, at| {
-                shape::nullable(value, at, shape::text)
+                shape::nullable(value, at, ResolverKeySourceResultGetsItem::decode_at)
             })
         })?;
         Ok(Self { gets })
@@ -27179,13 +27677,54 @@ impl Shape for ResolverKeySourceResult {
             Value::Array(
                 self.gets
                     .iter()
-                    .map(|held| {
-                        held.as_ref()
-                            .map_or(Value::Null, |held| Value::from(held.as_str()))
-                    })
+                    .map(|held| held.as_ref().map_or(Value::Null, |held| held.encode()))
                     .collect(),
             ),
         );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ResolverKeySourceResultGetsItem {
+    Text(String),
+    Object(ResolverKeySourceResultGetsItemObject),
+}
+
+impl Shape for ResolverKeySourceResultGetsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        if let Ok(held) = shape::text(value, at) {
+            return Ok(Self::Text(held));
+        }
+        if let Ok(held) = ResolverKeySourceResultGetsItemObject::decode_at(value, at) {
+            return Ok(Self::Object(held));
+        }
+        Err(shape::refused(at, "no branch matches"))
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Text(held) => Value::from(held.as_str()),
+            Self::Object(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverKeySourceResultGetsItemObject {}
+
+impl Shape for ResolverKeySourceResultGetsItemObject {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "forbidden", at, |value, at| {
+            shape::is_flag(value, at, true)
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("forbidden", Value::Bool(true));
         Value::Object(object)
     }
 }
@@ -27850,6 +28389,7 @@ impl Shape for ResolverRoutesInputStepsItem {
 #[derive(Debug, Clone, PartialEq)]
 pub struct ResolverRoutesInputAnswersValueKey {
     pub key: String,
+    pub bound_to: Option<String>,
 }
 
 impl Shape for ResolverRoutesInputAnswersValueKey {
@@ -27859,13 +28399,17 @@ impl Shape for ResolverRoutesInputAnswersValueKey {
             shape::is_text(value, at, "key")
         })?;
         let key = shape::required(object, "key", at, shape::text)?;
-        Ok(Self { key })
+        let bound_to = shape::optional(object, "boundTo", at, shape::text)?;
+        Ok(Self { key, bound_to })
     }
 
     fn encode(&self) -> Value {
         let mut object = Object::new();
         object.insert("kind", Value::from("key"));
         object.insert("key", Value::from(self.key.as_str()));
+        if let Some(held) = &self.bound_to {
+            object.insert("boundTo", Value::from(held.as_str()));
+        }
         Value::Object(object)
     }
 }
@@ -28718,6 +29262,7 @@ impl Shape for ResolverRoutesInputStepsItemDuringCall {
 #[derive(Debug, Clone, PartialEq)]
 pub struct ResolverRoutesInputStepsItemAnswerAnswerKey {
     pub key: String,
+    pub bound_to: Option<String>,
 }
 
 impl Shape for ResolverRoutesInputStepsItemAnswerAnswerKey {
@@ -28727,13 +29272,17 @@ impl Shape for ResolverRoutesInputStepsItemAnswerAnswerKey {
             shape::is_text(value, at, "key")
         })?;
         let key = shape::required(object, "key", at, shape::text)?;
-        Ok(Self { key })
+        let bound_to = shape::optional(object, "boundTo", at, shape::text)?;
+        Ok(Self { key, bound_to })
     }
 
     fn encode(&self) -> Value {
         let mut object = Object::new();
         object.insert("kind", Value::from("key"));
         object.insert("key", Value::from(self.key.as_str()));
+        if let Some(held) = &self.bound_to {
+            object.insert("boundTo", Value::from(held.as_str()));
+        }
         Value::Object(object)
     }
 }
@@ -29188,6 +29737,7 @@ impl Shape for ResolverRoutesInputStepsItemDuringCallSendFail {
 #[derive(Debug, Clone, PartialEq)]
 pub struct ResolverRoutesInputStepsItemDuringChangesItemAnswerAnswerKey {
     pub key: String,
+    pub bound_to: Option<String>,
 }
 
 impl Shape for ResolverRoutesInputStepsItemDuringChangesItemAnswerAnswerKey {
@@ -29197,13 +29747,17 @@ impl Shape for ResolverRoutesInputStepsItemDuringChangesItemAnswerAnswerKey {
             shape::is_text(value, at, "key")
         })?;
         let key = shape::required(object, "key", at, shape::text)?;
-        Ok(Self { key })
+        let bound_to = shape::optional(object, "boundTo", at, shape::text)?;
+        Ok(Self { key, bound_to })
     }
 
     fn encode(&self) -> Value {
         let mut object = Object::new();
         object.insert("kind", Value::from("key"));
         object.insert("key", Value::from(self.key.as_str()));
+        if let Some(held) = &self.bound_to {
+            object.insert("boundTo", Value::from(held.as_str()));
+        }
         Value::Object(object)
     }
 }
@@ -33207,6 +33761,7 @@ impl Shape for HealthKeyAnswer {
 #[derive(Debug, Clone, PartialEq)]
 pub struct HealthKeyAnswerKey {
     pub key: String,
+    pub bound_to: Option<String>,
 }
 
 impl Shape for HealthKeyAnswerKey {
@@ -33216,13 +33771,17 @@ impl Shape for HealthKeyAnswerKey {
             shape::is_text(value, at, "key")
         })?;
         let key = shape::required(object, "key", at, shape::text)?;
-        Ok(Self { key })
+        let bound_to = shape::optional(object, "boundTo", at, shape::text)?;
+        Ok(Self { key, bound_to })
     }
 
     fn encode(&self) -> Value {
         let mut object = Object::new();
         object.insert("kind", Value::from("key"));
         object.insert("key", Value::from(self.key.as_str()));
+        if let Some(held) = &self.bound_to {
+            object.insert("boundTo", Value::from(held.as_str()));
+        }
         Value::Object(object)
     }
 }
@@ -33280,6 +33839,167 @@ impl Shape for HealthKeyAnswerUnready {
     fn encode(&self) -> Value {
         let mut object = Object::new();
         object.insert("kind", Value::from("unready"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum HealthKeyRead {
+    Key(HealthKeyReadKey),
+    None(HealthKeyReadNone),
+    Refused(HealthKeyReadRefused),
+    Unready(HealthKeyReadUnready),
+    Foreign(HealthKeyReadForeign),
+    Insecure(HealthKeyReadInsecure),
+}
+
+impl Shape for HealthKeyRead {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "key" => HealthKeyReadKey::decode_at(value, at).map(Self::Key),
+            "none" => HealthKeyReadNone::decode_at(value, at).map(Self::None),
+            "refused" => HealthKeyReadRefused::decode_at(value, at).map(Self::Refused),
+            "unready" => HealthKeyReadUnready::decode_at(value, at).map(Self::Unready),
+            "foreign" => HealthKeyReadForeign::decode_at(value, at).map(Self::Foreign),
+            "insecure" => HealthKeyReadInsecure::decode_at(value, at).map(Self::Insecure),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Key(held) => held.encode(),
+            Self::None(held) => held.encode(),
+            Self::Refused(held) => held.encode(),
+            Self::Unready(held) => held.encode(),
+            Self::Foreign(held) => held.encode(),
+            Self::Insecure(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HealthKeyReadKey {
+    pub key: String,
+    pub bound_to: String,
+}
+
+impl Shape for HealthKeyReadKey {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "key")
+        })?;
+        let key = shape::required(object, "key", at, shape::text)?;
+        let bound_to = shape::required(object, "boundTo", at, shape::text)?;
+        Ok(Self { key, bound_to })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("key"));
+        object.insert("key", Value::from(self.key.as_str()));
+        object.insert("boundTo", Value::from(self.bound_to.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HealthKeyReadNone {}
+
+impl Shape for HealthKeyReadNone {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "none")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("none"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HealthKeyReadRefused {}
+
+impl Shape for HealthKeyReadRefused {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "refused")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("refused"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HealthKeyReadUnready {}
+
+impl Shape for HealthKeyReadUnready {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "unready")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("unready"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HealthKeyReadForeign {
+    pub bound_to: String,
+}
+
+impl Shape for HealthKeyReadForeign {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "foreign")
+        })?;
+        let bound_to = shape::required(object, "boundTo", at, shape::text)?;
+        Ok(Self { bound_to })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("foreign"));
+        object.insert("boundTo", Value::from(self.bound_to.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HealthKeyReadInsecure {}
+
+impl Shape for HealthKeyReadInsecure {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "insecure")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("insecure"));
         Value::Object(object)
     }
 }
@@ -34309,7 +35029,7 @@ impl Shape for HealthRunResultStepsItemAnswerNone {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct HealthRunResultStepsItemAnswerKeys {
-    pub answer: HealthKeyAnswer,
+    pub answer: HealthKeyRead,
 }
 
 impl Shape for HealthRunResultStepsItemAnswerKeys {
@@ -34318,7 +35038,7 @@ impl Shape for HealthRunResultStepsItemAnswerKeys {
         shape::required(object, "kind", at, |value, at| {
             shape::is_text(value, at, "keys")
         })?;
-        let answer = shape::required(object, "answer", at, HealthKeyAnswer::decode_at)?;
+        let answer = shape::required(object, "answer", at, HealthKeyRead::decode_at)?;
         Ok(Self { answer })
     }
 
@@ -34935,6 +35655,295 @@ impl Shape for HealthRegistryResultStepsItem {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+pub struct HealthVouchedInput {
+    pub entries: Vec<nyaaai_contract::shapes::provider::ProviderEntry>,
+    pub configured: Record<String>,
+    pub steps: Vec<HealthVouchedInputStepsItem>,
+}
+
+impl Shape for HealthVouchedInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let entries = shape::required(object, "entries", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::ProviderEntry::decode_at,
+            )
+        })?;
+        let configured = shape::required(object, "configured", at, |value, at| {
+            shape::record(value, at, shape::text)
+        })?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list_within(
+                value,
+                at,
+                Some(1),
+                None,
+                HealthVouchedInputStepsItem::decode_at,
+            )
+        })?;
+        Ok(Self {
+            entries,
+            configured,
+            steps,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "entries",
+            Value::Array(self.entries.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "configured",
+            shape::record_value(&self.configured, |held| Value::from(held.as_str())),
+        );
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum HealthVouchedInputStepsItem {
+    Read(HealthVouchedInputStepsItemRead),
+    Release(HealthVouchedInputStepsItemRelease),
+    List(HealthVouchedInputStepsItemList),
+    Configure(HealthVouchedInputStepsItemConfigure),
+}
+
+impl Shape for HealthVouchedInputStepsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "read" => HealthVouchedInputStepsItemRead::decode_at(value, at).map(Self::Read),
+            "release" => {
+                HealthVouchedInputStepsItemRelease::decode_at(value, at).map(Self::Release)
+            }
+            "list" => HealthVouchedInputStepsItemList::decode_at(value, at).map(Self::List),
+            "configure" => {
+                HealthVouchedInputStepsItemConfigure::decode_at(value, at).map(Self::Configure)
+            }
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Read(held) => held.encode(),
+            Self::Release(held) => held.encode(),
+            Self::List(held) => held.encode(),
+            Self::Configure(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HealthVouchedInputStepsItemRead {
+    pub id: String,
+    pub hold: Option<()>,
+}
+
+impl Shape for HealthVouchedInputStepsItemRead {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "read")
+        })?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let hold = shape::optional(object, "hold", at, |value, at| {
+            shape::is_flag(value, at, true)
+        })?;
+        Ok(Self { id, hold })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("read"));
+        object.insert("id", Value::from(self.id.as_str()));
+        if self.hold.is_some() {
+            object.insert("hold", Value::Bool(true));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HealthVouchedInputStepsItemRelease {}
+
+impl Shape for HealthVouchedInputStepsItemRelease {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "release")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("release"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HealthVouchedInputStepsItemList {
+    pub entries: Vec<nyaaai_contract::shapes::provider::ProviderEntry>,
+}
+
+impl Shape for HealthVouchedInputStepsItemList {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "list")
+        })?;
+        let entries = shape::required(object, "entries", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                nyaaai_contract::shapes::provider::ProviderEntry::decode_at,
+            )
+        })?;
+        Ok(Self { entries })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("list"));
+        object.insert(
+            "entries",
+            Value::Array(self.entries.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HealthVouchedInputStepsItemConfigure {
+    pub id: String,
+    pub key: Option<String>,
+}
+
+impl Shape for HealthVouchedInputStepsItemConfigure {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "configure")
+        })?;
+        let id = shape::required(object, "id", at, shape::text)?;
+        let key = shape::required(object, "key", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        Ok(Self { id, key })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("configure"));
+        object.insert("id", Value::from(self.id.as_str()));
+        object.insert(
+            "key",
+            self.key
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HealthVouchedResult {
+    pub steps: Vec<HealthVouchedResultStepsItem>,
+}
+
+impl Shape for HealthVouchedResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list(value, at, HealthVouchedResultStepsItem::decode_at)
+        })?;
+        Ok(Self { steps })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HealthVouchedResultStepsItem {
+    pub answers: Vec<HealthVouchedResultStepsItemAnswersItem>,
+    pub told: Vec<String>,
+}
+
+impl Shape for HealthVouchedResultStepsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let answers = shape::required(object, "answers", at, |value, at| {
+            shape::list(
+                value,
+                at,
+                HealthVouchedResultStepsItemAnswersItem::decode_at,
+            )
+        })?;
+        let told = shape::required(object, "told", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self { answers, told })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "answers",
+            Value::Array(self.answers.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "told",
+            Value::Array(
+                self.told
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HealthVouchedResultStepsItemAnswersItem {
+    pub read: i64,
+    pub answer: HealthKeyRead,
+}
+
+impl Shape for HealthVouchedResultStepsItemAnswersItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let read = shape::required(object, "read", at, shape::integer)?;
+        let answer = shape::required(object, "answer", at, HealthKeyRead::decode_at)?;
+        Ok(Self { read, answer })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("read", Value::Number(self.read as f64));
+        object.insert("answer", self.answer.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct HealthKeysInput {
     pub rows: Vec<HealthKeysInputRowsItem>,
 }
@@ -35121,7 +36130,7 @@ impl Shape for HealthKeysResult {
 #[derive(Debug, Clone, PartialEq)]
 pub struct HealthKeysResultRowsItem {
     pub status: nyaaai_contract::shapes::provider::KeyState,
-    pub answers: Vec<HealthKeyAnswer>,
+    pub answers: Vec<HealthKeyRead>,
     pub status_after: nyaaai_contract::shapes::provider::KeyState,
     pub told: Vec<String>,
     pub told_after: Vec<String>,
@@ -35138,7 +36147,7 @@ impl Shape for HealthKeysResultRowsItem {
             nyaaai_contract::shapes::provider::KeyState::decode_at,
         )?;
         let answers = shape::required(object, "answers", at, |value, at| {
-            shape::list(value, at, HealthKeyAnswer::decode_at)
+            shape::list(value, at, HealthKeyRead::decode_at)
         })?;
         let status_after = shape::required(
             object,
@@ -35227,6 +36236,7 @@ impl Shape for LifeKeyAnswer {
 #[derive(Debug, Clone, PartialEq)]
 pub struct LifeKeyAnswerKey {
     pub key: String,
+    pub bound_to: Option<String>,
 }
 
 impl Shape for LifeKeyAnswerKey {
@@ -35236,13 +36246,17 @@ impl Shape for LifeKeyAnswerKey {
             shape::is_text(value, at, "key")
         })?;
         let key = shape::required(object, "key", at, shape::text)?;
-        Ok(Self { key })
+        let bound_to = shape::optional(object, "boundTo", at, shape::text)?;
+        Ok(Self { key, bound_to })
     }
 
     fn encode(&self) -> Value {
         let mut object = Object::new();
         object.insert("kind", Value::from("key"));
         object.insert("key", Value::from(self.key.as_str()));
+        if let Some(held) = &self.bound_to {
+            object.insert("boundTo", Value::from(held.as_str()));
+        }
         Value::Object(object)
     }
 }

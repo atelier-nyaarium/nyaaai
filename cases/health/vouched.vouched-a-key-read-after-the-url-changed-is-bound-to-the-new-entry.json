@@ -1,0 +1,77 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.vouched",
+	"name": "vouched-a-key-read-after-the-url-changed-is-bound-to-the-new-entry",
+	"input": {
+		"entries": [
+			{
+				"id": "host",
+				"kind": "compatible",
+				"label": "Host",
+				"url": "http://lab.local:8000/v1"
+			}
+		],
+		"configured": {
+			"host": "fake-key-one"
+		},
+		"steps": [
+			{
+				"kind": "read",
+				"id": "host"
+			},
+			{
+				"kind": "list",
+				"entries": [
+					{
+						"id": "host",
+						"kind": "compatible",
+						"label": "Host",
+						"url": "http://lab2.local:8000/v1"
+					}
+				]
+			},
+			{
+				"kind": "read",
+				"id": "host"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answers": [
+					{
+						"read": 1,
+						"answer": {
+							"kind": "key",
+							"key": "fake-key-one",
+							"boundTo": "compatible http://lab.local:8000"
+						}
+					}
+				],
+				"told": []
+			},
+			{
+				"answers": [],
+				"told": [
+					"retired:host#1 1",
+					"added:host#2 2"
+				]
+			},
+			{
+				"answers": [
+					{
+						"read": 2,
+						"answer": {
+							"kind": "key",
+							"key": "fake-key-one",
+							"boundTo": "compatible http://lab2.local:8000"
+						}
+					}
+				],
+				"told": []
+			}
+		]
+	}
+}

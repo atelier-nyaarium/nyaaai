@@ -39,7 +39,7 @@
 	},
 	"expected": {
 		"gets": [
-			"fake-key-one",
+			null,
 			null
 		]
 	}

@@ -1,0 +1,251 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "lifecycle.run",
+	"name": "insecure-a-route-over-https-gets-the-key",
+	"input": {
+		"startMs": 1794052800000,
+		"entries": [
+			{
+				"id": "s",
+				"kind": "compatible",
+				"label": "Secure",
+				"url": "https://api.example.test/v1"
+			}
+		],
+		"keys": {
+			"s": {
+				"kind": "key",
+				"key": "fake-key-one"
+			}
+		},
+		"rows": [
+			"compatible:qwen"
+		],
+		"kinds": [
+			"compatible"
+		],
+		"listings": {},
+		"zdrOnly": false,
+		"exchanges": [
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Secure\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":100,\"completion_tokens\":10,\"cost\":0.001}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			}
+		],
+		"steps": [
+			{
+				"kind": "send",
+				"call": "first",
+				"model": "compatible:qwen",
+				"tag": {
+					"feature": "chat"
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1794052800000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"first"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "s",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 1
+			}
+		],
+		"calls": [
+			{
+				"call": "first",
+				"result": {
+					"kind": "served",
+					"entry": "s",
+					"reply": {
+						"parts": [
+							{
+								"kind": "text",
+								"text": "Secure"
+							}
+						],
+						"finish": "stop",
+						"usage": {
+							"input": 100,
+							"output": 10
+						},
+						"serving": {
+							"host": "Secure",
+							"generationId": "gen-1"
+						}
+					}
+				},
+				"trace": [
+					{
+						"kind": "admitted",
+						"entry": "s",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "s\ncompatible:qwen",
+								"era": 1,
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "s",
+						"model": "compatible:qwen",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "compatible:qwen",
+							"entry": "s",
+							"label": "Secure",
+							"at": 1794052800000,
+							"ms": 0,
+							"firstTokenMs": 0,
+							"usage": {
+								"input": 100,
+								"output": 10
+							},
+							"cost": {
+								"usd": 0,
+								"estimated": true
+							},
+							"provider": "Secure",
+							"generationId": "gen-1",
+							"finishReason": "stop"
+						}
+					},
+					{
+						"kind": "settled",
+						"entry": "s",
+						"outcome": "ok",
+						"answer": "done"
+					},
+					{
+						"kind": "billing",
+						"entry": "s",
+						"reply": "ok",
+						"usage": {
+							"input": 100,
+							"output": 10
+						}
+					},
+					{
+						"kind": "served",
+						"entry": "s",
+						"label": "Secure",
+						"model": "compatible:qwen"
+					}
+				],
+				"told": [],
+				"attempts": [
+					{
+						"entry": "s",
+						"events": [
+							{
+								"kind": "serving",
+								"serving": {
+									"host": "Secure",
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "text",
+								"text": "Secure"
+							},
+							{
+								"kind": "serving",
+								"serving": {
+									"host": "Secure",
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "finish",
+								"reason": "stop"
+							},
+							{
+								"kind": "usage",
+								"usage": {
+									"input": 100,
+									"output": 10
+								}
+							}
+						]
+					}
+				]
+			}
+		],
+		"requests": [
+			{
+				"url": "https://api.example.test/v1/chat/completions",
+				"authorization": "Bearer fake-key-one",
+				"accept": "text/event-stream"
+			}
+		],
+		"recorded": [
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "compatible:qwen",
+				"entry": "s",
+				"label": "Secure",
+				"at": 1794052800000,
+				"ms": 0,
+				"firstTokenMs": 0,
+				"usage": {
+					"input": 100,
+					"output": 10
+				},
+				"cost": {
+					"usd": 0,
+					"estimated": true
+				},
+				"provider": "Secure",
+				"generationId": "gen-1",
+				"finishReason": "stop"
+			}
+		],
+		"stats": [],
+		"waiting": []
+	}
+}

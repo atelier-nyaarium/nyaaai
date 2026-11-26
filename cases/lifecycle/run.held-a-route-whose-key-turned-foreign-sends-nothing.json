@@ -1,0 +1,161 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "lifecycle.run",
+	"name": "held-a-route-whose-key-turned-foreign-sends-nothing",
+	"input": {
+		"startMs": 1794052800000,
+		"entries": [
+			{
+				"id": "l",
+				"kind": "compatible",
+				"label": "Lab",
+				"url": "http://lab.local:8000/v1"
+			}
+		],
+		"keys": {
+			"l": {
+				"kind": "key",
+				"key": "fake-key-one"
+			}
+		},
+		"rows": [
+			"compatible:qwen"
+		],
+		"kinds": [
+			"compatible"
+		],
+		"listings": {},
+		"zdrOnly": false,
+		"exchanges": [],
+		"steps": [
+			{
+				"kind": "plan",
+				"name": "held",
+				"model": "compatible:qwen"
+			},
+			{
+				"kind": "key",
+				"id": "l",
+				"answer": {
+					"kind": "key",
+					"key": "fake-key-one",
+					"boundTo": "compatible https://other.example.test"
+				}
+			},
+			{
+				"kind": "send",
+				"call": "after",
+				"model": "compatible:qwen",
+				"tag": {
+					"feature": "chat"
+				},
+				"plan": "held"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1794052800000,
+				"answer": {
+					"kind": "plan",
+					"unresolved": null,
+					"candidates": [
+						"l"
+					],
+					"passed": []
+				},
+				"ended": [],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "l",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 0
+			},
+			{
+				"nowMs": 1794052800000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "l",
+						"key": {
+							"kind": "foreign",
+							"for": "other.example.test"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 0
+			},
+			{
+				"nowMs": 1794052800000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"after"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "l",
+						"key": {
+							"kind": "foreign",
+							"for": "other.example.test"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 0
+			}
+		],
+		"calls": [
+			{
+				"call": "after",
+				"result": {
+					"kind": "notice",
+					"notice": {
+						"kind": "keyMissing",
+						"entry": "Lab"
+					},
+					"failure": null
+				},
+				"trace": [
+					{
+						"kind": "notice",
+						"notice": {
+							"kind": "keyMissing",
+							"entry": "Lab"
+						}
+					}
+				],
+				"told": [],
+				"attempts": []
+			}
+		],
+		"requests": [],
+		"recorded": [],
+		"stats": [],
+		"waiting": []
+	}
+}

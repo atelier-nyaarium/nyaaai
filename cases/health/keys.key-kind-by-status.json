@@ -148,7 +148,8 @@
 				"answers": [
 					{
 						"kind": "key",
-						"key": "fake-key-one"
+						"key": "fake-key-one",
+						"boundTo": "openrouter"
 					}
 				],
 				"statusAfter": {
@@ -181,7 +182,8 @@
 				"answers": [
 					{
 						"kind": "key",
-						"key": "fake-key-one"
+						"key": "fake-key-one",
+						"boundTo": "openrouter"
 					}
 				],
 				"statusAfter": {
@@ -200,7 +202,8 @@
 				"answers": [
 					{
 						"kind": "key",
-						"key": "fake-key-one"
+						"key": "fake-key-one",
+						"boundTo": "openrouter"
 					}
 				],
 				"statusAfter": {
@@ -268,7 +271,8 @@
 				"answers": [
 					{
 						"kind": "key",
-						"key": "fake-key-one"
+						"key": "fake-key-one",
+						"boundTo": "openrouter"
 					}
 				],
 				"statusAfter": {

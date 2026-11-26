@@ -7,9 +7,11 @@ use std::sync::{Arc, Mutex, MutexGuard};
 use nyaaai_agentic::codec::Codec;
 use nyaaai_agentic::health::gate::Phase;
 use nyaaai_agentic::health::health::{Billing, Gate, HealthDeps, ProviderHealth, RouteRef};
+use nyaaai_agentic::provider::entry::{KeyKind, KindField};
 use nyaaai_agentic::provider::incarnation::{EntryRegistry, Incarnation, RegistryEvent};
+use nyaaai_agentic::provider::keyring::{KeyRead, VouchedRead, vouched_keys};
 use nyaaai_agentic::provider::kind::{
-    CatalogDeps, EntryCatalog, KINDS, KindDeps, KindError, KindField, ProviderKind,
+    CatalogDeps, EntryCatalog, KINDS, KindDeps, KindError, ProviderKind,
 };
 use nyaaai_agentic::transport::{KeySource, Transport};
 use nyaaai_contract::cancel::{CancelToken, Unsubscribe};
@@ -20,7 +22,7 @@ use nyaaai_contract::id::CountedIds;
 use nyaaai_contract::shapes::health::{Admission, HealthChange, Ticket};
 use nyaaai_contract::shapes::model::ModelView;
 use nyaaai_contract::shapes::provider::{
-    EntryFields, KeyState, KeyStateNone, ProviderEntry, ProviderKindName,
+    EntryFields, KeyState, KeyStateNone, ProviderEntry, ProviderKindName, ProviderPlan,
 };
 use nyaaai_contract::shapes::step::{Failure, FailureCategory, FailureStatus, NormalizedUsage};
 use nyaaai_contract::time::Clock;
@@ -29,6 +31,7 @@ use nyaaai_testkit::cases::block_on;
 use nyaaai_testkit::scripted_ports::{ScriptedEntryKeys, ScriptedProviderList};
 use tokio::sync::{oneshot, watch};
 
+use super::entry::{listed, planted};
 use super::local::net_of;
 use super::shapes::*;
 
@@ -38,21 +41,28 @@ fn locked<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
         .unwrap_or_else(|poisoned| poisoned.into_inner())
 }
 
-fn answer_of(held: &HealthKeyAnswer) -> KeyAnswer {
+/// The store's answer, a key planted for the entry given.
+fn answer_of(held: &HealthKeyAnswer, entry: Option<&ProviderEntry>) -> KeyAnswer {
     match held {
-        HealthKeyAnswer::Key(held) => KeyAnswer::Key(held.key.clone()),
+        HealthKeyAnswer::Key(held) => planted(&held.key, held.bound_to.as_deref(), entry),
         HealthKeyAnswer::None(_) => KeyAnswer::None,
         HealthKeyAnswer::Refused(_) => KeyAnswer::Refused,
         HealthKeyAnswer::Unready(_) => KeyAnswer::Unready,
     }
 }
 
-fn shown_of(held: &KeyAnswer) -> HealthKeyAnswer {
+fn read_of(held: KeyAnswer) -> HealthKeyRead {
+    shown_of(KeyRead::from(held))
+}
+
+fn shown_of(held: KeyRead) -> HealthKeyRead {
     match held {
-        KeyAnswer::Key(key) => HealthKeyAnswer::Key(HealthKeyAnswerKey { key: key.clone() }),
-        KeyAnswer::None => HealthKeyAnswer::None(HealthKeyAnswerNone {}),
-        KeyAnswer::Refused => HealthKeyAnswer::Refused(HealthKeyAnswerRefused {}),
-        KeyAnswer::Unready => HealthKeyAnswer::Unready(HealthKeyAnswerUnready {}),
+        KeyRead::Key { key, bound_to } => HealthKeyRead::Key(HealthKeyReadKey { key, bound_to }),
+        KeyRead::None => HealthKeyRead::None(HealthKeyReadNone {}),
+        KeyRead::Refused => HealthKeyRead::Refused(HealthKeyReadRefused {}),
+        KeyRead::Unready => HealthKeyRead::Unready(HealthKeyReadUnready {}),
+        KeyRead::Foreign { bound_to } => HealthKeyRead::Foreign(HealthKeyReadForeign { bound_to }),
+        KeyRead::Insecure => HealthKeyRead::Insecure(HealthKeyReadInsecure {}),
     }
 }
 
@@ -131,7 +141,7 @@ fn deps_of(
 #[derive(Default)]
 struct Go {
     state: Option<KeyState>,
-    answer: Option<KeyAnswer>,
+    answer: Option<HealthKeyAnswer>,
 }
 
 /// A place a check parks until the script releases it.
@@ -194,6 +204,7 @@ struct Armed {
 /// The store's keys, whose next read can be held.
 struct Held {
     raw: Arc<ScriptedEntryKeys>,
+    list: Arc<ScriptedProviderList>,
     armed: Arc<Armed>,
 }
 
@@ -206,7 +217,7 @@ impl EntryKeys for Held {
         Box::pin(async move {
             hold.arrive();
             match hold.released().await.answer {
-                Some(answer) => answer,
+                Some(answer) => answer_of(&answer, listed(&*self.list, &id).as_ref()),
                 None => self.raw.get(&id).await,
             }
         })
@@ -223,7 +234,7 @@ struct Parking {
     armed: Arc<Armed>,
 }
 
-impl ProviderKind for Parking {
+impl KeyKind for Parking {
     fn kind(&self) -> ProviderKindName {
         self.real.kind()
     }
@@ -232,12 +243,26 @@ impl ProviderKind for Parking {
         self.real.label()
     }
 
+    fn plans(&self) -> &[(ProviderPlan, &'static str)] {
+        self.real.plans()
+    }
+
+    fn default_plan(&self) -> Option<ProviderPlan> {
+        self.real.default_plan()
+    }
+
     fn field(&self) -> KindField {
         self.real.field()
     }
 
     fn optional_key(&self) -> bool {
         self.real.optional_key()
+    }
+}
+
+impl ProviderKind for Parking {
+    fn address(&self, entry: &EntryFields) -> Option<String> {
+        self.real.address(entry)
     }
 
     fn check<'a>(
@@ -316,13 +341,15 @@ async fn play(input: HealthRunInput) -> Outcome<HealthRunResult> {
     let list = Arc::new(ScriptedProviderList::new(input.entries.clone()));
     let raw = Arc::new(ScriptedEntryKeys::new());
     for (id, answer) in input.keys.iter() {
-        raw.set(id, answer_of(answer));
+        let entry = input.entries.iter().find(|each| each.id == id);
+        raw.set(id, answer_of(answer, entry));
     }
     let entries = Arc::new(EntryRegistry::new(list.clone(), &*raw));
     let armed: Arc<Armed> = Arc::default();
     let mut holds: Vec<Arc<Hold>> = Vec::new();
     let keys = Arc::new(Held {
         raw: Arc::clone(&raw),
+        list: Arc::clone(&list),
         armed: Arc::clone(&armed),
     });
     let mut deps = deps_of(
@@ -398,7 +425,7 @@ async fn play(input: HealthRunInput) -> Outcome<HealthRunResult> {
                     .ok_or_else(|| format!("No hold {}.", held.hold))?;
                 hold.let_go(Go {
                     state: held.state.clone(),
-                    answer: held.answer.as_ref().map(answer_of),
+                    answer: held.answer.clone(),
                 });
             }
             HealthRunInputStepsItem::ListenAndCheck(held) => {
@@ -412,7 +439,8 @@ async fn play(input: HealthRunInput) -> Outcome<HealthRunResult> {
             }
             HealthRunInputStepsItem::Key(held) => {
                 name(&named, &held.id);
-                raw.set(&held.id, answer_of(&held.answer));
+                let entry = listed(&*list, &held.id);
+                raw.set(&held.id, answer_of(&held.answer, entry.as_ref()));
             }
             HealthRunInputStepsItem::Check(held) => {
                 name(&named, &held.id);
@@ -423,7 +451,7 @@ async fn play(input: HealthRunInput) -> Outcome<HealthRunResult> {
                 name(&named, &held.id);
                 let answered = health.entry_keys().get(&held.id).await;
                 answer = HealthRunResultStepsItemAnswer::Keys(HealthRunResultStepsItemAnswerKeys {
-                    answer: shown_of(&answered),
+                    answer: shown_of(answered),
                 });
             }
             HealthRunInputStepsItem::Served(held) => {
@@ -578,7 +606,7 @@ async fn play(input: HealthRunInput) -> Outcome<HealthRunResult> {
                 },
                 HealthRunInputStepsItemHoldAt::Store => Go {
                     state: None,
-                    answer: Some(KeyAnswer::None),
+                    answer: Some(HealthKeyAnswer::None(HealthKeyAnswerNone {})),
                 },
             });
         }
@@ -663,6 +691,114 @@ fn text_of(event: &RegistryEvent) -> String {
     format!("{kind}:{}#{}", incarnation.id, incarnation.number)
 }
 
+/// The host's configured keys; its next read can be held.
+#[derive(Default)]
+struct Configured {
+    keys: Mutex<HashMap<String, String>>,
+    listeners: Mutex<Vec<KeyListener>>,
+    hold_next: AtomicBool,
+    releases: Mutex<Vec<oneshot::Sender<()>>>,
+}
+
+impl VouchedRead for Configured {
+    fn get(&self, id: &str) -> BoxFuture<'_, Option<String>> {
+        if !self.hold_next.swap(false, Ordering::SeqCst) {
+            let key = locked(&self.keys).get(id).cloned();
+            return Box::pin(async move { key });
+        }
+        let (release, wait) = oneshot::channel();
+        locked(&self.releases).push(release);
+        let id = id.to_owned();
+        Box::pin(async move {
+            let _ = wait.await;
+            locked(&self.keys).get(&id).cloned()
+        })
+    }
+
+    fn on_change(&self, listener: Box<dyn Fn(&str) + Send + Sync>) -> Unsubscribe {
+        locked(&self.listeners).push(Arc::from(listener));
+        Box::new(|| {})
+    }
+}
+
+pub fn vouched(input: HealthVouchedInput) -> Outcome<HealthVouchedResult> {
+    block_on(vouch(input))
+}
+
+async fn vouch(input: HealthVouchedInput) -> HealthVouchedResult {
+    let list = Arc::new(ScriptedProviderList::new(input.entries.clone()));
+    let configured = Arc::new(Configured::default());
+    for (id, key) in input.configured.iter() {
+        locked(&configured.keys).insert(id.to_owned(), key.clone());
+    }
+    let keys = vouched_keys(configured.clone(), list.clone(), KINDS.clone());
+    let entries = EntryRegistry::new(list.clone(), &*keys);
+    let told: Arc<Mutex<Vec<String>>> = Arc::default();
+    {
+        let told = Arc::clone(&told);
+        drop(entries.watch(Arc::new(move |events: &[RegistryEvent]| {
+            for event in events {
+                let incarnation = incarnation_of(event);
+                let era = incarnation.era().number;
+                locked(&told).push(format!("{} {era}", text_of(event)));
+            }
+        })));
+    }
+    let mut pending: Vec<(i64, BoxFuture<'_, KeyAnswer>)> = Vec::new();
+    let mut reads = 0;
+    let mut steps = Vec::new();
+    for step in &input.steps {
+        match step {
+            HealthVouchedInputStepsItem::Read(held) => {
+                reads += 1;
+                configured
+                    .hold_next
+                    .store(held.hold.is_some(), Ordering::SeqCst);
+                pending.push((reads, keys.get(&held.id)));
+            }
+            HealthVouchedInputStepsItem::Release(_) => {
+                for release in std::mem::take(&mut *locked(&configured.releases)) {
+                    let _ = release.send(());
+                }
+            }
+            HealthVouchedInputStepsItem::List(held) => list.set(held.entries.clone()),
+            HealthVouchedInputStepsItem::Configure(held) => {
+                match &held.key {
+                    None => locked(&configured.keys).remove(&held.id),
+                    Some(key) => locked(&configured.keys).insert(held.id.clone(), key.clone()),
+                };
+                let listeners: Vec<KeyListener> = locked(&configured.listeners).clone();
+                for listener in listeners {
+                    listener(&held.id);
+                }
+            }
+        }
+        let mut answers = Vec::new();
+        if locked(&configured.releases).is_empty() {
+            for (read, ended) in pending.drain(..) {
+                answers.push(HealthVouchedResultStepsItemAnswersItem {
+                    read,
+                    answer: read_of(ended.await),
+                });
+            }
+        }
+        steps.push(HealthVouchedResultStepsItem {
+            answers,
+            told: std::mem::take(&mut *locked(&told)),
+        });
+    }
+    entries.dispose();
+    HealthVouchedResult { steps }
+}
+
+fn incarnation_of(event: &RegistryEvent) -> &Arc<Incarnation> {
+    match event {
+        RegistryEvent::Added(held) | RegistryEvent::Retired(held) => held,
+        RegistryEvent::ExtraUsage { incarnation, .. }
+        | RegistryEvent::Rekeyed { incarnation, .. } => incarnation,
+    }
+}
+
 pub fn registry(input: HealthRegistryInput) -> Outcome<HealthRegistryResult> {
     let list = Arc::new(ScriptedProviderList::new(input.entries.clone()));
     let raw = Arc::new(ScriptedEntryKeys::new());
@@ -731,7 +867,7 @@ async fn ask(input: HealthKeysInput) -> Outcome<HealthKeysResult> {
     for row in &input.rows {
         let net = net_of(0, &row.exchanges);
         let store = Arc::new(Store {
-            current: Mutex::new(answer_of(&row.stored)),
+            current: Mutex::new(answer_of(&row.stored, Some(&row.entry))),
             listeners: Mutex::new(Vec::new()),
             next: Mutex::new(0),
         });
@@ -797,12 +933,12 @@ async fn ask(input: HealthKeysInput) -> Outcome<HealthKeysResult> {
             }
         }
         if let Some(then) = &row.stored_then {
-            *locked(&store.current) = answer_of(then);
+            *locked(&store.current) = answer_of(then, Some(&row.entry));
         }
         let status = health.status(id);
         // The asks and the tells run before any check gets a turn.
         let keys = health.entry_keys();
-        let asks: Vec<BoxFuture<'_, KeyAnswer>> =
+        let asks: Vec<BoxFuture<'_, KeyRead>> =
             (0..row.asks.unwrap_or(1)).map(|_| keys.get(id)).collect();
         let heard: Arc<Mutex<Vec<String>>> = Arc::default();
         let stop = {
@@ -819,7 +955,7 @@ async fn ask(input: HealthKeysInput) -> Outcome<HealthKeysResult> {
         }
         let mut answers = Vec::new();
         for ask in asks {
-            answers.push(shown_of(&ask.await));
+            answers.push(shown_of(ask.await));
         }
         health.idle().await;
         let status_after = health.status(id);

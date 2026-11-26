@@ -1,6 +1,5 @@
 // Routes a model key across the provider list.
 
-import type { EntryKeys, KeyAnswer } from "@nyaaai/contract/entryKeys";
 import type { ModelRegistry } from "@nyaaai/contract/modelRegistry";
 import type { Binding, ModelRow, ModelUse, ModelView, Refusal, Unresolved, Via } from "@nyaaai/contract/shapes/model";
 import type { KeyReach, Passed, ProviderEntry, ProviderKindName, SkipReason } from "@nyaaai/contract/shapes/provider";
@@ -8,8 +7,9 @@ import type { Codec } from "../codec";
 import { joinAll } from "../kinds/join";
 import { parseRowKey, servedIdOf } from "../models/rowKey";
 import { unknownView } from "../models/view";
-import type { KeySource, Transport } from "../transport";
+import { FORBIDDEN, type KeySource, type Transport } from "../transport";
 import { type EntryRegistry, type Incarnation, identityOf, type RegistryEvent } from "./incarnation";
+import type { KeyRead, KeyReads } from "./keyring";
 import type { KindDeps, ProviderKind, Route } from "./kind";
 
 ////////////////////////////////
@@ -69,8 +69,8 @@ export type Served = ResolvedOption & { via: Via };
 export interface ResolverDeps {
 	/** Incarnations in priority order. */
 	entries: EntryRegistry;
-	/** Key reads go through it. */
-	keys: Pick<EntryKeys, "get">;
+	/** Key reads go through it: a host gives health's `entryKeys`. */
+	keys: Pick<KeyReads, "get">;
 	registry: Pick<ModelRegistry, "rows" | "onChange">;
 	kinds: Partial<Record<ProviderKindName, ProviderKind>>;
 	/** What a kind's transport stands on. */
@@ -132,8 +132,8 @@ export function viaOf(entry: ProviderEntry): Via {
 	return { entry: entry.id, label: entry.label };
 }
 
-/** A URL kind needs no key; a key kind needs one. */
-export function reachOf(kind: Pick<ProviderKind, "field">, answer: KeyAnswer): KeyReach {
+/** A URL kind needs no key; a key kind needs one; a key that may not be sent is missing for every kind. */
+export function reachOf(kind: Pick<ProviderKind, "field">, answer: KeyRead): KeyReach {
 	switch (answer.kind) {
 		case "key":
 			return "ok";
@@ -143,15 +143,20 @@ export function reachOf(kind: Pick<ProviderKind, "field">, answer: KeyAnswer): K
 			return "keyRejected";
 		case "unready":
 			return "unreachable";
+		case "foreign":
+		case "insecure":
+			return "keyMissing";
 	}
 }
 
-/** The key, only while its incarnation lives. */
-export function keySourceOf(keys: Pick<EntryKeys, "get">, incarnation: Incarnation): KeySource {
+/** The key, only while its incarnation lives; one that may not be sent forbids the call. */
+export function keySourceOf(keys: Pick<KeyReads, "get">, incarnation: Incarnation): KeySource {
 	return {
 		get: async () => {
-			const answer = await keys.get(incarnation.id).catch((): KeyAnswer => ({ kind: "unready" }));
-			return incarnation.live && answer.kind === "key" ? answer.key : undefined;
+			const answer = await keys.get(incarnation.id).catch((): KeyRead => ({ kind: "unready" }));
+			if (!incarnation.live) return undefined;
+			if (answer.kind === "foreign" || answer.kind === "insecure") return FORBIDDEN;
+			return answer.kind === "key" ? answer.key : undefined;
 		},
 	};
 }

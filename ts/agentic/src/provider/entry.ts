@@ -1,9 +1,29 @@
 // Provider entries and the reader of a stored list.
 
+import type { KeyAnswer } from "@nyaaai/contract/entryKeys";
+import { parseJson, stringifyJson } from "@nyaaai/contract/json";
 import { Pattern } from "@nyaaai/contract/pattern";
-import { type ProviderEntry, ProviderKindName, ProviderPlan } from "@nyaaai/contract/shapes/provider";
+import { type EntryFields, type ProviderEntry, ProviderKindName, ProviderPlan } from "@nyaaai/contract/shapes/provider";
 import { trimText } from "@nyaaai/contract/text";
 import { parseUrl, type UrlParts } from "@nyaaai/contract/url";
+
+////////////////////////////////
+//  Interfaces & Types
+
+/** What a kind tells of its key. */
+export interface KeyKind {
+	readonly label: string;
+	/** Plan dropdown lines. */
+	readonly plans?: readonly { plan: ProviderPlan; label: string }[];
+	/** The plan of an entry that names none. */
+	readonly defaultPlan?: ProviderPlan;
+	/** Add-form third field: `key` for the kind's own address. */
+	readonly field: "key" | "url";
+	/** A URL kind that takes a key at the entry's address. */
+	readonly optionalKey?: true;
+}
+
+export type KeyKinds = Partial<Record<ProviderKindName, KeyKind>>;
 
 ////////////////////////////////
 //  Constants
@@ -60,6 +80,58 @@ function serverBase(value: unknown): string | undefined {
 export function sameOrigin(left: string | undefined, right: string | undefined): boolean {
 	const origin = (url: string | undefined) => webUrl(url)?.origin;
 	return origin(left) !== undefined && origin(left) === origin(right);
+}
+
+/** A key for the kind's own address, or for the entry's. */
+export function takesKey(kind: KeyKind): boolean {
+	return kind.field === "key" || kind.optionalKey === true;
+}
+
+/** What a key is for: the kind, its effective plan, and the origin of an address the person gives. */
+export function keyBindingOf(fields: EntryFields, kinds: KeyKinds): string | undefined {
+	const kind = kinds[fields.kind];
+	if (kind === undefined || !takesKey(kind)) return undefined;
+	let binding: string = fields.kind;
+	if (kind.plans !== undefined && kind.plans.length > 0) {
+		const plan = fields.plan ?? kind.defaultPlan;
+		if (plan === undefined) return undefined;
+		binding += ` ${plan}`;
+	}
+	if (kind.field === "url") {
+		const origin = webUrl(fields.url)?.origin;
+		if (origin === undefined) return undefined;
+		binding += ` ${origin}`;
+	}
+	return binding;
+}
+
+/** The text a host stores for a key; none when the fields bind no key. */
+export function boundKey(fields: EntryFields, key: string, kinds: KeyKinds): string | undefined {
+	const binding = keyBindingOf(fields, kinds);
+	return binding === undefined ? undefined : stringifyJson({ v: 1, for: binding, key });
+}
+
+/** A stored text's key and binding; none for any other text. */
+export function readBoundKey(text: string): Extract<KeyAnswer, { kind: "key" | "none" }> {
+	const value = parseJson(text);
+	if (typeof value !== "object" || value === null || Array.isArray(value)) return { kind: "none" };
+	const held = value as Record<string, unknown>;
+	const key = held["key"];
+	const binding = held["for"];
+	const exact = Object.keys(held).length === 3 && held["v"] === 1;
+	return exact && typeof key === "string" && typeof binding === "string"
+		? { kind: "key", key, boundTo: binding }
+		: { kind: "none" };
+}
+
+/** Whom a binding names: its origin's host, else its kind's label, else its kind name. */
+export function boundFor(binding: string, kinds: KeyKinds): string {
+	const parts = binding.split(" ");
+	const host = parseUrl(parts[parts.length - 1] ?? "")?.host;
+	if (host !== undefined) return host;
+	const name = parts[0] ?? "";
+	const kind = PROVIDER_KINDS.find((each) => each === name);
+	return (kind === undefined ? undefined : kinds[kind]?.label) ?? name;
 }
 
 /** Parse a provider entry; the label counts UTF-16 units. */

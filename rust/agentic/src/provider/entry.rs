@@ -1,12 +1,47 @@
 //! Provider entry ids, URL rules and the lenient stored-list reader.
 
-use std::sync::LazyLock;
+use std::sync::{Arc, LazyLock};
 
-use nyaaai_contract::json::Value;
+use nyaaai_contract::entry_keys::KeyAnswer;
+use nyaaai_contract::json::{Object, Value, parse_json, stringify_json};
 use nyaaai_contract::pattern::Pattern;
-use nyaaai_contract::shapes::provider::{ProviderEntry, ProviderKindName, ProviderPlan};
+use nyaaai_contract::shapes::provider::{
+    EntryFields, ProviderEntry, ProviderKindName, ProviderPlan,
+};
 use nyaaai_contract::text::{text_length, trim_text};
 use nyaaai_contract::url::{UrlParts, parse_url};
+
+/// The third field of the add form.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum KindField {
+    Key,
+    Url,
+}
+
+/// What a kind tells of its key.
+pub trait KeyKind: Send + Sync {
+    fn kind(&self) -> ProviderKindName;
+
+    fn label(&self) -> &str;
+
+    /// Plan dropdown lines.
+    fn plans(&self) -> &[(ProviderPlan, &'static str)] {
+        &[]
+    }
+
+    /// The plan of an entry that names none.
+    fn default_plan(&self) -> Option<ProviderPlan> {
+        None
+    }
+
+    /// Add-form third field: `Key` for the kind's own address.
+    fn field(&self) -> KindField;
+
+    /// A URL kind that takes a key at the entry's address.
+    fn optional_key(&self) -> bool {
+        false
+    }
+}
 
 pub const PROVIDER_KINDS: [ProviderKindName; 6] = ProviderKindName::ALL;
 
@@ -62,6 +97,74 @@ pub fn same_origin(left: Option<&str>, right: Option<&str>) -> bool {
     let origin = |url: Option<&str>| web_url(url).map(|parts| parts.origin);
     let held = origin(left);
     held.is_some() && held == origin(right)
+}
+
+/// A key for the kind's own address, or for the entry's.
+pub fn takes_key<K: KeyKind + ?Sized>(kind: &K) -> bool {
+    kind.field() == KindField::Key || kind.optional_key()
+}
+
+/// What a key is for: the kind, its effective plan, and the origin of an address the person gives.
+pub fn key_binding_of<K: KeyKind + ?Sized>(
+    fields: &EntryFields,
+    kinds: &[Arc<K>],
+) -> Option<String> {
+    let kind = kinds.iter().find(|held| held.kind() == fields.kind)?;
+    if !takes_key(&**kind) {
+        return None;
+    }
+    let mut binding = fields.kind.as_str().to_owned();
+    if !kind.plans().is_empty() {
+        let plan = fields.plan.or_else(|| kind.default_plan())?;
+        binding.push(' ');
+        binding.push_str(plan.as_str());
+    }
+    if kind.field() == KindField::Url {
+        binding.push(' ');
+        binding.push_str(&web_url(fields.url.as_deref())?.origin);
+    }
+    Some(binding)
+}
+
+/// The text a host stores for a key; none when the fields bind no key.
+pub fn bound_key<K: KeyKind + ?Sized>(
+    fields: &EntryFields,
+    key: &str,
+    kinds: &[Arc<K>],
+) -> Option<String> {
+    let binding = key_binding_of(fields, kinds)?;
+    let mut object = Object::new();
+    object.insert("v", Value::from(1.0));
+    object.insert("for", Value::from(binding));
+    object.insert("key", Value::from(key));
+    Some(stringify_json(&Value::Object(object)))
+}
+
+/// A stored text's key and binding; none for any other text.
+pub fn read_bound_key(text: &str) -> KeyAnswer {
+    let Some(Value::Object(held)) = parse_json(text) else {
+        return KeyAnswer::None;
+    };
+    let exact = held.len() == 3 && held.get("v").and_then(Value::as_f64) == Some(1.0);
+    match (held.get("key"), held.get("for")) {
+        (Some(Value::String(key)), Some(Value::String(binding))) if exact => KeyAnswer::Key {
+            key: key.clone(),
+            bound_to: binding.clone(),
+        },
+        _ => KeyAnswer::None,
+    }
+}
+
+/// Whom a binding names: its origin's host, else its kind's label, else its kind name.
+pub fn bound_for<K: KeyKind + ?Sized>(binding: &str, kinds: &[Arc<K>]) -> String {
+    let parts: Vec<&str> = binding.split(' ').collect();
+    if let Some(url) = parts.last().and_then(|last| parse_url(last)) {
+        return url.host;
+    }
+    let name = parts.first().copied().unwrap_or_default();
+    ProviderKindName::parse(name)
+        .and_then(|kind| kinds.iter().find(|held| held.kind() == kind))
+        .map_or_else(|| name.to_owned(), |held| held.label().to_owned())
 }
 
 /// Parse a provider entry; the label counts UTF-16 units.

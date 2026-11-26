@@ -11,15 +11,17 @@ use nyaaai_agentic::codec::{Codec, Mode, StreamDecoder};
 use nyaaai_agentic::failure::ProviderError;
 use nyaaai_agentic::kinds::fetcher::Aborted;
 use nyaaai_agentic::models::view::unknown_view;
+use nyaaai_agentic::provider::entry::{KeyKind, KindField};
 use nyaaai_agentic::provider::incarnation::{EntryRegistry, identity_of};
+use nyaaai_agentic::provider::keyring::{KeyRead, Keyring, KeyringDeps};
 use nyaaai_agentic::provider::kind::{
-    CatalogDeps, EntryCatalog, KINDS, KindDeps, KindError, KindField, ProviderKind,
+    CatalogDeps, EntryCatalog, KINDS, KindDeps, KindError, ProviderKind,
 };
 use nyaaai_agentic::provider::resolver::{
     Catalog, ModelResolver, Planned, Resolution, Resolved, ResolverDeps, ServedByDeps,
     key_source_of, reach_of, served_by as plan_served,
 };
-use nyaaai_agentic::transport::{KeySource, Transport, TransportError, static_key};
+use nyaaai_agentic::transport::{Forbidden, KeySource, Transport, TransportError, static_key};
 use nyaaai_contract::cancel::{CancelToken, Unsubscribe};
 use nyaaai_contract::entry_keys::{EntryKeys, KeyAnswer};
 use nyaaai_contract::fetch::{Chunks, Fetch, FetchError, FetchRequest, FetchResponse, Span};
@@ -29,7 +31,9 @@ use nyaaai_contract::model_registry::ModelRegistry;
 use nyaaai_contract::provider_list::ProviderList;
 use nyaaai_contract::shape::Shape;
 use nyaaai_contract::shapes::model::{ModelRow, ModelUse, ModelView, ModelViewStatus, Via};
-use nyaaai_contract::shapes::provider::{EntryFields, ProviderEntry, ProviderKindName};
+use nyaaai_contract::shapes::provider::{
+    EntryFields, ProviderEntry, ProviderKindName, ProviderPlan,
+};
 use nyaaai_contract::shapes::step::{
     CanonicalRequest, Failure, HeaderList, SseItem, StepEvent, StepResult,
 };
@@ -42,6 +46,7 @@ use nyaaai_testkit::scripted_ports::{
 use tokio::sync::oneshot;
 
 use super::catalog::{convert, row_of_key};
+use super::entry::{listed, planted};
 use super::local::local_row_of;
 use super::shapes::*;
 
@@ -63,24 +68,35 @@ fn rows_for(keys: &[String]) -> Outcome<Vec<ModelRow>> {
     keys.iter().map(|key| row_for(key)).collect()
 }
 
-/// A key answer, from any of the generated spellings of one.
-fn answer_of<T: Shape>(held: &T) -> Outcome<KeyAnswer> {
+/// A key read, from any of the generated spellings of one; a key with no binding is planted for the entry given.
+fn read_of<T: Shape>(held: &T, entry: Option<&ProviderEntry>) -> Outcome<KeyRead> {
     let Value::Object(fields) = held.encode() else {
         return Err("a key answer is an object".to_owned());
     };
-    let kind = fields.get("kind").and_then(Value::as_str);
-    Ok(match kind {
-        Some("key") => KeyAnswer::Key(
-            fields
-                .get("key")
-                .and_then(Value::as_str)
-                .unwrap_or_default()
-                .to_owned(),
-        ),
-        Some("none") => KeyAnswer::None,
-        Some("refused") => KeyAnswer::Refused,
-        Some("unready") => KeyAnswer::Unready,
+    let text = |name: &str| fields.get(name).and_then(Value::as_str);
+    Ok(match text("kind") {
+        Some("key") => planted(text("key").unwrap_or_default(), text("boundTo"), entry).into(),
+        Some("none") => KeyRead::None,
+        Some("refused") => KeyRead::Refused,
+        Some("unready") => KeyRead::Unready,
+        Some("foreign") => KeyRead::Foreign {
+            bound_to: text("boundTo").unwrap_or_default().to_owned(),
+        },
+        Some("insecure") => KeyRead::Insecure,
         _ => return Err("an unknown key answer".to_owned()),
+    })
+}
+
+/// The store's answer, from any of the generated spellings of one.
+fn answer_of<T: Shape>(held: &T, entry: Option<&ProviderEntry>) -> Outcome<KeyAnswer> {
+    Ok(match read_of(held, entry)? {
+        KeyRead::Key { key, bound_to } => KeyAnswer::Key { key, bound_to },
+        KeyRead::None => KeyAnswer::None,
+        KeyRead::Refused => KeyAnswer::Refused,
+        KeyRead::Unready => KeyAnswer::Unready,
+        KeyRead::Foreign { .. } | KeyRead::Insecure => {
+            return Err("a store answers no such key".to_owned());
+        }
     })
 }
 
@@ -428,17 +444,43 @@ struct Stub {
     hub: Arc<Hub>,
 }
 
+/// The real kind's key facts, for a stub over it.
+macro_rules! real_key_kind {
+    ($kind:ty) => {
+        impl KeyKind for $kind {
+            fn kind(&self) -> ProviderKindName {
+                self.real.kind()
+            }
+
+            fn label(&self) -> &str {
+                self.real.label()
+            }
+
+            fn plans(&self) -> &[(ProviderPlan, &'static str)] {
+                self.real.plans()
+            }
+
+            fn default_plan(&self) -> Option<ProviderPlan> {
+                self.real.default_plan()
+            }
+
+            fn field(&self) -> KindField {
+                self.real.field()
+            }
+
+            fn optional_key(&self) -> bool {
+                self.real.optional_key()
+            }
+        }
+    };
+}
+
+real_key_kind!(Stub);
+real_key_kind!(Asked);
+
 impl ProviderKind for Stub {
-    fn kind(&self) -> ProviderKindName {
-        self.real.kind()
-    }
-
-    fn label(&self) -> &str {
-        self.real.label()
-    }
-
-    fn field(&self) -> KindField {
-        self.real.field()
+    fn address(&self, entry: &EntryFields) -> Option<String> {
+        self.real.address(entry)
     }
 
     fn check<'a>(
@@ -570,7 +612,7 @@ pub fn reach(input: ResolverReachInput) -> Outcome<ResolverReachResult> {
             ResolverReachInputRowsItemField::Key => KindField::Key,
             ResolverReachInputRowsItemField::Url => KindField::Url,
         };
-        reaches.push(reach_of(field, &answer_of(&row.answer)?));
+        reaches.push(reach_of(field, &read_of(&row.answer, None)?));
     }
     Ok(ResolverReachResult { reaches })
 }
@@ -584,24 +626,41 @@ pub fn identity(input: ResolverIdentityInput) -> Outcome<ResolverIdentityResult>
 pub fn key_source(input: ResolverKeySourceInput) -> Outcome<ResolverKeySourceResult> {
     let keys = Arc::new(ScriptedEntryKeys::new());
     for (id, answer) in input.answers.iter() {
-        keys.set(id, answer_of(answer)?);
+        let entry = (input.entry.id == id).then_some(&input.entry);
+        keys.set(id, answer_of(answer, entry)?);
     }
     let list = Arc::new(ScriptedProviderList::new(vec![input.entry.clone()]));
-    let entries = EntryRegistry::new(list.clone(), &*keys);
+    let entries = Arc::new(EntryRegistry::new(list.clone(), &*keys));
     let incarnation = entries
         .incarnation(&input.entry.id)
         .ok_or_else(|| "The entry is listed.".to_owned())?;
-    let source = key_source_of(keys.clone(), &incarnation);
+    let deps = deps_of(
+        &Arc::new(Host::default()),
+        Arc::new(FakeScheduler::new(Arc::new(TimerWheel::new(0)))),
+    );
+    let keyring = Keyring::new(KeyringDeps {
+        keys: keys.clone(),
+        entries: Arc::clone(&entries),
+        kinds: KINDS.clone(),
+        kind_deps: Arc::new(move |_| deps.clone()),
+    });
+    let source = key_source_of(Arc::new(keyring), &incarnation);
     list.set(input.list.clone());
     let mut gets = Vec::new();
     for step in &input.steps {
         match step {
             ResolverKeySourceInputStepsItem::Get(_) => {
-                gets.push(block_on(source.get())?);
+                gets.push(match block_on(source.get())? {
+                    Err(Forbidden) => Some(ResolverKeySourceResultGetsItem::Object(
+                        ResolverKeySourceResultGetsItemObject {},
+                    )),
+                    Ok(key) => key.map(ResolverKeySourceResultGetsItem::Text),
+                });
             }
             ResolverKeySourceInputStepsItem::List(held) => list.set(held.entries.clone()),
             ResolverKeySourceInputStepsItem::Answer(held) => {
-                keys.set(&held.id, answer_of(&held.answer)?);
+                let entry = listed(&*list, &held.id);
+                keys.set(&held.id, answer_of(&held.answer, entry.as_ref())?);
             }
         }
     }
@@ -811,7 +870,9 @@ impl Rig {
         match step {
             ResolverRoutesInputStepsItem::List(each) => self.list.set(each.entries.clone()),
             ResolverRoutesInputStepsItem::Answer(each) => {
-                self.keys.set(&each.id, answer_of(&each.answer)?);
+                let entry = listed(&*self.list, &each.id);
+                self.keys
+                    .set(&each.id, answer_of(&each.answer, entry.as_ref())?);
             }
             ResolverRoutesInputStepsItem::Registry(each) => {
                 self.registry.set_rows(rows_for(&each.rows)?);
@@ -1045,7 +1106,8 @@ pub fn routes(input: ResolverRoutesInput) -> Outcome<ResolverRoutesResult> {
     let scheduler = Arc::new(FakeScheduler::new(Arc::clone(&wheel)));
     let scripted = Arc::new(ScriptedEntryKeys::new());
     for (id, answer) in input.answers.iter() {
-        scripted.set(id, answer_of(answer)?);
+        let entry = input.entries.iter().find(|each| each.id == id);
+        scripted.set(id, answer_of(answer, entry)?);
     }
     let list = Arc::new(ScriptedProviderList::new(input.entries.clone()));
     let registry = Arc::new(ScriptedModelRegistry::empty());
@@ -1103,12 +1165,19 @@ pub fn routes(input: ResolverRoutesInput) -> Outcome<ResolverRoutesResult> {
     let live = Arc::clone(&zdr);
     let deps_host = Arc::clone(&host);
     let entries = Arc::new(EntryRegistry::new(list.clone(), &*scripted));
+    let kind_deps: Arc<dyn Fn(ProviderKindName) -> KindDeps + Send + Sync> =
+        Arc::new(move |_| deps_of(&deps_host, Arc::clone(&scheduler)));
     let resolver = ModelResolver::new(ResolverDeps {
         entries: Arc::clone(&entries),
-        keys: gate.clone(),
+        keys: Arc::new(Keyring::new(KeyringDeps {
+            keys: gate.clone(),
+            entries: Arc::clone(&entries),
+            kinds: kinds.clone(),
+            kind_deps: Arc::clone(&kind_deps),
+        })),
         registry: registry.clone() as Arc<dyn ModelRegistry>,
         kinds,
-        kind_deps: Arc::new(move |_| deps_of(&deps_host, Arc::clone(&scheduler))),
+        kind_deps,
         zdr_only: Arc::new(move || live.load(Ordering::SeqCst)),
         refreshed: Some(Arc::new(move |entry| {
             locked(&told).push(nyaaai_agentic::provider::resolver::via_of(entry));
@@ -1212,16 +1281,8 @@ impl EntryCatalog for Asking {
 }
 
 impl ProviderKind for Asked {
-    fn kind(&self) -> ProviderKindName {
-        self.real.kind()
-    }
-
-    fn label(&self) -> &str {
-        self.real.label()
-    }
-
-    fn field(&self) -> KindField {
-        self.real.field()
+    fn address(&self, entry: &EntryFields) -> Option<String> {
+        self.real.address(entry)
     }
 
     fn check<'a>(
@@ -1291,19 +1352,27 @@ pub fn uses(input: ResolverUsesInput) -> Outcome<ResolverUsesResult> {
         extra_usage: None,
     };
     let keys = Arc::new(ScriptedEntryKeys::new());
-    keys.set("a", KeyAnswer::Key(KEY.to_owned()));
+    keys.set("a", planted(KEY, None, Some(&entry)));
     let registry = Arc::new(ScriptedModelRegistry::empty());
     registry.set_rows(rows_for(&input.rows)?);
     let entries = Arc::new(EntryRegistry::new(
         Arc::new(ScriptedProviderList::new(vec![entry])),
         &*keys,
     ));
+    let kinds = vec![kind];
+    let kind_deps: Arc<dyn Fn(ProviderKindName) -> KindDeps + Send + Sync> =
+        Arc::new(move |_| deps_of(&host, Arc::clone(&scheduler)));
     let resolver = ModelResolver::new(ResolverDeps {
         entries: Arc::clone(&entries),
-        keys,
+        keys: Arc::new(Keyring::new(KeyringDeps {
+            keys,
+            entries: Arc::clone(&entries),
+            kinds: kinds.clone(),
+            kind_deps: Arc::clone(&kind_deps),
+        })),
         registry: registry as Arc<dyn ModelRegistry>,
-        kinds: vec![kind],
-        kind_deps: Arc::new(move |_| deps_of(&host, Arc::clone(&scheduler))),
+        kinds,
+        kind_deps,
         zdr_only: Arc::new(|| true),
         refreshed: None,
     });

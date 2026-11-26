@@ -18,8 +18,9 @@ use super::key::{KeyCheck, KeyFailure, check_key};
 use crate::codec::Codec;
 use crate::dialects::openrouter::OPENROUTER_CHAT;
 use crate::provider::disposition::disposition_of;
+use crate::provider::entry::{KeyKind, KindField};
 use crate::provider::kind::{
-    Browser, CatalogDeps, EntryCatalog, KindDeps, KindError, KindField, ProviderKind, Route, Tester,
+    Browser, CatalogDeps, EntryCatalog, KindDeps, KindError, ProviderKind, Route, Tester,
 };
 use crate::transport::{KeyAuth, KeySource, Transport, TransportDeps, static_key};
 
@@ -82,7 +83,7 @@ fn catalog_of(route: &Route) -> Option<Arc<ModelCatalog>> {
 /// The OpenRouter kind; it reads no clock of its own.
 pub struct OpenRouterKind;
 
-impl ProviderKind for OpenRouterKind {
+impl KeyKind for OpenRouterKind {
     fn kind(&self) -> ProviderKindName {
         ProviderKindName::Openrouter
     }
@@ -93,6 +94,12 @@ impl ProviderKind for OpenRouterKind {
 
     fn field(&self) -> KindField {
         KindField::Key
+    }
+}
+
+impl ProviderKind for OpenRouterKind {
+    fn address(&self, _entry: &EntryFields) -> Option<String> {
+        Some(BASE_URL.to_owned())
     }
 
     fn balance(&self) -> Option<&str> {

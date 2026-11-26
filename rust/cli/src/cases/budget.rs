@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use nyaaai_agentic::dialects::openrouter::OPENROUTER_CHAT;
 use nyaaai_agentic::transport::{
-    Auth, KeyAuth, KeySource, Transport, TransportDeps, TransportError,
+    Auth, Forbidden, KeyAuth, KeySource, Transport, TransportDeps, TransportError,
 };
 use nyaaai_contract::cancel::CancelToken;
 use nyaaai_contract::fetch::{
@@ -188,10 +188,10 @@ struct SlowKey {
 }
 
 impl KeySource for SlowKey {
-    fn get(&self) -> BoxFuture<'_, Option<String>> {
+    fn get(&self) -> BoxFuture<'_, Result<Option<String>, Forbidden>> {
         Box::pin(async move {
             self.wheel.advance(self.ms);
-            Some("fake-key-one".to_owned())
+            Ok(Some("fake-key-one".to_owned()))
         })
     }
 }

@@ -27,9 +27,12 @@ use nyaaai_agentic::models::curated::MODELS;
 use nyaaai_agentic::models::registry::row_of;
 use nyaaai_agentic::models::row_key::parse_row_key_text;
 use nyaaai_agentic::models::view::{codec_facts_of, unknown_view};
-use nyaaai_agentic::provider::kind::{CatalogDeps, KindDeps, KindError, ProviderKind, Route};
+use nyaaai_agentic::provider::keyring::check_typed;
+use nyaaai_agentic::provider::kind::{
+    CatalogDeps, KINDS, KindDeps, KindError, ProviderKind, Route,
+};
 use nyaaai_agentic::step::reply_text;
-use nyaaai_agentic::transport::{KeySource, Transport, TransportError};
+use nyaaai_agentic::transport::{Forbidden, KeySource, Transport, TransportError};
 use nyaaai_contract::cancel::CancelToken;
 use nyaaai_contract::fetch::{Method, Span};
 use nyaaai_contract::future::BoxFuture;
@@ -244,8 +247,9 @@ fn entry_of(which: Which, label: &str, url: &Option<String>) -> EntryFields {
 struct Keys(Arc<FakeKeys>);
 
 impl KeySource for Keys {
-    fn get(&self) -> BoxFuture<'_, Option<String>> {
-        self.0.get()
+    fn get(&self) -> BoxFuture<'_, Result<Option<String>, Forbidden>> {
+        let read = self.0.get();
+        Box::pin(async move { Ok(read.await) })
     }
 }
 
@@ -517,7 +521,13 @@ pub fn reach(input: LocalReachInput) -> Outcome<LocalReachResult> {
         input.aborted_before,
     );
     let clock = ceiling_span(&net.scheduler, &token);
-    let checked = block_on(named.check(&entry, input.secret.as_deref(), &net.deps, &clock))?;
+    let checked = block_on(check_typed(
+        &KINDS,
+        &entry,
+        input.secret.as_deref(),
+        &net.deps,
+        &clock,
+    ))?;
     clock.clear();
     net.wheel.cancel("caller");
     let (state, thrown) = match checked {

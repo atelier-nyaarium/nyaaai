@@ -1,0 +1,250 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.run",
+	"name": "bound-a-url-edited-under-a-stored-key-reads-foreign-until-the-key-is-stored-again",
+	"input": {
+		"startMs": 2000000,
+		"entries": [
+			{
+				"id": "host",
+				"kind": "compatible",
+				"label": "Host",
+				"url": "http://lab.local:8000/v1"
+			}
+		],
+		"keys": {
+			"host": {
+				"kind": "key",
+				"key": "fake-key-one"
+			}
+		},
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "model-a"
+						}
+					]
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "model-a"
+						}
+					]
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "check",
+				"id": "host"
+			},
+			{
+				"kind": "list",
+				"entries": [
+					{
+						"id": "host",
+						"kind": "compatible",
+						"label": "Host",
+						"url": "http://lab2.local:8000/v1"
+					}
+				]
+			},
+			{
+				"kind": "keys",
+				"id": "host"
+			},
+			{
+				"kind": "key",
+				"id": "host",
+				"answer": {
+					"kind": "key",
+					"key": "fake-key-one"
+				}
+			},
+			{
+				"kind": "keys",
+				"id": "host"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "host",
+						"changed": [
+							"key"
+						]
+					},
+					{
+						"entry": "host",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "host",
+						"key": {
+							"kind": "ok",
+							"models": 1
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 1,
+				"parked": []
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "host",
+						"changed": [
+							"key"
+						]
+					},
+					{
+						"entry": "host",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "host",
+						"key": {
+							"kind": "foreign",
+							"for": "lab.local"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 1,
+				"parked": []
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "keys",
+					"answer": {
+						"kind": "foreign",
+						"boundTo": "compatible http://lab.local:8000"
+					}
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "host",
+						"key": {
+							"kind": "foreign",
+							"for": "lab.local"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 1,
+				"parked": []
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "host",
+						"changed": [
+							"key"
+						]
+					},
+					{
+						"entry": "host",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "host",
+						"key": {
+							"kind": "ok",
+							"models": 1
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 2,
+				"parked": []
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "keys",
+					"answer": {
+						"kind": "key",
+						"key": "fake-key-one",
+						"boundTo": "compatible http://lab2.local:8000"
+					}
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "host",
+						"key": {
+							"kind": "ok",
+							"models": 1
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 2,
+				"parked": []
+			}
+		],
+		"requests": [
+			"http://lab.local:8000/v1/models",
+			"http://lab2.local:8000/v1/models"
+		],
+		"waiting": []
+	}
+}

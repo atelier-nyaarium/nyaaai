@@ -2,6 +2,7 @@ import type { Codec } from "@nyaaai/agentic/codec";
 import { failureOf } from "@nyaaai/agentic/failure";
 import { parseRowKey } from "@nyaaai/agentic/models/rowKey";
 import { EntryRegistry, identityOf } from "@nyaaai/agentic/provider/incarnation";
+import { Keyring } from "@nyaaai/agentic/provider/keyring";
 import { type EntryCatalog, KINDS, type ProviderKind } from "@nyaaai/agentic/provider/kind";
 import {
 	type Catalog,
@@ -12,6 +13,7 @@ import {
 	servedBy,
 	viaOf,
 } from "@nyaaai/agentic/provider/resolver";
+import { FORBIDDEN } from "@nyaaai/agentic/transport";
 import type { KeyAnswer } from "@nyaaai/contract/entryKeys";
 import type { Fetch, FetchRequest } from "@nyaaai/contract/fetch";
 import { canonicalJson } from "@nyaaai/contract/json";
@@ -27,6 +29,7 @@ import { resolverColdCases } from "../caseSources/resolverCold";
 import { resolverKeyCases } from "../caseSources/resolverKey";
 import { withUses } from "../caseSources/uses";
 import { rowOfKey } from "./catalogKit";
+import { planted, plantedAll, readKey, storedKey } from "./keyKit";
 import { localRowOf } from "./localKit";
 
 ////////////////////////////////
@@ -34,13 +37,11 @@ import { localRowOf } from "./localKit";
 
 const ViewStatus = z.enum(["ok", "retired", "noZdrHost", "noTools", "unknown"]);
 
-/** What `EntryKeys.get` answers. */
-const KeyAnswerIn = z.discriminatedUnion("kind", [
-	z.object({ kind: z.literal("key"), key: z.string() }),
-	z.object({ kind: z.literal("none") }),
-	z.object({ kind: z.literal("refused") }),
-	z.object({ kind: z.literal("unready") }),
-]);
+/** What the store answers. */
+const KeyAnswerIn = storedKey();
+
+/** What a key source gives a transport: a key, none, or a key that may not be sent. */
+const Given = z.union([z.string(), z.object({ forbidden: z.literal(true) })]).nullable();
 
 /** What a catalog lists of a row for an entry. */
 const Listing = z.object({
@@ -288,7 +289,7 @@ export const resolver = caseGroup("resolver", {
 		/** What a key answer says of an entry, per key kind and URL kind. */
 		reach: kind(
 			z.object({
-				rows: z.array(z.object({ field: z.enum(["key", "url"]), answer: KeyAnswerIn })),
+				rows: z.array(z.object({ field: z.enum(["key", "url"]), answer: readKey() })),
 			}),
 			z.object({ reaches: z.array(KeyReach) }),
 			(input) => ({ reaches: input.rows.map((row) => reachOf({ field: row.field }, row.answer)) }),
@@ -315,20 +316,36 @@ export const resolver = caseGroup("resolver", {
 					]),
 				),
 			}),
-			z.object({ gets: z.array(z.string().nullable()) }),
+			z.object({ gets: z.array(Given) }),
 			async (input) => {
-				const keys = scriptedEntryKeys(input.answers as Record<string, KeyAnswer>);
+				const keys = scriptedEntryKeys(plantedAll(input.answers, [input.entry]));
 				const list = scriptedProviderList([input.entry]);
 				const entries = new EntryRegistry({ list, keys });
 				const incarnation = entries.incarnation(input.entry.id);
 				if (incarnation === undefined) throw new Error("The entry is listed.");
-				const source = keySourceOf(keys, incarnation);
+				const deps = {
+					fetch: echoHost([]).fetch,
+					scheduler: fakeScheduler(new TimerWheel(0)),
+					log: () => {},
+					userAgent: "cases/1.0",
+				};
+				const keyring = new Keyring({ keys, entries, kinds: KINDS, kindDeps: () => deps });
+				const source = keySourceOf(keyring, incarnation);
 				list.set(input.list);
-				const gets: Array<string | null> = [];
+				const gets: Array<z.infer<typeof Given>> = [];
 				for (const step of input.steps) {
-					if (step.kind === "get") gets.push((await source.get()) ?? null);
-					else if (step.kind === "list") list.set(step.entries);
-					else keys.set(step.id, step.answer);
+					if (step.kind === "get") {
+						const given = await source.get();
+						gets.push(given === FORBIDDEN ? { forbidden: true } : (given ?? null));
+					} else if (step.kind === "list") list.set(step.entries);
+					else
+						keys.set(
+							step.id,
+							planted(
+								step.answer,
+								list.entries().find((each) => each.id === step.id),
+							),
+						);
 				}
 				entries.dispose();
 				return { gets };
@@ -441,19 +458,21 @@ export const resolver = caseGroup("resolver", {
 					}),
 				};
 				const entry = { id: "a", kind: "openrouter" as const, label: "First" };
-				const keys = scriptedEntryKeys({ a: { kind: "key", key: KEY } });
+				const keys = scriptedEntryKeys({ a: planted({ kind: "key", key: KEY }, entry) });
 				const entries = new EntryRegistry({ list: scriptedProviderList([entry]), keys });
+				const kindDeps = () => ({
+					fetch: echoHost([]).fetch,
+					scheduler: fakeScheduler(new TimerWheel(0)),
+					log: () => {},
+					userAgent: "cases/1.0",
+				});
+				const kinds = { openrouter: stub };
 				const resolver = new ModelResolver({
 					entries,
-					keys,
+					keys: new Keyring({ keys, entries, kinds, kindDeps }),
 					registry: scriptedModelRegistry(input.rows.map(rowFor)),
-					kinds: { openrouter: stub },
-					kindDeps: () => ({
-						fetch: echoHost([]).fetch,
-						scheduler: fakeScheduler(new TimerWheel(0)),
-						log: () => {},
-						userAgent: "cases/1.0",
-					}),
+					kinds,
+					kindDeps,
 					zdrOnly: () => true,
 				});
 				const calls: Array<{
@@ -526,7 +545,7 @@ export const resolver = caseGroup("resolver", {
 			async (input) => {
 				const wheel = new TimerWheel(input.startMs ?? 0);
 				const scheduler = fakeScheduler(wheel);
-				const scriptedKeys = scriptedEntryKeys(input.answers as Record<string, KeyAnswer>);
+				const scriptedKeys = scriptedEntryKeys(plantedAll(input.answers, input.entries));
 				let armed: { reached: () => void; release: Promise<void> } | null = null;
 				const keys = {
 					get: async (id: string): Promise<KeyAnswer> => {
@@ -609,12 +628,13 @@ export const resolver = caseGroup("resolver", {
 				const kinds: Partial<Record<z.infer<typeof ProviderKindName>, ProviderKind>> = {};
 				for (const name of NAMES) if (input.kinds.includes(name)) kinds[name] = stub(name);
 
+				const kindDeps = () => ({ fetch: host.fetch, scheduler, log: () => {}, userAgent: "cases/1.0" });
 				const resolver = new ModelResolver({
 					entries,
-					keys,
+					keys: new Keyring({ keys, entries, kinds, kindDeps }),
 					registry,
 					kinds,
-					kindDeps: () => ({ fetch: host.fetch, scheduler, log: () => {}, userAgent: "cases/1.0" }),
+					kindDeps,
 					zdrOnly: () => zdr,
 					refreshed: (entry) => refreshed.push(viaOf(entry)),
 				});
@@ -624,7 +644,14 @@ export const resolver = caseGroup("resolver", {
 
 				const change = (step: z.infer<(typeof CHANGES)[number]>): void => {
 					if (step.kind === "list") list.set(step.entries);
-					else if (step.kind === "answer") scriptedKeys.set(step.id, step.answer);
+					else if (step.kind === "answer")
+						scriptedKeys.set(
+							step.id,
+							planted(
+								step.answer,
+								list.entries().find((each) => each.id === step.id),
+							),
+						);
 					else if (step.kind === "registry") registry.setRows(step.rows.map(rowFor));
 					else zdr = step.on;
 				};

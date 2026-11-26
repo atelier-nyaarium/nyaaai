@@ -22,8 +22,9 @@ use crate::hosts::opencode::opencode_host;
 use crate::messages::codec::messages_codec;
 use crate::models::view::codec_facts_of;
 use crate::provider::disposition::disposition_of;
+use crate::provider::entry::{KeyKind, KindField};
 use crate::provider::kind::{
-    Browser, CatalogDeps, EntryCatalog, KindDeps, KindError, KindField, ProviderKind, Route, Tester,
+    Browser, CatalogDeps, EntryCatalog, KindDeps, KindError, ProviderKind, Route, Tester,
 };
 use crate::responses::codec::responses_codec;
 use crate::transport::{KeyAuth, KeySource, Transport, TransportDeps, static_key};
@@ -34,6 +35,8 @@ const PLANS: [(ProviderPlan, &str); 2] = [
 ];
 
 const EXTRA_USAGE: [ProviderPlan; 1] = [ProviderPlan::Go];
+
+const DEFAULT_PLAN: ProviderPlan = ProviderPlan::Go;
 
 const DOT: &str = " \u{b7} ";
 
@@ -51,9 +54,8 @@ impl Clock for ArcClock {
     }
 }
 
-/// Missing plan: Go.
 fn plan_of(entry: &EntryFields) -> ProviderPlan {
-    entry.plan.unwrap_or(ProviderPlan::Go)
+    entry.plan.unwrap_or(DEFAULT_PLAN)
 }
 
 fn label_of(entry: &EntryFields) -> &'static str {
@@ -101,7 +103,7 @@ fn billing_facts(entry: &EntryFields, bill: Option<&Billed>) -> Option<String> {
 /// The OpenCode kind; every date comes from the route's deps.
 pub struct OpenCodeKind;
 
-impl ProviderKind for OpenCodeKind {
+impl KeyKind for OpenCodeKind {
     fn kind(&self) -> ProviderKindName {
         ProviderKindName::Opencode
     }
@@ -114,8 +116,18 @@ impl ProviderKind for OpenCodeKind {
         &PLANS
     }
 
+    fn default_plan(&self) -> Option<ProviderPlan> {
+        Some(DEFAULT_PLAN)
+    }
+
     fn field(&self) -> KindField {
         KindField::Key
+    }
+}
+
+impl ProviderKind for OpenCodeKind {
+    fn address(&self, entry: &EntryFields) -> Option<String> {
+        Some(base_url_of(plan_of(entry)).to_owned())
     }
 
     fn balance(&self) -> Option<&str> {

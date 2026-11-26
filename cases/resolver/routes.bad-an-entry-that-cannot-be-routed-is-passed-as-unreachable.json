@@ -19,10 +19,6 @@
 			}
 		],
 		"answers": {
-			"bad": {
-				"kind": "key",
-				"key": "fake-key-one"
-			},
 			"c": {
 				"kind": "key",
 				"key": "fake-key-one"

@@ -712,6 +712,7 @@ impl Shape for PoolVerdict {
 #[derive(Debug, Clone, PartialEq)]
 pub enum Blocked {
     KeyRejected(BlockedKeyRejected),
+    KeyMissing(BlockedKeyMissing),
     SpendLimit(BlockedSpendLimit),
 }
 
@@ -720,6 +721,7 @@ impl Shape for Blocked {
         let object = shape::object(value, at)?;
         match shape::tag(object, "kind", at)? {
             "keyRejected" => BlockedKeyRejected::decode_at(value, at).map(Self::KeyRejected),
+            "keyMissing" => BlockedKeyMissing::decode_at(value, at).map(Self::KeyMissing),
             "spendLimit" => BlockedSpendLimit::decode_at(value, at).map(Self::SpendLimit),
             _ => Err(shape::no_branch(at, "kind")),
         }
@@ -728,6 +730,7 @@ impl Shape for Blocked {
     fn encode(&self) -> Value {
         match self {
             Self::KeyRejected(held) => held.encode(),
+            Self::KeyMissing(held) => held.encode(),
             Self::SpendLimit(held) => held.encode(),
         }
     }
@@ -748,6 +751,25 @@ impl Shape for BlockedKeyRejected {
     fn encode(&self) -> Value {
         let mut object = Object::new();
         object.insert("kind", Value::from("keyRejected"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BlockedKeyMissing {}
+
+impl Shape for BlockedKeyMissing {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "keyMissing")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("keyMissing"));
         Value::Object(object)
     }
 }

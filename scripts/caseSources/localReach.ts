@@ -146,6 +146,15 @@ export const localReachCases: CaseSource[] = [
 		secret: KEY,
 		exchanges: [COMPAT_LIST],
 	}),
+	check("compatible-a-typed-key-over-http-to-a-public-host-is-not-sent", "compatible", {
+		...at("http://api.example.test/v1"),
+		secret: KEY,
+		exchanges: [COMPAT_LIST],
+	}),
+	check("compatible-no-key-over-http-to-a-public-host-is-checked-as-today", "compatible", {
+		...at("http://api.example.test/v1"),
+		exchanges: [COMPAT_LIST],
+	}),
 	check("compatible-a-malformed-key-is-rejected-without-a-request", "compatible", {
 		...at("https://host.lab.example/api/v2"),
 		secret: "fake bad",

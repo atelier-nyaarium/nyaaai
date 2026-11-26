@@ -1,0 +1,21 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.keyFor",
+	"name": "for-a-kind-the-table-does-not-hold-is-its-name",
+	"input": {
+		"bindings": [
+			"openrouter",
+			"opencode payg",
+			"compatible https://api.example.test"
+		],
+		"kinds": []
+	},
+	"expected": {
+		"for": [
+			"openrouter",
+			"opencode",
+			"api.example.test"
+		]
+	}
+}

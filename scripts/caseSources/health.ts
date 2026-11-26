@@ -26,6 +26,9 @@ type Step = Record<string, unknown>;
 const OR_OK = reply({ data: { usage: 1 } });
 const OC_OK = reply({ data: [{ id: "model-a" }] });
 const HOST = { id: "host", kind: "compatible", label: "Host", url: "http://lab.local:8000/v1" };
+const MOVED_HOST = { ...HOST, url: "http://lab2.local:8000/v1" };
+const PUBLIC_HOST = { ...HOST, url: "http://api.example.test/v1" };
+const SECURE_HOST = { id: "secure", kind: "compatible", label: "Secure", url: "https://api.example.test/v1" };
 
 const BOX_OK = reply({ models: [{ name: "local-a:27b" }, { name: "local-b:9b" }] });
 const DENIED = { status: 401, json: { error: { message: "No." } } };
@@ -104,6 +107,10 @@ const EDITED = { ...MAIN, plan: "payg" };
 const EDITED_AGAIN = { ...MAIN, plan: "go" };
 
 const keysCase = (name: string, rows: Fields[]): CaseSource => caseOf("health.keys")(name, { rows });
+
+const vouched = (name: string, input: Fields): CaseSource =>
+	caseOf("health.vouched")(name, { entries: [HOST], configured: { host: KEY }, ...input });
+const read = (id: string, hold = false): Step => ({ kind: "read", id, ...(hold ? { hold: true } : {}) });
 
 const run = (name: string, input: Fields): CaseSource =>
 	caseOf("health.run")(name, { startMs: START, entries: [], keys: {}, exchanges: [], ...input });
@@ -206,6 +213,40 @@ export const healthCases: CaseSource[] = [
 		steps: [check("main")],
 	}),
 
+	// A key reads only for what it was given for, and goes only where it may travel.
+	run("bound-a-key-for-another-origin-reads-foreign-and-sends-nothing", {
+		entries: [HOST],
+		keys: { host: { kind: "key", key: KEY, boundTo: "compatible https://other.example.test" } },
+		steps: [check("host"), keysOf("host")],
+	}),
+	run("bound-a-key-for-another-kind-under-the-same-id-reads-foreign", {
+		entries: [MAIN],
+		keys: { main: { kind: "key", key: KEY, boundTo: "opencode go" } },
+		steps: [check("main"), keysOf("main")],
+	}),
+	run("bound-a-url-edited-under-a-stored-key-reads-foreign-until-the-key-is-stored-again", {
+		entries: [HOST],
+		keys: { host: { kind: "key", key: KEY } },
+		exchanges: [OC_OK, OC_OK],
+		steps: [check("host"), list(MOVED_HOST), keysOf("host"), key("host"), keysOf("host")],
+	}),
+	run("insecure-a-key-over-http-to-a-public-host-is-not-sent", {
+		entries: [PUBLIC_HOST],
+		keys: { host: { kind: "key", key: KEY } },
+		steps: [check("host"), keysOf("host")],
+	}),
+	run("insecure-a-key-over-http-to-this-network-or-over-https-is-sent", {
+		entries: [HOST, SECURE_HOST],
+		keys: { host: { kind: "key", key: KEY }, secure: { kind: "key", key: KEY } },
+		exchanges: [OC_OK, OC_OK],
+		steps: [check("host"), check("secure"), keysOf("host"), keysOf("secure")],
+	}),
+	run("insecure-a-public-host-over-http-with-no-key-is-checked-as-today", {
+		entries: [PUBLIC_HOST],
+		exchanges: [OC_OK],
+		steps: [check("host"), keysOf("host")],
+	}),
+
 	// A key replaced or removed.
 	run("a-key-replaced-checks-again", {
 		entries: [MAIN],
@@ -262,7 +303,7 @@ export const healthCases: CaseSource[] = [
 	}),
 	run("an-entry-added-later-is-checked-once", {
 		entries: [MAIN],
-		keys: { main: { kind: "key", key: KEY }, fresh: { kind: "key", key: KEY } },
+		keys: { main: { kind: "key", key: KEY }, fresh: { kind: "key", key: KEY, boundTo: "openrouter" } },
 		exchanges: [OR_OK],
 		steps: [
 			list(MAIN, { ...MAIN, id: "fresh", label: "Fresh" }),
@@ -986,4 +1027,23 @@ export const healthCases: CaseSource[] = [
 		[MAIN, GONE],
 		[watch("w1"), { kind: "dispose" }, list(EDITED)],
 	),
+
+	// Keys a host vouches for.
+	vouched("vouched-a-key-read-after-the-url-changed-is-bound-to-the-new-entry", {
+		steps: [read("host"), list(MOVED_HOST), read("host")],
+	}),
+	vouched("vouched-a-read-during-the-change-answers-none", {
+		steps: [read("host", true), list(MOVED_HOST), { kind: "release" }, read("host")],
+	}),
+	vouched("vouched-a-change-of-a-configured-key-starts-a-new-era", {
+		steps: [read("host"), { kind: "configure", id: "host", key: OTHER }, read("host")],
+	}),
+	vouched("vouched-a-key-removed-unlisted-or-for-a-kind-that-takes-none-reads-none", {
+		entries: [HOST, BOX],
+		configured: { host: KEY, box: KEY, gone: KEY },
+		steps: [read("box"), read("gone"), { kind: "configure", id: "host", key: null }, read("host")],
+	}),
+	vouched("vouched-a-label-change-during-a-read-keeps-its-key", {
+		steps: [read("host", true), list({ ...HOST, label: "Renamed" }), { kind: "release" }],
+	}),
 ];

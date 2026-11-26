@@ -1,10 +1,9 @@
 //! A provider kind for a server named by URL.
 
-use std::sync::{Arc, LazyLock};
+use std::sync::Arc;
 
 use nyaaai_contract::fetch::Span;
 use nyaaai_contract::future::BoxFuture;
-use nyaaai_contract::pattern::Pattern;
 use nyaaai_contract::shapes::model::{ModelView, ModelViewPrice};
 use nyaaai_contract::shapes::provider::{
     Billed, Disposition, DispositionFallThrough, EntryFields, KeyState, KeyStateOk,
@@ -18,10 +17,12 @@ use crate::codec::Codec;
 use crate::dialects::local::{LocalDialect, LocalReplay, local_chat};
 use crate::models::view::codec_facts_of;
 use crate::provider::disposition::disposition_of;
+use crate::provider::entry::{KeyKind, KindField};
+use crate::provider::host::is_local_host;
 use crate::provider::kind::{
-    Browser, CatalogDeps, EntryCatalog, KindDeps, KindError, KindField, ProviderKind, Route, Tester,
+    Browser, CatalogDeps, EntryCatalog, KindDeps, KindError, ProviderKind, Route, Tester,
 };
-use crate::transport::{Auth, KeySource, Transport, TransportDeps};
+use crate::transport::{Auth, Forbidden, KeySource, Transport, TransportDeps};
 
 /// What an entry costs.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -53,27 +54,13 @@ pub const HOME: Terms = Terms {
     price: TermsPrice::Free,
 };
 
-/// Loopback, private ranges, LAN names; a host as the URL parser wrote it.
-static PRIVATE_HOST: LazyLock<Pattern> = LazyLock::new(|| {
-    Pattern::compile(
-        "^(localhost|0\\.0\\.0\\.0|(127|10)\\.[\\d.]+|192\\.168\\.[\\d.]+|172\\.(1[6-9]|2\\d|3[01])\\.[\\d.]+|169\\.254\\.[\\d.]+|100\\.(6[4-9]|[7-9]\\d|1[01]\\d|12[0-7])\\.[\\d.]+|\\[(::1?|f[cd][0-9a-f]{2}:[0-9a-f:]*|fe[89ab][0-9a-f]:[0-9a-f:]*)\\]|[^.[]+|.+\\.(localhost|local|lan|internal|home\\.arpa))$",
-        "i",
-    )
-    .expect("a fixed pattern")
-});
-
-/// Off this network: no URL, an unreadable one, or a host that is not private.
+/// No URL, an unreadable one, or a host of no private network.
 pub fn remote(entry: &EntryFields) -> bool {
-    let Some(url) = &entry.url else {
-        return true;
-    };
-    match parse_url(url) {
-        None => true,
-        Some(parts) => {
-            let host = parts.host.strip_suffix('.').unwrap_or(&parts.host);
-            !PRIVATE_HOST.test(host)
-        }
-    }
+    entry
+        .url
+        .as_deref()
+        .and_then(parse_url)
+        .is_none_or(|parts| !is_local_host(&parts.host))
 }
 
 /// A remote host may keep data and bill.
@@ -119,16 +106,16 @@ const DOT: &str = " \u{b7} ";
 struct NoKey;
 
 impl KeySource for NoKey {
-    fn get(&self) -> BoxFuture<'_, Option<String>> {
-        Box::pin(async { None })
+    fn get(&self) -> BoxFuture<'_, Result<Option<String>, Forbidden>> {
+        Box::pin(async { Ok(None) })
     }
 }
 
 struct SecretKey(String);
 
 impl KeySource for SecretKey {
-    fn get(&self) -> BoxFuture<'_, Option<String>> {
-        Box::pin(async move { Some(self.0.clone()) })
+    fn get(&self) -> BoxFuture<'_, Result<Option<String>, Forbidden>> {
+        Box::pin(async move { Ok(Some(self.0.clone())) })
     }
 }
 
@@ -183,7 +170,7 @@ fn catalog_of(route: &Route) -> Option<LocalCatalog> {
         .cloned()
 }
 
-impl ProviderKind for LocalKind {
+impl KeyKind for LocalKind {
     fn kind(&self) -> ProviderKindName {
         self.spec.kind
     }
@@ -199,9 +186,18 @@ impl ProviderKind for LocalKind {
     fn optional_key(&self) -> bool {
         self.spec.optional_key
     }
+}
 
+impl ProviderKind for LocalKind {
     fn url(&self) -> Option<&str> {
         self.spec.url
+    }
+
+    fn address(&self, entry: &EntryFields) -> Option<String> {
+        entry
+            .url
+            .clone()
+            .or_else(|| self.spec.url.map(str::to_owned))
     }
 
     /// URL, then model count.

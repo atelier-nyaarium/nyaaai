@@ -18,6 +18,7 @@ const ALL_KINDS = ["openrouter", "opencode", "ollama", "lmstudio", "llamacpp", "
 
 const KEY = { kind: "key", key: "fake-key-one" };
 const OTHER_KEY = { kind: "key", key: "fake-key-two" };
+const FOREIGN_KEY = { ...KEY, boundTo: "compatible https://other.example.test" };
 const NONE = { kind: "none" };
 const REFUSED = { kind: "refused" };
 const UNREADY = { kind: "unready" };
@@ -503,7 +504,15 @@ export const resolverCases: CaseSource[] = [
 	run("route-go-edited-to-payg-with-a-route-held", {
 		entries: [GO],
 		answers: { go: KEY },
-		steps: [resolve(LUNA), send(0), list({ ...GO, plan: "payg" }), send(0), resolve(LUNA), send(4)],
+		steps: [
+			resolve(LUNA),
+			send(0),
+			list({ ...GO, plan: "payg" }),
+			send(0),
+			answer("go", KEY),
+			resolve(LUNA),
+			send(5),
+		],
 	}),
 	run("route-an-entry-relabelled-keeps-its-route-and-its-key", {
 		entries: [FIRST],
@@ -519,9 +528,24 @@ export const resolverCases: CaseSource[] = [
 			send(0),
 			list({ ...COMPAT, url: "http://lab.local:9000/v1" }),
 			send(0),
+			answer("c", KEY),
 			resolve(COMPAT_ROW),
-			send(4),
+			send(5),
 		],
+	}),
+
+	// A held route whose key turned foreign sends nothing.
+	run("held-a-route-whose-key-turned-foreign-sends-nothing", {
+		entries: [COMPAT],
+		answers: { c: KEY },
+		rows: [COMPAT_ROW],
+		steps: [routes(COMPAT_ROW), send(0), answer("c", FOREIGN_KEY), send(0), routes(COMPAT_ROW)],
+	}),
+	run("held-a-keyless-route-whose-key-turned-foreign-sends-nothing", {
+		entries: [COMPAT],
+		answers: {},
+		rows: [COMPAT_ROW],
+		steps: [routes(COMPAT_ROW), send(0), answer("c", FOREIGN_KEY), send(0)],
 	}),
 
 	// The list is checked after the read.
@@ -602,19 +626,19 @@ export const resolverCases: CaseSource[] = [
 	// An entry whose route cannot be made.
 	run("bad-an-entry-that-cannot-be-routed-is-passed-as-unreachable", {
 		entries: [BAD, COMPAT],
-		answers: { bad: KEY, c: KEY },
+		answers: { c: KEY },
 		rows: [COMPAT_ROW],
 		steps: [routes(COMPAT_ROW), resolve(COMPAT_ROW), rows(), candidates(), route(BAD), route(COMPAT)],
 	}),
 	run("bad-the-only-entry-cannot-be-routed", {
 		entries: [BAD],
-		answers: { bad: KEY },
+		answers: {},
 		rows: [COMPAT_ROW],
 		steps: [routes(COMPAT_ROW), rows(), candidates()],
 	}),
 	run("bad-a-route-that-cannot-be-made-is-tried-again", {
 		entries: [BAD],
-		answers: { bad: KEY },
+		answers: {},
 		rows: [COMPAT_ROW],
 		steps: [routes(COMPAT_ROW), list({ ...BAD, url: "http://lab.local:8000/v1" }), routes(COMPAT_ROW)],
 	}),

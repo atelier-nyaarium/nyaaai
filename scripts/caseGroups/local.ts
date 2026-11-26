@@ -21,6 +21,7 @@ import { localTags, numCtxOf, modelOf as ollamaModel, runningOf } from "@nyaaai/
 import { MODELS } from "@nyaaai/agentic/models/curated";
 import { CHAT } from "@nyaaai/agentic/models/uses";
 import { codecFactsOf } from "@nyaaai/agentic/models/view";
+import { checkTyped } from "@nyaaai/agentic/provider/keyring";
 import type { ProviderKind } from "@nyaaai/agentic/provider/kind";
 import { replyText } from "@nyaaai/agentic/step";
 import { BUDGET_CEILINGS, type Span, span } from "@nyaaai/contract/fetch";
@@ -460,7 +461,7 @@ export const local = caseGroup("local", {
 				let state: z.infer<typeof KeyState> | null = null;
 				let thrown: string | null = null;
 				try {
-					state = await named.check(entry, input.secret ?? undefined, net.deps, clock);
+					state = await checkTyped(LOCAL_KINDS, entry, input.secret ?? undefined, net.deps, clock);
 				} catch (error) {
 					thrown = messageOf(error);
 				}

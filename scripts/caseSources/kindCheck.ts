@@ -54,6 +54,10 @@ export const kindCheckCases: CaseSource[] = [
 	OR("openrouter-a-reset-is-not-a-state-field", { exchanges: [reply({ data: { usage: 1, limit_reset: "daily" } })] }),
 	OR("openrouter-a-key-with-no-body-data-is-ok-and-empty", { exchanges: [reply({})] }),
 	OR("openrouter-the-url-of-a-test-loopback", { baseUrl: "http://127.0.0.1:9", exchanges: [KEY_BODY] }),
+	OR("openrouter-a-base-url-over-http-to-a-public-host-sends-no-key", {
+		baseUrl: "http://api.example.test",
+		exchanges: [KEY_BODY],
+	}),
 	...STATUSES.map((status) => OR(`openrouter-status-${status}`, { exchanges: [DENIED(status)] })),
 	OR("openrouter-a-dropped-connection-is-unreachable", { exchanges: [{ status: 200, text: "{", end: "dropped" }] }),
 	OR("openrouter-a-refused-connection-is-unreachable", { exchanges: [{ status: 200, text: "", end: "refused" }] }),

@@ -1,0 +1,62 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.readBoundKey",
+	"name": "read-anything-else-is-none",
+	"input": {
+		"texts": [
+			"fake-key-one",
+			"",
+			"null",
+			"\"fake-key-one\"",
+			"[1]",
+			"{\"key\":\"fake-key-one\"}",
+			"{\"v\":2,\"for\":\"openrouter\",\"key\":\"fake-key-one\"}",
+			"{\"v\":\"1\",\"for\":\"openrouter\",\"key\":\"fake-key-one\"}",
+			"{\"v\":1,\"for\":\"openrouter\",\"key\":7}",
+			"{\"v\":1,\"for\":null,\"key\":\"fake-key-one\"}",
+			"{\"v\":1,\"for\":\"openrouter\",\"key\":\"fake-key-one\",\"extra\":true}",
+			"{\"v\":1,\"for\":\"openrouter\",\"key\":\"fake-key-one\""
+		]
+	},
+	"expected": {
+		"answers": [
+			{
+				"kind": "none"
+			},
+			{
+				"kind": "none"
+			},
+			{
+				"kind": "none"
+			},
+			{
+				"kind": "none"
+			},
+			{
+				"kind": "none"
+			},
+			{
+				"kind": "none"
+			},
+			{
+				"kind": "none"
+			},
+			{
+				"kind": "none"
+			},
+			{
+				"kind": "none"
+			},
+			{
+				"kind": "none"
+			},
+			{
+				"kind": "none"
+			},
+			{
+				"kind": "none"
+			}
+		]
+	}
+}

@@ -1,0 +1,41 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.reach",
+	"name": "compatible-a-typed-key-over-http-to-a-public-host-is-not-sent",
+	"input": {
+		"kind": "compatible",
+		"entry": {
+			"label": "Lab",
+			"url": "http://api.example.test/v1"
+		},
+		"secret": "fake-key-one",
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "local-a",
+							"context_length": 32768
+						},
+						{
+							"id": "local-b"
+						},
+						{}
+					]
+				}
+			}
+		]
+	},
+	"expected": {
+		"state": {
+			"kind": "insecure"
+		},
+		"thrown": null,
+		"facts": "http://api.example.test/v1",
+		"requests": [],
+		"waiting": []
+	}
+}

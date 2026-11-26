@@ -64,6 +64,14 @@
 				"candidate": 0
 			},
 			{
+				"kind": "answer",
+				"id": "c",
+				"answer": {
+					"kind": "key",
+					"key": "fake-key-one"
+				}
+			},
+			{
 				"kind": "resolve",
 				"model": "compatible:qwen",
 				"use": {
@@ -74,7 +82,7 @@
 			},
 			{
 				"kind": "send",
-				"from": 4,
+				"from": 5,
 				"candidate": 0
 			}
 		]
@@ -127,6 +135,13 @@
 					"authorization": null,
 					"failure": null,
 					"thrown": null
+				},
+				"built": 1,
+				"disposed": 1
+			},
+			{
+				"answer": {
+					"kind": "changed"
 				},
 				"built": 1,
 				"disposed": 1

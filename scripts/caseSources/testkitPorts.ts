@@ -26,7 +26,7 @@ export const testkitPortCases: CaseSource[] = [
 				{ op: "listen", name: "a" },
 				{ op: "listen", name: "b" },
 				{ op: "listen", name: "c" },
-				{ op: "set", id: "e1", answer: "key", key: "fake-one" },
+				{ op: "set", id: "e1", answer: "key", key: "fake-one", boundTo: "openrouter" },
 				{ op: "get", id: "e1" },
 				{ op: "unlisten", name: "b" },
 				{ op: "set", id: "e2", answer: "refused" },

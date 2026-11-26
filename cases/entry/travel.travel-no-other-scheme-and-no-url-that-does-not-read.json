@@ -1,0 +1,28 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.travel",
+	"name": "travel-no-other-scheme-and-no-url-that-does-not-read",
+	"input": {
+		"urls": [
+			"ws://lab.local",
+			"wss://api.example.test",
+			"ftp://lab.local",
+			"file:///x",
+			"not a url",
+			"",
+			"http://"
+		]
+	},
+	"expected": {
+		"travels": [
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false
+		]
+	}
+}

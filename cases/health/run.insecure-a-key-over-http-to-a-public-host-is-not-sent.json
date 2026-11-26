@@ -1,0 +1,100 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.run",
+	"name": "insecure-a-key-over-http-to-a-public-host-is-not-sent",
+	"input": {
+		"startMs": 2000000,
+		"entries": [
+			{
+				"id": "host",
+				"kind": "compatible",
+				"label": "Host",
+				"url": "http://api.example.test/v1"
+			}
+		],
+		"keys": {
+			"host": {
+				"kind": "key",
+				"key": "fake-key-one"
+			}
+		},
+		"exchanges": [],
+		"steps": [
+			{
+				"kind": "check",
+				"id": "host"
+			},
+			{
+				"kind": "keys",
+				"id": "host"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "host",
+						"changed": [
+							"key"
+						]
+					},
+					{
+						"entry": "host",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "host",
+						"key": {
+							"kind": "insecure"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0,
+				"parked": []
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "keys",
+					"answer": {
+						"kind": "insecure"
+					}
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "host",
+						"key": {
+							"kind": "insecure"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0,
+				"parked": []
+			}
+		],
+		"requests": [],
+		"waiting": []
+	}
+}

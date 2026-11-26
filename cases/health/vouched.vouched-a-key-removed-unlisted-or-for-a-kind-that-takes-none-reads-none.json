@@ -1,0 +1,89 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.vouched",
+	"name": "vouched-a-key-removed-unlisted-or-for-a-kind-that-takes-none-reads-none",
+	"input": {
+		"entries": [
+			{
+				"id": "host",
+				"kind": "compatible",
+				"label": "Host",
+				"url": "http://lab.local:8000/v1"
+			},
+			{
+				"id": "box",
+				"kind": "ollama",
+				"label": "Box",
+				"url": "http://lab.local:11434"
+			}
+		],
+		"configured": {
+			"host": "fake-key-one",
+			"box": "fake-key-one",
+			"gone": "fake-key-one"
+		},
+		"steps": [
+			{
+				"kind": "read",
+				"id": "box"
+			},
+			{
+				"kind": "read",
+				"id": "gone"
+			},
+			{
+				"kind": "configure",
+				"id": "host",
+				"key": null
+			},
+			{
+				"kind": "read",
+				"id": "host"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answers": [
+					{
+						"read": 1,
+						"answer": {
+							"kind": "none"
+						}
+					}
+				],
+				"told": []
+			},
+			{
+				"answers": [
+					{
+						"read": 2,
+						"answer": {
+							"kind": "none"
+						}
+					}
+				],
+				"told": []
+			},
+			{
+				"answers": [],
+				"told": [
+					"rekeyed:host#1 3"
+				]
+			},
+			{
+				"answers": [
+					{
+						"read": 3,
+						"answer": {
+							"kind": "none"
+						}
+					}
+				],
+				"told": []
+			}
+		]
+	}
+}

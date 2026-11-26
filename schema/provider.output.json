@@ -163,6 +163,36 @@
 						"kind"
 					],
 					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "foreign"
+						},
+						"for": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"kind",
+						"for"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "insecure"
+						}
+					},
+					"required": [
+						"kind"
+					],
+					"additionalProperties": false
 				}
 			],
 			"x-tag": "kind"

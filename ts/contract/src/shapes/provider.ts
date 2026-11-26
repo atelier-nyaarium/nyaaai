@@ -43,6 +43,10 @@ export const KeyState = z.discriminatedUnion("kind", [
 	z.object({ kind: z.literal("unreachable") }),
 	/** The field did not parse. */
 	z.object({ kind: z.literal("invalid") }),
+	/** The stored key was given for another kind, plan or address: its host, else its kind's label. */
+	z.object({ kind: z.literal("foreign"), for: z.string() }),
+	/** The key would go over plain http to a public host. */
+	z.object({ kind: z.literal("insecure") }),
 ]);
 export type KeyState = z.infer<typeof KeyState>;
 

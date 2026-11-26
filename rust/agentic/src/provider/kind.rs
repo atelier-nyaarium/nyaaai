@@ -12,7 +12,7 @@ use nyaaai_contract::model_registry::ModelRegistry;
 use nyaaai_contract::shapes::model::{BrowseDetail, BrowseModel, ModelRow, ModelUse, ModelView};
 use nyaaai_contract::shapes::provider::{
     Billed, Disposition, EntryFields, KeyState, KindLine, KindLineField, Limits, ProviderEntry,
-    ProviderKindName, ProviderPlan, ProviderView,
+    ProviderPlan, ProviderView,
 };
 use nyaaai_contract::shapes::step::Failure;
 use nyaaai_contract::time::Scheduler;
@@ -20,6 +20,7 @@ use nyaaai_contract::time::Scheduler;
 use crate::codec::Codec;
 use crate::failure::ProviderError;
 use crate::kinds::fetcher::Aborted;
+use crate::provider::entry::{KeyKind, KindField};
 use crate::transport::{KeySource, Transport, TransportError};
 
 /// What a catalog stands on.
@@ -164,7 +165,7 @@ pub struct KindDeps {
     pub scheduler: Arc<dyn Scheduler>,
     pub log: Arc<dyn Fn(&str) + Send + Sync>,
     pub user_agent: String,
-    /// Overrides the entry's URL.
+    /// A host's tests only: where every request goes.
     pub base_url: Option<String>,
     /// What every span opens from; default the presets.
     pub budgets: Option<Budgets>,
@@ -177,36 +178,15 @@ pub struct Route {
     pub catalog: Arc<dyn EntryCatalog>,
 }
 
-/// The third field of the add form.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum KindField {
-    Key,
-    Url,
-}
-
 /// Provider engine.
-pub trait ProviderKind: Send + Sync {
-    fn kind(&self) -> ProviderKindName;
-
-    fn label(&self) -> &str;
-
-    /// Plan dropdown lines.
-    fn plans(&self) -> &[(ProviderPlan, &'static str)] {
-        &[]
-    }
-
-    /// Add-form third field.
-    fn field(&self) -> KindField;
-
-    /// URL kinds that also take a key.
-    fn optional_key(&self) -> bool {
-        false
-    }
-
+pub trait ProviderKind: KeyKind {
     /// Default URL.
     fn url(&self) -> Option<&str> {
         None
     }
+
+    /// Where its requests go, unless `KindDeps.base_url` says.
+    fn address(&self, entry: &EntryFields) -> Option<String>;
 
     /// The balance page.
     fn balance(&self) -> Option<&str> {

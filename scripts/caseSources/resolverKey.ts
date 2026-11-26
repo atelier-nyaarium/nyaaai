@@ -14,8 +14,19 @@ const MOVED = { ...LAB, url: "http://lab.local:9999" };
 const FIRST = { id: "a", kind: "openrouter", label: "First" };
 const SECOND = { id: "b", kind: "openrouter", label: "Second" };
 const GO = { id: "go", kind: "opencode", plan: "go", label: "Go" };
+const PUBLIC = { id: "p", kind: "compatible", label: "Public", url: "http://api.example.test/v1" };
 
 const ANSWERS = [KEY, { kind: "none" }, { kind: "refused" }, { kind: "unready" }];
+
+/** What the keyring reads, the forbidden keys included. */
+const READS = [
+	{ ...KEY, boundTo: "openrouter" },
+	{ kind: "none" },
+	{ kind: "refused" },
+	{ kind: "unready" },
+	{ kind: "foreign", boundTo: "compatible https://other.example.test" },
+	{ kind: "insecure" },
+];
 
 ////////////////////////////////
 //  Functions & Helpers
@@ -131,10 +142,22 @@ export const resolverKeyCases: CaseSource[] = [
 		answers: { a: { kind: "key", key: "" } },
 		steps: [get],
 	}),
+	key("key-a-key-for-another-binding-forbids-the-call", {
+		entry: FIRST,
+		list: [FIRST],
+		answers: { a: { ...KEY, boundTo: "opencode go" } },
+		steps: [get],
+	}),
+	key("key-a-key-over-http-to-a-public-host-forbids-the-call", {
+		entry: PUBLIC,
+		list: [PUBLIC],
+		answers: { p: KEY },
+		steps: [get],
+	}),
 
 	// The reach.
 	reach("reach-every-answer-for-a-key-kind-and-a-url-kind", {
-		rows: ["key", "url"].flatMap((field) => ANSWERS.map((held) => ({ field, answer: held }))),
+		rows: ["key", "url"].flatMap((field) => READS.map((held) => ({ field, answer: held }))),
 	}),
 
 	// What identifies an entry.

@@ -1,0 +1,31 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.binding",
+	"name": "binding-a-key-kind-at-its-own-address",
+	"input": {
+		"rows": [
+			{
+				"kind": "openrouter",
+				"label": "OpenRouter"
+			},
+			{
+				"kind": "openrouter",
+				"label": "Other",
+				"url": "https://elsewhere.example.test"
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"binding": "openrouter",
+				"for": "OpenRouter"
+			},
+			{
+				"binding": "openrouter",
+				"for": "OpenRouter"
+			}
+		]
+	}
+}

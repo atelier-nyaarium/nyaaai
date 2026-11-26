@@ -5,7 +5,8 @@ use std::sync::{Arc, Mutex};
 
 use nyaaai_agentic::codec::{Codec, Mode};
 use nyaaai_agentic::transport::{
-    Auth, KeyAuth, KeySource, Transport, TransportDeps, TransportError, is_key_shape, normalize_key,
+    Auth, Forbidden, KeyAuth, KeySource, Transport, TransportDeps, TransportError, is_key_shape,
+    normalize_key,
 };
 use nyaaai_contract::base64::base64_decode;
 use nyaaai_contract::cancel::CancelToken;
@@ -61,8 +62,9 @@ impl Codec for HeadedCodec {
 struct Keys(Arc<FakeKeys>);
 
 impl KeySource for Keys {
-    fn get(&self) -> BoxFuture<'_, Option<String>> {
-        self.0.get()
+    fn get(&self) -> BoxFuture<'_, Result<Option<String>, Forbidden>> {
+        let read = self.0.get();
+        Box::pin(async move { Ok(read.await) })
     }
 }
 

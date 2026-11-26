@@ -27,16 +27,20 @@ use crate::codec::{Codec, Mode, StreamDecoder};
 use crate::failure::{FailureExtra, ProviderError, failed};
 use crate::sse::SseDecoder;
 
-/// Where a key comes from.
+/// A stored key that may not be sent.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Forbidden;
+
+/// A key; none; or `Forbidden`: the call sends nothing.
 pub trait KeySource: Send + Sync {
-    fn get(&self) -> BoxFuture<'_, Option<String>>;
+    fn get(&self) -> BoxFuture<'_, Result<Option<String>, Forbidden>>;
 }
 
 struct StaticKey(String);
 
 impl KeySource for StaticKey {
-    fn get(&self) -> BoxFuture<'_, Option<String>> {
-        Box::pin(async move { Some(self.0.clone()) })
+    fn get(&self) -> BoxFuture<'_, Result<Option<String>, Forbidden>> {
+        Box::pin(async move { Ok(Some(self.0.clone())) })
     }
 }
 
@@ -527,7 +531,13 @@ impl Transport {
             return Ok(None);
         }
         let key = match auth {
-            KeyAuth::Stored => self.d.key.get().await,
+            KeyAuth::Stored => self.d.key.get().await.map_err(|Forbidden| {
+                failed(
+                    FailureCategory::KeyMissing,
+                    &format!("The {} key may not be sent.", self.d.label),
+                    FailureExtra::default(),
+                )
+            })?,
             KeyAuth::Key(key) => Some(key.clone()),
             KeyAuth::None => None,
         };

@@ -1,0 +1,50 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.binding",
+	"name": "binding-the-plan-and-its-default",
+	"input": {
+		"rows": [
+			{
+				"kind": "opencode",
+				"label": "Go",
+				"plan": "go"
+			},
+			{
+				"kind": "opencode",
+				"label": "Pay",
+				"plan": "payg"
+			},
+			{
+				"kind": "opencode",
+				"label": "Go"
+			},
+			{
+				"kind": "opencode",
+				"label": "Go",
+				"plan": "go",
+				"extraUsage": true
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"binding": "opencode go",
+				"for": "OpenCode"
+			},
+			{
+				"binding": "opencode payg",
+				"for": "OpenCode"
+			},
+			{
+				"binding": "opencode go",
+				"for": "OpenCode"
+			},
+			{
+				"binding": "opencode go",
+				"for": "OpenCode"
+			}
+		]
+	}
+}

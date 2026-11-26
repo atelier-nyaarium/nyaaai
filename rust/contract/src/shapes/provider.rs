@@ -190,6 +190,8 @@ pub enum KeyState {
     Rejected(KeyStateRejected),
     Unreachable(KeyStateUnreachable),
     Invalid(KeyStateInvalid),
+    Foreign(KeyStateForeign),
+    Insecure(KeyStateInsecure),
 }
 
 impl Shape for KeyState {
@@ -202,6 +204,8 @@ impl Shape for KeyState {
             "rejected" => KeyStateRejected::decode_at(value, at).map(Self::Rejected),
             "unreachable" => KeyStateUnreachable::decode_at(value, at).map(Self::Unreachable),
             "invalid" => KeyStateInvalid::decode_at(value, at).map(Self::Invalid),
+            "foreign" => KeyStateForeign::decode_at(value, at).map(Self::Foreign),
+            "insecure" => KeyStateInsecure::decode_at(value, at).map(Self::Insecure),
             _ => Err(shape::no_branch(at, "kind")),
         }
     }
@@ -214,6 +218,8 @@ impl Shape for KeyState {
             Self::Rejected(held) => held.encode(),
             Self::Unreachable(held) => held.encode(),
             Self::Invalid(held) => held.encode(),
+            Self::Foreign(held) => held.encode(),
+            Self::Insecure(held) => held.encode(),
         }
     }
 }
@@ -348,6 +354,48 @@ impl Shape for KeyStateInvalid {
     fn encode(&self) -> Value {
         let mut object = Object::new();
         object.insert("kind", Value::from("invalid"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KeyStateForeign {
+    pub for_: String,
+}
+
+impl Shape for KeyStateForeign {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "foreign")
+        })?;
+        let for_ = shape::required(object, "for", at, shape::text)?;
+        Ok(Self { for_ })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("foreign"));
+        object.insert("for", Value::from(self.for_.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct KeyStateInsecure {}
+
+impl Shape for KeyStateInsecure {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "insecure")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("insecure"));
         Value::Object(object)
     }
 }

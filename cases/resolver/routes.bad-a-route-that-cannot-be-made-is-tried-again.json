@@ -12,12 +12,7 @@
 				"url": "not a url"
 			}
 		],
-		"answers": {
-			"bad": {
-				"kind": "key",
-				"key": "fake-key-one"
-			}
-		},
+		"answers": {},
 		"failing": [],
 		"rows": [
 			"compatible:qwen"

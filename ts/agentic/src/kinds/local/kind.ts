@@ -1,13 +1,13 @@
 // A provider kind for a server named by URL.
 
 import type { Span } from "@nyaaai/contract/fetch";
-import { Pattern } from "@nyaaai/contract/pattern";
 import type { EntryFields, KeyState, ProviderKindName } from "@nyaaai/contract/shapes/provider";
 import { parseUrl } from "@nyaaai/contract/url";
 import { type LocalDialect, localChat } from "../../dialects/local";
 import { failureOf } from "../../failure";
 import { codecFactsOf } from "../../models/view";
 import { dispositionOf } from "../../provider/disposition";
+import { isLocalHost } from "../../provider/host";
 import type { ProviderKind, Route } from "../../provider/kind";
 import { type KeySource, Transport } from "../../transport";
 import { LocalCatalog, type LocalServer, type LocalTransport, localBrowser, localTester } from "./catalog";
@@ -42,12 +42,6 @@ export interface LocalKindSpec extends LocalDialect {
 /** Data stays home; calls bill nothing. */
 export const HOME: Terms = { kept: false, price: "free" };
 
-/** Loopback, private ranges and LAN names, trailing dot cut. */
-const PRIVATE_HOST = Pattern.compile(
-	"^(localhost|0\\.0\\.0\\.0|(127|10)\\.[\\d.]+|192\\.168\\.[\\d.]+|172\\.(1[6-9]|2\\d|3[01])\\.[\\d.]+|169\\.254\\.[\\d.]+|100\\.(6[4-9]|[7-9]\\d|1[01]\\d|12[0-7])\\.[\\d.]+|\\[(::1?|f[cd][0-9a-f]{2}:[0-9a-f:]*|fe[89ab][0-9a-f]:[0-9a-f:]*)\\]|[^.[]+|.+\\.(localhost|local|lan|internal|home\\.arpa))$",
-	"i",
-);
-
 const DOT = " \u{b7} ";
 
 const NO_KEY: KeySource = { get: async () => undefined };
@@ -69,13 +63,11 @@ function withoutSlashes(text: string): string {
 	return text.slice(0, end);
 }
 
-/** No URL, an unreadable one, or a non-private host. */
+/** No URL, an unreadable one, or a host of no private network. */
 export function remote(entry: EntryFields): boolean {
 	if (entry.url === undefined) return true;
 	const parts = parseUrl(entry.url);
-	if (parts === undefined) return true;
-	const host = parts.host.endsWith(".") ? parts.host.slice(0, -1) : parts.host;
-	return !PRIVATE_HOST.test(host);
+	return parts === undefined || !isLocalHost(parts.host);
 }
 
 /** A remote host may keep data and bill. */
@@ -97,6 +89,7 @@ export function localKind(spec: LocalKindSpec): ProviderKind {
 		field: "url",
 		...(spec.url === undefined ? {} : { url: spec.url }),
 		...(spec.optionalKey === undefined ? {} : { optionalKey: spec.optionalKey }),
+		address: (entry) => entry.url ?? spec.url,
 		// URL, then model count.
 		facts: (state: KeyState, entry) => {
 			const url = baseOf(entry);

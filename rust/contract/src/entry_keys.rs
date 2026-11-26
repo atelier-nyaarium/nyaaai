@@ -3,10 +3,10 @@
 use crate::cancel::Unsubscribe;
 use crate::future::BoxFuture;
 
-/// A key; none; refused by its server; or not yet read.
+/// A key with what it was given for (`bound_key` makes both); none; refused by its server; or not yet read.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum KeyAnswer {
-    Key(String),
+    Key { key: String, bound_to: String },
     None,
     Refused,
     Unready,

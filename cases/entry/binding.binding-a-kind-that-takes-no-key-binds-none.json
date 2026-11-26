@@ -1,0 +1,49 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.binding",
+	"name": "binding-a-kind-that-takes-no-key-binds-none",
+	"input": {
+		"rows": [
+			{
+				"kind": "ollama",
+				"label": "Lab"
+			},
+			{
+				"kind": "ollama",
+				"label": "Lab",
+				"url": "http://lab.local:11434"
+			},
+			{
+				"kind": "lmstudio",
+				"label": "Lab",
+				"url": "http://lab.local:1234"
+			},
+			{
+				"kind": "llamacpp",
+				"label": "Lab",
+				"url": "http://lab.local:9000"
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"binding": null,
+				"for": null
+			},
+			{
+				"binding": null,
+				"for": null
+			},
+			{
+				"binding": null,
+				"for": null
+			},
+			{
+				"binding": null,
+				"for": null
+			}
+		]
+	}
+}

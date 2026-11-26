@@ -97,30 +97,24 @@
 			{
 				"answer": {
 					"kind": "routes",
-					"unresolved": null,
-					"candidates": [
-						{
-							"entry": "go",
-							"kind": "opencode",
-							"binding": "gpt-6-luna",
-							"status": "ok",
-							"zdrOnly": true,
-							"path": "/openai/v1/chat/completions"
-						}
-					],
+					"unresolved": {
+						"ok": false,
+						"key": "openai/gpt-6-luna",
+						"refusal": "keyMissing",
+						"entry": "Go"
+					},
+					"candidates": [],
 					"passed": []
 				},
-				"built": 2,
+				"built": 1,
 				"disposed": 1
 			}
 		],
 		"transports": [
-			"Go/go",
-			"Go/payg"
+			"Go/go"
 		],
 		"stopped": [
-			"Go/go",
-			"Go/payg"
+			"Go/go"
 		],
 		"refreshed": [],
 		"keyReads": 2

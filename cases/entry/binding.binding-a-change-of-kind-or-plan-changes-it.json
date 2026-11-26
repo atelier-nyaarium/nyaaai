@@ -1,0 +1,49 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.binding",
+	"name": "binding-a-change-of-kind-or-plan-changes-it",
+	"input": {
+		"rows": [
+			{
+				"kind": "openrouter",
+				"label": "Lab"
+			},
+			{
+				"kind": "compatible",
+				"label": "Lab",
+				"url": "https://openrouter.ai/api/v1"
+			},
+			{
+				"kind": "opencode",
+				"label": "Lab",
+				"plan": "go"
+			},
+			{
+				"kind": "opencode",
+				"label": "Lab",
+				"plan": "payg"
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"binding": "openrouter",
+				"for": "OpenRouter"
+			},
+			{
+				"binding": "compatible https://openrouter.ai",
+				"for": "openrouter.ai"
+			},
+			{
+				"binding": "opencode go",
+				"for": "OpenCode"
+			},
+			{
+				"binding": "opencode payg",
+				"for": "OpenCode"
+			}
+		]
+	}
+}

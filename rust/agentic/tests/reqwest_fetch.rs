@@ -309,25 +309,28 @@ fn a_truncated_chunked_body_fails() {
     });
 }
 
+// A key must never follow a redirect to another origin.
 #[test]
-fn a_redirect_answers_its_status_and_is_not_followed() {
+fn a_307_to_another_origin_answers_its_status_and_the_other_sees_no_request() {
     run(async {
-        let mut moved = played(302, &[]);
-        moved
-            .headers
-            .push(("Location".to_owned(), "/next".to_owned()));
-        let server = Loopback::start(vec![moved, played(200, &["x"])])
+        let other = Loopback::start(vec![played(200, &["there"])])
             .await
             .unwrap();
+        let mut moved = played(307, &[]);
+        moved
+            .headers
+            .push(("Location".to_owned(), other.url("/next")));
+        let server = Loopback::start(vec![moved]).await.unwrap();
         let fetch = reqwest_fetch();
         let mut response = fetch
             .fetch(post(server.url("/"), "{}"), CancelToken::new())
             .await
             .unwrap();
-        assert_eq!(response.status, 302);
+        assert_eq!(response.status, 307);
         assert!(drained(&mut response).await.unwrap().is_empty());
         tokio::time::sleep(Duration::from_millis(50)).await;
         assert_eq!(server.requests().len(), 1);
+        assert!(other.requests().is_empty());
     });
 }
 

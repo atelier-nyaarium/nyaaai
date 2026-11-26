@@ -538,6 +538,7 @@ impl Inner {
             let mut held = empty_notice(NoticeKind::KeyRejected);
             match blocked {
                 Blocked::KeyRejected(_) => {}
+                Blocked::KeyMissing(_) => held.kind = NoticeKind::KeyMissing,
                 Blocked::SpendLimit(spend) => {
                     held.kind = NoticeKind::SpendLimit;
                     held.resets_at = spend.resets_at;

@@ -9,7 +9,6 @@ use std::sync::{Arc, Mutex, MutexGuard, Weak};
 use std::task::{Context, Poll, Waker};
 
 use nyaaai_contract::cancel::{CancelToken, Unsubscribe};
-use nyaaai_contract::entry_keys::{EntryKeys, KeyAnswer};
 use nyaaai_contract::fetch::Span;
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::json::{Record, Value};
@@ -24,12 +23,14 @@ use nyaaai_contract::shapes::provider::{
 use nyaaai_contract::shapes::step::{CanonicalRequest, StepResult};
 use tokio::sync::OnceCell;
 
+use super::entry::KindField;
 use super::incarnation::{EntryRegistry, Incarnation, RegistryEvent, identity_of};
-use super::kind::{EntryCatalog, KindDeps, KindField, ProviderKind, Route};
+use super::keyring::{KeyRead, KeyReads};
+use super::kind::{EntryCatalog, KindDeps, ProviderKind, Route};
 use crate::codec::Codec;
 use crate::models::row_key::{parse_row_key_text, served_id_of};
 use crate::models::view::unknown_view;
-use crate::transport::{EventStream, KeyAuth, KeySource, Transport, TransportError};
+use crate::transport::{EventStream, Forbidden, KeyAuth, KeySource, Transport, TransportError};
 
 /// One model's view by key.
 pub trait Catalog: Send + Sync {
@@ -159,8 +160,8 @@ impl std::error::Error for ResolveError {}
 pub struct ResolverDeps {
     /// Incarnations in priority order.
     pub entries: Arc<EntryRegistry>,
-    /// Key reads go through it.
-    pub keys: Arc<dyn EntryKeys>,
+    /// Key reads go through it: a host gives health's `entry_keys`.
+    pub keys: Arc<dyn KeyReads>,
     pub registry: Arc<dyn ModelRegistry>,
     pub kinds: Vec<Arc<dyn ProviderKind>>,
     /// What a kind's transport stands on.
@@ -220,31 +221,32 @@ pub fn via_of(entry: &ProviderEntry) -> Via {
     }
 }
 
-/// A URL kind needs no key; a key kind needs one.
-pub fn reach_of(field: KindField, answer: &KeyAnswer) -> KeyReach {
+/// A URL kind needs no key; a key kind needs one; a key that may not be sent is missing for every kind.
+pub fn reach_of(field: KindField, answer: &KeyRead) -> KeyReach {
     match answer {
-        KeyAnswer::Key(_) => KeyReach::Ok,
-        KeyAnswer::None => {
+        KeyRead::Key { .. } => KeyReach::Ok,
+        KeyRead::None => {
             if field == KindField::Url {
                 KeyReach::Ok
             } else {
                 KeyReach::KeyMissing
             }
         }
-        KeyAnswer::Refused => KeyReach::KeyRejected,
-        KeyAnswer::Unready => KeyReach::Unreachable,
+        KeyRead::Refused => KeyReach::KeyRejected,
+        KeyRead::Unready => KeyReach::Unreachable,
+        KeyRead::Foreign { .. } | KeyRead::Insecure => KeyReach::KeyMissing,
     }
 }
 
-/// One route's key: given only while its incarnation lives.
+/// One route's key: given only while its incarnation lives; one that may not be sent forbids the call.
 pub struct EntryKeySource {
-    keys: Arc<dyn EntryKeys>,
+    keys: Arc<dyn KeyReads>,
     /// Weak: the route is held by the incarnation, and a strong one would keep it alive.
     incarnation: Weak<Incarnation>,
     id: String,
 }
 
-pub fn key_source_of(keys: Arc<dyn EntryKeys>, incarnation: &Arc<Incarnation>) -> EntryKeySource {
+pub fn key_source_of(keys: Arc<dyn KeyReads>, incarnation: &Arc<Incarnation>) -> EntryKeySource {
     EntryKeySource {
         keys,
         incarnation: Arc::downgrade(incarnation),
@@ -253,15 +255,16 @@ pub fn key_source_of(keys: Arc<dyn EntryKeys>, incarnation: &Arc<Incarnation>) -
 }
 
 impl KeySource for EntryKeySource {
-    fn get(&self) -> BoxFuture<'_, Option<String>> {
+    fn get(&self) -> BoxFuture<'_, Result<Option<String>, Forbidden>> {
         Box::pin(async move {
             let answer = self.keys.get(&self.id).await;
             if !self.incarnation.upgrade().is_some_and(|held| held.live()) {
-                return None;
+                return Ok(None);
             }
             match answer {
-                KeyAnswer::Key(key) => Some(key),
-                _ => None,
+                KeyRead::Foreign { .. } | KeyRead::Insecure => Err(Forbidden),
+                KeyRead::Key { key, .. } => Ok(Some(key)),
+                _ => Ok(None),
             }
         })
     }
@@ -933,8 +936,26 @@ mod tests {
     use super::*;
     use crate::dialects::openrouter::OPENROUTER_CHAT;
     use crate::provider::disposition::disposition_of;
+    use crate::provider::entry::KeyKind;
+    use crate::provider::keyring::{Keyring, KeyringDeps};
     use crate::provider::kind::{CatalogDeps, KindError};
     use crate::transport::{Auth, TransportDeps};
+
+    type KindDepsOf = Arc<dyn Fn(ProviderKindName) -> KindDeps + Send + Sync>;
+
+    /// A keyring over an empty store.
+    fn no_keys(
+        entries: &Arc<EntryRegistry>,
+        kinds: Vec<Arc<dyn ProviderKind>>,
+        kind_deps: &KindDepsOf,
+    ) -> Arc<dyn KeyReads> {
+        Arc::new(Keyring::new(KeyringDeps {
+            keys: Arc::new(ScriptedEntryKeys::new()),
+            entries: Arc::clone(entries),
+            kinds,
+            kind_deps: Arc::clone(kind_deps),
+        }))
+    }
 
     struct Stopping(Arc<AtomicUsize>);
 
@@ -968,7 +989,7 @@ mod tests {
         stopped: Arc<AtomicUsize>,
     }
 
-    impl ProviderKind for Meeting {
+    impl KeyKind for Meeting {
         fn kind(&self) -> ProviderKindName {
             ProviderKindName::Openrouter
         }
@@ -979,6 +1000,12 @@ mod tests {
 
         fn field(&self) -> KindField {
             KindField::Key
+        }
+    }
+
+    impl ProviderKind for Meeting {
+        fn address(&self, _entry: &EntryFields) -> Option<String> {
+            None
         }
 
         fn check<'a>(
@@ -1062,23 +1089,26 @@ mod tests {
             url: None,
             extra_usage: None,
         };
+        let kind_deps: KindDepsOf = Arc::new(move |_| KindDeps {
+            runtime: runtime.handle().clone(),
+            fetch: fetch.clone(),
+            scheduler: scheduler.clone(),
+            log: Arc::new(|_| {}),
+            user_agent: "tests/1.0".to_owned(),
+            base_url: None,
+            budgets: None,
+        });
+        let entries = Arc::new(EntryRegistry::new(
+            Arc::new(ScriptedProviderList::new(vec![entry.clone()])),
+            &ScriptedEntryKeys::new(),
+        ));
+        let kinds = vec![kind.clone() as Arc<dyn ProviderKind>];
         let resolver = ModelResolver::new(ResolverDeps {
-            entries: Arc::new(EntryRegistry::new(
-                Arc::new(ScriptedProviderList::new(vec![entry.clone()])),
-                &ScriptedEntryKeys::new(),
-            )),
-            keys: Arc::new(ScriptedEntryKeys::new()),
+            keys: no_keys(&entries, kinds.clone(), &kind_deps),
+            entries,
             registry: Arc::new(ScriptedModelRegistry::empty()),
-            kinds: vec![kind.clone() as Arc<dyn ProviderKind>],
-            kind_deps: Arc::new(move |_| KindDeps {
-                runtime: runtime.handle().clone(),
-                fetch: fetch.clone(),
-                scheduler: scheduler.clone(),
-                log: Arc::new(|_| {}),
-                user_agent: "tests/1.0".to_owned(),
-                base_url: None,
-                budgets: None,
-            }),
+            kinds,
+            kind_deps,
             zdr_only: Arc::new(|| true),
             refreshed: None,
         });
@@ -1121,20 +1151,22 @@ mod tests {
         };
         let list = Arc::new(ScriptedProviderList::new(vec![entry.clone()]));
         let entries = Arc::new(EntryRegistry::new(list.clone(), &ScriptedEntryKeys::new()));
+        let kind_deps: KindDepsOf = Arc::new(move |_| KindDeps {
+            runtime: runtime.handle().clone(),
+            fetch: fetch.clone(),
+            scheduler: scheduler.clone(),
+            log: Arc::new(|_| {}),
+            user_agent: "tests/1.0".to_owned(),
+            base_url: None,
+            budgets: None,
+        });
+        let kinds = vec![kind as Arc<dyn ProviderKind>];
         let resolver = ModelResolver::new(ResolverDeps {
             entries: Arc::clone(&entries),
-            keys: Arc::new(ScriptedEntryKeys::new()),
+            keys: no_keys(&entries, kinds.clone(), &kind_deps),
             registry: Arc::new(ScriptedModelRegistry::empty()),
-            kinds: vec![kind as Arc<dyn ProviderKind>],
-            kind_deps: Arc::new(move |_| KindDeps {
-                runtime: runtime.handle().clone(),
-                fetch: fetch.clone(),
-                scheduler: scheduler.clone(),
-                log: Arc::new(|_| {}),
-                user_agent: "tests/1.0".to_owned(),
-                base_url: None,
-                budgets: None,
-            }),
+            kinds,
+            kind_deps,
             zdr_only: Arc::new(|| true),
             refreshed: None,
         });

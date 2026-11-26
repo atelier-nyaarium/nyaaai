@@ -1,6 +1,7 @@
 import { checkKey } from "@nyaaai/agentic/kinds/openrouter/key";
 import { CHAT } from "@nyaaai/agentic/models/uses";
 import { codecFactsOf } from "@nyaaai/agentic/models/view";
+import { checkTyped } from "@nyaaai/agentic/provider/keyring";
 import { KINDS, kindLines, type ProviderKind, providerView } from "@nyaaai/agentic/provider/kind";
 import type { KeyAuth } from "@nyaaai/agentic/transport";
 import { BUDGET_CEILINGS, span } from "@nyaaai/contract/fetch";
@@ -296,7 +297,7 @@ export const kindGroup = caseGroup("kind", {
 				let state: z.infer<typeof KeyState> | null = null;
 				let thrown: string | null = null;
 				try {
-					state = await named.check(entry, input.secret ?? undefined, deps, clock);
+					state = await checkTyped(KINDS, entry, input.secret ?? undefined, deps, clock);
 				} catch (error) {
 					thrown = messageOf(error);
 				}

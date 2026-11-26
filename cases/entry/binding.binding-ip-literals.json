@@ -1,0 +1,59 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.binding",
+	"name": "binding-ip-literals",
+	"input": {
+		"rows": [
+			{
+				"kind": "compatible",
+				"label": "Lab",
+				"url": "http://[::1]:8000/v1"
+			},
+			{
+				"kind": "compatible",
+				"label": "Lab",
+				"url": "http://[0:0:0:0:0:0:0:1]:8000"
+			},
+			{
+				"kind": "compatible",
+				"label": "Lab",
+				"url": "http://[::ffff:192.168.1.5]:8000"
+			},
+			{
+				"kind": "compatible",
+				"label": "Lab",
+				"url": "http://192.168.1.5:8000"
+			},
+			{
+				"kind": "compatible",
+				"label": "Lab",
+				"url": "http://0x7f.1"
+			}
+		]
+	},
+	"expected": {
+		"rows": [
+			{
+				"binding": "compatible http://[::1]:8000",
+				"for": "[::1]"
+			},
+			{
+				"binding": "compatible http://[::1]:8000",
+				"for": "[::1]"
+			},
+			{
+				"binding": "compatible http://[::ffff:c0a8:105]:8000",
+				"for": "[::ffff:c0a8:105]"
+			},
+			{
+				"binding": "compatible http://192.168.1.5:8000",
+				"for": "192.168.1.5"
+			},
+			{
+				"binding": "compatible http://127.0.0.1",
+				"for": "127.0.0.1"
+			}
+		]
+	}
+}

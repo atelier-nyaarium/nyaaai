@@ -155,6 +155,34 @@
 					"required": [
 						"kind"
 					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "foreign"
+						},
+						"for": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"kind",
+						"for"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "insecure"
+						}
+					},
+					"required": [
+						"kind"
+					]
 				}
 			],
 			"x-tag": "kind"

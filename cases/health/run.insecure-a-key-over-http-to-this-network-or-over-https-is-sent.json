@@ -1,0 +1,253 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.run",
+	"name": "insecure-a-key-over-http-to-this-network-or-over-https-is-sent",
+	"input": {
+		"startMs": 2000000,
+		"entries": [
+			{
+				"id": "host",
+				"kind": "compatible",
+				"label": "Host",
+				"url": "http://lab.local:8000/v1"
+			},
+			{
+				"id": "secure",
+				"kind": "compatible",
+				"label": "Secure",
+				"url": "https://api.example.test/v1"
+			}
+		],
+		"keys": {
+			"host": {
+				"kind": "key",
+				"key": "fake-key-one"
+			},
+			"secure": {
+				"kind": "key",
+				"key": "fake-key-one"
+			}
+		},
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "model-a"
+						}
+					]
+				}
+			},
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "model-a"
+						}
+					]
+				}
+			}
+		],
+		"steps": [
+			{
+				"kind": "check",
+				"id": "host"
+			},
+			{
+				"kind": "check",
+				"id": "secure"
+			},
+			{
+				"kind": "keys",
+				"id": "host"
+			},
+			{
+				"kind": "keys",
+				"id": "secure"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "host",
+						"changed": [
+							"key"
+						]
+					},
+					{
+						"entry": "host",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "host",
+						"key": {
+							"kind": "ok",
+							"models": 1
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					},
+					{
+						"entry": "secure",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 1,
+				"parked": []
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "secure",
+						"changed": [
+							"key"
+						]
+					},
+					{
+						"entry": "secure",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "host",
+						"key": {
+							"kind": "ok",
+							"models": 1
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					},
+					{
+						"entry": "secure",
+						"key": {
+							"kind": "ok",
+							"models": 1
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 2,
+				"parked": []
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "keys",
+					"answer": {
+						"kind": "key",
+						"key": "fake-key-one",
+						"boundTo": "compatible http://lab.local:8000"
+					}
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "host",
+						"key": {
+							"kind": "ok",
+							"models": 1
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					},
+					{
+						"entry": "secure",
+						"key": {
+							"kind": "ok",
+							"models": 1
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 2,
+				"parked": []
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "keys",
+					"answer": {
+						"kind": "key",
+						"key": "fake-key-one",
+						"boundTo": "compatible https://api.example.test"
+					}
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "host",
+						"key": {
+							"kind": "ok",
+							"models": 1
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					},
+					{
+						"entry": "secure",
+						"key": {
+							"kind": "ok",
+							"models": 1
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 2,
+				"parked": []
+			}
+		],
+		"requests": [
+			"http://lab.local:8000/v1/models",
+			"https://api.example.test/v1/models"
+		],
+		"waiting": []
+	}
+}

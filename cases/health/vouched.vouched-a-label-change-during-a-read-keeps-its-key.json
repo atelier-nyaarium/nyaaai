@@ -1,0 +1,65 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.vouched",
+	"name": "vouched-a-label-change-during-a-read-keeps-its-key",
+	"input": {
+		"entries": [
+			{
+				"id": "host",
+				"kind": "compatible",
+				"label": "Host",
+				"url": "http://lab.local:8000/v1"
+			}
+		],
+		"configured": {
+			"host": "fake-key-one"
+		},
+		"steps": [
+			{
+				"kind": "read",
+				"id": "host",
+				"hold": true
+			},
+			{
+				"kind": "list",
+				"entries": [
+					{
+						"id": "host",
+						"kind": "compatible",
+						"label": "Renamed",
+						"url": "http://lab.local:8000/v1"
+					}
+				]
+			},
+			{
+				"kind": "release"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answers": [],
+				"told": []
+			},
+			{
+				"answers": [],
+				"told": []
+			},
+			{
+				"answers": [
+					{
+						"read": 1,
+						"answer": {
+							"kind": "key",
+							"key": "fake-key-one",
+							"boundTo": "compatible http://lab.local:8000"
+						}
+					}
+				],
+				"told": []
+			}
+		]
+	}
+}

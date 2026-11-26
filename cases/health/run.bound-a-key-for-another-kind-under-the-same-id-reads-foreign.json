@@ -1,0 +1,103 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.run",
+	"name": "bound-a-key-for-another-kind-under-the-same-id-reads-foreign",
+	"input": {
+		"startMs": 2000000,
+		"entries": [
+			{
+				"id": "main",
+				"kind": "openrouter",
+				"label": "Main"
+			}
+		],
+		"keys": {
+			"main": {
+				"kind": "key",
+				"key": "fake-key-one",
+				"boundTo": "opencode go"
+			}
+		},
+		"exchanges": [],
+		"steps": [
+			{
+				"kind": "check",
+				"id": "main"
+			},
+			{
+				"kind": "keys",
+				"id": "main"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "main",
+						"changed": [
+							"key"
+						]
+					},
+					{
+						"entry": "main",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "foreign",
+							"for": "OpenCode"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0,
+				"parked": []
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "keys",
+					"answer": {
+						"kind": "foreign",
+						"boundTo": "opencode go"
+					}
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "main",
+						"key": {
+							"kind": "foreign",
+							"for": "OpenCode"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0,
+				"parked": []
+			}
+		],
+		"requests": [],
+		"waiting": []
+	}
+}

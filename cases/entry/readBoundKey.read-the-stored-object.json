@@ -1,0 +1,44 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.readBoundKey",
+	"name": "read-the-stored-object",
+	"input": {
+		"texts": [
+			"{\"v\":1,\"for\":\"openrouter\",\"key\":\"fake-key-one\"}",
+			"{\"v\":1,\"for\":\"compatible https://api.example.test:8443\",\"key\":\"fake \\\"quoted\\\" \\\\ key\\n\\u00e9\"}",
+			"{\"key\":\"fake-key-one\",\"for\":\"openrouter\",\"v\":1}",
+			"{\"v\":1.0,\"for\":\"openrouter\",\"key\":\"fake-key-one\"}",
+			" {\"v\":1,\"for\":\"\",\"key\":\"\"} "
+		]
+	},
+	"expected": {
+		"answers": [
+			{
+				"kind": "key",
+				"key": "fake-key-one",
+				"boundTo": "openrouter"
+			},
+			{
+				"kind": "key",
+				"key": "fake \"quoted\" \\ key\né",
+				"boundTo": "compatible https://api.example.test:8443"
+			},
+			{
+				"kind": "key",
+				"key": "fake-key-one",
+				"boundTo": "openrouter"
+			},
+			{
+				"kind": "key",
+				"key": "fake-key-one",
+				"boundTo": "openrouter"
+			},
+			{
+				"kind": "key",
+				"key": "",
+				"boundTo": ""
+			}
+		]
+	}
+}

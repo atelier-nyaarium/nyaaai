@@ -19,7 +19,9 @@ import type {
 import type { Billed, KeyState, ProviderEntry, ProviderKindName, SkipReason } from "@nyaaai/contract/shapes/provider";
 import type { Failure, NormalizedUsage } from "@nyaaai/contract/shapes/step";
 import type { Scheduler } from "@nyaaai/contract/time";
+import { boundFor, takesKey } from "../provider/entry";
 import type { EntryRegistry, Era, Incarnation, RegistryEvent } from "../provider/incarnation";
+import { type KeyReads, Keyring } from "../provider/keyring";
 import type { KindDeps, ProviderKind } from "../provider/kind";
 import type { Resolved } from "../provider/resolver";
 import { type GateState, ProviderGate } from "./gate";
@@ -66,7 +68,7 @@ export interface HealthDeps {
 	ids: Ids;
 	/** Shared with the resolver. */
 	entries: EntryRegistry;
-	/** The store's keys; health offers `entryKeys` over them. */
+	/** The store's keys; health reads them through its keyring and offers `entryKeys`. */
 	keys: Pick<EntryKeys, "get">;
 	kinds: Partial<Record<ProviderKindName, ProviderKind>>;
 	/** What a kind's check stands on. */
@@ -122,8 +124,9 @@ function billedWith(was: Billed | undefined, reply: Billing): Billed {
 
 /** Entry health and routing. */
 export class ProviderHealth implements Gate {
-	/** Store keys, unless health holds the entry out. */
-	readonly entryKeys: EntryKeys;
+	/** The keyring's reads, unless health holds the entry out. */
+	readonly entryKeys: KeyReads;
+	private readonly keyring: Keyring;
 	private readonly gate: ProviderGate;
 	/** Readers dropped while a check ran. */
 	private retired: KeyReader[] = [];
@@ -146,6 +149,7 @@ export class ProviderHealth implements Gate {
 			...(d.maxPauses === undefined ? {} : { maxPauses: d.maxPauses }),
 			onTicket: (ticket) => this.admitted(ticket),
 		});
+		this.keyring = new Keyring({ keys: d.keys, entries: d.entries, kinds: d.kinds, kindDeps: d.kindDeps });
 		this.entryKeys = {
 			get: async (id) => {
 				try {
@@ -153,14 +157,14 @@ export class ProviderHealth implements Gate {
 					if (incarnation === undefined) return { kind: "none" };
 					const standing = this.standing(incarnation);
 					if (standing !== undefined) return { kind: standing };
-					const answer = await d.keys.get(id);
+					const answer = await this.keyring.read(incarnation.entry);
 					// A URL kind needs no key, so an unreadable store is no key.
 					return answer.kind === "unready" && this.keyless(incarnation.entry) ? { kind: "none" } : answer;
 				} catch {
 					return { kind: "unready" };
 				}
 			},
-			onChange: (listener) => d.entries.onKeyChange(listener),
+			onChange: (listener) => this.keyring.onChange(listener),
 		};
 		this.unsubscribe.push(
 			d.entries.watch((events) => this.observe(events)),
@@ -290,6 +294,7 @@ export class ProviderHealth implements Gate {
 	deferred(route: Resolved, keep?: ReadonlySet<string>): SkipReason | undefined {
 		const incarnation = this.owned(route);
 		if (this.rejected(incarnation.era)) return "keyRejected";
+		if (this.forbidden(incarnation.era)) return "keyMissing";
 		const pool = this.verdict(incarnation, keep);
 		if (pool !== undefined) return pool.skip;
 		return this.gate.ready(incarnation.era.gates, keyOf(route)) ? undefined : "paused";
@@ -298,6 +303,7 @@ export class ProviderHealth implements Gate {
 	blocked(route: Resolved, keep?: ReadonlySet<string>): Blocked | undefined {
 		const incarnation = this.owned(route);
 		if (this.rejected(incarnation.era)) return { kind: "keyRejected" };
+		if (this.forbidden(incarnation.era)) return { kind: "keyMissing" };
 		return this.verdict(incarnation, keep)?.blocked;
 	}
 
@@ -510,12 +516,13 @@ export class ProviderHealth implements Gate {
 		const kind = this.d.kinds[entry.kind];
 		if (kind === undefined) return none();
 		const stale = () => span.signal.aborted || era.retired;
-		const answer = await this.d.keys.get(entry.id);
+		const answer = await this.keyring.read(entry);
 		if (stale()) return undefined;
 		let state: KeyState;
 		if (answer.kind === "refused") state = { kind: "rejected" };
-		else if (answer.kind === "unready" && (kind.field === "key" || kind.optionalKey === true))
-			state = { kind: "unreachable" };
+		else if (answer.kind === "unready" && takesKey(kind)) state = { kind: "unreachable" };
+		else if (answer.kind === "foreign") state = { kind: "foreign", for: boundFor(answer.boundTo, this.d.kinds) };
+		else if (answer.kind === "insecure") state = { kind: "insecure" };
 		else {
 			const secret = answer.kind === "key" ? answer.key : undefined;
 			state =
@@ -580,10 +587,16 @@ export class ProviderHealth implements Gate {
 		return era.status?.state.kind === "rejected";
 	}
 
-	/** A URL kind that takes no key at all. */
+	/** Its key may not be sent. */
+	private forbidden(era: Era): boolean {
+		const kind = era.status?.state.kind;
+		return kind === "foreign" || kind === "insecure";
+	}
+
+	/** A kind that takes no key at all. */
 	private keyless(entry: ProviderEntry): boolean {
 		const kind = this.d.kinds[entry.kind];
-		return kind?.field === "url" && kind.optionalKey !== true;
+		return kind !== undefined && !takesKey(kind);
 	}
 
 	private byUrl(entry: Pick<ProviderEntry, "kind">): boolean {

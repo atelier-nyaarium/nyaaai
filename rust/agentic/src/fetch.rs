@@ -26,19 +26,21 @@ struct Raw {
 
 impl ReqwestFetch {
     pub fn new(scheduler: Arc<dyn Scheduler>) -> Result<Self, FetchError> {
-        reqwest::Client::builder()
-            .no_proxy()
-            .redirect(reqwest::redirect::Policy::none())
-            .build()
-            .map(|client| Self::with_client(client, scheduler))
-            .map_err(|error| FetchError::Failed(described(error)))
+        Self::with_client(reqwest::Client::builder().no_proxy(), scheduler)
     }
 
-    /// A host's own settings: its proxies and redirects are its own.
-    pub fn with_client(client: reqwest::Client, scheduler: Arc<dyn Scheduler>) -> Self {
-        Self {
+    /// A host's own settings, its proxies included; a redirect is never followed.
+    pub fn with_client(
+        builder: reqwest::ClientBuilder,
+        scheduler: Arc<dyn Scheduler>,
+    ) -> Result<Self, FetchError> {
+        let client = builder
+            .redirect(reqwest::redirect::Policy::none())
+            .build()
+            .map_err(|error| FetchError::Failed(described(error)))?;
+        Ok(Self {
             inner: budgeted(Raw { client }, scheduler),
-        }
+        })
     }
 }
 

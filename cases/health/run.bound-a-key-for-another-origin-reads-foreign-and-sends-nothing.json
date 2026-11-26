@@ -1,0 +1,104 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.run",
+	"name": "bound-a-key-for-another-origin-reads-foreign-and-sends-nothing",
+	"input": {
+		"startMs": 2000000,
+		"entries": [
+			{
+				"id": "host",
+				"kind": "compatible",
+				"label": "Host",
+				"url": "http://lab.local:8000/v1"
+			}
+		],
+		"keys": {
+			"host": {
+				"kind": "key",
+				"key": "fake-key-one",
+				"boundTo": "compatible https://other.example.test"
+			}
+		},
+		"exchanges": [],
+		"steps": [
+			{
+				"kind": "check",
+				"id": "host"
+			},
+			{
+				"kind": "keys",
+				"id": "host"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "none"
+				},
+				"changes": [
+					{
+						"entry": "host",
+						"changed": [
+							"key"
+						]
+					},
+					{
+						"entry": "host",
+						"changed": [
+							"key"
+						]
+					}
+				],
+				"entries": [
+					{
+						"entry": "host",
+						"key": {
+							"kind": "foreign",
+							"for": "other.example.test"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0,
+				"parked": []
+			},
+			{
+				"nowMs": 2000000,
+				"answer": {
+					"kind": "keys",
+					"answer": {
+						"kind": "foreign",
+						"boundTo": "compatible https://other.example.test"
+					}
+				},
+				"changes": [],
+				"entries": [
+					{
+						"entry": "host",
+						"key": {
+							"kind": "foreign",
+							"for": "other.example.test"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"run": [],
+				"requests": 0,
+				"parked": []
+			}
+		],
+		"requests": [],
+		"waiting": []
+	}
+}

@@ -2193,6 +2193,9 @@
 							"key": {
 								"type": "string"
 							},
+							"boundTo": {
+								"type": "string"
+							},
 							"unlistens": {
 								"type": "string"
 							}
@@ -2240,6 +2243,9 @@
 										"type": "string"
 									},
 									"key": {
+										"type": "string"
+									},
+									"boundTo": {
 										"type": "string"
 									}
 								},
@@ -5816,6 +5822,220 @@
 			},
 			"required": [
 				"keys"
+			]
+		},
+		"EntryBindingInput": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"$ref": "provider.input.json#/$defs/EntryFields"
+					}
+				}
+			},
+			"required": [
+				"rows"
+			]
+		},
+		"EntryBindingResult": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"binding": {
+								"type": [
+									"string",
+									"null"
+								]
+							},
+							"for": {
+								"type": [
+									"string",
+									"null"
+								]
+							}
+						},
+						"required": [
+							"binding",
+							"for"
+						]
+					}
+				}
+			},
+			"required": [
+				"rows"
+			]
+		},
+		"EntryKeyForInput": {
+			"type": "object",
+			"properties": {
+				"bindings": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"kinds": {
+					"type": "array",
+					"items": {
+						"$ref": "provider.input.json#/$defs/ProviderKindName"
+					}
+				}
+			},
+			"required": [
+				"bindings",
+				"kinds"
+			]
+		},
+		"EntryKeyForResult": {
+			"type": "object",
+			"properties": {
+				"for": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"for"
+			]
+		},
+		"EntryBoundKeyInput": {
+			"type": "object",
+			"properties": {
+				"rows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"fields": {
+								"$ref": "provider.input.json#/$defs/EntryFields"
+							},
+							"key": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"fields",
+							"key"
+						]
+					}
+				}
+			},
+			"required": [
+				"rows"
+			]
+		},
+		"EntryBoundKeyResult": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": [
+							"string",
+							"null"
+						]
+					}
+				}
+			},
+			"required": [
+				"texts"
+			]
+		},
+		"EntryReadBoundKeyInput": {
+			"type": "object",
+			"properties": {
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"texts"
+			]
+		},
+		"EntryReadBoundKeyResult": {
+			"type": "object",
+			"properties": {
+				"answers": {
+					"type": "array",
+					"items": {
+						"oneOf": [
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "key"
+									},
+									"key": {
+										"type": "string"
+									},
+									"boundTo": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"kind",
+									"key",
+									"boundTo"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "none"
+									}
+								},
+								"required": [
+									"kind"
+								]
+							}
+						],
+						"x-tag": "kind"
+					}
+				}
+			},
+			"required": [
+				"answers"
+			]
+		},
+		"EntryTravelInput": {
+			"type": "object",
+			"properties": {
+				"urls": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"urls"
+			]
+		},
+		"EntryTravelResult": {
+			"type": "object",
+			"properties": {
+				"travels": {
+					"type": "array",
+					"items": {
+						"type": "boolean"
+					}
+				}
+			},
+			"required": [
+				"travels"
 			]
 		},
 		"RowKeyBuildInput": {
@@ -13644,11 +13864,15 @@
 											},
 											"key": {
 												"type": "string"
+											},
+											"boundTo": {
+												"type": "string"
 											}
 										},
 										"required": [
 											"kind",
-											"key"
+											"key",
+											"boundTo"
 										]
 									},
 									{
@@ -13681,6 +13905,34 @@
 											"kind": {
 												"type": "string",
 												"const": "unready"
+											}
+										},
+										"required": [
+											"kind"
+										]
+									},
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "foreign"
+											},
+											"boundTo": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"kind",
+											"boundTo"
+										]
+									},
+									{
+										"type": "object",
+										"properties": {
+											"kind": {
+												"type": "string",
+												"const": "insecure"
 											}
 										},
 										"required": [
@@ -13771,6 +14023,9 @@
 										"const": "key"
 									},
 									"key": {
+										"type": "string"
+									},
+									"boundTo": {
 										"type": "string"
 									}
 								},
@@ -13875,6 +14130,9 @@
 													},
 													"key": {
 														"type": "string"
+													},
+													"boundTo": {
+														"type": "string"
 													}
 												},
 												"required": [
@@ -13946,9 +14204,29 @@
 				"gets": {
 					"type": "array",
 					"items": {
-						"type": [
-							"string",
-							"null"
+						"anyOf": [
+							{
+								"anyOf": [
+									{
+										"type": "string"
+									},
+									{
+										"type": "object",
+										"properties": {
+											"forbidden": {
+												"type": "boolean",
+												"const": true
+											}
+										},
+										"required": [
+											"forbidden"
+										]
+									}
+								]
+							},
+							{
+								"type": "null"
+							}
 						]
 					}
 				}
@@ -14150,6 +14428,9 @@
 										"const": "key"
 									},
 									"key": {
+										"type": "string"
+									},
+									"boundTo": {
 										"type": "string"
 									}
 								},
@@ -14358,6 +14639,9 @@
 														"const": "key"
 													},
 													"key": {
+														"type": "string"
+													},
+													"boundTo": {
 														"type": "string"
 													}
 												},
@@ -14708,6 +14992,9 @@
 																			"const": "key"
 																		},
 																		"key": {
+																			"type": "string"
+																		},
+																		"boundTo": {
 																			"type": "string"
 																		}
 																	},
@@ -16947,6 +17234,9 @@
 						},
 						"key": {
 							"type": "string"
+						},
+						"boundTo": {
+							"type": "string"
 						}
 					},
 					"required": [
@@ -16984,6 +17274,95 @@
 						"kind": {
 							"type": "string",
 							"const": "unready"
+						}
+					},
+					"required": [
+						"kind"
+					]
+				}
+			],
+			"x-tag": "kind"
+		},
+		"HealthKeyRead": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "key"
+						},
+						"key": {
+							"type": "string"
+						},
+						"boundTo": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"kind",
+						"key",
+						"boundTo"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "none"
+						}
+					},
+					"required": [
+						"kind"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "refused"
+						}
+					},
+					"required": [
+						"kind"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "unready"
+						}
+					},
+					"required": [
+						"kind"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "foreign"
+						},
+						"boundTo": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"kind",
+						"boundTo"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "insecure"
 						}
 					},
 					"required": [
@@ -17494,7 +17873,7 @@
 												"const": "keys"
 											},
 											"answer": {
-												"$ref": "#/$defs/HealthKeyAnswer"
+												"$ref": "#/$defs/HealthKeyRead"
 											}
 										},
 										"required": [
@@ -17883,6 +18262,160 @@
 				"steps"
 			]
 		},
+		"HealthVouchedInput": {
+			"type": "object",
+			"properties": {
+				"entries": {
+					"type": "array",
+					"items": {
+						"$ref": "provider.input.json#/$defs/ProviderEntry"
+					}
+				},
+				"configured": {
+					"type": "object",
+					"propertyNames": {
+						"type": "string"
+					},
+					"additionalProperties": {
+						"type": "string"
+					}
+				},
+				"steps": {
+					"minItems": 1,
+					"type": "array",
+					"items": {
+						"oneOf": [
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "read"
+									},
+									"id": {
+										"type": "string"
+									},
+									"hold": {
+										"type": "boolean",
+										"const": true
+									}
+								},
+								"required": [
+									"kind",
+									"id"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "release"
+									}
+								},
+								"required": [
+									"kind"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "list"
+									},
+									"entries": {
+										"type": "array",
+										"items": {
+											"$ref": "provider.input.json#/$defs/ProviderEntry"
+										}
+									}
+								},
+								"required": [
+									"kind",
+									"entries"
+								]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "configure"
+									},
+									"id": {
+										"type": "string"
+									},
+									"key": {
+										"type": [
+											"string",
+											"null"
+										]
+									}
+								},
+								"required": [
+									"kind",
+									"id",
+									"key"
+								]
+							}
+						],
+						"x-tag": "kind"
+					}
+				}
+			},
+			"required": [
+				"entries",
+				"configured",
+				"steps"
+			]
+		},
+		"HealthVouchedResult": {
+			"type": "object",
+			"properties": {
+				"steps": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"answers": {
+								"type": "array",
+								"items": {
+									"type": "object",
+									"properties": {
+										"read": {
+											"type": "integer",
+											"minimum": -9007199254740991,
+											"maximum": 9007199254740991
+										},
+										"answer": {
+											"$ref": "#/$defs/HealthKeyRead"
+										}
+									},
+									"required": [
+										"read",
+										"answer"
+									]
+								}
+							},
+							"told": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							}
+						},
+						"required": [
+							"answers",
+							"told"
+						]
+					}
+				}
+			},
+			"required": [
+				"steps"
+			]
+		},
 		"HealthKeysInput": {
 			"type": "object",
 			"properties": {
@@ -17964,7 +18497,7 @@
 							"answers": {
 								"type": "array",
 								"items": {
-									"$ref": "#/$defs/HealthKeyAnswer"
+									"$ref": "#/$defs/HealthKeyRead"
 								}
 							},
 							"statusAfter": {
@@ -18013,6 +18546,9 @@
 							"const": "key"
 						},
 						"key": {
+							"type": "string"
+						},
+						"boundTo": {
 							"type": "string"
 						}
 					},

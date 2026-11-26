@@ -400,6 +400,19 @@
 					"properties": {
 						"kind": {
 							"type": "string",
+							"const": "keyMissing"
+						}
+					},
+					"required": [
+						"kind"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
 							"const": "spendLimit"
 						},
 						"resetsAt": {

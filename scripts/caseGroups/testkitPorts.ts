@@ -75,6 +75,7 @@ export const portKinds = {
 					id: z.string().exactOptional(),
 					answer: z.enum(["key", "none", "refused", "unready"]).exactOptional(),
 					key: z.string().exactOptional(),
+					boundTo: z.string().exactOptional(),
 					/** A listener that, once told, stops the named one. */
 					unlistens: z.string().exactOptional(),
 				}),
@@ -84,7 +85,13 @@ export const portKinds = {
 			steps: z.array(
 				z.object({
 					heard: z.array(Heard),
-					got: z.object({ kind: z.string(), key: z.string().exactOptional() }).exactOptional(),
+					got: z
+						.object({
+							kind: z.string(),
+							key: z.string().exactOptional(),
+							boundTo: z.string().exactOptional(),
+						})
+						.exactOptional(),
 					reads: z.int(),
 				}),
 			),
@@ -97,7 +104,7 @@ export const portKinds = {
 			for (const step of input.steps) {
 				const name = step.name ?? "";
 				const id = step.id ?? "";
-				let got: { kind: string; key?: string } | undefined;
+				let got: { kind: string; key?: string; boundTo?: string } | undefined;
 				if (step.op === "listen") {
 					stops.set(
 						name,
@@ -109,12 +116,19 @@ export const portKinds = {
 				} else if (step.op === "unlisten") {
 					stops.get(name)?.();
 				} else if (step.op === "set") {
+					if (step.answer === "key" && step.boundTo === undefined)
+						throw new Error("A key names its binding.");
 					const answer: KeyAnswer =
-						step.answer === "key" ? { kind: "key", key: step.key ?? "" } : { kind: step.answer ?? "none" };
+						step.answer === "key"
+							? { kind: "key", key: step.key ?? "", boundTo: step.boundTo ?? "" }
+							: { kind: step.answer ?? "none" };
 					keys.set(id, answer);
 				} else {
 					const answer = await keys.get(id);
-					got = answer.kind === "key" ? { kind: "key", key: answer.key } : { kind: answer.kind };
+					got =
+						answer.kind === "key"
+							? { kind: "key", key: answer.key, boundTo: answer.boundTo }
+							: { kind: answer.kind };
 				}
 				steps.push({ heard, ...(got === undefined ? {} : { got }), reads: keys.reads() });
 				heard = [];

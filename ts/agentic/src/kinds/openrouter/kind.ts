@@ -54,6 +54,7 @@ export const OPENROUTER: ProviderKind = (() => {
 		kind: "openrouter",
 		label: "OpenRouter",
 		field: "key",
+		address: () => BASE_URL,
 		balance: "https://openrouter.ai/settings/credits",
 		stats: true,
 		facts: usageFacts,

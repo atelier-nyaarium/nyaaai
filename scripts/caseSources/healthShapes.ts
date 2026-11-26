@@ -115,6 +115,7 @@ export const healthShapeCases: CaseSource[] = [
 	health("Blocked", [
 		{ kind: "keyRejected" },
 		{ kind: "keyRejected", extra: 1 },
+		{ kind: "keyMissing" },
 		{ kind: "spendLimit" },
 		{ kind: "spendLimit", resetsAt: 1794528001000, nextTryAt: 1794528002000 },
 		{ kind: "spendLimit", resetsAt: "soon" },

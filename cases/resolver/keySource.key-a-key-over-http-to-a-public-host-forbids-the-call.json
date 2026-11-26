@@ -1,0 +1,40 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.keySource",
+	"name": "key-a-key-over-http-to-a-public-host-forbids-the-call",
+	"input": {
+		"entry": {
+			"id": "p",
+			"kind": "compatible",
+			"label": "Public",
+			"url": "http://api.example.test/v1"
+		},
+		"list": [
+			{
+				"id": "p",
+				"kind": "compatible",
+				"label": "Public",
+				"url": "http://api.example.test/v1"
+			}
+		],
+		"answers": {
+			"p": {
+				"kind": "key",
+				"key": "fake-key-one"
+			}
+		},
+		"steps": [
+			{
+				"kind": "get"
+			}
+		]
+	},
+	"expected": {
+		"gets": [
+			{
+				"forbidden": true
+			}
+		]
+	}
+}

@@ -18,9 +18,10 @@ use nyaaai_agentic::lifecycle::lifecycle::{
 use nyaaai_agentic::lifecycle::retry::RetryPolicy;
 use nyaaai_agentic::models::uses::CHAT;
 use nyaaai_agentic::models::view::unknown_view;
+use nyaaai_agentic::provider::entry::{KeyKind, KindField};
 use nyaaai_agentic::provider::incarnation::EntryRegistry;
 use nyaaai_agentic::provider::kind::{
-    CatalogDeps, EntryCatalog, KINDS, KindDeps, KindError, KindField, ProviderKind,
+    CatalogDeps, EntryCatalog, KINDS, KindDeps, KindError, ProviderKind,
 };
 use nyaaai_agentic::provider::resolver::{ModelResolver, Planned, Resolved, ResolverDeps, Routes};
 use nyaaai_agentic::step::{StepAssembler, reply_calls, reply_text};
@@ -41,7 +42,7 @@ use nyaaai_contract::shapes::model::{
     ModelRow, ModelUse, ModelView, ModelViewPrice, ModelViewStatus, RowIdentity,
 };
 use nyaaai_contract::shapes::provider::{
-    EntryFields, KeyState, KeyStateOk, ProviderEntry, ProviderKindName, Skip,
+    EntryFields, KeyState, KeyStateOk, ProviderEntry, ProviderKindName, ProviderPlan, Skip,
 };
 use nyaaai_contract::shapes::step::{
     CanonicalRequest, Failure, FailureBilled, FailureCategory, FinishReason, NormalizedUsage,
@@ -58,6 +59,7 @@ use nyaaai_testkit::scripted_ports::{
 };
 
 use super::catalog::row_of_key;
+use super::entry::{listed, planted};
 use super::local::local_row_of;
 use super::shapes::*;
 
@@ -88,9 +90,10 @@ fn remember(named: &Mutex<Vec<String>>, id: &str) {
     }
 }
 
-fn key_answer(held: &LifeKeyAnswer) -> KeyAnswer {
+/// The store's answer, a key planted for the entry given.
+fn key_answer(held: &LifeKeyAnswer, entry: Option<&ProviderEntry>) -> KeyAnswer {
     match held {
-        LifeKeyAnswer::Key(held) => KeyAnswer::Key(held.key.clone()),
+        LifeKeyAnswer::Key(held) => planted(&held.key, held.bound_to.as_deref(), entry),
         LifeKeyAnswer::None(_) => KeyAnswer::None,
         LifeKeyAnswer::Refused(_) => KeyAnswer::Refused,
         LifeKeyAnswer::Unready(_) => KeyAnswer::Unready,
@@ -213,7 +216,7 @@ struct Kind {
     checked: bool,
 }
 
-impl ProviderKind for Kind {
+impl KeyKind for Kind {
     fn kind(&self) -> ProviderKindName {
         self.real.kind()
     }
@@ -222,12 +225,26 @@ impl ProviderKind for Kind {
         self.real.label()
     }
 
+    fn plans(&self) -> &[(ProviderPlan, &'static str)] {
+        self.real.plans()
+    }
+
+    fn default_plan(&self) -> Option<ProviderPlan> {
+        self.real.default_plan()
+    }
+
     fn field(&self) -> KindField {
         self.real.field()
     }
 
     fn optional_key(&self) -> bool {
         self.real.optional_key()
+    }
+}
+
+impl ProviderKind for Kind {
+    fn address(&self, entry: &EntryFields) -> Option<String> {
+        self.real.address(entry)
     }
 
     fn check<'a>(
@@ -571,7 +588,8 @@ async fn play(input: LifecycleRunInput) -> Outcome<LifecycleRunResult> {
     ));
     let scripted = Arc::new(ScriptedEntryKeys::new());
     for (id, answer) in input.keys.iter() {
-        scripted.set(id, key_answer(answer));
+        let entry = input.entries.iter().find(|each| each.id == id);
+        scripted.set(id, key_answer(answer, entry));
     }
     let list = Arc::new(ScriptedProviderList::new(input.entries.clone()));
     let entries = Arc::new(EntryRegistry::new(list.clone(), &*scripted));
@@ -853,7 +871,8 @@ async fn play(input: LifecycleRunInput) -> Outcome<LifecycleRunResult> {
                         }
                         LifeChange::Key(held) => {
                             remember(&named, &held.id);
-                            scripted.set(&held.id, key_answer(&held.answer));
+                            let entry = listed(&*list, &held.id);
+                            scripted.set(&held.id, key_answer(&held.answer, entry.as_ref()));
                         }
                     }),
                 );
@@ -916,7 +935,8 @@ async fn play(input: LifecycleRunInput) -> Outcome<LifecycleRunResult> {
             }
             LifeStep::Key(held) => {
                 name(&held.id);
-                scripted.set(&held.id, key_answer(&held.answer));
+                let entry = listed(&*list, &held.id);
+                scripted.set(&held.id, key_answer(&held.answer, entry.as_ref()));
             }
             LifeStep::Zdr(held) => zdr.store(held.on, Ordering::SeqCst),
             LifeStep::Check(held) => {
@@ -1068,6 +1088,7 @@ mod tests {
     use std::task::{Context, Waker};
 
     use nyaaai_agentic::failure::FailureExtra;
+    use nyaaai_agentic::provider::keyring::{Keyring, KeyringDeps};
     use nyaaai_agentic::usage::meter::Meter;
     use nyaaai_contract::shapes::health::{
         Admission, AdmissionGaveUp, AdmissionGo, GateOutcome, GateSettled, Ticket,
@@ -1315,7 +1336,13 @@ mod tests {
         };
         let keys = Arc::new(ScriptedEntryKeys::new());
         for id in ids {
-            keys.set(id, KeyAnswer::Key("fake-key-one".to_owned()));
+            keys.set(
+                id,
+                KeyAnswer::Key {
+                    key: "fake-key-one".to_owned(),
+                    bound_to: "openrouter".to_owned(),
+                },
+            );
         }
         let registry = Arc::new(ScriptedModelRegistry::empty());
         registry.set_rows(vec![row_of_key(ROW).expect("a curated row")]);
@@ -1334,12 +1361,20 @@ mod tests {
             )),
             &*keys,
         ));
+        let kinds: Vec<Arc<dyn ProviderKind>> = vec![Arc::new(stub)];
+        let kind_deps: Arc<dyn Fn(ProviderKindName) -> KindDeps + Send + Sync> =
+            Arc::new(move |_| deps.clone());
         let resolver = ModelResolver::new(ResolverDeps {
+            keys: Arc::new(Keyring::new(KeyringDeps {
+                keys,
+                entries: Arc::clone(&entries),
+                kinds: kinds.clone(),
+                kind_deps: Arc::clone(&kind_deps),
+            })),
             entries,
-            keys,
             registry: registry as Arc<dyn ModelRegistry>,
-            kinds: vec![Arc::new(stub)],
-            kind_deps: Arc::new(move |_| deps.clone()),
+            kinds,
+            kind_deps,
             zdr_only: Arc::new(|| false),
             refreshed: None,
         });

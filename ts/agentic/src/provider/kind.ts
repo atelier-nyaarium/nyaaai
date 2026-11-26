@@ -25,6 +25,7 @@ import { OLLAMA } from "../kinds/ollama";
 import { OPENCODE } from "../kinds/opencode/kind";
 import { OPENROUTER } from "../kinds/openrouter/kind";
 import type { KeySource, Transport } from "../transport";
+import type { KeyKind } from "./entry";
 
 ////////////////////////////////
 //  Interfaces & Types
@@ -37,7 +38,7 @@ export interface KindDeps {
 	log(line: string): void;
 	/** The consumer's `name/version`. */
 	userAgent: string;
-	/** Test loopback URL. */
+	/** A host's tests only: where every request goes. */
 	baseUrl?: string;
 	/** What every span opens from; default `BUDGETS`. */
 	budgets?: Budgets;
@@ -102,17 +103,12 @@ export interface Route {
 }
 
 /** Provider engine. */
-export interface ProviderKind {
+export interface ProviderKind extends KeyKind {
 	readonly kind: ProviderKindName;
-	readonly label: string;
-	/** Plan dropdown lines. */
-	readonly plans?: readonly { plan: ProviderPlan; label: string }[];
-	/** Add-form third field. */
-	readonly field: "key" | "url";
-	/** URL kinds that also take a key. */
-	readonly optionalKey?: true;
 	/** Default URL. */
 	readonly url?: string;
+	/** Where its requests go, unless `KindDeps.baseUrl` says. */
+	address(entry: EntryFields): string | undefined;
 	/** The balance page. */
 	readonly balance?: string;
 	/** Plans with extra usage. */

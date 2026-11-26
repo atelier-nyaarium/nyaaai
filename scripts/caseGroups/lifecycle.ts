@@ -16,7 +16,6 @@ import { type EntryCatalog, KINDS, type ProviderKind } from "@nyaaai/agentic/pro
 import { ModelResolver, type Resolved, type Routes } from "@nyaaai/agentic/provider/resolver";
 import { replyCalls, replyText, StepAssembler } from "@nyaaai/agentic/step";
 import { providerMeter } from "@nyaaai/agentic/usage/meter";
-import type { KeyAnswer } from "@nyaaai/contract/entryKeys";
 import { countedIds } from "@nyaaai/contract/id";
 import { sequenceRandom } from "@nyaaai/contract/random";
 import { z } from "@nyaaai/contract/shape";
@@ -39,18 +38,14 @@ import {
 } from "@nyaaai/testkit/scriptedPorts";
 import { lifecycleCases } from "../caseSources/lifecycle";
 import { rowOfKey } from "./catalogKit";
+import { planted, plantedAll, storedKey } from "./keyKit";
 import { localRowOf } from "./localKit";
 
 ////////////////////////////////
 //  Shapes
 
-/** What `EntryKeys.get` answers. */
-const LifeKeyAnswer = z.discriminatedUnion("kind", [
-	z.object({ kind: z.literal("key"), key: z.string() }),
-	z.object({ kind: z.literal("none") }),
-	z.object({ kind: z.literal("refused") }),
-	z.object({ kind: z.literal("unready") }),
-]);
+/** What the store answers. */
+const LifeKeyAnswer = storedKey();
 
 /** One request's reply: head, body chunks, ending. */
 const LifeReply = z.object({
@@ -339,7 +334,7 @@ export const lifecycle = caseGroup("lifecycle", {
 				});
 				const played = scriptedFetch(input.exchanges.map(exchangeOf), scheduler);
 
-				const scriptedKeys = scriptedEntryKeys(input.keys as Record<string, KeyAnswer>);
+				const scriptedKeys = scriptedEntryKeys(plantedAll(input.keys, input.entries));
 				const list = scriptedProviderList(input.entries);
 				const entries = new EntryRegistry({ list, keys: scriptedKeys });
 				const registry = scriptedModelRegistry(input.rows.map(rowFor));
@@ -610,7 +605,13 @@ export const lifecycle = caseGroup("lifecycle", {
 				};
 				const rekey = (id: string, answer: z.infer<typeof LifeKeyAnswer>) => {
 					name(id);
-					scriptedKeys.set(id, answer);
+					scriptedKeys.set(
+						id,
+						planted(
+							answer,
+							list.entries().find((each) => each.id === id),
+						),
+					);
 				};
 
 				const stepOuts: Array<{

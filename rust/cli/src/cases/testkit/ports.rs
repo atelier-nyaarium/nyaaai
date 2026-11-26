@@ -136,9 +136,13 @@ pub fn entry_keys(input: TestkitEntryKeysInput) -> Outcome<TestkitEntryKeysResul
                 }
                 TestkitEntryKeysInputStepsItemOp::Set => {
                     let answer = match step.answer {
-                        Some(TestkitEntryKeysInputStepsItemAnswer::Key) => {
-                            KeyAnswer::Key(step.key.clone().unwrap_or_default())
-                        }
+                        Some(TestkitEntryKeysInputStepsItemAnswer::Key) => KeyAnswer::Key {
+                            key: step.key.clone().unwrap_or_default(),
+                            bound_to: step
+                                .bound_to
+                                .clone()
+                                .ok_or_else(|| "A key names its binding.".to_owned())?,
+                        },
                         Some(TestkitEntryKeysInputStepsItemAnswer::Refused) => KeyAnswer::Refused,
                         Some(TestkitEntryKeysInputStepsItemAnswer::Unready) => KeyAnswer::Unready,
                         Some(TestkitEntryKeysInputStepsItemAnswer::None) | None => KeyAnswer::None,
@@ -146,15 +150,16 @@ pub fn entry_keys(input: TestkitEntryKeysInput) -> Outcome<TestkitEntryKeysResul
                     keys.set(&id, answer);
                 }
                 TestkitEntryKeysInputStepsItemOp::Get => {
-                    let (kind, key) = match keys.get(&id).await {
-                        KeyAnswer::Key(key) => ("key", Some(key)),
-                        KeyAnswer::None => ("none", None),
-                        KeyAnswer::Refused => ("refused", None),
-                        KeyAnswer::Unready => ("unready", None),
+                    let (kind, key, bound_to) = match keys.get(&id).await {
+                        KeyAnswer::Key { key, bound_to } => ("key", Some(key), Some(bound_to)),
+                        KeyAnswer::None => ("none", None, None),
+                        KeyAnswer::Refused => ("refused", None, None),
+                        KeyAnswer::Unready => ("unready", None, None),
                     };
                     got = Some(TestkitEntryKeysResultStepsItemGot {
                         kind: kind.to_owned(),
                         key,
+                        bound_to,
                     });
                 }
             }
@@ -167,8 +172,8 @@ pub fn entry_keys(input: TestkitEntryKeysInput) -> Outcome<TestkitEntryKeysResul
                 reads: keys.reads() as i64,
             });
         }
-        TestkitEntryKeysResult { steps }
-    })
+        Ok(TestkitEntryKeysResult { steps })
+    })?
 }
 
 pub fn provider_list(input: TestkitProviderListInput) -> Outcome<TestkitProviderListResult> {

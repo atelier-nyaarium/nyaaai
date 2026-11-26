@@ -18,7 +18,7 @@ use nyaaai_agentic::models::registry::row_of;
 use nyaaai_agentic::models::row_key::parse_row_key_text;
 use nyaaai_agentic::models::uses::CHAT;
 use nyaaai_agentic::provider::kind::{CatalogDeps, EntryCatalog};
-use nyaaai_agentic::transport::{Auth, KeySource, Transport, TransportDeps};
+use nyaaai_agentic::transport::{Auth, Forbidden, KeySource, Transport, TransportDeps};
 use nyaaai_contract::cancel::CancelToken;
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::json::{Object, Value, stringify_json};
@@ -119,8 +119,9 @@ pub(super) fn view_lines(views: &[ModelView]) -> Outcome<Vec<ViewLine>> {
 struct Keys(Arc<FakeKeys>);
 
 impl KeySource for Keys {
-    fn get(&self) -> BoxFuture<'_, Option<String>> {
-        self.0.get()
+    fn get(&self) -> BoxFuture<'_, Result<Option<String>, Forbidden>> {
+        let read = self.0.get();
+        Box::pin(async move { Ok(read.await) })
     }
 }
 

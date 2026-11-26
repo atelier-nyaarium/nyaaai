@@ -787,6 +787,17 @@ export const localDecodeCases: CaseSource[] = [
 			"http://[::]",
 		],
 	}),
+	compatTerms("hosts-an-ipv4-mapped-address-is-judged-by-its-ipv4-address", {
+		urls: [
+			"http://[::ffff:10.0.0.1]",
+			"http://[::ffff:192.168.1.5]:8000",
+			"http://[::ffff:0.0.0.0]",
+			"http://[::ffff:a00:1]",
+			"http://[::ffff:8.8.8.8]",
+			"http://[::ffff:100.128.0.1]",
+			"http://[::fffe:10.0.0.1]",
+		],
+	}),
 	compatTerms("hosts-look-alikes-are-remote", {
 		urls: [
 			"http://10.example.com",

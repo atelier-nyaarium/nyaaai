@@ -31,8 +31,9 @@ import { SseDecoder } from "./sse";
 ////////////////////////////////
 //  Interfaces & Types
 
+/** A key; none; or `FORBIDDEN`: the call sends nothing. */
 export interface KeySource {
-	get(): Promise<string | undefined>;
+	get(): Promise<string | undefined | typeof FORBIDDEN>;
 }
 
 export interface TransportDeps {
@@ -65,6 +66,9 @@ interface Seen {
 
 ////////////////////////////////
 //  Constants
+
+/** A stored key that may not be sent. */
+export const FORBIDDEN: unique symbol = Symbol("forbidden");
 
 /** Cuts what the budget let through. */
 const ERROR_BODY_BYTES = 64 * 1024;
@@ -242,6 +246,7 @@ export class Transport {
 	private async keyFor(auth: KeyAuth): Promise<string | undefined> {
 		if (auth === "none" || this.d.auth === "none") return undefined;
 		const key = auth === "stored" ? await this.d.key.get() : auth.key;
+		if (key === FORBIDDEN) throw failed("keyMissing", `The ${this.d.label} key may not be sent.`);
 		if (this.d.auth === "optional" && auth === "stored" && !key) return undefined;
 		return this.checked(key);
 	}

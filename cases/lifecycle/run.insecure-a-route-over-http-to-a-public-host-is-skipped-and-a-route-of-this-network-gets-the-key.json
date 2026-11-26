@@ -1,0 +1,271 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "lifecycle.run",
+	"name": "insecure-a-route-over-http-to-a-public-host-is-skipped-and-a-route-of-this-network-gets-the-key",
+	"input": {
+		"startMs": 1794052800000,
+		"entries": [
+			{
+				"id": "p",
+				"kind": "compatible",
+				"label": "Public",
+				"url": "http://api.example.test/v1"
+			},
+			{
+				"id": "l",
+				"kind": "compatible",
+				"label": "Lab",
+				"url": "http://lab.local:8000/v1"
+			}
+		],
+		"keys": {
+			"p": {
+				"kind": "key",
+				"key": "fake-key-one"
+			},
+			"l": {
+				"kind": "key",
+				"key": "fake-key-one"
+			}
+		},
+		"rows": [
+			"compatible:qwen"
+		],
+		"kinds": [
+			"compatible"
+		],
+		"listings": {},
+		"zdrOnly": false,
+		"exchanges": [
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"text/event-stream"
+					]
+				],
+				"chunks": [
+					"data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Lab\"}}]}\n\n",
+					"data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":100,\"completion_tokens\":10,\"cost\":0.001}}\n\n",
+					"data: [DONE]\n\n"
+				]
+			}
+		],
+		"steps": [
+			{
+				"kind": "send",
+				"call": "first",
+				"model": "compatible:qwen",
+				"tag": {
+					"feature": "chat"
+				}
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"nowMs": 1794052800000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [
+					"first"
+				],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "p",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					},
+					{
+						"entry": "l",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 1
+			}
+		],
+		"calls": [
+			{
+				"call": "first",
+				"result": {
+					"kind": "served",
+					"entry": "l",
+					"reply": {
+						"parts": [
+							{
+								"kind": "text",
+								"text": "Lab"
+							}
+						],
+						"finish": "stop",
+						"usage": {
+							"input": 100,
+							"output": 10
+						},
+						"serving": {
+							"host": "Lab",
+							"generationId": "gen-1"
+						}
+					}
+				},
+				"trace": [
+					{
+						"kind": "admitted",
+						"entry": "l",
+						"admission": {
+							"kind": "go",
+							"ticket": {
+								"gate": "gate-1",
+								"model": "l\ncompatible:qwen",
+								"era": 2,
+								"generation": 0,
+								"probe": false,
+								"serial": 1
+							}
+						}
+					},
+					{
+						"kind": "attempt",
+						"entry": "l",
+						"model": "compatible:qwen",
+						"attempt": 1,
+						"live": false,
+						"again": false
+					},
+					{
+						"kind": "metered",
+						"call": {
+							"tag": {
+								"feature": "chat"
+							},
+							"model": "compatible:qwen",
+							"entry": "l",
+							"label": "Lab",
+							"at": 1794052800000,
+							"ms": 0,
+							"firstTokenMs": 0,
+							"usage": {
+								"input": 100,
+								"output": 10
+							},
+							"cost": {
+								"usd": 0,
+								"estimated": true
+							},
+							"provider": "Lab",
+							"generationId": "gen-1",
+							"finishReason": "stop"
+						}
+					},
+					{
+						"kind": "settled",
+						"entry": "l",
+						"outcome": "ok",
+						"answer": "done"
+					},
+					{
+						"kind": "billing",
+						"entry": "l",
+						"reply": "ok",
+						"usage": {
+							"input": 100,
+							"output": 10
+						}
+					},
+					{
+						"kind": "served",
+						"entry": "l",
+						"label": "Lab",
+						"model": "compatible:qwen"
+					}
+				],
+				"told": [],
+				"attempts": [
+					{
+						"entry": "l",
+						"events": [
+							{
+								"kind": "serving",
+								"serving": {
+									"host": "Lab",
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "text",
+								"text": "Lab"
+							},
+							{
+								"kind": "serving",
+								"serving": {
+									"host": "Lab",
+									"generationId": "gen-1"
+								}
+							},
+							{
+								"kind": "finish",
+								"reason": "stop"
+							},
+							{
+								"kind": "usage",
+								"usage": {
+									"input": 100,
+									"output": 10
+								}
+							}
+						]
+					}
+				]
+			}
+		],
+		"requests": [
+			{
+				"url": "http://lab.local:8000/v1/chat/completions",
+				"authorization": "Bearer fake-key-one",
+				"accept": "text/event-stream"
+			}
+		],
+		"recorded": [
+			{
+				"tag": {
+					"feature": "chat"
+				},
+				"model": "compatible:qwen",
+				"entry": "l",
+				"label": "Lab",
+				"at": 1794052800000,
+				"ms": 0,
+				"firstTokenMs": 0,
+				"usage": {
+					"input": 100,
+					"output": 10
+				},
+				"cost": {
+					"usd": 0,
+					"estimated": true
+				},
+				"provider": "Lab",
+				"generationId": "gen-1",
+				"finishReason": "stop"
+			}
+		],
+		"stats": [],
+		"waiting": []
+	}
+}

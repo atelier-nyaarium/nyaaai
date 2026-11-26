@@ -1,0 +1,48 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.travel",
+	"name": "travel-https-or-http-to-this-network",
+	"input": {
+		"urls": [
+			"https://api.example.test/v1",
+			"https://8.8.8.8",
+			"http://api.example.test/v1",
+			"http://8.8.8.8:8000",
+			"http://127.0.0.1:8000",
+			"http://localhost:8000",
+			"http://lab.local:8000",
+			"http://labhost",
+			"http://192.168.1.5",
+			"http://[::1]:8000",
+			"http://[fd00::1]",
+			"http://[::ffff:192.168.1.5]",
+			"http://[::ffff:127.0.0.1]",
+			"http://[::ffff:8.8.8.8]",
+			"http://[2001:db8::1]",
+			"http://10.example.test",
+			"HTTP://LAB.LOCAL"
+		]
+	},
+	"expected": {
+		"travels": [
+			true,
+			true,
+			false,
+			false,
+			true,
+			true,
+			true,
+			true,
+			true,
+			true,
+			true,
+			true,
+			true,
+			false,
+			false,
+			false,
+			true
+		]
+	}
+}

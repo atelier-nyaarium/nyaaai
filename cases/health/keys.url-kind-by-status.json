@@ -175,8 +175,7 @@
 				},
 				"answers": [
 					{
-						"kind": "key",
-						"key": "fake-key-one"
+						"kind": "none"
 					}
 				],
 				"statusAfter": {

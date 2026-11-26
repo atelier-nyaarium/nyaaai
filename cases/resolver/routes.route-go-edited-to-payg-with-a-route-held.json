@@ -66,6 +66,14 @@
 				"candidate": 0
 			},
 			{
+				"kind": "answer",
+				"id": "go",
+				"answer": {
+					"kind": "key",
+					"key": "fake-key-one"
+				}
+			},
+			{
 				"kind": "resolve",
 				"model": "openai/gpt-6-luna",
 				"use": {
@@ -76,7 +84,7 @@
 			},
 			{
 				"kind": "send",
-				"from": 4,
+				"from": 5,
 				"candidate": 0
 			}
 		]
@@ -130,6 +138,13 @@
 						"message": "No OpenCode Go key is set."
 					},
 					"thrown": null
+				},
+				"built": 1,
+				"disposed": 1
+			},
+			{
+				"answer": {
+					"kind": "changed"
 				},
 				"built": 1,
 				"disposed": 1

@@ -1,0 +1,55 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.boundKey",
+	"name": "bound-the-exact-text",
+	"input": {
+		"rows": [
+			{
+				"fields": {
+					"kind": "openrouter",
+					"label": "OpenRouter"
+				},
+				"key": "fake-key-one"
+			},
+			{
+				"fields": {
+					"kind": "opencode",
+					"label": "Go"
+				},
+				"key": "fake-key-two"
+			},
+			{
+				"fields": {
+					"kind": "compatible",
+					"label": "Lab",
+					"url": "https://api.example.test:8443/v1/"
+				},
+				"key": "fake-key-three"
+			},
+			{
+				"fields": {
+					"kind": "openrouter",
+					"label": "OpenRouter"
+				},
+				"key": "fake \"quoted\" \\ key\né"
+			},
+			{
+				"fields": {
+					"kind": "openrouter",
+					"label": "OpenRouter"
+				},
+				"key": ""
+			}
+		]
+	},
+	"expected": {
+		"texts": [
+			"{\"v\":1,\"for\":\"openrouter\",\"key\":\"fake-key-one\"}",
+			"{\"v\":1,\"for\":\"opencode go\",\"key\":\"fake-key-two\"}",
+			"{\"v\":1,\"for\":\"compatible https://api.example.test:8443\",\"key\":\"fake-key-three\"}",
+			"{\"v\":1,\"for\":\"openrouter\",\"key\":\"fake \\\"quoted\\\" \\\\ key\\né\"}",
+			"{\"v\":1,\"for\":\"openrouter\",\"key\":\"\"}"
+		]
+	}
+}

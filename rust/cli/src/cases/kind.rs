@@ -8,6 +8,7 @@ use std::sync::Arc;
 
 use nyaaai_agentic::codec::Mode;
 use nyaaai_agentic::models::view::{codec_facts_of, unknown_view};
+use nyaaai_agentic::provider::keyring::check_typed;
 use nyaaai_agentic::provider::kind::{
     CatalogDeps, KINDS, ProviderKind, Route, kind_lines, provider_view as view_of,
 };
@@ -243,7 +244,13 @@ pub fn check(input: KindCheckInput) -> Outcome<KindCheckResult> {
         input.aborted_before,
     );
     let clock = ceiling_span(&net.scheduler, &token);
-    let checked = block_on(named.check(&entry, input.secret.as_deref(), &deps, &clock))?;
+    let checked = block_on(check_typed(
+        &KINDS,
+        &entry,
+        input.secret.as_deref(),
+        &deps,
+        &clock,
+    ))?;
     clock.clear();
     net.wheel.cancel("caller");
     let (state, thrown) = match checked {

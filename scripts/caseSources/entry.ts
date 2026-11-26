@@ -25,6 +25,10 @@ const localUrl = (name: string, url: unknown): CaseSource[] =>
 
 const BASE = { id: "or1", kind: "openrouter", label: "OpenRouter" };
 
+const binding = (name: string, rows: unknown[]): CaseSource => ({ kind: "entry.binding", name, input: { rows } });
+
+const compatibleFields = (url: string) => ({ kind: "compatible", label: "Lab", url });
+
 ////////////////////////////////
 //  Cases
 
@@ -329,4 +333,171 @@ export const entryCases: CaseSource[] = [
 	},
 	{ kind: "entry.secretKey", name: "keys-other-namespace", input: { ids: ["a"], namespace: "tool.v2" } },
 	{ kind: "entry.secretKey", name: "keys-empty-namespace", input: { ids: ["a"], namespace: "" } },
+
+	// What a key is for.
+	binding("binding-a-key-kind-at-its-own-address", [
+		{ kind: "openrouter", label: "OpenRouter" },
+		{ kind: "openrouter", label: "Other", url: "https://elsewhere.example.test" },
+	]),
+	binding("binding-the-plan-and-its-default", [
+		{ kind: "opencode", label: "Go", plan: "go" },
+		{ kind: "opencode", label: "Pay", plan: "payg" },
+		{ kind: "opencode", label: "Go" },
+		{ kind: "opencode", label: "Go", plan: "go", extraUsage: true },
+	]),
+	binding("binding-the-origin-of-a-url-with-a-path-a-port-or-a-trailing-slash", [
+		compatibleFields("https://api.example.test/v1/chat"),
+		compatibleFields("https://api.example.test:8443/v1"),
+		compatibleFields("https://api.example.test:443/v1"),
+		compatibleFields("http://api.example.test:80"),
+		compatibleFields("https://API.Example.TEST/"),
+		compatibleFields("https://api.example.test/v1/"),
+		compatibleFields("http://api.example.test."),
+	]),
+	binding("binding-ip-literals", [
+		compatibleFields("http://[::1]:8000/v1"),
+		compatibleFields("http://[0:0:0:0:0:0:0:1]:8000"),
+		compatibleFields("http://[::ffff:192.168.1.5]:8000"),
+		compatibleFields("http://192.168.1.5:8000"),
+		compatibleFields("http://0x7f.1"),
+	]),
+	binding("binding-a-url-the-entry-rules-refuse-binds-none", [
+		compatibleFields("https://api.example.test/v1?tenant=a"),
+		compatibleFields("https://api.example.test/v1#a"),
+		compatibleFields("https://user:pw@api.example.test/v1"),
+		compatibleFields("ftp://api.example.test"),
+		compatibleFields("not a url"),
+		{ kind: "compatible", label: "Lab" },
+	]),
+	binding("binding-a-kind-that-takes-no-key-binds-none", [
+		{ kind: "ollama", label: "Lab" },
+		{ kind: "ollama", label: "Lab", url: "http://lab.local:11434" },
+		{ kind: "lmstudio", label: "Lab", url: "http://lab.local:1234" },
+		{ kind: "llamacpp", label: "Lab", url: "http://lab.local:9000" },
+	]),
+	binding("binding-a-change-of-kind-or-plan-changes-it", [
+		{ kind: "openrouter", label: "Lab" },
+		compatibleFields("https://openrouter.ai/api/v1"),
+		{ kind: "opencode", label: "Lab", plan: "go" },
+		{ kind: "opencode", label: "Lab", plan: "payg" },
+	]),
+	{
+		kind: "entry.keyFor",
+		name: "for-a-host-else-a-label-else-a-kind-name",
+		input: {
+			bindings: [
+				"compatible https://api.example.test:8443",
+				"compatible http://[::1]:8000",
+				"openrouter",
+				"opencode go",
+				"compatible",
+				"ollama",
+				"team plan",
+				"",
+				"compatible not-a-url",
+			],
+			kinds: ["openrouter", "opencode", "compatible"],
+		},
+	},
+	{
+		kind: "entry.keyFor",
+		name: "for-a-kind-the-table-does-not-hold-is-its-name",
+		input: { bindings: ["openrouter", "opencode payg", "compatible https://api.example.test"], kinds: [] },
+	},
+	{
+		kind: "entry.boundKey",
+		name: "bound-the-exact-text",
+		input: {
+			rows: [
+				{ fields: { kind: "openrouter", label: "OpenRouter" }, key: "fake-key-one" },
+				{ fields: { kind: "opencode", label: "Go" }, key: "fake-key-two" },
+				{ fields: compatibleFields("https://api.example.test:8443/v1/"), key: "fake-key-three" },
+				{ fields: { kind: "openrouter", label: "OpenRouter" }, key: 'fake "quoted" \\ key\n\u{e9}' },
+				{ fields: { kind: "openrouter", label: "OpenRouter" }, key: "" },
+			],
+		},
+	},
+	{
+		kind: "entry.boundKey",
+		name: "bound-refused-for-fields-that-bind-no-key",
+		input: {
+			rows: [
+				{ fields: { kind: "ollama", label: "Lab" }, key: "fake-key-one" },
+				{ fields: compatibleFields("https://api.example.test/v1?x=1"), key: "fake-key-one" },
+			],
+		},
+	},
+	{
+		kind: "entry.readBoundKey",
+		name: "read-the-stored-object",
+		input: {
+			texts: [
+				'{"v":1,"for":"openrouter","key":"fake-key-one"}',
+				'{"v":1,"for":"compatible https://api.example.test:8443","key":"fake \\"quoted\\" \\\\ key\\n\\u00e9"}',
+				'{"key":"fake-key-one","for":"openrouter","v":1}',
+				'{"v":1.0,"for":"openrouter","key":"fake-key-one"}',
+				' {"v":1,"for":"","key":""} ',
+			],
+		},
+	},
+	{
+		kind: "entry.readBoundKey",
+		name: "read-anything-else-is-none",
+		input: {
+			texts: [
+				"fake-key-one",
+				"",
+				"null",
+				'"fake-key-one"',
+				"[1]",
+				'{"key":"fake-key-one"}',
+				'{"v":2,"for":"openrouter","key":"fake-key-one"}',
+				'{"v":"1","for":"openrouter","key":"fake-key-one"}',
+				'{"v":1,"for":"openrouter","key":7}',
+				'{"v":1,"for":null,"key":"fake-key-one"}',
+				'{"v":1,"for":"openrouter","key":"fake-key-one","extra":true}',
+				'{"v":1,"for":"openrouter","key":"fake-key-one"',
+			],
+		},
+	},
+	{
+		kind: "entry.travel",
+		name: "travel-https-or-http-to-this-network",
+		input: {
+			urls: [
+				"https://api.example.test/v1",
+				"https://8.8.8.8",
+				"http://api.example.test/v1",
+				"http://8.8.8.8:8000",
+				"http://127.0.0.1:8000",
+				"http://localhost:8000",
+				"http://lab.local:8000",
+				"http://labhost",
+				"http://192.168.1.5",
+				"http://[::1]:8000",
+				"http://[fd00::1]",
+				"http://[::ffff:192.168.1.5]",
+				"http://[::ffff:127.0.0.1]",
+				"http://[::ffff:8.8.8.8]",
+				"http://[2001:db8::1]",
+				"http://10.example.test",
+				"HTTP://LAB.LOCAL",
+			],
+		},
+	},
+	{
+		kind: "entry.travel",
+		name: "travel-no-other-scheme-and-no-url-that-does-not-read",
+		input: {
+			urls: [
+				"ws://lab.local",
+				"wss://api.example.test",
+				"ftp://lab.local",
+				"file:///x",
+				"not a url",
+				"",
+				"http://",
+			],
+		},
+	},
 ];

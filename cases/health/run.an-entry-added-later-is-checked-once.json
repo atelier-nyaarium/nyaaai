@@ -19,7 +19,8 @@
 			},
 			"fresh": {
 				"kind": "key",
-				"key": "fake-key-one"
+				"key": "fake-key-one",
+				"boundTo": "openrouter"
 			}
 		},
 		"exchanges": [

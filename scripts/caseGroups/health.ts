@@ -1,5 +1,6 @@
 import { ProviderHealth } from "@nyaaai/agentic/health/health";
 import { EntryRegistry, type RegistryEvent } from "@nyaaai/agentic/provider/incarnation";
+import { vouchedKeys } from "@nyaaai/agentic/provider/keyring";
 import { KINDS } from "@nyaaai/agentic/provider/kind";
 import type { Resolved } from "@nyaaai/agentic/provider/resolver";
 import type { KeyAnswer } from "@nyaaai/contract/entryKeys";
@@ -21,18 +22,17 @@ import { scriptedEntryKeys, scriptedProviderList } from "@nyaaai/testkit/scripte
 import { healthCases } from "../caseSources/health";
 import { NetExchange } from "./catalogKit";
 import { leftIncarnation } from "./incarnationKit";
+import { planted, plantedAll, readKey, storedKey } from "./keyKit";
 import { networkOf } from "./localKit";
 
 ////////////////////////////////
 //  Shapes
 
-/** What `EntryKeys.get` answers. */
-const HealthKeyAnswer = z.discriminatedUnion("kind", [
-	z.object({ kind: z.literal("key"), key: z.string() }),
-	z.object({ kind: z.literal("none") }),
-	z.object({ kind: z.literal("refused") }),
-	z.object({ kind: z.literal("unready") }),
-]);
+/** What the store answers. */
+const HealthKeyAnswer = storedKey();
+
+/** What `entryKeys` reads. */
+const HealthKeyRead = readKey();
 
 /** The fields health reads of a resolved route; `taken` names a route a `take` step held, entry and key still given. */
 const HealthRoute = z.object({ entry: ProviderEntry, key: z.string(), taken: z.string().exactOptional() });
@@ -122,10 +122,21 @@ const RegistryStep = () =>
 		z.object({ kind: z.literal("dispose") }),
 	]);
 
+const VouchedStep = () =>
+	z.discriminatedUnion("kind", [
+		/** A read of the vouched keys; `hold` keeps its configuration read open until `release`. */
+		z.object({ kind: z.literal("read"), id: z.string(), hold: z.literal(true).exactOptional() }),
+		z.object({ kind: z.literal("release") }),
+		/** The list changes, and tells. */
+		z.object({ kind: z.literal("list"), entries: z.array(ProviderEntry) }),
+		/** The host's configured key changes, and tells; null removes it. */
+		z.object({ kind: z.literal("configure"), id: z.string(), key: z.string().nullable() }),
+	]);
+
 const Answer = () =>
 	z.discriminatedUnion("kind", [
 		z.object({ kind: z.literal("none") }),
-		z.object({ kind: z.literal("keys"), answer: HealthKeyAnswer }),
+		z.object({ kind: z.literal("keys"), answer: HealthKeyRead }),
 		z.object({ kind: z.literal("skip"), skip: SkipReason.nullable() }),
 		z.object({ kind: z.literal("blocked"), blocked: Blocked.nullable() }),
 		z.object({ kind: z.literal("ticket"), ticket: Ticket.nullable() }),
@@ -159,7 +170,7 @@ const PREPARED = z.enum(["none", "checking", "ok", "rejected", "unreachable"]);
 //  Group
 
 export const health = caseGroup("health", {
-	shapes: { HealthKeyAnswer, HealthRoute },
+	shapes: { HealthKeyAnswer, HealthKeyRead, HealthRoute },
 	kinds: {
 		/** One health over scripted ports, real kinds' checks and the wheel. */
 		run: kind(
@@ -184,8 +195,9 @@ export const health = caseGroup("health", {
 			async (input) => {
 				const net = networkOf(input.startMs, input.exchanges);
 				const list = scriptedProviderList(input.entries);
-				const raw = scriptedEntryKeys(input.keys);
+				const raw = scriptedEntryKeys(plantedAll(input.keys, input.entries));
 				const entries = new EntryRegistry({ list, keys: raw });
+				const listed = (id: string) => list.entries().find((each) => each.id === id);
 				interface Hold {
 					at: "store" | "check";
 					reached: Promise<void>;
@@ -236,7 +248,7 @@ export const health = caseGroup("health", {
 						if (held === undefined) return raw.get(id);
 						held.arrive();
 						const go = await held.released;
-						return go.answer === undefined ? raw.get(id) : go.answer;
+						return go.answer === undefined ? raw.get(id) : planted(go.answer, listed(id));
 					},
 					onChange: raw.onChange,
 				};
@@ -314,7 +326,7 @@ export const health = caseGroup("health", {
 						list.set(step.entries);
 					} else if (step.kind === "key") {
 						name(step.id);
-						raw.set(step.id, step.answer);
+						raw.set(step.id, planted(step.answer, listed(step.id)));
 					} else if (step.kind === "check") {
 						name(step.id);
 						health.check(step.id);
@@ -464,6 +476,83 @@ export const health = caseGroup("health", {
 				return { steps };
 			},
 		),
+		/** Keys a host vouches for from its configuration, over a registry that watches them. */
+		vouched: kind(
+			z.object({
+				entries: z.array(ProviderEntry),
+				/** The host's configured keys by entry id. */
+				configured: z.record(z.string(), z.string()),
+				steps: z.array(VouchedStep()).min(1),
+			}),
+			z.object({
+				steps: z.array(
+					z.object({
+						/** Reads that ended during the step, by their number from 1. */
+						answers: z.array(z.object({ read: z.int(), answer: HealthKeyRead })),
+						/** What the registry told: `event:id#incarnation era`. */
+						told: z.array(z.string()),
+					}),
+				),
+			}),
+			async (input) => {
+				const list = scriptedProviderList(input.entries);
+				const configured = new Map(Object.entries(input.configured));
+				const listeners = new Set<(id: string) => void>();
+				const releases: Array<() => void> = [];
+				let holdNext = false;
+				const keys = vouchedKeys(
+					{
+						get: async (id) => {
+							if (holdNext) {
+								holdNext = false;
+								await new Promise<void>((resolve) => releases.push(resolve));
+							}
+							return configured.get(id);
+						},
+						onChange: (listener) => {
+							listeners.add(listener);
+							return () => {
+								listeners.delete(listener);
+							};
+						},
+					},
+					list,
+					KINDS,
+				);
+				const entries = new EntryRegistry({ list, keys });
+				let told: string[] = [];
+				entries.watch((events) => {
+					for (const event of events)
+						told.push(
+							`${event.kind}:${event.incarnation.id}#${event.incarnation.number} ${event.incarnation.era.number}`,
+						);
+				});
+				const pending: Array<Promise<{ read: number; answer: KeyAnswer }>> = [];
+				let reads = 0;
+				const steps: Array<{ answers: Array<{ read: number; answer: KeyAnswer }>; told: string[] }> = [];
+				for (const step of input.steps) {
+					if (step.kind === "read") {
+						reads += 1;
+						const read = reads;
+						holdNext = step.hold === true;
+						pending.push(keys.get(step.id).then((answer) => ({ read, answer })));
+					} else if (step.kind === "release") {
+						for (const release of releases.splice(0)) release();
+					} else if (step.kind === "list") {
+						list.set(step.entries);
+					} else {
+						if (step.key === null) configured.delete(step.id);
+						else configured.set(step.id, step.key);
+						for (const listener of [...listeners]) listener(step.id);
+					}
+					const ended = releases.length === 0 ? await Promise.all(pending.splice(0)) : [];
+					steps.push({ answers: ended, told });
+					told = [];
+				}
+				entries.dispose();
+				return { steps };
+			},
+		),
 		/** The store's answer, unless health holds the entry out. */
 		keys: kind(
 			z.object({
@@ -494,7 +583,7 @@ export const health = caseGroup("health", {
 						/** The status the entry stood in when asked. */
 						status: KeyState,
 						/** What each ask answered. */
-						answers: z.array(HealthKeyAnswer),
+						answers: z.array(HealthKeyRead),
 						/** The status once every check has ended. */
 						statusAfter: KeyState,
 						/** Ids told to the listener while it was held. */
@@ -509,7 +598,7 @@ export const health = caseGroup("health", {
 			async (input) => {
 				const rows: Array<{
 					status: z.infer<typeof KeyState>;
-					answers: Array<z.infer<typeof HealthKeyAnswer>>;
+					answers: Array<z.infer<typeof HealthKeyRead>>;
 					statusAfter: z.infer<typeof KeyState>;
 					told: string[];
 					toldAfter: string[];
@@ -517,7 +606,7 @@ export const health = caseGroup("health", {
 				}> = [];
 				for (const row of input.rows) {
 					const net = networkOf(0, row.exchanges);
-					let current: KeyAnswer = row.stored;
+					let current: KeyAnswer = planted(row.stored, row.entry);
 					const listeners = new Set<(id: string) => void>();
 					const keys = {
 						get: async () => current,
@@ -557,7 +646,7 @@ export const health = caseGroup("health", {
 					} else if (row.prepare === "unreachable") {
 						health.failed(route, { category: "network", status: "network", message: "down" }, false);
 					}
-					if (row.storedThen !== undefined) current = row.storedThen;
+					if (row.storedThen !== undefined) current = planted(row.storedThen, row.entry);
 					const status = health.status(row.entry.id);
 					// The asks and the tells run before any check gets a turn.
 					const asks = Array.from({ length: row.asks ?? 1 }, () => health.entryKeys.get(row.entry.id));

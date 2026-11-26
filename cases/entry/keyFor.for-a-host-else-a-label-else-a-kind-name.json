@@ -1,0 +1,37 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "entry.keyFor",
+	"name": "for-a-host-else-a-label-else-a-kind-name",
+	"input": {
+		"bindings": [
+			"compatible https://api.example.test:8443",
+			"compatible http://[::1]:8000",
+			"openrouter",
+			"opencode go",
+			"compatible",
+			"ollama",
+			"team plan",
+			"",
+			"compatible not-a-url"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"compatible"
+		]
+	},
+	"expected": {
+		"for": [
+			"api.example.test",
+			"[::1]",
+			"OpenRouter",
+			"OpenCode",
+			"OpenAI-compatible",
+			"ollama",
+			"team",
+			"",
+			"OpenAI-compatible"
+		]
+	}
+}

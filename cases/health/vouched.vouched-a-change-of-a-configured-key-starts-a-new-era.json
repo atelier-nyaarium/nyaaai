@@ -1,0 +1,70 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "health.vouched",
+	"name": "vouched-a-change-of-a-configured-key-starts-a-new-era",
+	"input": {
+		"entries": [
+			{
+				"id": "host",
+				"kind": "compatible",
+				"label": "Host",
+				"url": "http://lab.local:8000/v1"
+			}
+		],
+		"configured": {
+			"host": "fake-key-one"
+		},
+		"steps": [
+			{
+				"kind": "read",
+				"id": "host"
+			},
+			{
+				"kind": "configure",
+				"id": "host",
+				"key": "fake-key-two"
+			},
+			{
+				"kind": "read",
+				"id": "host"
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answers": [
+					{
+						"read": 1,
+						"answer": {
+							"kind": "key",
+							"key": "fake-key-one",
+							"boundTo": "compatible http://lab.local:8000"
+						}
+					}
+				],
+				"told": []
+			},
+			{
+				"answers": [],
+				"told": [
+					"rekeyed:host#1 2"
+				]
+			},
+			{
+				"answers": [
+					{
+						"read": 2,
+						"answer": {
+							"kind": "key",
+							"key": "fake-key-two",
+							"boundTo": "compatible http://lab.local:8000"
+						}
+					}
+				],
+				"told": []
+			}
+		]
+	}
+}

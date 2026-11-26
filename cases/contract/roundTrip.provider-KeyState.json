@@ -14,6 +14,9 @@
 			"{\"kind\":\"rejected\"}",
 			"{\"kind\":\"unreachable\"}",
 			"{\"kind\":\"invalid\"}",
+			"{\"kind\":\"foreign\",\"for\":\"api.example.test\"}",
+			"{\"kind\":\"foreign\"}",
+			"{\"kind\":\"insecure\"}",
 			"{\"kind\":\"none\",\"extra\":1}",
 			"{\"kind\":\"ok\",\"usage\":\"1\"}",
 			"{\"kind\":\"ok\",\"models\":null}",
@@ -50,6 +53,20 @@
 			{
 				"ok": true,
 				"text": "{\"kind\":\"invalid\"}"
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"foreign\",\"for\":\"api.example.test\"}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"for"
+				]
+			},
+			{
+				"ok": true,
+				"text": "{\"kind\":\"insecure\"}"
 			},
 			{
 				"ok": true,

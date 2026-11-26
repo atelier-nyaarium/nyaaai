@@ -10,19 +10,19 @@ use std::sync::{Arc, Mutex, MutexGuard, Weak};
 use std::task::{Context, Poll, Waker};
 
 use nyaaai_contract::cancel::{CancelToken, Unsubscribe};
-use nyaaai_contract::entry_keys::{EntryKeys, KeyAnswer};
+use nyaaai_contract::entry_keys::EntryKeys;
 use nyaaai_contract::fetch::{Budget, BudgetName, Budgets, Span};
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::id::Ids;
 use nyaaai_contract::shapes::health::{
-    Admission, AdmissionRetired, Blocked, BlockedKeyRejected, EntryHealth, GateOutcome,
-    GateSettled, HealthChange, HealthChangeChangedItem, PoolEvent, PoolEventAdmitted,
+    Admission, AdmissionRetired, Blocked, BlockedKeyMissing, BlockedKeyRejected, EntryHealth,
+    GateOutcome, GateSettled, HealthChange, HealthChangeChangedItem, PoolEvent, PoolEventAdmitted,
     PoolEventBilled, PoolEventExtraUsage, PoolEventRefused, PoolEventRefusedReason,
     PoolEventSettled, PoolVerdict, Ticket,
 };
 use nyaaai_contract::shapes::provider::{
-    Billed, EntryFields, KeyState, KeyStateNone, KeyStateRejected, KeyStateUnreachable,
-    ProviderEntry, ProviderKindName, SkipReason,
+    Billed, EntryFields, KeyState, KeyStateForeign, KeyStateInsecure, KeyStateNone,
+    KeyStateRejected, KeyStateUnreachable, ProviderEntry, ProviderKindName, SkipReason,
 };
 use nyaaai_contract::shapes::step::{Failure, FailureCategory, NormalizedUsage};
 use nyaaai_contract::time::Scheduler;
@@ -31,10 +31,12 @@ use tokio::runtime::Handle;
 use super::gate::{GateDeps, GateState, ProviderGate, WaitFn};
 use super::key_reader::{Check, Failed, KeyReader, Shown};
 use super::pool::{clear, step, verdict};
+use crate::provider::entry::{KindField, bound_for, takes_key};
 use crate::provider::incarnation::{
     EntryRegistry, Era, Incarnation, KeyStatus, RegistryEvent, TicketKey,
 };
-use crate::provider::kind::{KindDeps, KindField, ProviderKind};
+use crate::provider::keyring::{KeyRead, KeyReads, Keyring, KeyringDeps};
+use crate::provider::kind::{KindDeps, ProviderKind};
 use crate::provider::resolver::Resolved;
 
 type Part = HealthChangeChangedItem;
@@ -137,7 +139,7 @@ pub struct HealthDeps {
     pub scheduler: Arc<dyn Scheduler>,
     /// Shared with the resolver.
     pub entries: Arc<EntryRegistry>,
-    /// The store's keys; health offers `entry_keys` over them.
+    /// The store's keys; health reads them through its keyring and offers `entry_keys`.
     pub keys: Arc<dyn EntryKeys>,
     pub kinds: Vec<Arc<dyn ProviderKind>>,
     /// What a kind's check stands on.
@@ -162,7 +164,7 @@ struct Core {
     runtime: Handle,
     scheduler: Arc<dyn Scheduler>,
     entries: Arc<EntryRegistry>,
-    keys: Arc<dyn EntryKeys>,
+    keyring: Keyring,
     kinds: Vec<Arc<dyn ProviderKind>>,
     kind_deps: Arc<dyn Fn(ProviderKindName) -> KindDeps + Send + Sync>,
     /// Each key check's span opens from it.
@@ -341,10 +343,9 @@ impl Core {
             .is_some_and(|kind| kind.field() == KindField::Url)
     }
 
-    /// A URL kind that takes no key at all.
+    /// A kind that takes no key at all.
     fn keyless(&self, entry: &ProviderEntry) -> bool {
-        self.kind_of(entry)
-            .is_some_and(|kind| kind.field() == KindField::Url && !kind.optional_key())
+        self.kind_of(entry).is_some_and(|kind| !takes_key(&**kind))
     }
 
     fn now(&self) -> i64 {
@@ -374,6 +375,14 @@ impl Core {
         matches!(Self::status_of_era(era), KeyState::Rejected(_))
     }
 
+    /// Its key may not be sent.
+    fn forbidden(era: &Era) -> bool {
+        matches!(
+            Self::status_of_era(era),
+            KeyState::Foreign(_) | KeyState::Insecure(_)
+        )
+    }
+
     /// The ticket's era when it is this incarnation's; with no ticket, the live one. None drops the report.
     fn era_for(&self, incarnation: &Incarnation, ticket: Option<&Ticket>) -> Option<Arc<Era>> {
         match ticket {
@@ -386,11 +395,11 @@ impl Core {
     }
 
     /// Unhealthy entries are held out; asking rechecks an unreachable server.
-    fn standing(self: &Arc<Self>, incarnation: &Incarnation) -> Option<KeyAnswer> {
+    fn standing(self: &Arc<Self>, incarnation: &Incarnation) -> Option<KeyRead> {
         let era = incarnation.era();
         let status = Self::status_of_era(&era);
         if matches!(status, KeyState::Rejected(_)) {
-            return Some(KeyAnswer::Refused);
+            return Some(KeyRead::Refused);
         }
         if !self.by_url(&incarnation.entry()) {
             return None;
@@ -401,7 +410,7 @@ impl Core {
         }
         // Out until the recheck passes.
         (unreachable || (matches!(status, KeyState::Checking(_)) && self.rechecking(&era)))
-            .then_some(KeyAnswer::Unready)
+            .then_some(KeyRead::Unready)
     }
 
     /// A later turn may find it back.
@@ -592,18 +601,20 @@ impl Core {
             return Ok(Some(none()));
         };
         let stale = || limit.token().is_cancelled() || era.retired();
-        let answer = self.keys.get(&entry.id).await;
+        let answer = self.keyring.read(&entry).await;
         if stale() {
             return Ok(None);
         }
         let state = match answer {
-            KeyAnswer::Refused => KeyState::Rejected(KeyStateRejected {}),
-            KeyAnswer::Unready if kind.field() == KindField::Key || kind.optional_key() => {
-                KeyState::Unreachable(KeyStateUnreachable {})
-            }
+            KeyRead::Refused => KeyState::Rejected(KeyStateRejected {}),
+            KeyRead::Unready if takes_key(&*kind) => KeyState::Unreachable(KeyStateUnreachable {}),
+            KeyRead::Foreign { bound_to } => KeyState::Foreign(KeyStateForeign {
+                for_: bound_for(&bound_to, &self.kinds),
+            }),
+            KeyRead::Insecure => KeyState::Insecure(KeyStateInsecure {}),
             held => {
                 let secret = match held {
-                    KeyAnswer::Key(key) => Some(key),
+                    KeyRead::Key { key, .. } => Some(key),
                     _ => None,
                 };
                 if kind.field() == KindField::Key && secret.is_none() {
@@ -702,29 +713,30 @@ pub struct ProviderHealth {
     core: Arc<Core>,
 }
 
-/// The keys a resolver reads: the store's, unless health holds the entry out.
+/// The keyring's reads, unless health holds the entry out.
 struct HealthKeys {
     core: Arc<Core>,
 }
 
-impl EntryKeys for HealthKeys {
-    fn get(&self, id: &str) -> BoxFuture<'_, KeyAnswer> {
+impl KeyReads for HealthKeys {
+    fn get(&self, id: &str) -> BoxFuture<'_, KeyRead> {
         let (core, id) = (Arc::clone(&self.core), id.to_owned());
         let work = eager(Caught(Box::pin(async move {
             let Some(incarnation) = core.entries.incarnation(&id) else {
-                return KeyAnswer::None;
+                return KeyRead::None;
             };
             if let Some(standing) = core.standing(&incarnation) {
                 return standing;
             }
-            let answer = core.keys.get(&id).await;
-            // A URL kind needs no key, so an unreadable store is no key.
-            if answer == KeyAnswer::Unready && core.keyless(&incarnation.entry()) {
-                return KeyAnswer::None;
+            let entry = incarnation.entry();
+            let answer = core.keyring.read(&entry).await;
+            // A kind that takes no key needs none, so an unreadable store is no key.
+            if answer == KeyRead::Unready && core.keyless(&entry) {
+                return KeyRead::None;
             }
             answer
         })));
-        Box::pin(async move { work.await.unwrap_or(KeyAnswer::Unready) })
+        Box::pin(async move { work.await.unwrap_or(KeyRead::Unready) })
     }
 
     fn on_change(&self, listener: Box<dyn Fn(&str) + Send + Sync>) -> Unsubscribe {
@@ -765,8 +777,13 @@ impl ProviderHealth {
             Core {
                 runtime: deps.runtime,
                 scheduler: deps.scheduler,
+                keyring: Keyring::new(KeyringDeps {
+                    keys: deps.keys,
+                    entries: Arc::clone(&deps.entries),
+                    kinds: deps.kinds.clone(),
+                    kind_deps: Arc::clone(&deps.kind_deps),
+                }),
                 entries: deps.entries,
-                keys: deps.keys,
                 kinds: deps.kinds,
                 kind_deps: deps.kind_deps,
                 key_check: deps
@@ -806,7 +823,7 @@ impl ProviderHealth {
     }
 
     /// The keys a resolver reads.
-    pub fn entry_keys(&self) -> Arc<dyn EntryKeys> {
+    pub fn entry_keys(&self) -> Arc<dyn KeyReads> {
         Arc::new(HealthKeys {
             core: Arc::clone(&self.core),
         })
@@ -1056,6 +1073,9 @@ impl Gate for ProviderHealth {
         if Core::rejected(&era) {
             return Some(SkipReason::KeyRejected);
         }
+        if Core::forbidden(&era) {
+            return Some(SkipReason::KeyMissing);
+        }
         if let Some(pool) = self.core.verdict(incarnation, keep) {
             return Some(pool.skip);
         }
@@ -1071,8 +1091,12 @@ impl Gate for ProviderHealth {
         if !self.core.owned(incarnation) {
             return None;
         }
-        if Core::rejected(&incarnation.era()) {
+        let era = incarnation.era();
+        if Core::rejected(&era) {
             return Some(Blocked::KeyRejected(BlockedKeyRejected {}));
+        }
+        if Core::forbidden(&era) {
+            return Some(Blocked::KeyMissing(BlockedKeyMissing {}));
         }
         self.core.verdict(incarnation, keep)?.blocked
     }

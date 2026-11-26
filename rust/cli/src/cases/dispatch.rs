@@ -373,6 +373,24 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
             input,
             super::entry::secret_key,
         ),
+        "entry.binding" => run::<shapes::EntryBindingInput, shapes::EntryBindingResult>(
+            input,
+            super::entry::binding,
+        ),
+        "entry.keyFor" => {
+            run::<shapes::EntryKeyForInput, shapes::EntryKeyForResult>(input, super::entry::key_for)
+        }
+        "entry.boundKey" => run::<shapes::EntryBoundKeyInput, shapes::EntryBoundKeyResult>(
+            input,
+            super::entry::bound_key,
+        ),
+        "entry.readBoundKey" => run::<
+            shapes::EntryReadBoundKeyInput,
+            shapes::EntryReadBoundKeyResult,
+        >(input, super::entry::read_bound_key),
+        "entry.travel" => {
+            run::<shapes::EntryTravelInput, shapes::EntryTravelResult>(input, super::entry::travel)
+        }
         "rowKey.build" => {
             run::<shapes::RowKeyBuildInput, shapes::RowKeyBuildResult>(input, super::row_key::build)
         }
@@ -719,6 +737,10 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
         "health.registry" => run::<shapes::HealthRegistryInput, shapes::HealthRegistryResult>(
             input,
             super::health::registry,
+        ),
+        "health.vouched" => run::<shapes::HealthVouchedInput, shapes::HealthVouchedResult>(
+            input,
+            super::health::vouched,
         ),
         "health.keys" => {
             run::<shapes::HealthKeysInput, shapes::HealthKeysResult>(input, super::health::keys)

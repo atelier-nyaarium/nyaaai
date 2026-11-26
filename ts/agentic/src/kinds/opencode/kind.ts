@@ -29,14 +29,15 @@ const BASE_URLS: Record<ProviderPlan, string> = {
 	payg: "https://opencode.ai/inference",
 };
 
+const DEFAULT_PLAN: ProviderPlan = "go";
+
 const DOT = " \u{b7} ";
 
 ////////////////////////////////
 //  Functions & Helpers
 
-/** Missing plan: Go. */
 function planOf(entry: EntryFields): ProviderPlan {
-	return entry.plan ?? "go";
+	return entry.plan ?? DEFAULT_PLAN;
 }
 
 function labelOf(entry: EntryFields): string {
@@ -85,7 +86,9 @@ export const OPENCODE: ProviderKind = (() => {
 		kind: "opencode",
 		label: "OpenCode",
 		plans: PLANS,
+		defaultPlan: DEFAULT_PLAN,
 		field: "key",
+		address: (entry) => BASE_URLS[planOf(entry)],
 		balance: "https://opencode.ai/console",
 		extraUsage: ["go"],
 		facts: billingFacts,

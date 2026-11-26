@@ -117,6 +117,14 @@
 				]
 			},
 			{
+				"kind": "key",
+				"id": "go",
+				"answer": {
+					"kind": "key",
+					"key": "fake-key-one"
+				}
+			},
+			{
 				"kind": "send",
 				"call": "changed",
 				"model": "openai/gpt-6-luna",
@@ -192,6 +200,38 @@
 							"eta": 1794070800000,
 							"next": 1794061800000,
 							"probe": null
+						},
+						"waiting": []
+					},
+					{
+						"entry": "b",
+						"key": {
+							"kind": "none"
+						},
+						"pool": {
+							"kind": "clear"
+						},
+						"waiting": []
+					}
+				],
+				"requests": 2
+			},
+			{
+				"nowMs": 1794052800000,
+				"answer": {
+					"kind": "none"
+				},
+				"ended": [],
+				"parked": [],
+				"entries": [
+					{
+						"entry": "go",
+						"key": {
+							"kind": "foreign",
+							"for": "OpenCode"
+						},
+						"pool": {
+							"kind": "clear"
 						},
 						"waiting": []
 					},
@@ -591,7 +631,7 @@
 							"ticket": {
 								"gate": "gate-1",
 								"model": "go\nopenai/gpt-6-luna",
-								"era": 3,
+								"era": 4,
 								"generation": 0,
 								"probe": false,
 								"serial": 3

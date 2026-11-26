@@ -382,6 +382,18 @@
 					"properties": {
 						"kind": {
 							"type": "string",
+							"const": "keyMissing"
+						}
+					},
+					"required": [
+						"kind"
+					]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
 							"const": "spendLimit"
 						},
 						"resetsAt": {

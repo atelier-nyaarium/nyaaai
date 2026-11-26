@@ -99,29 +99,23 @@
 			{
 				"answer": {
 					"kind": "routes",
-					"unresolved": null,
-					"candidates": [
-						{
-							"entry": "a",
-							"kind": "opencode",
-							"binding": "gpt-6-luna",
-							"status": "ok",
-							"zdrOnly": true,
-							"path": "/openai/v1/chat/completions"
-						}
-					],
+					"unresolved": {
+						"ok": false,
+						"key": "openai/gpt-6-luna",
+						"refusal": "keyMissing",
+						"entry": "First"
+					},
+					"candidates": [],
 					"passed": []
 				},
-				"built": 2,
+				"built": 1,
 				"disposed": 1
 			}
 		],
 		"transports": [
-			"First",
 			"First"
 		],
 		"stopped": [
-			"First",
 			"First"
 		],
 		"refreshed": [],

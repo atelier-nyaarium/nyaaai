@@ -133,22 +133,25 @@ describe("the platform fetch", () => {
 		expect(new TextDecoder().decode(parts[0])).toBe("held");
 	});
 
-	it("answers a redirect as its status and makes no second request", async () => {
-		const trace: Trace = {
-			format: 1,
-			exchanges: [exchange({ status: 302, headers: { location: "" } }), exchange({ chunks: [encoded("there")] })],
-		};
-		const provider = await loopbackProvider(trace);
-		try {
-			(trace.exchanges[0] as TraceExchange).headers["location"] = `${provider.url}/next`;
-			const answer = await fetched(post(provider, '{"prompt":"p"}'), new AbortController().signal);
-			expect(answer.status).toBe(302);
-			expect(headerOf(answer.headers, "location")).toBe(`${provider.url}/next`);
-			await joined(answer.chunks);
-			expect(provider.requests).toEqual([{ prompt: "p" }]);
-		} finally {
-			await provider.close();
-		}
+	// A key must never follow a redirect to another origin.
+	it("answers a 307 to another origin as its status, and the other origin sees no request", async () => {
+		await serving([exchange({ chunks: [encoded("there")] })], [], async (other) => {
+			const trace: Trace = {
+				format: 1,
+				exchanges: [exchange({ status: 307, headers: { location: `${other.url}/next` } })],
+			};
+			const provider = await loopbackProvider(trace);
+			try {
+				const answer = await fetched(post(provider, '{"prompt":"p"}'), new AbortController().signal);
+				expect(answer.status).toBe(307);
+				expect(headerOf(answer.headers, "location")).toBe(`${other.url}/next`);
+				await joined(answer.chunks);
+				expect(provider.requests).toEqual([{ prompt: "p" }]);
+				expect(other.requests).toEqual([]);
+			} finally {
+				await provider.close();
+			}
+		});
 	});
 
 	it("rejects with the signal's reason when aborted before the head, and the server sees the close", async () => {

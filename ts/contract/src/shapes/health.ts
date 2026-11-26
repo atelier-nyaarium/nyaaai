@@ -88,6 +88,8 @@ export type PoolEvent = z.infer<typeof PoolEvent>;
 /** A last-route refusal. */
 export const Blocked = z.discriminatedUnion("kind", [
 	z.object({ kind: z.literal("keyRejected") }),
+	/** The key may not be sent: `foreign` or `insecure`. */
+	z.object({ kind: z.literal("keyMissing") }),
 	z.object({
 		kind: z.literal("spendLimit"),
 		resetsAt: z.number().exactOptional(),

@@ -9,7 +9,8 @@
 				"field": "key",
 				"answer": {
 					"kind": "key",
-					"key": "fake-key-one"
+					"key": "fake-key-one",
+					"boundTo": "openrouter"
 				}
 			},
 			{
@@ -28,13 +29,27 @@
 				"field": "key",
 				"answer": {
 					"kind": "unready"
+				}
+			},
+			{
+				"field": "key",
+				"answer": {
+					"kind": "foreign",
+					"boundTo": "compatible https://other.example.test"
+				}
+			},
+			{
+				"field": "key",
+				"answer": {
+					"kind": "insecure"
 				}
 			},
 			{
 				"field": "url",
 				"answer": {
 					"kind": "key",
-					"key": "fake-key-one"
+					"key": "fake-key-one",
+					"boundTo": "openrouter"
 				}
 			},
 			{
@@ -53,6 +68,19 @@
 				"field": "url",
 				"answer": {
 					"kind": "unready"
+				}
+			},
+			{
+				"field": "url",
+				"answer": {
+					"kind": "foreign",
+					"boundTo": "compatible https://other.example.test"
+				}
+			},
+			{
+				"field": "url",
+				"answer": {
+					"kind": "insecure"
 				}
 			}
 		]
@@ -63,10 +91,14 @@
 			"keyMissing",
 			"keyRejected",
 			"unreachable",
+			"keyMissing",
+			"keyMissing",
 			"ok",
 			"ok",
 			"keyRejected",
-			"unreachable"
+			"unreachable",
+			"keyMissing",
+			"keyMissing"
 		]
 	}
 }
