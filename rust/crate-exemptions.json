@@ -1,0 +1,9 @@
+{
+	"young": [],
+	"advisories": [
+		{
+			"id": "RUSTSEC-2026-0592",
+			"reason": "Nothing here, nor reqwest 0.13.5 or tower-http 0.6.11, calls Url::origin or url::quirks::origin. The fixed url 2.5.9 needs form_urlencoded 1.2.3, seven days old on 2026-11-27. Remove with that update."
+		}
+	]
+}
