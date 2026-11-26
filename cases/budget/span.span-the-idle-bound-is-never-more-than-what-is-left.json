@@ -1,0 +1,61 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "budget.span",
+	"name": "span-the-idle-bound-is-never-more-than-what-is-left",
+	"input": {
+		"budget": {
+			"totalMs": 10000,
+			"idleMs": 8000,
+			"maxBytes": 1000
+		},
+		"exchanges": [
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"application/json"
+					]
+				],
+				"chunks": [
+					{
+						"kind": "text",
+						"text": "{\"a\":1}"
+					}
+				]
+			}
+		],
+		"steps": [
+			{
+				"kind": "advance",
+				"ms": 5000
+			},
+			{
+				"kind": "read",
+				"path": "/one"
+			}
+		]
+	},
+	"expected": {
+		"reads": [
+			{
+				"startMs": 5000,
+				"endMs": 5000,
+				"sent": {
+					"totalMs": 5000,
+					"idleMs": 5000,
+					"maxBytes": 1000
+				},
+				"answer": {
+					"a": 1
+				},
+				"failure": null,
+				"thrown": null
+			}
+		],
+		"ended": null,
+		"requests": 1,
+		"waiting": []
+	}
+}

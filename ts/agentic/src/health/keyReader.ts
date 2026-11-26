@@ -1,12 +1,9 @@
 // One entry's key status; a newer read drops the last.
 
+import { type Span, span } from "@nyaaai/contract/fetch";
 import type { KeyState } from "@nyaaai/contract/shapes/provider";
-import { deadline, type Scheduler } from "@nyaaai/contract/time";
-
-////////////////////////////////
-//  Constants
-
-export const KEY_CHECK_MS = 30_000;
+import type { Budget } from "@nyaaai/contract/shapes/step";
+import type { Scheduler } from "@nyaaai/contract/time";
 
 ////////////////////////////////
 //  Classes
@@ -16,10 +13,12 @@ export class KeyReader {
 	private readonly running = new Set<Promise<void>>();
 
 	constructor(
-		/** The deadline of each check comes from it. */
+		/** Each check's clock. */
 		private readonly scheduler: Scheduler,
+		/** Each check's span opens from it. */
+		private readonly budget: Budget,
 		/** Undefined: the check ended without effect. */
-		private readonly check: (signal: AbortSignal) => Promise<KeyState | undefined>,
+		private readonly check: (span: Span) => Promise<KeyState | undefined>,
 		private readonly shown: (state: KeyState) => void,
 	) {}
 
@@ -29,13 +28,13 @@ export class KeyReader {
 		const abort = new AbortController();
 		this.abort = abort;
 		this.shown({ kind: "checking" });
-		const limit = deadline(this.scheduler, KEY_CHECK_MS, abort.signal);
+		const limit = span(this.scheduler, this.budget, abort.signal);
 		const raced = new Promise<KeyState | undefined>((resolve, reject) => {
 			const end = () => reject(limit.signal.reason);
 			if (limit.signal.aborted) return end();
 			limit.signal.addEventListener("abort", end, { once: true });
 			try {
-				this.check(limit.signal).then(resolve, reject);
+				this.check(limit).then(resolve, reject);
 			} catch (error) {
 				reject(error);
 			}

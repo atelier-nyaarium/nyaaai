@@ -11,9 +11,10 @@ import {
 import { OPENROUTER, OPENROUTER_ENTRY } from "@nyaaai/agentic/kinds/openrouter/kind";
 import { MODELS } from "@nyaaai/agentic/models/curated";
 import { CHAT } from "@nyaaai/agentic/models/uses";
+import { BUDGETS, span } from "@nyaaai/contract/fetch";
 import { fixedText, numberOfText, numberText } from "@nyaaai/contract/number";
 import type { ModelRow, ModelView } from "@nyaaai/contract/shapes/model";
-import { deadline, systemScheduler } from "@nyaaai/contract/time";
+import { systemScheduler } from "@nyaaai/contract/time";
 
 ////////////////////////////////
 //  Interfaces & Types
@@ -25,11 +26,6 @@ export interface Report {
 	/** A curated model is retired or has no zero-retention host. */
 	failed: boolean;
 }
-
-////////////////////////////////
-//  Constants
-
-const FETCH_MS = 30_000;
 
 ////////////////////////////////
 //  Functions & Helpers
@@ -112,12 +108,17 @@ if (import.meta.main) {
 	const transport = OPENROUTER.transport(
 		OPENROUTER_ENTRY,
 		{ get: async () => undefined },
-		{ fetch: platformFetch(), scheduler: systemScheduler, log: () => {}, userAgent: "nyaaai-models-check/1" },
+		{
+			fetch: platformFetch(systemScheduler),
+			scheduler: systemScheduler,
+			log: () => {},
+			userAgent: "nyaaai-models-check/1",
+		},
 	);
-	const limit = deadline(systemScheduler, FETCH_MS);
+	const limit = span(systemScheduler, BUDGETS.catalog);
 	const [models, zdr] = await Promise.all([
-		transport.getJson("/models", limit.signal, "none"),
-		transport.getJson("/endpoints/zdr", limit.signal, "none"),
+		transport.getJson("/models", limit, "none"),
+		transport.getJson("/endpoints/zdr", limit, "none"),
 	]);
 	limit.clear();
 	const report = reportOf(models, zdr, MODELS, systemScheduler.nowMs());

@@ -2,11 +2,29 @@
 	"format": 2,
 	"type": "function",
 	"kind": "transport.exchange",
-	"name": "cap-a-stream-counts-from-the-last-chunk-that-finished-an-item",
+	"name": "clamp-a-reset-ten-years-away",
 	"input": {
 		"codec": {
 			"family": "chat-completions",
-			"dialect": "openrouter"
+			"dialect": "opencode",
+			"facts": {
+				"api": {
+					"family": "chat-completions",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false,
+					"reasoning": "reasoning_content"
+				},
+				"efforts": [
+					"high"
+				]
+			},
+			"nowMs": 1800000000000
 		},
 		"baseUrl": "https://openrouter.ai/api/v1",
 		"label": "OpenRouter",
@@ -19,35 +37,17 @@
 			"kind": "inline",
 			"exchanges": [
 				{
-					"status": 200,
+					"status": 429,
 					"headers": [
 						[
 							"content-type",
-							"text/event-stream"
+							"application/json"
 						]
 					],
 					"chunks": [
 						{
 							"kind": "text",
-							"text": "data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Hi\"}}]}\n\n"
-						},
-						{
-							"kind": "repeat",
-							"text": "y",
-							"times": 20
-						},
-						{
-							"kind": "repeat",
-							"text": "y",
-							"times": 20
-						},
-						{
-							"kind": "text",
-							"text": "\n\n"
-						},
-						{
-							"kind": "text",
-							"text": "data: [DONE]\n\n"
+							"text": "{\"error\":{\"type\":\"GoUsageLimitError\",\"message\":\"Limit.\",\"resetsAt\":\"2036-11-07T17:00:00Z\"}}"
 						}
 					]
 				}
@@ -72,31 +72,19 @@
 					"zdrOnly": true
 				}
 			}
-		],
-		"maxBytes": 30
+		]
 	},
 	"expected": {
 		"calls": [
 			{
-				"events": [
-					{
-						"kind": "serving",
-						"serving": {
-							"host": "Azure",
-							"generationId": "gen-1"
-						}
-					},
-					{
-						"kind": "text",
-						"text": "Hi"
-					}
-				],
+				"events": [],
 				"result": null,
 				"answer": null,
 				"failure": {
-					"category": "stream",
-					"status": "stream",
-					"message": "A stream event is larger than 30 bytes."
+					"category": "allowance",
+					"status": 429,
+					"resetsAt": 1802678400000,
+					"message": "Limit."
 				},
 				"thrown": null,
 				"aborted": false,
@@ -106,8 +94,12 @@
 		"requests": [
 			{
 				"method": "POST",
-				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"url": "https://openrouter.ai/api/v1/openai/v1/chat/completions",
 				"headers": [
+					[
+						"x-opencode-session",
+						"root-1"
+					],
 					[
 						"Content-Type",
 						"application/json"
@@ -125,18 +117,18 @@
 						"lab-app/1.0"
 					]
 				],
-				"body": "{\"model\":\"openai/gpt-6-luna\",\"messages\":[{\"role\":\"user\",\"content\":\"Hi\"}],\"stream\":true,\"session_id\":\"root-1\",\"provider\":{\"zdr\":true,\"data_collection\":\"deny\",\"require_parameters\":true}}"
+				"body": "{\"model\":\"openai/gpt-6-luna\",\"messages\":[{\"role\":\"user\",\"content\":\"Hi\"}],\"stream\":true,\"stream_options\":{\"include_usage\":true}}"
 			}
 		],
 		"log": [
-			"OpenRouter 200 gen-1 Azure"
+			"OpenRouter 429 - -"
 		],
 		"settled": [
 			"openai/gpt-6-luna"
 		],
 		"keyReads": 1,
 		"read": [
-			3
+			1
 		],
 		"waiting": []
 	}

@@ -195,7 +195,7 @@ function stamped(transport: Resolved["transport"], zdrOnly: () => boolean): Reso
 	return {
 		stream: (codec, request, signal) => transport.stream(codec, { ...request, zdrOnly: zdrOnly() }, signal),
 		complete: (codec, request, signal) => transport.complete(codec, { ...request, zdrOnly: zdrOnly() }, signal),
-		getJson: (path, signal, auth) => transport.getJson(path, signal, auth),
+		getJson: (path, clock, auth) => transport.getJson(path, clock, auth),
 	};
 }
 
@@ -282,6 +282,7 @@ export class ModelResolver {
 		const transport = kind.transport(entry, keySourceOf(this.d.keys, incarnation), deps);
 		const catalog = kind.catalog(entry, transport, {
 			scheduler: deps.scheduler,
+			budgets: deps.budgets,
 			rows: this.d.registry,
 			refreshed: () => this.d.refreshed?.(incarnation.entry),
 		});

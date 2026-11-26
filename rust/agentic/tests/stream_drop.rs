@@ -70,8 +70,7 @@ fn a_dropped_next_does_not_send_again() {
             user_agent: "t/1".to_owned(),
             errors: Arc::new(OPENROUTER_CHAT),
             auth: Auth::Bearer,
-            idle_ms: None,
-            max_bytes: None,
+            budgets: None,
         });
         let counted = Arc::clone(&told);
         transport.on_settled(move |_| {

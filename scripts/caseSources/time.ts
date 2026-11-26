@@ -71,6 +71,14 @@ export const timeCases: CaseSource[] = [
 	},
 	{
 		kind: "time.retryAfter",
+		name: "a-wait-past-thirty-one-days-is-thirty-one-days",
+		input: {
+			nowMs: NOW_MS,
+			headers: ["2678400", "2678401", "86400000", "2026-12-16T12:00:00Z", "2026-12-25T12:00:00Z"],
+		},
+	},
+	{
+		kind: "time.retryAfter",
 		name: "past-the-safe-range",
 		input: {
 			nowMs: -Number.MAX_SAFE_INTEGER,

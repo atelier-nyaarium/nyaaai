@@ -1,10 +1,11 @@
 // The local catalog: one entry's discovered models, their views, browser and tester.
 
+import { BUDGETS, type Budgets, type Span, span } from "@nyaaai/contract/fetch";
 import type { ModelRegistry } from "@nyaaai/contract/modelRegistry";
 import type { BrowseModel, ModelRow, ModelUse, ModelView, RowIdentity } from "@nyaaai/contract/shapes/model";
 import type { ApiFacts, Effort } from "@nyaaai/contract/shapes/step";
 import { headOf, trimText } from "@nyaaai/contract/text";
-import { deadline, type Scheduler } from "@nyaaai/contract/time";
+import type { Scheduler } from "@nyaaai/contract/time";
 import { EFFORTS } from "../../effort";
 import { rowKey, shownId } from "../../models/rowKey";
 import { CHAT } from "../../models/uses";
@@ -39,13 +40,13 @@ export interface LocalModel {
 /** One server's discovery. */
 export interface LocalServer {
 	/** Throws when unreadable; `known` is the last list. */
-	models(known: readonly LocalModel[], signal: AbortSignal): Promise<LocalModel[]>;
+	models(known: readonly LocalModel[], span: Span): Promise<LocalModel[]>;
 	/** Loaded context by tag, after a reply. */
-	loaded?(tag: string, signal: AbortSignal): Promise<ReadonlyMap<string, number>>;
+	loaded?(tag: string, span: Span): Promise<ReadonlyMap<string, number>>;
 	/** A reload can change context. */
 	live?: true;
 	/** Loads an unprobed model. */
-	warm?(tag: string, signal: AbortSignal): Promise<void>;
+	warm?(tag: string, span: Span): Promise<void>;
 }
 
 /** Server-reported model. */
@@ -64,8 +65,10 @@ export interface LocalCatalogDeps {
 	entry: string;
 	server: LocalServer;
 	terms: Terms;
-	/** The time, and the deadlines of a read. */
+	/** The time, and the spans of its reads. */
 	scheduler: Scheduler;
+	/** Spans open from `discover` and `warm`. */
+	budgets?: Budgets | undefined;
 	rows: Pick<ModelRegistry, "rows">;
 	refreshed?(): void;
 }
@@ -74,7 +77,6 @@ export interface LocalCatalogDeps {
 //  Constants
 
 const RETRY_MS = 60_000;
-const DISCOVER_MS = 10_000;
 
 /** Thinking-on efforts. */
 const ON: readonly Effort[] = ["low", "medium", "high"];
@@ -279,7 +281,12 @@ export class LocalCatalog implements EntryCatalog {
 		const { server } = this.d;
 		const model = (await raced(this.fetched(), signal))?.find((each) => each.tag === tag);
 		if (server.warm === undefined || model?.probed !== false) return;
-		await server.warm(tag, signal);
+		const limit = span(this.d.scheduler, this.budgets().warm, signal);
+		try {
+			await server.warm(tag, limit);
+		} finally {
+			limit.clear();
+		}
 		await raced(this.discovering(), signal);
 	}
 
@@ -298,9 +305,9 @@ export class LocalCatalog implements EntryCatalog {
 		if (server.loaded === undefined || model === undefined) return;
 		if (model.context !== undefined || this.reading || (this.loaded.has(tag) && server.live !== true)) return;
 		this.reading = true;
-		const limit = deadline(this.d.scheduler, DISCOVER_MS);
+		const limit = span(this.d.scheduler, this.budgets().discover);
 		const reading = server
-			.loaded(tag, limit.signal)
+			.loaded(tag, limit)
 			.then((contexts) => {
 				let changed = false;
 				for (const [name, context] of contexts) {
@@ -343,10 +350,14 @@ export class LocalCatalog implements EntryCatalog {
 		return this.inflight;
 	}
 
+	private budgets(): Budgets {
+		return this.d.budgets ?? BUDGETS;
+	}
+
 	private async discover(): Promise<readonly LocalModel[] | undefined> {
-		const limit = deadline(this.d.scheduler, DISCOVER_MS);
+		const limit = span(this.d.scheduler, this.budgets().discover);
 		try {
-			const models = await this.d.server.models(this.good ?? [], limit.signal);
+			const models = await this.d.server.models(this.good ?? [], limit);
 			this.good = models;
 			for (const tag of this.loaded.keys())
 				if (!models.some((model) => model.tag === tag)) this.loaded.delete(tag);

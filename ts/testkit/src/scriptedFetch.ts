@@ -1,9 +1,9 @@
 // A Fetch that plays a script on virtual time.
 
-import type { Fetch, FetchRequest } from "@nyaaai/contract/fetch";
+import { budgeted, type Fetch, type FetchRequest, type RawFetch } from "@nyaaai/contract/fetch";
 import { responseHeaders } from "@nyaaai/contract/headers";
 import type { HeaderList } from "@nyaaai/contract/shapes/step";
-import type { TimerWheel } from "./scheduler";
+import type { FakeScheduler } from "./scheduler";
 
 ////////////////////////////////
 //  Interfaces & Types
@@ -28,6 +28,7 @@ export interface ScriptedExchange {
 }
 
 export interface ScriptedFetch {
+	/** Budgeted on the scheduler's wheel. */
 	fetch: Fetch;
 	/** Every request given, in order. */
 	requests: FetchRequest[];
@@ -41,7 +42,8 @@ export interface ScriptedFetch {
 //  Functions & Helpers
 
 /** Plays exchanges in order on one lane; a body neither read nor cancelled holds it. */
-export function scriptedFetch(exchanges: readonly ScriptedExchange[], wheel: TimerWheel): ScriptedFetch {
+export function scriptedFetch(exchanges: readonly ScriptedExchange[], scheduler: FakeScheduler): ScriptedFetch {
+	const { wheel } = scheduler;
 	const requests: FetchRequest[] = [];
 	const served = exchanges.map(() => 0);
 	let next = 0;
@@ -132,34 +134,36 @@ export function scriptedFetch(exchanges: readonly ScriptedExchange[], wheel: Tim
 		});
 	}
 
+	const raw: RawFetch = async (request, signal) => {
+		if (busy) {
+			waits += 1;
+			await wait(signal);
+		} else busy = true;
+		try {
+			requests.push(request);
+			if (signal.aborted) throw signal.reason;
+			const at = next;
+			const exchange = exchanges[at];
+			if (exchange === undefined) throw new Error("the script holds no further exchange");
+			next += 1;
+			wheel.advance(exchange.headMs ?? 0);
+			if (signal.aborted) throw signal.reason;
+			if (exchange.end === "refused") throw new Error(exchange.error ?? "connection refused");
+			return {
+				status: exchange.status,
+				headers: responseHeaders(exchange.headers),
+				chunks: held(body(exchange, at, signal), signal),
+			};
+		} catch (error) {
+			hand();
+			throw error;
+		}
+	};
+
 	return {
 		requests,
 		read: () => [...served],
 		waited: () => waits,
-		fetch: async (request, signal) => {
-			if (busy) {
-				waits += 1;
-				await wait(signal);
-			} else busy = true;
-			try {
-				requests.push(request);
-				if (signal.aborted) throw signal.reason;
-				const at = next;
-				const exchange = exchanges[at];
-				if (exchange === undefined) throw new Error("the script holds no further exchange");
-				next += 1;
-				wheel.advance(exchange.headMs ?? 0);
-				if (signal.aborted) throw signal.reason;
-				if (exchange.end === "refused") throw new Error(exchange.error ?? "connection refused");
-				return {
-					status: exchange.status,
-					headers: responseHeaders(exchange.headers),
-					chunks: held(body(exchange, at, signal), signal),
-				};
-			} catch (error) {
-				hand();
-				throw error;
-			}
-		},
+		fetch: budgeted(raw, scheduler),
 	};
 }

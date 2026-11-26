@@ -55,8 +55,8 @@ export function modelOf(model: ListedModel): LocalModel {
 
 export function server(transport: LocalTransport, maxListed = MAX_LISTED): LocalServer {
 	return {
-		models: async (_known, signal) => {
-			const models = listed(await transport.getJson(LIST, signal, "stored"));
+		models: async (_known, span) => {
+			const models = listed(await transport.getJson(LIST, span, "stored"));
 			if (models === undefined) throw new Error("The model list did not parse.");
 			return firstDistinct(models, (model) => model.id, maxListed).map(modelOf);
 		},
@@ -88,6 +88,6 @@ export const COMPATIBLE = localKind({
 	optionalKey: true,
 	base: baseOf,
 	chatPath: "/chat/completions",
-	reach: async (transport, signal) => listed(await transport.getJson(LIST, signal, "stored"))?.length,
+	reach: async (transport, span) => listed(await transport.getJson(LIST, span, "stored"))?.length,
 	server,
 });

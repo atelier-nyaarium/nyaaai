@@ -4,13 +4,16 @@ use std::collections::VecDeque;
 use std::sync::{Arc, Mutex, MutexGuard};
 
 use nyaaai_contract::cancel::CancelToken;
-use nyaaai_contract::fetch::{Chunks, Fetch, FetchError, FetchRequest, FetchResponse};
+use nyaaai_contract::fetch::{
+    Budgeted, Chunks, Fetch, FetchError, FetchRequest, FetchResponse, RawFetch, budgeted,
+};
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::headers::response_headers;
 use nyaaai_contract::shapes::step::HeaderList;
+use nyaaai_contract::time::Scheduler;
 use tokio::sync::oneshot;
 
-use crate::scheduler::TimerWheel;
+use crate::scheduler::{FakeScheduler, TimerWheel};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ScriptedChunk {
@@ -177,12 +180,17 @@ async fn enter(lane: &Arc<Lane>, cancel: &CancelToken) -> Result<Held, FetchErro
     }
 }
 
-/// Plays exchanges in order on one lane; a body neither read nor dropped holds it.
-pub struct ScriptedFetch {
+/// The script, unbudgeted.
+struct Raw {
     exchanges: Vec<ScriptedExchange>,
     wheel: Arc<TimerWheel>,
     state: Arc<Mutex<State>>,
     lane: Arc<Lane>,
+}
+
+/// Plays exchanges in order on one lane, budgeted; a body neither read nor dropped holds it.
+pub struct ScriptedFetch {
+    inner: Budgeted<Raw>,
 }
 
 fn locked(state: &Mutex<State>) -> MutexGuard<'_, State> {
@@ -192,11 +200,11 @@ fn locked(state: &Mutex<State>) -> MutexGuard<'_, State> {
 }
 
 impl ScriptedFetch {
-    pub fn new(exchanges: Vec<ScriptedExchange>, wheel: Arc<TimerWheel>) -> Self {
+    pub fn new(exchanges: Vec<ScriptedExchange>, scheduler: Arc<FakeScheduler>) -> Self {
         let served = vec![0; exchanges.len()];
-        Self {
+        let raw = Raw {
             exchanges,
-            wheel,
+            wheel: Arc::clone(scheduler.wheel()),
             state: Arc::new(Mutex::new(State {
                 requests: Vec::new(),
                 served,
@@ -210,22 +218,35 @@ impl ScriptedFetch {
                     waits: 0,
                 }),
             }),
+        };
+        Self {
+            inner: budgeted(raw, scheduler as Arc<dyn Scheduler>),
         }
     }
 
     /// Every request given, in order.
     pub fn requests(&self) -> Vec<FetchRequest> {
-        locked(&self.state).requests.clone()
+        locked(&self.inner.raw().state).requests.clone()
     }
 
     /// Requests that found the lane held and had to wait for it.
     pub fn waited(&self) -> usize {
-        lane_locked(&self.lane).waits
+        lane_locked(&self.inner.raw().lane).waits
     }
 
     /// Chunks handed out, per exchange of the script.
     pub fn read(&self) -> Vec<usize> {
-        locked(&self.state).served.clone()
+        locked(&self.inner.raw().state).served.clone()
+    }
+}
+
+impl Fetch for ScriptedFetch {
+    fn fetch(
+        &self,
+        request: FetchRequest,
+        cancel: CancelToken,
+    ) -> BoxFuture<'_, Result<FetchResponse, FetchError>> {
+        self.inner.fetch(request, cancel)
     }
 }
 
@@ -277,7 +298,7 @@ impl Chunks for Body {
     }
 }
 
-impl Fetch for ScriptedFetch {
+impl RawFetch for Raw {
     fn fetch(
         &self,
         request: FetchRequest,
@@ -336,7 +357,7 @@ impl Fetch for ScriptedFetch {
 
 #[cfg(test)]
 mod tests {
-    use nyaaai_contract::fetch::Method;
+    use nyaaai_contract::fetch::{BUDGET_CEILINGS, Method};
     use nyaaai_contract::time::Clock;
 
     use super::*;
@@ -364,6 +385,7 @@ mod tests {
             url: url.to_owned(),
             headers: Vec::new(),
             body: None,
+            budget: BUDGET_CEILINGS,
         }
     }
 
@@ -396,7 +418,7 @@ mod tests {
             let wheel = Arc::new(TimerWheel::new(0));
             let played = Arc::new(ScriptedFetch::new(
                 vec![exchange(10, &[("a", 5)]), exchange(3, &[("b", 2)])],
-                Arc::clone(&wheel),
+                Arc::new(FakeScheduler::new(Arc::clone(&wheel))),
             ));
             let first = {
                 let played = Arc::clone(&played);
@@ -437,7 +459,7 @@ mod tests {
             let wheel = Arc::new(TimerWheel::new(0));
             let played = Arc::new(ScriptedFetch::new(
                 vec![exchange(1, &[("a", 0)]), exchange(1, &[("c", 0)])],
-                Arc::clone(&wheel),
+                Arc::new(FakeScheduler::new(Arc::clone(&wheel))),
             ));
             let holder = played
                 .fetch(request("a"), CancelToken::new())
@@ -468,7 +490,7 @@ mod tests {
             let wheel = Arc::new(TimerWheel::new(0));
             let played = Arc::new(ScriptedFetch::new(
                 vec![exchange(0, &[("a", 0)]), exchange(0, &[("c", 0)])],
-                Arc::clone(&wheel),
+                Arc::new(FakeScheduler::new(Arc::clone(&wheel))),
             ));
             let shared = CancelToken::new();
             let holder = played
@@ -505,7 +527,7 @@ mod tests {
             let wheel = Arc::new(TimerWheel::new(0));
             let played = Arc::new(ScriptedFetch::new(
                 vec![exchange(0, &[("a", 0), ("b", 0)]), exchange(0, &[("c", 0)])],
-                Arc::clone(&wheel),
+                Arc::new(FakeScheduler::new(Arc::clone(&wheel))),
             ));
             let mut holder = played
                 .fetch(request("a"), CancelToken::new())
@@ -534,7 +556,8 @@ mod tests {
     fn a_request_with_the_lane_free_is_seen_with_an_ended_token() {
         runtime().block_on(async {
             let wheel = Arc::new(TimerWheel::new(0));
-            let played = ScriptedFetch::new(vec![exchange(0, &[])], wheel);
+            let played =
+                ScriptedFetch::new(vec![exchange(0, &[])], Arc::new(FakeScheduler::new(wheel)));
             let ended = CancelToken::new();
             ended.cancel();
             let answer = played.fetch(request("a"), ended).await.map(|_| ());

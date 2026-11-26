@@ -7,6 +7,7 @@ use std::sync::{Arc, Mutex, MutexGuard};
 use std::task::{Context, Poll, Waker};
 
 use nyaaai_contract::cancel::CancelToken;
+use nyaaai_contract::fetch::{BudgetName, Budgets, Span, span};
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::json::{Object, Value};
 use nyaaai_contract::shapes::step::NormalizedUsage;
@@ -21,9 +22,9 @@ use crate::kinds::readers::{
     boolean_field, field_of, fields_of, number_field, object_field, text_field,
 };
 
-/// Reads a generation through its serving entry's transport, never another entry's key; should end on its token; a failure or panic is `Err`.
+/// Reads a generation through its serving entry's transport, never another entry's key; should end on its span; a failure or panic is `Err`.
 pub type ReadStats = Arc<
-    dyn Fn(Option<String>, String, CancelToken) -> BoxFuture<'static, Result<Value, String>>
+    dyn Fn(Option<String>, String, Arc<Span>) -> BoxFuture<'static, Result<Value, String>>
         + Send
         + Sync,
 >;
@@ -36,6 +37,8 @@ pub struct StatsQueueDeps {
     /// Where stats are written, and where unfilled records are listed.
     pub usage: Arc<dyn UsageSink>,
     pub read: ReadStats,
+    /// `stats` bounds reads and asks; default the presets.
+    pub budgets: Option<Budgets>,
 }
 
 /// A record whose stats are still to be read.
@@ -68,9 +71,6 @@ const SPACING_MS: i64 = 250;
 
 /// Queue limit.
 const MAX_WAITING: usize = 500;
-
-/// Bounds each read.
-const READ_MS: i64 = 10_000;
 
 /// How far back `restore` looks for records without stats.
 pub const UNFILLED_MS: i64 = 2 * 60 * 60_000;
@@ -464,43 +464,47 @@ fn begin(shared: &Arc<Shared>) -> Option<WaitingRead> {
     each
 }
 
-/// A port's answer, or none on deadline, dispose or failure.
-async fn within<'a, T>(
-    shared: &Shared,
-    call: impl FnOnce(CancelToken) -> BoxFuture<'a, T>,
-) -> Option<T> {
-    let limit = deadline(&*shared.d.scheduler, READ_MS, &shared.stop);
-    let asked = catch_unwind(AssertUnwindSafe(|| call(limit.token().clone())));
-    let answer = match asked {
+/// A port's answer, or none at the window's end, dispose or failure.
+async fn within<'a, T>(limit: &CancelToken, call: impl FnOnce() -> BoxFuture<'a, T>) -> Option<T> {
+    match catch_unwind(AssertUnwindSafe(call)) {
         Ok(asked) => {
             // The answer comes after a turn, as a port's does.
             Turn(false).await;
-            limit
-                .token()
-                .run_until(Caught(Box::pin(asked)))
-                .await
-                .flatten()
+            limit.run_until(Caught(Box::pin(asked))).await.flatten()
         }
         Err(_) => None,
-    };
-    limit.clear();
-    answer
+    }
 }
 
 /// Reads or reschedules.
 async fn finish(shared: Arc<Shared>, mut each: WaitingRead) {
+    let scheduler = &shared.d.scheduler;
+    let budget = shared
+        .d
+        .budgets
+        .clone()
+        .unwrap_or_default()
+        .get(BudgetName::Stats)
+        .clone();
+    // The ask is a host port's wait, not an exchange.
+    let asked = deadline(&**scheduler, budget.total_ms as i64, &shared.stop);
     // A failed ask reads the record.
-    let filled = within(&shared, |_| shared.d.usage.filled(&each.id, each.at)).await == Some(true);
+    let filled =
+        within(asked.token(), || shared.d.usage.filled(&each.id, each.at)).await == Some(true);
+    asked.clear();
     let disposed = shared.locked().disposed;
     let body = if filled || disposed {
         None
     } else {
+        let reading = Arc::new(span(scheduler, &budget, Some(&shared.stop)));
         let path = format!("/generation?id={}", each.generation_id);
-        within(&shared, |token| {
-            (shared.d.read)(each.entry.clone(), path, token)
+        let read = within(reading.token(), || {
+            (shared.d.read)(each.entry.clone(), path, Arc::clone(&reading))
         })
         .await
-        .and_then(Result::ok)
+        .and_then(Result::ok);
+        reading.clear();
+        read
     };
     let mut spacing = SPACING_MS;
     let stop = {
@@ -595,6 +599,7 @@ mod tests {
                 reads.fetch_add(1, Ordering::SeqCst);
                 Box::pin(async { Err("no stats".to_owned()) })
             }),
+            budgets: None,
         }
     }
 

@@ -391,7 +391,7 @@ export const browseCases: CaseSource[] = [
 		exchanges: [...PAIR, failing(404)],
 		steps: [{ kind: "detail", id: "lab/glm" }],
 	}),
-	browser("browser-detail-has-no-deadline-of-its-own", {
+	browser("browser-detail-ends-at-its-span", {
 		exchanges: [...PAIR, { ...DETAIL_BODY, headMs: 60_000 }],
 		steps: [{ kind: "detail", id: "lab/glm" }],
 	}),

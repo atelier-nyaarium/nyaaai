@@ -339,7 +339,7 @@ async fn play(input: StatsRunInput, net: super::catalog::Net) -> Outcome<StatsRu
                 live: Arc::clone(&live),
             }),
             usage,
-            read: Arc::new(move |entry, path, cancel| {
+            read: Arc::new(move |entry, path, clock| {
                 let transport = Arc::clone(&transport);
                 let wheel = Arc::clone(&wheel);
                 let lines = Arc::clone(&lines);
@@ -373,7 +373,7 @@ async fn play(input: StatsRunInput, net: super::catalog::Net) -> Outcome<StatsRu
                         script.parked.send_modify(|count| *count += 1);
                         return wait.await.map_err(|_| "the read was dropped".to_owned());
                     }
-                    let answer = transport.get_json(&path, &cancel, &KeyAuth::Stored).await;
+                    let answer = transport.get_json(&path, &clock, &KeyAuth::Stored).await;
                     locked(&lines).push(StatsRunResultStepsItemReadsItem {
                         at_ms,
                         ended_ms: wheel.now_ms(),
@@ -384,6 +384,7 @@ async fn play(input: StatsRunInput, net: super::catalog::Net) -> Outcome<StatsRu
                     answer.map_err(|error| error.to_string())
                 })
             }),
+            budgets: None,
         })
     };
     let times = |live: &Mutex<Vec<Live>>, script: &Script, target: i64| -> Vec<i64> {

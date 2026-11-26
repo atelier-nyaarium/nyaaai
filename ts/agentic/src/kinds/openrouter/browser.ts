@@ -1,19 +1,14 @@
 // OpenRouter model browser and tester.
 
+import { BUDGETS, type Budgets, span } from "@nyaaai/contract/fetch";
 import { asciiLower, encodePathSegment, trimText } from "@nyaaai/contract/text";
-import type { Clock, Scheduler } from "@nyaaai/contract/time";
-import { deadline } from "@nyaaai/contract/time";
+import type { Scheduler } from "@nyaaai/contract/time";
 import type { ChatRequest } from "../../chat/wire";
 import type { Codec } from "../../codec";
 import type { Browser, Pins, Tester } from "../../provider/kind";
 import type { Transport } from "../../transport";
 import { browseModels, parseProviders } from "./browse";
 import type { ModelCatalog } from "./catalog";
-
-////////////////////////////////
-//  Constants
-
-const DETAIL_MS = 30_000;
 
 ////////////////////////////////
 //  Functions & Helpers
@@ -34,20 +29,37 @@ export function endpointsPath(id: string): `/${string}` {
 	return `/models/${id.split("/").map(segmentOf).join("/")}/endpoints`;
 }
 
+/** An endpoints read under a span from `detail`. */
+async function endpointsOf(
+	transport: Pick<Transport, "getJson">,
+	scheduler: Scheduler,
+	budgets: Budgets,
+	id: string,
+	signal: AbortSignal,
+): Promise<unknown> {
+	const clock = span(scheduler, budgets.detail, signal);
+	try {
+		return await transport.getJson(endpointsPath(id), clock, "none");
+	} finally {
+		clock.clear();
+	}
+}
+
 /** Catalog and provider endpoints. */
 export function openRouterBrowser(
 	catalog: Pick<ModelCatalog, "listing">,
 	transport: Pick<Transport, "getJson">,
-	clock: Clock,
+	scheduler: Scheduler,
+	budgets: Budgets = BUDGETS,
 ): Browser {
 	return {
 		list: async (fresh) => {
 			const listing = await catalog.listing(undefined, fresh);
-			return listing === undefined ? undefined : browseModels(listing, clock.nowMs());
+			return listing === undefined ? undefined : browseModels(listing, scheduler.nowMs());
 		},
 		detail: async (id, signal) => {
 			const listing = await catalog.listing(signal);
-			const raw = await transport.getJson(endpointsPath(id), signal, "none");
+			const raw = await endpointsOf(transport, scheduler, budgets, id, signal);
 			const hosts = parseProviders(raw, listing?.endpoints.get(id) ?? []);
 			return hosts === undefined ? undefined : { hosts };
 		},
@@ -58,6 +70,7 @@ export function openRouterTester(
 	catalog: Pick<ModelCatalog, "entry" | "viewFor">,
 	transport: Pick<Transport, "getJson">,
 	scheduler: Scheduler,
+	budgets: Budgets = BUDGETS,
 ): Tester {
 	return {
 		listed: async (id, signal) => {
@@ -69,24 +82,18 @@ export function openRouterTester(
 			};
 		},
 		view: (row, use, signal) => catalog.viewFor(row, use, signal),
-		pins: () => pinsOf(transport, scheduler),
+		pins: () => pinsOf(transport, scheduler, budgets),
 	};
 }
 
 /** Pin and record tests. */
-function pinsOf(transport: Pick<Transport, "getJson">, scheduler: Scheduler): Pins {
+function pinsOf(transport: Pick<Transport, "getJson">, scheduler: Scheduler, budgets: Budgets): Pins {
 	let hosts: string[] = [];
 	let step = 0;
 	let sent: ChatRequest[] = [];
 	return {
 		hop: async (id, view, signal) => {
-			const limit = deadline(scheduler, DETAIL_MS, signal);
-			let raw: unknown;
-			try {
-				raw = await transport.getJson(endpointsPath(id), limit.signal, "none");
-			} finally {
-				limit.clear();
-			}
+			const raw = await endpointsOf(transport, scheduler, budgets, id, signal);
 			const serving = parseProviders(raw, []) ?? [];
 			const zdr = new Set(view.hosts.map(slugOf));
 			const both = [...new Set(serving.map((provider) => slugOf(provider.tag)))].filter(

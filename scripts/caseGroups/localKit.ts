@@ -104,8 +104,9 @@ function exchangeOf(held: z.infer<typeof NetExchange>): ScriptedExchange {
 /** A kind's deps over a scripted network on a wheel. */
 export function networkOf(startMs: number, exchanges: readonly z.infer<typeof NetExchange>[]) {
 	const wheel = new TimerWheel(startMs);
-	const played = scriptedFetch(exchanges.map(exchangeOf), wheel);
-	const scheduler: Scheduler = fakeScheduler(wheel);
+	const fake = fakeScheduler(wheel);
+	const played = scriptedFetch(exchanges.map(exchangeOf), fake);
+	const scheduler: Scheduler = fake;
 	const deps: KindDeps = { fetch: played.fetch, scheduler, log: () => {}, userAgent: USER_AGENT };
 	return { wheel, played, scheduler, deps };
 }

@@ -8,7 +8,7 @@ use std::sync::Arc;
 use nyaaai_contract::base64::base64_decode;
 use nyaaai_contract::shape::Shape;
 
-use crate::scheduler::TimerWheel;
+use crate::scheduler::FakeScheduler;
 use crate::scripted_fetch::{ScriptedChunk, ScriptedEnd, ScriptedExchange, ScriptedFetch};
 use crate::trace_shapes::Trace;
 
@@ -18,8 +18,8 @@ pub fn read_trace(file: &Path) -> io::Result<Trace> {
         .map_err(|refused| io::Error::other(format!("{} is no trace: {refused}", file.display())))
 }
 
-/// Plays the exchanges in order on `wheel`, keeping chunk edges. Nothing waits.
-pub fn replay_fetch(trace: &Trace, wheel: Arc<TimerWheel>) -> io::Result<ScriptedFetch> {
+/// Plays the exchanges in order on the scheduler's wheel, budgeted, keeping chunk edges. Nothing waits.
+pub fn replay_fetch(trace: &Trace, scheduler: Arc<FakeScheduler>) -> io::Result<ScriptedFetch> {
     let exchanges = trace
         .exchanges
         .iter()
@@ -47,5 +47,5 @@ pub fn replay_fetch(trace: &Trace, wheel: Arc<TimerWheel>) -> io::Result<Scripte
             })
         })
         .collect::<io::Result<Vec<_>>>()?;
-    Ok(ScriptedFetch::new(exchanges, wheel))
+    Ok(ScriptedFetch::new(exchanges, scheduler))
 }

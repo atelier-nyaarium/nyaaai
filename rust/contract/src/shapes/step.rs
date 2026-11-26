@@ -1250,7 +1250,9 @@ impl Shape for Failure {
         let object = shape::object(value, at)?;
         let category = shape::required(object, "category", at, FailureCategory::decode_at)?;
         let status = shape::required(object, "status", at, FailureStatus::decode_at)?;
-        let retry_after_ms = shape::optional(object, "retryAfterMs", at, shape::integer)?;
+        let retry_after_ms = shape::optional(object, "retryAfterMs", at, |value, at| {
+            shape::integer(value, at).and_then(|held| shape::at_most(held, 2678400000, at))
+        })?;
         let resets_at = shape::optional(object, "resetsAt", at, shape::integer)?;
         let message = shape::required(object, "message", at, shape::text)?;
         let reasons = shape::optional(object, "reasons", at, |value, at| {
@@ -1651,6 +1653,47 @@ pub fn encode_header_list(held: &HeaderList) -> Value {
     )
 }
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct Budget {
+    pub total_ms: u64,
+    pub idle_ms: u64,
+    pub max_bytes: u64,
+}
+
+impl Shape for Budget {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let total_ms = shape::required(object, "totalMs", at, |value, at| {
+            shape::natural(value, at)
+                .and_then(|held| shape::at_least(held, 1, at))
+                .and_then(|held| shape::at_most(held, 86400000, at))
+        })?;
+        let idle_ms = shape::required(object, "idleMs", at, |value, at| {
+            shape::natural(value, at)
+                .and_then(|held| shape::at_least(held, 1, at))
+                .and_then(|held| shape::at_most(held, 1800000, at))
+        })?;
+        let max_bytes = shape::required(object, "maxBytes", at, |value, at| {
+            shape::natural(value, at)
+                .and_then(|held| shape::at_least(held, 1, at))
+                .and_then(|held| shape::at_most(held, 1073741824, at))
+        })?;
+        Ok(Self {
+            total_ms,
+            idle_ms,
+            max_bytes,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("totalMs", Value::Number(self.total_ms as f64));
+        object.insert("idleMs", Value::Number(self.idle_ms as f64));
+        object.insert("maxBytes", Value::Number(self.max_bytes as f64));
+        Value::Object(object)
+    }
+}
+
 /// Decodes then encodes a named shape.
 pub fn normalize(shape: &str, value: &Value) -> Option<Result<Value, Refused>> {
     let at = &mut Path::new();
@@ -1677,6 +1720,7 @@ pub fn normalize(shape: &str, value: &Value) -> Option<Result<Value, Refused>> {
         "Encoded" => Encoded::decode_at(value, at).map(|held| held.encode()),
         "SseItem" => SseItem::decode_at(value, at).map(|held| held.encode()),
         "HeaderList" => decode_header_list(value, at).map(|held| encode_header_list(&held)),
+        "Budget" => Budget::decode_at(value, at).map(|held| held.encode()),
         _ => return None,
     })
 }

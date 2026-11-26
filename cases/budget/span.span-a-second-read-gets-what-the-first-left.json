@@ -1,0 +1,91 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "budget.span",
+	"name": "span-a-second-read-gets-what-the-first-left",
+	"input": {
+		"budget": {
+			"totalMs": 10000,
+			"idleMs": 10000,
+			"maxBytes": 1000
+		},
+		"exchanges": [
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"application/json"
+					]
+				],
+				"chunks": [
+					{
+						"kind": "text",
+						"text": "{\"a\":1}"
+					}
+				],
+				"headMs": 4000
+			},
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"application/json"
+					]
+				],
+				"chunks": [
+					{
+						"kind": "text",
+						"text": "{\"b\":2}"
+					}
+				]
+			}
+		],
+		"steps": [
+			{
+				"kind": "read",
+				"path": "/one"
+			},
+			{
+				"kind": "read",
+				"path": "/two"
+			}
+		]
+	},
+	"expected": {
+		"reads": [
+			{
+				"startMs": 0,
+				"endMs": 4000,
+				"sent": {
+					"totalMs": 10000,
+					"idleMs": 10000,
+					"maxBytes": 1000
+				},
+				"answer": {
+					"a": 1
+				},
+				"failure": null,
+				"thrown": null
+			},
+			{
+				"startMs": 4000,
+				"endMs": 4000,
+				"sent": {
+					"totalMs": 6000,
+					"idleMs": 6000,
+					"maxBytes": 1000
+				},
+				"answer": {
+					"b": 2
+				},
+				"failure": null,
+				"thrown": null
+			}
+		],
+		"ended": null,
+		"requests": 2,
+		"waiting": []
+	}
+}

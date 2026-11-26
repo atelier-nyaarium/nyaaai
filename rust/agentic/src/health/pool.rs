@@ -6,6 +6,7 @@ use nyaaai_contract::shapes::health::{
     PoolVerdict, Ticket,
 };
 use nyaaai_contract::shapes::provider::SkipReason;
+use nyaaai_contract::time::MAX_SERVER_WAIT_MS;
 
 pub fn clear() -> PoolState {
     PoolState::Clear(PoolStateClear {})
@@ -16,9 +17,6 @@ pub const BALANCE_COOL_MS: f64 = 5.0 * 60.0 * 60_000.0;
 
 /// ETA floor before halving.
 pub const PROBE_FLOOR_MS: f64 = 10.0 * 60_000.0;
-
-/// A window ends within a month of the reply.
-pub const MAX_WINDOW_MS: f64 = 31.0 * 24.0 * 60.0 * 60_000.0;
 
 /// Pool billing sources.
 pub const ALLOWANCE_SOURCES: [&str; 2] = ["go", "go-plus"];
@@ -79,7 +77,7 @@ pub fn step(state: &PoolState, event: &PoolEvent, now_ms: f64, pause_ms: f64) ->
             }
         }
         PoolEvent::Refused(held) => {
-            let farthest = now_ms + MAX_WINDOW_MS;
+            let farthest = now_ms + MAX_SERVER_WAIT_MS as f64;
             let waited = held
                 .retry_after_ms
                 .map(|after| (now_ms + after).min(farthest));

@@ -1,6 +1,14 @@
 // A codec's calls over the Fetch port.
 
-import type { Fetch, FetchResponse } from "@nyaaai/contract/fetch";
+import {
+	BUDGETS,
+	BudgetExceeded,
+	type Budgets,
+	type Fetch,
+	type FetchResponse,
+	type Span,
+	span,
+} from "@nyaaai/contract/fetch";
 import { headerOf } from "@nyaaai/contract/headers";
 import { jsString, parseJson, stringifyJson } from "@nyaaai/contract/json";
 import { scrubSecret } from "@nyaaai/contract/secret";
@@ -15,7 +23,7 @@ import type {
 	StepResult,
 } from "@nyaaai/contract/shapes/step";
 import { asciiLower, trimText, Utf8Decoder } from "@nyaaai/contract/text";
-import { parseRetryAfter, type Scheduler } from "@nyaaai/contract/time";
+import { MAX_SERVER_WAIT_MS, parseRetryAfter, type Scheduler } from "@nyaaai/contract/time";
 import type { Codec } from "./codec";
 import { failed, ProviderError } from "./failure";
 import { SseDecoder } from "./sse";
@@ -29,7 +37,7 @@ export interface KeySource {
 
 export interface TransportDeps {
 	fetch: Fetch;
-	/** Idle timer; dates `Retry-After`. */
+	/** Spans; dates `Retry-After`. */
 	scheduler: Scheduler;
 	key: KeySource;
 	/** Status, generation, host. */
@@ -43,9 +51,8 @@ export interface TransportDeps {
 	errors: Pick<Codec, "failure">;
 	/** `optional`: key auth only when a key exists. */
 	auth?: "bearer" | "none" | "optional";
-	idleMs?: number;
-	/** Cap on one reply, or on a stream's bytes between items. Default 16 MiB. */
-	maxBytes?: number;
+	/** Default `BUDGETS`; `stream` and `reply` bound each call. */
+	budgets?: Budgets | undefined;
 }
 
 export type KeyAuth = "none" | "stored" | { key: string };
@@ -59,11 +66,10 @@ interface Seen {
 ////////////////////////////////
 //  Constants
 
-const IDLE_MS = 120_000;
+/** Cuts what the budget let through. */
 const ERROR_BODY_BYTES = 64 * 1024;
 /** The names a codec cannot set. */
 const OWNED_HEADERS = ["content-type", "accept", "authorization", "user-agent"];
-const REPLY_BYTES = 16 * 1024 * 1024;
 const TOKEN_SYMBOLS = "!#$%&'*+-.^_`|~";
 
 ////////////////////////////////
@@ -71,13 +77,11 @@ const TOKEN_SYMBOLS = "!#$%&'*+-.^_`|~";
 
 /** Scrubbed codec transport. */
 export class Transport {
-	private readonly idleMs: number;
-	private readonly maxBytes: number;
+	private readonly budgets: Budgets;
 	private readonly settled = new Set<(model: string) => void>();
 
 	constructor(private readonly d: TransportDeps) {
-		this.idleMs = d.idleMs ?? IDLE_MS;
-		this.maxBytes = d.maxBytes ?? REPLY_BYTES;
+		this.budgets = d.budgets ?? BUDGETS;
 	}
 
 	/** After each unaborted reply. */
@@ -86,90 +90,98 @@ export class Transport {
 		return () => this.settled.delete(listener);
 	}
 
-	/** A generator left unfinished keeps its idle timer until closed. */
+	/** One `stream` span per call, held until closed. */
 	async *stream(codec: Codec, request: CanonicalRequest, signal: AbortSignal): AsyncGenerator<StepEvent> {
 		if (signal.aborted) throw signal.reason;
 		const encoded = encodedOf(codec, request, "stream");
 		this.checkHeaders(encoded);
-		const key = await this.requestKey();
-		if (signal.aborted) throw signal.reason;
-		const cut = new Cut(signal, this.d.scheduler, this.idleMs);
-		const seen: Seen = {};
+		const clock = span(this.d.scheduler, this.budgets.stream, signal);
 		try {
-			const response = await this.post(codec, encoded, key, cut.signal, "text/event-stream", seen);
-			cut.arm();
-			const body = response.chunks[Symbol.asyncIterator]();
+			const key = await this.requestKey();
+			if (signal.aborted) throw signal.reason;
+			const seen: Seen = {};
 			try {
-				const open: AsyncIterable<Uint8Array> = { [Symbol.asyncIterator]: () => body };
-				for await (const event of codec.stream(this.items(open, cut))) {
-					if (event.kind !== "serving") {
-						yield event;
-						continue;
+				const response = await this.post(codec, encoded, key, clock, "text/event-stream", seen);
+				const body = response.chunks[Symbol.asyncIterator]();
+				try {
+					const open: AsyncIterable<Uint8Array> = { [Symbol.asyncIterator]: () => body };
+					for await (const event of codec.stream(items(open))) {
+						if (event.kind !== "serving") {
+							yield event;
+							continue;
+						}
+						const serving = scrubbedServing(event.serving, key);
+						seen.generation ??= serving.generationId;
+						seen.host ??= serving.host;
+						yield { kind: "serving", serving };
 					}
-					const serving = scrubbedServing(event.serving, key);
-					seen.generation ??= serving.generationId;
-					seen.host ??= serving.host;
-					yield { kind: "serving", serving };
+				} finally {
+					// A body the codec never pulled is still cancelled.
+					await body.return?.();
 				}
+			} catch (error) {
+				if (!signal.aborted) this.notify(request.model);
+				throw this.mapped(error, signal, key);
 			} finally {
-				// A body the codec never pulled is still cancelled.
-				await body.return?.();
+				this.log(seen);
 			}
-		} catch (error) {
-			if (!signal.aborted) this.notify(request.model);
-			throw mapped(error, signal, cut, key, this.d.label);
+			this.notify(request.model);
 		} finally {
-			cut.close();
-			this.log(seen);
+			clock.clear();
 		}
-		this.notify(request.model);
 	}
 
+	/** One `reply` span per call. */
 	async complete(codec: Codec, request: CanonicalRequest, signal: AbortSignal): Promise<StepResult> {
 		if (signal.aborted) throw signal.reason;
 		const encoded = encodedOf(codec, request, "complete");
 		this.checkHeaders(encoded);
-		const key = await this.requestKey();
-		if (signal.aborted) throw signal.reason;
-		const cut = new Cut(signal, this.d.scheduler, this.idleMs);
-		const seen: Seen = {};
-		let result: StepResult;
+		const clock = span(this.d.scheduler, this.budgets.reply, signal);
 		try {
-			const response = await this.post(codec, encoded, key, cut.signal, "application/json", seen);
-			cut.arm();
-			const body = parseJson(await readAll(response.chunks, this.maxBytes));
-			if (body === undefined) throw failed("stream", "The reply was not JSON.");
-			const decoded = codec.complete(body);
-			const serving = scrubbedServing(decoded.serving, key);
-			seen.generation = serving.generationId;
-			seen.host = serving.host;
-			result = { ...decoded, serving };
-		} catch (error) {
-			if (!signal.aborted) this.notify(request.model);
-			throw mapped(error, signal, cut, key, this.d.label);
+			const key = await this.requestKey();
+			if (signal.aborted) throw signal.reason;
+			const seen: Seen = {};
+			let result: StepResult;
+			try {
+				const response = await this.post(codec, encoded, key, clock, "application/json", seen);
+				const body = parseJson(await readAll(response.chunks));
+				if (body === undefined) throw failed("stream", "The reply was not JSON.");
+				const decoded = codec.complete(body);
+				const serving = scrubbedServing(decoded.serving, key);
+				seen.generation = serving.generationId;
+				seen.host = serving.host;
+				result = { ...decoded, serving };
+			} catch (error) {
+				if (!signal.aborted) this.notify(request.model);
+				throw this.mapped(error, signal, key);
+			} finally {
+				this.log(seen);
+			}
+			this.notify(request.model);
+			return result;
 		} finally {
-			cut.close();
-			this.log(seen);
+			clock.clear();
 		}
-		this.notify(request.model);
-		return result;
 	}
 
-	async getJson(path: `/${string}`, signal: AbortSignal, auth: KeyAuth): Promise<unknown> {
-		return this.json("GET", path, undefined, signal, auth);
+	/** The span's owner clears it. */
+	async getJson(path: `/${string}`, clock: Span, auth: KeyAuth): Promise<unknown> {
+		return this.json("GET", path, undefined, clock, auth);
 	}
 
-	async postJson(path: `/${string}`, body: unknown, signal: AbortSignal, auth: KeyAuth): Promise<unknown> {
-		return this.json("POST", path, body, signal, auth);
+	async postJson(path: `/${string}`, body: unknown, clock: Span, auth: KeyAuth): Promise<unknown> {
+		return this.json("POST", path, body, clock, auth);
 	}
 
+	/** The key first, then the budget. */
 	private async json(
 		method: "GET" | "POST",
 		path: `/${string}`,
 		body: unknown,
-		signal: AbortSignal,
+		clock: Span,
 		auth: KeyAuth,
 	): Promise<unknown> {
+		const signal = clock.caller;
 		if (signal.aborted) throw signal.reason;
 		checkedHeaders([["User-Agent", this.d.userAgent]]);
 		const key = await this.keyFor(auth);
@@ -187,16 +199,31 @@ export class Transport {
 					url: `${this.d.baseUrl}${path}`,
 					headers,
 					...(body === undefined ? {} : { body: stringifyJson(body) }),
+					budget: clock.budget(),
 				},
 				signal,
 			);
 			if (!ok(response)) throw await this.failure(this.d.errors, response);
-			const answer = parseJson(await readAll(response.chunks, this.maxBytes));
+			const answer = parseJson(await readAll(response.chunks));
 			if (answer === undefined) throw failed("network", `${path} did not answer JSON.`);
 			return answer;
 		} catch (error) {
-			throw mapped(error, signal, undefined, key, this.d.label);
+			throw this.mapped(error, signal, key);
 		}
+	}
+
+	/** The one exit; the first cause stands. */
+	private mapped(error: unknown, signal: AbortSignal, key: string | undefined): unknown {
+		const { label } = this.d;
+		if (error instanceof BudgetExceeded) {
+			if (error.bound === "idle") return failed("idle", `${label} sent nothing for too long.`);
+			if (error.bound === "total") return failed("idle", `${label} did not finish in time.`);
+			return failed("network", `The reply is larger than ${error.limit} bytes.`);
+		}
+		if (signal.aborted) return signal.reason ?? error;
+		if (error instanceof ProviderError)
+			return new ProviderError(clamped(scrubbedFailure(error.failure, key), this.d.scheduler.nowMs()));
+		return failed("network", scrubbed(error instanceof Error ? error.message : jsString(error), key));
 	}
 
 	private notify(model: string): void {
@@ -207,22 +234,6 @@ export class Transport {
 				// A listener cannot change a call's outcome.
 			}
 		}
-	}
-
-	/** Re-arms the idle abort. */
-	private async *items(chunks: AsyncIterable<Uint8Array>, cut: Cut): AsyncGenerator<SseItem> {
-		const decoder = new SseDecoder();
-		let since = 0;
-		for await (const chunk of chunks) {
-			cut.arm();
-			const items = decoder.push(chunk);
-			// A comment is no event.
-			since = items.some((item) => item.kind !== "comment") ? 0 : since + chunk.byteLength;
-			if (since > this.maxBytes) throw failed("stream", `A stream event is larger than ${this.maxBytes} bytes.`);
-			yield* items;
-		}
-		cut.arm();
-		yield* decoder.end();
 	}
 
 	private requestKey(): Promise<string | undefined> {
@@ -251,7 +262,7 @@ export class Transport {
 		codec: Codec,
 		encoded: Encoded,
 		key: string | undefined,
-		signal: AbortSignal,
+		clock: Span,
 		accept: string,
 		seen: Seen,
 	): Promise<FetchResponse> {
@@ -267,8 +278,9 @@ export class Transport {
 					["User-Agent", this.d.userAgent],
 				],
 				body: stringifyJson(encoded.body),
+				budget: clock.budget(),
 			},
-			signal,
+			clock.caller,
 		);
 		seen.status = response.status;
 		if (!ok(response)) throw await this.failure(codec, response);
@@ -297,51 +309,14 @@ export class Transport {
 	}
 }
 
-/** The caller's signal and the idle abort, as one. */
-class Cut {
-	/** Whether the idle abort fired. */
-	idle = false;
-	private readonly controller = new AbortController();
-	private readonly stop: () => void;
-	private cancel: (() => void) | undefined;
-
-	constructor(
-		private readonly caller: AbortSignal,
-		private readonly scheduler: Scheduler,
-		private readonly ms: number,
-	) {
-		this.stop = () => this.controller.abort(caller.reason);
-		if (caller.aborted) this.stop();
-		else caller.addEventListener("abort", this.stop, { once: true });
-		this.arm();
-	}
-
-	get signal(): AbortSignal {
-		return this.controller.signal;
-	}
-
-	/** One timer, replaced at every call. */
-	arm(): void {
-		this.clear();
-		this.cancel = this.scheduler.schedule(this.ms, () => {
-			this.idle = true;
-			this.controller.abort();
-		});
-	}
-
-	clear(): void {
-		this.cancel?.();
-		this.cancel = undefined;
-	}
-
-	close(): void {
-		this.clear();
-		this.caller.removeEventListener("abort", this.stop);
-	}
-}
-
 ////////////////////////////////
 //  Functions & Helpers
+
+async function* items(chunks: AsyncIterable<Uint8Array>): AsyncGenerator<SseItem> {
+	const decoder = new SseDecoder();
+	for await (const chunk of chunks) yield* decoder.push(chunk);
+	yield* decoder.end();
+}
 
 /** Printable ASCII, excluding spaces. */
 export function isKeyShape(key: string): boolean {
@@ -409,16 +384,10 @@ function checkedHeaders(headers: ReadonlyArray<readonly [string, string]>): void
 	}
 }
 
-/** Fails past the cap. */
-async function readAll(chunks: AsyncIterable<Uint8Array>, cap: number): Promise<string> {
+async function readAll(chunks: AsyncIterable<Uint8Array>): Promise<string> {
 	const decoder = new Utf8Decoder();
 	let text = "";
-	let size = 0;
-	for await (const chunk of chunks) {
-		size += chunk.byteLength;
-		if (size > cap) throw failed("network", `The reply is larger than ${cap} bytes.`);
-		text += decoder.push(chunk);
-	}
+	for await (const chunk of chunks) text += decoder.push(chunk);
 	return text + decoder.end();
 }
 
@@ -459,15 +428,12 @@ function scrubbedFailure(failure: Failure, key: string | undefined): Failure {
 	};
 }
 
-function mapped(
-	error: unknown,
-	signal: AbortSignal,
-	cut: Cut | undefined,
-	key: string | undefined,
-	label: string,
-): unknown {
-	if (signal.aborted) return signal.reason ?? error;
-	if (error instanceof ProviderError) return new ProviderError(scrubbedFailure(error.failure, key));
-	if (cut?.idle) return failed("idle", `${label} sent nothing for too long.`);
-	return failed("network", scrubbed(error instanceof Error ? error.message : jsString(error), key));
+/** Caps a server's wait and reset. */
+function clamped(failure: Failure, nowMs: number): Failure {
+	const { retryAfterMs, resetsAt } = failure;
+	return {
+		...failure,
+		...(retryAfterMs === undefined ? {} : { retryAfterMs: Math.min(retryAfterMs, MAX_SERVER_WAIT_MS) }),
+		...(resetsAt === undefined ? {} : { resetsAt: Math.min(resetsAt, nowMs + MAX_SERVER_WAIT_MS) }),
+	};
 }

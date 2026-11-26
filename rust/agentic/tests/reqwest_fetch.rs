@@ -5,8 +5,16 @@ use std::time::Duration;
 
 use nyaaai_agentic::fetch::ReqwestFetch;
 use nyaaai_contract::cancel::CancelToken;
-use nyaaai_contract::fetch::{Fetch, FetchError, FetchRequest, FetchResponse, Method};
+use nyaaai_contract::fetch::{
+    BUDGET_CEILINGS, BudgetBound, Fetch, FetchError, FetchRequest, FetchResponse, Method,
+};
 use nyaaai_testkit::loopback::{Hold, Loopback, LoopbackExchange};
+
+/// On the running runtime's clock.
+fn reqwest_fetch() -> ReqwestFetch {
+    let scheduler = nyaaai_contract::time::SystemScheduler::new(tokio::runtime::Handle::current());
+    ReqwestFetch::new(std::sync::Arc::new(scheduler)).unwrap()
+}
 
 fn run<F: Future>(work: F) -> F::Output {
     tokio::runtime::Builder::new_current_thread()
@@ -41,6 +49,7 @@ fn post(url: String, body: &str) -> FetchRequest {
             ("X-Sent".to_owned(), "yes".to_owned()),
         ],
         body: Some(body.to_owned()),
+        budget: BUDGET_CEILINGS,
     }
 }
 
@@ -58,7 +67,7 @@ fn answers_status_headers_body_and_sends_its_request() {
         let server = Loopback::start(vec![played(201, &["data: one\n\n", "data: two\n\n"])])
             .await
             .unwrap();
-        let fetch = ReqwestFetch::new().unwrap();
+        let fetch = reqwest_fetch();
         let mut response = fetch
             .fetch(post(server.url("/v1/run"), "{\"a\":1}"), CancelToken::new())
             .await
@@ -102,12 +111,13 @@ fn answers_status_headers_body_and_sends_its_request() {
 fn a_get_sends_no_body() {
     run(async {
         let server = Loopback::start(vec![played(200, &["{}"])]).await.unwrap();
-        let fetch = ReqwestFetch::new().unwrap();
+        let fetch = reqwest_fetch();
         let request = FetchRequest {
             method: Method::Get,
             url: server.url("/models"),
             headers: Vec::new(),
             body: Some("ignored".to_owned()),
+            budget: BUDGET_CEILINGS,
         };
         let mut response = fetch.fetch(request, CancelToken::new()).await.unwrap();
         assert_eq!(drained(&mut response).await.unwrap(), b"{}");
@@ -129,7 +139,7 @@ fn a_cancel_before_the_head_ends_cancelled_and_closes() {
         let mut held = played(200, &[]);
         held.hold = Hold::BeforeHead;
         let server = std::sync::Arc::new(Loopback::start(vec![held]).await.unwrap());
-        let fetch = ReqwestFetch::new().unwrap();
+        let fetch = reqwest_fetch();
         let cancel = CancelToken::new();
         let later = cancel.clone();
         let watching = std::sync::Arc::clone(&server);
@@ -149,7 +159,7 @@ fn a_cancel_mid_body_ends_cancelled_and_closes() {
         let mut held = played(200, &["first"]);
         held.hold = Hold::AfterChunks;
         let server = Loopback::start(vec![held]).await.unwrap();
-        let fetch = ReqwestFetch::new().unwrap();
+        let fetch = reqwest_fetch();
         let cancel = CancelToken::new();
         let mut response = fetch
             .fetch(post(server.url("/"), "{}"), cancel.clone())
@@ -175,10 +185,49 @@ fn a_cancel_mid_body_ends_cancelled_and_closes() {
 }
 
 #[test]
+fn a_silent_body_ends_at_its_idle_bound_and_closes() {
+    run(async {
+        let mut held = played(200, &["first"]);
+        held.hold = Hold::AfterChunks;
+        let server = Loopback::start(vec![held.clone(), held]).await.unwrap();
+        let fetch = reqwest_fetch();
+        let mut request = post(server.url("/"), "{}");
+        request.budget.idle_ms = 50;
+        let mut response = fetch.fetch(request, CancelToken::new()).await.unwrap();
+        assert_eq!(
+            response.chunks.next().await.unwrap(),
+            Some(b"first".to_vec())
+        );
+        let outcome = response.chunks.next().await;
+        let Err(FetchError::Budget(exceeded)) = outcome else {
+            panic!("the idle bound should end the body");
+        };
+        assert_eq!((exceeded.bound, exceeded.limit), (BudgetBound::Idle, 50));
+        assert!(server.wait_closed(1).await);
+        // A caller's cancel ends a long silent wait at once.
+        let cancel = CancelToken::new();
+        let mut request = post(server.url("/"), "{}");
+        request.budget.idle_ms = 120_000;
+        let mut response = fetch.fetch(request, cancel.clone()).await.unwrap();
+        response.chunks.next().await.unwrap();
+        tokio::spawn(async move {
+            tokio::time::sleep(Duration::from_millis(50)).await;
+            cancel.cancel();
+        });
+        let began = std::time::Instant::now();
+        let outcome = response.chunks.next().await;
+        assert!(
+            matches!(outcome, Err(FetchError::Cancelled))
+                && began.elapsed() < Duration::from_secs(5)
+        );
+    });
+}
+
+#[test]
 fn a_cancelled_token_makes_no_request() {
     run(async {
         let server = Loopback::start(vec![played(200, &["x"])]).await.unwrap();
-        let fetch = ReqwestFetch::new().unwrap();
+        let fetch = reqwest_fetch();
         let cancel = CancelToken::new();
         cancel.cancel();
         let outcome = fetch.fetch(post(server.url("/"), "{}"), cancel).await;
@@ -196,7 +245,7 @@ fn a_refused_connection_fails() {
         };
         // The listener is gone with the server.
         tokio::time::sleep(Duration::from_millis(20)).await;
-        let fetch = ReqwestFetch::new().unwrap();
+        let fetch = reqwest_fetch();
         let outcome = fetch.fetch(post(url, "{}"), CancelToken::new()).await;
         assert!(matches!(outcome, Err(FetchError::Failed(_))));
     });
@@ -208,7 +257,7 @@ fn a_dropped_body_closes_its_connection() {
         let mut held = played(200, &["first"]);
         held.hold = Hold::AfterChunks;
         let server = Loopback::start(vec![held]).await.unwrap();
-        let fetch = ReqwestFetch::new().unwrap();
+        let fetch = reqwest_fetch();
         let mut response = fetch
             .fetch(post(server.url("/"), "{}"), CancelToken::new())
             .await
@@ -228,7 +277,7 @@ fn a_truncated_chunked_body_fails() {
         let mut held = played(200, &["ab"]);
         held.hold = Hold::Truncate;
         let server = Loopback::start(vec![held]).await.unwrap();
-        let fetch = ReqwestFetch::new().unwrap();
+        let fetch = reqwest_fetch();
         let mut response = fetch
             .fetch(post(server.url("/"), "{}"), CancelToken::new())
             .await
@@ -257,7 +306,7 @@ fn a_redirect_answers_its_status_and_is_not_followed() {
         let server = Loopback::start(vec![moved, played(200, &["x"])])
             .await
             .unwrap();
-        let fetch = ReqwestFetch::new().unwrap();
+        let fetch = reqwest_fetch();
         let mut response = fetch
             .fetch(post(server.url("/"), "{}"), CancelToken::new())
             .await
@@ -277,7 +326,7 @@ fn a_failed_send_holds_no_url() {
             server.url("/secret-path?token=abc")
         };
         tokio::time::sleep(Duration::from_millis(20)).await;
-        let fetch = ReqwestFetch::new().unwrap();
+        let fetch = reqwest_fetch();
         let Err(FetchError::Failed(text)) = fetch
             .fetch(post(url.clone(), "{}"), CancelToken::new())
             .await
@@ -294,7 +343,7 @@ fn a_failed_send_holds_no_url() {
 fn a_header_that_is_not_valid_is_refused_without_its_text() {
     run(async {
         let server = Loopback::start(vec![played(200, &["{}"])]).await.unwrap();
-        let fetch = ReqwestFetch::new().unwrap();
+        let fetch = reqwest_fetch();
         let mut request = post(server.url("/"), "{}");
         request
             .headers
@@ -353,7 +402,7 @@ fn the_transport_runs_over_the_adapter() {
         let logged = Arc::new(std::sync::Mutex::new(Vec::<String>::new()));
         let sink = Arc::clone(&logged);
         let transport = Transport::new(TransportDeps {
-            fetch: Arc::new(ReqwestFetch::new().unwrap()),
+            fetch: Arc::new(reqwest_fetch()),
             scheduler: Arc::new(SystemScheduler::new(tokio::runtime::Handle::current())),
             key: Arc::new(static_key(KEY)),
             log: Box::new(move |line| sink.lock().unwrap().push(line.to_owned())),
@@ -362,8 +411,7 @@ fn the_transport_runs_over_the_adapter() {
             user_agent: "test/1".to_owned(),
             errors: Arc::new(OPENROUTER_CHAT),
             auth: Auth::Bearer,
-            idle_ms: None,
-            max_bytes: None,
+            budgets: None,
         });
         let request = request_of();
         let cancel = CancelToken::new();

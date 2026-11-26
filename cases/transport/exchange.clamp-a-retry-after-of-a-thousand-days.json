@@ -2,7 +2,7 @@
 	"format": 2,
 	"type": "function",
 	"kind": "transport.exchange",
-	"name": "idle-edge-a-chunk-at-exactly-the-limit-is-idle",
+	"name": "clamp-a-retry-after-of-a-thousand-days",
 	"input": {
 		"codec": {
 			"family": "chat-completions",
@@ -19,28 +19,21 @@
 			"kind": "inline",
 			"exchanges": [
 				{
-					"status": 200,
+					"status": 429,
 					"headers": [
 						[
 							"content-type",
-							"text/event-stream"
+							"application/json"
+						],
+						[
+							"retry-after",
+							"86400000"
 						]
 					],
 					"chunks": [
 						{
 							"kind": "text",
-							"text": "data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Hi\"}}]}\n\n",
-							"delayMs": 30
-						},
-						{
-							"kind": "text",
-							"text": "data: {\"id\":\"gen-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}]}\n\n",
-							"delayMs": 30
-						},
-						{
-							"kind": "text",
-							"text": "data: [DONE]\n\n",
-							"delayMs": 30
+							"text": "{\"error\":{\"code\":429,\"message\":\"Slow down\"}}"
 						}
 					]
 				}
@@ -65,8 +58,7 @@
 					"zdrOnly": true
 				}
 			}
-		],
-		"idleMs": 30
+		]
 	},
 	"expected": {
 		"calls": [
@@ -75,13 +67,14 @@
 				"result": null,
 				"answer": null,
 				"failure": {
-					"category": "idle",
-					"status": "idle",
-					"message": "OpenRouter sent nothing for too long."
+					"category": "rateLimited",
+					"status": 429,
+					"retryAfterMs": 2678400000,
+					"message": "Slow down"
 				},
 				"thrown": null,
 				"aborted": false,
-				"nowMs": 1800000000030
+				"nowMs": 1800000000000
 			}
 		],
 		"requests": [
@@ -110,14 +103,14 @@
 			}
 		],
 		"log": [
-			"OpenRouter 200 - -"
+			"OpenRouter 429 - -"
 		],
 		"settled": [
 			"openai/gpt-6-luna"
 		],
 		"keyReads": 1,
 		"read": [
-			0
+			1
 		],
 		"waiting": []
 	}

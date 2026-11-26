@@ -337,7 +337,7 @@ export const lifecycle = caseGroup("lifecycle", {
 						if (slot?.state === "sleeping") slot.state = "running";
 					},
 				});
-				const played = scriptedFetch(input.exchanges.map(exchangeOf), wheel);
+				const played = scriptedFetch(input.exchanges.map(exchangeOf), scheduler);
 
 				const scriptedKeys = scriptedEntryKeys(input.keys as Record<string, KeyAnswer>);
 				const list = scriptedProviderList(input.entries);

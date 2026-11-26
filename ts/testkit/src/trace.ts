@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import { base64Decode } from "@nyaaai/contract/base64";
 import { decodeText, shapeSet } from "@nyaaai/contract/shape";
 import { z } from "zod";
-import { TimerWheel } from "./scheduler";
+import { type FakeScheduler, fakeScheduler } from "./scheduler";
 import { type ScriptedExchange, type ScriptedFetch, scriptedFetch } from "./scriptedFetch";
 
 ////////////////////////////////
@@ -36,8 +36,8 @@ export async function readTrace(file: string): Promise<Trace> {
 	return held.value;
 }
 
-/** Plays the exchanges in order on `wheel`, keeping chunk edges. Nothing waits. */
-export function replayFetch(trace: Trace, wheel: TimerWheel = new TimerWheel()): ScriptedFetch {
+/** Plays the exchanges in order on the scheduler's wheel, keeping chunk edges. Nothing waits. */
+export function replayFetch(trace: Trace, scheduler: FakeScheduler = fakeScheduler()): ScriptedFetch {
 	const exchanges = trace.exchanges.map(
 		(exchange): ScriptedExchange => ({
 			status: exchange.status,
@@ -49,5 +49,5 @@ export function replayFetch(trace: Trace, wheel: TimerWheel = new TimerWheel()):
 			}),
 		}),
 	);
-	return scriptedFetch(exchanges, wheel);
+	return scriptedFetch(exchanges, scheduler);
 }

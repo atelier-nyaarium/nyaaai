@@ -87,12 +87,12 @@ export function loadedContexts(models: readonly ListedModel[]): Map<string, numb
 export function server(transport: LocalTransport, maxListed = MAX_LISTED): LocalServer {
 	return {
 		live: true,
-		models: async (_known, signal) => {
-			const models = chatModels(await transport.getJson(LIST, signal, "none"));
+		models: async (_known, span) => {
+			const models = chatModels(await transport.getJson(LIST, span, "none"));
 			if (models === undefined) throw new Error("The model list did not parse.");
 			return firstDistinct(models, (model) => model.key, maxListed).map(modelOf);
 		},
-		loaded: async (_tag, signal) => loadedContexts(chatModels(await transport.getJson(LIST, signal, "none")) ?? []),
+		loaded: async (_tag, span) => loadedContexts(chatModels(await transport.getJson(LIST, span, "none")) ?? []),
 	};
 }
 
@@ -103,6 +103,6 @@ export const LMSTUDIO = localKind({
 	kind: "lmstudio",
 	label: "LM Studio",
 	url: "http://127.0.0.1:1234",
-	reach: async (transport, signal) => chatModels(await transport.getJson(LIST, signal, "none"))?.length,
+	reach: async (transport, span) => chatModels(await transport.getJson(LIST, span, "none"))?.length,
 	server,
 });

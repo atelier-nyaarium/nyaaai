@@ -1,5 +1,6 @@
 // A provider kind for a server named by URL.
 
+import type { Span } from "@nyaaai/contract/fetch";
 import { Pattern } from "@nyaaai/contract/pattern";
 import type { EntryFields, KeyState, ProviderKindName } from "@nyaaai/contract/shapes/provider";
 import { parseUrl } from "@nyaaai/contract/url";
@@ -31,7 +32,7 @@ export interface LocalKindSpec extends LocalDialect {
 	/** Defaults to `termsOf`, over the entry's URL or this kind's own. */
 	terms?(entry: EntryFields): Terms;
 	/** Model count; undefined when foreign. */
-	reach(transport: LocalTransport, signal: AbortSignal): Promise<number | undefined>;
+	reach(transport: LocalTransport, span: Span): Promise<number | undefined>;
 	server(transport: LocalTransport): LocalServer;
 }
 
@@ -102,13 +103,13 @@ export function localKind(spec: LocalKindSpec): ProviderKind {
 			if (state.kind !== "ok" || state.models === undefined) return url;
 			return `${url}${DOT}${state.models} ${state.models === 1 ? "model" : "models"}`;
 		},
-		check: async (entry, secret, deps, signal) => {
+		check: async (entry, secret, deps, span) => {
 			try {
 				const key = secret === undefined ? NO_KEY : { get: async () => secret };
-				const models = await spec.reach(self.transport(entry, key, deps), signal);
+				const models = await spec.reach(self.transport(entry, key, deps), span);
 				return models === undefined ? { kind: "unreachable" } : { kind: "ok", models };
 			} catch (error) {
-				if (signal.aborted) throw error;
+				if (span.signal.aborted) throw error;
 				return KEY_REFUSED.has(failureOf(error)?.category ?? "")
 					? { kind: "rejected" }
 					: { kind: "unreachable" };
@@ -125,6 +126,7 @@ export function localKind(spec: LocalKindSpec): ProviderKind {
 				auth: spec.optionalKey ? "optional" : "none",
 				scheduler: deps.scheduler,
 				userAgent: deps.userAgent,
+				budgets: deps.budgets,
 			}),
 		catalog: (entry, transport, deps) => {
 			const catalog = new LocalCatalog({
@@ -134,6 +136,7 @@ export function localKind(spec: LocalKindSpec): ProviderKind {
 					entry.url === undefined && spec.url !== undefined ? { ...entry, url: spec.url } : entry,
 				),
 				scheduler: deps.scheduler,
+				budgets: deps.budgets,
 				rows: deps.rows,
 				refreshed: deps.refreshed,
 			});

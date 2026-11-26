@@ -20,6 +20,7 @@ use nyaaai_contract::time::Clock;
 use nyaaai_testkit::scheduler::{FakeScheduler, TimerWheel};
 use nyaaai_testkit::scripted_ports::ScriptedModelRegistry;
 
+use super::budget::ceiling_span;
 use super::catalog::{
     BASE_URL, CALLER_REASON, caller_token, network_of, row_of_key, rows_of_keys, view_line,
     view_lines,
@@ -68,7 +69,9 @@ pub fn openrouter_key(input: KindOpenrouterKeyInput) -> Outcome<KindOpenrouterKe
             ),
         };
         let token = caller_token(&net.wheel, &format!("caller-{tags}"), after, before);
-        let result = block_on(check_key(&net.transport, &auth, &token))?;
+        let clock = ceiling_span(&net.scheduler, &token);
+        let result = block_on(check_key(&net.transport, &auth, &clock))?;
+        clock.clear();
         checks.push(match result {
             Ok(KeyCheck::Ok {
                 usage,
@@ -239,7 +242,9 @@ pub fn check(input: KindCheckInput) -> Outcome<KindCheckResult> {
         input.abort_after_ms,
         input.aborted_before,
     );
-    let checked = block_on(named.check(&entry, input.secret.as_deref(), &deps, &token))?;
+    let clock = ceiling_span(&net.scheduler, &token);
+    let checked = block_on(named.check(&entry, input.secret.as_deref(), &deps, &clock))?;
+    clock.clear();
     net.wheel.cancel("caller");
     let (state, thrown) = match checked {
         Ok(state) => (Some(state), None),
@@ -279,11 +284,13 @@ pub fn limits(input: KindLimitsInput) -> Outcome<KindLimitsResult> {
         input.aborted_before,
     );
     let present = named.has_limits();
+    let clock = ceiling_span(&net.scheduler, &token);
     let limits = if present {
-        block_on(named.limits(&transport, &token))?
+        block_on(named.limits(&transport, &clock))?
     } else {
         None
     };
+    clock.clear();
     net.wheel.cancel("caller");
     Ok(KindLimitsResult {
         present,
@@ -414,6 +421,7 @@ pub fn route(input: KindRouteInput) -> Outcome<KindRouteResult> {
         CatalogDeps {
             runtime: nyaaai_testkit::cases::runtime(),
             scheduler: net.scheduler.clone(),
+            budgets: None,
             rows: registry.clone() as Arc<dyn ModelRegistry>,
             refreshed: Arc::new(|| {}),
         },

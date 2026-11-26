@@ -1,0 +1,17 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "budget.table",
+	"name": "table-an-unknown-preset-is-refused",
+	"input": {
+		"changes": {
+			"slow": {
+				"totalMs": 1
+			}
+		}
+	},
+	"expected": {
+		"presets": null,
+		"refused": "There is no slow budget."
+	}
+}

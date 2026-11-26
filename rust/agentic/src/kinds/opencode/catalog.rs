@@ -4,6 +4,7 @@ use std::future::Future;
 use std::sync::Arc;
 
 use nyaaai_contract::cancel::CancelToken;
+use nyaaai_contract::fetch::{BudgetName, Budgets, span};
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::json::Value;
 use nyaaai_contract::model_registry::ModelRegistry;
@@ -15,11 +16,11 @@ use nyaaai_contract::shapes::model::{
 };
 use nyaaai_contract::shapes::provider::{ProviderKindName, ProviderPlan};
 use nyaaai_contract::shapes::step::{ApiFacts, ApiFamily};
-use nyaaai_contract::time::{Scheduler, deadline};
+use nyaaai_contract::time::Scheduler;
 
 use super::retention::{is_zdr, retention_of};
 use crate::effort::EFFORTS;
-use crate::kinds::fetcher::{Aborted, FETCH_MS, Fetcher, Refreshed, TTL_MS, Waiter};
+use crate::kinds::fetcher::{Aborted, Fetcher, Refreshed, TTL_MS, Waiter};
 use crate::kinds::openrouter::catalog::Ordered;
 use crate::kinds::readers::{
     boolean_field, data_list, field_of, fields_of, number_field, object_field, text_field,
@@ -399,6 +400,8 @@ struct Shared {
     plan: ProviderPlan,
     transport: Arc<Transport>,
     scheduler: Arc<dyn Scheduler>,
+    /// A refresh's span opens from `catalog`.
+    budgets: Budgets,
     rows: Arc<dyn ModelRegistry>,
     refreshed: Arc<dyn Fn() + Send + Sync>,
     ttl_ms: Option<i64>,
@@ -424,6 +427,7 @@ impl OpenCodeCatalog {
                 plan: deps.plan,
                 transport: deps.transport,
                 scheduler: deps.deps.scheduler,
+                budgets: deps.deps.budgets.unwrap_or_default(),
                 rows: deps.deps.rows,
                 refreshed: deps.deps.refreshed,
                 ttl_ms: deps.ttl_ms,
@@ -491,11 +495,11 @@ fn fetched(shared: &Arc<Shared>) -> Waiter<Arc<Ordered<OpenCodeModel>>> {
     let now = shared.scheduler.now_ms();
     let ttl = shared.ttl_ms.unwrap_or(TTL_MS);
     shared.fetcher.fetched(now, ttl, move || {
-        let limit = deadline(&*held.scheduler, FETCH_MS, &CancelToken::new());
+        let limit = span(&held.scheduler, held.budgets.get(BudgetName::Catalog), None);
         Box::pin(async move {
             let read = held
                 .transport
-                .get_json("/v1/models", limit.token(), &KeyAuth::None)
+                .get_json("/v1/models", &limit, &KeyAuth::None)
                 .await;
             limit.clear();
             match read.ok().as_ref().and_then(parse_open_code) {

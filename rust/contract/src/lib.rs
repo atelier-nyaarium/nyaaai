@@ -1,5 +1,6 @@
 pub mod adapter_texts;
 pub mod base64;
+pub mod budgets;
 pub mod cancel;
 pub mod entry_keys;
 pub mod fetch;

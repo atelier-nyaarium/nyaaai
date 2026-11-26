@@ -116,6 +116,11 @@ const fallThrough: CaseSource[] = [
 			send("reset", { model: OPUS }),
 		],
 	}),
+	run("a-lone-entry-out-of-its-pool-with-a-reset-ten-years-away-shows-the-clamped-reset", {
+		...GO_ALONE,
+		exchanges: [poolLimit("2036-11-07T17:00:00Z")],
+		steps: [send("first")],
+	}),
 	run("a-pool-limit-reset-in-epoch-seconds-keeps-the-entry-skipped-until-just-past-it", {
 		...GO_WITH_B,
 		exchanges: [poolLimit(RESET_MS / 1000), says("B"), says("B"), says("Go")],

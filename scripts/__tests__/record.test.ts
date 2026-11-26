@@ -4,11 +4,11 @@ import { describe, expect, it } from "bun:test";
 import { readdirSync } from "node:fs";
 import path from "node:path";
 import { base64Decode, base64Encode } from "@nyaaai/contract/base64";
-import type { Fetch } from "@nyaaai/contract/fetch";
+import { BUDGETS, type Fetch } from "@nyaaai/contract/fetch";
 import { parseJson, stringifyJson } from "@nyaaai/contract/json";
 import { recordingFetch } from "@nyaaai/testkit/recorder";
 import { rejection } from "@nyaaai/testkit/rejection";
-import { fakeScheduler, TimerWheel } from "@nyaaai/testkit/scheduler";
+import { fakeScheduler } from "@nyaaai/testkit/scheduler";
 import { scriptedFetch } from "@nyaaai/testkit/scriptedFetch";
 import { readTrace, replayFetch, type Trace } from "@nyaaai/testkit/trace";
 import { ROOT } from "../child";
@@ -29,8 +29,14 @@ async function replayThrough(fetch: Fetch, trace: Trace): Promise<void> {
 	for (const held of trace.exchanges) {
 		const answer = await fetch(
 			held.request === null
-				? { method: "GET", url: "http://lab.test/v1", headers: [] }
-				: { method: "POST", url: "http://lab.test/v1", headers: [], body: stringifyJson(held.request) },
+				? { method: "GET", url: "http://lab.test/v1", headers: [], budget: BUDGETS.stream }
+				: {
+						method: "POST",
+						url: "http://lab.test/v1",
+						headers: [],
+						body: stringifyJson(held.request),
+						budget: BUDGETS.stream,
+					},
 			signal,
 		);
 		for await (const chunk of answer.chunks) void chunk;
@@ -77,7 +83,7 @@ describe("recording a replay", () => {
 					],
 				},
 			],
-			new TimerWheel(),
+			fakeScheduler(),
 		);
 		const reason = await rejection(recordScenario(title, echoing.fetch, KEY, SESSION, fakeScheduler()));
 		expect((reason as Error).message).not.toContain(KEY);

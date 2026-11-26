@@ -1,6 +1,6 @@
 //! OpenRouter key check.
 
-use nyaaai_contract::cancel::CancelToken;
+use nyaaai_contract::fetch::Span;
 use nyaaai_contract::json::Object;
 use nyaaai_contract::shapes::step::FailureCategory;
 
@@ -25,16 +25,16 @@ pub enum KeyCheck {
     Failed(KeyFailure),
 }
 
-/// `GET /key` validates keys and reports limits; a cancel of the caller is the error.
+/// `GET /key` validates keys and reports limits; the span's end is the error.
 pub async fn check_key(
     transport: &Transport,
     auth: &KeyAuth,
-    cancel: &CancelToken,
+    span: &Span,
 ) -> Result<KeyCheck, TransportError> {
-    let body = match transport.get_json("/key", cancel, auth).await {
+    let body = match transport.get_json("/key", span, auth).await {
         Ok(body) => body,
         Err(error) => {
-            if cancel.is_cancelled() {
+            if span.token().is_cancelled() {
                 return Err(error);
             }
             let rejected = matches!(

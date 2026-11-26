@@ -658,7 +658,7 @@
 				"retryAfterMs": {
 					"type": "integer",
 					"minimum": -9007199254740991,
-					"maximum": 9007199254740991
+					"maximum": 2678400000
 				},
 				"resetsAt": {
 					"type": "integer",
@@ -860,6 +860,32 @@
 				"minItems": 2,
 				"maxItems": 2
 			}
+		},
+		"Budget": {
+			"type": "object",
+			"properties": {
+				"totalMs": {
+					"type": "integer",
+					"minimum": 1,
+					"maximum": 86400000
+				},
+				"idleMs": {
+					"type": "integer",
+					"minimum": 1,
+					"maximum": 1800000
+				},
+				"maxBytes": {
+					"type": "integer",
+					"minimum": 1,
+					"maximum": 1073741824
+				}
+			},
+			"required": [
+				"totalMs",
+				"idleMs",
+				"maxBytes"
+			],
+			"additionalProperties": false
 		}
 	}
 }

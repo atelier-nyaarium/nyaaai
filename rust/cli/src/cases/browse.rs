@@ -15,6 +15,7 @@ use nyaaai_agentic::kinds::openrouter::catalog::{
 };
 use nyaaai_agentic::models::view::unknown_view;
 use nyaaai_agentic::provider::kind::{Browser, CatalogDeps, KindError, Tester};
+use nyaaai_contract::fetch::Budgets;
 use nyaaai_contract::json::Value;
 use nyaaai_contract::model_registry::ModelRegistry;
 use nyaaai_contract::shapes::provider::ProviderPlan;
@@ -163,6 +164,7 @@ fn catalog_of(net: &Net) -> Arc<ModelCatalog> {
         deps: CatalogDeps {
             runtime: nyaaai_testkit::cases::runtime(),
             scheduler: net.scheduler.clone(),
+            budgets: None,
             rows: empty_registry() as Arc<dyn ModelRegistry>,
             refreshed: Arc::new(|| {}),
         },
@@ -179,15 +181,26 @@ pub fn openrouter_browser(
         Arc::clone(&catalog),
         Arc::clone(&net.transport),
         net.scheduler.clone(),
+        Budgets::default(),
     );
-    let tester = open_router_tester(catalog, Arc::clone(&net.transport), net.scheduler.clone());
+    let tester = open_router_tester(
+        catalog,
+        Arc::clone(&net.transport),
+        net.scheduler.clone(),
+        Budgets::default(),
+    );
     block_on(drive(&net, &browser, &tester, &input.steps))?
 }
 
 pub fn openrouter_hop(input: BrowseOpenrouterHopInput) -> Outcome<BrowseOpenrouterHopResult> {
     let net = network_of(input.start_ms, &input.exchanges, None)?;
     let catalog = catalog_of(&net);
-    let tester = open_router_tester(catalog, Arc::clone(&net.transport), net.scheduler.clone());
+    let tester = open_router_tester(
+        catalog,
+        Arc::clone(&net.transport),
+        net.scheduler.clone(),
+        Budgets::default(),
+    );
     let pins = tester
         .pins()
         .ok_or_else(|| "The tester has no pins.".to_owned())?;
@@ -218,7 +231,12 @@ pub fn openrouter_hop(input: BrowseOpenrouterHopInput) -> Outcome<BrowseOpenrout
 pub fn openrouter_pins(input: BrowseOpenrouterPinsInput) -> Outcome<BrowseOpenrouterPinsResult> {
     let net = network_of(0, &[], None)?;
     let catalog = catalog_of(&net);
-    let tester = open_router_tester(catalog, Arc::clone(&net.transport), net.scheduler.clone());
+    let tester = open_router_tester(
+        catalog,
+        Arc::clone(&net.transport),
+        net.scheduler.clone(),
+        Budgets::default(),
+    );
     let pins = tester
         .pins()
         .ok_or_else(|| "The tester has no pins.".to_owned())?;
@@ -278,6 +296,7 @@ pub fn opencode_browser(input: BrowseOpencodeBrowserInput) -> Outcome<BrowseOpen
         deps: CatalogDeps {
             runtime: nyaaai_testkit::cases::runtime(),
             scheduler: net.scheduler.clone(),
+            budgets: None,
             rows: empty_registry() as Arc<dyn ModelRegistry>,
             refreshed: Arc::new(|| {}),
         },

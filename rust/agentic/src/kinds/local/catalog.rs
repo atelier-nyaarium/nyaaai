@@ -7,6 +7,7 @@ use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::sync::{Arc, Mutex, MutexGuard};
 
 use nyaaai_contract::cancel::CancelToken;
+use nyaaai_contract::fetch::{BudgetName, Budgets, Span, span};
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::json::{Object, Value};
 use nyaaai_contract::model_registry::ModelRegistry;
@@ -16,7 +17,7 @@ use nyaaai_contract::shapes::model::{
 };
 use nyaaai_contract::shapes::step::{ApiFacts, ApiFamily, Effort};
 use nyaaai_contract::text::{head_of, trim_text};
-use nyaaai_contract::time::{Scheduler, deadline};
+use nyaaai_contract::time::Scheduler;
 use tokio::runtime::Handle;
 use tokio::sync::watch;
 
@@ -54,7 +55,7 @@ pub trait LocalServer: Send + Sync {
     fn models<'a>(
         &'a self,
         known: &'a [LocalModel],
-        cancel: &'a CancelToken,
+        span: &'a Span,
     ) -> BoxFuture<'a, Result<Vec<LocalModel>, KindError>>;
 
     /// Whether the server tells a loaded context after a reply.
@@ -66,7 +67,7 @@ pub trait LocalServer: Send + Sync {
     fn loaded<'a>(
         &'a self,
         _tag: &'a str,
-        _cancel: &'a CancelToken,
+        _span: &'a Span,
     ) -> BoxFuture<'a, Result<Loaded, KindError>> {
         Box::pin(async { Ok(Vec::new()) })
     }
@@ -82,11 +83,7 @@ pub trait LocalServer: Send + Sync {
     }
 
     /// Loads an unprobed model.
-    fn warm<'a>(
-        &'a self,
-        _tag: &'a str,
-        _cancel: &'a CancelToken,
-    ) -> BoxFuture<'a, Result<(), KindError>> {
+    fn warm<'a>(&'a self, _tag: &'a str, _span: &'a Span) -> BoxFuture<'a, Result<(), KindError>> {
         Box::pin(async { Ok(()) })
     }
 }
@@ -111,8 +108,10 @@ pub struct LocalCatalogDeps {
     pub entry: String,
     pub server: Arc<dyn LocalServer>,
     pub terms: Terms,
-    /// The time, and the deadlines of a read.
+    /// The time, and the spans of its reads.
     pub scheduler: Arc<dyn Scheduler>,
+    /// Spans open from `discover` and `warm`; default the presets.
+    pub budgets: Option<Budgets>,
     pub rows: Arc<dyn ModelRegistry>,
     pub refreshed: Arc<dyn Fn() + Send + Sync>,
 }
@@ -125,7 +124,6 @@ pub enum Think {
 }
 
 const RETRY_MS: i64 = 60_000;
-const DISCOVER_MS: i64 = 10_000;
 const LABEL_UNITS: usize = 200;
 const ON: [Effort; 3] = [Effort::Low, Effort::Medium, Effort::High];
 
@@ -281,6 +279,7 @@ struct Shared {
     server: Arc<dyn LocalServer>,
     terms: Terms,
     scheduler: Arc<dyn Scheduler>,
+    budgets: Budgets,
     rows: Arc<dyn ModelRegistry>,
     refreshed: Arc<dyn Fn() + Send + Sync>,
     fetcher: Fetcher<Models>,
@@ -298,6 +297,11 @@ impl Shared {
 
     fn loaded_of(&self, tag: &str) -> Option<f64> {
         self.locked().loaded.get(tag).copied()
+    }
+
+    /// A span from the named preset.
+    fn span(&self, name: BudgetName, caller: Option<&CancelToken>) -> Span {
+        span(&self.scheduler, self.budgets.get(name), caller)
     }
 
     /// This entry's local rows only.
@@ -338,9 +342,9 @@ fn tell(shared: &Shared) {
 /// One refresh: the server's list, and the loaded contexts it carries.
 fn refresh(shared: &Arc<Shared>, known: Vec<LocalModel>) -> BoxFuture<'static, Refreshed<Models>> {
     let shared = Arc::clone(shared);
-    let limit = deadline(&*shared.scheduler, DISCOVER_MS, &CancelToken::new());
+    let limit = shared.span(BudgetName::Discover, None);
     Box::pin(async move {
-        let read = shared.server.models(&known, limit.token()).await;
+        let read = shared.server.models(&known, &limit).await;
         limit.clear();
         match read {
             Ok(models) => {
@@ -427,13 +431,13 @@ fn settled(shared: &Arc<Shared>, tag: &str) {
         inner.reading = true;
     }
     let reading = Reading::begin(shared);
-    let limit = deadline(&*shared.scheduler, DISCOVER_MS, &CancelToken::new());
+    let limit = shared.span(BudgetName::Discover, None);
     let runtime = shared.runtime.clone();
     let shared = Arc::clone(shared);
     let tag = tag.to_owned();
     runtime.spawn(async move {
         let _reading = reading;
-        let read = shared.server.loaded(&tag, limit.token()).await;
+        let read = shared.server.loaded(&tag, &limit).await;
         limit.clear();
         if let Ok(contexts) = read {
             let mut changed = false;
@@ -470,6 +474,7 @@ impl LocalCatalog {
                 server: deps.server,
                 terms: deps.terms,
                 scheduler: deps.scheduler,
+                budgets: deps.budgets.unwrap_or_default(),
                 rows: deps.rows,
                 refreshed: deps.refreshed,
                 inner: Mutex::new(Inner {
@@ -630,7 +635,10 @@ impl LocalCatalog {
             if !shared.server.warms() || !unprobed {
                 return Ok(());
             }
-            shared.server.warm(&tag, &cancel).await?;
+            let limit = shared.span(BudgetName::Warm, Some(&cancel));
+            let warmed = shared.server.warm(&tag, &limit).await;
+            limit.clear();
+            warmed?;
             discovering(&shared).raced(Some(&cancel)).await?;
             Ok(())
         }

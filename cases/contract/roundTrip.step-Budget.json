@@ -1,0 +1,73 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "contract.roundTrip",
+	"name": "step-Budget",
+	"input": {
+		"set": "step",
+		"shape": "Budget",
+		"texts": [
+			"{\"totalMs\":30000,\"idleMs\":30000,\"maxBytes\":16777216}",
+			"{\"totalMs\":1,\"idleMs\":1,\"maxBytes\":1}",
+			"{\"totalMs\":86400000,\"idleMs\":1800000,\"maxBytes\":1073741824,\"extra\":1}",
+			"{\"totalMs\":86400001,\"idleMs\":1,\"maxBytes\":1}",
+			"{\"totalMs\":1,\"idleMs\":1800001,\"maxBytes\":1}",
+			"{\"totalMs\":1,\"idleMs\":1,\"maxBytes\":1073741825}",
+			"{\"totalMs\":0,\"idleMs\":1,\"maxBytes\":1}",
+			"{\"totalMs\":1.5,\"idleMs\":1,\"maxBytes\":1}",
+			"{\"totalMs\":1,\"idleMs\":1}"
+		]
+	},
+	"expected": {
+		"results": [
+			{
+				"ok": true,
+				"text": "{\"totalMs\":30000,\"idleMs\":30000,\"maxBytes\":16777216}"
+			},
+			{
+				"ok": true,
+				"text": "{\"totalMs\":1,\"idleMs\":1,\"maxBytes\":1}"
+			},
+			{
+				"ok": true,
+				"text": "{\"totalMs\":86400000,\"idleMs\":1800000,\"maxBytes\":1073741824}"
+			},
+			{
+				"ok": false,
+				"path": [
+					"totalMs"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"idleMs"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"maxBytes"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"totalMs"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"totalMs"
+				]
+			},
+			{
+				"ok": false,
+				"path": [
+					"maxBytes"
+				]
+			}
+		]
+	}
+}

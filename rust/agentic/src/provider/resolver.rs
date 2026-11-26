@@ -10,6 +10,7 @@ use std::task::{Context, Poll, Waker};
 
 use nyaaai_contract::cancel::{CancelToken, Unsubscribe};
 use nyaaai_contract::entry_keys::{EntryKeys, KeyAnswer};
+use nyaaai_contract::fetch::Span;
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::json::{Record, Value};
 use nyaaai_contract::model_registry::ModelRegistry;
@@ -85,10 +86,10 @@ impl RouteTransport {
     pub async fn get_json(
         &self,
         path: &str,
-        cancel: &CancelToken,
+        clock: &Span,
         auth: &KeyAuth,
     ) -> Result<Value, TransportError> {
-        self.transport.get_json(path, cancel, auth).await
+        self.transport.get_json(path, clock, auth).await
     }
 }
 
@@ -584,6 +585,7 @@ impl ModelResolver {
             super::kind::CatalogDeps {
                 runtime: deps.runtime.clone(),
                 scheduler: Arc::clone(&deps.scheduler),
+                budgets: deps.budgets.clone(),
                 rows: Arc::clone(&self.d.registry),
                 refreshed: Arc::new(move || {
                     if let (Some(told), Some(incarnation)) = (&told, named.upgrade()) {
@@ -984,7 +986,7 @@ mod tests {
             _entry: &'a EntryFields,
             _secret: Option<&'a str>,
             _deps: &'a KindDeps,
-            _cancel: &'a CancelToken,
+            _span: &'a Span,
         ) -> BoxFuture<'a, Result<KeyState, KindError>> {
             Box::pin(async { Ok(KeyState::None(KeyStateNone {})) })
         }
@@ -1005,8 +1007,7 @@ mod tests {
                 user_agent: "tests/1.0".to_owned(),
                 errors: Arc::new(OPENROUTER_CHAT),
                 auth: Auth::Optional,
-                idle_ms: None,
-                max_bytes: None,
+                budgets: None,
             })))
         }
 
@@ -1043,7 +1044,7 @@ mod tests {
     fn two_tasks_making_one_route_keep_the_first_and_stop_the_extra() {
         let wheel = Arc::new(TimerWheel::new(0));
         let scheduler = Arc::new(FakeScheduler::new(Arc::clone(&wheel)));
-        let fetch = Arc::new(ScriptedFetch::new(Vec::new(), wheel));
+        let fetch = Arc::new(ScriptedFetch::new(Vec::new(), Arc::clone(&scheduler)));
         let runtime = tokio::runtime::Builder::new_current_thread()
             .build()
             .unwrap();
@@ -1076,6 +1077,7 @@ mod tests {
                 log: Arc::new(|_| {}),
                 user_agent: "tests/1.0".to_owned(),
                 base_url: None,
+                budgets: None,
             }),
             zdr_only: Arc::new(|| true),
             refreshed: None,
@@ -1099,7 +1101,7 @@ mod tests {
     fn an_incarnation_that_left_is_freed_with_its_route() {
         let wheel = Arc::new(TimerWheel::new(0));
         let scheduler = Arc::new(FakeScheduler::new(Arc::clone(&wheel)));
-        let fetch = Arc::new(ScriptedFetch::new(Vec::new(), wheel));
+        let fetch = Arc::new(ScriptedFetch::new(Vec::new(), Arc::clone(&scheduler)));
         let runtime = tokio::runtime::Builder::new_current_thread()
             .build()
             .unwrap();
@@ -1131,6 +1133,7 @@ mod tests {
                 log: Arc::new(|_| {}),
                 user_agent: "tests/1.0".to_owned(),
                 base_url: None,
+                budgets: None,
             }),
             zdr_only: Arc::new(|| true),
             refreshed: None,

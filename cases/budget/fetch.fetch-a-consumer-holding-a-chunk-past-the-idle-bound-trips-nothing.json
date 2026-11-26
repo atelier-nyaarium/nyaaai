@@ -1,0 +1,74 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "budget.fetch",
+	"name": "fetch-a-consumer-holding-a-chunk-past-the-idle-bound-trips-nothing",
+	"input": {
+		"budget": {
+			"totalMs": 1000,
+			"idleMs": 30,
+			"maxBytes": 1000
+		},
+		"exchange": {
+			"status": 200,
+			"headers": [
+				[
+					"content-type",
+					"text/plain"
+				]
+			],
+			"chunks": [
+				{
+					"kind": "text",
+					"text": "a",
+					"delayMs": 5
+				},
+				{
+					"kind": "text",
+					"text": "a",
+					"delayMs": 5
+				},
+				{
+					"kind": "text",
+					"text": "a",
+					"delayMs": 5
+				}
+			]
+		},
+		"holds": [
+			100,
+			100
+		]
+	},
+	"expected": {
+		"seen": [
+			{
+				"kind": "head",
+				"atMs": 0,
+				"status": 200
+			},
+			{
+				"kind": "chunk",
+				"atMs": 5,
+				"size": 1
+			},
+			{
+				"kind": "chunk",
+				"atMs": 110,
+				"size": 1
+			},
+			{
+				"kind": "chunk",
+				"atMs": 215,
+				"size": 1
+			},
+			{
+				"kind": "done",
+				"atMs": 215
+			}
+		],
+		"served": 3,
+		"waiting": [],
+		"nowMs": 215
+	}
+}

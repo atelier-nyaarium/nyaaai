@@ -61,7 +61,11 @@
 				}
 			}
 		],
-		"idleMs": 30
+		"budgets": {
+			"reply": {
+				"idleMs": 30
+			}
+		}
 	},
 	"expected": {
 		"calls": [

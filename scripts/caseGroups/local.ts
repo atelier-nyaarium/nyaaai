@@ -23,6 +23,7 @@ import { CHAT } from "@nyaaai/agentic/models/uses";
 import { codecFactsOf } from "@nyaaai/agentic/models/view";
 import type { ProviderKind } from "@nyaaai/agentic/provider/kind";
 import { replyText } from "@nyaaai/agentic/step";
+import { BUDGET_CEILINGS, type Span, span } from "@nyaaai/contract/fetch";
 import { jsString } from "@nyaaai/contract/json";
 import { z } from "@nyaaai/contract/shape";
 import { BrowseDetail, BrowseModel, ModelUse, type ModelView } from "@nyaaai/contract/shapes/model";
@@ -270,28 +271,28 @@ export function scriptedServer(
 	}
 	const server: LocalServer = {
 		...(script.live ? { live: true as const } : {}),
-		models: async (known, signal) =>
+		models: async (known, clock) =>
 			(
 				await answer(
 					"models",
 					script.models,
 					null,
 					known.map((model) => model.tag),
-					signal,
+					clock.signal,
 				)
 			).models.map((model) => ({ ...model })),
 		...(script.loaded
 			? {
-					loaded: async (tag: string, signal: AbortSignal) => {
-						const reply = await answer("loaded", script.loads, tag, [], signal);
+					loaded: async (tag: string, clock: Span) => {
+						const reply = await answer("loaded", script.loads, tag, [], clock.signal);
 						return new Map(reply.contexts.map((each) => [each.tag, each.context] as const));
 					},
 				}
 			: {}),
 		...(script.warm
 			? {
-					warm: async (tag: string, signal: AbortSignal) => {
-						await answer("warm", script.warms, tag, [], signal);
+					warm: async (tag: string, clock: Span) => {
+						await answer("warm", script.warms, tag, [], clock.signal);
 					},
 				}
 			: {}),
@@ -455,13 +456,15 @@ export const local = caseGroup("local", {
 				const named = LOCAL_KINDS[input.kind];
 				const entry = { kind: input.kind, label: input.entry.label, ...urlOf(input.entry) };
 				const signal = callerSignal(net.wheel, "caller", input);
+				const clock = span(net.scheduler, BUDGET_CEILINGS, signal);
 				let state: z.infer<typeof KeyState> | null = null;
 				let thrown: string | null = null;
 				try {
-					state = await named.check(entry, input.secret ?? undefined, net.deps, signal);
+					state = await named.check(entry, input.secret ?? undefined, net.deps, clock);
 				} catch (error) {
 					thrown = messageOf(error);
 				}
+				clock.clear();
 				net.wheel.cancel("caller");
 				return {
 					state,
@@ -510,6 +513,7 @@ export const local = caseGroup("local", {
 				for (const step of input.steps) {
 					tags += 1;
 					const signal = callerSignal(net.wheel, `caller-${tags}`, step);
+					const clock = span(net.scheduler, BUDGET_CEILINGS, signal);
 					const held = {
 						models: null as LocalModel[] | null,
 						contexts: null as ReturnType<typeof contextsOf> | null,
@@ -517,18 +521,19 @@ export const local = caseGroup("local", {
 						thrown: null as string | null,
 					};
 					try {
-						if (step.kind === "models") held.models = await server.models(step.known, signal);
+						if (step.kind === "models") held.models = await server.models(step.known, clock);
 						else if (step.kind === "loaded") {
 							if (server.loaded === undefined) throw new Error("This server reads no loaded contexts.");
-							held.contexts = contextsOf(await server.loaded(step.tag, signal));
+							held.contexts = contextsOf(await server.loaded(step.tag, clock));
 						} else {
 							if (server.warm === undefined) throw new Error("This server loads no model.");
-							await server.warm(step.tag, signal);
+							await server.warm(step.tag, clock);
 							held.done = true;
 						}
 					} catch (error) {
 						held.thrown = messageOf(error);
 					}
+					clock.clear();
 					steps.push(held);
 				}
 				for (let tag = 1; tag <= tags; tag++) net.wheel.cancel(`caller-${tag}`);

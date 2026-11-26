@@ -1,5 +1,6 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
+import { BUDGETS } from "@nyaaai/contract/fetch";
 import { parseJson, stringifyJson } from "@nyaaai/contract/json";
 import { sequenceRandom } from "@nyaaai/contract/random";
 import { z } from "@nyaaai/contract/shape";
@@ -186,6 +187,7 @@ export const testkit = caseGroup("testkit", {
 							url: "http://replay.invalid/",
 							headers: [],
 							body: stringifyJson(exchange.request),
+							budget: BUDGETS.stream,
 						},
 						signal,
 					);

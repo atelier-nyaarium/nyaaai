@@ -110,8 +110,8 @@ export function networkOf(
 	stored: string | undefined = "fake-key-one",
 ) {
 	const wheel = new TimerWheel(startMs);
-	const played = scriptedFetch(exchanges.map(exchangeOf), wheel);
 	const scheduler = fakeScheduler(wheel);
+	const played = scriptedFetch(exchanges.map(exchangeOf), scheduler);
 	const keys = fakeKeys([stored]);
 	const transport = new Transport({
 		fetch: played.fetch,

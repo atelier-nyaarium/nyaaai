@@ -1,6 +1,6 @@
 // What a provider kind gives a host.
 
-import type { Fetch } from "@nyaaai/contract/fetch";
+import type { Budgets, Fetch, Span } from "@nyaaai/contract/fetch";
 import type { ModelRegistry } from "@nyaaai/contract/modelRegistry";
 import type { BrowseDetail, BrowseModel, ModelRow, ModelUse, ModelView } from "@nyaaai/contract/shapes/model";
 import type {
@@ -39,12 +39,15 @@ export interface KindDeps {
 	userAgent: string;
 	/** Test loopback URL. */
 	baseUrl?: string;
+	/** What every span opens from; default `BUDGETS`. */
+	budgets?: Budgets;
 }
 
 /** What a catalog stands on. */
 export interface CatalogDeps {
-	/** The time, and the deadlines of a fetch. */
+	/** The time, and the spans of its reads. */
 	scheduler: Scheduler;
+	budgets?: Budgets | undefined;
 	/** Rows; a caching catalog rejoins on change. */
 	rows: Pick<ModelRegistry, "rows" | "onChange">;
 	/** Told after each successful refresh. */
@@ -118,8 +121,8 @@ export interface ProviderKind {
 	readonly stats?: true;
 	/** Provider status facts. */
 	facts?(state: KeyState, entry: EntryFields, bill: Billed | undefined): string | undefined;
-	/** Key or URL check. */
-	check(entry: EntryFields, secret: string | undefined, deps: KindDeps, signal: AbortSignal): Promise<KeyState>;
+	/** Key or URL check; its reads draw from the span. */
+	check(entry: EntryFields, secret: string | undefined, deps: KindDeps, span: Span): Promise<KeyState>;
 	transport(entry: EntryFields, key: KeySource, deps: KindDeps): Transport;
 	catalog(entry: ProviderEntry, transport: Transport, deps: CatalogDeps): EntryCatalog;
 	/** Omitted if unavailable. */
@@ -130,7 +133,7 @@ export interface ProviderKind {
 	/** Retry, fall-through, or stop. */
 	failure(failure: Failure, view: ModelView | undefined): Disposition;
 	/** Optional provider limits. */
-	limits?(transport: Pick<Transport, "getJson">, signal: AbortSignal): Promise<Limits | undefined>;
+	limits?(transport: Pick<Transport, "getJson">, span: Span): Promise<Limits | undefined>;
 }
 
 ////////////////////////////////

@@ -16,6 +16,9 @@ use crate::zone::system_zone;
 
 const DAY_MS: i64 = 86_400_000;
 
+/// The longest wait a server may ask.
+pub const MAX_SERVER_WAIT_MS: i64 = crate::budgets::MAX_SERVER_WAIT_MS as i64;
+
 /// Clock values use milliseconds.
 pub trait Clock {
     fn now_ms(&self) -> i64;
@@ -572,7 +575,7 @@ fn whole_ms(ms: f64) -> Option<i64> {
     (ms.is_finite() && ms.abs() <= SAFE).then(|| round_half_up(ms) as i64)
 }
 
-/// Nonnegative wait in milliseconds.
+/// Nonnegative wait in milliseconds, at most `MAX_SERVER_WAIT_MS`.
 pub fn parse_retry_after(header: Option<&str>, now_ms: i64) -> Option<i64> {
     let text = trim_text(header.unwrap_or(""));
     if text.is_empty() {
@@ -582,7 +585,7 @@ pub fn parse_retry_after(header: Option<&str>, now_ms: i64) -> Option<i64> {
         Some(seconds) => whole_ms(seconds * 1000.0)?,
         None => whole_ms(parse_stamp(text, now_ms)?.saturating_sub(now_ms) as f64)?,
     };
-    Some(wait.max(0))
+    Some(wait.clamp(0, MAX_SERVER_WAIT_MS))
 }
 
 /// Seconds, milliseconds, or dates.

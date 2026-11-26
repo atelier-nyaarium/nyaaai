@@ -30,12 +30,12 @@
 						{
 							"kind": "repeat",
 							"text": "x",
-							"times": 60
+							"times": 200
 						},
 						{
 							"kind": "repeat",
 							"text": "x",
-							"times": 60
+							"times": 200
 						}
 					]
 				},
@@ -94,7 +94,11 @@
 				}
 			}
 		],
-		"maxBytes": 100
+		"budgets": {
+			"stream": {
+				"maxBytes": 300
+			}
+		}
 	},
 	"expected": {
 		"calls": [
@@ -103,9 +107,9 @@
 				"result": null,
 				"answer": null,
 				"failure": {
-					"category": "stream",
-					"status": "stream",
-					"message": "A stream event is larger than 100 bytes."
+					"category": "network",
+					"status": "network",
+					"message": "The reply is larger than 300 bytes."
 				},
 				"thrown": null,
 				"aborted": false,

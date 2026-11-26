@@ -1,0 +1,58 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "budget.span",
+	"name": "span-the-budget-is-drawn-after-the-key-is-read",
+	"input": {
+		"budget": {
+			"totalMs": 10000,
+			"idleMs": 10000,
+			"maxBytes": 1000
+		},
+		"keyMs": 1000,
+		"exchanges": [
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"application/json"
+					]
+				],
+				"chunks": [
+					{
+						"kind": "text",
+						"text": "{\"a\":1}"
+					}
+				]
+			}
+		],
+		"steps": [
+			{
+				"kind": "read",
+				"path": "/one"
+			}
+		]
+	},
+	"expected": {
+		"reads": [
+			{
+				"startMs": 0,
+				"endMs": 1000,
+				"sent": {
+					"totalMs": 9000,
+					"idleMs": 9000,
+					"maxBytes": 1000
+				},
+				"answer": {
+					"a": 1
+				},
+				"failure": null,
+				"thrown": null
+			}
+		],
+		"ended": null,
+		"requests": 1,
+		"waiting": []
+	}
+}

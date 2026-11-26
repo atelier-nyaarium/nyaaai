@@ -12,8 +12,6 @@ use tokio::sync::watch;
 pub const TTL_MS: i64 = 12 * 60 * 60 * 1000;
 /// The wait after a failed refresh.
 pub const RETRY_MS: i64 = 60_000;
-/// The time one refresh may take.
-pub const FETCH_MS: i64 = 30_000;
 
 /// Tells the owner a refresh stored its data; what it does changes nothing.
 pub type Told = Box<dyn FnOnce() + Send>;

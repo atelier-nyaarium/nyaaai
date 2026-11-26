@@ -1,5 +1,6 @@
 // One request over its candidate routes.
 
+import { BUDGETS, type Budgets, span } from "@nyaaai/contract/fetch";
 import { numberText } from "@nyaaai/contract/number";
 import type {
 	Admission,
@@ -15,7 +16,7 @@ import type { TraceEntry } from "@nyaaai/contract/shapes/lifecycle";
 import type { NoticeKind, Passed, Skip, SkipReason } from "@nyaaai/contract/shapes/provider";
 import type { Failure, NormalizedUsage, StepResult } from "@nyaaai/contract/shapes/step";
 import type { CallTag, MeteredCall } from "@nyaaai/contract/shapes/usage";
-import { deadline, type Scheduler } from "@nyaaai/contract/time";
+import type { Scheduler } from "@nyaaai/contract/time";
 import { failureOf } from "../failure";
 import type { Gate } from "../health/health";
 import { told } from "../kinds/join";
@@ -74,6 +75,8 @@ export interface LifecycleDeps {
 	retry?: RetryPolicy;
 	/** The time and the waits of the retries. */
 	scheduler: Scheduler;
+	/** A limits read's span opens from `limits`; default `BUDGETS`. */
+	budgets?: Budgets;
 }
 
 type Billing = { usage?: NormalizedUsage };
@@ -108,9 +111,6 @@ type Gated = Admission | { kind: "go"; ticket: undefined };
 export const STOPPED: Ended = { kind: "stopped" };
 
 const LIVE_TRIES = 2;
-
-/** The most a limits read may take. */
-const LIMITS_MS = 5000;
 
 ////////////////////////////////
 //  Functions & Helpers
@@ -589,9 +589,9 @@ export class RequestLifecycle {
 	/** The kind's limits, none when the read fails or outlives its bound. */
 	private async limitsOf(route: Resolved, signal: AbortSignal) {
 		if (route.kind.limits === undefined) return undefined;
-		const bound = deadline(this.d.scheduler, LIMITS_MS, signal);
+		const bound = span(this.d.scheduler, (this.d.budgets ?? BUDGETS).limits, signal);
 		try {
-			return await raced(route.kind.limits(route.transport, bound.signal), bound.signal);
+			return await raced(route.kind.limits(route.transport, bound), bound.signal);
 		} catch {
 			return undefined;
 		} finally {

@@ -1,0 +1,59 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "budget.span",
+	"name": "span-a-read-asked-of-a-span-that-ran-out-sends-nothing",
+	"input": {
+		"budget": {
+			"totalMs": 10000,
+			"idleMs": 10000,
+			"maxBytes": 1000
+		},
+		"exchanges": [
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"application/json"
+					]
+				],
+				"chunks": [
+					{
+						"kind": "text",
+						"text": "{\"a\":1}"
+					}
+				]
+			}
+		],
+		"steps": [
+			{
+				"kind": "advance",
+				"ms": 10000
+			},
+			{
+				"kind": "read",
+				"path": "/one"
+			}
+		]
+	},
+	"expected": {
+		"reads": [
+			{
+				"startMs": 10000,
+				"endMs": 10000,
+				"sent": null,
+				"answer": null,
+				"failure": {
+					"category": "idle",
+					"status": "idle",
+					"message": "Lab did not finish in time."
+				},
+				"thrown": null
+			}
+		],
+		"ended": "deadline",
+		"requests": 0,
+		"waiting": []
+	}
+}

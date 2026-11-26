@@ -202,7 +202,7 @@ if (import.meta.main) {
 	let failed = 0;
 	for (const scenario of chosen) {
 		try {
-			const text = await recordScenario(scenario, platformFetch(), key, randomUuid());
+			const text = await recordScenario(scenario, platformFetch(systemScheduler), key, randomUuid());
 			mkdirSync(folder, { recursive: true });
 			const file = path.join(folder, `openrouter.${scenario.name}.json`);
 			writeFileSync(file, text);

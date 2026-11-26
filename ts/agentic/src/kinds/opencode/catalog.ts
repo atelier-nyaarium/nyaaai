@@ -1,5 +1,6 @@
 // The OpenCode plan catalog: decoder, join, browser and tester.
 
+import { BUDGETS, type Budgets, span } from "@nyaaai/contract/fetch";
 import type { ModelRegistry } from "@nyaaai/contract/modelRegistry";
 import type {
 	Binding,
@@ -12,7 +13,7 @@ import type {
 } from "@nyaaai/contract/shapes/model";
 import type { ProviderPlan } from "@nyaaai/contract/shapes/provider";
 import type { ApiFacts, ApiFamily } from "@nyaaai/contract/shapes/step";
-import { type Clock, deadline, type Scheduler } from "@nyaaai/contract/time";
+import type { Clock, Scheduler } from "@nyaaai/contract/time";
 import { EFFORTS } from "../../effort";
 import { MODELS } from "../../models/curated";
 import { rowKey, shownId } from "../../models/rowKey";
@@ -79,6 +80,8 @@ export interface OpenCodeCatalogDeps {
 	plan: ProviderPlan;
 	transport: Pick<Transport, "getJson">;
 	scheduler: Scheduler;
+	/** A refresh's span opens from `catalog`. */
+	budgets?: Budgets | undefined;
 	rows: Pick<ModelRegistry, "rows">;
 	refreshed?: () => void;
 	ttlMs?: number;
@@ -89,7 +92,6 @@ export interface OpenCodeCatalogDeps {
 
 const TTL_MS = 12 * 60 * 60 * 1000;
 const RETRY_MS = 60_000;
-const FETCH_MS = 30_000;
 
 const FAMILIES: readonly ApiFamily[] = ["chat-completions", "responses", "messages", "generate-content"];
 
@@ -409,9 +411,9 @@ export class OpenCodeCatalog implements EntryCatalog {
 	}
 
 	private async refresh(): Promise<Map<string, OpenCodeModel> | undefined> {
-		const limit = deadline(this.d.scheduler, FETCH_MS);
+		const limit = span(this.d.scheduler, (this.d.budgets ?? BUDGETS).catalog);
 		try {
-			const models = parseOpenCode(await this.d.transport.getJson("/v1/models", limit.signal, "none"));
+			const models = parseOpenCode(await this.d.transport.getJson("/v1/models", limit, "none"));
 			if (models === undefined) throw new Error("The catalog did not parse.");
 			this.good = { models, at: this.d.scheduler.nowMs() };
 			this.failedAt = undefined;

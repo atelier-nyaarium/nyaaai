@@ -1,7 +1,8 @@
 // Delayed generation stats: reading them back, with retries and spacing.
 
+import { BUDGETS, type Budgets, type Span, span } from "@nyaaai/contract/fetch";
 import type { GenerationStats } from "@nyaaai/contract/shapes/usage";
-import { deadline, type Scheduler } from "@nyaaai/contract/time";
+import { type Deadline, deadline, type Scheduler } from "@nyaaai/contract/time";
 import type { UsageSink } from "@nyaaai/contract/usageSink";
 import { booleanField, type Fields, fieldOf, fieldsOf, numberField, objectField, textField } from "../kinds/readers";
 import { reportedCost } from "./cost";
@@ -13,8 +14,10 @@ export interface StatsQueueDeps {
 	scheduler: Scheduler;
 	/** Where stats are written, and where unfilled records are listed. */
 	usage: Pick<UsageSink, "fill" | "filled" | "unfilled">;
-	/** Reads through the serving entry's transport only, never another's key; should end on its signal. */
-	read: (entry: string | undefined, path: `/generation?id=${string}`, signal: AbortSignal) => Promise<unknown>;
+	/** Reads through the serving entry's transport only, never another's key; should end on its span. */
+	read: (entry: string | undefined, path: `/generation?id=${string}`, span: Span) => Promise<unknown>;
+	/** `stats` bounds reads and asks. */
+	budgets?: Budgets;
 }
 
 /** A record whose stats are still to be read. */
@@ -44,9 +47,6 @@ const SPACING_MS = 250;
 
 /** Queue limit. */
 const MAX_WAITING = 500;
-
-/** Bounds each read. */
-const READ_MS = 10_000;
 
 /** How far back `restore` looks for records without stats. */
 export const UNFILLED_MS = 2 * 60 * 60_000;
@@ -221,11 +221,10 @@ export class StatsQueue {
 		});
 	}
 
-	/** A port's answer; none on deadline, dispose or failure. */
-	private async within<T>(call: (signal: AbortSignal) => Promise<T>): Promise<T | undefined> {
-		const limit = deadline(this.d.scheduler, READ_MS, this.stop.signal);
+	/** A port's answer; none at the window's end, dispose or failure. */
+	private async within<T>(limit: Deadline, call: () => Promise<T>): Promise<T | undefined> {
 		try {
-			const work = new Promise<T>((resolve) => resolve(call(limit.signal)));
+			const work = new Promise<T>((resolve) => resolve(call()));
 			const ended = new Promise<undefined>((resolve) => {
 				if (limit.signal.aborted) resolve(undefined);
 				else limit.signal.addEventListener("abort", () => resolve(undefined), { once: true });
@@ -248,12 +247,15 @@ export class StatsQueue {
 		this.current = each.id;
 		let spacing = SPACING_MS;
 		try {
-			const filled = (await this.within(() => this.d.usage.filled(each.id, each.at))) === true;
+			const budget = (this.d.budgets ?? BUDGETS).stats;
+			const asked = deadline(this.d.scheduler, budget.totalMs, this.stop.signal);
+			const filled = (await this.within(asked, () => this.d.usage.filled(each.id, each.at))) === true;
+			const reading = filled || this.disposed ? undefined : span(this.d.scheduler, budget, this.stop.signal);
 			const body =
-				filled || this.disposed
+				reading === undefined
 					? undefined
-					: await this.within((signal) =>
-							this.d.read(each.entry, `/generation?id=${each.generationId}`, signal),
+					: await this.within(reading, () =>
+							this.d.read(each.entry, `/generation?id=${each.generationId}`, reading),
 						);
 			if (this.disposed) return;
 			if (filled) spacing = 0;

@@ -57,9 +57,9 @@ export const OPENROUTER: ProviderKind = (() => {
 		balance: "https://openrouter.ai/settings/credits",
 		stats: true,
 		facts: usageFacts,
-		check: async (entry, secret, deps, signal) => {
+		check: async (entry, secret, deps, span) => {
 			if (secret === undefined) return { kind: "none" };
-			return keyStateOf(await checkKey(self.transport(entry, staticKey(secret), deps), "stored", signal));
+			return keyStateOf(await checkKey(self.transport(entry, staticKey(secret), deps), "stored", span));
 		},
 		transport: (_entry, key, deps) =>
 			new Transport({
@@ -71,14 +71,17 @@ export const OPENROUTER: ProviderKind = (() => {
 				errors: OPENROUTER_CHAT,
 				scheduler: deps.scheduler,
 				userAgent: deps.userAgent,
+				budgets: deps.budgets,
 			}),
 		catalog: (_entry, transport, deps) => new ModelCatalog({ transport, ...deps }),
-		browse: (_entry, route, deps) => openRouterBrowser(catalogOf(route), route.transport, deps.scheduler),
-		tester: (_entry, route, deps) => openRouterTester(catalogOf(route), route.transport, deps.scheduler),
+		browse: (_entry, route, deps) =>
+			openRouterBrowser(catalogOf(route), route.transport, deps.scheduler, deps.budgets),
+		tester: (_entry, route, deps) =>
+			openRouterTester(catalogOf(route), route.transport, deps.scheduler, deps.budgets),
 		codec: () => OPENROUTER_CHAT,
 		failure: dispositionOf,
-		limits: async (transport, signal) => {
-			const key = await checkKey(transport, "stored", signal).catch(() => undefined);
+		limits: async (transport, span) => {
+			const key = await checkKey(transport, "stored", span).catch(() => undefined);
 			if (key?.ok !== true) return undefined;
 			return {
 				...(key.limit === undefined ? {} : { limit: key.limit }),

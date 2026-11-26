@@ -1,6 +1,7 @@
 // One entry's pool cooldown: the transition and the skip it asks for.
 
 import type { PoolEvent, PoolState, PoolVerdict, Ticket } from "@nyaaai/contract/shapes/health";
+import { MAX_SERVER_WAIT_MS } from "@nyaaai/contract/time";
 
 ////////////////////////////////
 //  Constants
@@ -12,9 +13,6 @@ export const BALANCE_COOL_MS = 5 * 60 * 60_000;
 
 /** ETA floor before halving. */
 export const PROBE_FLOOR_MS = 10 * 60_000;
-
-/** A window ends within a month of the reply. */
-export const MAX_WINDOW_MS = 31 * 24 * 60 * 60_000;
 
 /** Pool billing sources. */
 export const ALLOWANCE_SOURCES: ReadonlySet<string> = new Set(["go", "go-plus"]);
@@ -53,7 +51,7 @@ export function step(state: PoolState, event: PoolEvent, nowMs: number, pauseMs:
 		case "billed":
 			return event.plan === "go" ? billed(state, event.source, event.extraUsage, nowMs) : state;
 		case "refused": {
-			const farthest = nowMs + MAX_WINDOW_MS;
+			const farthest = nowMs + MAX_SERVER_WAIT_MS;
 			const waited =
 				event.retryAfterMs === undefined ? undefined : Math.min(nowMs + event.retryAfterMs, farthest);
 			const known = event.resetsAt === undefined ? undefined : Math.min(event.resetsAt, farthest);

@@ -289,4 +289,15 @@ export const stepShapeCases: CaseSource[] = [
 		[["a", 1]],
 		{ a: "b" },
 	]),
+	step("Budget", [
+		{ totalMs: 30_000, idleMs: 30_000, maxBytes: 16_777_216 },
+		{ totalMs: 1, idleMs: 1, maxBytes: 1 },
+		{ totalMs: 86_400_000, idleMs: 1_800_000, maxBytes: 1_073_741_824, extra: 1 },
+		{ totalMs: 86_400_001, idleMs: 1, maxBytes: 1 },
+		{ totalMs: 1, idleMs: 1_800_001, maxBytes: 1 },
+		{ totalMs: 1, idleMs: 1, maxBytes: 1_073_741_825 },
+		{ totalMs: 0, idleMs: 1, maxBytes: 1 },
+		{ totalMs: 1.5, idleMs: 1, maxBytes: 1 },
+		{ totalMs: 1, idleMs: 1 },
+	]),
 ];

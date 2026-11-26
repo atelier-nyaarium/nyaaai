@@ -1,0 +1,17 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "budget.table",
+	"name": "table-a-total-past-its-ceiling-is-refused",
+	"input": {
+		"changes": {
+			"stream": {
+				"totalMs": 86400001
+			}
+		}
+	},
+	"expected": {
+		"presets": null,
+		"refused": "The stream budget's totalMs is not a whole number from 1 to 86400000."
+	}
+}

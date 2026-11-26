@@ -1,0 +1,70 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "budget.fetch",
+	"name": "fetch-tie-a-chunk-due-as-its-idle-clock-ends-is-delivered",
+	"input": {
+		"budget": {
+			"totalMs": 1000,
+			"idleMs": 30,
+			"maxBytes": 1000
+		},
+		"exchange": {
+			"status": 200,
+			"headers": [
+				[
+					"content-type",
+					"text/plain"
+				]
+			],
+			"chunks": [
+				{
+					"kind": "text",
+					"text": "a",
+					"delayMs": 30
+				},
+				{
+					"kind": "text",
+					"text": "a",
+					"delayMs": 30
+				},
+				{
+					"kind": "text",
+					"text": "a",
+					"delayMs": 30
+				}
+			]
+		}
+	},
+	"expected": {
+		"seen": [
+			{
+				"kind": "head",
+				"atMs": 0,
+				"status": 200
+			},
+			{
+				"kind": "chunk",
+				"atMs": 30,
+				"size": 1
+			},
+			{
+				"kind": "chunk",
+				"atMs": 60,
+				"size": 1
+			},
+			{
+				"kind": "chunk",
+				"atMs": 90,
+				"size": 1
+			},
+			{
+				"kind": "done",
+				"atMs": 90
+			}
+		],
+		"served": 3,
+		"waiting": [],
+		"nowMs": 90
+	}
+}

@@ -1,6 +1,7 @@
 // Model request and reply shapes.
 
 import { shapeSet, z } from "../shape";
+import { MAX_SERVER_WAIT_MS } from "../time";
 
 ////////////////////////////////
 //  Shapes
@@ -200,7 +201,7 @@ export const Failure = z.object({
 	category: FailureCategory,
 	/** HTTP status, or where it failed. */
 	status: z.union([z.number(), z.string()]),
-	retryAfterMs: z.int().exactOptional(),
+	retryAfterMs: z.int().max(MAX_SERVER_WAIT_MS).exactOptional(),
 	/** Epoch ms reset time. */
 	resetsAt: z.int().exactOptional(),
 	message: z.string(),
@@ -264,6 +265,24 @@ export type SseItem = z.infer<typeof SseItem>;
 export const HeaderList = z.array(z.tuple([z.string(), z.string()]));
 export type HeaderList = z.infer<typeof HeaderList>;
 
+/** Ceiling of any budget's `totalMs`: a day. */
+export const MAX_TOTAL_MS = 24 * 60 * 60_000;
+/** Ceiling of any budget's `idleMs`: half an hour. */
+export const MAX_IDLE_MS = 30 * 60_000;
+/** Ceiling of any budget's `maxBytes`: 1 GiB. */
+export const MAX_BYTES = 1024 * 1024 * 1024;
+
+/** One exchange's bounds, each finite. */
+export const Budget = z.object({
+	/** From the call to the body's end. */
+	totalMs: z.int().min(1).max(MAX_TOTAL_MS),
+	/** Each wait on the network. */
+	idleMs: z.int().min(1).max(MAX_IDLE_MS),
+	/** The body's bytes, an error body included. */
+	maxBytes: z.int().min(1).max(MAX_BYTES),
+});
+export type Budget = z.infer<typeof Budget>;
+
 export const stepSet = shapeSet("step", {
 	Effort,
 	ToolSpec,
@@ -287,4 +306,5 @@ export const stepSet = shapeSet("step", {
 	Encoded,
 	SseItem,
 	HeaderList,
+	Budget,
 });

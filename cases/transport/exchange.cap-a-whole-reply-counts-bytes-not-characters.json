@@ -55,7 +55,11 @@
 				}
 			}
 		],
-		"maxBytes": 6
+		"budgets": {
+			"reply": {
+				"maxBytes": 6
+			}
+		}
 	},
 	"expected": {
 		"calls": [

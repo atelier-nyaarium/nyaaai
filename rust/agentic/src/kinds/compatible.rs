@@ -2,7 +2,7 @@
 
 use std::sync::{Arc, LazyLock};
 
-use nyaaai_contract::cancel::CancelToken;
+use nyaaai_contract::fetch::Span;
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::json::Value;
 use nyaaai_contract::shapes::provider::ProviderKindName;
@@ -68,12 +68,12 @@ impl LocalServer for CompatibleServer {
     fn models<'a>(
         &'a self,
         _known: &'a [LocalModel],
-        cancel: &'a CancelToken,
+        span: &'a Span,
     ) -> BoxFuture<'a, Result<Vec<LocalModel>, KindError>> {
         Box::pin(async move {
             let raw = self
                 .transport
-                .get_json(LIST, cancel, &KeyAuth::Stored)
+                .get_json(LIST, span, &KeyAuth::Stored)
                 .await?;
             let Some(models) = listed(&raw) else {
                 return Err(KindError::Message(
@@ -128,9 +128,9 @@ pub static COMPATIBLE: LazyLock<Arc<LocalKind>> = LazyLock::new(|| {
         chat_path: Some("/chat/completions"),
         base: Some(base_of),
         terms: None,
-        reach: |transport, cancel| {
+        reach: |transport, span| {
             Box::pin(async move {
-                let raw = transport.get_json(LIST, &cancel, &KeyAuth::Stored).await?;
+                let raw = transport.get_json(LIST, span, &KeyAuth::Stored).await?;
                 Ok(listed(&raw).map(|models| models.len()))
             })
         },

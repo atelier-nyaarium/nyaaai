@@ -2,7 +2,9 @@
 
 import { describe, expect, it } from "bun:test";
 import { base64Encode } from "@nyaaai/contract/base64";
+import { BUDGETS, BudgetExceeded } from "@nyaaai/contract/fetch";
 import { headerOf } from "@nyaaai/contract/headers";
+import { systemScheduler } from "@nyaaai/contract/time";
 import { type Loopback, type LoopbackHold, loopbackProvider } from "@nyaaai/testkit/loopback";
 import { rejection } from "@nyaaai/testkit/rejection";
 import type { Trace, TraceExchange } from "@nyaaai/testkit/trace";
@@ -47,7 +49,10 @@ const post = (provider: Loopback, body: string, path = "/v1/chat") => ({
 	url: `${provider.url}${path}`,
 	headers: [["content-type", "application/json"]] as Array<[string, string]>,
 	body,
+	budget: BUDGETS.catalog,
 });
+
+const fetched = platformFetch(systemScheduler);
 
 ////////////////////////////////
 //  Tests
@@ -59,7 +64,7 @@ describe("the platform fetch", () => {
 			[exchange({ headers: { "Content-Type": "text/event-stream", "X-RateLimit-Remaining": "3" }, chunks })],
 			[],
 			async (provider) => {
-				const answer = await platformFetch()(post(provider, '{"turn":1}'), new AbortController().signal);
+				const answer = await fetched(post(provider, '{"turn":1}'), new AbortController().signal);
 				expect(answer.status).toBe(200);
 				const names = answer.headers.map(([name]) => name);
 				expect(names).toEqual([...names].sort());
@@ -75,17 +80,18 @@ describe("the platform fetch", () => {
 		await serving([exchange(), exchange()], [], async (provider) => {
 			const signal = new AbortController().signal;
 			await joined(
-				(
-					await platformFetch()(
-						{ ...post(provider, '{"model":"m","n":[1,2]}'), headers: [["x-lab", "1"]] },
-						signal,
-					)
-				).chunks,
+				(await fetched({ ...post(provider, '{"model":"m","n":[1,2]}'), headers: [["x-lab", "1"]] }, signal))
+					.chunks,
 			);
 			await joined(
 				(
-					await platformFetch()(
-						{ method: "GET", url: `${provider.url}/v1/models`, headers: [["x-lab", "2"]] },
+					await fetched(
+						{
+							method: "GET",
+							url: `${provider.url}/v1/models`,
+							headers: [["x-lab", "2"]],
+							budget: BUDGETS.catalog,
+						},
 						signal,
 					)
 				).chunks,
@@ -97,7 +103,7 @@ describe("the platform fetch", () => {
 
 	it("answers no chunks for a response with no body", async () => {
 		await serving([exchange({ status: 204, headers: {} })], [], async (provider) => {
-			const answer = await platformFetch()(post(provider, "{}"), new AbortController().signal);
+			const answer = await fetched(post(provider, "{}"), new AbortController().signal);
 			expect(answer.status).toBe(204);
 			expect(await joined(answer.chunks)).toBe("");
 		});
@@ -112,8 +118,8 @@ describe("the platform fetch", () => {
 			},
 			{ preconnect: fetch.preconnect },
 		);
-		const answer = await platformFetch(given)(
-			{ method: "GET", url: "http://lab.local/x", headers: [] },
+		const answer = await platformFetch(systemScheduler, given)(
+			{ method: "GET", url: "http://lab.local/x", headers: [], budget: BUDGETS.catalog },
 			new AbortController().signal,
 		);
 		const parts: Uint8Array[] = [];
@@ -135,7 +141,7 @@ describe("the platform fetch", () => {
 		const provider = await loopbackProvider(trace);
 		try {
 			(trace.exchanges[0] as TraceExchange).headers["location"] = `${provider.url}/next`;
-			const answer = await platformFetch()(post(provider, '{"prompt":"p"}'), new AbortController().signal);
+			const answer = await fetched(post(provider, '{"prompt":"p"}'), new AbortController().signal);
 			expect(answer.status).toBe(302);
 			expect(headerOf(answer.headers, "location")).toBe(`${provider.url}/next`);
 			await joined(answer.chunks);
@@ -148,7 +154,7 @@ describe("the platform fetch", () => {
 	it("rejects with the signal's reason when aborted before the head, and the server sees the close", async () => {
 		await serving([exchange()], ["head"], async (provider) => {
 			const controller = new AbortController();
-			const call = platformFetch()(post(provider, "{}"), controller.signal);
+			const call = fetched(post(provider, "{}"), controller.signal);
 			await provider.arrived(0);
 			const reason = new Error("stop now");
 			controller.abort(reason);
@@ -162,7 +168,7 @@ describe("the platform fetch", () => {
 			const controller = new AbortController();
 			const reason = new Error("early");
 			controller.abort(reason);
-			expect(await rejection(platformFetch()(post(provider, "{}"), controller.signal))).toBe(reason);
+			expect(await rejection(fetched(post(provider, "{}"), controller.signal))).toBe(reason);
 			expect(provider.requests).toEqual([]);
 		});
 	});
@@ -170,7 +176,7 @@ describe("the platform fetch", () => {
 	it("rejects the read with the signal's reason when aborted mid-body, and the server sees the close", async () => {
 		await serving([exchange({ chunks: [encoded("first")] })], ["chunks"], async (provider) => {
 			const controller = new AbortController();
-			const answer = await platformFetch()(post(provider, "{}"), controller.signal);
+			const answer = await fetched(post(provider, "{}"), controller.signal);
 			const reader = answer.chunks[Symbol.asyncIterator]();
 			expect(new TextDecoder().decode((await reader.next()).value)).toBe("first");
 			const pending = reader.next();
@@ -181,9 +187,25 @@ describe("the platform fetch", () => {
 		});
 	});
 
+	// No case reaches the platform adapter.
+	it("ends a silent body at its idle bound, and the server sees the close", async () => {
+		await serving([exchange({ chunks: [encoded("first")] })], ["chunks"], async (provider) => {
+			const answer = await fetched(
+				{ ...post(provider, "{}"), budget: { ...BUDGETS.catalog, idleMs: 50 } },
+				new AbortController().signal,
+			);
+			const reader = answer.chunks[Symbol.asyncIterator]();
+			await reader.next();
+			const reason = await rejection(reader.next());
+			expect(reason).toBeInstanceOf(BudgetExceeded);
+			expect((reason as BudgetExceeded).bound).toBe("idle");
+			await provider.closed(0);
+		});
+	});
+
 	it("releases the connection when the reader stops early", async () => {
 		await serving([exchange({ chunks: [encoded("first")] })], ["chunks"], async (provider) => {
-			const answer = await platformFetch()(post(provider, "{}"), new AbortController().signal);
+			const answer = await fetched(post(provider, "{}"), new AbortController().signal);
 			const reader = answer.chunks[Symbol.asyncIterator]();
 			await reader.next();
 			await reader.return?.();
@@ -196,7 +218,7 @@ describe("the platform fetch", () => {
 		const url = provider.url;
 		await provider.close();
 		const reason = await rejection(
-			platformFetch()({ method: "GET", url, headers: [] }, new AbortController().signal),
+			fetched({ method: "GET", url, headers: [], budget: BUDGETS.catalog }, new AbortController().signal),
 		);
 		expect(reason).toBeInstanceOf(Error);
 	});

@@ -89,14 +89,14 @@ export const OPENCODE: ProviderKind = (() => {
 		balance: "https://opencode.ai/console",
 		extraUsage: ["go"],
 		facts: billingFacts,
-		check: async (entry, secret, deps, signal) => {
+		check: async (entry, secret, deps, span) => {
 			if (secret === undefined) return { kind: "none" };
 			try {
 				// 200 clears rejection only.
-				await self.transport(entry, staticKey(secret), deps).getJson("/v1/models", signal, "stored");
+				await self.transport(entry, staticKey(secret), deps).getJson("/v1/models", span, "stored");
 				return { kind: "ok" };
 			} catch (error) {
-				if (signal.aborted) throw error;
+				if (span.signal.aborted) throw error;
 				const category = failureOf(error)?.category;
 				return { kind: category === "keyRejected" || category === "keyMissing" ? "rejected" : "unreachable" };
 			}
@@ -111,6 +111,7 @@ export const OPENCODE: ProviderKind = (() => {
 				errors: opencodeErrors(deps.scheduler),
 				scheduler: deps.scheduler,
 				userAgent: deps.userAgent,
+				budgets: deps.budgets,
 			}),
 		catalog: (entry, transport, deps) => new OpenCodeCatalog({ plan: planOf(entry), transport, ...deps }),
 		browse: (entry, route, deps) => opencodeBrowser(catalogOf(route), planOf(entry), deps.scheduler),

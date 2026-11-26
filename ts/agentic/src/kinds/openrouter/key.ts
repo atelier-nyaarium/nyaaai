@@ -1,5 +1,6 @@
 // OpenRouter key check.
 
+import type { Span } from "@nyaaai/contract/fetch";
 import { failureOf } from "../../failure";
 import type { KeyAuth, Transport } from "../../transport";
 import { type Fields, fieldOf, fieldsOf } from "../readers";
@@ -25,13 +26,13 @@ function usd(fields: Fields, key: string): number | undefined {
 export async function checkKey(
 	transport: Pick<Transport, "getJson">,
 	auth: Exclude<KeyAuth, "none">,
-	signal: AbortSignal,
+	span: Span,
 ): Promise<KeyCheck> {
 	let body: unknown;
 	try {
-		body = await transport.getJson("/key", signal, auth);
+		body = await transport.getJson("/key", span, auth);
 	} catch (error) {
-		if (signal.aborted) throw error;
+		if (span.signal.aborted) throw error;
 		const category = failureOf(error)?.category;
 		const rejected = category === "keyRejected" || category === "refused" || category === "keyMissing";
 		return { ok: false, reason: rejected ? "rejected" : "unreachable" };

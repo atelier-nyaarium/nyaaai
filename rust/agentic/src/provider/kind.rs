@@ -6,7 +6,7 @@ use std::sync::Arc;
 use tokio::runtime::Handle;
 
 use nyaaai_contract::cancel::CancelToken;
-use nyaaai_contract::fetch::Fetch;
+use nyaaai_contract::fetch::{Budgets, Fetch, Span};
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::model_registry::ModelRegistry;
 use nyaaai_contract::shapes::model::{BrowseDetail, BrowseModel, ModelRow, ModelUse, ModelView};
@@ -27,8 +27,10 @@ use crate::transport::{KeySource, Transport, TransportError};
 pub struct CatalogDeps {
     /// Where a refresh or a read runs, from any thread.
     pub runtime: Handle,
-    /// The time, and the deadlines of a fetch.
+    /// The time, and the spans of its reads.
     pub scheduler: Arc<dyn Scheduler>,
+    /// Default the presets.
+    pub budgets: Option<Budgets>,
     /// Rows; a catalog that caches a join rejoins when this tells a change.
     pub rows: Arc<dyn ModelRegistry>,
     /// Told after each successful refresh.
@@ -164,6 +166,8 @@ pub struct KindDeps {
     pub user_agent: String,
     /// Overrides the entry's URL.
     pub base_url: Option<String>,
+    /// What every span opens from; default the presets.
+    pub budgets: Option<Budgets>,
 }
 
 /// An entry's transport and catalog.
@@ -229,13 +233,13 @@ pub trait ProviderKind: Send + Sync {
         None
     }
 
-    /// Key or URL check; `Err` is the caller's cancel or a refusal, not a state.
+    /// Key or URL check, its reads drawn from the span; `Err` is the span's end or a refusal, not a state.
     fn check<'a>(
         &'a self,
         entry: &'a EntryFields,
         secret: Option<&'a str>,
         deps: &'a KindDeps,
-        cancel: &'a CancelToken,
+        span: &'a Span,
     ) -> BoxFuture<'a, Result<KeyState, KindError>>;
 
     /// A refusal is the text of why no transport can be made.
@@ -292,7 +296,7 @@ pub trait ProviderKind: Send + Sync {
     fn limits<'a>(
         &'a self,
         _transport: &'a Transport,
-        _cancel: &'a CancelToken,
+        _span: &'a Span,
     ) -> BoxFuture<'a, Option<Limits>> {
         Box::pin(async { None })
     }

@@ -2,7 +2,7 @@
 	"format": 2,
 	"type": "function",
 	"kind": "transport.exchange",
-	"name": "cap-a-stream-line-at-the-cap-then-its-end",
+	"name": "idle-an-error-body-has-a-window-per-read",
 	"input": {
 		"codec": {
 			"family": "chat-completions",
@@ -19,25 +19,23 @@
 			"kind": "inline",
 			"exchanges": [
 				{
-					"status": 200,
+					"status": 500,
 					"headers": [
 						[
 							"content-type",
-							"text/event-stream"
+							"application/json"
 						]
 					],
 					"chunks": [
 						{
 							"kind": "text",
-							"text": "data: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+							"text": "{\"error\":",
+							"delayMs": 20
 						},
 						{
 							"kind": "text",
-							"text": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-						},
-						{
-							"kind": "text",
-							"text": "\n\n"
+							"text": "{\"message\":\"x\"}}",
+							"delayMs": 20
 						}
 					]
 				}
@@ -63,7 +61,11 @@
 				}
 			}
 		],
-		"maxBytes": 100
+		"budgets": {
+			"stream": {
+				"idleMs": 30
+			}
+		}
 	},
 	"expected": {
 		"calls": [
@@ -72,13 +74,13 @@
 				"result": null,
 				"answer": null,
 				"failure": {
-					"category": "stream",
-					"status": "stream",
-					"message": "A stream chunk was not JSON."
+					"category": "unavailable",
+					"status": 500,
+					"message": "x"
 				},
 				"thrown": null,
 				"aborted": false,
-				"nowMs": 1800000000000
+				"nowMs": 1800000000040
 			}
 		],
 		"requests": [
@@ -107,14 +109,14 @@
 			}
 		],
 		"log": [
-			"OpenRouter 200 - -"
+			"OpenRouter 500 - -"
 		],
 		"settled": [
 			"openai/gpt-6-luna"
 		],
 		"keyReads": 1,
 		"read": [
-			3
+			2
 		],
 		"waiting": []
 	}

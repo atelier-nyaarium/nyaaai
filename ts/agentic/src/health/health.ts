@@ -1,6 +1,7 @@
 // Entry health: key status, bills, pool cooldowns and gates, read through ports.
 
 import type { EntryKeys } from "@nyaaai/contract/entryKeys";
+import { BUDGETS, type Budgets, type Span } from "@nyaaai/contract/fetch";
 import type { Ids } from "@nyaaai/contract/id";
 import { canonicalJson } from "@nyaaai/contract/json";
 import type {
@@ -22,7 +23,7 @@ import type { EntryRegistry, Era, Incarnation, RegistryEvent } from "../provider
 import type { KindDeps, ProviderKind } from "../provider/kind";
 import type { Resolved } from "../provider/resolver";
 import { type GateState, ProviderGate } from "./gate";
-import { KEY_CHECK_MS, KeyReader } from "./keyReader";
+import { KeyReader } from "./keyReader";
 import { CLEAR, step, verdict } from "./pool";
 
 ////////////////////////////////
@@ -70,6 +71,8 @@ export interface HealthDeps {
 	kinds: Partial<Record<ProviderKindName, ProviderKind>>;
 	/** What a kind's check stands on. */
 	kindDeps(kind: ProviderKindName): KindDeps;
+	/** A key check's span opens from `keyCheck`; default `BUDGETS`. */
+	budgets?: Budgets;
 	pauseMs?: number;
 	maxPauses?: number;
 }
@@ -82,6 +85,9 @@ type Part = HealthChange["changed"][number];
 const PAUSE_MS = 60_000;
 
 const RECHECK_MS = 60_000;
+
+/** A recheck this recent reads as unready. */
+const RECHECKING_MS = 30_000;
 
 /** Declaration order of the shape's parts. */
 const PARTS: readonly Part[] = ["key", "billed", "pool", "waiting"];
@@ -432,7 +438,7 @@ export class ProviderHealth implements Gate {
 	}
 
 	private rechecking(era: Era): boolean {
-		return era.rechecked !== undefined && this.d.scheduler.nowMs() - era.rechecked < KEY_CHECK_MS;
+		return era.rechecked !== undefined && this.d.scheduler.nowMs() - era.rechecked < RECHECKING_MS;
 	}
 
 	/** The only pool writer. */
@@ -486,7 +492,8 @@ export class ProviderHealth implements Gate {
 			state: none(),
 			reader: new KeyReader(
 				this.d.scheduler,
-				(signal) => this.keyCheck(era, signal),
+				(this.d.budgets ?? BUDGETS).keyCheck,
+				(span) => this.keyCheck(era, span),
 				(state) => {
 					fresh.state = state;
 					this.touch(era.incarnation.id, "key");
@@ -498,11 +505,11 @@ export class ProviderHealth implements Gate {
 	}
 
 	/** Ends without effect once its era retired. */
-	private async keyCheck(era: Era, signal: AbortSignal): Promise<KeyState | undefined> {
+	private async keyCheck(era: Era, span: Span): Promise<KeyState | undefined> {
 		const { entry } = era.incarnation;
 		const kind = this.d.kinds[entry.kind];
 		if (kind === undefined) return none();
-		const stale = () => signal.aborted || era.retired;
+		const stale = () => span.signal.aborted || era.retired;
 		const answer = await this.d.keys.get(entry.id);
 		if (stale()) return undefined;
 		let state: KeyState;
@@ -514,7 +521,7 @@ export class ProviderHealth implements Gate {
 			state =
 				kind.field === "key" && secret === undefined
 					? none()
-					: await kind.check(entry, secret, this.d.kindDeps(entry.kind), signal);
+					: await kind.check(entry, secret, this.d.kindDeps(entry.kind), span);
 		}
 		return stale() ? undefined : state;
 	}

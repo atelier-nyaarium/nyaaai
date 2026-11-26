@@ -1,0 +1,17 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "budget.table",
+	"name": "table-a-size-past-its-ceiling-is-refused",
+	"input": {
+		"changes": {
+			"catalog": {
+				"maxBytes": 1073741825
+			}
+		}
+	},
+	"expected": {
+		"presets": null,
+		"refused": "The catalog budget's maxBytes is not a whole number from 1 to 1073741824."
+	}
+}

@@ -11,6 +11,7 @@ use std::task::{Context, Poll, Waker};
 
 use nyaaai_contract::cancel::{CancelToken, Unsubscribe};
 use nyaaai_contract::entry_keys::{EntryKeys, KeyAnswer};
+use nyaaai_contract::fetch::{Budget, BudgetName, Budgets, Span};
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::id::Ids;
 use nyaaai_contract::shapes::health::{
@@ -24,11 +25,11 @@ use nyaaai_contract::shapes::provider::{
     ProviderEntry, ProviderKindName, SkipReason,
 };
 use nyaaai_contract::shapes::step::{Failure, FailureCategory, NormalizedUsage};
-use nyaaai_contract::time::{Deadline, Scheduler};
+use nyaaai_contract::time::Scheduler;
 use tokio::runtime::Handle;
 
 use super::gate::{GateDeps, GateState, ProviderGate, WaitFn};
-use super::key_reader::{Check, Failed, KEY_CHECK_MS, KeyReader, Shown};
+use super::key_reader::{Check, Failed, KeyReader, Shown};
 use super::pool::{clear, step, verdict};
 use crate::provider::incarnation::{
     EntryRegistry, Era, Incarnation, KeyStatus, RegistryEvent, TicketKey,
@@ -43,6 +44,9 @@ type Listener = Arc<dyn Fn(&HealthChange) + Send + Sync>;
 const PAUSE_MS: i64 = 60_000;
 
 const RECHECK_MS: i64 = 60_000;
+
+/// A recheck this recent reads as unready.
+const RECHECKING_MS: i64 = 30_000;
 
 /// Declaration order of the shape's parts.
 const PARTS: [Part; 4] = [Part::Key, Part::Billed, Part::Pool, Part::Waiting];
@@ -138,6 +142,8 @@ pub struct HealthDeps {
     pub kinds: Vec<Arc<dyn ProviderKind>>,
     /// What a kind's check stands on.
     pub kind_deps: Arc<dyn Fn(ProviderKindName) -> KindDeps + Send + Sync>,
+    /// A key check's span opens from `keyCheck`; default the presets.
+    pub budgets: Option<Budgets>,
     pub pause_ms: Option<i64>,
     pub max_pauses: Option<u64>,
 }
@@ -159,6 +165,8 @@ struct Core {
     keys: Arc<dyn EntryKeys>,
     kinds: Vec<Arc<dyn ProviderKind>>,
     kind_deps: Arc<dyn Fn(ProviderKindName) -> KindDeps + Send + Sync>,
+    /// Each key check's span opens from it.
+    key_check: Budget,
     pause_ms: i64,
     gate: ProviderGate,
     disposed: AtomicBool,
@@ -413,7 +421,7 @@ impl Core {
 
     fn rechecking(&self, era: &Era) -> bool {
         let last = era.state().rechecked;
-        last.is_some_and(|last| self.now() - last < KEY_CHECK_MS)
+        last.is_some_and(|last| self.now() - last < RECHECKING_MS)
     }
 
     /// The only pool writer; false when the era had retired, and nothing was applied.
@@ -556,6 +564,7 @@ impl Core {
             reader: KeyReader::new(
                 Arc::clone(&self.scheduler),
                 self.runtime.clone(),
+                self.key_check.clone(),
                 check,
                 shown,
             ),
@@ -567,18 +576,14 @@ impl Core {
     fn key_check(
         self: &Arc<Self>,
         era: Arc<Era>,
-        limit: Arc<Deadline>,
+        limit: Arc<Span>,
     ) -> BoxFuture<'static, Result<Option<KeyState>, Failed>> {
         let core = Arc::clone(self);
         Box::pin(async move { core.key_state(&era, &limit).await })
     }
 
     /// Ends without effect once its token ended or its era retired.
-    async fn key_state(
-        &self,
-        era: &Arc<Era>,
-        limit: &Deadline,
-    ) -> Result<Option<KeyState>, Failed> {
+    async fn key_state(&self, era: &Arc<Era>, limit: &Span) -> Result<Option<KeyState>, Failed> {
         let Some(incarnation) = era.incarnation() else {
             return Ok(None);
         };
@@ -612,7 +617,7 @@ impl Core {
                         extra_usage: entry.extra_usage,
                     };
                     let deps = (self.kind_deps)(entry.kind);
-                    kind.check(&fields, secret.as_deref(), &deps, limit.token())
+                    kind.check(&fields, secret.as_deref(), &deps, limit)
                         .await
                         .map_err(|_| Failed)?
                 }
@@ -764,6 +769,11 @@ impl ProviderHealth {
                 keys: deps.keys,
                 kinds: deps.kinds,
                 kind_deps: deps.kind_deps,
+                key_check: deps
+                    .budgets
+                    .unwrap_or_default()
+                    .get(BudgetName::KeyCheck)
+                    .clone(),
                 pause_ms: deps.pause_ms.unwrap_or(PAUSE_MS),
                 gate,
                 disposed: AtomicBool::new(false),
@@ -1205,6 +1215,7 @@ mod tests {
                 keys: keys.clone(),
                 kinds: Vec::new(),
                 kind_deps: Arc::new(|_| unreachable!("no kind asks")),
+                budgets: None,
                 pause_ms: None,
                 max_pauses: None,
             },

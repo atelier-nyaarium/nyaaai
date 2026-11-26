@@ -1,16 +1,16 @@
 // Scripted fetch and key source tests.
 
 import { describe, expect, it } from "bun:test";
-import type { FetchRequest } from "@nyaaai/contract/fetch";
+import { BUDGETS, type FetchRequest } from "@nyaaai/contract/fetch";
 import { rejection } from "../rejection";
-import { TimerWheel } from "../scheduler";
+import { fakeScheduler, TimerWheel } from "../scheduler";
 import { type ScriptedExchange, scriptedFetch } from "../scriptedFetch";
 import { replayFetch } from "../trace";
 
 ////////////////////////////////
 //  Functions & Helpers
 
-const REQUEST: FetchRequest = { method: "GET", url: "http://lab.local/x", headers: [] };
+const REQUEST: FetchRequest = { method: "GET", url: "http://lab.local/x", headers: [], budget: BUDGETS.catalog };
 
 const bytes = (text: string): Uint8Array => new TextEncoder().encode(text);
 
@@ -32,7 +32,7 @@ async function drain(chunks: AsyncIterable<Uint8Array>): Promise<string[]> {
 
 describe("the scripted fetch", () => {
 	it("counts the requests that had to wait for the lane", async () => {
-		const played = scriptedFetch([exchange(), exchange()], new TimerWheel(0));
+		const played = scriptedFetch([exchange(), exchange()], fakeScheduler(new TimerWheel(0)));
 		const signal = new AbortController().signal;
 		const first = await played.fetch(REQUEST, signal);
 		expect(played.waited()).toBe(0);
@@ -44,7 +44,7 @@ describe("the scripted fetch", () => {
 
 	it("plays its exchanges in order and records each request and each chunk handed out", async () => {
 		const wheel = new TimerWheel(100);
-		const played = scriptedFetch([exchange(), exchange({ status: 404, chunks: [] })], wheel);
+		const played = scriptedFetch([exchange(), exchange({ status: 404, chunks: [] })], fakeScheduler(wheel));
 		const signal = new AbortController().signal;
 		const first = await played.fetch(REQUEST, signal);
 		expect(first.status).toBe(200);
@@ -69,7 +69,7 @@ describe("the scripted fetch", () => {
 					],
 				}),
 			],
-			new TimerWheel(),
+			fakeScheduler(),
 		);
 		const response = await played.fetch(REQUEST, new AbortController().signal);
 		expect(response.headers).toEqual([
@@ -86,7 +86,7 @@ describe("the scripted fetch", () => {
 		wheel.after(15, "mid", () => fired.push(`mid@${wheel.nowMs()}`));
 		const played = scriptedFetch(
 			[exchange({ headMs: 10, chunks: [{ bytes: bytes("a"), delayMs: 10 }, { bytes: bytes("b") }] })],
-			wheel,
+			fakeScheduler(wheel),
 		);
 		const response = await played.fetch(REQUEST, new AbortController().signal);
 		expect(wheel.nowMs()).toBe(10);
@@ -98,7 +98,7 @@ describe("the scripted fetch", () => {
 		const wheel = new TimerWheel(0);
 		const stop = new AbortController();
 		wheel.after(5, "stop", () => stop.abort(new Error("stopped")));
-		const played = scriptedFetch([exchange({ headMs: 10 }), exchange()], wheel);
+		const played = scriptedFetch([exchange({ headMs: 10 }), exchange()], fakeScheduler(wheel));
 		expect(((await rejection(played.fetch(REQUEST, stop.signal))) as Error).message).toBe("stopped");
 
 		const later = new AbortController();
@@ -117,7 +117,7 @@ describe("the scripted fetch", () => {
 				exchange({ end: "dropped" }),
 				exchange({ end: "dropped", error: "reset" }),
 			],
-			new TimerWheel(),
+			fakeScheduler(),
 		);
 		const signal = new AbortController().signal;
 		await rejection(played.fetch(REQUEST, signal));
@@ -129,7 +129,7 @@ describe("the scripted fetch", () => {
 	});
 
 	it("takes a request when the signal is already aborted, and plays no exchange for it", async () => {
-		const played = scriptedFetch([exchange()], new TimerWheel());
+		const played = scriptedFetch([exchange()], fakeScheduler());
 		const stop = new AbortController();
 		stop.abort(new Error("early"));
 		expect(((await rejection(played.fetch(REQUEST, stop.signal))) as Error).message).toBe("early");
@@ -169,7 +169,7 @@ describe("the scripted fetch", () => {
 				}),
 				exchange({ headMs: 7 }),
 			],
-			wheel,
+			fakeScheduler(wheel),
 		);
 		const signal = new AbortController().signal;
 		const one = played.fetch(REQUEST, signal);
@@ -185,7 +185,7 @@ describe("the scripted fetch", () => {
 	});
 
 	it("frees the lane when a body is cancelled midway", async () => {
-		const played = scriptedFetch([exchange(), exchange()], new TimerWheel(0));
+		const played = scriptedFetch([exchange(), exchange()], fakeScheduler(new TimerWheel(0)));
 		const signal = new AbortController().signal;
 		const first = await played.fetch(REQUEST, signal);
 		const iterator = first.chunks[Symbol.asyncIterator]();
@@ -200,7 +200,7 @@ describe("the scripted fetch", () => {
 
 	it("refuses a waiting request whose signal ended, unseen and with no time spent", async () => {
 		const own = new TimerWheel(0);
-		const left = scriptedFetch([exchange(), exchange()], own);
+		const left = scriptedFetch([exchange(), exchange()], fakeScheduler(own));
 		const held = await left.fetch(REQUEST, new AbortController().signal);
 		const gone = new AbortController();
 		const waiting = rejection(left.fetch({ ...REQUEST, url: "http://lab.local/gone" }, gone.signal));
@@ -212,7 +212,10 @@ describe("the scripted fetch", () => {
 		expect(left.requests.map((request) => request.url)).toEqual(["http://lab.local/x", "http://lab.local/z"]);
 
 		const wheel = new TimerWheel(0);
-		const played = scriptedFetch([exchange({ headMs: 5 }), exchange({ headMs: 50 }), exchange()], wheel);
+		const played = scriptedFetch(
+			[exchange({ headMs: 5 }), exchange({ headMs: 50 }), exchange()],
+			fakeScheduler(wheel),
+		);
 		const shared = new AbortController();
 		const first = await played.fetch(REQUEST, shared.signal);
 		const second = rejection(played.fetch({ ...REQUEST, url: "http://lab.local/y" }, shared.signal));

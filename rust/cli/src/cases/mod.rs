@@ -6,6 +6,7 @@ pub mod shapes;
 
 pub mod base64;
 pub mod browse;
+pub mod budget;
 pub mod catalog;
 pub mod claude;
 pub mod codec;

@@ -117,15 +117,15 @@ export function runningOf(raw: unknown): Map<string, number> {
 
 export function server(transport: LocalTransport, maxListed = MAX_LISTED): LocalServer {
 	return {
-		models: async (known, signal) => {
-			const listing = localTags(await transport.getJson("/api/tags", signal, "none"));
+		models: async (known, span) => {
+			const listing = localTags(await transport.getJson("/api/tags", span, "none"));
 			if (listing === undefined) throw new Error("The model list did not parse.");
 			const tags = firstDistinct(listing, (tag) => tag, maxListed);
 			const last = new Map(known.map((model) => [model.tag, model]));
 			const shown = await joinLimited(
 				tags.map(
 					(tag) => () =>
-						transport.postJson("/api/show", { model: tag }, signal, "none").then(
+						transport.postJson("/api/show", { model: tag }, span, "none").then(
 							(raw) => modelOf(tag, raw),
 							// Failed show retains prior.
 							() => last.get(tag),
@@ -134,7 +134,7 @@ export function server(transport: LocalTransport, maxListed = MAX_LISTED): Local
 			);
 			return shown.filter((model): model is LocalModel => model !== undefined);
 		},
-		loaded: async (_tag, signal) => runningOf(await transport.getJson("/api/ps", signal, "none")),
+		loaded: async (_tag, span) => runningOf(await transport.getJson("/api/ps", span, "none")),
 	};
 }
 
@@ -146,6 +146,6 @@ export const OLLAMA = localKind({
 	label: "Ollama",
 	url: "http://127.0.0.1:11434",
 	replay: "reasoning",
-	reach: async (transport, signal) => localTags(await transport.getJson("/api/tags", signal, "none"))?.length,
+	reach: async (transport, span) => localTags(await transport.getJson("/api/tags", span, "none"))?.length,
 	server,
 });

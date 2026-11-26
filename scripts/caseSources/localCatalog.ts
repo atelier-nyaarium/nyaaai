@@ -370,8 +370,12 @@ export const localCatalogCases: CaseSource[] = [
 		server: { warm: true, models: [models(MA, MB_ASLEEP), models(MA, MB_WOKEN)], warms: [{ fails: true }] },
 		steps: [views(), call({ kind: "warmed", tag: B }), views()],
 	}),
-	run("run-a-slow-warm-has-no-deadline-of-its-own", {
+	run("run-a-slow-warm-outlasts-the-discover-bound", {
 		server: { warm: true, models: [models(MA, MB_ASLEEP), models(MA, MB_WOKEN)], warms: [{ delayMs: 20_000 }] },
+		steps: [views(), call({ kind: "warmed", tag: B }), views()],
+	}),
+	run("run-a-warm-ends-at-its-own-span", {
+		server: { warm: true, models: [models(MA, MB_ASLEEP), models(MA, MB_WOKEN)], warms: [{ delayMs: 600_001 }] },
 		steps: [views(), call({ kind: "warmed", tag: B }), views()],
 	}),
 	run("run-a-warm-the-caller-aborts-throws-at-once", {

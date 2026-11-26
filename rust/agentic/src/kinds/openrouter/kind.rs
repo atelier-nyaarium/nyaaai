@@ -2,7 +2,7 @@
 
 use std::sync::Arc;
 
-use nyaaai_contract::cancel::CancelToken;
+use nyaaai_contract::fetch::Span;
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::number::fixed_text;
 use nyaaai_contract::shapes::model::ModelView;
@@ -117,7 +117,7 @@ impl ProviderKind for OpenRouterKind {
         entry: &'a EntryFields,
         secret: Option<&'a str>,
         deps: &'a KindDeps,
-        cancel: &'a CancelToken,
+        span: &'a Span,
     ) -> BoxFuture<'a, Result<KeyState, KindError>> {
         Box::pin(async move {
             let Some(secret) = secret else {
@@ -126,7 +126,7 @@ impl ProviderKind for OpenRouterKind {
             let transport = self
                 .transport(entry, Arc::new(static_key(secret)), deps)
                 .map_err(KindError::Message)?;
-            let checked = check_key(&transport, &KeyAuth::Stored, cancel).await?;
+            let checked = check_key(&transport, &KeyAuth::Stored, span).await?;
             Ok(key_state_of(checked))
         })
     }
@@ -148,8 +148,7 @@ impl ProviderKind for OpenRouterKind {
             user_agent: deps.user_agent.clone(),
             errors: Arc::new(OPENROUTER_CHAT),
             auth: crate::transport::Auth::Bearer,
-            idle_ms: None,
-            max_bytes: None,
+            budgets: deps.budgets.clone(),
         })))
     }
 
@@ -177,6 +176,7 @@ impl ProviderKind for OpenRouterKind {
             catalog,
             Arc::clone(&route.transport),
             Arc::clone(&deps.scheduler),
+            deps.budgets.clone().unwrap_or_default(),
         )))
     }
 
@@ -191,6 +191,7 @@ impl ProviderKind for OpenRouterKind {
             catalog,
             Arc::clone(&route.transport),
             Arc::clone(&deps.scheduler),
+            deps.budgets.clone().unwrap_or_default(),
         )))
     }
 
@@ -214,10 +215,10 @@ impl ProviderKind for OpenRouterKind {
     fn limits<'a>(
         &'a self,
         transport: &'a Transport,
-        cancel: &'a CancelToken,
+        span: &'a Span,
     ) -> BoxFuture<'a, Option<Limits>> {
         Box::pin(async move {
-            match check_key(transport, &KeyAuth::Stored, cancel).await {
+            match check_key(transport, &KeyAuth::Stored, span).await {
                 Ok(KeyCheck::Ok { limit, reset, .. }) => Some(Limits { limit, reset }),
                 _ => None,
             }

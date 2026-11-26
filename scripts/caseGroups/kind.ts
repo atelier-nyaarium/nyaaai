@@ -3,6 +3,7 @@ import { CHAT } from "@nyaaai/agentic/models/uses";
 import { codecFactsOf } from "@nyaaai/agentic/models/view";
 import { KINDS, kindLines, type ProviderKind, providerView } from "@nyaaai/agentic/provider/kind";
 import type { KeyAuth } from "@nyaaai/agentic/transport";
+import { BUDGET_CEILINGS, span } from "@nyaaai/contract/fetch";
 import { jsString } from "@nyaaai/contract/json";
 import { z } from "@nyaaai/contract/shape";
 import { BrowseDetail, BrowseModel, ModelUse, type ModelView } from "@nyaaai/contract/shapes/model";
@@ -188,8 +189,9 @@ export const kindGroup = caseGroup("kind", {
 					tags += 1;
 					const signal = callerSignal(net.wheel, `caller-${tags}`, held);
 					const auth: KeyAuth = held.auth === "stored" ? "stored" : { key: held.key };
+					const clock = span(net.scheduler, BUDGET_CEILINGS, signal);
 					try {
-						const result = await checkKey(net.transport, auth, signal);
+						const result = await checkKey(net.transport, auth, clock);
 						checks.push(
 							result.ok
 								? {
@@ -219,6 +221,7 @@ export const kindGroup = caseGroup("kind", {
 							thrown: error instanceof Error ? error.message : jsString(error),
 						});
 					}
+					clock.clear();
 					net.wheel.cancel(`caller-${tags}`);
 				}
 				return {
@@ -289,13 +292,15 @@ export const kindGroup = caseGroup("kind", {
 				const entry = entryOf(input.kind, input.entry);
 				const deps = input.baseUrl === undefined ? net.deps : { ...net.deps, baseUrl: input.baseUrl };
 				const signal = callerSignal(net.wheel, "caller", input);
+				const clock = span(net.scheduler, BUDGET_CEILINGS, signal);
 				let state: z.infer<typeof KeyState> | null = null;
 				let thrown: string | null = null;
 				try {
-					state = await named.check(entry, input.secret ?? undefined, deps, signal);
+					state = await named.check(entry, input.secret ?? undefined, deps, clock);
 				} catch (error) {
 					thrown = messageOf(error);
 				}
+				clock.clear();
 				net.wheel.cancel("caller");
 				return {
 					state,
@@ -329,7 +334,9 @@ export const kindGroup = caseGroup("kind", {
 				const named = hostedKind(input.kind);
 				const transport = named.transport(entryOf(input.kind, input.entry), keysOf(input.stored), net.deps);
 				const signal = callerSignal(net.wheel, "caller", input);
-				const limits = named.limits === undefined ? null : ((await named.limits(transport, signal)) ?? null);
+				const clock = span(net.scheduler, BUDGET_CEILINGS, signal);
+				const limits = named.limits === undefined ? null : ((await named.limits(transport, clock)) ?? null);
+				clock.clear();
 				net.wheel.cancel("caller");
 				return {
 					present: named.limits !== undefined,

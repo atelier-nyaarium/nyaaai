@@ -1,31 +1,52 @@
 //! The `reqwest` adapter of the Fetch port.
 
 use std::error::Error;
+use std::sync::Arc;
 
 use nyaaai_contract::cancel::CancelToken;
-use nyaaai_contract::fetch::{Chunks, Fetch, FetchError, FetchRequest, FetchResponse, Method};
+use nyaaai_contract::fetch::{
+    Budgeted, Chunks, Fetch, FetchError, FetchRequest, FetchResponse, Method, RawFetch, budgeted,
+};
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::headers::response_headers;
+use nyaaai_contract::time::Scheduler;
 use reqwest::header::{HeaderName, HeaderValue};
 
-/// No environment proxy, no redirects, no timeout.
+/// No environment proxy, no redirects; bounded by each request's budget.
 pub struct ReqwestFetch {
+    inner: Budgeted<Raw>,
+}
+
+/// The client, unbudgeted.
+struct Raw {
     client: reqwest::Client,
 }
 
 impl ReqwestFetch {
-    pub fn new() -> Result<Self, FetchError> {
+    pub fn new(scheduler: Arc<dyn Scheduler>) -> Result<Self, FetchError> {
         reqwest::Client::builder()
             .no_proxy()
             .redirect(reqwest::redirect::Policy::none())
             .build()
-            .map(Self::with_client)
+            .map(|client| Self::with_client(client, scheduler))
             .map_err(|error| FetchError::Failed(described(error)))
     }
 
     /// A host's own settings: its proxies and redirects are its own.
-    pub fn with_client(client: reqwest::Client) -> Self {
-        Self { client }
+    pub fn with_client(client: reqwest::Client, scheduler: Arc<dyn Scheduler>) -> Self {
+        Self {
+            inner: budgeted(Raw { client }, scheduler),
+        }
+    }
+}
+
+impl Fetch for ReqwestFetch {
+    fn fetch(
+        &self,
+        request: FetchRequest,
+        cancel: CancelToken,
+    ) -> BoxFuture<'_, Result<FetchResponse, FetchError>> {
+        self.inner.fetch(request, cancel)
     }
 }
 
@@ -85,7 +106,7 @@ impl Chunks for Body {
     }
 }
 
-impl Fetch for ReqwestFetch {
+impl RawFetch for Raw {
     fn fetch(
         &self,
         request: FetchRequest,

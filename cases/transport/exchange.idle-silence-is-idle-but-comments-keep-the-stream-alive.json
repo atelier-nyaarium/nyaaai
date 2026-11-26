@@ -86,7 +86,11 @@
 				}
 			}
 		],
-		"idleMs": 40
+		"budgets": {
+			"stream": {
+				"idleMs": 40
+			}
+		}
 	},
 	"expected": {
 		"calls": [

@@ -2,6 +2,7 @@
 
 import * as adapter from "@nyaaai/adapter/runtime";
 import { COMMANDS } from "@nyaaai/cli/commands";
+import { BUDGET_CEILINGS, BUDGET_NAMES, BUDGETS } from "@nyaaai/contract/fetch";
 import { ISSUE_MESSAGES } from "@nyaaai/contract/issues";
 import { CONTRACT_VERSION } from "@nyaaai/contract/shape";
 import * as strict from "@nyaaai/contract/strictSchema";
@@ -19,6 +20,7 @@ import "@nyaaai/testkit/tortureShapes";
 import "@nyaaai/testkit/trace";
 import { base64 } from "./scripts/caseGroups/base64";
 import { browse } from "./scripts/caseGroups/browse";
+import { budget } from "./scripts/caseGroups/budget";
 import { catalog } from "./scripts/caseGroups/catalog";
 import { claude } from "./scripts/caseGroups/claude";
 import { codec } from "./scripts/caseGroups/codec";
@@ -69,7 +71,7 @@ import { usage } from "./scripts/caseGroups/usage";
 import { view } from "./scripts/caseGroups/view";
 import { adapterCases } from "./scripts/caseSources/adapter";
 import { curatedTableRust } from "./scripts/curatedTable";
-import { rustModule, rustText, rustTexts, rustWhole } from "./scripts/rustConstants";
+import { rustModule, rustNamedWholes, rustText, rustTexts, rustWhole } from "./scripts/rustConstants";
 import { converse, crash, crashBlocking, misfit, spin, spinBlocking } from "./scripts/testCommands";
 
 ////////////////////////////////
@@ -128,6 +130,20 @@ const timeTokensRust = (): string =>
 		rustTexts("MONTHS", httpDates.MONTHS),
 		rustTexts("SHORT_DAYS", httpDates.SHORT_DAYS),
 		rustTexts("LONG_DAYS", httpDates.LONG_DAYS),
+	]);
+
+/** The budget presets, their ceilings and the longest server wait. */
+const budgetsRust = (): string =>
+	rustModule("The budget presets, their ceilings and the longest server wait.", [
+		rustWhole("MAX_TOTAL_MS", "u64", BUDGET_CEILINGS.totalMs),
+		rustWhole("MAX_IDLE_MS", "u64", BUDGET_CEILINGS.idleMs),
+		rustWhole("MAX_BYTES", "u64", BUDGET_CEILINGS.maxBytes),
+		rustWhole("MAX_SERVER_WAIT_MS", "u64", httpDates.MAX_SERVER_WAIT_MS),
+		rustNamedWholes(
+			"PRESETS",
+			BUDGET_NAMES.map((name) => [name, [BUDGETS[name].totalMs, BUDGETS[name].idleMs, BUDGETS[name].maxBytes]]),
+			"Each preset's total, idle and bytes, in table order.",
+		),
 	]);
 
 /** The adapter's limits and texts. */
@@ -212,6 +228,7 @@ export default project({
 		schemaProjection,
 		codec,
 		transport,
+		budget,
 		secret,
 		entry,
 		rowKeyGroup,
@@ -273,6 +290,7 @@ export default project({
 				["rust/contract/src/strict_policy.rs", strictPolicyRust()],
 				["rust/contract/src/time_tokens.rs", timeTokensRust()],
 				["rust/contract/src/adapter_texts.rs", adapterTextsRust()],
+				["rust/contract/src/budgets.rs", budgetsRust()],
 				["rust/agentic/src/models/curated_table.rs", curatedTableRust()],
 			]),
 	],

@@ -10,6 +10,7 @@ use std::sync::{Arc, Mutex, MutexGuard};
 use std::task::{Context, Poll};
 
 use nyaaai_contract::cancel::CancelToken;
+use nyaaai_contract::fetch::{BudgetName, Budgets, span};
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::json::number_to_string;
 use nyaaai_contract::random::SystemRandom;
@@ -31,7 +32,7 @@ use nyaaai_contract::shapes::step::{
     Failure, FailureBilled, FailureCategory, FailureStatus, NormalizedUsage, StepResult,
 };
 use nyaaai_contract::shapes::usage::{CallTag, MeteredCall};
-use nyaaai_contract::time::{Scheduler, Slept, deadline};
+use nyaaai_contract::time::{Scheduler, Slept};
 
 use super::retry::RetryPolicy;
 use crate::failure::failure_of;
@@ -147,6 +148,8 @@ pub struct LifecycleDeps {
     pub retry: Option<RetryPolicy>,
     /// The time and the waits of the retries.
     pub scheduler: Arc<dyn Scheduler>,
+    /// A limits read's span opens from `limits`; default the presets.
+    pub budgets: Option<Budgets>,
 }
 
 /// A refusal before a route is tried.
@@ -174,9 +177,6 @@ enum Gated {
 }
 
 const LIVE_TRIES: i64 = 2;
-
-/// The most a limits read may take.
-const LIMITS_MS: i64 = 5000;
 
 fn locked<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
     mutex
@@ -367,6 +367,7 @@ struct Inner {
     meter: Option<Arc<dyn Meter>>,
     retry: RetryPolicy,
     scheduler: Arc<dyn Scheduler>,
+    budgets: Budgets,
 }
 
 /// Runs candidates in order.
@@ -394,6 +395,7 @@ impl RequestLifecycle {
                 meter: d.meter,
                 retry,
                 scheduler: d.scheduler,
+                budgets: d.budgets.unwrap_or_default(),
             }),
         }
     }
@@ -1137,11 +1139,13 @@ impl Inner {
 
     /// The kind's limits, none when the read fails or outlives its bound.
     async fn limits_of(&self, route: &Resolved, cancel: &CancelToken) -> Option<Limits> {
-        let bound = deadline(&*self.scheduler, LIMITS_MS, cancel);
+        let bound = span(
+            &self.scheduler,
+            self.budgets.get(BudgetName::Limits),
+            Some(cancel),
+        );
         let read = catch_unwind(AssertUnwindSafe(|| {
-            route
-                .kind
-                .limits(route.transport.transport(), bound.token())
+            route.kind.limits(route.transport.transport(), &bound)
         }));
         let found = match read {
             Ok(read) => bound

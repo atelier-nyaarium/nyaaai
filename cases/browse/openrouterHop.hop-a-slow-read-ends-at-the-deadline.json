@@ -31,7 +31,7 @@
 	},
 	"expected": {
 		"hosts": null,
-		"thrown": "The operation timed out.",
+		"thrown": "Catalog did not finish in time.",
 		"requests": [
 			"/models/lab/glm/endpoints"
 		],

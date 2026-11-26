@@ -2,7 +2,7 @@
 	"format": 2,
 	"type": "function",
 	"kind": "transport.exchange",
-	"name": "json-calls-have-no-idle-abort",
+	"name": "json-calls-have-the-idle-bound-of-their-span",
 	"input": {
 		"codec": {
 			"family": "chat-completions",
@@ -41,17 +41,24 @@
 				"kind": "getJson",
 				"path": "/models"
 			}
-		]
+		],
+		"budgets": {
+			"catalog": {
+				"idleMs": 1000
+			}
+		}
 	},
 	"expected": {
 		"calls": [
 			{
 				"events": [],
 				"result": null,
-				"answer": {
-					"data": []
+				"answer": null,
+				"failure": {
+					"category": "idle",
+					"status": "idle",
+					"message": "OpenRouter sent nothing for too long."
 				},
-				"failure": null,
 				"thrown": null,
 				"aborted": false,
 				"nowMs": 1800000300000
@@ -82,7 +89,7 @@
 		"settled": [],
 		"keyReads": 1,
 		"read": [
-			1
+			0
 		],
 		"waiting": []
 	}

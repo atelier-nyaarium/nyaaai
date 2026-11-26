@@ -1,10 +1,11 @@
 // The OpenRouter catalog: decoders, the join to rows and the cached fetch.
 
+import { BUDGETS, type Budgets, span } from "@nyaaai/contract/fetch";
 import { canonicalJson, parseJson, stringifyJson } from "@nyaaai/contract/json";
 import type { ModelRegistry } from "@nyaaai/contract/modelRegistry";
 import { numberOfText, roundHalfUp } from "@nyaaai/contract/number";
 import type { Binding, ModelRow, ModelUse, ModelView, PriceTier } from "@nyaaai/contract/shapes/model";
-import { deadline, parseIsoTime, type Scheduler } from "@nyaaai/contract/time";
+import { parseIsoTime, type Scheduler } from "@nyaaai/contract/time";
 import { EFFORTS } from "../../effort";
 import { CHAT } from "../../models/uses";
 import { raced, unknownView } from "../../models/view";
@@ -77,6 +78,8 @@ export interface CatalogListing {
 export interface ModelCatalogDeps {
 	transport: Pick<Transport, "getJson">;
 	scheduler: Scheduler;
+	/** A refresh's span opens from `catalog`. */
+	budgets?: Budgets | undefined;
 	/** Rows; a change rejoins the cached views. */
 	rows: Pick<ModelRegistry, "rows" | "onChange">;
 	refreshed?: () => void;
@@ -97,7 +100,6 @@ interface Joined {
 
 const TTL_MS = 12 * 60 * 60 * 1000;
 const RETRY_MS = 60_000;
-const FETCH_MS = 30_000;
 const STRUCTURED_PARAMS = ["response_format", "structured_outputs"];
 /** Characters of a date alone. */
 const DATE_CHARS = 10;
@@ -481,11 +483,11 @@ export class ModelCatalog {
 	}
 
 	private async refresh(): Promise<Fetched | undefined> {
-		const limit = deadline(this.d.scheduler, FETCH_MS);
+		const limit = span(this.d.scheduler, (this.d.budgets ?? BUDGETS).catalog);
 		try {
 			const [models, zdr] = await joinSettled([
-				() => this.d.transport.getJson("/models", limit.signal, "none"),
-				() => this.d.transport.getJson("/endpoints/zdr", limit.signal, "none"),
+				() => this.d.transport.getJson("/models", limit, "none"),
+				() => this.d.transport.getJson("/endpoints/zdr", limit, "none"),
 			]);
 			const entries = parseModels(models);
 			const endpoints = parseEndpoints(zdr);

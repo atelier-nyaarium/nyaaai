@@ -103,6 +103,12 @@ export const postCall = (path: string, body: unknown, over: Json = {}): Json => 
 	...over,
 });
 
+/** A host's change of one preset's idle bound. */
+export const idle = (ms: number, preset = "stream"): Json => ({ budgets: { [preset]: { idleMs: ms } } });
+
+/** A host's change of one preset's size. */
+export const capped = (bytes: number, preset = "stream"): Json => ({ budgets: { [preset]: { maxBytes: bytes } } });
+
 /** One transport run. `over` replaces any input field. */
 export function exchange(name: string, calls: Json[], exchanges: Json[], over: Json = {}): CaseSource {
 	return {

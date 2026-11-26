@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
 use nyaaai_contract::cancel::CancelToken;
-use nyaaai_contract::fetch::{Fetch, FetchRequest, Method};
+use nyaaai_contract::fetch::{BudgetName, Fetch, FetchRequest, Method, budgets};
 use nyaaai_contract::id::Ids;
 use nyaaai_contract::json::{Record, Value, parse_json, stringify_json};
 use nyaaai_contract::random::{Random, SequenceRandom};
@@ -156,7 +156,8 @@ pub fn random(input: TestkitRandomInput) -> Outcome<TestkitRandomResult> {
 
 pub fn replay(input: TestkitReplayInput, context: &CaseContext) -> Outcome<TestkitReplayResult> {
     let trace = read_trace(&context.root().join(&input.file)).map_err(failed)?;
-    let played = replay_fetch(&trace, Arc::new(TimerWheel::new(0))).map_err(failed)?;
+    let scheduler = Arc::new(FakeScheduler::new(Arc::new(TimerWheel::new(0))));
+    let played = replay_fetch(&trace, scheduler).map_err(failed)?;
     let cancel = CancelToken::new();
     let exchanges = block_on(async {
         let mut exchanges = Vec::new();
@@ -166,6 +167,7 @@ pub fn replay(input: TestkitReplayInput, context: &CaseContext) -> Outcome<Testk
                 url: "http://replay.invalid/".to_owned(),
                 headers: Vec::new(),
                 body: Some(stringify_json(&exchange.request)),
+                budget: budgets().get(BudgetName::Stream).clone(),
             };
             let mut response = played
                 .fetch(request, cancel.clone())

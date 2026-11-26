@@ -7,28 +7,28 @@ use std::sync::{Arc, Mutex, MutexGuard};
 use std::task::{Context, Poll};
 
 use nyaaai_contract::cancel::CancelToken;
+use nyaaai_contract::fetch::{Budget, Span, span};
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::shapes::provider::{KeyState, KeyStateChecking, KeyStateUnreachable};
-use nyaaai_contract::time::{Deadline, Scheduler, deadline};
+use nyaaai_contract::time::Scheduler;
 use tokio::runtime::Handle;
 use tokio::sync::{oneshot, watch};
-
-pub const KEY_CHECK_MS: i64 = 30_000;
 
 /// A check that ended without a state.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Failed;
 
-/// One check, ended by the deadline's token; `Ok(None)` ended without effect.
-pub type Check = Arc<
-    dyn Fn(Arc<Deadline>) -> BoxFuture<'static, Result<Option<KeyState>, Failed>> + Send + Sync,
->;
+/// One check under its span; `Ok(None)` ended without effect.
+pub type Check =
+    Arc<dyn Fn(Arc<Span>) -> BoxFuture<'static, Result<Option<KeyState>, Failed>> + Send + Sync>;
 
 /// Told each state the reader shows.
 pub type Shown = Arc<dyn Fn(KeyState) + Send + Sync>;
 
 struct Inner {
     scheduler: Arc<dyn Scheduler>,
+    /// Each check's span opens from it.
+    budget: Budget,
     runtime: Handle,
     check: Check,
     shown: Shown,
@@ -73,11 +73,18 @@ pub struct KeyReader {
 }
 
 impl KeyReader {
-    /// The deadline of each check comes from `scheduler`; a check runs on `runtime`.
-    pub fn new(scheduler: Arc<dyn Scheduler>, runtime: Handle, check: Check, shown: Shown) -> Self {
+    /// Each check's span comes from `scheduler` and `budget`; a check runs on `runtime`.
+    pub fn new(
+        scheduler: Arc<dyn Scheduler>,
+        runtime: Handle,
+        budget: Budget,
+        check: Check,
+        shown: Shown,
+    ) -> Self {
         Self {
             inner: Arc::new(Inner {
                 scheduler,
+                budget,
                 runtime,
                 check,
                 shown,
@@ -95,7 +102,11 @@ impl KeyReader {
             previous.cancel();
         }
         (self.inner.shown)(KeyState::Checking(KeyStateChecking {}));
-        let limit = Arc::new(deadline(&*self.inner.scheduler, KEY_CHECK_MS, &abort));
+        let limit = Arc::new(span(
+            &self.inner.scheduler,
+            &self.inner.budget,
+            Some(&abort),
+        ));
         // A check that throws at once is a failed check and leaves no timer.
         let Ok(work) = catch_unwind(AssertUnwindSafe(|| (self.inner.check)(Arc::clone(&limit))))
         else {
@@ -111,7 +122,7 @@ impl KeyReader {
         let inner = Arc::clone(&self.inner);
         let finish = async move {
             let _count = count;
-            // Raced against the deadline: a miss shows `unreachable`, a later answer is dropped.
+            // Raced against the span: a miss shows `unreachable`, a later answer is dropped.
             let raced = limit.token().run_until(Caught(Box::pin(work))).await;
             if !abort.is_cancelled() {
                 match raced.flatten() {
@@ -154,6 +165,7 @@ impl KeyReader {
 
 #[cfg(test)]
 mod tests {
+    use nyaaai_contract::fetch::{BudgetName, budgets};
     use nyaaai_contract::shapes::provider::KeyStateNone;
     use nyaaai_contract::time::SystemScheduler;
 
@@ -169,6 +181,7 @@ mod tests {
         let reader = KeyReader::new(
             Arc::new(SystemScheduler::new(runtime.handle().clone())),
             runtime.handle().clone(),
+            budgets().get(BudgetName::KeyCheck).clone(),
             Arc::new(|_| Box::pin(async { Ok(Some(KeyState::None(KeyStateNone {}))) })),
             {
                 let shown = Arc::clone(&shown);

@@ -1,0 +1,17 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "budget.table",
+	"name": "table-a-zero-is-refused",
+	"input": {
+		"changes": {
+			"reply": {
+				"idleMs": 0
+			}
+		}
+	},
+	"expected": {
+		"presets": null,
+		"refused": "The reply budget's idleMs is not a whole number from 1 to 1800000."
+	}
+}

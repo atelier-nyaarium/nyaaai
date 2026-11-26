@@ -3,22 +3,20 @@
 use std::sync::{Arc, Mutex, MutexGuard};
 
 use nyaaai_contract::cancel::CancelToken;
+use nyaaai_contract::fetch::{BudgetName, Budgets, span};
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::json::{Object, Value};
 use nyaaai_contract::shapes::model::{BrowseDetail, BrowseModel, ModelRow, ModelUse, ModelView};
 use nyaaai_contract::shapes::step::{CanonicalRequest, Encoded, Failure, HeaderList, StepResult};
 use nyaaai_contract::text::{ascii_lower, encode_path_segment, trim_text};
-use nyaaai_contract::time::{Ended, Scheduler, deadline};
+use nyaaai_contract::time::Scheduler;
 
 use super::browse::{browse_models, parse_providers};
 use super::catalog::ModelCatalog;
 use crate::codec::{Codec, Mode, StreamDecoder};
 use crate::failure::ProviderError;
-use crate::kinds::fetcher::FETCH_MS;
 use crate::provider::kind::{Browser, KindError, Listed, Pins, Tester};
-use crate::transport::{KeyAuth, Transport};
-
-const DETAIL_MS: i64 = FETCH_MS;
+use crate::transport::{KeyAuth, Transport, TransportError};
 
 /// Provider filter tag, the one rule for a tag and a host name.
 fn slug_of(tag: &str) -> String {
@@ -40,22 +38,41 @@ pub fn endpoints_path(id: &str) -> String {
     format!("/models/{}/endpoints", parts.join("/"))
 }
 
+/// An endpoints read under a span from `detail`.
+async fn endpoints_of(
+    transport: &Transport,
+    scheduler: &Arc<dyn Scheduler>,
+    budgets: &Budgets,
+    id: &str,
+    cancel: &CancelToken,
+) -> Result<Value, TransportError> {
+    let clock = span(scheduler, budgets.get(BudgetName::Detail), Some(cancel));
+    let read = transport
+        .get_json(&endpoints_path(id), &clock, &KeyAuth::None)
+        .await;
+    clock.clear();
+    read
+}
+
 /// Catalog and provider endpoints.
 pub struct OpenRouterBrowser {
     catalog: Arc<ModelCatalog>,
     transport: Arc<Transport>,
-    clock: Arc<dyn Scheduler>,
+    scheduler: Arc<dyn Scheduler>,
+    budgets: Budgets,
 }
 
 pub fn open_router_browser(
     catalog: Arc<ModelCatalog>,
     transport: Arc<Transport>,
-    clock: Arc<dyn Scheduler>,
+    scheduler: Arc<dyn Scheduler>,
+    budgets: Budgets,
 ) -> OpenRouterBrowser {
     OpenRouterBrowser {
         catalog,
         transport,
-        clock,
+        scheduler,
+        budgets,
     }
 }
 
@@ -64,7 +81,7 @@ impl Browser for OpenRouterBrowser {
         let listing = self.catalog.listing(None, fresh);
         Box::pin(async move {
             let listing = listing.await?;
-            Ok(listing.map(|held| browse_models(&held, self.clock.now_ms())))
+            Ok(listing.map(|held| browse_models(&held, self.scheduler.now_ms())))
         })
     }
 
@@ -76,10 +93,8 @@ impl Browser for OpenRouterBrowser {
         let listing = self.catalog.listing(Some(cancel), false);
         Box::pin(async move {
             let listing = listing.await?;
-            let raw = self
-                .transport
-                .get_json(&endpoints_path(id), cancel, &KeyAuth::None)
-                .await?;
+            let raw =
+                endpoints_of(&self.transport, &self.scheduler, &self.budgets, id, cancel).await?;
             let known: Vec<_> = listing
                 .as_ref()
                 .and_then(|held| held.endpoints().get(id))
@@ -101,17 +116,20 @@ pub struct OpenRouterTester {
     catalog: Arc<ModelCatalog>,
     transport: Arc<Transport>,
     scheduler: Arc<dyn Scheduler>,
+    budgets: Budgets,
 }
 
 pub fn open_router_tester(
     catalog: Arc<ModelCatalog>,
     transport: Arc<Transport>,
     scheduler: Arc<dyn Scheduler>,
+    budgets: Budgets,
 ) -> OpenRouterTester {
     OpenRouterTester {
         catalog,
         transport,
         scheduler,
+        budgets,
     }
 }
 
@@ -151,6 +169,7 @@ impl Tester for OpenRouterTester {
         Some(Box::new(OpenRouterPins {
             transport: Arc::clone(&self.transport),
             scheduler: Arc::clone(&self.scheduler),
+            budgets: self.budgets.clone(),
             state: Arc::new(Mutex::new(PinState::default())),
         }))
     }
@@ -167,6 +186,7 @@ struct PinState {
 struct OpenRouterPins {
     transport: Arc<Transport>,
     scheduler: Arc<dyn Scheduler>,
+    budgets: Budgets,
     state: Arc<Mutex<PinState>>,
 }
 
@@ -184,24 +204,8 @@ impl Pins for OpenRouterPins {
         cancel: &'a CancelToken,
     ) -> BoxFuture<'a, Result<Vec<String>, KindError>> {
         Box::pin(async move {
-            let limit = deadline(&*self.scheduler, DETAIL_MS, cancel);
-            let read = self
-                .transport
-                .get_json(&endpoints_path(id), limit.token(), &KeyAuth::None)
-                .await;
-            let ended = limit.ended();
-            limit.clear();
-            let raw = match read {
-                Ok(raw) => raw,
-                Err(error) => {
-                    return Err(match (error, ended) {
-                        (crate::transport::TransportError::Cancelled, Some(Ended::Deadline)) => {
-                            KindError::TimedOut
-                        }
-                        (error, _) => error.into(),
-                    });
-                }
-            };
+            let raw =
+                endpoints_of(&self.transport, &self.scheduler, &self.budgets, id, cancel).await?;
             let serving = parse_providers(&raw, &[]).unwrap_or_default();
             let zdr: Vec<String> = view.hosts.iter().map(|tag| slug_of(tag)).collect();
             let mut both: Vec<String> = Vec::new();

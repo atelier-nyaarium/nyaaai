@@ -2,7 +2,7 @@
 
 use std::sync::{Arc, LazyLock};
 
-use nyaaai_contract::cancel::CancelToken;
+use nyaaai_contract::fetch::Span;
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::pattern::Pattern;
 use nyaaai_contract::shapes::model::{ModelView, ModelViewPrice};
@@ -88,9 +88,9 @@ pub fn terms_of(entry: &EntryFields) -> Terms {
     }
 }
 
-/// The count of models a check reads; none when the server is foreign.
+/// The count of models a check reads under its span; none when the server is foreign.
 pub type Reach =
-    fn(Arc<Transport>, CancelToken) -> BoxFuture<'static, Result<Option<usize>, KindError>>;
+    for<'a> fn(Arc<Transport>, &'a Span) -> BoxFuture<'a, Result<Option<usize>, KindError>>;
 
 /// A request root from a URL; refuses one it cannot read.
 pub type Base = fn(&str) -> Result<String, String>;
@@ -229,7 +229,7 @@ impl ProviderKind for LocalKind {
         entry: &'a EntryFields,
         secret: Option<&'a str>,
         deps: &'a KindDeps,
-        cancel: &'a CancelToken,
+        span: &'a Span,
     ) -> BoxFuture<'a, Result<KeyState, KindError>> {
         Box::pin(async move {
             let key: Arc<dyn KeySource> = match secret {
@@ -237,7 +237,7 @@ impl ProviderKind for LocalKind {
                 Some(secret) => Arc::new(SecretKey(secret.to_owned())),
             };
             let read = match self.transport(entry, key, deps) {
-                Ok(transport) => (self.spec.reach)(transport, cancel.clone()).await,
+                Ok(transport) => (self.spec.reach)(transport, span).await,
                 Err(message) => Err(KindError::Message(message)),
             };
             match read {
@@ -248,8 +248,8 @@ impl ProviderKind for LocalKind {
                     models: Some(models as f64),
                 })),
                 Err(error) => {
-                    if cancel.is_cancelled() {
-                        return Err(KindError::Cancelled);
+                    if span.token().is_cancelled() {
+                        return Err(error);
                     }
                     let refused = matches!(
                         &error,
@@ -295,8 +295,7 @@ impl ProviderKind for LocalKind {
             } else {
                 Auth::None
             },
-            idle_ms: None,
-            max_bytes: None,
+            budgets: deps.budgets.clone(),
         })))
     }
 
@@ -320,6 +319,7 @@ impl ProviderKind for LocalKind {
             server: (self.spec.server)(Arc::clone(&transport)),
             terms,
             scheduler: deps.scheduler,
+            budgets: deps.budgets,
             rows: deps.rows,
             refreshed: deps.refreshed,
         });

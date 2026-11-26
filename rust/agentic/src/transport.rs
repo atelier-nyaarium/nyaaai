@@ -4,11 +4,14 @@ use std::borrow::Cow;
 use std::collections::VecDeque;
 use std::error::Error;
 use std::fmt;
-use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 
 use nyaaai_contract::cancel::CancelToken;
-use nyaaai_contract::fetch::{Chunks, Fetch, FetchError, FetchRequest, FetchResponse, Method};
+use nyaaai_contract::fetch::{
+    BudgetBound, BudgetName, Budgets, Chunks, Fetch, FetchError, FetchRequest, FetchResponse,
+    Method, Span, span,
+};
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::headers::header_of;
 use nyaaai_contract::json::{Value, parse_json, quote_json, stringify_json};
@@ -18,7 +21,7 @@ use nyaaai_contract::shapes::step::{
     StepEvent, StepEventServing, StepResult,
 };
 use nyaaai_contract::text::{Utf8Decoder, ascii_lower, trim_text};
-use nyaaai_contract::time::{Scheduled, Scheduler, parse_retry_after};
+use nyaaai_contract::time::{MAX_SERVER_WAIT_MS, Scheduler, parse_retry_after};
 
 use crate::codec::{Codec, Mode, StreamDecoder};
 use crate::failure::{FailureExtra, ProviderError, failed};
@@ -71,7 +74,7 @@ impl fmt::Debug for KeyAuth {
 
 pub struct TransportDeps {
     pub fetch: Arc<dyn Fetch>,
-    /// Idle timer; dates `Retry-After`.
+    /// Spans; dates `Retry-After`.
     pub scheduler: Arc<dyn Scheduler>,
     pub key: Arc<dyn KeySource>,
     /// Status, generation, host.
@@ -84,10 +87,8 @@ pub struct TransportDeps {
     /// Decodes failed reads.
     pub errors: Arc<dyn Codec>,
     pub auth: Auth,
-    /// Default two minutes.
-    pub idle_ms: Option<i64>,
-    /// Cap on one reply, or on a stream's bytes between items. Default 16 MiB.
-    pub max_bytes: Option<usize>,
+    /// Default the presets; `stream` and `reply` bound each call.
+    pub budgets: Option<Budgets>,
 }
 
 /// How a call ended, short of an answer.
@@ -144,11 +145,10 @@ struct Seen {
     host: Option<String>,
 }
 
-const IDLE_MS: i64 = 120_000;
+/// Cuts what the budget let through.
 const ERROR_BODY_BYTES: usize = 64 * 1024;
 /// The names a codec cannot set.
 const OWNED_HEADERS: [&str; 4] = ["content-type", "accept", "authorization", "user-agent"];
-const REPLY_BYTES: usize = 16 * 1024 * 1024;
 const TOKEN_SYMBOLS: &str = "!#$%&'*+-.^_`|~";
 
 type Listener = Arc<dyn Fn(&str) + Send + Sync>;
@@ -156,84 +156,20 @@ type Listener = Arc<dyn Fn(&str) + Send + Sync>;
 /// Scrubbed codec transport.
 pub struct Transport {
     d: TransportDeps,
-    idle_ms: i64,
-    max_bytes: usize,
+    budgets: Budgets,
     settled: Mutex<Vec<(u64, Listener)>>,
     listeners: AtomicU64,
-}
-
-/// The caller's token and the idle abort, as one.
-struct Cut {
-    /// Cancelled by the caller or by silence.
-    token: CancelToken,
-    /// Whether the idle abort fired.
-    idle: Arc<AtomicBool>,
-    scheduler: Arc<dyn Scheduler>,
-    ms: i64,
-    pending: Mutex<Option<Scheduled>>,
-}
-
-impl Cut {
-    fn new(caller: &CancelToken, scheduler: Arc<dyn Scheduler>, ms: i64) -> Self {
-        let cut = Self {
-            token: caller.child(),
-            idle: Arc::new(AtomicBool::new(false)),
-            scheduler,
-            ms,
-            pending: Mutex::new(None),
-        };
-        cut.arm();
-        cut
-    }
-
-    /// One timer, replaced at every call.
-    fn arm(&self) {
-        self.clear();
-        let token = self.token.clone();
-        let idle = Arc::clone(&self.idle);
-        let scheduled = self.scheduler.schedule(
-            self.ms,
-            Box::new(move || {
-                idle.store(true, Ordering::SeqCst);
-                token.cancel();
-            }),
-        );
-        *self.slot() = Some(scheduled);
-    }
-
-    fn clear(&self) {
-        if let Some(scheduled) = self.slot().take() {
-            scheduled.cancel();
-        }
-    }
-
-    fn idled(&self) -> bool {
-        self.idle.load(Ordering::SeqCst)
-    }
-
-    fn slot(&self) -> std::sync::MutexGuard<'_, Option<Scheduled>> {
-        self.pending
-            .lock()
-            .unwrap_or_else(|poisoned| poisoned.into_inner())
-    }
-}
-
-impl Drop for Cut {
-    fn drop(&mut self) {
-        self.clear();
-    }
 }
 
 /// An open stream's state.
 struct Open<'a> {
     key: Option<String>,
-    cut: Cut,
+    /// The call's `stream` span.
+    clock: Span,
     seen: Seen,
     body: Option<Box<dyn Chunks>>,
     body_done: bool,
     sse: SseDecoder,
-    /// Bytes received since the last event.
-    since: usize,
     decoder: Box<dyn StreamDecoder + 'a>,
     events: VecDeque<StepEvent>,
     failed: Option<Fault>,
@@ -330,12 +266,9 @@ impl EventStream<'_> {
                 if !self.cancel.is_cancelled() {
                     self.transport.notify(&self.request.model);
                 }
-                let error = self.transport.mapped(
-                    fault,
-                    &self.cancel,
-                    Some(&open.cut),
-                    open.key.as_deref(),
-                );
+                let error = self
+                    .transport
+                    .mapped(fault, &self.cancel, open.key.as_deref());
                 self.close();
                 return Err(error);
             }
@@ -351,7 +284,7 @@ impl EventStream<'_> {
     fn close(&mut self) {
         match std::mem::replace(&mut self.state, StreamState::Closed) {
             StreamState::Open(open) => {
-                open.cut.clear();
+                open.clock.clear();
                 self.transport.log(&open.seen);
             }
             StreamState::Opening => self.transport.log(&self.seen),
@@ -369,8 +302,7 @@ impl Drop for EventStream<'_> {
 impl Transport {
     pub fn new(d: TransportDeps) -> Self {
         Self {
-            idle_ms: d.idle_ms.unwrap_or(IDLE_MS),
-            max_bytes: d.max_bytes.unwrap_or(REPLY_BYTES),
+            budgets: d.budgets.clone().unwrap_or_default(),
             d,
             settled: Mutex::new(Vec::new()),
             listeners: AtomicU64::new(0),
@@ -445,11 +377,15 @@ impl Transport {
         }
         let encoded = encoded_of(codec, request, Mode::Complete)?;
         self.check_headers(&encoded)?;
+        let clock = span(
+            &self.d.scheduler,
+            self.budgets.get(BudgetName::Reply),
+            Some(cancel),
+        );
         let key = self.request_key().await?;
         if cancel.is_cancelled() {
             return Err(TransportError::Cancelled);
         }
-        let cut = Cut::new(cancel, Arc::clone(&self.d.scheduler), self.idle_ms);
         let mut seen = Seen::default();
         let run = async {
             let mut response = self
@@ -457,13 +393,12 @@ impl Transport {
                     codec,
                     &encoded,
                     key.as_deref(),
-                    &cut.token,
+                    &clock,
                     "application/json",
                     &mut seen,
                 )
                 .await?;
-            cut.arm();
-            let text = read_all(&mut *response.chunks, self.max_bytes).await?;
+            let text = read_all(&mut *response.chunks).await?;
             let Some(body) = parse_json(&text) else {
                 return Err(Fault::Provider(failed(
                     FailureCategory::Stream,
@@ -478,52 +413,55 @@ impl Transport {
             Ok::<_, Fault>(StepResult { serving, ..decoded })
         };
         let outcome = run.await;
-        match outcome {
+        let answer = match outcome {
             Err(fault) => {
                 if !cancel.is_cancelled() {
                     self.notify(&request.model);
                 }
-                let error = self.mapped(fault, cancel, Some(&cut), key.as_deref());
-                cut.clear();
+                let error = self.mapped(fault, cancel, key.as_deref());
                 self.log(&seen);
                 Err(error)
             }
             Ok(result) => {
-                cut.clear();
                 self.log(&seen);
                 self.notify(&request.model);
                 Ok(result)
             }
-        }
+        };
+        clock.clear();
+        answer
     }
 
+    /// A read of the span's operation; the span's owner clears it.
     pub async fn get_json(
         &self,
         path: &str,
-        cancel: &CancelToken,
+        clock: &Span,
         auth: &KeyAuth,
     ) -> Result<Value, TransportError> {
-        self.json(Method::Get, path, None, cancel, auth).await
+        self.json(Method::Get, path, None, clock, auth).await
     }
 
     pub async fn post_json(
         &self,
         path: &str,
         body: Option<&Value>,
-        cancel: &CancelToken,
+        clock: &Span,
         auth: &KeyAuth,
     ) -> Result<Value, TransportError> {
-        self.json(Method::Post, path, body, cancel, auth).await
+        self.json(Method::Post, path, body, clock, auth).await
     }
 
+    /// The key first, then the budget.
     async fn json(
         &self,
         method: Method,
         path: &str,
         body: Option<&Value>,
-        cancel: &CancelToken,
+        clock: &Span,
         auth: &KeyAuth,
     ) -> Result<Value, TransportError> {
+        let cancel = clock.caller();
         if cancel.is_cancelled() {
             return Err(TransportError::Cancelled);
         }
@@ -542,20 +480,21 @@ impl Transport {
         if body.is_some() {
             headers.push(("Content-Type".to_owned(), "application/json".to_owned()));
         }
-        let request = FetchRequest {
-            method,
-            url: format!("{}{path}", self.d.base_url),
-            headers,
-            body: body.map(stringify_json),
-        };
         let run = async {
+            let request = FetchRequest {
+                method,
+                url: format!("{}{path}", self.d.base_url),
+                headers,
+                body: body.map(stringify_json),
+                budget: clock.budget().map_err(FetchError::Budget)?,
+            };
             let mut response = self.d.fetch.fetch(request, cancel.clone()).await?;
             if !ok(&response) {
                 return Err(Fault::Provider(
                     self.failure(&*self.d.errors, response).await?,
                 ));
             }
-            let answer = parse_json(&read_all(&mut *response.chunks, self.max_bytes).await?);
+            let answer = parse_json(&read_all(&mut *response.chunks).await?);
             answer.ok_or_else(|| {
                 Fault::Provider(failed(
                     FailureCategory::Network,
@@ -565,7 +504,7 @@ impl Transport {
             })
         };
         run.await
-            .map_err(|fault| self.mapped(fault, cancel, None, key.as_deref()))
+            .map_err(|fault| self.mapped(fault, cancel, key.as_deref()))
     }
 
     fn notify(&self, model: &str) {
@@ -626,7 +565,7 @@ impl Transport {
         codec: &dyn Codec,
         encoded: &Encoded,
         key: Option<&str>,
-        cancel: &CancelToken,
+        clock: &Span,
         accept: &str,
         seen: &mut Seen,
     ) -> Result<FetchResponse, Fault> {
@@ -645,8 +584,9 @@ impl Transport {
             url: format!("{}{}", self.d.base_url, encoded.path),
             headers,
             body: Some(stringify_json(&encoded.body)),
+            budget: clock.budget().map_err(FetchError::Budget)?,
         };
-        let response = self.d.fetch.fetch(request, cancel.clone()).await?;
+        let response = self.d.fetch.fetch(request, clock.caller().clone()).await?;
         seen.status = Some(response.status);
         if !ok(&response) {
             return Err(Fault::Provider(self.failure(codec, response).await?));
@@ -706,17 +646,21 @@ impl Transport {
         }
         let encoded = encoded_of(codec, request, Mode::Stream)?;
         self.check_headers(&encoded)?;
+        let clock = span(
+            &self.d.scheduler,
+            self.budgets.get(BudgetName::Stream),
+            Some(cancel),
+        );
         let key = self.request_key().await?;
         if cancel.is_cancelled() {
             return Err(TransportError::Cancelled);
         }
-        let cut = Cut::new(cancel, Arc::clone(&self.d.scheduler), self.idle_ms);
         let posted = self
             .post(
                 codec,
                 &encoded,
                 key.as_deref(),
-                &cut.token,
+                &clock,
                 "text/event-stream",
                 seen,
             )
@@ -726,31 +670,27 @@ impl Transport {
                 if !cancel.is_cancelled() {
                     self.notify(&request.model);
                 }
-                let error = self.mapped(fault, cancel, Some(&cut), key.as_deref());
-                cut.clear();
+                let error = self.mapped(fault, cancel, key.as_deref());
+                clock.clear();
                 self.log(seen);
                 Err(error)
             }
-            Ok(response) => {
-                cut.arm();
-                Ok(Open {
-                    key,
-                    cut,
-                    seen: std::mem::take(seen),
-                    body: Some(response.chunks),
-                    body_done: false,
-                    sse: SseDecoder::new(),
-                    since: 0,
-                    decoder: codec.stream(),
-                    events: VecDeque::new(),
-                    failed: None,
-                    ended: false,
-                })
-            }
+            Ok(response) => Ok(Open {
+                key,
+                clock,
+                seen: std::mem::take(seen),
+                body: Some(response.chunks),
+                body_done: false,
+                sse: SseDecoder::new(),
+                decoder: codec.stream(),
+                events: VecDeque::new(),
+                failed: None,
+                ended: false,
+            }),
         }
     }
 
-    /// Reads on, re-arming the idle abort.
+    /// Reads on.
     async fn advance(&self, open: &mut Open<'_>) {
         if open.decoder.over() {
             open.body = None;
@@ -768,25 +708,10 @@ impl Transport {
         match body.next().await {
             Err(error) => open.failed = Some(Fault::Fetch(error)),
             Ok(Some(bytes)) => {
-                open.cut.arm();
                 let items = open.sse.push(&bytes);
-                // A comment is no event.
-                let event = items.iter().any(|item| {
-                    !matches!(item, nyaaai_contract::shapes::step::SseItem::Comment(_))
-                });
-                open.since = if event { 0 } else { open.since + bytes.len() };
-                if open.since > self.max_bytes {
-                    open.failed = Some(Fault::Provider(failed(
-                        FailureCategory::Stream,
-                        &format!("A stream event is larger than {} bytes.", self.max_bytes),
-                        FailureExtra::default(),
-                    )));
-                    return;
-                }
                 open.push_items(items);
             }
             Ok(None) => {
-                open.cut.arm();
                 let items = open.sse.end();
                 open.push_items(items);
                 open.body_done = true;
@@ -795,31 +720,40 @@ impl Transport {
         }
     }
 
-    fn mapped(
-        &self,
-        fault: Fault,
-        cancel: &CancelToken,
-        cut: Option<&Cut>,
-        key: Option<&str>,
-    ) -> TransportError {
+    /// The one exit; the first cause stands.
+    fn mapped(&self, fault: Fault, cancel: &CancelToken, key: Option<&str>) -> TransportError {
+        if let Fault::Fetch(FetchError::Budget(exceeded)) = &fault {
+            let label = &self.d.label;
+            let (category, message) = match exceeded.bound {
+                BudgetBound::Idle => (
+                    FailureCategory::Idle,
+                    format!("{label} sent nothing for too long."),
+                ),
+                BudgetBound::Total => (
+                    FailureCategory::Idle,
+                    format!("{label} did not finish in time."),
+                ),
+                BudgetBound::Bytes => (
+                    FailureCategory::Network,
+                    format!("The reply is larger than {} bytes.", exceeded.limit),
+                ),
+            };
+            return TransportError::Provider(failed(category, &message, FailureExtra::default()));
+        }
         if cancel.is_cancelled() {
             return TransportError::Cancelled;
         }
         match fault {
-            Fault::Provider(error) => {
-                TransportError::Provider(ProviderError::new(scrubbed_failure(*error.failure, key)))
-            }
+            Fault::Provider(error) => TransportError::Provider(ProviderError::new(clamped(
+                scrubbed_failure(*error.failure, key),
+                self.d.scheduler.now_ms(),
+            ))),
             Fault::Fetch(error) => {
-                if cut.is_some_and(Cut::idled) {
-                    return TransportError::Provider(failed(
-                        FailureCategory::Idle,
-                        &format!("{} sent nothing for too long.", self.d.label),
-                        FailureExtra::default(),
-                    ));
-                }
                 let message = match error {
                     FetchError::Failed(message) => message,
-                    FetchError::Cancelled => "the exchange was cancelled".to_owned(),
+                    FetchError::Cancelled | FetchError::Budget(_) => {
+                        "the exchange was cancelled".to_owned()
+                    }
                 };
                 TransportError::Provider(failed(
                     FailureCategory::Network,
@@ -933,24 +867,21 @@ fn checked_headers(headers: &[(&str, &str)]) -> Result<(), ProviderError> {
     Ok(())
 }
 
-/// Fails past the cap.
-async fn read_all(chunks: &mut dyn Chunks, cap: usize) -> Result<String, Fault> {
-    let mut decoder = Utf8Decoder::new();
-    let mut text = String::new();
-    let mut size = 0usize;
-    while let Some(chunk) = chunks.next().await? {
-        size += chunk.len();
-        if size > cap {
-            return Err(Fault::Provider(failed(
-                FailureCategory::Network,
-                &format!("The reply is larger than {cap} bytes."),
-                FailureExtra::default(),
-            )));
-        }
-        text.push_str(&decoder.push(&chunk));
+async fn read_all(chunks: &mut dyn Chunks) -> Result<String, Fault> {
+    read_text(chunks, None).await.map_err(Fault::Fetch)
+}
+
+/// Caps a server's wait and reset.
+fn clamped(failure: Failure, now_ms: i64) -> Failure {
+    Failure {
+        retry_after_ms: failure
+            .retry_after_ms
+            .map(|wait| wait.min(MAX_SERVER_WAIT_MS)),
+        resets_at: failure
+            .resets_at
+            .map(|stamp| stamp.min(now_ms.saturating_add(MAX_SERVER_WAIT_MS))),
+        ..failure
     }
-    text.push_str(&decoder.end());
-    Ok(text)
 }
 
 /// Sanitize response-derived names.

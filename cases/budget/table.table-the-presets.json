@@ -1,0 +1,86 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "budget.table",
+	"name": "table-the-presets",
+	"input": {
+		"changes": {}
+	},
+	"expected": {
+		"presets": [
+			{
+				"name": "keyCheck",
+				"budget": {
+					"totalMs": 30000,
+					"idleMs": 30000,
+					"maxBytes": 16777216
+				}
+			},
+			{
+				"name": "limits",
+				"budget": {
+					"totalMs": 5000,
+					"idleMs": 5000,
+					"maxBytes": 16777216
+				}
+			},
+			{
+				"name": "stats",
+				"budget": {
+					"totalMs": 10000,
+					"idleMs": 10000,
+					"maxBytes": 16777216
+				}
+			},
+			{
+				"name": "catalog",
+				"budget": {
+					"totalMs": 30000,
+					"idleMs": 30000,
+					"maxBytes": 16777216
+				}
+			},
+			{
+				"name": "detail",
+				"budget": {
+					"totalMs": 30000,
+					"idleMs": 30000,
+					"maxBytes": 16777216
+				}
+			},
+			{
+				"name": "discover",
+				"budget": {
+					"totalMs": 10000,
+					"idleMs": 10000,
+					"maxBytes": 16777216
+				}
+			},
+			{
+				"name": "warm",
+				"budget": {
+					"totalMs": 600000,
+					"idleMs": 600000,
+					"maxBytes": 16777216
+				}
+			},
+			{
+				"name": "reply",
+				"budget": {
+					"totalMs": 240000,
+					"idleMs": 120000,
+					"maxBytes": 16777216
+				}
+			},
+			{
+				"name": "stream",
+				"budget": {
+					"totalMs": 7200000,
+					"idleMs": 120000,
+					"maxBytes": 268435456
+				}
+			}
+		],
+		"refused": null
+	}
+}

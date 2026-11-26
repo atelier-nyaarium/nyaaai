@@ -6,16 +6,17 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 
 use nyaaai_contract::cancel::{CancelToken, Unsubscribe};
+use nyaaai_contract::fetch::{BudgetName, Span, span};
 use nyaaai_contract::json::{Object, Value};
 use nyaaai_contract::number::{number_of_text, round_half_up};
 use nyaaai_contract::shapes::model::{
     Ability, ModelRow, ModelUse, ModelView, ModelViewPrice, ModelViewStatus, Price, PriceTier,
 };
 use nyaaai_contract::text::text_length;
-use nyaaai_contract::time::{deadline, parse_iso_time};
+use nyaaai_contract::time::parse_iso_time;
 
 use crate::effort::EFFORTS;
-use crate::kinds::fetcher::{Aborted, FETCH_MS, Fetcher, Refreshed, TTL_MS, Waiter};
+use crate::kinds::fetcher::{Aborted, Fetcher, Refreshed, TTL_MS, Waiter};
 use crate::kinds::join::join_settled;
 use crate::kinds::readers::{
     data_list, field_of, fields_of, number_field, object_field, text_field, texts_field,
@@ -780,7 +781,9 @@ fn fetched(shared: &Arc<Shared>) -> Wait {
     shared
         .fetcher
         .fetched(now, shared.deps.ttl_ms.unwrap_or(TTL_MS), move || {
-            let limit = deadline(&*held.deps.deps.scheduler, FETCH_MS, &CancelToken::new());
+            let deps = &held.deps.deps;
+            let budgets = deps.budgets.clone().unwrap_or_default();
+            let limit = span(&deps.scheduler, budgets.get(BudgetName::Catalog), None);
             Box::pin(refresh(held, limit))
         })
 }
@@ -847,26 +850,19 @@ fn locked<T>(held: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
 }
 
 /// One read of the catalog's own paths.
-async fn read(
-    transport: &Transport,
-    path: &str,
-    token: &CancelToken,
-) -> Result<Value, TransportError> {
-    transport.get_json(path, token, &KeyAuth::None).await
+async fn read(transport: &Transport, path: &str, clock: &Span) -> Result<Value, TransportError> {
+    transport.get_json(path, clock, &KeyAuth::None).await
 }
 
-async fn refresh(
-    shared: Arc<Shared>,
-    limit: nyaaai_contract::time::Deadline,
-) -> Refreshed<Arc<Fetched>> {
+async fn refresh(shared: Arc<Shared>, limit: Span) -> Refreshed<Arc<Fetched>> {
     let scheduler = &shared.deps.deps.scheduler;
     let transport = &shared.deps.transport;
     let read_all = join_settled([
-        read(transport, "/models", limit.token()),
-        read(transport, "/endpoints/zdr", limit.token()),
+        read(transport, "/models", &limit),
+        read(transport, "/endpoints/zdr", &limit),
     ])
     .await;
-    // The deadline bounds every read; it goes once all have settled.
+    // The span bounds every read; it goes once all have settled.
     limit.clear();
     let outcome = match read_all {
         Ok(read) => match read.as_slice() {

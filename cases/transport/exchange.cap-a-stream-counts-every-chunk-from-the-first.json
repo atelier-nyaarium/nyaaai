@@ -2,7 +2,7 @@
 	"format": 2,
 	"type": "function",
 	"kind": "transport.exchange",
-	"name": "idle-an-error-body-has-one-window-from-the-request",
+	"name": "cap-a-stream-counts-every-chunk-from-the-first",
 	"input": {
 		"codec": {
 			"family": "chat-completions",
@@ -19,23 +19,35 @@
 			"kind": "inline",
 			"exchanges": [
 				{
-					"status": 500,
+					"status": 200,
 					"headers": [
 						[
 							"content-type",
-							"application/json"
+							"text/event-stream"
 						]
 					],
 					"chunks": [
 						{
 							"kind": "text",
-							"text": "{\"error\":",
-							"delayMs": 20
+							"text": "data: {\"id\":\"gen-1\",\"provider\":\"Azure\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Hi\"}}]}\n\n"
+						},
+						{
+							"kind": "repeat",
+							"text": "y",
+							"times": 20
+						},
+						{
+							"kind": "repeat",
+							"text": "y",
+							"times": 20
 						},
 						{
 							"kind": "text",
-							"text": "{\"message\":\"x\"}}",
-							"delayMs": 20
+							"text": "\n\n"
+						},
+						{
+							"kind": "text",
+							"text": "data: [DONE]\n\n"
 						}
 					]
 				}
@@ -61,7 +73,11 @@
 				}
 			}
 		],
-		"idleMs": 30
+		"budgets": {
+			"stream": {
+				"maxBytes": 30
+			}
+		}
 	},
 	"expected": {
 		"calls": [
@@ -70,13 +86,13 @@
 				"result": null,
 				"answer": null,
 				"failure": {
-					"category": "idle",
-					"status": "idle",
-					"message": "OpenRouter sent nothing for too long."
+					"category": "network",
+					"status": "network",
+					"message": "The reply is larger than 30 bytes."
 				},
 				"thrown": null,
 				"aborted": false,
-				"nowMs": 1800000000040
+				"nowMs": 1800000000000
 			}
 		],
 		"requests": [
@@ -105,7 +121,7 @@
 			}
 		],
 		"log": [
-			"OpenRouter 500 - -"
+			"OpenRouter 200 - -"
 		],
 		"settled": [
 			"openai/gpt-6-luna"

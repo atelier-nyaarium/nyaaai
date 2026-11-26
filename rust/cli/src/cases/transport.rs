@@ -9,16 +9,18 @@ use nyaaai_agentic::transport::{
 };
 use nyaaai_contract::base64::base64_decode;
 use nyaaai_contract::cancel::CancelToken;
-use nyaaai_contract::fetch::Method;
+use nyaaai_contract::fetch::{BudgetName, Budgets, Method, budget_table, span};
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::json::Value;
 use nyaaai_contract::shapes::step::{CanonicalRequest, Encoded, Failure, HeaderList, StepResult};
+use nyaaai_contract::time::Scheduler;
 use nyaaai_testkit::cases::{CaseContext, Outcome, block_on, failed};
 use nyaaai_testkit::keys::FakeKeys;
 use nyaaai_testkit::scheduler::{FakeScheduler, TimerWheel};
 use nyaaai_testkit::scripted_fetch::{ScriptedChunk, ScriptedEnd, ScriptedExchange, ScriptedFetch};
 use nyaaai_testkit::trace::{read_trace, replay_fetch};
 
+use super::budget::changes_of;
 use super::codec::codec_of;
 use super::shapes::*;
 
@@ -83,7 +85,7 @@ fn delay_of(chunk: &TransportChunk) -> i64 {
     .unwrap_or(0)
 }
 
-fn exchange_of(held: &TransportExchange) -> Outcome<ScriptedExchange> {
+pub fn exchange_of(held: &TransportExchange) -> Outcome<ScriptedExchange> {
     let chunks = held
         .chunks
         .iter()
@@ -153,13 +155,30 @@ fn recorded(outcome: &mut TransportOutcome, error: TransportError) {
     }
 }
 
+/// A JSON call's own span opens from its preset, `catalog` by default.
+fn preset_of(call: &TransportCall) -> Option<BudgetName> {
+    let named = match call {
+        TransportCall::GetJson(held) => held.preset.map(|held| held.as_str()),
+        TransportCall::PostJson(held) => held.preset.map(|held| held.as_str()),
+        _ => return None,
+    };
+    Some(
+        named
+            .and_then(BudgetName::of)
+            .unwrap_or(BudgetName::Catalog),
+    )
+}
+
 async fn run_call(
     transport: &Transport,
     codec: &dyn Codec,
     call: &TransportCall,
     caller: &CancelToken,
+    clock: Option<&nyaaai_contract::fetch::Span>,
+    wheel: &TimerWheel,
 ) -> Outcome<TransportOutcome> {
     let mut outcome = outcome();
+    let opened = || clock.ok_or_else(|| "a JSON call opens a span".to_owned());
     match call {
         TransportCall::Stream(held) => {
             let mut stream = transport.stream(codec, &held.request, caller);
@@ -169,6 +188,9 @@ async fn run_call(
                         outcome.events.push(event);
                         if Some(outcome.events.len() as u64) == held.stop_after {
                             break;
+                        }
+                        if let Some(ms) = held.take_ms {
+                            wheel.advance(ms as i64);
                         }
                     }
                     Ok(None) => break,
@@ -190,7 +212,7 @@ async fn run_call(
         TransportCall::GetJson(held) => {
             let auth = key_auth_of(held.key_auth.as_ref());
             match transport
-                .get_json(slashed(&held.path)?, caller, &auth)
+                .get_json(slashed(&held.path)?, opened()?, &auth)
                 .await
             {
                 Ok(answer) => outcome.answer = answer,
@@ -200,7 +222,7 @@ async fn run_call(
         TransportCall::PostJson(held) => {
             let auth = key_auth_of(held.key_auth.as_ref());
             let sent = transport
-                .post_json(slashed(&held.path)?, held.body.as_ref(), caller, &auth)
+                .post_json(slashed(&held.path)?, held.body.as_ref(), opened()?, &auth)
                 .await;
             match sent {
                 Ok(answer) => outcome.answer = answer,
@@ -213,7 +235,7 @@ async fn run_call(
 
 fn played_of(
     script: &TransportScript,
-    wheel: &Arc<TimerWheel>,
+    scheduler: &Arc<FakeScheduler>,
     root: &Path,
 ) -> Outcome<ScriptedFetch> {
     match script {
@@ -223,11 +245,11 @@ fn played_of(
                 .iter()
                 .map(exchange_of)
                 .collect::<Outcome<Vec<_>>>()?;
-            Ok(ScriptedFetch::new(exchanges, Arc::clone(wheel)))
+            Ok(ScriptedFetch::new(exchanges, Arc::clone(scheduler)))
         }
         TransportScript::Trace(held) => {
             let trace = read_trace(&root.join(&held.file)).map_err(failed)?;
-            replay_fetch(&trace, Arc::clone(wheel)).map_err(failed)
+            replay_fetch(&trace, Arc::clone(scheduler)).map_err(failed)
         }
     }
 }
@@ -248,7 +270,9 @@ pub fn exchange(
         }
     }
     let wheel = Arc::new(TimerWheel::new(input.start_ms));
-    let played = Arc::new(played_of(&input.script, &wheel, context.root())?);
+    let scheduler = Arc::new(FakeScheduler::new(Arc::clone(&wheel)));
+    let budgets: Budgets = budget_table(&changes_of(input.budgets.as_ref()))?;
+    let played = Arc::new(played_of(&input.script, &scheduler, context.root())?);
     let keys = Arc::new(
         FakeKeys::new(input.keys.clone()).ok_or_else(|| "fakeKeys needs a value".to_owned())?,
     );
@@ -268,7 +292,7 @@ pub fn exchange(
     let sink = Arc::clone(&log);
     let transport = Transport::new(TransportDeps {
         fetch: played.clone(),
-        scheduler: Arc::new(FakeScheduler::new(Arc::clone(&wheel))),
+        scheduler: scheduler.clone(),
         key: Arc::new(Keys(Arc::clone(&keys))),
         log: Box::new(move |line| {
             sink.lock()
@@ -284,8 +308,7 @@ pub fn exchange(
             Some(TransportExchangeInputAuth::None) => Auth::None,
             Some(TransportExchangeInputAuth::Optional) => Auth::Optional,
         },
-        idle_ms: input.idle_ms,
-        max_bytes: input.max_bytes.map(|held| held.max(0) as usize),
+        budgets: Some(budgets.clone()),
     });
     let told = Arc::clone(&settled);
     transport.on_settled(move |model| {
@@ -304,7 +327,13 @@ pub fn exchange(
                 let held = caller.clone();
                 wheel.after_run(ms, "caller", Box::new(move || held.cancel()));
             }
-            let mut outcome = run_call(&transport, &*codec, call, &caller).await?;
+            let shared: Arc<dyn Scheduler> = scheduler.clone();
+            let clock = preset_of(call).map(|name| span(&shared, budgets.get(name), Some(&caller)));
+            let mut outcome =
+                run_call(&transport, &*codec, call, &caller, clock.as_ref(), &wheel).await?;
+            if let Some(clock) = &clock {
+                clock.clear();
+            }
             wheel.cancel("caller");
             outcome.aborted = caller.is_cancelled();
             outcome.now_ms = nyaaai_contract::time::Clock::now_ms(&*wheel);

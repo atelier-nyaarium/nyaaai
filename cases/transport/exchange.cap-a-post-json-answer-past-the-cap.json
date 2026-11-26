@@ -42,7 +42,11 @@
 				"body": {}
 			}
 		],
-		"maxBytes": 5
+		"budgets": {
+			"catalog": {
+				"maxBytes": 5
+			}
+		}
 	},
 	"expected": {
 		"calls": [

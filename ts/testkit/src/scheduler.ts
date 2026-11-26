@@ -16,6 +16,9 @@ export interface SleepWatch {
 	woke(signal: AbortSignal | undefined): void;
 }
 
+/** The test's scheduler, its wheel at hand. */
+export type FakeScheduler = Scheduler & { wheel: TimerWheel };
+
 interface Timer {
 	tag: string;
 	atMs: number;
@@ -83,10 +86,7 @@ export class TimerWheel {
 //  Functions & Helpers
 
 /** Virtual-time scheduler; `watch` hears every sleep begin and end. */
-export function fakeScheduler(
-	wheel: TimerWheel = new TimerWheel(),
-	watch?: SleepWatch,
-): Scheduler & { wheel: TimerWheel } {
+export function fakeScheduler(wheel: TimerWheel = new TimerWheel(), watch?: SleepWatch): FakeScheduler {
 	let sleeps = 0;
 	let schedules = 0;
 	return {

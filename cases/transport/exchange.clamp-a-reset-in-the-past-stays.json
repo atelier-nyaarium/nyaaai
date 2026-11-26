@@ -2,11 +2,29 @@
 	"format": 2,
 	"type": "function",
 	"kind": "transport.exchange",
-	"name": "cap-an-error-body-keeps-its-own-cap",
+	"name": "clamp-a-reset-in-the-past-stays",
 	"input": {
 		"codec": {
 			"family": "chat-completions",
-			"dialect": "openrouter"
+			"dialect": "opencode",
+			"facts": {
+				"api": {
+					"family": "chat-completions",
+					"structured": true,
+					"choice": [
+						"auto",
+						"none",
+						"required",
+						"tool"
+					],
+					"strict": false,
+					"reasoning": "reasoning_content"
+				},
+				"efforts": [
+					"high"
+				]
+			},
+			"nowMs": 1800000000000
 		},
 		"baseUrl": "https://openrouter.ai/api/v1",
 		"label": "OpenRouter",
@@ -19,7 +37,7 @@
 			"kind": "inline",
 			"exchanges": [
 				{
-					"status": 400,
+					"status": 429,
 					"headers": [
 						[
 							"content-type",
@@ -29,7 +47,7 @@
 					"chunks": [
 						{
 							"kind": "text",
-							"text": "{\"error\":{\"code\":400,\"message\":\"Bad request body\"}}"
+							"text": "{\"error\":{\"type\":\"GoUsageLimitError\",\"message\":\"Limit.\",\"resetsAt\":\"2020-01-01T00:00:00Z\"}}"
 						}
 					]
 				}
@@ -54,8 +72,7 @@
 					"zdrOnly": true
 				}
 			}
-		],
-		"maxBytes": 10
+		]
 	},
 	"expected": {
 		"calls": [
@@ -64,9 +81,10 @@
 				"result": null,
 				"answer": null,
 				"failure": {
-					"category": "badRequest",
-					"status": 400,
-					"message": "Bad request body"
+					"category": "allowance",
+					"status": 429,
+					"resetsAt": 1577836800000,
+					"message": "Limit."
 				},
 				"thrown": null,
 				"aborted": false,
@@ -76,8 +94,12 @@
 		"requests": [
 			{
 				"method": "POST",
-				"url": "https://openrouter.ai/api/v1/chat/completions",
+				"url": "https://openrouter.ai/api/v1/openai/v1/chat/completions",
 				"headers": [
+					[
+						"x-opencode-session",
+						"root-1"
+					],
 					[
 						"Content-Type",
 						"application/json"
@@ -95,11 +117,11 @@
 						"lab-app/1.0"
 					]
 				],
-				"body": "{\"model\":\"openai/gpt-6-luna\",\"messages\":[{\"role\":\"user\",\"content\":\"Hi\"}],\"stream\":true,\"session_id\":\"root-1\",\"provider\":{\"zdr\":true,\"data_collection\":\"deny\",\"require_parameters\":true}}"
+				"body": "{\"model\":\"openai/gpt-6-luna\",\"messages\":[{\"role\":\"user\",\"content\":\"Hi\"}],\"stream\":true,\"stream_options\":{\"include_usage\":true}}"
 			}
 		],
 		"log": [
-			"OpenRouter 400 - -"
+			"OpenRouter 429 - -"
 		],
 		"settled": [
 			"openai/gpt-6-luna"

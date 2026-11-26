@@ -1,0 +1,25 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "time.retryAfter",
+	"name": "a-wait-past-thirty-one-days-is-thirty-one-days",
+	"input": {
+		"nowMs": 1794744000000,
+		"headers": [
+			"2678400",
+			"2678401",
+			"86400000",
+			"2026-12-16T12:00:00Z",
+			"2026-12-25T12:00:00Z"
+		]
+	},
+	"expected": {
+		"results": [
+			2678400000,
+			2678400000,
+			2678400000,
+			2678400000,
+			2678400000
+		]
+	}
+}

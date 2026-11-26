@@ -2,10 +2,10 @@
 
 import { describe, expect, it } from "bun:test";
 import { base64Decode, base64Encode } from "@nyaaai/contract/base64";
-import type { Fetch, FetchRequest } from "@nyaaai/contract/fetch";
+import { BUDGETS, type Fetch, type FetchRequest } from "@nyaaai/contract/fetch";
 import { encodePathSegment } from "@nyaaai/contract/text";
 import { recordingFetch } from "../recorder";
-import { TimerWheel } from "../scheduler";
+import { fakeScheduler } from "../scheduler";
 import { type ScriptedExchange, scriptedFetch } from "../scriptedFetch";
 
 ////////////////////////////////
@@ -30,6 +30,7 @@ const request = (body?: string): FetchRequest => ({
 	url: "http://lab.test/v1",
 	headers: [["authorization", `Bearer ${SECRET}`]],
 	...(body === undefined ? {} : { body }),
+	budget: BUDGETS.catalog,
 });
 
 async function play(inner: Fetch, sent: FetchRequest = request("{}")): Promise<void> {
@@ -47,7 +48,7 @@ async function refusal(held: ReturnType<typeof recordingFetch>): Promise<string>
 }
 
 function recording(exchanges: ScriptedExchange[], secrets: string[] = [SECRET]) {
-	return recordingFetch(scriptedFetch(exchanges, new TimerWheel()).fetch, secrets);
+	return recordingFetch(scriptedFetch(exchanges, fakeScheduler()).fetch, secrets);
 }
 
 ////////////////////////////////
@@ -72,7 +73,7 @@ describe("the recording fetch", () => {
 		]);
 		await play(held.fetch, request('{"model":"m","n":[1]}'));
 		await play(held.fetch, request("not json"));
-		await play(held.fetch, { method: "GET", url: "http://lab.test/v1", headers: [] });
+		await play(held.fetch, { method: "GET", url: "http://lab.test/v1", headers: [], budget: BUDGETS.catalog });
 		const [first, second, third] = held.trace().exchanges;
 		expect(first?.request).toEqual({ model: "m", n: [1] });
 		expect([first?.status, first?.headers]).toEqual([

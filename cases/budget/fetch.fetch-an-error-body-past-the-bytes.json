@@ -1,0 +1,49 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "budget.fetch",
+	"name": "fetch-an-error-body-past-the-bytes",
+	"input": {
+		"budget": {
+			"totalMs": 1000,
+			"idleMs": 30,
+			"maxBytes": 20
+		},
+		"exchange": {
+			"status": 500,
+			"headers": [
+				[
+					"content-type",
+					"application/json"
+				]
+			],
+			"chunks": [
+				{
+					"kind": "text",
+					"text": "{\"error\":{\"message\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"}}"
+				}
+			]
+		}
+	},
+	"expected": {
+		"seen": [
+			{
+				"kind": "head",
+				"atMs": 0,
+				"status": 500
+			},
+			{
+				"kind": "ended",
+				"atMs": 0,
+				"end": {
+					"kind": "budget",
+					"bound": "bytes",
+					"limit": 20
+				}
+			}
+		],
+		"served": 1,
+		"waiting": [],
+		"nowMs": 0
+	}
+}

@@ -41,7 +41,11 @@
 				"path": "/models"
 			}
 		],
-		"maxBytes": 18
+		"budgets": {
+			"catalog": {
+				"maxBytes": 18
+			}
+		}
 	},
 	"expected": {
 		"calls": [

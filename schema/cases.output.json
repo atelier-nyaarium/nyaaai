@@ -4780,6 +4780,15 @@
 			],
 			"additionalProperties": false
 		},
+		"BudgetChanges": {
+			"type": "object",
+			"propertyNames": {
+				"type": "string"
+			},
+			"additionalProperties": {
+				"$ref": "#/$defs/BudgetChange"
+			}
+		},
 		"TransportChunk": {
 			"oneOf": [
 				{
@@ -4963,6 +4972,11 @@
 							"minimum": 1,
 							"maximum": 9007199254740991
 						},
+						"takeMs": {
+							"type": "integer",
+							"minimum": 0,
+							"maximum": 9007199254740991
+						},
 						"abortAfterMs": {
 							"type": "integer",
 							"minimum": -9007199254740991,
@@ -5016,6 +5030,20 @@
 						"keyAuth": {
 							"$ref": "#/$defs/TransportKeyAuth"
 						},
+						"preset": {
+							"type": "string",
+							"enum": [
+								"keyCheck",
+								"limits",
+								"stats",
+								"catalog",
+								"detail",
+								"discover",
+								"warm",
+								"reply",
+								"stream"
+							]
+						},
 						"abortAfterMs": {
 							"type": "integer",
 							"minimum": -9007199254740991,
@@ -5044,6 +5072,20 @@
 						"body": {},
 						"keyAuth": {
 							"$ref": "#/$defs/TransportKeyAuth"
+						},
+						"preset": {
+							"type": "string",
+							"enum": [
+								"keyCheck",
+								"limits",
+								"stats",
+								"catalog",
+								"detail",
+								"discover",
+								"warm",
+								"reply",
+								"stream"
+							]
 						},
 						"abortAfterMs": {
 							"type": "integer",
@@ -5220,15 +5262,8 @@
 						"optional"
 					]
 				},
-				"idleMs": {
-					"type": "integer",
-					"minimum": -9007199254740991,
-					"maximum": 9007199254740991
-				},
-				"maxBytes": {
-					"type": "integer",
-					"minimum": -9007199254740991,
-					"maximum": 9007199254740991
+				"budgets": {
+					"$ref": "#/$defs/BudgetChanges"
 				},
 				"keys": {
 					"minItems": 1,
@@ -5354,6 +5389,470 @@
 			"required": [
 				"shape",
 				"normalized"
+			],
+			"additionalProperties": false
+		},
+		"BudgetChange": {
+			"type": "object",
+			"properties": {
+				"totalMs": {
+					"type": "number"
+				},
+				"idleMs": {
+					"type": "number"
+				},
+				"maxBytes": {
+					"type": "number"
+				}
+			},
+			"additionalProperties": false
+		},
+		"BudgetEnd": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "budget"
+						},
+						"bound": {
+							"type": "string",
+							"enum": [
+								"total",
+								"idle",
+								"bytes"
+							]
+						},
+						"limit": {
+							"type": "integer",
+							"minimum": -9007199254740991,
+							"maximum": 9007199254740991
+						}
+					},
+					"required": [
+						"kind",
+						"bound",
+						"limit"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "caller"
+						}
+					},
+					"required": [
+						"kind"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "failed"
+						},
+						"message": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"kind",
+						"message"
+					],
+					"additionalProperties": false
+				}
+			],
+			"x-tag": "kind"
+		},
+		"BudgetSeen": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "head"
+						},
+						"atMs": {
+							"type": "integer",
+							"minimum": -9007199254740991,
+							"maximum": 9007199254740991
+						},
+						"status": {
+							"type": "integer",
+							"minimum": -9007199254740991,
+							"maximum": 9007199254740991
+						}
+					},
+					"required": [
+						"kind",
+						"atMs",
+						"status"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "chunk"
+						},
+						"atMs": {
+							"type": "integer",
+							"minimum": -9007199254740991,
+							"maximum": 9007199254740991
+						},
+						"size": {
+							"type": "integer",
+							"minimum": -9007199254740991,
+							"maximum": 9007199254740991
+						}
+					},
+					"required": [
+						"kind",
+						"atMs",
+						"size"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "done"
+						},
+						"atMs": {
+							"type": "integer",
+							"minimum": -9007199254740991,
+							"maximum": 9007199254740991
+						}
+					},
+					"required": [
+						"kind",
+						"atMs"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "ended"
+						},
+						"atMs": {
+							"type": "integer",
+							"minimum": -9007199254740991,
+							"maximum": 9007199254740991
+						},
+						"end": {
+							"$ref": "#/$defs/BudgetEnd"
+						}
+					},
+					"required": [
+						"kind",
+						"atMs",
+						"end"
+					],
+					"additionalProperties": false
+				}
+			],
+			"x-tag": "kind"
+		},
+		"BudgetSpanStep": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "read"
+						},
+						"path": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"kind",
+						"path"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "advance"
+						},
+						"ms": {
+							"type": "integer",
+							"minimum": 0,
+							"maximum": 9007199254740991
+						}
+					},
+					"required": [
+						"kind",
+						"ms"
+					],
+					"additionalProperties": false
+				}
+			],
+			"x-tag": "kind"
+		},
+		"BudgetSpanRead": {
+			"type": "object",
+			"properties": {
+				"startMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"endMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"sent": {
+					"anyOf": [
+						{
+							"$ref": "step.output.json#/$defs/Budget"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"answer": {},
+				"failure": {
+					"anyOf": [
+						{
+							"$ref": "step.output.json#/$defs/Failure"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"thrown": {
+					"type": [
+						"string",
+						"null"
+					]
+				}
+			},
+			"required": [
+				"startMs",
+				"endMs",
+				"sent",
+				"answer",
+				"failure",
+				"thrown"
+			],
+			"additionalProperties": false
+		},
+		"BudgetTableInput": {
+			"type": "object",
+			"properties": {
+				"changes": {
+					"$ref": "#/$defs/BudgetChanges"
+				}
+			},
+			"required": [
+				"changes"
+			],
+			"additionalProperties": false
+		},
+		"BudgetTableResult": {
+			"type": "object",
+			"properties": {
+				"presets": {
+					"anyOf": [
+						{
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"name": {
+										"type": "string"
+									},
+									"budget": {
+										"$ref": "step.output.json#/$defs/Budget"
+									}
+								},
+								"required": [
+									"name",
+									"budget"
+								],
+								"additionalProperties": false
+							}
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"refused": {
+					"type": [
+						"string",
+						"null"
+					]
+				}
+			},
+			"required": [
+				"presets",
+				"refused"
+			],
+			"additionalProperties": false
+		},
+		"BudgetFetchInput": {
+			"type": "object",
+			"properties": {
+				"budget": {
+					"$ref": "step.output.json#/$defs/Budget"
+				},
+				"exchange": {
+					"$ref": "#/$defs/TransportExchange"
+				},
+				"holds": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"minimum": 0,
+						"maximum": 9007199254740991
+					}
+				},
+				"abortAfterMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"afterMs": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				}
+			},
+			"required": [
+				"budget",
+				"exchange"
+			],
+			"additionalProperties": false
+		},
+		"BudgetFetchResult": {
+			"type": "object",
+			"properties": {
+				"seen": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/BudgetSeen"
+					}
+				},
+				"served": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"waiting": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"nowMs": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				}
+			},
+			"required": [
+				"seen",
+				"served",
+				"waiting",
+				"nowMs"
+			],
+			"additionalProperties": false
+		},
+		"BudgetSpanInput": {
+			"type": "object",
+			"properties": {
+				"budget": {
+					"$ref": "step.output.json#/$defs/Budget"
+				},
+				"keyMs": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 9007199254740991
+				},
+				"exchanges": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/TransportExchange"
+					}
+				},
+				"steps": {
+					"minItems": 1,
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/BudgetSpanStep"
+					}
+				}
+			},
+			"required": [
+				"budget",
+				"exchanges",
+				"steps"
+			],
+			"additionalProperties": false
+		},
+		"BudgetSpanResult": {
+			"type": "object",
+			"properties": {
+				"reads": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/BudgetSpanRead"
+					}
+				},
+				"ended": {
+					"anyOf": [
+						{
+							"type": "string",
+							"enum": [
+								"deadline",
+								"caller"
+							]
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"requests": {
+					"type": "integer",
+					"minimum": -9007199254740991,
+					"maximum": 9007199254740991
+				},
+				"waiting": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"reads",
+				"ended",
+				"requests",
+				"waiting"
 			],
 			"additionalProperties": false
 		},

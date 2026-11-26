@@ -1,0 +1,97 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "budget.table",
+	"name": "table-a-change-inside-the-ceilings-is-applied",
+	"input": {
+		"changes": {
+			"discover": {
+				"totalMs": 60000
+			},
+			"stream": {
+				"maxBytes": 1073741824,
+				"idleMs": 1800000
+			},
+			"warm": {
+				"totalMs": 86400000
+			}
+		}
+	},
+	"expected": {
+		"presets": [
+			{
+				"name": "keyCheck",
+				"budget": {
+					"totalMs": 30000,
+					"idleMs": 30000,
+					"maxBytes": 16777216
+				}
+			},
+			{
+				"name": "limits",
+				"budget": {
+					"totalMs": 5000,
+					"idleMs": 5000,
+					"maxBytes": 16777216
+				}
+			},
+			{
+				"name": "stats",
+				"budget": {
+					"totalMs": 10000,
+					"idleMs": 10000,
+					"maxBytes": 16777216
+				}
+			},
+			{
+				"name": "catalog",
+				"budget": {
+					"totalMs": 30000,
+					"idleMs": 30000,
+					"maxBytes": 16777216
+				}
+			},
+			{
+				"name": "detail",
+				"budget": {
+					"totalMs": 30000,
+					"idleMs": 30000,
+					"maxBytes": 16777216
+				}
+			},
+			{
+				"name": "discover",
+				"budget": {
+					"totalMs": 60000,
+					"idleMs": 10000,
+					"maxBytes": 16777216
+				}
+			},
+			{
+				"name": "warm",
+				"budget": {
+					"totalMs": 86400000,
+					"idleMs": 600000,
+					"maxBytes": 16777216
+				}
+			},
+			{
+				"name": "reply",
+				"budget": {
+					"totalMs": 240000,
+					"idleMs": 120000,
+					"maxBytes": 16777216
+				}
+			},
+			{
+				"name": "stream",
+				"budget": {
+					"totalMs": 7200000,
+					"idleMs": 1800000,
+					"maxBytes": 1073741824
+				}
+			}
+		],
+		"refused": null
+	}
+}

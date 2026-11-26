@@ -28,6 +28,7 @@ use nyaaai_agentic::transport::{KeySource, Transport, TransportError};
 use nyaaai_agentic::usage::meter::{MeterDeps, provider_meter};
 use nyaaai_contract::cancel::CancelToken;
 use nyaaai_contract::entry_keys::KeyAnswer;
+use nyaaai_contract::fetch::Span;
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::id::CountedIds;
 use nyaaai_contract::json::{parse_json, quote_json};
@@ -234,7 +235,7 @@ impl ProviderKind for Kind {
         entry: &'a EntryFields,
         secret: Option<&'a str>,
         deps: &'a KindDeps,
-        cancel: &'a CancelToken,
+        span: &'a Span,
     ) -> BoxFuture<'a, Result<KeyState, KindError>> {
         if self.checked {
             return Box::pin(async {
@@ -245,7 +246,7 @@ impl ProviderKind for Kind {
                 }))
             });
         }
-        self.real.check(entry, secret, deps, cancel)
+        self.real.check(entry, secret, deps, span)
     }
 
     fn transport(
@@ -301,9 +302,9 @@ impl ProviderKind for Kind {
     fn limits<'a>(
         &'a self,
         transport: &'a Transport,
-        cancel: &'a CancelToken,
+        span: &'a Span,
     ) -> BoxFuture<'a, Option<nyaaai_contract::shapes::provider::Limits>> {
-        self.real.limits(transport, cancel)
+        self.real.limits(transport, span)
     }
 }
 
@@ -566,7 +567,7 @@ async fn play(input: LifecycleRunInput) -> Outcome<LifecycleRunResult> {
     let scheduler = Arc::new(FakeScheduler::new(Arc::clone(&wheel)));
     let played = Arc::new(ScriptedFetch::new(
         input.exchanges.iter().map(exchange_of).collect(),
-        Arc::clone(&wheel),
+        Arc::clone(&scheduler),
     ));
     let scripted = Arc::new(ScriptedEntryKeys::new());
     for (id, answer) in input.keys.iter() {
@@ -592,6 +593,7 @@ async fn play(input: LifecycleRunInput) -> Outcome<LifecycleRunResult> {
         log: Arc::new(|_| {}),
         user_agent: "cases/1.0".to_owned(),
         base_url: None,
+        budgets: None,
     };
     let mut listings = Listings::new();
     for (entry, rows) in input.listings.iter() {
@@ -631,6 +633,7 @@ async fn play(input: LifecycleRunInput) -> Outcome<LifecycleRunResult> {
                 let deps = deps.clone();
                 Arc::new(move |_| deps.clone())
             },
+            budgets: None,
             pause_ms: input.pause_ms.map(|held| held as i64),
             max_pauses: input.max_pauses,
         },
@@ -681,6 +684,7 @@ async fn play(input: LifecycleRunInput) -> Outcome<LifecycleRunResult> {
             Arc::new(draws),
         )),
         scheduler: scheduler.clone(),
+        budgets: None,
     });
 
     let mut plans = Plans::new();
@@ -1302,11 +1306,12 @@ mod tests {
         let scheduler = Arc::new(FakeScheduler::new(Arc::clone(&wheel)));
         let deps = KindDeps {
             runtime: nyaaai_testkit::cases::runtime(),
-            fetch: Arc::new(ScriptedFetch::new(Vec::new(), Arc::clone(&wheel))),
+            fetch: Arc::new(ScriptedFetch::new(Vec::new(), Arc::clone(&scheduler))),
             scheduler: scheduler.clone(),
             log: Arc::new(|_| {}),
             user_agent: "cases/1.0".to_owned(),
             base_url: None,
+            budgets: None,
         };
         let keys = Arc::new(ScriptedEntryKeys::new());
         for id in ids {
@@ -1351,6 +1356,7 @@ mod tests {
             meter: Some(records.clone() as Arc<dyn Meter>),
             retry: None,
             scheduler: rig.scheduler.clone(),
+            budgets: None,
         })
     }
 

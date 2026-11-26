@@ -31,7 +31,7 @@ use nyaaai_agentic::provider::kind::{CatalogDeps, KindDeps, KindError, ProviderK
 use nyaaai_agentic::step::reply_text;
 use nyaaai_agentic::transport::{KeySource, Transport, TransportError};
 use nyaaai_contract::cancel::CancelToken;
-use nyaaai_contract::fetch::Method;
+use nyaaai_contract::fetch::{Method, Span};
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::json::{Value, parse_json};
 use nyaaai_contract::model_registry::ModelRegistry;
@@ -43,13 +43,14 @@ use nyaaai_contract::shapes::model::{
 };
 use nyaaai_contract::shapes::provider::{EntryFields, KeyState, ProviderEntry, ProviderKindName};
 use nyaaai_contract::shapes::step::CanonicalRequest;
-use nyaaai_contract::time::Clock;
+use nyaaai_contract::time::{Clock, Ended};
 use nyaaai_testkit::cases::{Outcome, block_on};
 use nyaaai_testkit::keys::FakeKeys;
 use nyaaai_testkit::scheduler::{FakeScheduler, TimerWheel};
 use nyaaai_testkit::scripted_fetch::ScriptedFetch;
 use nyaaai_testkit::scripted_ports::ScriptedModelRegistry;
 
+use super::budget::ceiling_span;
 use super::catalog::{CALLER_REASON, Told, caller_token, exchange_of, view_line, view_lines};
 use nyaaai_agentic::models::uses::CHAT;
 
@@ -258,11 +259,11 @@ pub(super) struct Net {
 
 pub(super) fn net_of(start_ms: i64, exchanges: &[NetExchange]) -> Net {
     let wheel = Arc::new(TimerWheel::new(start_ms));
+    let scheduler = Arc::new(FakeScheduler::new(Arc::clone(&wheel)));
     let played = Arc::new(ScriptedFetch::new(
         exchanges.iter().map(exchange_of).collect(),
-        Arc::clone(&wheel),
+        Arc::clone(&scheduler),
     ));
-    let scheduler = Arc::new(FakeScheduler::new(Arc::clone(&wheel)));
     let deps = KindDeps {
         runtime: nyaaai_testkit::cases::runtime(),
         fetch: played.clone(),
@@ -270,6 +271,7 @@ pub(super) fn net_of(start_ms: i64, exchanges: &[NetExchange]) -> Net {
         log: Arc::new(|_| {}),
         user_agent: USER_AGENT.to_owned(),
         base_url: None,
+        budgets: None,
     };
     Net {
         wheel,
@@ -514,7 +516,9 @@ pub fn reach(input: LocalReachInput) -> Outcome<LocalReachResult> {
         input.abort_after_ms,
         input.aborted_before,
     );
-    let checked = block_on(named.check(&entry, input.secret.as_deref(), &net.deps, &token))?;
+    let clock = ceiling_span(&net.scheduler, &token);
+    let checked = block_on(named.check(&entry, input.secret.as_deref(), &net.deps, &clock))?;
+    clock.clear();
     net.wheel.cancel("caller");
     let (state, thrown) = match checked {
         Ok(state) => (Some(state), None),
@@ -553,6 +557,8 @@ pub fn server(input: LocalServerInput) -> Outcome<LocalServerResult> {
                 LocalServerInputStepsItem::Warm(held) => (held.abort_after_ms, held.aborted_before),
             };
             let token = caller_token(&net.wheel, &tag, after, before);
+            let clock = ceiling_span(&net.scheduler, &token);
+            let token = &clock;
             let mut held = LocalServerResultStepsItem {
                 models: None,
                 contexts: None,
@@ -562,7 +568,7 @@ pub fn server(input: LocalServerInput) -> Outcome<LocalServerResult> {
             match step {
                 LocalServerInputStepsItem::Models(each) => {
                     let known: Vec<LocalModel> = each.known.iter().map(local_of).collect();
-                    match server.models(&known, &token).await {
+                    match server.models(&known, token).await {
                         Ok(models) => held.models = Some(models.iter().map(served_of).collect()),
                         Err(error) => held.thrown = Some(message_of(&error)),
                     }
@@ -571,7 +577,7 @@ pub fn server(input: LocalServerInput) -> Outcome<LocalServerResult> {
                     if !server.reads_loaded() {
                         held.thrown = Some("This server reads no loaded contexts.".to_owned());
                     } else {
-                        match server.loaded(&each.tag, &token).await {
+                        match server.loaded(&each.tag, token).await {
                             Ok(contexts) => {
                                 held.contexts = Some(
                                     contexts_of(&contexts)
@@ -590,13 +596,14 @@ pub fn server(input: LocalServerInput) -> Outcome<LocalServerResult> {
                     if !server.warms() {
                         held.thrown = Some("This server loads no model.".to_owned());
                     } else {
-                        match server.warm(&each.tag, &token).await {
+                        match server.warm(&each.tag, token).await {
                             Ok(()) => held.done = true,
                             Err(error) => held.thrown = Some(message_of(&error)),
                         }
                     }
                 }
             }
+            clock.clear();
             steps.push(held);
         }
     })?;
@@ -661,8 +668,9 @@ impl ScriptedServer {
         method: Ask,
         tag: Option<&str>,
         known: Vec<String>,
-        cancel: &CancelToken,
+        span: &Span,
     ) -> Result<(Vec<LocalModel>, Loaded), KindError> {
+        let cancel = span.token();
         let at = method as usize;
         let reply = {
             let mut taken = self.taken.lock().unwrap_or_else(|held| held.into_inner());
@@ -696,7 +704,9 @@ impl ScriptedServer {
             )),
             Some(reply) => {
                 self.wheel.advance(reply.delay_ms.unwrap_or(0));
-                if cancel.is_cancelled() {
+                if span.ended() == Some(Ended::Deadline) {
+                    Err(KindError::TimedOut)
+                } else if cancel.is_cancelled() {
                     Err(KindError::Cancelled)
                 } else if reply.fails {
                     Err(KindError::Message("the server failed".to_owned()))
@@ -716,11 +726,11 @@ impl LocalServer for ScriptedServer {
     fn models<'a>(
         &'a self,
         known: &'a [LocalModel],
-        cancel: &'a CancelToken,
+        span: &'a Span,
     ) -> BoxFuture<'a, Result<Vec<LocalModel>, KindError>> {
         Box::pin(async move {
             let known = known.iter().map(|model| model.tag.clone()).collect();
-            Ok(self.answer(Ask::Models, None, known, cancel).await?.0)
+            Ok(self.answer(Ask::Models, None, known, span).await?.0)
         })
     }
 
@@ -735,11 +745,11 @@ impl LocalServer for ScriptedServer {
     fn loaded<'a>(
         &'a self,
         tag: &'a str,
-        cancel: &'a CancelToken,
+        span: &'a Span,
     ) -> BoxFuture<'a, Result<Loaded, KindError>> {
         Box::pin(async move {
             Ok(self
-                .answer(Ask::Loaded, Some(tag), Vec::new(), cancel)
+                .answer(Ask::Loaded, Some(tag), Vec::new(), span)
                 .await?
                 .1)
         })
@@ -749,14 +759,9 @@ impl LocalServer for ScriptedServer {
         self.warm
     }
 
-    fn warm<'a>(
-        &'a self,
-        tag: &'a str,
-        cancel: &'a CancelToken,
-    ) -> BoxFuture<'a, Result<(), KindError>> {
+    fn warm<'a>(&'a self, tag: &'a str, span: &'a Span) -> BoxFuture<'a, Result<(), KindError>> {
         Box::pin(async move {
-            self.answer(Ask::Warm, Some(tag), Vec::new(), cancel)
-                .await?;
+            self.answer(Ask::Warm, Some(tag), Vec::new(), span).await?;
             Ok(())
         })
     }
@@ -959,6 +964,7 @@ pub fn catalog_run(input: LocalCatalogRunInput) -> Outcome<LocalCatalogRunResult
         server: scripted.clone(),
         terms: terms_from(&input.terms),
         scheduler: scheduler.clone(),
+        budgets: None,
         rows: registry.clone() as Arc<dyn ModelRegistry>,
         refreshed: told.callback(),
     });
@@ -1103,6 +1109,7 @@ pub fn flow(input: LocalFlowInput) -> Outcome<LocalFlowResult> {
         CatalogDeps {
             runtime: nyaaai_testkit::cases::runtime(),
             scheduler: net.scheduler.clone(),
+            budgets: None,
             rows: registry.clone() as Arc<dyn ModelRegistry>,
             refreshed: Arc::new(move || {
                 told.fetch_add(1, Ordering::SeqCst);

@@ -1,0 +1,51 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "budget.fetch",
+	"name": "fetch-tie-a-head-due-as-its-idle-clock-ends-is-delivered",
+	"input": {
+		"budget": {
+			"totalMs": 1000,
+			"idleMs": 30,
+			"maxBytes": 1000
+		},
+		"exchange": {
+			"status": 200,
+			"headers": [
+				[
+					"content-type",
+					"text/plain"
+				]
+			],
+			"chunks": [
+				{
+					"kind": "text",
+					"text": "a",
+					"delayMs": 0
+				}
+			],
+			"headMs": 30
+		}
+	},
+	"expected": {
+		"seen": [
+			{
+				"kind": "head",
+				"atMs": 30,
+				"status": 200
+			},
+			{
+				"kind": "chunk",
+				"atMs": 30,
+				"size": 1
+			},
+			{
+				"kind": "done",
+				"atMs": 30
+			}
+		],
+		"served": 1,
+		"waiting": [],
+		"nowMs": 30
+	}
+}

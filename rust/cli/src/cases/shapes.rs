@@ -8734,6 +8734,16 @@ impl Shape for CodecFailureResult {
     }
 }
 
+pub type BudgetChanges = Record<BudgetChange>;
+
+pub fn decode_budget_changes(value: &Value, at: &mut Path) -> Result<BudgetChanges, Refused> {
+    shape::record(value, at, BudgetChange::decode_at)
+}
+
+pub fn encode_budget_changes(held: &BudgetChanges) -> Value {
+    shape::record_value(held, |held| held.encode())
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum TransportChunk {
     Text(TransportChunkText),
@@ -9070,6 +9080,7 @@ impl Shape for TransportCall {
 pub struct TransportCallStream {
     pub request: nyaaai_contract::shapes::step::CanonicalRequest,
     pub stop_after: Option<u64>,
+    pub take_ms: Option<u64>,
     pub abort_after_ms: Option<i64>,
     pub aborted_before: Option<bool>,
 }
@@ -9089,11 +9100,13 @@ impl Shape for TransportCallStream {
         let stop_after = shape::optional(object, "stopAfter", at, |value, at| {
             shape::natural(value, at).and_then(|held| shape::at_least(held, 1, at))
         })?;
+        let take_ms = shape::optional(object, "takeMs", at, shape::natural)?;
         let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
         let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
         Ok(Self {
             request,
             stop_after,
+            take_ms,
             abort_after_ms,
             aborted_before,
         })
@@ -9105,6 +9118,9 @@ impl Shape for TransportCallStream {
         object.insert("request", self.request.encode());
         if let Some(held) = &self.stop_after {
             object.insert("stopAfter", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.take_ms {
+            object.insert("takeMs", Value::Number(*held as f64));
         }
         if let Some(held) = &self.abort_after_ms {
             object.insert("abortAfterMs", Value::Number(*held as f64));
@@ -9162,6 +9178,7 @@ impl Shape for TransportCallComplete {
 pub struct TransportCallGetJson {
     pub path: String,
     pub key_auth: Option<TransportKeyAuth>,
+    pub preset: Option<TransportCallGetJsonPreset>,
     pub abort_after_ms: Option<i64>,
     pub aborted_before: Option<bool>,
 }
@@ -9174,11 +9191,13 @@ impl Shape for TransportCallGetJson {
         })?;
         let path = shape::required(object, "path", at, shape::text)?;
         let key_auth = shape::optional(object, "keyAuth", at, TransportKeyAuth::decode_at)?;
+        let preset = shape::optional(object, "preset", at, TransportCallGetJsonPreset::decode_at)?;
         let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
         let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
         Ok(Self {
             path,
             key_auth,
+            preset,
             abort_after_ms,
             aborted_before,
         })
@@ -9190,6 +9209,9 @@ impl Shape for TransportCallGetJson {
         object.insert("path", Value::from(self.path.as_str()));
         if let Some(held) = &self.key_auth {
             object.insert("keyAuth", held.encode());
+        }
+        if let Some(held) = &self.preset {
+            object.insert("preset", held.encode());
         }
         if let Some(held) = &self.abort_after_ms {
             object.insert("abortAfterMs", Value::Number(*held as f64));
@@ -9206,6 +9228,7 @@ pub struct TransportCallPostJson {
     pub path: String,
     pub body: Option<Value>,
     pub key_auth: Option<TransportKeyAuth>,
+    pub preset: Option<TransportCallPostJsonPreset>,
     pub abort_after_ms: Option<i64>,
     pub aborted_before: Option<bool>,
 }
@@ -9219,12 +9242,14 @@ impl Shape for TransportCallPostJson {
         let path = shape::required(object, "path", at, shape::text)?;
         let body = shape::optional(object, "body", at, shape::any)?;
         let key_auth = shape::optional(object, "keyAuth", at, TransportKeyAuth::decode_at)?;
+        let preset = shape::optional(object, "preset", at, TransportCallPostJsonPreset::decode_at)?;
         let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
         let aborted_before = shape::optional(object, "abortedBefore", at, shape::flag)?;
         Ok(Self {
             path,
             body,
             key_auth,
+            preset,
             abort_after_ms,
             aborted_before,
         })
@@ -9240,6 +9265,9 @@ impl Shape for TransportCallPostJson {
         if let Some(held) = &self.key_auth {
             object.insert("keyAuth", held.encode());
         }
+        if let Some(held) = &self.preset {
+            object.insert("preset", held.encode());
+        }
         if let Some(held) = &self.abort_after_ms {
             object.insert("abortAfterMs", Value::Number(*held as f64));
         }
@@ -9247,6 +9275,122 @@ impl Shape for TransportCallPostJson {
             object.insert("abortedBefore", Value::Bool(*held));
         }
         Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum TransportCallGetJsonPreset {
+    KeyCheck,
+    Limits,
+    Stats,
+    Catalog,
+    Detail,
+    Discover,
+    Warm,
+    Reply,
+    Stream,
+}
+
+impl TransportCallGetJsonPreset {
+    pub const ALL: [Self; 9] = [
+        Self::KeyCheck,
+        Self::Limits,
+        Self::Stats,
+        Self::Catalog,
+        Self::Detail,
+        Self::Discover,
+        Self::Warm,
+        Self::Reply,
+        Self::Stream,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::KeyCheck => "keyCheck",
+            Self::Limits => "limits",
+            Self::Stats => "stats",
+            Self::Catalog => "catalog",
+            Self::Detail => "detail",
+            Self::Discover => "discover",
+            Self::Warm => "warm",
+            Self::Reply => "reply",
+            Self::Stream => "stream",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for TransportCallGetJsonPreset {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum TransportCallPostJsonPreset {
+    KeyCheck,
+    Limits,
+    Stats,
+    Catalog,
+    Detail,
+    Discover,
+    Warm,
+    Reply,
+    Stream,
+}
+
+impl TransportCallPostJsonPreset {
+    pub const ALL: [Self; 9] = [
+        Self::KeyCheck,
+        Self::Limits,
+        Self::Stats,
+        Self::Catalog,
+        Self::Detail,
+        Self::Discover,
+        Self::Warm,
+        Self::Reply,
+        Self::Stream,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::KeyCheck => "keyCheck",
+            Self::Limits => "limits",
+            Self::Stats => "stats",
+            Self::Catalog => "catalog",
+            Self::Detail => "detail",
+            Self::Discover => "discover",
+            Self::Warm => "warm",
+            Self::Reply => "reply",
+            Self::Stream => "stream",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for TransportCallPostJsonPreset {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
     }
 }
 
@@ -9460,8 +9604,7 @@ pub struct TransportExchangeInput {
     pub label: String,
     pub user_agent: String,
     pub auth: Option<TransportExchangeInputAuth>,
-    pub idle_ms: Option<i64>,
-    pub max_bytes: Option<i64>,
+    pub budgets: Option<BudgetChanges>,
     pub keys: Vec<Option<String>>,
     pub start_ms: i64,
     pub script: TransportScript,
@@ -9479,8 +9622,7 @@ impl Shape for TransportExchangeInput {
         let label = shape::required(object, "label", at, shape::text)?;
         let user_agent = shape::required(object, "userAgent", at, shape::text)?;
         let auth = shape::optional(object, "auth", at, TransportExchangeInputAuth::decode_at)?;
-        let idle_ms = shape::optional(object, "idleMs", at, shape::integer)?;
-        let max_bytes = shape::optional(object, "maxBytes", at, shape::integer)?;
+        let budgets = shape::optional(object, "budgets", at, decode_budget_changes)?;
         let keys = shape::required(object, "keys", at, |value, at| {
             shape::list_within(value, at, Some(1), None, |value, at| {
                 shape::nullable(value, at, shape::text)
@@ -9498,8 +9640,7 @@ impl Shape for TransportExchangeInput {
             label,
             user_agent,
             auth,
-            idle_ms,
-            max_bytes,
+            budgets,
             keys,
             start_ms,
             script,
@@ -9522,11 +9663,8 @@ impl Shape for TransportExchangeInput {
         if let Some(held) = &self.auth {
             object.insert("auth", held.encode());
         }
-        if let Some(held) = &self.idle_ms {
-            object.insert("idleMs", Value::Number(*held as f64));
-        }
-        if let Some(held) = &self.max_bytes {
-            object.insert("maxBytes", Value::Number(*held as f64));
+        if let Some(held) = &self.budgets {
+            object.insert("budgets", encode_budget_changes(held));
         }
         object.insert(
             "keys",
@@ -9729,6 +9867,761 @@ impl Shape for TransportKeyResult {
                 .map_or(Value::Null, |held| Value::from(held.as_str())),
         );
         Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BudgetChange {
+    pub total_ms: Option<f64>,
+    pub idle_ms: Option<f64>,
+    pub max_bytes: Option<f64>,
+}
+
+impl Shape for BudgetChange {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let total_ms = shape::optional(object, "totalMs", at, shape::number)?;
+        let idle_ms = shape::optional(object, "idleMs", at, shape::number)?;
+        let max_bytes = shape::optional(object, "maxBytes", at, shape::number)?;
+        Ok(Self {
+            total_ms,
+            idle_ms,
+            max_bytes,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        if let Some(held) = &self.total_ms {
+            object.insert("totalMs", Value::Number(*held));
+        }
+        if let Some(held) = &self.idle_ms {
+            object.insert("idleMs", Value::Number(*held));
+        }
+        if let Some(held) = &self.max_bytes {
+            object.insert("maxBytes", Value::Number(*held));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum BudgetEnd {
+    Budget(BudgetEndBudget),
+    Caller(BudgetEndCaller),
+    Failed(BudgetEndFailed),
+}
+
+impl Shape for BudgetEnd {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "budget" => BudgetEndBudget::decode_at(value, at).map(Self::Budget),
+            "caller" => BudgetEndCaller::decode_at(value, at).map(Self::Caller),
+            "failed" => BudgetEndFailed::decode_at(value, at).map(Self::Failed),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Budget(held) => held.encode(),
+            Self::Caller(held) => held.encode(),
+            Self::Failed(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BudgetEndBudget {
+    pub bound: BudgetEndBudgetBound,
+    pub limit: i64,
+}
+
+impl Shape for BudgetEndBudget {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "budget")
+        })?;
+        let bound = shape::required(object, "bound", at, BudgetEndBudgetBound::decode_at)?;
+        let limit = shape::required(object, "limit", at, shape::integer)?;
+        Ok(Self { bound, limit })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("budget"));
+        object.insert("bound", self.bound.encode());
+        object.insert("limit", Value::Number(self.limit as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BudgetEndCaller {}
+
+impl Shape for BudgetEndCaller {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "caller")
+        })?;
+        Ok(Self {})
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("caller"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BudgetEndFailed {
+    pub message: String,
+}
+
+impl Shape for BudgetEndFailed {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "failed")
+        })?;
+        let message = shape::required(object, "message", at, shape::text)?;
+        Ok(Self { message })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("failed"));
+        object.insert("message", Value::from(self.message.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum BudgetEndBudgetBound {
+    Total,
+    Idle,
+    Bytes,
+}
+
+impl BudgetEndBudgetBound {
+    pub const ALL: [Self; 3] = [Self::Total, Self::Idle, Self::Bytes];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Total => "total",
+            Self::Idle => "idle",
+            Self::Bytes => "bytes",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for BudgetEndBudgetBound {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum BudgetSeen {
+    Head(BudgetSeenHead),
+    Chunk(BudgetSeenChunk),
+    Done(BudgetSeenDone),
+    Ended(BudgetSeenEnded),
+}
+
+impl Shape for BudgetSeen {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "head" => BudgetSeenHead::decode_at(value, at).map(Self::Head),
+            "chunk" => BudgetSeenChunk::decode_at(value, at).map(Self::Chunk),
+            "done" => BudgetSeenDone::decode_at(value, at).map(Self::Done),
+            "ended" => BudgetSeenEnded::decode_at(value, at).map(Self::Ended),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Head(held) => held.encode(),
+            Self::Chunk(held) => held.encode(),
+            Self::Done(held) => held.encode(),
+            Self::Ended(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BudgetSeenHead {
+    pub at_ms: i64,
+    pub status: i64,
+}
+
+impl Shape for BudgetSeenHead {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "head")
+        })?;
+        let at_ms = shape::required(object, "atMs", at, shape::integer)?;
+        let status = shape::required(object, "status", at, shape::integer)?;
+        Ok(Self { at_ms, status })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("head"));
+        object.insert("atMs", Value::Number(self.at_ms as f64));
+        object.insert("status", Value::Number(self.status as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BudgetSeenChunk {
+    pub at_ms: i64,
+    pub size: i64,
+}
+
+impl Shape for BudgetSeenChunk {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "chunk")
+        })?;
+        let at_ms = shape::required(object, "atMs", at, shape::integer)?;
+        let size = shape::required(object, "size", at, shape::integer)?;
+        Ok(Self { at_ms, size })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("chunk"));
+        object.insert("atMs", Value::Number(self.at_ms as f64));
+        object.insert("size", Value::Number(self.size as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BudgetSeenDone {
+    pub at_ms: i64,
+}
+
+impl Shape for BudgetSeenDone {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "done")
+        })?;
+        let at_ms = shape::required(object, "atMs", at, shape::integer)?;
+        Ok(Self { at_ms })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("done"));
+        object.insert("atMs", Value::Number(self.at_ms as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BudgetSeenEnded {
+    pub at_ms: i64,
+    pub end: BudgetEnd,
+}
+
+impl Shape for BudgetSeenEnded {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "ended")
+        })?;
+        let at_ms = shape::required(object, "atMs", at, shape::integer)?;
+        let end = shape::required(object, "end", at, BudgetEnd::decode_at)?;
+        Ok(Self { at_ms, end })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("ended"));
+        object.insert("atMs", Value::Number(self.at_ms as f64));
+        object.insert("end", self.end.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum BudgetSpanStep {
+    Read(BudgetSpanStepRead),
+    Advance(BudgetSpanStepAdvance),
+}
+
+impl Shape for BudgetSpanStep {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        match shape::tag(object, "kind", at)? {
+            "read" => BudgetSpanStepRead::decode_at(value, at).map(Self::Read),
+            "advance" => BudgetSpanStepAdvance::decode_at(value, at).map(Self::Advance),
+            _ => Err(shape::no_branch(at, "kind")),
+        }
+    }
+
+    fn encode(&self) -> Value {
+        match self {
+            Self::Read(held) => held.encode(),
+            Self::Advance(held) => held.encode(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BudgetSpanStepRead {
+    pub path: String,
+}
+
+impl Shape for BudgetSpanStepRead {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "read")
+        })?;
+        let path = shape::required(object, "path", at, shape::text)?;
+        Ok(Self { path })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("read"));
+        object.insert("path", Value::from(self.path.as_str()));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BudgetSpanStepAdvance {
+    pub ms: u64,
+}
+
+impl Shape for BudgetSpanStepAdvance {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "advance")
+        })?;
+        let ms = shape::required(object, "ms", at, shape::natural)?;
+        Ok(Self { ms })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("advance"));
+        object.insert("ms", Value::Number(self.ms as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BudgetSpanRead {
+    pub start_ms: i64,
+    pub end_ms: i64,
+    pub sent: Option<nyaaai_contract::shapes::step::Budget>,
+    pub answer: Value,
+    pub failure: Option<nyaaai_contract::shapes::step::Failure>,
+    pub thrown: Option<String>,
+}
+
+impl Shape for BudgetSpanRead {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let start_ms = shape::required(object, "startMs", at, shape::integer)?;
+        let end_ms = shape::required(object, "endMs", at, shape::integer)?;
+        let sent = shape::required(object, "sent", at, |value, at| {
+            shape::nullable(value, at, nyaaai_contract::shapes::step::Budget::decode_at)
+        })?;
+        let answer = shape::required(object, "answer", at, shape::any)?;
+        let failure = shape::required(object, "failure", at, |value, at| {
+            shape::nullable(value, at, nyaaai_contract::shapes::step::Failure::decode_at)
+        })?;
+        let thrown = shape::required(object, "thrown", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        Ok(Self {
+            start_ms,
+            end_ms,
+            sent,
+            answer,
+            failure,
+            thrown,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("startMs", Value::Number(self.start_ms as f64));
+        object.insert("endMs", Value::Number(self.end_ms as f64));
+        object.insert(
+            "sent",
+            self.sent.as_ref().map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert("answer", self.answer.clone());
+        object.insert(
+            "failure",
+            self.failure
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert(
+            "thrown",
+            self.thrown
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BudgetTableInput {
+    pub changes: BudgetChanges,
+}
+
+impl Shape for BudgetTableInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let changes = shape::required(object, "changes", at, decode_budget_changes)?;
+        Ok(Self { changes })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("changes", encode_budget_changes(&self.changes));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BudgetTableResult {
+    pub presets: Option<Vec<BudgetTableResultPresetsItem>>,
+    pub refused: Option<String>,
+}
+
+impl Shape for BudgetTableResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let presets = shape::required(object, "presets", at, |value, at| {
+            shape::nullable(value, at, |value, at| {
+                shape::list(value, at, BudgetTableResultPresetsItem::decode_at)
+            })
+        })?;
+        let refused = shape::required(object, "refused", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        Ok(Self { presets, refused })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "presets",
+            self.presets.as_ref().map_or(Value::Null, |held| {
+                Value::Array(held.iter().map(|held| held.encode()).collect())
+            }),
+        );
+        object.insert(
+            "refused",
+            self.refused
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BudgetTableResultPresetsItem {
+    pub name: String,
+    pub budget: nyaaai_contract::shapes::step::Budget,
+}
+
+impl Shape for BudgetTableResultPresetsItem {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let name = shape::required(object, "name", at, shape::text)?;
+        let budget = shape::required(
+            object,
+            "budget",
+            at,
+            nyaaai_contract::shapes::step::Budget::decode_at,
+        )?;
+        Ok(Self { name, budget })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("name", Value::from(self.name.as_str()));
+        object.insert("budget", self.budget.encode());
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BudgetFetchInput {
+    pub budget: nyaaai_contract::shapes::step::Budget,
+    pub exchange: TransportExchange,
+    pub holds: Option<Vec<u64>>,
+    pub abort_after_ms: Option<i64>,
+    pub after_ms: Option<u64>,
+}
+
+impl Shape for BudgetFetchInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let budget = shape::required(
+            object,
+            "budget",
+            at,
+            nyaaai_contract::shapes::step::Budget::decode_at,
+        )?;
+        let exchange = shape::required(object, "exchange", at, TransportExchange::decode_at)?;
+        let holds = shape::optional(object, "holds", at, |value, at| {
+            shape::list(value, at, shape::natural)
+        })?;
+        let abort_after_ms = shape::optional(object, "abortAfterMs", at, shape::integer)?;
+        let after_ms = shape::optional(object, "afterMs", at, shape::natural)?;
+        Ok(Self {
+            budget,
+            exchange,
+            holds,
+            abort_after_ms,
+            after_ms,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("budget", self.budget.encode());
+        object.insert("exchange", self.exchange.encode());
+        if let Some(held) = &self.holds {
+            object.insert(
+                "holds",
+                Value::Array(
+                    held.iter()
+                        .map(|held| Value::Number(*held as f64))
+                        .collect(),
+                ),
+            );
+        }
+        if let Some(held) = &self.abort_after_ms {
+            object.insert("abortAfterMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.after_ms {
+            object.insert("afterMs", Value::Number(*held as f64));
+        }
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BudgetFetchResult {
+    pub seen: Vec<BudgetSeen>,
+    pub served: i64,
+    pub waiting: Vec<String>,
+    pub now_ms: i64,
+}
+
+impl Shape for BudgetFetchResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let seen = shape::required(object, "seen", at, |value, at| {
+            shape::list(value, at, BudgetSeen::decode_at)
+        })?;
+        let served = shape::required(object, "served", at, shape::integer)?;
+        let waiting = shape::required(object, "waiting", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        let now_ms = shape::required(object, "nowMs", at, shape::integer)?;
+        Ok(Self {
+            seen,
+            served,
+            waiting,
+            now_ms,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "seen",
+            Value::Array(self.seen.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert("served", Value::Number(self.served as f64));
+        object.insert(
+            "waiting",
+            Value::Array(
+                self.waiting
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        object.insert("nowMs", Value::Number(self.now_ms as f64));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BudgetSpanInput {
+    pub budget: nyaaai_contract::shapes::step::Budget,
+    pub key_ms: Option<u64>,
+    pub exchanges: Vec<TransportExchange>,
+    pub steps: Vec<BudgetSpanStep>,
+}
+
+impl Shape for BudgetSpanInput {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let budget = shape::required(
+            object,
+            "budget",
+            at,
+            nyaaai_contract::shapes::step::Budget::decode_at,
+        )?;
+        let key_ms = shape::optional(object, "keyMs", at, shape::natural)?;
+        let exchanges = shape::required(object, "exchanges", at, |value, at| {
+            shape::list(value, at, TransportExchange::decode_at)
+        })?;
+        let steps = shape::required(object, "steps", at, |value, at| {
+            shape::list_within(value, at, Some(1), None, BudgetSpanStep::decode_at)
+        })?;
+        Ok(Self {
+            budget,
+            key_ms,
+            exchanges,
+            steps,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("budget", self.budget.encode());
+        if let Some(held) = &self.key_ms {
+            object.insert("keyMs", Value::Number(*held as f64));
+        }
+        object.insert(
+            "exchanges",
+            Value::Array(self.exchanges.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "steps",
+            Value::Array(self.steps.iter().map(|held| held.encode()).collect()),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BudgetSpanResult {
+    pub reads: Vec<BudgetSpanRead>,
+    pub ended: Option<BudgetSpanResultEnded>,
+    pub requests: i64,
+    pub waiting: Vec<String>,
+}
+
+impl Shape for BudgetSpanResult {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        let reads = shape::required(object, "reads", at, |value, at| {
+            shape::list(value, at, BudgetSpanRead::decode_at)
+        })?;
+        let ended = shape::required(object, "ended", at, |value, at| {
+            shape::nullable(value, at, BudgetSpanResultEnded::decode_at)
+        })?;
+        let requests = shape::required(object, "requests", at, shape::integer)?;
+        let waiting = shape::required(object, "waiting", at, |value, at| {
+            shape::list(value, at, shape::text)
+        })?;
+        Ok(Self {
+            reads,
+            ended,
+            requests,
+            waiting,
+        })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert(
+            "reads",
+            Value::Array(self.reads.iter().map(|held| held.encode()).collect()),
+        );
+        object.insert(
+            "ended",
+            self.ended
+                .as_ref()
+                .map_or(Value::Null, |held| held.encode()),
+        );
+        object.insert("requests", Value::Number(self.requests as f64));
+        object.insert(
+            "waiting",
+            Value::Array(
+                self.waiting
+                    .iter()
+                    .map(|held| Value::from(held.as_str()))
+                    .collect(),
+            ),
+        );
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum BudgetSpanResultEnded {
+    Deadline,
+    Caller,
+}
+
+impl BudgetSpanResultEnded {
+    pub const ALL: [Self; 2] = [Self::Deadline, Self::Caller];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Deadline => "deadline",
+            Self::Caller => "caller",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|held| held.as_str() == text)
+    }
+}
+
+impl Shape for BudgetSpanResultEnded {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        value
+            .as_str()
+            .and_then(Self::parse)
+            .ok_or_else(|| shape::refused(at, "not one of the values"))
+    }
+
+    fn encode(&self) -> Value {
+        Value::from(self.as_str())
     }
 }
 

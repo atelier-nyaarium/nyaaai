@@ -2,7 +2,7 @@
 
 use std::sync::{Arc, LazyLock};
 
-use nyaaai_contract::cancel::CancelToken;
+use nyaaai_contract::fetch::Span;
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::json::{Object, Value};
 use nyaaai_contract::shapes::provider::ProviderKindName;
@@ -116,13 +116,10 @@ impl LocalServer for LmStudioServer {
     fn models<'a>(
         &'a self,
         _known: &'a [LocalModel],
-        cancel: &'a CancelToken,
+        span: &'a Span,
     ) -> BoxFuture<'a, Result<Vec<LocalModel>, KindError>> {
         Box::pin(async move {
-            let raw = self
-                .transport
-                .get_json(LIST, cancel, &KeyAuth::None)
-                .await?;
+            let raw = self.transport.get_json(LIST, span, &KeyAuth::None).await?;
             let Some(models) = chat_models(&raw) else {
                 return Err(KindError::Message(
                     "The model list did not parse.".to_owned(),
@@ -144,13 +141,10 @@ impl LocalServer for LmStudioServer {
     fn loaded<'a>(
         &'a self,
         _tag: &'a str,
-        cancel: &'a CancelToken,
+        span: &'a Span,
     ) -> BoxFuture<'a, Result<Loaded, KindError>> {
         Box::pin(async move {
-            let raw = self
-                .transport
-                .get_json(LIST, cancel, &KeyAuth::None)
-                .await?;
+            let raw = self.transport.get_json(LIST, span, &KeyAuth::None).await?;
             Ok(loaded_contexts(&chat_models(&raw).unwrap_or_default()))
         })
     }
@@ -178,9 +172,9 @@ pub static LMSTUDIO: LazyLock<Arc<LocalKind>> = LazyLock::new(|| {
         chat_path: None,
         base: None,
         terms: None,
-        reach: |transport, cancel| {
+        reach: |transport, span| {
             Box::pin(async move {
-                let raw = transport.get_json(LIST, &cancel, &KeyAuth::None).await?;
+                let raw = transport.get_json(LIST, span, &KeyAuth::None).await?;
                 Ok(chat_models(&raw).map(|models| models.len()))
             })
         },

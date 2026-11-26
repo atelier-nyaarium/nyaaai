@@ -1,0 +1,94 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "budget.span",
+	"name": "span-a-read-ends-with-its-span",
+	"input": {
+		"budget": {
+			"totalMs": 10000,
+			"idleMs": 10000,
+			"maxBytes": 1000
+		},
+		"exchanges": [
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"application/json"
+					]
+				],
+				"chunks": [
+					{
+						"kind": "text",
+						"text": "{\"a\":1}"
+					}
+				],
+				"headMs": 3000
+			},
+			{
+				"status": 200,
+				"headers": [
+					[
+						"content-type",
+						"application/json"
+					]
+				],
+				"chunks": [
+					{
+						"kind": "text",
+						"text": "{\"b\":2}"
+					}
+				],
+				"headMs": 9000
+			}
+		],
+		"steps": [
+			{
+				"kind": "read",
+				"path": "/one"
+			},
+			{
+				"kind": "read",
+				"path": "/two"
+			}
+		]
+	},
+	"expected": {
+		"reads": [
+			{
+				"startMs": 0,
+				"endMs": 3000,
+				"sent": {
+					"totalMs": 10000,
+					"idleMs": 10000,
+					"maxBytes": 1000
+				},
+				"answer": {
+					"a": 1
+				},
+				"failure": null,
+				"thrown": null
+			},
+			{
+				"startMs": 3000,
+				"endMs": 12000,
+				"sent": {
+					"totalMs": 7000,
+					"idleMs": 7000,
+					"maxBytes": 1000
+				},
+				"answer": null,
+				"failure": {
+					"category": "idle",
+					"status": "idle",
+					"message": "Lab did not finish in time."
+				},
+				"thrown": null
+			}
+		],
+		"ended": "deadline",
+		"requests": 2,
+		"waiting": []
+	}
+}

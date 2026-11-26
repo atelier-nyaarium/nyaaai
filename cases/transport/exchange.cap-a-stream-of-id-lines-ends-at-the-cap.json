@@ -171,7 +171,11 @@
 				}
 			}
 		],
-		"maxBytes": 100
+		"budgets": {
+			"stream": {
+				"maxBytes": 100
+			}
+		}
 	},
 	"expected": {
 		"calls": [
@@ -180,9 +184,9 @@
 				"result": null,
 				"answer": null,
 				"failure": {
-					"category": "stream",
-					"status": "stream",
-					"message": "A stream event is larger than 100 bytes."
+					"category": "network",
+					"status": "network",
+					"message": "The reply is larger than 100 bytes."
 				},
 				"thrown": null,
 				"aborted": false,

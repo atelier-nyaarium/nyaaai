@@ -1,0 +1,69 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "budget.fetch",
+	"name": "fetch-a-total-that-passes-while-the-consumer-holds-the-last-chunk-shows-at-the-next-read",
+	"input": {
+		"budget": {
+			"totalMs": 100,
+			"idleMs": 50,
+			"maxBytes": 1000
+		},
+		"exchange": {
+			"status": 200,
+			"headers": [
+				[
+					"content-type",
+					"text/plain"
+				]
+			],
+			"chunks": [
+				{
+					"kind": "text",
+					"text": "a",
+					"delayMs": 10
+				},
+				{
+					"kind": "text",
+					"text": "a",
+					"delayMs": 10
+				}
+			]
+		},
+		"holds": [
+			0,
+			200
+		]
+	},
+	"expected": {
+		"seen": [
+			{
+				"kind": "head",
+				"atMs": 0,
+				"status": 200
+			},
+			{
+				"kind": "chunk",
+				"atMs": 10,
+				"size": 1
+			},
+			{
+				"kind": "chunk",
+				"atMs": 20,
+				"size": 1
+			},
+			{
+				"kind": "ended",
+				"atMs": 220,
+				"end": {
+					"kind": "budget",
+					"bound": "total",
+					"limit": 100
+				}
+			}
+		],
+		"served": 2,
+		"waiting": [],
+		"nowMs": 220
+	}
+}

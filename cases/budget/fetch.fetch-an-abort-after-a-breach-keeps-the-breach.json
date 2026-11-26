@@ -1,0 +1,71 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "budget.fetch",
+	"name": "fetch-an-abort-after-a-breach-keeps-the-breach",
+	"input": {
+		"budget": {
+			"totalMs": 1000,
+			"idleMs": 30,
+			"maxBytes": 1000
+		},
+		"exchange": {
+			"status": 200,
+			"headers": [
+				[
+					"content-type",
+					"text/plain"
+				]
+			],
+			"chunks": [
+				{
+					"kind": "text",
+					"text": "a",
+					"delayMs": 10
+				},
+				{
+					"kind": "text",
+					"text": "b",
+					"delayMs": 50
+				}
+			]
+		},
+		"abortAfterMs": 60,
+		"afterMs": 100
+	},
+	"expected": {
+		"seen": [
+			{
+				"kind": "head",
+				"atMs": 0,
+				"status": 200
+			},
+			{
+				"kind": "chunk",
+				"atMs": 10,
+				"size": 1
+			},
+			{
+				"kind": "ended",
+				"atMs": 60,
+				"end": {
+					"kind": "budget",
+					"bound": "idle",
+					"limit": 30
+				}
+			},
+			{
+				"kind": "ended",
+				"atMs": 160,
+				"end": {
+					"kind": "budget",
+					"bound": "idle",
+					"limit": 30
+				}
+			}
+		],
+		"served": 1,
+		"waiting": [],
+		"nowMs": 160
+	}
+}

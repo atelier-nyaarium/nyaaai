@@ -1,7 +1,8 @@
 // The Fetch port over the platform's fetch.
 
-import type { Fetch } from "@nyaaai/contract/fetch";
+import { budgeted, type Fetch } from "@nyaaai/contract/fetch";
 import { responseHeaders } from "@nyaaai/contract/headers";
+import type { Scheduler } from "@nyaaai/contract/time";
 
 ////////////////////////////////
 //  Functions & Helpers
@@ -31,9 +32,9 @@ async function* chunksOf(body: ReadableStream<Uint8Array> | null, signal: AbortS
 	}
 }
 
-/** The platform's fetch as a port. */
-export function platformFetch(platform: typeof fetch = fetch): Fetch {
-	return async (request, signal) => {
+/** The platform's fetch as a port, budgeted on the scheduler. */
+export function platformFetch(scheduler: Scheduler, platform: typeof fetch = fetch): Fetch {
+	return budgeted(async (request, signal) => {
 		if (signal.aborted) throw signal.reason;
 		const response = await platform(request.url, {
 			method: request.method,
@@ -49,5 +50,5 @@ export function platformFetch(platform: typeof fetch = fetch): Fetch {
 			headers: responseHeaders([...response.headers]),
 			chunks: chunksOf(response.body, signal),
 		};
-	};
+	}, scheduler);
 }

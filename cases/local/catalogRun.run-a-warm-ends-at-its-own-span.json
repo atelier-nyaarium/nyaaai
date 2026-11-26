@@ -2,7 +2,7 @@
 	"format": 2,
 	"type": "function",
 	"kind": "local.catalogRun",
-	"name": "run-a-slow-warm-has-no-deadline-of-its-own",
+	"name": "run-a-warm-ends-at-its-own-span",
 	"input": {
 		"startMs": 1790337600000,
 		"entry": "lab",
@@ -88,7 +88,7 @@
 			"loads": [],
 			"warms": [
 				{
-					"delayMs": 20000
+					"delayMs": 600001
 				}
 			]
 		}
@@ -150,10 +150,11 @@
 				"refreshed": 1
 			},
 			{
-				"nowMs": 1790337620000,
+				"nowMs": 1790338200001,
 				"answers": [
 					{
-						"kind": "warmed"
+						"kind": "thrown",
+						"message": "The operation timed out."
 					}
 				],
 				"served": [
@@ -162,25 +163,14 @@
 						"tag": "local-b:9b",
 						"known": [],
 						"startMs": 1790337600000,
-						"endMs": 1790337620000,
-						"aborted": false
-					},
-					{
-						"method": "models",
-						"tag": null,
-						"known": [
-							"local-a:27b",
-							"local-b:9b"
-						],
-						"startMs": 1790337620000,
-						"endMs": 1790337620000,
-						"aborted": false
+						"endMs": 1790338200001,
+						"aborted": true
 					}
 				],
-				"refreshed": 1
+				"refreshed": 0
 			},
 			{
-				"nowMs": 1790337620000,
+				"nowMs": 1790338200001,
 				"answers": [
 					{
 						"kind": "views",
@@ -207,18 +197,14 @@
 							{
 								"key": "local:lab/local-b:9b",
 								"status": "ok",
-								"efforts": [
-									"medium"
-								],
-								"promptLimit": 16384,
+								"efforts": [],
 								"price": "free",
 								"hosts": [],
 								"api": {
 									"family": "chat-completions",
 									"structured": true,
 									"choice": [],
-									"strict": false,
-									"reasoning": "reasoning"
+									"strict": false
 								},
 								"cache": "implicit"
 							}

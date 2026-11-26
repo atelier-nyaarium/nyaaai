@@ -1,0 +1,17 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "budget.table",
+	"name": "table-a-fraction-is-refused",
+	"input": {
+		"changes": {
+			"catalog": {
+				"maxBytes": 1.5
+			}
+		}
+	},
+	"expected": {
+		"presets": null,
+		"refused": "The catalog budget's maxBytes is not a whole number from 1 to 1073741824."
+	}
+}

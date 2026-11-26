@@ -22,7 +22,7 @@ use nyaaai_agentic::provider::resolver::{
 use nyaaai_agentic::transport::{KeySource, Transport, TransportError, static_key};
 use nyaaai_contract::cancel::{CancelToken, Unsubscribe};
 use nyaaai_contract::entry_keys::{EntryKeys, KeyAnswer};
-use nyaaai_contract::fetch::{Chunks, Fetch, FetchError, FetchRequest, FetchResponse};
+use nyaaai_contract::fetch::{Chunks, Fetch, FetchError, FetchRequest, FetchResponse, Span};
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::json::{Value, parse_json, stringify_json};
 use nyaaai_contract::model_registry::ModelRegistry;
@@ -446,9 +446,9 @@ impl ProviderKind for Stub {
         entry: &'a EntryFields,
         secret: Option<&'a str>,
         deps: &'a KindDeps,
-        cancel: &'a CancelToken,
+        span: &'a Span,
     ) -> BoxFuture<'a, Result<nyaaai_contract::shapes::provider::KeyState, KindError>> {
-        self.real.check(entry, secret, deps, cancel)
+        self.real.check(entry, secret, deps, span)
     }
 
     fn transport(
@@ -517,6 +517,7 @@ fn deps_of(host: &Arc<Host>, scheduler: Arc<FakeScheduler>) -> KindDeps {
         log: Arc::new(|_| {}),
         user_agent: "cases/1.0".to_owned(),
         base_url: None,
+        budgets: None,
     }
 }
 
@@ -1228,9 +1229,9 @@ impl ProviderKind for Asked {
         entry: &'a EntryFields,
         secret: Option<&'a str>,
         deps: &'a KindDeps,
-        cancel: &'a CancelToken,
+        span: &'a Span,
     ) -> BoxFuture<'a, Result<nyaaai_contract::shapes::provider::KeyState, KindError>> {
-        self.real.check(entry, secret, deps, cancel)
+        self.real.check(entry, secret, deps, span)
     }
 
     fn transport(

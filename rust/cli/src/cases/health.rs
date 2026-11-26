@@ -14,6 +14,7 @@ use nyaaai_agentic::provider::kind::{
 use nyaaai_agentic::transport::{KeySource, Transport};
 use nyaaai_contract::cancel::{CancelToken, Unsubscribe};
 use nyaaai_contract::entry_keys::{EntryKeys, KeyAnswer};
+use nyaaai_contract::fetch::Span;
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::id::CountedIds;
 use nyaaai_contract::shapes::health::{Admission, HealthChange, Ticket};
@@ -120,6 +121,7 @@ fn deps_of(
         keys,
         kinds: KINDS.clone(),
         kind_deps: Arc::new(move |_| kind_deps.clone()),
+        budgets: None,
         pause_ms,
         max_pauses: None,
     }
@@ -243,16 +245,16 @@ impl ProviderKind for Parking {
         entry: &'a EntryFields,
         secret: Option<&'a str>,
         deps: &'a KindDeps,
-        cancel: &'a CancelToken,
+        span: &'a Span,
     ) -> BoxFuture<'a, Result<KeyState, KindError>> {
         let Some(hold) = locked(&self.armed.check).pop_front() else {
-            return self.real.check(entry, secret, deps, cancel);
+            return self.real.check(entry, secret, deps, span);
         };
         Box::pin(async move {
             hold.arrive();
             match hold.released().await.state {
                 Some(state) => Ok(state),
-                None => self.real.check(entry, secret, deps, cancel).await,
+                None => self.real.check(entry, secret, deps, span).await,
             }
         })
     }

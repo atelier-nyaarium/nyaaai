@@ -1,0 +1,115 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "budget.fetch",
+	"name": "fetch-a-drip-inside-the-idle-bound-ends-at-the-total",
+	"input": {
+		"budget": {
+			"totalMs": 100,
+			"idleMs": 30,
+			"maxBytes": 1000
+		},
+		"exchange": {
+			"status": 200,
+			"headers": [
+				[
+					"content-type",
+					"text/plain"
+				]
+			],
+			"chunks": [
+				{
+					"kind": "text",
+					"text": "a",
+					"delayMs": 20
+				},
+				{
+					"kind": "text",
+					"text": "a",
+					"delayMs": 20
+				},
+				{
+					"kind": "text",
+					"text": "a",
+					"delayMs": 20
+				},
+				{
+					"kind": "text",
+					"text": "a",
+					"delayMs": 20
+				},
+				{
+					"kind": "text",
+					"text": "a",
+					"delayMs": 20
+				},
+				{
+					"kind": "text",
+					"text": "a",
+					"delayMs": 20
+				},
+				{
+					"kind": "text",
+					"text": "a",
+					"delayMs": 20
+				},
+				{
+					"kind": "text",
+					"text": "a",
+					"delayMs": 20
+				},
+				{
+					"kind": "text",
+					"text": "a",
+					"delayMs": 20
+				},
+				{
+					"kind": "text",
+					"text": "a",
+					"delayMs": 20
+				}
+			]
+		}
+	},
+	"expected": {
+		"seen": [
+			{
+				"kind": "head",
+				"atMs": 0,
+				"status": 200
+			},
+			{
+				"kind": "chunk",
+				"atMs": 20,
+				"size": 1
+			},
+			{
+				"kind": "chunk",
+				"atMs": 40,
+				"size": 1
+			},
+			{
+				"kind": "chunk",
+				"atMs": 60,
+				"size": 1
+			},
+			{
+				"kind": "chunk",
+				"atMs": 80,
+				"size": 1
+			},
+			{
+				"kind": "ended",
+				"atMs": 100,
+				"end": {
+					"kind": "budget",
+					"bound": "total",
+					"limit": 100
+				}
+			}
+		],
+		"served": 4,
+		"waiting": [],
+		"nowMs": 100
+	}
+}

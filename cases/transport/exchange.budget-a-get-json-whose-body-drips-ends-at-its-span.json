@@ -1,0 +1,122 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.exchange",
+	"name": "budget-a-get-json-whose-body-drips-ends-at-its-span",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"baseUrl": "https://openrouter.ai/api/v1",
+		"label": "OpenRouter",
+		"userAgent": "lab-app/1.0",
+		"keys": [
+			"fake-key-one"
+		],
+		"startMs": 1800000000000,
+		"script": {
+			"kind": "inline",
+			"exchanges": [
+				{
+					"status": 200,
+					"headers": [
+						[
+							"content-type",
+							"application/json"
+						]
+					],
+					"chunks": [
+						{
+							"kind": "text",
+							"text": " ",
+							"delayMs": 30
+						},
+						{
+							"kind": "text",
+							"text": " ",
+							"delayMs": 30
+						},
+						{
+							"kind": "text",
+							"text": " ",
+							"delayMs": 30
+						},
+						{
+							"kind": "text",
+							"text": " ",
+							"delayMs": 30
+						},
+						{
+							"kind": "text",
+							"text": " ",
+							"delayMs": 30
+						},
+						{
+							"kind": "text",
+							"text": " ",
+							"delayMs": 30
+						}
+					]
+				}
+			]
+		},
+		"calls": [
+			{
+				"kind": "getJson",
+				"path": "/models"
+			}
+		],
+		"budgets": {
+			"catalog": {
+				"totalMs": 100,
+				"idleMs": 50
+			}
+		}
+	},
+	"expected": {
+		"calls": [
+			{
+				"events": [],
+				"result": null,
+				"answer": null,
+				"failure": {
+					"category": "idle",
+					"status": "idle",
+					"message": "OpenRouter did not finish in time."
+				},
+				"thrown": null,
+				"aborted": false,
+				"nowMs": 1800000000120
+			}
+		],
+		"requests": [
+			{
+				"method": "GET",
+				"url": "https://openrouter.ai/api/v1/models",
+				"headers": [
+					[
+						"Accept",
+						"application/json"
+					],
+					[
+						"User-Agent",
+						"lab-app/1.0"
+					],
+					[
+						"Authorization",
+						"Bearer fake-key-one"
+					]
+				],
+				"body": null
+			}
+		],
+		"log": [],
+		"settled": [],
+		"keyReads": 1,
+		"read": [
+			3
+		],
+		"waiting": []
+	}
+}

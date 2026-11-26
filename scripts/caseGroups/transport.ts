@@ -3,6 +3,7 @@ import type { Codec } from "@nyaaai/agentic/codec";
 import { failureOf } from "@nyaaai/agentic/failure";
 import { isKeyShape, type KeyAuth, normalizeKey, Transport } from "@nyaaai/agentic/transport";
 import { base64Decode } from "@nyaaai/contract/base64";
+import { BUDGET_NAMES, budgetTable, span } from "@nyaaai/contract/fetch";
 import { jsString } from "@nyaaai/contract/json";
 import { z } from "@nyaaai/contract/shape";
 import { CanonicalRequest, Failure, HeaderList, StepEvent, StepResult } from "@nyaaai/contract/shapes/step";
@@ -12,6 +13,7 @@ import { fakeScheduler, TimerWheel } from "@nyaaai/testkit/scheduler";
 import { type ScriptedExchange, scriptedFetch } from "@nyaaai/testkit/scriptedFetch";
 import { readTrace, replayFetch } from "@nyaaai/testkit/trace";
 import { transportCases } from "../caseSources/transport";
+import { BudgetChanges, changesOf } from "./budgetKit";
 import { CodecName, codecOf } from "./codecOf";
 
 ////////////////////////////////
@@ -53,23 +55,35 @@ const abort = {
 	abortedBefore: z.boolean().exactOptional(),
 };
 
+/** A JSON call's own span opens from this preset, `catalog` by default. */
+const preset = { preset: z.enum(BUDGET_NAMES).exactOptional() };
+
 export const TransportCall = z.discriminatedUnion("kind", [
 	z.object({
 		kind: z.literal("stream"),
 		request: CanonicalRequest,
 		/** Takes this many events, then lets go of the stream. */
 		stopAfter: z.int().min(1).exactOptional(),
+		/** Wheel time the consumer spends on each event it takes. */
+		takeMs: z.int().min(0).exactOptional(),
 		...abort,
 	}),
 	z.object({ kind: z.literal("complete"), request: CanonicalRequest, ...abort }),
 	/** The path starts with a slash. */
-	z.object({ kind: z.literal("getJson"), path: z.string(), keyAuth: TransportKeyAuth.exactOptional(), ...abort }),
+	z.object({
+		kind: z.literal("getJson"),
+		path: z.string(),
+		keyAuth: TransportKeyAuth.exactOptional(),
+		...preset,
+		...abort,
+	}),
 	z.object({
 		kind: z.literal("postJson"),
 		path: z.string(),
 		/** Absent sends no body. */
 		body: z.unknown().exactOptional(),
 		keyAuth: TransportKeyAuth.exactOptional(),
+		...preset,
 		...abort,
 	}),
 ]);
@@ -118,7 +132,7 @@ function bytesOf(chunk: z.infer<typeof TransportChunk>): Uint8Array {
 	return bytes;
 }
 
-function exchangeOf(held: z.infer<typeof TransportExchange>): ScriptedExchange {
+export function exchangeOf(held: z.infer<typeof TransportExchange>): ScriptedExchange {
 	return {
 		status: held.status,
 		headers: held.headers,
@@ -148,6 +162,7 @@ function slashed(path: string): `/${string}` {
 export const transport = caseGroup("transport", {
 	shapes: {
 		CodecName,
+		BudgetChanges,
 		TransportChunk,
 		TransportExchange,
 		TransportKeyAuth,
@@ -167,9 +182,8 @@ export const transport = caseGroup("transport", {
 				label: z.string(),
 				userAgent: z.string(),
 				auth: z.enum(["bearer", "none", "optional"]).exactOptional(),
-				idleMs: z.int().exactOptional(),
-				/** The transport's cap on a reply. */
-				maxBytes: z.int().exactOptional(),
+				/** The host's changes to the presets. */
+				budgets: BudgetChanges.exactOptional(),
 				/** What each read of the key source answers, the last repeating; null is no key. */
 				keys: z.array(z.string().nullable()).min(1),
 				/** The wheel's first instant. */
@@ -193,10 +207,12 @@ export const transport = caseGroup("transport", {
 			}),
 			async (input, context) => {
 				const wheel = new TimerWheel(input.startMs);
+				const scheduler = fakeScheduler(wheel);
+				const budgets = budgetTable(changesOf(input.budgets));
 				const played =
 					input.script.kind === "inline"
-						? scriptedFetch(input.script.exchanges.map(exchangeOf), wheel)
-						: replayFetch(await readTrace(path.join(context.root, input.script.file)), wheel);
+						? scriptedFetch(input.script.exchanges.map(exchangeOf), scheduler)
+						: replayFetch(await readTrace(path.join(context.root, input.script.file)), scheduler);
 				const keys = fakeKeys(input.keys.map((held) => held ?? undefined));
 				const log: string[] = [];
 				const settled: string[] = [];
@@ -214,7 +230,7 @@ export const transport = caseGroup("transport", {
 							};
 				const made = new Transport({
 					fetch: played.fetch,
-					scheduler: fakeScheduler(wheel),
+					scheduler,
 					key: keys,
 					log: (line) => log.push(line),
 					baseUrl: input.baseUrl,
@@ -222,8 +238,7 @@ export const transport = caseGroup("transport", {
 					userAgent: input.userAgent,
 					errors: base,
 					...(input.auth === undefined ? {} : { auth: input.auth }),
-					...(input.idleMs === undefined ? {} : { idleMs: input.idleMs }),
-					...(input.maxBytes === undefined ? {} : { maxBytes: input.maxBytes }),
+					budgets,
 				});
 				made.onSettled((model) => settled.push(model));
 				for (const call of input.calls)
@@ -243,6 +258,10 @@ export const transport = caseGroup("transport", {
 						aborted: false,
 						nowMs: 0,
 					};
+					const clock =
+						call.kind === "getJson" || call.kind === "postJson"
+							? span(scheduler, budgets[call.preset ?? "catalog"], caller.signal)
+							: undefined;
 					try {
 						if (call.kind === "stream") {
 							const events = made.stream(codec, call.request, caller.signal);
@@ -250,23 +269,20 @@ export const transport = caseGroup("transport", {
 								for await (const event of events) {
 									outcome.events.push(event);
 									if (outcome.events.length === call.stopAfter) break;
+									if (call.takeMs !== undefined) wheel.advance(call.takeMs);
 								}
 							} finally {
 								await events.return(undefined);
 							}
 						} else if (call.kind === "complete") {
 							outcome.result = await made.complete(codec, call.request, caller.signal);
-						} else if (call.kind === "getJson") {
-							outcome.answer = await made.getJson(
-								slashed(call.path),
-								caller.signal,
-								keyAuthOf(call.keyAuth),
-							);
-						} else {
+						} else if (clock !== undefined && call.kind === "getJson") {
+							outcome.answer = await made.getJson(slashed(call.path), clock, keyAuthOf(call.keyAuth));
+						} else if (clock !== undefined && call.kind === "postJson") {
 							outcome.answer = await made.postJson(
 								slashed(call.path),
 								call.body,
-								caller.signal,
+								clock,
 								keyAuthOf(call.keyAuth),
 							);
 						}
@@ -276,6 +292,7 @@ export const transport = caseGroup("transport", {
 							outcome.thrown = error instanceof Error ? error.message : jsString(error);
 						else outcome.failure = held;
 					}
+					clock?.clear();
 					wheel.cancel("caller");
 					outcome.aborted = caller.signal.aborted;
 					outcome.nowMs = wheel.nowMs();

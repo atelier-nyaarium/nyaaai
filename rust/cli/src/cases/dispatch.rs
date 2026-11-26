@@ -341,6 +341,15 @@ pub fn dispatch(kind: &str, input: &Value, root: &Path) -> Option<Result<Value, 
             input,
             super::transport::key,
         ),
+        "budget.table" => {
+            run::<shapes::BudgetTableInput, shapes::BudgetTableResult>(input, super::budget::table)
+        }
+        "budget.fetch" => {
+            run::<shapes::BudgetFetchInput, shapes::BudgetFetchResult>(input, super::budget::fetch)
+        }
+        "budget.span" => {
+            run::<shapes::BudgetSpanInput, shapes::BudgetSpanResult>(input, super::budget::span)
+        }
         "secret.spellings" => run::<shapes::SecretSpellingsInput, shapes::SecretSpellingsResult>(
             input,
             super::secret::spellings,

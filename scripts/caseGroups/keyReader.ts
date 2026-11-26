@@ -1,4 +1,5 @@
 import { KeyReader } from "@nyaaai/agentic/health/keyReader";
+import { BUDGETS } from "@nyaaai/contract/fetch";
 import { z } from "@nyaaai/contract/shape";
 import { KeyState } from "@nyaaai/contract/shapes/provider";
 import { caseGroup, casesFor, kind } from "@nyaaai/testkit/caseGroup";
@@ -69,7 +70,8 @@ export const keyReader = caseGroup("keyReader", {
 				let signalled: Array<{ check: number; by: "deadline" | "caller" }> = [];
 				const reader = new KeyReader(
 					scheduler,
-					(signal) => {
+					BUDGETS.keyCheck,
+					({ signal }) => {
 						if (input.checks === "throwAtOnce") throw new Error("thrown");
 						return new Promise((resolve, reject) => {
 							const number = checks.length + 1;

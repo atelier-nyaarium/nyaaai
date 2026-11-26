@@ -1,0 +1,90 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "budget.fetch",
+	"name": "fetch-a-body-at-exactly-its-bytes-ends-well",
+	"input": {
+		"budget": {
+			"totalMs": 1000,
+			"idleMs": 30,
+			"maxBytes": 10
+		},
+		"exchange": {
+			"status": 200,
+			"headers": [
+				[
+					"content-type",
+					"text/plain"
+				]
+			],
+			"chunks": [
+				{
+					"kind": "text",
+					"text": "ab",
+					"delayMs": 1
+				},
+				{
+					"kind": "text",
+					"text": "ab",
+					"delayMs": 1
+				},
+				{
+					"kind": "text",
+					"text": "ab",
+					"delayMs": 1
+				},
+				{
+					"kind": "text",
+					"text": "ab",
+					"delayMs": 1
+				},
+				{
+					"kind": "text",
+					"text": "ab",
+					"delayMs": 1
+				}
+			]
+		}
+	},
+	"expected": {
+		"seen": [
+			{
+				"kind": "head",
+				"atMs": 0,
+				"status": 200
+			},
+			{
+				"kind": "chunk",
+				"atMs": 1,
+				"size": 2
+			},
+			{
+				"kind": "chunk",
+				"atMs": 2,
+				"size": 2
+			},
+			{
+				"kind": "chunk",
+				"atMs": 3,
+				"size": 2
+			},
+			{
+				"kind": "chunk",
+				"atMs": 4,
+				"size": 2
+			},
+			{
+				"kind": "chunk",
+				"atMs": 5,
+				"size": 2
+			},
+			{
+				"kind": "done",
+				"atMs": 5
+			}
+		],
+		"served": 5,
+		"waiting": [],
+		"nowMs": 5
+	}
+}

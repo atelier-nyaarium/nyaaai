@@ -1,0 +1,56 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "budget.fetch",
+	"name": "fetch-a-dropped-body-ends-as-the-network-said",
+	"input": {
+		"budget": {
+			"totalMs": 1000,
+			"idleMs": 30,
+			"maxBytes": 1000
+		},
+		"exchange": {
+			"status": 200,
+			"headers": [
+				[
+					"content-type",
+					"text/plain"
+				]
+			],
+			"chunks": [
+				{
+					"kind": "text",
+					"text": "a",
+					"delayMs": 5
+				}
+			],
+			"end": "dropped",
+			"error": "socket hang up"
+		}
+	},
+	"expected": {
+		"seen": [
+			{
+				"kind": "head",
+				"atMs": 0,
+				"status": 200
+			},
+			{
+				"kind": "chunk",
+				"atMs": 5,
+				"size": 1
+			},
+			{
+				"kind": "ended",
+				"atMs": 5,
+				"end": {
+					"kind": "failed",
+					"message": "socket hang up"
+				}
+			}
+		],
+		"served": 1,
+		"waiting": [],
+		"nowMs": 5
+	}
+}

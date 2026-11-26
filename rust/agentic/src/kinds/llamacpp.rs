@@ -2,7 +2,7 @@
 
 use std::sync::{Arc, LazyLock};
 
-use nyaaai_contract::cancel::CancelToken;
+use nyaaai_contract::fetch::Span;
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::json::Value;
 use nyaaai_contract::shapes::provider::ProviderKindName;
@@ -68,20 +68,12 @@ pub fn props_of_body(raw: &Value) -> Option<Props> {
 }
 
 /// None while a router's model sleeps.
-async fn props_of(
-    transport: &Transport,
-    id: &str,
-    autoload: bool,
-    cancel: &CancelToken,
-) -> Option<Props> {
+async fn props_of(transport: &Transport, id: &str, autoload: bool, span: &Span) -> Option<Props> {
     let path = format!(
         "/props?model={}&autoload={autoload}",
         encode_path_segment(id)
     );
-    let raw = transport
-        .get_json(&path, cancel, &KeyAuth::None)
-        .await
-        .ok()?;
+    let raw = transport.get_json(&path, span, &KeyAuth::None).await.ok()?;
     props_of_body(&raw)
 }
 
@@ -119,9 +111,9 @@ async fn one(
     transport: &Transport,
     model: &ListedModel,
     known: &[LocalModel],
-    cancel: &CancelToken,
+    span: &Span,
 ) -> LocalModel {
-    let props = props_of(transport, &model.id, false, cancel).await;
+    let props = props_of(transport, &model.id, false, span).await;
     model_of(
         &model.id,
         model.trained,
@@ -139,13 +131,10 @@ impl LocalServer for LlamaCppServer {
     fn models<'a>(
         &'a self,
         known: &'a [LocalModel],
-        cancel: &'a CancelToken,
+        span: &'a Span,
     ) -> BoxFuture<'a, Result<Vec<LocalModel>, KindError>> {
         Box::pin(async move {
-            let raw = self
-                .transport
-                .get_json(LIST, cancel, &KeyAuth::None)
-                .await?;
+            let raw = self.transport.get_json(LIST, span, &KeyAuth::None).await?;
             let Some(models) = listed(&raw) else {
                 return Err(KindError::Message(
                     "The model list did not parse.".to_owned(),
@@ -154,7 +143,7 @@ impl LocalServer for LlamaCppServer {
             let models = first_distinct(models, |model| model.id.clone(), self.max_listed);
             let reads: Vec<_> = models
                 .iter()
-                .map(|model| ok(one(&self.transport, model, known, cancel)))
+                .map(|model| ok(one(&self.transport, model, known, span)))
                 .collect();
             Ok(join_limited(reads, READS_AT_ONCE).await.unwrap_or_default())
         })
@@ -167,10 +156,10 @@ impl LocalServer for LlamaCppServer {
     fn loaded<'a>(
         &'a self,
         tag: &'a str,
-        cancel: &'a CancelToken,
+        span: &'a Span,
     ) -> BoxFuture<'a, Result<Loaded, KindError>> {
         Box::pin(async move {
-            let context = props_of(&self.transport, tag, false, cancel)
+            let context = props_of(&self.transport, tag, false, span)
                 .await
                 .and_then(|props| props.context);
             Ok(context.map_or_else(Vec::new, |context| vec![(tag.to_owned(), context)]))
@@ -181,13 +170,9 @@ impl LocalServer for LlamaCppServer {
         true
     }
 
-    fn warm<'a>(
-        &'a self,
-        tag: &'a str,
-        cancel: &'a CancelToken,
-    ) -> BoxFuture<'a, Result<(), KindError>> {
+    fn warm<'a>(&'a self, tag: &'a str, span: &'a Span) -> BoxFuture<'a, Result<(), KindError>> {
         Box::pin(async move {
-            props_of(&self.transport, tag, true, cancel).await;
+            props_of(&self.transport, tag, true, span).await;
             Ok(())
         })
     }
@@ -215,9 +200,9 @@ pub static LLAMACPP: LazyLock<Arc<LocalKind>> = LazyLock::new(|| {
         chat_path: None,
         base: None,
         terms: None,
-        reach: |transport, cancel| {
+        reach: |transport, span| {
             Box::pin(async move {
-                let raw = transport.get_json(LIST, &cancel, &KeyAuth::None).await?;
+                let raw = transport.get_json(LIST, span, &KeyAuth::None).await?;
                 Ok(listed(&raw).map(|models| models.len()))
             })
         },

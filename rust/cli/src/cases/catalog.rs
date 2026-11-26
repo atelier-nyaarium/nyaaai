@@ -171,11 +171,11 @@ pub(super) fn network_of(
     stored: Option<&str>,
 ) -> Outcome<Net> {
     let wheel = Arc::new(TimerWheel::new(start_ms));
+    let scheduler = Arc::new(FakeScheduler::new(Arc::clone(&wheel)));
     let played = Arc::new(ScriptedFetch::new(
         exchanges.iter().map(exchange_of).collect(),
-        Arc::clone(&wheel),
+        Arc::clone(&scheduler),
     ));
-    let scheduler = Arc::new(FakeScheduler::new(Arc::clone(&wheel)));
     let keys = Arc::new(
         FakeKeys::new(vec![Some(stored.unwrap_or("fake-key-one").to_owned())])
             .ok_or_else(|| "fakeKeys needs a value".to_owned())?,
@@ -190,8 +190,7 @@ pub(super) fn network_of(
         user_agent: "cases/1.0".to_owned(),
         errors: Arc::new(OPENROUTER_CHAT),
         auth: Auth::Bearer,
-        idle_ms: None,
-        max_bytes: None,
+        budgets: None,
     }));
     Ok(Net {
         wheel,
@@ -852,6 +851,7 @@ pub fn openrouter_run(input: CatalogOpenrouterRunInput) -> Outcome<CatalogOpenro
         deps: CatalogDeps {
             runtime: nyaaai_testkit::cases::runtime(),
             scheduler: net.scheduler.clone(),
+            budgets: None,
             rows: registry.clone() as Arc<dyn ModelRegistry>,
             refreshed: told.callback(),
         },
@@ -1026,6 +1026,7 @@ pub fn opencode_run(input: CatalogOpencodeRunInput) -> Outcome<CatalogOpencodeRu
         deps: CatalogDeps {
             runtime: nyaaai_testkit::cases::runtime(),
             scheduler: net.scheduler.clone(),
+            budgets: None,
             rows: registry.clone() as Arc<dyn ModelRegistry>,
             refreshed: told.callback(),
         },

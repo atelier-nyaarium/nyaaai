@@ -1,0 +1,17 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "budget.table",
+	"name": "table-an-idle-past-its-ceiling-is-refused",
+	"input": {
+		"changes": {
+			"reply": {
+				"idleMs": 1800001
+			}
+		}
+	},
+	"expected": {
+		"presets": null,
+		"refused": "The reply budget's idleMs is not a whole number from 1 to 1800000."
+	}
+}

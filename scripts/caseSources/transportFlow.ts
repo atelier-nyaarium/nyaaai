@@ -10,6 +10,7 @@ import {
 	frame,
 	getCall,
 	HI_FRAMES,
+	idle,
 	JSON_HEAD,
 	jsonReply,
 	piece,
@@ -232,9 +233,10 @@ const json: CaseSource[] = [
 		[{ status: 200, headers: JSON_HEAD, chunks: splitAt('{"name":"h\u{e9}llo \u{1f600}"}', 11, 18) }],
 	),
 	exchange(
-		"json-calls-have-no-idle-abort",
+		"json-calls-have-the-idle-bound-of-their-span",
 		[getCall("/models")],
 		[jsonReply({ data: [] }, 200, [], { headMs: 300_000 })],
+		idle(1000, "catalog"),
 	),
 	exchange(
 		"json-calls-are-not-logged-or-settled",
@@ -295,18 +297,18 @@ const cancels: CaseSource[] = [
 		[streamCall({ abortAfterMs: 10 }), streamCall()],
 		[sseReply(HI_PIECES, { headMs: 50 }), sseReply(HI_PIECES)],
 	),
-	exchange("idle-before-the-head", [streamCall()], [sseReply(HI_PIECES, { headMs: 100 })], { idleMs: 30 }),
+	exchange("idle-before-the-head", [streamCall()], [sseReply(HI_PIECES, { headMs: 100 })], idle(30)),
 	exchange(
 		"idle-a-stream-that-goes-silent",
 		[streamCall()],
 		[sseReply([piece(frame(text("Hi"))), piece("", 1_000_000)])],
-		{ idleMs: 30 },
+		idle(30),
 	),
 	exchange(
 		"idle-between-chunks",
 		[streamCall()],
 		[sseReply([piece(frame(text("Hi")), 5), piece(frame(text(" there")), 50), piece(DONE_TEXT)])],
-		{ idleMs: 30 },
+		idle(30),
 	),
 	exchange(
 		"idle-silence-is-idle-but-comments-keep-the-stream-alive",
@@ -322,19 +324,19 @@ const cancels: CaseSource[] = [
 				piece(DONE_TEXT, 15),
 			]),
 		],
-		{ idleMs: 40 },
+		idle(40),
 	),
 	exchange(
-		"idle-edge-a-chunk-at-exactly-the-limit-is-idle",
+		"idle-edge-a-chunk-at-exactly-the-limit-is-alive",
 		[streamCall()],
 		[sseReply([piece(frame(text("Hi")), 30), piece(frame(finish("stop")), 30), piece(DONE_TEXT, 30)])],
-		{ idleMs: 30 },
+		idle(30),
 	),
 	exchange(
 		"idle-edge-a-chunk-just-inside-the-limit-is-alive",
 		[streamCall()],
 		[sseReply([piece(frame(text("Hi")), 29), piece(frame(finish("stop")), 29), piece(DONE_TEXT, 29)])],
-		{ idleMs: 30 },
+		idle(30),
 	),
 	exchange(
 		"idle-default-limit-is-two-minutes",
@@ -349,7 +351,7 @@ const cancels: CaseSource[] = [
 	),
 	exchange("idle-default-limit-passed", [streamCall()], [sseReply(HI_PIECES, { headMs: 120_001 })]),
 	exchange(
-		"idle-an-unstreamed-body-has-one-window-after-its-head",
+		"idle-an-unstreamed-body-has-a-window-per-read",
 		[completeCall()],
 		[
 			{
@@ -358,7 +360,7 @@ const cancels: CaseSource[] = [
 				chunks: [piece(JSON.stringify(REPLY).slice(0, 10), 20), piece(JSON.stringify(REPLY).slice(10), 20)],
 			},
 		],
-		{ idleMs: 30 },
+		idle(30, "reply"),
 	),
 	exchange(
 		"idle-an-unstreamed-body-inside-its-window",
@@ -370,22 +372,20 @@ const cancels: CaseSource[] = [
 				chunks: [piece(JSON.stringify(REPLY).slice(0, 10), 10), piece(JSON.stringify(REPLY).slice(10), 10)],
 			},
 		],
-		{ idleMs: 30 },
+		idle(30, "reply"),
 	),
 	exchange(
-		"idle-an-error-body-has-one-window-from-the-request",
+		"idle-an-error-body-has-a-window-per-read",
 		[streamCall()],
 		[{ status: 500, headers: JSON_HEAD, chunks: [piece('{"error":', 20), piece('{"message":"x"}}', 20)] }],
-		{ idleMs: 30 },
+		idle(30),
 	),
-	exchange("idle-a-slow-head-then-a-fast-body", [streamCall()], [sseReply(HI_PIECES, { headMs: 25 })], {
-		idleMs: 30,
-	}),
+	exchange("idle-a-slow-head-then-a-fast-body", [streamCall()], [sseReply(HI_PIECES, { headMs: 25 })], idle(30)),
 	exchange(
 		"idle-then-the-next-call-is-clean",
 		[streamCall(), streamCall()],
 		[sseReply(HI_PIECES, { headMs: 100 }), sseReply(HI_PIECES)],
-		{ idleMs: 30 },
+		idle(30),
 	),
 	exchange("dropped-mid-stream", [streamCall()], [sseReply([piece(frame(text("Hi")))], { end: "dropped" })]),
 	exchange(

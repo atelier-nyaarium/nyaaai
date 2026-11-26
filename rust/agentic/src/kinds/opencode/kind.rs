@@ -2,7 +2,7 @@
 
 use std::sync::Arc;
 
-use nyaaai_contract::cancel::CancelToken;
+use nyaaai_contract::fetch::Span;
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::number::fixed_text;
 use nyaaai_contract::shapes::model::ModelView;
@@ -140,7 +140,7 @@ impl ProviderKind for OpenCodeKind {
         entry: &'a EntryFields,
         secret: Option<&'a str>,
         deps: &'a KindDeps,
-        cancel: &'a CancelToken,
+        span: &'a Span,
     ) -> BoxFuture<'a, Result<KeyState, KindError>> {
         Box::pin(async move {
             let Some(secret) = secret else {
@@ -151,7 +151,7 @@ impl ProviderKind for OpenCodeKind {
                 .map_err(KindError::Message)?;
             // 200 clears rejection only.
             match transport
-                .get_json("/v1/models", cancel, &KeyAuth::Stored)
+                .get_json("/v1/models", span, &KeyAuth::Stored)
                 .await
             {
                 Ok(_) => Ok(KeyState::Ok(KeyStateOk {
@@ -160,7 +160,7 @@ impl ProviderKind for OpenCodeKind {
                     models: None,
                 })),
                 Err(error) => {
-                    if cancel.is_cancelled() {
+                    if span.token().is_cancelled() {
                         return Err(error.into());
                     }
                     let rejected = matches!(
@@ -201,8 +201,7 @@ impl ProviderKind for OpenCodeKind {
             user_agent: deps.user_agent.clone(),
             errors: Arc::new(opencode_errors(ArcClock(Arc::clone(&deps.scheduler)))),
             auth: crate::transport::Auth::Bearer,
-            idle_ms: None,
-            max_bytes: None,
+            budgets: deps.budgets.clone(),
         })))
     }
 

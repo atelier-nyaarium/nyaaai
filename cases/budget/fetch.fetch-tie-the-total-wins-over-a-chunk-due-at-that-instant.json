@@ -1,0 +1,60 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "budget.fetch",
+	"name": "fetch-tie-the-total-wins-over-a-chunk-due-at-that-instant",
+	"input": {
+		"budget": {
+			"totalMs": 100,
+			"idleMs": 200,
+			"maxBytes": 1000
+		},
+		"exchange": {
+			"status": 200,
+			"headers": [
+				[
+					"content-type",
+					"text/plain"
+				]
+			],
+			"chunks": [
+				{
+					"kind": "text",
+					"text": "a",
+					"delayMs": 50
+				},
+				{
+					"kind": "text",
+					"text": "a",
+					"delayMs": 50
+				}
+			]
+		}
+	},
+	"expected": {
+		"seen": [
+			{
+				"kind": "head",
+				"atMs": 0,
+				"status": 200
+			},
+			{
+				"kind": "chunk",
+				"atMs": 50,
+				"size": 1
+			},
+			{
+				"kind": "ended",
+				"atMs": 100,
+				"end": {
+					"kind": "budget",
+					"bound": "total",
+					"limit": 100
+				}
+			}
+		],
+		"served": 1,
+		"waiting": [],
+		"nowMs": 100
+	}
+}

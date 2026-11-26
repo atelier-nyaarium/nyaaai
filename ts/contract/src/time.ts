@@ -36,6 +36,8 @@ export const LONG_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"
 /** Below this: seconds. */
 const SECONDS_BELOW = 1e11;
 const DAY_MS = 86_400_000;
+/** The longest wait a server may ask. */
+export const MAX_SERVER_WAIT_MS = 31 * DAY_MS;
 
 ////////////////////////////////
 //  Functions & Helpers
@@ -215,14 +217,15 @@ function parseStamp(text: string, nowMs: number): number | undefined {
 const wholeMs = (ms: number): number | undefined =>
 	Number.isFinite(ms) && Math.abs(ms) <= Number.MAX_SAFE_INTEGER ? Math.round(ms) + 0 : undefined;
 
-/** Nonnegative wait in milliseconds. */
+/** Nonnegative wait in milliseconds, at most `MAX_SERVER_WAIT_MS`. */
 export function parseRetryAfter(header: string | null | undefined, nowMs: number): number | undefined {
 	const text = trimText(header ?? "");
 	if (text.length === 0) return undefined;
 	const seconds = numberOfText(text);
 	const wait = seconds === undefined ? parseStamp(text, nowMs) : wholeMs(seconds * 1000);
 	if (wait === undefined) return undefined;
-	return wholeMs(Math.max(0, seconds === undefined ? wait - nowMs : wait));
+	const whole = wholeMs(Math.max(0, seconds === undefined ? wait - nowMs : wait));
+	return whole === undefined ? undefined : Math.min(whole, MAX_SERVER_WAIT_MS);
 }
 
 /** Seconds, milliseconds, or dates. */

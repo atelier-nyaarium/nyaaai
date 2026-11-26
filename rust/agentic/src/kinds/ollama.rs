@@ -2,7 +2,7 @@
 
 use std::sync::{Arc, LazyLock};
 
-use nyaaai_contract::cancel::CancelToken;
+use nyaaai_contract::fetch::Span;
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::json::Value;
 use nyaaai_contract::number::number_of_text;
@@ -174,11 +174,11 @@ async fn show(
     transport: &Transport,
     tag: &str,
     known: &[LocalModel],
-    cancel: &CancelToken,
+    span: &Span,
 ) -> Option<LocalModel> {
     let body = body_of("model", tag);
     match transport
-        .post_json("/api/show", Some(&body), cancel, &KeyAuth::None)
+        .post_json("/api/show", Some(&body), span, &KeyAuth::None)
         .await
     {
         Ok(raw) => model_of(tag, &raw),
@@ -195,12 +195,12 @@ impl LocalServer for OllamaServer {
     fn models<'a>(
         &'a self,
         known: &'a [LocalModel],
-        cancel: &'a CancelToken,
+        span: &'a Span,
     ) -> BoxFuture<'a, Result<Vec<LocalModel>, KindError>> {
         Box::pin(async move {
             let raw = self
                 .transport
-                .get_json("/api/tags", cancel, &KeyAuth::None)
+                .get_json("/api/tags", span, &KeyAuth::None)
                 .await?;
             let Some(tags) = local_tags(&raw) else {
                 return Err(KindError::Message(
@@ -210,7 +210,7 @@ impl LocalServer for OllamaServer {
             let tags = first_distinct(tags, Clone::clone, self.max_listed);
             let reads: Vec<_> = tags
                 .iter()
-                .map(|tag| ok(show(&self.transport, tag, known, cancel)))
+                .map(|tag| ok(show(&self.transport, tag, known, span)))
                 .collect();
             let shown = join_limited(reads, READS_AT_ONCE).await.unwrap_or_default();
             Ok(shown.into_iter().flatten().collect())
@@ -224,12 +224,12 @@ impl LocalServer for OllamaServer {
     fn loaded<'a>(
         &'a self,
         _tag: &'a str,
-        cancel: &'a CancelToken,
+        span: &'a Span,
     ) -> BoxFuture<'a, Result<Loaded, KindError>> {
         Box::pin(async move {
             let raw = self
                 .transport
-                .get_json("/api/ps", cancel, &KeyAuth::None)
+                .get_json("/api/ps", span, &KeyAuth::None)
                 .await?;
             Ok(running_of(&raw))
         })
@@ -258,10 +258,10 @@ pub static OLLAMA: LazyLock<Arc<LocalKind>> = LazyLock::new(|| {
         chat_path: None,
         base: None,
         terms: None,
-        reach: |transport, cancel| {
+        reach: |transport, span| {
             Box::pin(async move {
                 let raw = transport
-                    .get_json("/api/tags", &cancel, &KeyAuth::None)
+                    .get_json("/api/tags", span, &KeyAuth::None)
                     .await?;
                 Ok(local_tags(&raw).map(|tags| tags.len()))
             })
