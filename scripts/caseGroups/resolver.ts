@@ -110,6 +110,8 @@ const RouteStep = () =>
 		/** The route of an entry is asked for directly. */
 		z.object({ kind: z.literal("route"), entry: ProviderEntry }),
 		z.object({ kind: z.literal("dispose") }),
+		/** Where the kinds' requests go from now; null is each kind's own address. */
+		z.object({ kind: z.literal("base"), url: z.string().nullable() }),
 		/** A call whose first key read is held during the changes. */
 		z.object({
 			kind: z.literal("during"),
@@ -520,6 +522,8 @@ export const resolver = caseGroup("resolver", {
 				disposeFails: z.array(z.string()).exactOptional(),
 				/** The scheduler's first instant. */
 				startMs: z.int().exactOptional(),
+				/** Where the kinds' requests go until a `base` step. */
+				baseUrl: z.string().exactOptional(),
 				zdrOnly: z.boolean(),
 				steps: z.array(RouteStep()).min(1),
 			}),
@@ -628,7 +632,14 @@ export const resolver = caseGroup("resolver", {
 				const kinds: Partial<Record<z.infer<typeof ProviderKindName>, ProviderKind>> = {};
 				for (const name of NAMES) if (input.kinds.includes(name)) kinds[name] = stub(name);
 
-				const kindDeps = () => ({ fetch: host.fetch, scheduler, log: () => {}, userAgent: "cases/1.0" });
+				let base = input.baseUrl;
+				const kindDeps = () => ({
+					fetch: host.fetch,
+					scheduler,
+					log: () => {},
+					userAgent: "cases/1.0",
+					...(base === undefined ? {} : { baseUrl: base }),
+				});
 				const resolver = new ModelResolver({
 					entries,
 					keys: new Keyring({ keys, entries, kinds, kindDeps }),
@@ -747,6 +758,9 @@ export const resolver = caseGroup("resolver", {
 							}
 						case "dispose":
 							resolver.dispose();
+							return { kind: "changed" };
+						case "base":
+							base = step.url ?? undefined;
 							return { kind: "changed" };
 						case "during": {
 							let reached = () => {};

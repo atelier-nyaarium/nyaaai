@@ -25,6 +25,7 @@ use nyaaai_contract::time::{Scheduler, parse_retry_after};
 
 use crate::codec::{Codec, Mode, StreamDecoder};
 use crate::failure::{FailureExtra, ProviderError, failed};
+use crate::provider::host::key_may_travel;
 use crate::sse::SseDecoder;
 
 /// A stored key that may not be sent.
@@ -161,6 +162,8 @@ type Listener = Arc<dyn Fn(&str) + Send + Sync>;
 pub struct Transport {
     d: TransportDeps,
     budgets: Budgets,
+    /// A key may go to `base_url`.
+    travels: bool,
     settled: Mutex<Vec<(u64, Listener)>>,
     listeners: AtomicU64,
 }
@@ -307,6 +310,7 @@ impl Transport {
     pub fn new(d: TransportDeps) -> Self {
         Self {
             budgets: d.budgets.clone().unwrap_or_default(),
+            travels: key_may_travel(&d.base_url),
             d,
             settled: Mutex::new(Vec::new()),
             listeners: AtomicU64::new(0),
@@ -526,18 +530,18 @@ impl Transport {
         self.key_for(&KeyAuth::Stored).await
     }
 
+    /// Any key, stored or explicit, only where it may travel.
     async fn key_for(&self, auth: &KeyAuth) -> Result<Option<String>, ProviderError> {
         if *auth == KeyAuth::None || self.d.auth == Auth::None {
             return Ok(None);
         }
         let key = match auth {
-            KeyAuth::Stored => self.d.key.get().await.map_err(|Forbidden| {
-                failed(
-                    FailureCategory::KeyMissing,
-                    &format!("The {} key may not be sent.", self.d.label),
-                    FailureExtra::default(),
-                )
-            })?,
+            KeyAuth::Stored => self
+                .d
+                .key
+                .get()
+                .await
+                .map_err(|Forbidden| self.forbidden())?,
             KeyAuth::Key(key) => Some(key.clone()),
             KeyAuth::None => None,
         };
@@ -545,7 +549,19 @@ impl Transport {
         if self.d.auth == Auth::Optional && *auth == KeyAuth::Stored && empty {
             return Ok(None);
         }
-        self.checked(key).map(Some)
+        let sent = self.checked(key)?;
+        if !self.travels {
+            return Err(self.forbidden());
+        }
+        Ok(Some(sent))
+    }
+
+    fn forbidden(&self) -> ProviderError {
+        failed(
+            FailureCategory::KeyMissing,
+            &format!("The {} key may not be sent.", self.d.label),
+            FailureExtra::default(),
+        )
     }
 
     fn checked(&self, key: Option<String>) -> Result<String, ProviderError> {

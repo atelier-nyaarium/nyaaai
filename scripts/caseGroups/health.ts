@@ -177,6 +177,8 @@ export const health = caseGroup("health", {
 			z.object({
 				startMs: z.int(),
 				pauseMs: z.int().min(0).exactOptional(),
+				/** Where every request goes. */
+				baseUrl: z.string().exactOptional(),
 				/** The first list. */
 				entries: z.array(ProviderEntry),
 				/** The store's first answers; an entry with none answers none. */
@@ -272,7 +274,7 @@ export const health = caseGroup("health", {
 					entries,
 					keys,
 					kinds,
-					kindDeps: () => net.deps,
+					kindDeps: () => (input.baseUrl === undefined ? net.deps : { ...net.deps, baseUrl: input.baseUrl }),
 					...(input.pauseMs === undefined ? {} : { pauseMs: input.pauseMs }),
 				});
 				let changes: Array<z.infer<typeof HealthChange>> = [];

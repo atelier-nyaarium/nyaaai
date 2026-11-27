@@ -15276,6 +15276,9 @@
 					"minimum": -9007199254740991,
 					"maximum": 9007199254740991
 				},
+				"baseUrl": {
+					"type": "string"
+				},
 				"zdrOnly": {
 					"type": "boolean"
 				},
@@ -15642,6 +15645,26 @@
 								},
 								"required": [
 									"kind"
+								],
+								"additionalProperties": false
+							},
+							{
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"const": "base"
+									},
+									"url": {
+										"type": [
+											"string",
+											"null"
+										]
+									}
+								},
+								"required": [
+									"kind",
+									"url"
 								],
 								"additionalProperties": false
 							},
@@ -18225,6 +18248,9 @@
 					"type": "integer",
 					"minimum": 0,
 					"maximum": 9007199254740991
+				},
+				"baseUrl": {
+					"type": "string"
 				},
 				"entries": {
 					"type": "array",

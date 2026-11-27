@@ -39,6 +39,8 @@ const forms = (key: string): [string, string, string] => [
 
 const ECHOED = { id: `gen-${KEY}`, provider: `Azure ${KEY}` };
 
+const PUBLIC_HTTP = "http://public.example.test/v1";
+
 ////////////////////////////////
 //  Cases
 
@@ -147,6 +149,35 @@ const keyRules: CaseSource[] = [
 		keys: [null],
 		label: "Lab",
 		baseUrl: "http://lab.local:11434/v1",
+	}),
+];
+
+/** A key goes only over https or to a local host. */
+const travel: CaseSource[] = [
+	exchange(
+		"travel-an-explicit-key-to-a-public-http-address-sends-nothing",
+		[
+			getCall("/models", { keyAuth: { kind: "key", key: KEY } }),
+			postCall("/probe", { a: 1 }, { keyAuth: { kind: "key", key: KEY } }),
+		],
+		[],
+		{ baseUrl: PUBLIC_HTTP },
+	),
+	exchange(
+		"travel-an-explicit-key-to-a-local-http-address-is-sent",
+		[getCall("/models", { keyAuth: { kind: "key", key: KEY } })],
+		[jsonReply({})],
+		{ baseUrl: "http://lab.local:8000/v1" },
+	),
+	exchange("travel-a-stored-key-to-a-public-http-address-sends-nothing", NEEDS_KEY, [], { baseUrl: PUBLIC_HTTP }),
+	exchange(
+		"travel-an-optional-key-to-a-public-http-address-is-refused-and-no-key-is-sent-as-today",
+		[streamCall(), streamCall()],
+		[sseReply(HI)],
+		{ baseUrl: PUBLIC_HTTP, auth: "optional", keys: [KEY, null] },
+	),
+	exchange("travel-a-base-url-that-does-not-parse-takes-no-key", [streamCall(), getCall("/models")], [], {
+		baseUrl: "http://%70ublic.example.test/v1",
 	}),
 ];
 
@@ -392,4 +423,4 @@ const scrubs: CaseSource[] = [
 	),
 ];
 
-export const keyCases: CaseSource[] = [...keyRules, ...shapes, ...scrubs];
+export const keyCases: CaseSource[] = [...keyRules, ...travel, ...shapes, ...scrubs];

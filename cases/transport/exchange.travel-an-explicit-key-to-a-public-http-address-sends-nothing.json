@@ -1,0 +1,80 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "transport.exchange",
+	"name": "travel-an-explicit-key-to-a-public-http-address-sends-nothing",
+	"input": {
+		"codec": {
+			"family": "chat-completions",
+			"dialect": "openrouter"
+		},
+		"baseUrl": "http://public.example.test/v1",
+		"label": "OpenRouter",
+		"userAgent": "lab-app/1.0",
+		"keys": [
+			"fake-key-one"
+		],
+		"startMs": 1800000000000,
+		"script": {
+			"kind": "inline",
+			"exchanges": []
+		},
+		"calls": [
+			{
+				"kind": "getJson",
+				"path": "/models",
+				"keyAuth": {
+					"kind": "key",
+					"key": "fake-key-one"
+				}
+			},
+			{
+				"kind": "postJson",
+				"path": "/probe",
+				"body": {
+					"a": 1
+				},
+				"keyAuth": {
+					"kind": "key",
+					"key": "fake-key-one"
+				}
+			}
+		]
+	},
+	"expected": {
+		"calls": [
+			{
+				"events": [],
+				"result": null,
+				"answer": null,
+				"failure": {
+					"category": "keyMissing",
+					"status": "keyMissing",
+					"message": "The OpenRouter key may not be sent."
+				},
+				"thrown": null,
+				"aborted": false,
+				"nowMs": 1800000000000
+			},
+			{
+				"events": [],
+				"result": null,
+				"answer": null,
+				"failure": {
+					"category": "keyMissing",
+					"status": "keyMissing",
+					"message": "The OpenRouter key may not be sent."
+				},
+				"thrown": null,
+				"aborted": false,
+				"nowMs": 1800000000000
+			}
+		],
+		"requests": [],
+		"log": [],
+		"settled": [],
+		"keyReads": 0,
+		"read": [],
+		"waiting": []
+	}
+}

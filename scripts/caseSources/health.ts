@@ -241,6 +241,12 @@ export const healthCases: CaseSource[] = [
 		exchanges: [OC_OK, OC_OK],
 		steps: [check("host"), check("secure"), keysOf("host"), keysOf("secure")],
 	}),
+	run("insecure-a-stored-key-to-a-base-url-that-does-not-parse-reads-insecure", {
+		entries: [MAIN],
+		keys: { main: { kind: "key", key: KEY } },
+		baseUrl: "http://%70ublic.example.test/v1",
+		steps: [check("main"), keysOf("main")],
+	}),
 	run("insecure-a-public-host-over-http-with-no-key-is-checked-as-today", {
 		entries: [PUBLIC_HOST],
 		exchanges: [OC_OK],

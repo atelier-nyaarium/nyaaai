@@ -65,7 +65,7 @@ fn a_dropped_next_does_not_send_again() {
             scheduler: Arc::new(FakeScheduler::new(Arc::new(TimerWheel::new(0)))),
             key: Arc::new(static_key("fake-1")),
             log: Box::new(move |line| sink.lock().unwrap().push(line.to_owned())),
-            base_url: "http://silent.invalid".to_owned(),
+            base_url: "https://silent.invalid".to_owned(),
             label: "L".to_owned(),
             user_agent: "t/1".to_owned(),
             errors: Arc::new(OPENROUTER_CHAT),

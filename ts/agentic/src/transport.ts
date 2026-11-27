@@ -26,6 +26,7 @@ import { asciiLower, trimText, Utf8Decoder } from "@nyaaai/contract/text";
 import { parseRetryAfter, type Scheduler } from "@nyaaai/contract/time";
 import type { Codec } from "./codec";
 import { failed, ProviderError } from "./failure";
+import { keyMayTravel } from "./provider/host";
 import { SseDecoder } from "./sse";
 
 ////////////////////////////////
@@ -83,9 +84,12 @@ const TOKEN_SYMBOLS = "!#$%&'*+-.^_`|~";
 export class Transport {
 	private readonly budgets: Budgets;
 	private readonly settled = new Set<(model: string) => void>();
+	/** A key may go to `baseUrl`. */
+	private readonly travels: boolean;
 
 	constructor(private readonly d: TransportDeps) {
 		this.budgets = d.budgets ?? BUDGETS;
+		this.travels = keyMayTravel(d.baseUrl);
 	}
 
 	/** After each unaborted reply. */
@@ -243,12 +247,19 @@ export class Transport {
 		return this.keyFor("stored");
 	}
 
+	/** Any key, stored or explicit, only where it may travel. */
 	private async keyFor(auth: KeyAuth): Promise<string | undefined> {
 		if (auth === "none" || this.d.auth === "none") return undefined;
 		const key = auth === "stored" ? await this.d.key.get() : auth.key;
-		if (key === FORBIDDEN) throw failed("keyMissing", `The ${this.d.label} key may not be sent.`);
+		if (key === FORBIDDEN) throw this.forbidden();
 		if (this.d.auth === "optional" && auth === "stored" && !key) return undefined;
-		return this.checked(key);
+		const sent = this.checked(key);
+		if (!this.travels) throw this.forbidden();
+		return sent;
+	}
+
+	private forbidden(): ProviderError {
+		return failed("keyMissing", `The ${this.d.label} key may not be sent.`);
 	}
 
 	private checked(key: string | undefined): string {

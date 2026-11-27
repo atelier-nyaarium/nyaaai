@@ -174,6 +174,10 @@ export const localReachCases: CaseSource[] = [
 		exchanges: [refused()],
 	}),
 	check("compatible-no-url-is-unreachable-and-asks-nothing", "compatible", { exchanges: [COMPAT_LIST] }),
+	check("compatible-a-typed-key-with-no-url-is-invalid-and-asks-nothing", "compatible", {
+		secret: KEY,
+		exchanges: [COMPAT_LIST],
+	}),
 	check("compatible-a-url-that-does-not-read-is-unreachable-and-asks-nothing", "compatible", {
 		...at("not a url"),
 		exchanges: [COMPAT_LIST],

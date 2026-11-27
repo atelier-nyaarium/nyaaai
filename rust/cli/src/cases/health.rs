@@ -358,6 +358,13 @@ async fn play(input: HealthRunInput) -> Outcome<HealthRunResult> {
         keys,
         input.pause_ms.map(|held| held as i64),
     );
+    if let Some(base) = &input.base_url {
+        let kind_deps = KindDeps {
+            base_url: Some(base.clone()),
+            ..net.deps.clone()
+        };
+        deps.kind_deps = Arc::new(move |_| kind_deps.clone());
+    }
     deps.kinds = KINDS
         .iter()
         .map(|real| {

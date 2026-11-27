@@ -856,6 +856,8 @@ struct Rig {
     refreshed: Arc<Mutex<Vec<Via>>>,
     gate: Arc<Keys>,
     wheel: Arc<TimerWheel>,
+    /// Where the kinds' requests go; none is each kind's own.
+    base: Arc<Mutex<Option<String>>>,
 }
 
 impl Rig {
@@ -1096,6 +1098,10 @@ impl Rig {
                     None => running.await,
                 }
             }
+            ResolverRoutesInputStepsItem::Base(each) => {
+                *locked(&self.base) = each.url.clone();
+                Ok(changed())
+            }
             other => self.called(held, other).await,
         }
     }
@@ -1165,8 +1171,15 @@ pub fn routes(input: ResolverRoutesInput) -> Outcome<ResolverRoutesResult> {
     let live = Arc::clone(&zdr);
     let deps_host = Arc::clone(&host);
     let entries = Arc::new(EntryRegistry::new(list.clone(), &*scripted));
-    let kind_deps: Arc<dyn Fn(ProviderKindName) -> KindDeps + Send + Sync> =
-        Arc::new(move |_| deps_of(&deps_host, Arc::clone(&scheduler)));
+    let base = Arc::new(Mutex::new(input.base_url.clone()));
+    let read_base = Arc::clone(&base);
+    let kind_deps: Arc<dyn Fn(ProviderKindName) -> KindDeps + Send + Sync> = Arc::new(move |_| {
+        let base_url = locked(&read_base).clone();
+        KindDeps {
+            base_url,
+            ..deps_of(&deps_host, Arc::clone(&scheduler))
+        }
+    });
     let resolver = ModelResolver::new(ResolverDeps {
         entries: Arc::clone(&entries),
         keys: Arc::new(Keyring::new(KeyringDeps {
@@ -1194,6 +1207,7 @@ pub fn routes(input: ResolverRoutesInput) -> Outcome<ResolverRoutesResult> {
         refreshed: Arc::clone(&refreshed),
         gate,
         wheel: Arc::clone(&wheel),
+        base,
     };
     let mut held: Vec<Vec<Resolved>> = Vec::new();
     let mut steps = Vec::new();

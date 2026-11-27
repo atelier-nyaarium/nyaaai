@@ -4,7 +4,6 @@ import type { EntryKeys, KeyAnswer } from "@nyaaai/contract/entryKeys";
 import type { Span } from "@nyaaai/contract/fetch";
 import type { ProviderList } from "@nyaaai/contract/providerList";
 import type { EntryFields, KeyState, ProviderEntry, ProviderKindName } from "@nyaaai/contract/shapes/provider";
-import { parseUrl } from "@nyaaai/contract/url";
 import { type KeyKinds, keyBindingOf, takesKey } from "./entry";
 import { keyMayTravel } from "./host";
 import type { EntryRegistry } from "./incarnation";
@@ -48,9 +47,9 @@ function guarded(kinds: Kinds, fields: EntryFields, key: string, boundTo: string
 	const kind = kinds[fields.kind];
 	if (kind === undefined || !takesKey(kind)) return { kind: "none" };
 	if (boundTo !== keyBindingOf(fields, kinds)) return { kind: "foreign", boundTo };
-	// An unreadable address sends nothing.
+	// Missing or unreadable is insecure.
 	const address = deps.baseUrl ?? kind.address(fields);
-	if (address !== undefined && parseUrl(address) !== undefined && !keyMayTravel(address)) return { kind: "insecure" };
+	if (address === undefined || !keyMayTravel(address)) return { kind: "insecure" };
 	return { kind: "key", key, boundTo };
 }
 
@@ -64,9 +63,9 @@ export async function checkTyped(
 ): Promise<KeyState> {
 	const kind = kinds[fields.kind];
 	if (kind === undefined) return { kind: "none" };
+	if (secret === undefined || !takesKey(kind)) return kind.check(fields, undefined, deps, span);
 	const binding = keyBindingOf(fields, kinds);
-	if (secret === undefined || binding === undefined)
-		return kind.check(fields, takesKey(kind) ? secret : undefined, deps, span);
+	if (binding === undefined) return { kind: "invalid" };
 	const read = guarded(kinds, fields, secret, binding, deps);
 	return read.kind === "insecure" ? { kind: "insecure" } : kind.check(fields, secret, deps, span);
 }

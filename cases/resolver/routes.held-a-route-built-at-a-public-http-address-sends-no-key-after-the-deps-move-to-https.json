@@ -1,0 +1,138 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "resolver.routes",
+	"name": "held-a-route-built-at-a-public-http-address-sends-no-key-after-the-deps-move-to-https",
+	"input": {
+		"entries": [
+			{
+				"id": "c",
+				"kind": "compatible",
+				"label": "Host",
+				"url": "http://lab.local:8000/v1"
+			}
+		],
+		"answers": {},
+		"failing": [],
+		"rows": [
+			"compatible:qwen"
+		],
+		"kinds": [
+			"openrouter",
+			"opencode",
+			"ollama",
+			"lmstudio",
+			"llamacpp",
+			"compatible"
+		],
+		"listings": {},
+		"zdrOnly": true,
+		"baseUrl": "http://public.example.test/v1",
+		"steps": [
+			{
+				"kind": "routes",
+				"model": "compatible:qwen",
+				"use": {
+					"name": "chat",
+					"requires": [],
+					"hides": true
+				}
+			},
+			{
+				"kind": "send",
+				"from": 0,
+				"candidate": 0
+			},
+			{
+				"kind": "base",
+				"url": "https://public.example.test/v1"
+			},
+			{
+				"kind": "answer",
+				"id": "c",
+				"answer": {
+					"kind": "key",
+					"key": "fake-key-one"
+				}
+			},
+			{
+				"kind": "send",
+				"from": 0,
+				"candidate": 0
+			}
+		]
+	},
+	"expected": {
+		"steps": [
+			{
+				"answer": {
+					"kind": "routes",
+					"unresolved": null,
+					"candidates": [
+						{
+							"entry": "c",
+							"kind": "compatible",
+							"binding": "qwen",
+							"status": "ok",
+							"zdrOnly": true,
+							"path": "/chat/completions"
+						}
+					],
+					"passed": []
+				},
+				"built": 1,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "sent",
+					"zdrOnly": true,
+					"url": "http://public.example.test/v1/chat/completions",
+					"authorization": null,
+					"failure": null,
+					"thrown": null
+				},
+				"built": 1,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "changed"
+				},
+				"built": 1,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "changed"
+				},
+				"built": 1,
+				"disposed": 0
+			},
+			{
+				"answer": {
+					"kind": "sent",
+					"zdrOnly": true,
+					"url": null,
+					"authorization": null,
+					"failure": {
+						"category": "keyMissing",
+						"status": "keyMissing",
+						"message": "The OpenAI-compatible key may not be sent."
+					},
+					"thrown": null
+				},
+				"built": 1,
+				"disposed": 0
+			}
+		],
+		"transports": [
+			"Host http://lab.local:8000/v1"
+		],
+		"stopped": [
+			"Host http://lab.local:8000/v1"
+		],
+		"refreshed": [],
+		"keyReads": 3
+	}
+}

@@ -547,6 +547,19 @@ export const resolverCases: CaseSource[] = [
 		rows: [COMPAT_ROW],
 		steps: [routes(COMPAT_ROW), send(0), answer("c", FOREIGN_KEY), send(0)],
 	}),
+	run("held-a-route-built-at-a-public-http-address-sends-no-key-after-the-deps-move-to-https", {
+		entries: [COMPAT],
+		answers: {},
+		rows: [COMPAT_ROW],
+		baseUrl: "http://public.example.test/v1",
+		steps: [
+			routes(COMPAT_ROW),
+			send(0),
+			{ kind: "base", url: "https://public.example.test/v1" },
+			answer("c", KEY),
+			send(0),
+		],
+	}),
 
 	// The list is checked after the read.
 	run("during-the-list-changes-while-the-key-is-read", {

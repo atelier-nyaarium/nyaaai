@@ -8,9 +8,9 @@ use nyaaai_contract::fetch::Span;
 use nyaaai_contract::future::BoxFuture;
 use nyaaai_contract::provider_list::ProviderList;
 use nyaaai_contract::shapes::provider::{
-    EntryFields, KeyState, KeyStateInsecure, KeyStateNone, ProviderEntry, ProviderKindName,
+    EntryFields, KeyState, KeyStateInsecure, KeyStateInvalid, KeyStateNone, ProviderEntry,
+    ProviderKindName,
 };
-use nyaaai_contract::url::parse_url;
 
 use crate::provider::entry::{key_binding_of, takes_key};
 use crate::provider::host::key_may_travel;
@@ -94,9 +94,9 @@ fn guarded(
     if key_binding_of(fields, kinds).as_ref() != Some(&bound_to) {
         return KeyRead::Foreign { bound_to };
     }
-    // An unreadable address sends nothing.
+    // Missing or unreadable is insecure.
     let address = deps.base_url.clone().or_else(|| kind.address(fields));
-    if address.is_some_and(|held| parse_url(&held).is_some() && !key_may_travel(&held)) {
+    if address.is_none_or(|held| !key_may_travel(&held)) {
         return KeyRead::Insecure;
     }
     KeyRead::Key { key, bound_to }
@@ -114,9 +114,11 @@ pub fn check_typed<'a>(
         let Some(kind) = kind_in(kinds, fields.kind) else {
             return Ok(KeyState::None(KeyStateNone {}));
         };
-        let (Some(secret), Some(binding)) = (secret, key_binding_of(fields, kinds)) else {
-            let given = secret.filter(|_| takes_key(&**kind));
-            return kind.check(fields, given, deps, span).await;
+        let Some(secret) = secret.filter(|_| takes_key(&**kind)) else {
+            return kind.check(fields, None, deps, span).await;
+        };
+        let Some(binding) = key_binding_of(fields, kinds) else {
+            return Ok(KeyState::Invalid(KeyStateInvalid {}));
         };
         match guarded(kinds, fields, secret.to_owned(), binding, deps) {
             KeyRead::Insecure => Ok(KeyState::Insecure(KeyStateInsecure {})),

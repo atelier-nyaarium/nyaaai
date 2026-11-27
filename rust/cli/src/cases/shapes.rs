@@ -28089,6 +28089,7 @@ pub struct ResolverRoutesInput {
     pub slow: Option<Record<u64>>,
     pub dispose_fails: Option<Vec<String>>,
     pub start_ms: Option<i64>,
+    pub base_url: Option<String>,
     pub zdr_only: bool,
     pub steps: Vec<ResolverRoutesInputStepsItem>,
 }
@@ -28141,6 +28142,7 @@ impl Shape for ResolverRoutesInput {
             shape::list(value, at, shape::text)
         })?;
         let start_ms = shape::optional(object, "startMs", at, shape::integer)?;
+        let base_url = shape::optional(object, "baseUrl", at, shape::text)?;
         let zdr_only = shape::required(object, "zdrOnly", at, shape::flag)?;
         let steps = shape::required(object, "steps", at, |value, at| {
             shape::list_within(
@@ -28163,6 +28165,7 @@ impl Shape for ResolverRoutesInput {
             slow,
             dispose_fails,
             start_ms,
+            base_url,
             zdr_only,
             steps,
         })
@@ -28232,6 +28235,9 @@ impl Shape for ResolverRoutesInput {
         }
         if let Some(held) = &self.start_ms {
             object.insert("startMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.base_url {
+            object.insert("baseUrl", Value::from(held.as_str()));
         }
         object.insert("zdrOnly", Value::Bool(self.zdr_only));
         object.insert(
@@ -28329,6 +28335,7 @@ pub enum ResolverRoutesInputStepsItem {
     After(ResolverRoutesInputStepsItemAfter),
     Route(ResolverRoutesInputStepsItemRoute),
     Dispose(ResolverRoutesInputStepsItemDispose),
+    Base(ResolverRoutesInputStepsItemBase),
     During(ResolverRoutesInputStepsItemDuring),
 }
 
@@ -28360,6 +28367,7 @@ impl Shape for ResolverRoutesInputStepsItem {
             "dispose" => {
                 ResolverRoutesInputStepsItemDispose::decode_at(value, at).map(Self::Dispose)
             }
+            "base" => ResolverRoutesInputStepsItemBase::decode_at(value, at).map(Self::Base),
             "during" => ResolverRoutesInputStepsItemDuring::decode_at(value, at).map(Self::During),
             _ => Err(shape::no_branch(at, "kind")),
         }
@@ -28381,6 +28389,7 @@ impl Shape for ResolverRoutesInputStepsItem {
             Self::After(held) => held.encode(),
             Self::Route(held) => held.encode(),
             Self::Dispose(held) => held.encode(),
+            Self::Base(held) => held.encode(),
             Self::During(held) => held.encode(),
         }
     }
@@ -28954,6 +28963,36 @@ impl Shape for ResolverRoutesInputStepsItemDispose {
     fn encode(&self) -> Value {
         let mut object = Object::new();
         object.insert("kind", Value::from("dispose"));
+        Value::Object(object)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ResolverRoutesInputStepsItemBase {
+    pub url: Option<String>,
+}
+
+impl Shape for ResolverRoutesInputStepsItemBase {
+    fn decode_at(value: &Value, at: &mut Path) -> Result<Self, Refused> {
+        let object = shape::object(value, at)?;
+        shape::required(object, "kind", at, |value, at| {
+            shape::is_text(value, at, "base")
+        })?;
+        let url = shape::required(object, "url", at, |value, at| {
+            shape::nullable(value, at, shape::text)
+        })?;
+        Ok(Self { url })
+    }
+
+    fn encode(&self) -> Value {
+        let mut object = Object::new();
+        object.insert("kind", Value::from("base"));
+        object.insert(
+            "url",
+            self.url
+                .as_ref()
+                .map_or(Value::Null, |held| Value::from(held.as_str())),
+        );
         Value::Object(object)
     }
 }
@@ -34040,6 +34079,7 @@ impl Shape for HealthRoute {
 pub struct HealthRunInput {
     pub start_ms: i64,
     pub pause_ms: Option<u64>,
+    pub base_url: Option<String>,
     pub entries: Vec<nyaaai_contract::shapes::provider::ProviderEntry>,
     pub keys: Record<HealthKeyAnswer>,
     pub exchanges: Vec<NetExchange>,
@@ -34051,6 +34091,7 @@ impl Shape for HealthRunInput {
         let object = shape::object(value, at)?;
         let start_ms = shape::required(object, "startMs", at, shape::integer)?;
         let pause_ms = shape::optional(object, "pauseMs", at, shape::natural)?;
+        let base_url = shape::optional(object, "baseUrl", at, shape::text)?;
         let entries = shape::required(object, "entries", at, |value, at| {
             shape::list(
                 value,
@@ -34070,6 +34111,7 @@ impl Shape for HealthRunInput {
         Ok(Self {
             start_ms,
             pause_ms,
+            base_url,
             entries,
             keys,
             exchanges,
@@ -34082,6 +34124,9 @@ impl Shape for HealthRunInput {
         object.insert("startMs", Value::Number(self.start_ms as f64));
         if let Some(held) = &self.pause_ms {
             object.insert("pauseMs", Value::Number(*held as f64));
+        }
+        if let Some(held) = &self.base_url {
+            object.insert("baseUrl", Value::from(held.as_str()));
         }
         object.insert(
             "entries",

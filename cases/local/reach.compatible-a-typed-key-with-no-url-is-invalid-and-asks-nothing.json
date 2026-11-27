@@ -1,0 +1,40 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "local.reach",
+	"name": "compatible-a-typed-key-with-no-url-is-invalid-and-asks-nothing",
+	"input": {
+		"kind": "compatible",
+		"entry": {
+			"label": "Lab"
+		},
+		"secret": "fake-key-one",
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": [
+						{
+							"id": "local-a",
+							"context_length": 32768
+						},
+						{
+							"id": "local-b"
+						},
+						{}
+					]
+				}
+			}
+		]
+	},
+	"expected": {
+		"state": {
+			"kind": "invalid"
+		},
+		"thrown": null,
+		"facts": null,
+		"requests": [],
+		"waiting": []
+	}
+}

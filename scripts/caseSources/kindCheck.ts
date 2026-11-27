@@ -58,6 +58,10 @@ export const kindCheckCases: CaseSource[] = [
 		baseUrl: "http://api.example.test",
 		exchanges: [KEY_BODY],
 	}),
+	OR("openrouter-a-base-url-that-does-not-parse-sends-no-key", {
+		baseUrl: "http://%70ublic.example.test/v1",
+		exchanges: [KEY_BODY],
+	}),
 	...STATUSES.map((status) => OR(`openrouter-status-${status}`, { exchanges: [DENIED(status)] })),
 	OR("openrouter-a-dropped-connection-is-unreachable", { exchanges: [{ status: 200, text: "{", end: "dropped" }] }),
 	OR("openrouter-a-refused-connection-is-unreachable", { exchanges: [{ status: 200, text: "", end: "refused" }] }),

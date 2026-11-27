@@ -1,0 +1,36 @@
+{
+	"format": 2,
+	"type": "function",
+	"kind": "kind.check",
+	"name": "openrouter-a-base-url-that-does-not-parse-sends-no-key",
+	"input": {
+		"kind": "openrouter",
+		"entry": {
+			"label": "Zen"
+		},
+		"secret": "fake-key-one",
+		"startMs": 1790337600000,
+		"exchanges": [
+			{
+				"status": 200,
+				"json": {
+					"data": {
+						"usage": 4.12,
+						"limit": 20,
+						"limit_reset": "monthly"
+					}
+				}
+			}
+		],
+		"baseUrl": "http://%70ublic.example.test/v1"
+	},
+	"expected": {
+		"state": {
+			"kind": "insecure"
+		},
+		"thrown": null,
+		"facts": null,
+		"requests": [],
+		"waiting": []
+	}
+}
